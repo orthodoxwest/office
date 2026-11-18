@@ -151,12 +151,12 @@ struct OrdoScreen: View {
                     let next = number == 12 ? (year + 1, 1) : (year, number + 1)
                     Continuation(
                         previousLabel: "Previous month",
-                        previous: monthName(prev.1),
+                        previous: pickerYears.contains(prev.0) ? monthName(prev.1) : nil,
                         onPrevious: { model.open(.ordo(year: prev.0, month: prev.1, day: 0)) },
                         middle: "\(year) Ordo",
                         onMiddle: { model.open(.year(year)) },
                         nextLabel: "Next month",
-                        next: monthName(next.1),
+                        next: pickerYears.contains(next.0) ? monthName(next.1) : nil,
                         onNext: { model.open(.ordo(year: next.0, month: next.1, day: 0)) }
                     )
                     .ordoColumn(m, wide: wide)
@@ -328,8 +328,13 @@ private struct OrdoHeader: View {
         let nav = TextStyle(size: 12.8, line: 20.5, lining: true)
         let t = model.today
         return HStack(spacing: 0) {
-            Button { sameView(year - 1) } label: { cell("‹ \(String(year - 1))", nav) }
-                .buttonStyle(Quiet()).accessibilityLabel("Previous year, \(String(year - 1))")
+            // The years stop where the date picker's do (pickerYears), as the web's.
+            if pickerYears.contains(year - 1) {
+                Button { sameView(year - 1) } label: { cell("‹ \(String(year - 1))", nav) }
+                    .buttonStyle(Quiet()).accessibilityLabel("Previous year, \(String(year - 1))")
+            } else {
+                Color.clear.frame(maxWidth: wide ? 0 : .infinity, maxHeight: 0)
+            }
             GiltPoint()
             Button { model.open(.ordo(year: Int(t.year), month: Int(t.month), day: Int(t.day))) } label: {
                 // Always underlined in the gold line, in any year, as the web's `.calendar-today-link`;
@@ -342,8 +347,12 @@ private struct OrdoHeader: View {
             .buttonStyle(Quiet())
             .accessibilityHint("Opens today in the ordo")
             GiltPoint()
-            Button { sameView(year + 1) } label: { cell("\(String(year + 1)) ›", nav) }
-                .buttonStyle(Quiet()).accessibilityLabel("Next year, \(String(year + 1))")
+            if pickerYears.contains(year + 1) {
+                Button { sameView(year + 1) } label: { cell("\(String(year + 1)) ›", nav) }
+                    .buttonStyle(Quiet()).accessibilityLabel("Next year, \(String(year + 1))")
+            } else {
+                Color.clear.frame(maxWidth: wide ? 0 : .infinity, maxHeight: 0)
+            }
         }
         .frame(minHeight: 44)
     }

@@ -21,6 +21,13 @@
  *   - /lauds?date=D → redirect to /lauds/D (canonical dated path).
  *   - /static/* → cache-first on versioned URLs.
  *
+ * A page the cache does not hold waits for the network, however slow the
+ * server is: the offline page answers only when the fetch fails (as it does
+ * at once with no connection), when the device reports itself offline, or
+ * after PAGE_NETWORK_GIVE_UP_MS. A held page is never kept waiting on a slow
+ * or hung network: stale-while-revalidate serves it at once, and the other
+ * pages fall back to it after PAGE_NETWORK_TIMEOUT_MS.
+ *
  * Install only precaches the shell + today so skipWaiting is not blocked on
  * the full 14-day window; activate claims quickly, then app message + free
  * precacheUpcoming fill the rest. Within one version a page's liturgical
@@ -32,8 +39,16 @@ var VERSION = "__VERSION__";
 var CACHE = "office-" + VERSION;
 var META_CACHE = "office-meta";
 var PRECACHE_DAYS = 14;
-// Bounds cold SWR miss only (cache hit revalidates in background unbounded).
+// How long a page the cache holds a copy of waits on the network before the
+// copy is served (network-first pages; stale-while-revalidate serves its copy
+// at once).
 var PAGE_NETWORK_TIMEOUT_MS = 2500;
+// How long a page the cache does not hold waits before the offline page. Far
+// shorter than this, a slow server reads as no connection: a page beyond the
+// precached fortnight took longer than 2.5 s to compose, the reader was shown
+// "not saved" while online, and a reload found the page the abandoned fetch
+// had saved meanwhile.
+var PAGE_NETWORK_GIVE_UP_MS = 30000;
 var HOURS = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
 var ASSET_Q = "?v=" + VERSION;
 // Filled by the server: "/static/path": "content stamp" for every asset.
@@ -100,6 +115,20 @@ var CORE_ASSETS = [
 // entry under an unversioned HTML URL).
 function networkFetch(req) {
   return fetch(req, { cache: "reload" });
+}
+
+// revalidate asks the network for a page the cache holds, naming the copy held
+// by its ETag: the server answers 304 Not Modified, composing and sending
+// nothing, while the page is unchanged (a 304 is not ok, so putIfOk keeps the
+// copy). A copy without a tag is fetched whole, as networkFetch does.
+function revalidate(req, cached) {
+  var tag = cached.headers.get("ETag");
+  if (!tag) {
+    return networkFetch(req);
+  }
+  // Redirects stay unfollowed, as for the navigation itself: a page that now
+  // redirects is not stored under its old key.
+  return fetch(req.url, { headers: { "If-None-Match": tag }, cache: "no-store", credentials: "same-origin", redirect: "manual" });
 }
 
 function putIfOk(cache, req, resp) {
@@ -448,28 +477,58 @@ function staleWhileRevalidate(req, url) {
     candidates.unshift(req);
 
     return cacheMatchFirst(cache, candidates).then(function (cached) {
-      var revalidate = networkFetch(req).then(function (resp) {
-        return putIfOk(cache, storeKey, resp);
-      }).catch(function () {
-        return undefined;
-      });
-
       if (cached) {
-        revalidate.then(function () {});
+        revalidate(req, cached).then(function (resp) {
+          return putIfOk(cache, storeKey, resp);
+        }).catch(function () {});
         return cached;
       }
+      // Cold miss: one fetch, waited for (see pageFromNetwork).
+      return pageFromNetwork(req, cache, candidates, storeKey);
+    });
+  });
+}
 
-      // Cold miss: bound wait so a hung network falls back to near-miss cache keys.
-      return fetchWithTimeout(req, PAGE_NETWORK_TIMEOUT_MS).then(function (resp) {
-        return putIfOk(cache, storeKey, resp);
-      }).catch(function () {
-        return cacheMatchFirst(cache, candidates).then(function (fallback) {
-          if (fallback) {
-            return fallback;
-          }
-          return offlineResponse();
-        });
-      });
+// pageFromNetwork answers a page from the network, storing it under storeKey.
+// It falls back to the first cached candidate when the fetch fails, when the
+// device reports itself offline, or after PAGE_NETWORK_TIMEOUT_MS; with no
+// cached candidate it keeps waiting, and the offline page answers only a
+// failed fetch or one PAGE_NETWORK_GIVE_UP_MS old. A fetch outlived by a
+// cached answer still stores what it brings.
+function pageFromNetwork(req, cache, candidates, storeKey) {
+  function cachedOrOffline() {
+    return cacheMatchFirst(cache, candidates).then(function (cached) {
+      return cached || offlineResponse();
+    });
+  }
+  if (self.navigator && self.navigator.onLine === false) {
+    return cachedOrOffline();
+  }
+  return new Promise(function (resolve) {
+    var settled = false;
+    function settle(resp) {
+      if (!settled) {
+        settled = true;
+        resolve(resp);
+      }
+    }
+    var timer = setTimeout(function () {
+      cacheMatchFirst(cache, candidates).then(function (cached) {
+        if (cached) {
+          settle(cached);
+        }
+      }).catch(function () {});
+    }, PAGE_NETWORK_TIMEOUT_MS);
+    fetchWithTimeout(req, PAGE_NETWORK_GIVE_UP_MS).then(function (resp) {
+      return putIfOk(cache, storeKey, resp);
+    }).then(function (resp) {
+      clearTimeout(timer);
+      settle(resp);
+    }, function () {
+      clearTimeout(timer);
+      if (!settled) {
+        cachedOrOffline().then(settle);
+      }
     });
   });
 }
@@ -481,24 +540,12 @@ function redirectToDated(url, datedPath) {
 }
 
 // networkFirstWithFallback is retained for non-dated pages that are not SWR
-// targets (errors, odd paths). Prefer cache after a failed network attempt.
+// targets (feast pages, errors, odd paths).
 function networkFirstWithFallback(req, url) {
   return caches.open(CACHE).then(function (cache) {
     var candidates = fallbackURLs(url);
     candidates.push(req);
-    return fetchWithTimeout(req, PAGE_NETWORK_TIMEOUT_MS).then(function (resp) {
-      if (resp.ok) {
-        cache.put(canonicalCacheKey(url) || req, resp.clone());
-      }
-      return resp;
-    }).catch(function () {
-      return cacheMatchFirst(cache, candidates).then(function (cached) {
-        if (cached) {
-          return cached;
-        }
-        return offlineResponse();
-      });
-    });
+    return pageFromNetwork(req, cache, candidates, canonicalCacheKey(url) || req);
   });
 }
 

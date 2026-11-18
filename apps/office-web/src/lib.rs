@@ -7,6 +7,7 @@ mod crawl;
 // compiles it only to test it.
 #[cfg(test)]
 mod css;
+mod etag;
 mod feasts;
 mod handlers;
 mod http;
@@ -145,7 +146,19 @@ impl Server {
                 }
             }
         }
-        match route {
+        // The pages answer a request for the copy the reader holds with "not modified" (see etag).
+        let page = matches!(route, Route::Reminders | Route::Privacy | Route::About | Route::Calendar | Route::Feast | Route::Root)
+            && (method == Method::GET || method == Method::HEAD);
+        let tag = page.then(|| {
+            let target = uri.path_and_query().map(|p| p.as_str()).unwrap_or("/");
+            etag::page_tag(self.version(), &site, target, headers, web_time::now_in(&self.user_location(&req)), Server::local_year())
+        });
+        if let Some(tag) = &tag
+            && etag::matches(headers, tag)
+        {
+            return etag::not_modified(tag);
+        }
+        let mut resp = match route {
             Route::UsageEvent => usage::handle_event(self.usage.as_ref(), method, headers, host, self.canonical.as_deref(), body),
             Route::UsageDashboard => usage::handle_dashboard(self.usage.as_ref(), &self.pages, method, &query),
             Route::Static => pwa::serve_static(&path, query.get("v")),
@@ -161,7 +174,15 @@ impl Server {
             Route::Robots => crawl::robots(&site),
             Route::Sitemap => crawl::sitemap(&site, Server::local_year(), self.cache.feasts()),
             Route::Root => self.root(&req),
+        };
+        if let Some(tag) = tag
+            && resp.status() == StatusCode::OK
+        {
+            // The tag names the reader's cookies, so the page varies with them.
+            http::set(&mut resp, header::ETAG, &tag);
+            http::set(&mut resp, header::VARY, "Cookie");
         }
+        resp
     }
 
     /// Composes `year`'s calendar months ahead of the first request for them.
@@ -364,6 +385,54 @@ mod routing_tests {
     }
 
     #[tokio::test]
+    async fn an_unchanged_page_is_not_sent_again() {
+        let get = |path: &str, cookie: &str, tag: Option<&str>| {
+            let mut request = Request::builder().uri(path).header(header::COOKIE, cookie);
+            if let Some(tag) = tag {
+                request = request.header(header::IF_NONE_MATCH, tag);
+            }
+            let router = test_server().router();
+            let request = request.body(Body::empty()).unwrap();
+            async move {
+                let resp = router.oneshot(request).await.unwrap();
+                let (status, tag) = (resp.status(), resp.headers().get(header::ETAG).map(|t| t.to_str().unwrap().to_string()));
+                (status, tag, axum::body::to_bytes(resp.into_body(), usize::MAX).await.unwrap().len())
+            }
+        };
+        // The tag names the reader's hour, so a pair of requests either side of the hour's turn
+        // is asked again.
+        let hour = || web_time::now_in(&web_time::load_location("America/New_York").unwrap()).1;
+        for path in ["/lauds/2026-12-25", "/?date=2026-12-25", "/calendar/2026/12", "/feast/christmas", "/about"] {
+            let (tag, again) = loop {
+                let before = hour();
+                let (status, tag, _) = get(path, "tz=America/New_York", None).await;
+                let tag = tag.unwrap_or_else(|| panic!("{path} has no ETag"));
+                assert_eq!(status, StatusCode::OK, "{path}");
+                assert!(tag.starts_with("W/\""), "{path}: {tag}");
+                // The copy held is answered "not modified", with nothing sent.
+                let again = get(path, "tz=America/New_York", Some(&tag)).await;
+                if hour() == before {
+                    break (tag, again);
+                }
+            };
+            assert_eq!((again.0, again.1.as_deref(), again.2), (StatusCode::NOT_MODIFIED, Some(tag.as_str()), 0), "{path}");
+            // Another reader's cookies, or another page, is another copy.
+            let (status, _, _) = get(path, "tz=Europe/London", Some(&tag)).await;
+            assert_eq!(status, StatusCode::OK, "{path}: another time zone");
+            let (status, _, _) =
+                get(&format!("{path}{}x=1", if path.contains('?') { '&' } else { '?' }), "tz=America/New_York", Some(&tag)).await;
+            assert_eq!(status, StatusCode::OK, "{path}: another address");
+        }
+        // A list of tags, and a strong copy of the weak one, are compared as RFC 9110 says.
+        let mut headers = HeaderMap::new();
+        headers.insert(header::IF_NONE_MATCH, "\"other\", \"v-1\"".parse().unwrap());
+        assert!(etag::matches(&headers, "W/\"v-1\"") && !etag::matches(&headers, "W/\"v-2\""));
+        // Only a page that was found carries a tag.
+        let (status, tag, _) = get("/calendar/0001", "", None).await;
+        assert_eq!((status, tag), (StatusCode::NOT_FOUND, None));
+    }
+
+    #[tokio::test]
     async fn search_engines_find_the_undated_pages_on_the_canonical_host() {
         let mut server = Server::new(Path::new("../../data")).unwrap();
         server.canonical = moved::parse_host("example.org");
@@ -381,6 +450,11 @@ mod routing_tests {
         let (status, robots) = get("example.org", "/robots.txt").await;
         assert_eq!(status, StatusCode::OK);
         assert!(robots.contains("Disallow: /admin/") && robots.contains("Sitemap: https://example.org/sitemap.xml"), "{robots}");
+        // The dated days and hours are kept from crawlers; the undated ones are not.
+        for line in ["Disallow: /?date=", "Disallow: /lauds/", "Disallow: /lauds?date=", "Disallow: /compline/"] {
+            assert!(robots.lines().any(|l| l == line), "{line}: {robots}");
+        }
+        assert!(!robots.lines().any(|l| l == "Disallow: /lauds" || l == "Disallow: /"), "{robots}");
         let (_, sitemap) = get("example.org", "/sitemap.xml").await;
         for page in ["/", "/lauds", "/compline", "/privacy", "/about"] {
             assert!(sitemap.contains(&format!("<loc>https://example.org{page}</loc>")), "{page}: {sitemap}");
@@ -400,8 +474,33 @@ mod routing_tests {
         assert!(home.contains("icons&#x2f;share-card.png") && home.contains("summary_large_image"));
         let (status, _) = get("example.org", &pwa::asset_url("icons/share-card.png")).await;
         assert_eq!(status, StatusCode::OK, "the preview card is served");
-        let (_, far) = get("example.org", "/calendar/1900").await;
+        let this_year = Server::local_year();
+        let (_, far) = get("example.org", &format!("/calendar/{}", this_year - 10)).await;
         assert!(far.contains("noindex"));
+        // A crawler follows the year links only to the years search indexes, not a year at a
+        // time from end to end: each new year is a year's calendar built on the server.
+        assert_eq!(far.matches("rel=\"nofollow\"").count(), 2, "neither neighbour of a far year is indexed");
+        // Nor month by month across the years.
+        let (_, january) = get("example.org", &format!("/calendar/{}/01", this_year - 10)).await;
+        assert!(january.contains("rel=\"nofollow\"><span class=\"continuation-label\">Previous month"), "{january}");
+        let (_, this_january) = get("example.org", &format!("/calendar/{this_year}/12")).await;
+        assert!(!this_january.contains("rel=\"nofollow\"><span class=\"continuation-label\">Next month"), "next year is indexed");
+        // Nor is a year beyond the ones every front offers built at all.
+        let years = presentation::offered_years(this_year);
+        let (before, after) = (years.start() - 1, years.end() + 1);
+        for path in [
+            format!("/calendar/{before}"),
+            format!("/calendar/{after}/01"),
+            "/calendar/4294969196".to_string(),
+            format!("/lauds/{after}-01-01"),
+            format!("/?date={before}-12-31"),
+        ] {
+            let (status, _) = get("example.org", &path).await;
+            assert_eq!(status, StatusCode::NOT_FOUND, "{path}");
+        }
+        let (_, current) = get("example.org", &format!("/calendar/{this_year}")).await;
+        let nofollow = format!("{}\" rel=\"nofollow\"", this_year - 1);
+        assert!(current.contains(&nofollow) && current.matches("rel=\"nofollow\"").count() == 1, "next year is followed, last year not");
         let (_, missing) = get("example.org", "/nowhere").await;
         assert!(missing.contains("noindex") && !missing.contains("rel=\"canonical\""));
     }

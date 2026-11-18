@@ -468,10 +468,15 @@ struct HourScreen: View {
                 }
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.
                 guard let id = anchor(rows) else { return ScreenshotReady.mark(.hour(date, view.hour), in: model) }
+                // Again once the rows the first move brought in are laid out, as a kept place is:
+                // the first lands on rows taken at a guessed height, a fraction of a point off (#891).
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     scroll.scrollTo(id, anchor: .top)
-                    // The screenshot waits for the scroll, not a guess at its time.
-                    ScreenshotReady.mark(.hour(date, view.hour), in: model)
+                    DispatchQueue.main.async {
+                        scroll.scrollTo(id, anchor: .top)
+                        // The screenshot waits for the scroll, not a guess at its time.
+                        ScreenshotReady.mark(.hour(date, view.hour), in: model)
+                    }
                 }
             }
         }
@@ -673,6 +678,8 @@ final class Reading {
     static let space = "hour"
     /// The hour's ending's id among the rows' (theirs hold a `|`, or begin "toggle ").
     static let ending = "ending"
+    /// How far below the screen's top a row may stand and still be the one at the top: under a point.
+    static let atTop: CGFloat = 0.5
     /// How much of the office has passed, from 0 to 1; the only thing the hairline watches.
     private(set) var ratio: CGFloat = 0
     /// The office's rows in number; the ending stands at this index. A section opened or closed
@@ -737,7 +744,9 @@ final class Reading {
         let bottom = viewport.height
         let ending = frames[Reading.ending]?.frame
         if let ending, ending.minY <= bottom { return 1 }
-        guard let top = frames.values.filter({ $0.frame.minY <= 0 }).max(by: { $0.row < $1.row }), top.row < end else { return 0 }
+        // The row at the screen's top: a row stood there by `scrollTo` can land a fraction of a
+        // point below it, which is still at the top (#891).
+        guard let top = frames.values.filter({ $0.frame.minY <= Reading.atTop }).max(by: { $0.row < $1.row }), top.row < end else { return 0 }
         let known = (0..<end).compactMap { heights[$0] }
         let average = known.isEmpty ? 1 : known.reduce(0, +) / CGFloat(known.count)
         func height(_ i: Int) -> CGFloat { heights[i] ?? average }

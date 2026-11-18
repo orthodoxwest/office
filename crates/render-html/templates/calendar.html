@@ -82,9 +82,9 @@
       <p class="calendar-subtitle">{% if view == "year" and year_roman %}Anno Domini {{ year_roman }}{% else %}Feasts &amp; daily observances{% endif %}</p>
     </div>
     <nav class="year-nav" aria-label="Calendar year">
-      {% if year > 1 %}<a href="{{ prev_year_link|url }}" aria-label="Previous year, {{ prev_year }}">&lsaquo; {{ prev_year }}</a>{% else %}<span></span>{% endif %}
+      {% if has_prev_year %}<a href="{{ prev_year_link|url }}"{% if not prev_year_follow %} rel="nofollow"{% endif %} aria-label="Previous year, {{ prev_year }}">&lsaquo; {{ prev_year }}</a>{% else %}<span></span>{% endif %}
       <a id="calendar-today-link" class="calendar-today-link" href="/calendar">Today</a>
-      {% if year < 9999 %}<a href="{{ next_year_link|url }}" aria-label="Next year, {{ next_year }}">{{ next_year }} &rsaquo;</a>{% else %}<span></span>{% endif %}
+      {% if has_next_year %}<a href="{{ next_year_link|url }}"{% if not next_year_follow %} rel="nofollow"{% endif %} aria-label="Next year, {{ next_year }}">{{ next_year }} &rsaquo;</a>{% else %}<span></span>{% endif %}
     </nav>
   </div>
   {{ feast_search() }}
@@ -253,9 +253,9 @@
   <span id="ordo-place" hidden></span>
   {# The hours' continuation: the same diamond, labels and targets. #}
   <nav class="hour-continuation ordo-continuation" aria-label="Other months">
-    {% if prev_month %}<a class="hour-continuation-link previous-hour" href="{{ prev_month.href|url }}"><span class="continuation-label">Previous month</span><span>&larr; {{ prev_month.name }}</span></a>{% else %}<span></span>{% endif %}
+    {% if prev_month %}<a class="hour-continuation-link previous-hour" href="{{ prev_month.href|url }}"{% if not prev_month.follow %} rel="nofollow"{% endif %}><span class="continuation-label">Previous month</span><span>&larr; {{ prev_month.name }}</span></a>{% else %}<span></span>{% endif %}
     <a class="day-hours-link" href="{{ year_link|url }}">{{ year }} Ordo</a>
-    {% if next_month %}<a class="hour-continuation-link next-hour" href="{{ next_month.href|url }}"><span class="continuation-label">Next month</span><span>{{ next_month.name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
+    {% if next_month %}<a class="hour-continuation-link next-hour" href="{{ next_month.href|url }}"{% if not next_month.follow %} rel="nofollow"{% endif %}><span class="continuation-label">Next month</span><span>{{ next_month.name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
   </nav>
   {% endif %}
   {% endif %}

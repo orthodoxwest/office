@@ -18,6 +18,18 @@ pub mod usage;
 use calendar::{CalendarDay, Color, Date, MoveableDates, Rank, Season};
 use liturgy::{ElementType, OfficeHour, OfficeSection};
 
+/// How far back and ahead of this year every front offers: the date pickers (app.js's
+/// YEARS_BACK and YEARS_AHEAD, as Chrome.kt and Chrome.swift name them, and the templates'
+/// date fields) and the ordo's year links stop at the ends, and the web server builds no year
+/// beyond them, so that a crawler walking the ordo cannot keep it building years.
+pub const YEARS_BACK: i32 = 30;
+pub const YEARS_AHEAD: i32 = 100;
+
+/// The years offered when it is `this_year` ([`YEARS_BACK`] before it to [`YEARS_AHEAD`] after).
+pub fn offered_years(this_year: i32) -> std::ops::RangeInclusive<i32> {
+    this_year - YEARS_BACK..=this_year + YEARS_AHEAD
+}
+
 /// Capitalizes the first letter ("advent" → "Advent").
 pub fn title_case(s: &str) -> String {
     let mut chars = s.chars();
@@ -544,6 +556,28 @@ pub fn year_roman(year: i32) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Every front's date picker and the templates' date fields keep to the offered years.
+    #[test]
+    fn every_front_offers_the_same_years() {
+        let read =
+            |path: &str| std::fs::read_to_string(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").join(path)).expect(path);
+        assert_eq!(offered_years(2026), 1996..=2126);
+        let (back, ahead) = (YEARS_BACK, YEARS_AHEAD);
+        let js = read("apps/office-web/static/app.js");
+        assert!(js.contains(&format!("var YEARS_BACK = {back};")) && js.contains(&format!("var YEARS_AHEAD = {ahead};")), "app.js");
+        for template in ["home", "hour"] {
+            let html = read(&format!("crates/render-html/templates/{template}.html"));
+            assert!(html.contains(r#"min="{{ first_year }}-01-01" max="{{ last_year }}-12-31""#), "{template}.html's date field");
+        }
+        let kotlin = read("apps/android/app/src/main/kotlin/org/orthodoxwest/office/Chrome.kt");
+        assert!(
+            kotlin.contains(&format!("const val YEARS_BACK = {back}")) && kotlin.contains(&format!("const val YEARS_AHEAD = {ahead}")),
+            "Chrome.kt"
+        );
+        let swift = read("apps/ios/Office/Chrome.swift");
+        assert!(swift.contains(&format!("let yearsBack = {back}")) && swift.contains(&format!("let yearsAhead = {ahead}")), "Chrome.swift");
+    }
 
     #[test]
     fn lauds_prime_and_vespers_open_their_prayers() {

@@ -2174,10 +2174,21 @@ function plainClickOpensHere(e, link) {
     "July", "August", "September", "October", "November", "December",
   ];
   var WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  // The picker offers a working span of years; the native field's min and
-  // max in the templates match it.
-  var PICKER_FIRST_YEAR = 1950;
-  var PICKER_LAST_YEAR = 2150;
+  // The picker offers the years every front offers, from YEARS_BACK before
+  // this year to YEARS_AHEAD after (presentation's offered_years); the native
+  // field's min and max in the templates match it.
+  var YEARS_BACK = 30;
+  var YEARS_AHEAD = 100;
+  // The page's date field holds the server's span, which a device whose year
+  // has turned before the server's does not overstep.
+  var PICKER_FIRST_YEAR = pickerBound("min", -YEARS_BACK);
+  var PICKER_LAST_YEAR = pickerBound("max", YEARS_AHEAD);
+
+  function pickerBound(attr, fromThisYear) {
+    var field = document.querySelector(".date-jump");
+    var year = field ? parseInt((field.getAttribute(attr) || "").slice(0, 4), 10) : NaN;
+    return isNaN(year) ? new Date().getFullYear() + fromThisYear : year;
+  }
 
   // Dates are UTC midnights built with setUTCFullYear, which neither maps
   // years 0-99 onto the 1900s nor shifts across daylight saving, and which
@@ -2669,7 +2680,9 @@ function plainClickOpensHere(e, link) {
 
     // Brings the card's foot, and the gutter it rests on, into view: each
     // frame of the turn by as much as it has passed the screen's foot, or
-    // at once without motion.
+    // at once without motion. The frames run as long as the turn does, which
+    // on a loaded device can outlast its 260ms (a transition started late),
+    // and the turn's end brings the foot to rest once more (see end).
     function follow(gap, animated) {
       var run = ++following;
       function overflow() {
@@ -2692,7 +2705,7 @@ function plainClickOpensHere(e, link) {
         if (over > 0.5) {
           window.scrollBy(0, over);
         }
-        if (now < until) {
+        if (now < until || turning) {
           window.requestAnimationFrame(step);
         }
       }
@@ -2747,7 +2760,9 @@ function plainClickOpensHere(e, link) {
         incoming.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 60, easing: "ease-out", fill: "both" }),
       ];
       var timer = 0;
-      function end() {
+      // finished: the turn ran its course, rather than being cut short by
+      // another.
+      function end(finished) {
         turning = null;
         window.clearTimeout(timer);
         stage.removeEventListener("transitionend", ended);
@@ -2760,16 +2775,24 @@ function plainClickOpensHere(e, link) {
         if (!details.open && held) {
           release();
         }
+        // The stage at its own height now: the foot where it finally rests.
+        if (finished && open && details.open) {
+          follow(gap, false);
+        }
       }
       function ended(event) {
         if (event.target === stage && event.propertyName === "height") {
-          end();
+          end(true);
         }
       }
-      turning = end;
+      turning = function () {
+        end(false);
+      };
       stage.addEventListener("transitionend", ended);
       // transitionend never comes where nothing moved, or in a hidden tab.
-      timer = window.setTimeout(end, 400);
+      timer = window.setTimeout(function () {
+        end(true);
+      }, 400);
       if (open) {
         follow(gap, true);
       }

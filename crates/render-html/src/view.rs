@@ -46,6 +46,9 @@ pub struct HomeHourLink {
 pub struct HomeData {
     #[serde(flatten)]
     pub chrome: Chrome,
+    /// The date field's span, `presentation::offered_years`.
+    pub first_year: i32,
+    pub last_year: i32,
     pub date_str: String,
     pub date_slug: String,
     pub prev_link: String,
@@ -110,6 +113,9 @@ pub struct SectionView {
 pub struct HourData {
     #[serde(flatten)]
     pub chrome: Chrome,
+    /// The date field's span, `presentation::offered_years`.
+    pub first_year: i32,
+    pub last_year: i32,
     pub leader_forms: Vec<LeaderForm>,
     pub leader_sections: Vec<LeaderSection>,
     /// The single form's sections, when there are no leader forms.
@@ -254,6 +260,10 @@ pub struct TabulaData {
 pub struct MonthStep {
     pub name: String,
     pub href: String,
+    /// Whether a crawler may follow it: only within the years search indexes, as the year
+    /// links (`CalendarData::prev_year_follow`), so that it does not walk the ordo a month at
+    /// a time from end to end either.
+    pub follow: bool,
 }
 
 /// An ordo page: one month, the year's frontispiece, or the whole year.
@@ -272,6 +282,13 @@ pub struct CalendarData {
     /// or whole year.
     pub prev_year_link: String,
     pub next_year_link: String,
+    /// Whether a crawler may follow the year links: only to the years search indexes, so
+    /// that a crawler does not walk the ordo a year at a time from end to end.
+    pub prev_year_follow: bool,
+    pub next_year_follow: bool,
+    /// Whether the neighbouring years are offered (`presentation::offered_years`).
+    pub has_prev_year: bool,
+    pub has_next_year: bool,
     pub year_link: String,
     pub all_link: String,
     pub month_links: Vec<MonthLink>,

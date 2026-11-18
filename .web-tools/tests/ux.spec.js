@@ -3867,6 +3867,21 @@ test("home's Change date turns the hours into the calendar in their place", asyn
   }
 });
 
+test("home's Change date brings the card's foot to rest however late its turn ends", async ({ page }) => {
+  // A loaded device can start the turn's transition late, so that it ends after the frames
+  // that follow it were due to stop; a long transition stands in for that here.
+  await page.setViewportSize({ width: 375, height: 667 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.waitForFunction(() => document.documentElement.classList.contains("motion-ready"));
+  await page.addStyleTag({ content: ":root { --tempo-unfold-in: 600ms !important; }" });
+  await page.locator(".home-hero details.home-date-nav > summary").click();
+  await expect(page.locator(".home-stage")).not.toHaveClass(/is-turning/);
+  await expect.poll(() => page.evaluate(() => {
+    const foot = document.querySelector(".home-hero").getBoundingClientRect().bottom;
+    return foot <= innerHeight - 15 && foot > innerHeight - 33;
+  }), { message: "the card's foot at rest on its gutter" }).toBe(true);
+});
+
 test("dated hour navigation keeps the selected liturgical day", async ({ page }) => {
   await openDatedPage(page, `/lauds/${testDate}`);
 
@@ -3948,13 +3963,15 @@ test("the date picker is set in the room, not the platform", async ({ page }) =>
   await expect(page).toHaveURL(/\/lauds\/2026-03-17$/);
 });
 
-test("the date picker keeps to 1950-2150", async ({ page }) => {
+test("the date picker keeps to thirty years back and a hundred ahead", async ({ page }) => {
   const picker = page.getByRole("group", { name: "Choose a date" });
+  const year = Number((await serverTodaySlug(page)).slice(0, 4));
+  // presentation::offered_years: YEARS_BACK and YEARS_AHEAD of this year.
+  const [first, last] = [year - 30, year + 100];
+  const lastDay = new Date(Date.UTC(last, 11, 31)).toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" }) + `, December 31, ${last}`;
   for (const [path, month, closed, open] of [
-    ["/lauds/2150-12-15", "December 2150", "Next month", "Previous month"],
-    ["/lauds/1950-01-10", "January 1950", "Previous month", "Next month"],
-    // Outside the span, the picker opens at the nearer end.
-    ["/lauds/2200-06-01", "December 2150", "Next month", "Previous month"],
+    [`/lauds/${last}-12-15`, `December ${last}`, "Next month", "Previous month"],
+    [`/lauds/${first}-01-10`, `January ${first}`, "Previous month", "Next month"],
   ]) {
     await openDatedPage(page, path);
     await page.locator("button.hour-meta-date").click();
@@ -3962,17 +3979,20 @@ test("the date picker keeps to 1950-2150", async ({ page }) => {
     await expect(picker.getByRole("button", { name: closed })).toBeDisabled();
     await expect(picker.getByRole("button", { name: open })).toBeEnabled();
   }
+  // Outside the span there is no page.
+  expect((await page.goto(`/lauds/${last + 1}-06-01`)).status()).toBe(404);
   // Keys stop at the end rather than leaving the span.
-  await page.goto("/lauds/2150-12-15");
+  await page.goto(`/lauds/${last}-12-15`);
   await page.locator("button.hour-meta-date").click();
   // Let the opening's toggle run first: it resets the roving focus to the
   // page's day, as a reader's own keypress always follows it.
-  await expect(picker.getByRole("grid", { name: "December 2150" })).toBeVisible();
+  await expect(picker.getByRole("grid", { name: `December ${last}` })).toBeVisible();
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve))));
-  await picker.getByRole("link", { name: "Thursday, December 31, 2150" }).focus();
+  await picker.getByRole("link", { name: lastDay }).focus();
   await page.keyboard.press("ArrowRight");
-  await expect(picker.getByRole("link", { name: "Thursday, December 31, 2150" })).toBeFocused();
-  await expect(page.locator(".date-jump")).toHaveAttribute("max", "2150-12-31");
+  await expect(picker.getByRole("link", { name: lastDay })).toBeFocused();
+  await expect(page.locator(".date-jump")).toHaveAttribute("max", `${last}-12-31`);
+  await expect(page.locator(".date-jump")).toHaveAttribute("min", `${first}-01-01`);
 });
 
 test("home's date picker opens the chosen day's home", async ({ page }) => {
@@ -5814,6 +5834,59 @@ test("the ordo's current month and frontispiece are saved for offline use", asyn
     await expect(page.locator(`#d-${today}`)).toBeVisible();
     await page.goto(year);
     await expect(page.getByRole('heading', { name: 'Tabula Temporaria', exact: true })).toBeVisible();
+  } finally { await context.close(); }
+});
+
+test("a page beyond the saved fortnight waits for a slow server, and offline answers at once", async ({ browser, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright routes a service worker's own fetches only in Chromium, and its WebKit fails any navigation once context.setOffline(true) is set");
+  const context = await browser.newContext({ serviceWorkers: "allow", baseURL });
+  try {
+    const page = await context.newPage();
+    const today = await serverTodaySlug(page);
+    await page.goto(`/lauds/${today}`);
+    await page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+      if (!navigator.serviceWorker.controller) await new Promise(resolve => navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true }));
+    });
+    // A month a year and more ahead is never precached; the server takes longer to
+    // answer it than the worker once waited before calling the reader offline.
+    const year = Number(today.slice(0, 4)) + 1;
+    const far = `/calendar/${year}/07`;
+    const asked = [];
+    await context.route(`**${far}`, async route => {
+      const held = route.request().headers()["if-none-match"];
+      if (asked.length === 0) await new Promise(resolve => setTimeout(resolve, 4000));
+      const answer = await route.fetch();
+      asked.push({ held, status: answer.status() });
+      await route.fulfill({ response: answer });
+    });
+    // The tag names the reader's hour (America/New_York, whole hours from UTC), so a check
+    // made in the next hour is answered with the page.
+    const hour = () => Math.floor(Date.now() / 3600000);
+    const before = hour();
+    const response = await page.goto(far);
+    expect(response.status()).toBe(200);
+    await expect(page.locator("#offline-heading")).toHaveCount(0);
+    await expect(page.locator(`a[href^="/calendar/${year}"]`).first()).toBeAttached();
+    // One fetch for the page, not a second racing it.
+    expect(asked).toHaveLength(1);
+
+    // Opened again, the saved copy shows at once and is checked by its tag: the server,
+    // finding it unchanged, sends nothing.
+    await page.goto(far);
+    await expect.poll(() => asked.length).toBe(2);
+    expect(asked[1].held).toMatch(/^W\/"/);
+    expect(asked[1].status).toBe(hour() === before ? 304 : 200);
+
+    // With no connection, a page the cache does not hold says so without waiting.
+    await context.setOffline(true);
+    const started = Date.now();
+    await page.goto(`/calendar/${year}/08`);
+    await expect(page.locator("#offline-heading")).toBeVisible();
+    expect(Date.now() - started).toBeLessThan(2000);
+    // A page it holds still opens offline.
+    await page.goto(far);
+    await expect(page.locator("#offline-heading")).toHaveCount(0);
   } finally { await context.close(); }
 });
 

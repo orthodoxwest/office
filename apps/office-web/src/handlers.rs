@@ -330,6 +330,9 @@ impl Server {
                 None => return self.error_page(req, StatusCode::BAD_REQUEST, &invalid_date(ds)),
             }
         };
+        if !crate::cache::offered_year(date.year()) {
+            return self.not_found_page(req);
+        }
         let slug = date_slug(date);
         let entry = match self.cache.get(date.year()) {
             Ok(e) => e,
@@ -355,6 +358,7 @@ impl Server {
         let from = req.query.get("from");
         let from_feast =
             is_feast_id(from).then(|| feasts.get(from)).flatten().map(|e| LinkRow { label: e.name.clone(), href: feast_link(&e.id) });
+        let offered = presentation::offered_years(Server::local_year());
         let data = HomeData {
             chrome: Chrome {
                 page: "home".into(),
@@ -371,6 +375,8 @@ impl Server {
                 canonical: home_link(if ds.is_empty() { "" } else { &slug }),
                 noindex: !ds.is_empty(),
             },
+            first_year: *offered.start(),
+            last_year: *offered.end(),
             date_str: long_date(date),
             date_slug: slug.clone(),
             prev_link: home_link(&date_slug(date.add_days(-1))),
@@ -422,6 +428,10 @@ impl Server {
                 None => return self.error_page(req, StatusCode::BAD_REQUEST, &invalid_date(date_str)),
             }
         };
+        // Years beyond the ones every front offers are not built (see `YearCache::get`).
+        if !crate::cache::offered_year(date.year()) {
+            return self.not_found_page(req);
+        }
         let entry = match self.cache.get(date.year()) {
             Ok(e) => e,
             Err(e) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, &format!("error building calendar: {e}")),
@@ -461,6 +471,7 @@ impl Server {
         let (previous_hour_name, previous_hour_link, next_hour_name, next_hour_link) =
             adjacent_hours(hour_name, &date_str, &date_slug(date.add_days(1)));
         let today_slug = date_slug(now_in(&loc).0);
+        let offered = presentation::offered_years(Server::local_year());
         let mut data = HourData {
             chrome: Chrome {
                 page: hour_name.into(),
@@ -476,6 +487,8 @@ impl Server {
                 canonical: if dated { hour_link(hour_name, &date_slug(date)) } else { hour_link(hour_name, "") },
                 noindex: dated,
             },
+            first_year: *offered.start(),
+            last_year: *offered.end(),
             leader_forms: composed
                 .iter()
                 .map(|(form, h)| LeaderForm {
@@ -551,7 +564,9 @@ impl Server {
             return redirect(&target, StatusCode::FOUND);
         }
         let year = match data_format::atoi(parts[1]) {
-            Ok(y) if (1..=9999).contains(&y) => y as i32,
+            // Years beyond the ones every front offers are not built (see `YearCache::get`).
+            Ok(y) if i32::try_from(y).is_ok_and(crate::cache::offered_year) => y as i32,
+            Ok(_) => return self.not_found_page(req),
             // Beneath a year that is not one, there is no page at all.
             _ if parts.len() == 3 => return self.not_found_page(req),
             _ => return self.error_page(req, StatusCode::BAD_REQUEST, &format!("Invalid year {}.", data_format::quote(parts[1]))),
@@ -587,9 +602,12 @@ impl Server {
             Ok(entry) => presentation::course::year_course(entry.days.iter().map(|d| &**d)),
             Err(e) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, &format!("error building calendar: {e}")),
         };
+        // Search needs only this year's ordo and the next.
+        let indexed = |y: i32| (now.year()..=now.year() + 1).contains(&y);
         let step = |y: i32, m: u32| MonthStep {
             name: if y == year { MONTHS[m as usize - 1].to_string() } else { format!("{} {y}", MONTHS[m as usize - 1]) },
             href: calendar_month_link(y, m),
+            follow: indexed(y),
         };
         let data = CalendarData {
             chrome: Chrome {
@@ -599,7 +617,7 @@ impl Server {
                 site: req.site.into(),
                 canonical: same_view(year),
                 // Every year has an ordo; search needs only this one and the next.
-                noindex: !(now.year()..=now.year() + 1).contains(&year),
+                noindex: !indexed(year),
                 ..Chrome::default()
             },
             year,
@@ -609,6 +627,10 @@ impl Server {
             next_year: year + 1,
             prev_year_link: same_view(year - 1),
             next_year_link: same_view(year + 1),
+            prev_year_follow: indexed(year - 1),
+            next_year_follow: indexed(year + 1),
+            has_prev_year: crate::cache::offered_year(year - 1),
+            has_next_year: crate::cache::offered_year(year + 1),
             year_link: calendar_year_link(year),
             all_link: calendar_all_link(year),
             month_links: MONTHS
@@ -634,12 +656,12 @@ impl Server {
                 .collect(),
             months,
             prev_month: current.and_then(|m| match m {
-                1 if year > 1 => Some(step(year - 1, 12)),
+                1 if crate::cache::offered_year(year - 1) => Some(step(year - 1, 12)),
                 1 => None,
                 m => Some(step(year, m - 1)),
             }),
             next_month: current.and_then(|m| match m {
-                12 if year < 9999 => Some(step(year + 1, 1)),
+                12 if crate::cache::offered_year(year + 1) => Some(step(year + 1, 1)),
                 12 => None,
                 m => Some(step(year, m + 1)),
             }),
@@ -1193,8 +1215,13 @@ mod tests {
         assert_eq!(strip.matches(r#"aria-current="page""#).count(), 1);
         assert!(strip.contains(r#"data-month="2026-09""#));
         assert_eq!(body.matches(r#"aria-current="page""#).count(), 2, "the month and the Ordo menu item");
-        assert!(body.contains(r#"href="/calendar/2025/09" aria-label="Previous year, 2025""#));
-        assert!(body.contains(r#"href="/calendar/2027/09" aria-label="Next year, 2027""#));
+        // (Whether a crawler follows them depends on the year it is; see
+        // search_engines_find_the_undated_pages_on_the_canonical_host.)
+        assert!(body.contains(r#"href="/calendar/2025/09""#) && body.contains(r#"aria-label="Previous year, 2025""#));
+        assert!(body.contains(r#"href="/calendar/2027/09""#) && body.contains(r#"aria-label="Next year, 2027""#));
+        // The month links, whichever a crawler follows this year.
+        let unruled = |page: String| page.replace(r#" rel="nofollow""#, "");
+        let body = unruled(body);
         for want in [
             r#"href="/calendar/2026/08"><span class="continuation-label">Previous month</span><span>&larr; August</span>"#,
             r#"href="/calendar/2026/10"><span class="continuation-label">Next month</span><span>October &rarr;</span>"#,
@@ -1204,14 +1231,21 @@ mod tests {
         }
         // Neighbours across the year name their year.
         assert!(
-            ordo("/calendar/2026/12")
+            unruled(ordo("/calendar/2026/12"))
                 .contains(r#"href="/calendar/2027/01"><span class="continuation-label">Next month</span><span>January 2027 &rarr;</span>"#)
         );
-        assert!(ordo("/calendar/2026/01").contains(
+        assert!(unruled(ordo("/calendar/2026/01")).contains(
             r#"href="/calendar/2025/12"><span class="continuation-label">Previous month</span><span>&larr; December 2025</span>"#
         ));
-        assert!(!ordo("/calendar/0001/01").contains("Previous month"));
-        assert!(!ordo("/calendar/9999/12").contains("Next month"));
+        // The ordo runs over the years every front offers, and stops at their ends.
+        let years = presentation::offered_years(Server::local_year());
+        let (first, last) = (*years.start(), *years.end());
+        let opening = ordo(&format!("/calendar/{first}/01"));
+        let next = format!("Next year, {}", first + 1);
+        assert!(!opening.contains("Previous month") && !opening.contains("Previous year") && opening.contains(&next));
+        let closing = ordo(&format!("/calendar/{last}/12"));
+        let previous = format!("Previous year, {}", last - 1);
+        assert!(!closing.contains("Next month") && !closing.contains("Next year") && closing.contains(&previous));
     }
 
     /// An observance kept by monastics and oblates only is the ordo's bracketed line under the

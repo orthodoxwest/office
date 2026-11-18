@@ -241,12 +241,12 @@ fun OrdoScreen(
             val next = if (monthNumber == 12) year + 1 to 1 else year to monthNumber + 1
             Continuation(
                 previousLabel = "Previous month",
-                previous = Month.of(prev.second).getDisplayName(JavaTextStyle.FULL, Locale.US),
+                previous = Month.of(prev.second).getDisplayName(JavaTextStyle.FULL, Locale.US).takeIf { prev.first in PICKER_YEARS },
                 onPrevious = { onMonth(prev.first, prev.second) },
                 middle = "$year Ordo",
                 onMiddle = { onYear(year) },
                 nextLabel = "Next month",
-                next = Month.of(next.second).getDisplayName(JavaTextStyle.FULL, Locale.US),
+                next = Month.of(next.second).getDisplayName(JavaTextStyle.FULL, Locale.US).takeIf { next.first in PICKER_YEARS },
                 onNext = { onMonth(next.first, next.second) },
                 modifier = ordoColumn().padding(top = 44.dp),
             )
@@ -298,12 +298,21 @@ private fun OrdoHeader(
         Row(m.height(IntrinsicSize.Min).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
             val nav = Type.body.copy(fontSize = 12.8.sp, lineHeight = 20.5.sp, color = p.accent, fontFeatureSettings = "lnum")
             val cell = if (wide) Modifier else Modifier.weight(1f)
-            Text("‹ ${year - 1}", cell.tap(label = "Previous year, ${year - 1}") { sameView(year - 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
+            // The years stop where the date picker's do (PICKER_YEARS), as the web's.
+            if (year - 1 in PICKER_YEARS) {
+                Text("‹ ${year - 1}", cell.tap(label = "Previous year, ${year - 1}") { sameView(year - 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
+            } else {
+                Spacer(cell)
+            }
             // Gilt points part the three, as they part home's hours.
             GiltPoint()
             Text("Today", cell.tap(action = "open today in the ordo", onClick = onToday).padding(12.dp).goldUnderline(true, p.goldLine, if (wide) 12.dp else 24.dp), style = nav.copy(textAlign = TextAlign.Center))
             GiltPoint()
-            Text("${year + 1} ›", cell.tap(label = "Next year, ${year + 1}") { sameView(year + 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
+            if (year + 1 in PICKER_YEARS) {
+                Text("${year + 1} ›", cell.tap(label = "Next year, ${year + 1}") { sameView(year + 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
+            } else {
+                Spacer(cell)
+            }
         }
     }
     // The month strip: the shown month underlined in gold along its cell's foot, and under each
