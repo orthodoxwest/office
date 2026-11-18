@@ -82,7 +82,7 @@
            picker unfolds under its own control instead. #}
       <div class="home-stage">
       <div class="home-hours-face">
-      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}"><span class="pray-now-label">{{ pray_now_label }}</span></a></p>
+      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}"><span class="pray-now-label">{{ pray_now_label }}</span> <span class="pray-now-gloss"{% if not pray_now_gloss %} hidden{% endif %}>{{ pray_now_gloss }}</span></a></p>
       <nav class="home-hour-links" aria-label="Hours for the day">
         <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
           <h3 class="home-hour-group-label" id="home-hours-morning">
@@ -181,7 +181,7 @@
         day.setDate(day.getDate() + entry[3]);
         var shown = card.getAttribute("data-date-slug");
         var ours = shown === slug(now) || shown === slug(day);
-        var href = null, label = "Open Lauds";
+        var href = null, label = "Open Lauds", hour = null;
         card.querySelectorAll(".home-hour-link").forEach(function (link) {
           var hour = link.getAttribute("data-hour");
           var current = ours && entry[3] === 0 && hour === entry[1];
@@ -197,6 +197,7 @@
             }
             href = link.getAttribute("href");
             label = "Pray " + entry[2];
+            hour = entry[1];
           } else {
             link.removeAttribute("aria-current");
             if (state) state.parentNode.removeChild(state);
@@ -206,9 +207,17 @@
         if (ours && entry[3] !== 0) {
           href = "/" + entry[1] + "/" + slug(day);
           label = "Pray " + entry[2];
+          hour = entry[1];
         }
         if (href) prayNow.setAttribute("href", href);
-        prayNow.textContent = label;
+        (prayNow.querySelector(".pray-now-label") || prayNow).textContent = label;
+        // The hour's gloss, which a phone sets under the words: the one its hour carries below.
+        var gloss = prayNow.querySelector(".pray-now-gloss");
+        var note = hour && card.querySelector('.home-hour-link[data-hour="' + hour + '"] .home-hour-link-note');
+        if (gloss) {
+          gloss.textContent = note ? note.textContent : "";
+          gloss.hidden = !note;
+        }
       })();
     </script>
     {# The cross answers a tap: it turns the look over, Nave to Apse or back

@@ -362,8 +362,8 @@ struct HomeTier {
     var hour: CGFloat { desk ? legible(list ? 19.84 : 18.56) : 15.68 }
     /// The hour that is now is larger in the niche, as well as lit and rubricated.
     var hourNow: CGFloat { desk ? legible(list ? 22.72 : 21.12) : hour }
-    /// Every hour's gloss in the niche; a phone's only under the hour that is now.
-    var gloss: CGFloat { desk ? legible(list ? 16 : 13.76) : 12.48 }
+    /// Every hour's gloss in the niche; a phone's, the hour that is now's, under the invitation's words.
+    var gloss: CGFloat { desk ? legible(list ? 16 : 13.76) : 13.76 }
     /// The periods' labels: larger in the niche, where they stand beside the list.
     var period: CGFloat { desk ? legible(list ? 15.2 : 13.76) : 11.52 }
     var periodTracking: CGFloat { list ? 0.16 : desk ? 0.14 : 0.12 }
@@ -702,12 +702,14 @@ private struct Frontispiece: View {
                 let now = light.map { HourLightNow(pass: $0, frame: hourLightAt(ms: Float(tick.date.timeIntervalSince($0.start) * 1000))) }
                 let lit = now?.lit ?? HourLit(view)
                 VStack(spacing: 0) {
-                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil) {
+                    // A phone says what the hour is under the invitation's words, so the hours' table
+                    // keeps one shape whichever hour is now; the niche glosses every hour in its table.
+                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil, gloss: tier.desk ? "" : lit.note, glossSize: tier.gloss, glossInk: home.nowGloss) {
                         model.open(.hour(view.prayNowDate, view.prayNowHour))
                     }
                     .crownInk("r-pray")
                     .padding(.top, m.px(tier.bandGap))
-                    HourDirectory(current: lit.hour, note: lit.note, light: now, prayed: model.hoursPrayed(on: date), tier: tier, now: titulusNow(p, season: view.ornament), home: home) { h in model.open(.hour(date, h)) }
+                    HourDirectory(current: lit.hour, light: now, prayed: model.hoursPrayed(on: date), tier: tier, now: titulusNow(p, season: view.ornament), home: home) { h in model.open(.hour(date, h)) }
                         .padding(.top, m.px(tier.prayGap))
                 }
             }
@@ -967,30 +969,42 @@ private struct FeastName: View {
  * ruled by hand twice, the lining and inside it the day's colour (`frontal`) stopping short of
  * the corners; neither veils with the season, and a bare black day has no wash. Its words are the
  * tituli's red ochre, or by night the lining, lifted on a phone (`lifted`). About's foot sets
- * the same tablet (`style` and `pad` are the tier's on home).
+ * the same tablet (`style` and `pad` are the tier's on home). On a phone's home a quiet italic
+ * line under the words says what the hour is (`gloss`, the web's `.pray-now-gloss`).
  */
 struct PrayNow: View {
     let label: String
-    /// The words' opacity: they go out and come back as the light moves to another hour.
+    /// The words' opacity: they (and the gloss) go out and come back as the light moves to another hour.
     var words: Double = 1
     let style: TextStyle
     let pad: CGFloat
     let frontal: Color
     let wash: Color
     let lifted: Color?
+    /// What the hour is ("Evening prayer"), under the words; empty for none.
+    var gloss: String = ""
+    var glossSize: CGFloat = 13.76
+    var glossInk: Color = .secondary
     let action: () -> Void
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
         Button(action: action) {
-            Text(label).type(style.tracked(style.size * 0.012))
-                .foregroundStyle(lifted ?? (p.dark ? p.lining : p.titulus))
-                .opacity(words)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity, minHeight: 44)
-                .padding(.vertical, m.px(pad))
-                .padding(.horizontal, m.px(13.8))
+            VStack(spacing: m.px(1.3)) {
+                Text(label).type(style.tracked(style.size * 0.012))
+                    .foregroundStyle(lifted ?? (p.dark ? p.lining : p.titulus))
+                if !gloss.isEmpty {
+                    Text(gloss)
+                        .type(TextStyle(size: glossSize, line: glossSize * 1.2, italic: true))
+                        .foregroundStyle(glossInk)
+                }
+            }
+            .opacity(words)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .padding(.vertical, m.px(pad))
+            .padding(.horizontal, m.px(13.8))
         }
         .buttonStyle(Tablet(
             frontal: frontal, wash: wash, lining: p.lining, accent: p.accent,
@@ -1043,14 +1057,13 @@ private struct Tablet: ButtonStyle {
  * `.home-hour-links`): a firmer rule above and below and finer ones between the periods, by hand,
  * in the lining, and none upright. The periods are the margin's index in the quiet ink, with no
  * cell of their own; gilt points part the hours in a band. The hour that is now lies under a pool
- * of light with no edge, its name rubricated (`now`) and its gloss under it. In the wide niche
- * every hour carries its gloss and the hour that is now is set larger as well, so it is not told by
- * colour alone; from 1000 high the hours stand one to a line there (`HourList`).
+ * of light with no edge, its name rubricated (`now`). On a phone no hour carries a gloss, so the
+ * table keeps one shape whichever hour is now: the invitation says what the hour is (`PrayNow`).
+ * In the wide niche every hour carries its gloss and the hour that is now is set larger as well,
+ * so it is not told by colour alone; from 1000 high the hours stand one to a line there (`HourList`).
  */
 private struct HourDirectory: View {
     let current: String
-    /// What the current hour is, set under its name for a newcomer.
-    let note: String
     /// The light moving from one hour to the next, at this frame; nil at rest.
     let light: HourLightNow?
     /// The hours prayed on this day.
@@ -1128,13 +1141,13 @@ private struct HourDirectory: View {
         }
     }
 
-    /// One hour of a band: its name, its gloss (in the niche every hour's, on a phone the hour
-    /// that is now's), the pool of light on the hour that is now, a gilt point before it.
+    /// One hour of a band: its name, its gloss (in the niche every hour's, on a phone none), the
+    /// pool of light on the hour that is now, a gilt point before it.
     private func cell(_ h: String, _ j: Int) -> some View {
         let desk = tier.desk
         let done = prayed.contains(h)
         let isNow = h == current
-        let gloss = desk ? hourNote(slug: h) : isNow ? note : ""
+        let gloss = desk ? hourNote(slug: h) : ""
         let size = isNow ? tier.hourNow : tier.hour
         let pool = light?.pool(h) ?? (isNow ? 1 : 0)
         return Button { open(h) } label: {
@@ -1156,23 +1169,7 @@ private struct HourDirectory: View {
                     }
                 // What the hour is, for a newcomer, as the web's `.home-hour-link-note`.
                 if !gloss.isEmpty {
-                    if !desk {
-                        // A gloss wider than its cell ("Mid-morning prayer" among the day's three)
-                        // takes a second, balanced line rather than running into its neighbour; it
-                        // keeps 6 clear of either gilt point, and steps down where even its
-                        // longest word would not, as the web's.
-                        let two = balancedLines(gloss)
-                        ViewThatFits(in: .horizontal) {
-                            glossText(gloss, h, isNow)
-                            glossText(two, h, isNow)
-                            glossText(two, h, isNow, scale: 0.94)
-                            glossText(two, h, isNow, scale: 0.88)
-                            glossText(two, h, isNow, scale: 0.82)
-                            glossText(two, h, isNow, scale: 0.76)
-                        }
-                        .padding(.horizontal, m.px(4))
-                        .opacity(light?.gloss(h) ?? 1)
-                    } else if tier.shortScreen {
+                    if tier.shortScreen {
                         // Held at 12 in so small a niche, a gloss takes a second line rather than
                         // running into its neighbour.
                         Text(gloss)
@@ -1188,7 +1185,6 @@ private struct HourDirectory: View {
                             .lineLimit(1)
                             .fixedSize()
                             .frame(width: 0)
-                            .opacity(desk ? 1 : light?.gloss(h) ?? 1)
                     }
                 }
             }
@@ -1229,23 +1225,6 @@ private struct HourDirectory: View {
         light?.ink(h, now: home.nowGloss, plain: p.muted) ?? (isNow ? home.nowGloss : p.muted)
     }
 
-    /// A phone's gloss at its own size or a step below, set whole on the lines it is given.
-    private func glossText(_ words: String, _ h: String, _ isNow: Bool, scale: CGFloat = 1) -> some View {
-        let size = tier.gloss * scale
-        return Text(words)
-            .type(TextStyle(size: size, line: size * 1.15, italic: true))
-            .foregroundStyle(glossInk(h, isNow))
-            .multilineTextAlignment(.center)
-            .fixedSize()
-    }
-
-    /// A gloss parted on two lines at the space that makes them most even ("Mid-morning / prayer").
-    private func balancedLines(_ gloss: String) -> String {
-        let chars = Array(gloss)
-        let spaces = chars.indices.filter { chars[$0] == " " }
-        guard let split = spaces.min(by: { max($0, chars.count - $0 - 1) < max($1, chars.count - $1 - 1) }) else { return gloss }
-        return String(chars[..<split]) + "\n" + String(chars[(split + 1)...])
-    }
 }
 
 /**
@@ -1369,7 +1348,7 @@ private struct HourListLayout: Layout {
 }
 
 /// What home's light rests on: the hour that is now (none in the small hours, when Compline is the
-/// day before's), its gloss, and the invitation's words.
+/// day before's), and the invitation's words and gloss (the hour it opens).
 struct HourLit: Equatable {
     let hour: String
     let note: String
@@ -1377,7 +1356,7 @@ struct HourLit: Equatable {
 
     init(_ view: HomeView) {
         hour = view.currentHour
-        note = view.currentHourNote
+        note = view.prayNowGloss
         label = view.prayNowLabel
     }
 }
@@ -1405,8 +1384,8 @@ struct HourLightNow {
     private var moves: Bool { pass.from.hour != pass.to.hour }
     private func touched(_ h: String) -> Bool { moves && (h == pass.from.hour || h == pass.to.hour) }
 
-    /// The invitation's words.
-    var words: Double { pass.from.label == pass.to.label ? 1 : Double(frame.words) }
+    /// The invitation's words, and on a phone the gloss under them.
+    var words: Double { pass.from.label == pass.to.label && pass.from.note == pass.to.note ? 1 : Double(frame.words) }
     /// The pool under `h`, or nil where the pass leaves it as it is.
     func pool(_ h: String) -> Double? {
         guard touched(h) else { return nil }
@@ -1419,10 +1398,5 @@ struct HourLightNow {
         guard touched(h) else { return nil }
         let share = CGFloat(h == pass.from.hour ? 1 - frame.ink : frame.ink)
         return mix(now, plain, share)
-    }
-    /// A phone's gloss, shown only under the hour that is now.
-    func gloss(_ h: String) -> Double {
-        guard touched(h) else { return 1 }
-        return Double(h == pass.from.hour ? frame.leavingGloss : frame.comingGloss)
     }
 }

@@ -279,6 +279,9 @@ pub struct Invitation {
     /// The hour home's directory marks as now; empty when the invitation is
     /// not to this day's office.
     pub current: &'static str,
+    /// What the hour it opens is, for a newcomer ("Evening prayer"), which a
+    /// phone sets in the invitation under its words; empty for "Open Lauds".
+    pub gloss: &'static str,
 }
 
 /// What an hour is, for a newcomer reading home's invitation: "Evening prayer".
@@ -404,10 +407,16 @@ impl EndLeaf {
 /// The invitation on home for `shown`, given the reader's own day and clock hour.
 pub fn invitation(shown: Date, now: Date, now_hour: i8) -> Invitation {
     if shown != now {
-        return Invitation { hour: "lauds", label: "Open Lauds".to_string(), date: shown, current: "" };
+        return Invitation { hour: "lauds", label: "Open Lauds".to_string(), date: shown, current: "", gloss: "" };
     }
     let (hour, name, offset) = current_hour_entry(now_hour);
-    Invitation { hour, label: format!("Pray {name}"), date: now.add_days(offset), current: if offset == 0 { hour } else { "" } }
+    Invitation {
+        hour,
+        label: format!("Pray {name}"),
+        date: now.add_days(offset),
+        current: if offset == 0 { hour } else { "" },
+        gloss: hour_gloss(hour),
+    }
 }
 
 /// The reminder page's hours, as the web offers them and the apps start from: slug, name, the
@@ -853,9 +862,14 @@ mod tests {
         let today = Date::new(2026, 3, 15);
         let evening = invitation(today, today, 18);
         assert_eq!((evening.hour, evening.label.as_str(), evening.date, evening.current), ("vespers", "Pray Vespers", today, "vespers"));
+        assert_eq!(evening.gloss, "Evening prayer");
+        // Compline after midnight marks no hour today, but the invitation still says what it is.
         let late = invitation(today, today, 1);
-        assert_eq!((late.hour, late.date, late.current), ("compline", Date::new(2026, 3, 14), ""));
+        assert_eq!((late.hour, late.date, late.current, late.gloss), ("compline", Date::new(2026, 3, 14), "", "Prayer before sleep"));
         let other = invitation(today.add_days(1), today, 18);
-        assert_eq!((other.hour, other.label.as_str(), other.date, other.current), ("lauds", "Open Lauds", today.add_days(1), ""));
+        assert_eq!(
+            (other.hour, other.label.as_str(), other.date, other.current, other.gloss),
+            ("lauds", "Open Lauds", today.add_days(1), "", "")
+        );
     }
 }

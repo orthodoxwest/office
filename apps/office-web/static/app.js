@@ -3360,6 +3360,18 @@ function plainClickOpensHere(e, link) {
       return (n.nodeType === 3 && n.nodeValue.trim()) || (n.nodeType === 1 && n.classList.contains("pray-now-words"));
     });
   }
+  // What the hour the invitation opens is ("Evening prayer"), which a phone
+  // sets under its words: the gloss its hour carries in the table below.
+  function prayNowGloss(prayNow) {
+    return prayNow.querySelector(".pray-now-gloss");
+  }
+  function setPrayNowGloss(prayNow, gloss) {
+    var el = prayNowGloss(prayNow);
+    if (el) {
+      el.textContent = gloss;
+      el.hidden = !gloss;
+    }
+  }
   function setPrayNowLabel(prayNow, label) {
     var words = prayNowWords(prayNow);
     if (words) {
@@ -3372,11 +3384,11 @@ function plainClickOpensHere(e, link) {
   // The light moves with the hours. When the hour that is now changes while
   // home is in front (never on arrival, never on a return that finds the
   // clock moved on), the pool under the old hour dies as one gathers under
-  // the new, the rubric ink follows, the gloss changes and the invitation's
-  // words change in place, all on one clock. A word is never slid: a name
-  // whose seat changes (the hour that is now stands higher on a phone, to make
-  // room for its gloss, and is larger in the wide niche) goes out where it
-  // stood and comes back where it belongs, as the invitation's words do, and
+  // the new, the rubric ink follows, and the invitation's words and the gloss
+  // under them (a phone's) change in place, all on one clock. A word is never
+  // slid: a name whose seat changes (the hour that is now is larger in the
+  // wide niche) goes out where it stood and comes back where it belongs, as
+  // the invitation's words do, and
   // the new hour's look takes over at `seat`, while they are out. The figures
   // are render_blocks::hour_light's, which the apps play too; a test holds
   // this line to them. Reduced motion, a hidden page or a browser without
@@ -3412,7 +3424,7 @@ function plainClickOpensHere(e, link) {
   // Plays the change from the hour lit (`was`) and the invitation's words
   // (`wasLabel`) to `lit` and `label`. The links' aria-current has already
   // moved; their look is held at the old hour's until the seat.
-  function passLight(card, was, lit, prayNow, wasLabel, label) {
+  function passLight(card, was, lit, prayNow, wasLabel, label, wasGloss, gloss) {
     var L = HOUR_LIGHT;
     var T = L.total;
     var moves = was !== lit;
@@ -3462,6 +3474,7 @@ function plainClickOpensHere(e, link) {
         hold(false);
         if (prayNow) {
           setPrayNowLabel(prayNow, label);
+          setPrayNowGloss(prayNow, gloss);
         }
       },
     };
@@ -3527,6 +3540,11 @@ function plainClickOpensHere(e, link) {
       pass.words = words;
       run(words, dip, { duration: T });
     }
+    // The gloss under the words, on a phone, goes out and comes back with them.
+    var glossEl = prayNow ? prayNowGloss(prayNow) : null;
+    if (glossEl && wasGloss !== gloss && glossEl.getClientRects().length) {
+      run(glossEl, dip, { duration: T });
+    }
 
     // The seat and the end, on the same clock as the rest: a promise settled
     // in the frame an animation finishes is drawn in that frame.
@@ -3572,6 +3590,7 @@ function plainClickOpensHere(e, link) {
     var lit = null;
     var href = null;
     var label = "Open Lauds";
+    var glossHour = null;
 
     card.querySelectorAll(".home-hour-link").forEach(function (link) {
       if (info !== null && info.offset === 0 && link.getAttribute("data-hour") === info.slug) {
@@ -3581,11 +3600,13 @@ function plainClickOpensHere(e, link) {
     if (lit) {
       href = lit.getAttribute("href");
       label = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
+      glossHour = info.slug;
     } else if (info !== null && info.offset !== 0) {
       var offsetDate = new Date(now.getTime());
       offsetDate.setDate(offsetDate.getDate() + info.offset);
       href = "/" + info.slug + "/" + localDateSlug(offsetDate);
       label = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
+      glossHour = info.slug;
     } else {
       var lauds = card.querySelector('.home-hour-link[data-hour="lauds"]');
       if (lauds) {
@@ -3598,16 +3619,21 @@ function plainClickOpensHere(e, link) {
     var was = card.querySelector(".home-hour-link.is-current");
     var wasWords = prayNow ? prayNowWords(prayNow) : null;
     var wasLabel = wasWords ? wasWords.textContent.trim() : "";
+    var glossNote = glossHour && card.querySelector('.home-hour-link[data-hour="' + glossHour + '"] .home-hour-link-note');
+    var gloss = glossNote ? glossNote.textContent : "";
+    var wasGlossEl = prayNow ? prayNowGloss(prayNow) : null;
+    var wasGloss = wasGlossEl && !wasGlossEl.hidden ? wasGlossEl.textContent : "";
     card.querySelectorAll(".home-hour-link").forEach(function (link) {
       setHourCurrent(link, link === lit);
     });
     if (prayNow && href) {
       prayNow.setAttribute("href", href);
     }
-    if (passing === true && (was !== lit || (prayNow && wasLabel !== label)) && lightMayPass()) {
-      passLight(card, was, lit, prayNow, wasLabel, label);
+    if (passing === true && (was !== lit || (prayNow && (wasLabel !== label || wasGloss !== gloss))) && lightMayPass()) {
+      passLight(card, was, lit, prayNow, wasLabel, label, wasGloss, gloss);
     } else if (prayNow) {
       setPrayNowLabel(prayNow, label);
+      setPrayNowGloss(prayNow, gloss);
     }
   }
 
@@ -4492,7 +4518,7 @@ function plainClickOpensHere(e, link) {
       var out = [];
       // (With the header's words: they too change ink in one move, not through
       // a half-mix in which neither ink reads.)
-      [".site-header .site-brand", ".site-header details > summary", ".site-header nav", ".page-home .pray-now-label", ".page-home .home-hour-group", ".page-home .home-day-meta"].forEach(function (sel) {
+      [".site-header .site-brand", ".site-header details > summary", ".site-header nav", ".page-home .pray-now-label", ".page-home .pray-now-gloss", ".page-home .home-hour-group", ".page-home .home-day-meta"].forEach(function (sel) {
         Array.prototype.forEach.call(document.querySelectorAll(sel), function (el) {
           if (el.getClientRects().length) {
             out.push(el);

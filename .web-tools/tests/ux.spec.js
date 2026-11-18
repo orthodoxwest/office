@@ -530,7 +530,7 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
 
   const invitation = page.locator(".pray-now");
   const current = page.locator('.home-hour-link[aria-current="time"]');
-  await expect(invitation).toHaveText("Pray Terce");
+  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Terce");
   await expect(invitation).toHaveAttribute("href", `/terce/${testDate}`);
   await expect(current).toHaveAttribute("data-hour", "terce");
   // "Now" is announced, not drawn: the tinted cell and the invitation above
@@ -565,8 +565,9 @@ test("the early-morning invitation opens the previous day's Compline", async ({ 
   await page.clock.setFixedTime(new Date("2026-03-15T01:00:00-04:00"));
   await openDatedPage(page, `/?date=${testDate}`);
 
-  await expect(page.locator(".pray-now")).toHaveText("Pray Compline");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Compline");
   await expect(page.locator(".pray-now")).toHaveAttribute("href", "/compline/2026-03-14");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Prayer before sleep");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveCount(0);
 });
 
@@ -574,25 +575,55 @@ test("the foreground home invitation advances at the next office boundary", asyn
   await page.clock.install({ time: new Date("2026-03-15T10:59:00-04:00") });
   await openDatedPage(page, `/?date=${testDate}`);
 
-  await expect(page.locator(".pray-now")).toHaveText("Pray Terce");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Terce");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "terce",
   );
 
-  // The current hour says what it is under its name, and the line moves with it.
-  const note = page.locator(".home-hour-link-note:visible");
-  await expect(note).toHaveCount(1);
+  // The invitation says what the hour is under its words, and the line moves
+  // with it; the hours' table glosses none on a phone, so it keeps one shape.
+  const note = page.locator(".pray-now-gloss");
+  await expect(note).toBeVisible();
   await expect(note).toHaveText("Mid-morning prayer");
+  await expect(page.locator(".home-hour-link-note:visible")).toHaveCount(0);
 
   await page.clock.fastForward("02:00");
 
-  await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Sext");
   await expect(note).toHaveText("Midday prayer");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "sext",
   );
+});
+
+// A phone's table of hours once took the current hour's gloss under its name,
+// so its rows grew and its names moved as the hours turned ("Mid-morning
+// prayer" took two lines in the day's band). The gloss is the invitation's
+// now, and the table stands the same at every hour.
+test("the phone's table of hours keeps one shape whichever hour is now", async ({ page }) => {
+  const shape = () =>
+    page.evaluate(() => {
+      const table = document.querySelector(".home-hour-links").getBoundingClientRect();
+      return {
+        table: Math.round(table.height),
+        names: Array.from(document.querySelectorAll(".home-hour-link-name")).map((n) => Math.round(n.getBoundingClientRect().top - table.top)),
+      };
+    });
+  const shapes = [];
+  for (const [time, gloss] of [["10:00", "Mid-morning prayer"], ["18:00", "Evening prayer"], ["06:00", "Morning praise"]]) {
+    await page.clock.setFixedTime(new Date(`2026-03-15T${time}:00-04:00`));
+    await openDatedPage(page, `/?date=${testDate}`);
+    await expect(page.locator(".pray-now-gloss")).toHaveText(gloss);
+    await expect(page.locator(".home-hour-link-note:visible")).toHaveCount(0);
+    shapes.push(await shape());
+  }
+  expect(shapes[1]).toEqual(shapes[0]);
+  expect(shapes[2]).toEqual(shapes[0]);
+  // Another day's "Open Lauds" says nothing more.
+  await openDatedPage(page, "/?date=2026-03-16");
+  await expect(page.locator(".pray-now-gloss")).toBeHidden();
 });
 
 // The light moves with the hours (app.js HOUR_LIGHT, render_blocks::hour_light).
@@ -633,7 +664,7 @@ test("the light moves from Sext to None on an open home, and settles as a fresh 
   await page.clock.install({ time: new Date("2026-03-15T12:59:58-04:00") });
   await openDatedPage(page, `/?date=${testDate}`);
   const invitation = page.locator(".pray-now");
-  await expect(invitation).toHaveText("Pray Sext");
+  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Sext");
   // Arrival never moves the light.
   expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
 
@@ -644,16 +675,18 @@ test("the light moves from Sext to None on an open home, and settles as a fresh 
   // … while the eye sees the light leave Sext: both hours hold a pool.
   await lightAt(page, 300);
   await expect(page.locator(".home-hour-link.is-passing")).toHaveCount(2);
-  await expect(invitation).toHaveText("Pray Sext");
+  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Sext");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Midday prayer");
   expect((await homeAtRest(page)).current).toEqual(["sext"]);
-  // Past the seat, the new hour's look and words.
+  // Past the seat, the new hour's look and words, the gloss with them.
   await lightAt(page, 700);
-  await expect(invitation).toHaveText("Pray None");
+  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray None");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Afternoon prayer");
   expect((await homeAtRest(page)).current).toEqual(["none"]);
   // At the end nothing of the pass is left.
   await lightAt(page, 1400);
   expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["none"] });
-  await expect(page.locator(".home-hour-link-note:visible")).toHaveText("Afternoon prayer");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Afternoon prayer");
 });
 
 test("a second turn of the hour during a pass settles the first", async ({ page }) => {
@@ -668,10 +701,10 @@ test("a second turn of the hour during a pass settles the first", async ({ page 
   // The first pass ends where it was going (None), and the next leaves from there.
   const passing = await page.evaluate(() => Array.from(document.querySelectorAll(".is-passing")).map((l) => l.dataset.hour));
   expect(passing).toEqual(["none", "vespers"]);
-  await expect(page.locator(".pray-now")).toHaveText("Pray None");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray None");
   await lightAt(page, 1400);
   expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["vespers"] });
-  await expect(page.locator(".pray-now")).toHaveText("Pray Vespers");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Vespers");
 });
 
 test.describe("under reduced motion", () => {
@@ -681,7 +714,7 @@ test.describe("under reduced motion", () => {
     await page.clock.install({ time: new Date("2026-03-15T12:59:58-04:00") });
     await openDatedPage(page, `/?date=${testDate}`);
     await page.clock.runFor(3000);
-    await expect(page.locator(".pray-now")).toHaveText("Pray None");
+    await expect(page.locator(".pray-now-label")).toHaveText("Pray None");
     expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
     expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["none"] });
   });
@@ -702,7 +735,7 @@ test("a page hidden at the turn of the hour is corrected on its return, without 
     window.pageHidden = false;
     document.dispatchEvent(new Event("visibilitychange"));
   });
-  await expect(page.locator(".pray-now")).toHaveText("Pray None");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray None");
   expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
   expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["none"] });
 });
@@ -713,7 +746,7 @@ test("a turn found late, after a sleeping timer, corrects home without moving th
   await openDatedPage(page, `/?date=${testDate}`);
   await page.clock.setSystemTime(new Date("2026-03-15T18:00:00-04:00"));
   await page.clock.runFor("01:01");
-  await expect(page.locator(".pray-now")).toHaveText("Pray Vespers");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Vespers");
   expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
 });
 
@@ -734,9 +767,9 @@ test("the light leaves Compline at midnight and gathers on Lauds at two", async 
   await page.clock.runFor(3000);
   await lightAt(page, 300);
   await expect(page.locator(".home-hour-link.is-passing")).toHaveCount(1);
-  await expect(page.locator(".pray-now")).toHaveText("Pray Compline");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Compline");
   await lightAt(page, 1400);
-  await expect(page.locator(".pray-now")).toHaveText("Pray Lauds");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Lauds");
   expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["lauds"] });
 });
 
@@ -1233,12 +1266,12 @@ test("the home invitation catches up when the clock jumps past a sleeping timer"
   // timeout set at the previous hour.
   await page.clock.install({ time: new Date("2026-03-15T12:00:00-04:00") });
   await openDatedPage(page, `/?date=${testDate}`);
-  await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Sext");
 
   await page.clock.setSystemTime(new Date("2026-03-15T18:00:00-04:00"));
   await page.clock.runFor("01:01");
 
-  await expect(page.locator(".pray-now")).toHaveText("Pray Vespers");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Vespers");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "vespers",
@@ -1252,7 +1285,7 @@ test("the foreground home keeps previous-day Compline current across midnight", 
   await openDatedPage(page, "/?date=2026-07-29");
 
   const invitation = page.locator(".pray-now");
-  await expect(invitation).toHaveText("Pray Compline");
+  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Compline");
   await expect(invitation).toHaveAttribute("href", "/compline/2026-07-29");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
@@ -1261,7 +1294,7 @@ test("the foreground home keeps previous-day Compline current across midnight", 
 
   await page.clock.fastForward("02:00");
 
-  await expect(invitation).toHaveText("Pray Compline");
+  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Compline");
   await expect(invitation).toHaveAttribute("href", "/compline/2026-07-29");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Go to today" })).toBeVisible();
@@ -6739,13 +6772,13 @@ test("home marks the device's hour before its script runs", async ({ page }) => 
   const ready = new Promise((resolve) => { release = resolve; });
   await page.route("**/static/app.js*", async (route) => { await ready; await route.continue(); });
   await page.goto(`/?date=${testDate}`, { waitUntil: "commit" });
-  await expect(page.locator(".pray-now")).toHaveText("Pray Terce");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Terce");
   await expect(page.locator(".pray-now")).toHaveAttribute("href", `/terce/${testDate}`);
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute("data-hour", "terce");
   await expect(page.locator(".home-hour-link.is-current")).toHaveCount(1);
   release();
   await page.waitForLoadState("load");
-  await expect(page.locator(".pray-now")).toHaveText("Pray Terce");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Terce");
   await page.unroute("**/static/app.js*");
 });
 
