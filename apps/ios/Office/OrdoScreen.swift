@@ -186,9 +186,14 @@ struct OrdoScreen: View {
                     // found among its neighbours, as the web's `scroll-margin-top` keeps a row
                     // above it; the month's first day has none before it here.
                     let anchorDay = max(1, focusDay - 1)
+                    // Again once the rows the first move brought in are laid out: the first
+                    // lands on rows taken at a guessed height, some points off (#891).
                     DispatchQueue.main.async {
                         scroll.scrollTo("d-\(anchorDay)", anchor: focus)
-                        placed = true
+                        DispatchQueue.main.async {
+                            scroll.scrollTo("d-\(anchorDay)", anchor: focus)
+                            placed = true
+                        }
                     }
                 } else {
                     placed = true
