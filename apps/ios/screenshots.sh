@@ -10,8 +10,8 @@
 # The checked-in baselines (apps/ios/snapshots/) record the Xcode, runtime and devices they were
 # taken with (environment.json). `devices` takes the same ones when the runner has them, and says
 # pinned=true; otherwise (or with `store`, or before any baselines exist) it takes the image's
-# default Xcode, its newest iOS runtime's iPhone 17 and 11-inch iPad Pro, and says pinned=false,
-# since shots from another runtime differ in ways no page changed.
+# default Xcode, an iPhone 17 and an 11-inch iPad Pro, each from the newest iOS runtime that has
+# it, and says pinned=false, since shots from another runtime differ in ways no page changed.
 set -euo pipefail
 
 here=$(cd "$(dirname "$0")" && pwd)
@@ -53,7 +53,7 @@ devices() {
   sdk_version=$(xcrun --sdk iphonesimulator --show-sdk-version)
   pick() {
     python3 - "${RUNNER_TEMP:-/tmp}/devices.json" "$1" "$2" "$3" "$4" "$sdk_version" <<'PY'
-import json, sys
+import json, re, sys
 path, family, preferred, runtime, exact_name, sdk_version = sys.argv[1:]
 devices = json.load(open(path))["devices"]
 if runtime:
@@ -63,16 +63,26 @@ if runtime:
 else:
     # The newest runtime this Xcode's simulator SDK can run that has the family: an image can
     # carry a runtime newer than its default Xcode, whose devices xcodebuild cannot see.
-    version = lambda k: [int(x) for x in k.rsplit("iOS-", 1)[1].split("-")]
+    # A key can carry a suffix after the version (Xcode 27.1's iOS-27-1-iPhone19-1 for a model
+    # with its own build), so only the leading numbers count.
+    version = lambda k: [int(x) for x in re.search(r"iOS-(\d+(?:-\d+)*)", k).group(1).split("-")]
     sdk = [int(x) for x in sdk_version.split(".")]
-    ios = sorted((k for k in devices if "iOS" in k and version(k) <= sdk
-                  and any(d["name"].startswith(family) for d in devices[k])), key=version)
+    # `preferred` is one or more models, best first, split by "|" (a store size's model changes
+    # with the image). A point release's runtime can carry only a new model (Xcode 27.1's iOS
+    # 27.1 has only the iPhone Duo), so the newest runtime with a preferred model wins, else the
+    # newest with the family.
+    usable = [k for k in devices if re.search(r"iOS-\d", k) and version(k) <= sdk]
+    has = lambda k, prefix: any(d["name"].startswith(prefix) for d in devices[k])
+    for prefix in [*preferred.split("|"), family]:
+        ios = sorted((k for k in usable if has(k, prefix)), key=version)
+        if ios:
+            break
     if not ios:
         sys.exit(0)
     runtime = ios[-1]
-    found = [d for d in devices[runtime] if d["name"].startswith(family)]
-    exact = [d for d in found if d["name"] == preferred]
-    found = exact or [d for d in found if d["name"].startswith(preferred)] or found
+    found = [d for d in devices[runtime] if d["name"].startswith(prefix)]
+    exact = [d for d in found if d["name"] in preferred.split("|")]
+    found = exact or found
 if found:
     print(found[0]["udid"], runtime, found[0]["name"], sep="\t")
 PY
@@ -90,7 +100,7 @@ PY
     # A manual run with `store` takes the sizes App Store Connect asks for instead: the 6.9-inch
     # iPhone (1320 x 2868) and the 13-inch iPad (2064 x 2752).
     if [ -n "$store" ]; then
-      phone=$(pick iPhone 'iPhone 17 Pro Max' '' '') ipad=$(pick iPad 'iPad Pro 13' '' '')
+      phone=$(pick iPhone 'iPhone 18 Pro Max|iPhone 17 Pro Max' '' '') ipad=$(pick iPad 'iPad Pro 13' '' '')
     else
       phone=$(pick iPhone 'iPhone 17' '' '') ipad=$(pick iPad 'iPad Pro 11' '' '')
     fi
@@ -134,6 +144,16 @@ shoot() {
     xcrun simctl spawn "$sim" defaults delete "$data/Library/Preferences/$id" > /dev/null 2>&1 || true
     rm -rf "$data/Library" "$data/Documents" "$data/tmp"
     mkdir -p "$data/Library/Preferences" "$data/Library/Caches" "$data/Documents" "$data/tmp"
+  }
+  # Whether a full-size shot is the bare wall, a page not yet on the screen, by the comparison's
+  # own test (scripts/ios-snapshots.py blank). Without SNAPSHOT_PYTHON (a Python with Pillow)
+  # nothing is taken for wall, and the comparison still refuses a blank shot afterwards.
+  wall() {
+    [ -n "${SNAPSHOT_PYTHON:-}" ] || return 1
+    case "$2" in
+      ipad-*) "$SNAPSHOT_PYTHON" "$here/../../scripts/ios-snapshots.py" blank "$1" --ipad ;;
+      *) "$SNAPSHOT_PYTHON" "$here/../../scripts/ios-snapshots.py" blank "$1" ;;
+    esac
   }
   # Each page at a fixed day (DATE, else 15 March 2026), with today pinned to it, at 9 AM.
   one() {
@@ -181,9 +201,12 @@ shoot() {
       sleep 1
       settled=$((settled + 1))
       xcrun simctl io "$sim" screenshot "$this" > /dev/null
-      if cmp -s "$last" "$this"; then break; fi
+      # Still, and showing the page: on Xcode 27's simulators the screen can stay the bare wall
+      # (the launch screen's colour) for some seconds after the app says its page is drawn, and
+      # two frames of wall are alike. So a still wall waits on, as a moving frame does.
+      if cmp -s "$last" "$this" && ! wall "$this" "$name"; then break; fi
       if [ "$settled" -ge 20 ]; then
-        echo "::warning::$name did not come to rest in 20 seconds after it was drawn" >&2
+        echo "::warning::$name did not come to rest, or still showed the bare wall, 20 seconds after it was drawn" >&2
         break
       fi
       mv "$this" "$last"

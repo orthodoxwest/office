@@ -4,6 +4,7 @@
     ios-snapshots.py compare RAW BASELINES --updates DIR --diffs DIR [--summary FILE]
     ios-snapshots.py fetch BRANCH [--remote origin]
     ios-snapshots.py store RAW OUT
+    ios-snapshots.py blank SHOT [--ipad]
 
 `compare` takes the simulator's full-size screenshots in RAW (apps/ios/screenshots.sh shoot),
 brings each down to the device's points (a third of an iPhone's pixels, half an iPad's) and
@@ -17,7 +18,8 @@ CHANNEL_TOLERANCE levels of 255, and a shot differs when more than PIXEL_RATIO o
 - to --diffs, a picture of each changed shot: baseline, this run, and its differing pixels in red.
 
 A blank shot (one colour below the status bar: a page not yet drawn) fails the run and is never
-offered as a baseline; `fetch` refuses a set with one.
+offered as a baseline; `fetch` refuses a set with one. `blank` asks the same of one full-size shot
+while it is taken (apps/ios/screenshots.sh), exiting 0 when it is blank.
 
 It exits 0 when every shot matches, when there are no baselines yet (with a notice) or when the
 shots were not compared (another environment, with a warning); 1 when a shot changed, is new or is
@@ -352,7 +354,15 @@ def main(argv=None):
     s = sub.add_parser("store")
     s.add_argument("raw", type=pathlib.Path)
     s.add_argument("out", type=pathlib.Path)
+    b = sub.add_parser("blank", help="exit 0 when the shot is the bare wall, 1 when its page is drawn")
+    b.add_argument("shot", type=pathlib.Path)
+    b.add_argument("--ipad", action="store_true", help="an iPad's shot (2 pixels a point, not 3)")
     args = parser.parse_args(argv)
+    if args.command == "blank":
+        from PIL import Image
+
+        with Image.open(args.shot) as image:
+            return 0 if is_blank(image.convert("RGB").reduce(2 if args.ipad else 3)) else 1
     if args.command == "store":
         store(args.raw, args.out)
         return 0

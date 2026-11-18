@@ -186,6 +186,16 @@ class CompareTest(unittest.TestCase):
             ImageDraw.Draw(page).text((20, y), "O God, make speed to save me", fill=(40, 30, 20), font_size=16)
         self.assertFalse(SNAP.is_blank(page))
 
+    def test_blank_command_reads_a_full_size_shot(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            shot = pathlib.Path(tmp) / "home-nave.png"
+            Image.new("RGB", (393 * 3, 852 * 3), (240, 232, 220)).save(shot)
+            self.assertEqual(SNAP.main(["blank", str(shot)]), 0)
+            page = Image.new("RGB", (393 * 3, 852 * 3), (240, 232, 220))
+            ImageDraw.Draw(page).rectangle((60, 600, 1100, 1800), fill=(40, 30, 30))
+            page.save(shot)
+            self.assertEqual(SNAP.main(["blank", str(shot)]), 1)
+
     def test_state_goes_to_the_output_file(self):
         self.shot("home-nave")
         output = pathlib.Path(self.tmp.name) / "output"
