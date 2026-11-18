@@ -87,7 +87,9 @@ counted (`office-counted` and `office-counted-before` in localStorage, `usage-co
 two words (`presentation::usage::periods`; app.js mirrors it). Every beacon of a first day says
 `first`. Older clients say nothing, so the report shows how many of the period's readers reported
 and a week leads only once every day of it was reported; a period whose first days went
-unreported is counted from the day reports began, and says so.
+unreported is counted from the day reports began, and says so. While under nine in ten of a
+period's readers report, its figure counts the clients that have updated more than the readers,
+and can fall below one day's readers, so it is withheld and the report gives the share instead.
 
 A page's marks can fail it: Safari erases them after seven days away, which would open a month
 twice, and a page left before a beacon's reply never writes them. So for a browser the server

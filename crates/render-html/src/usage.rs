@@ -156,11 +156,10 @@ pub struct UsageData {
     pub recorded_days: i64,
     pub first_date: String,
     pub last_date: String,
-    /// The report in a sentence: its figure, the rest of the sentence, and a second sentence on
-    /// returning and new readers.
+    /// The report in a sentence: its figure and the rest of the sentence. The tiles under it
+    /// split the readers into returning and new.
     pub headline_figure: String,
     pub headline_rest: String,
-    pub headline_detail: String,
     pub tiles: Vec<UsageTile>,
     /// Readers in a calendar week and month, once any client reports them.
     pub period_tiles: Vec<UsageTile>,
@@ -224,6 +223,10 @@ const TODAY_GAP: f64 = 11.0;
 
 /// Rows of the daily table shown before the rest are folded away.
 const TABLE_ROWS: usize = 14;
+
+/// Tenths of a period's readers whose client must report the period before its readers are
+/// shown: below it the figure counts the updated clients more than the readers.
+const REPORTING: i64 = 9;
 
 /// A week-on-week change smaller than this is not told from a level week: at a few dozen readers
 /// a day, two weeks' averages differ by a tenth or more by chance.
@@ -360,7 +363,7 @@ pub fn usage_data(
         if window.iter().any(|r| r.day.as_str() < *day) {
             let name = CLIENT_NAMES.iter().find(|(key, ..)| key == client).map_or(*client, |c| c.1);
             d.corrections.push(format!(
-                "{name} before {}: {why}. Those counts are left out of readers, new readers and the clients. The hours they opened and the settings they reported cannot be told from readers' and remain.",
+                "{name} before {}: {why}. They are left out of the reader counts, but not of the hours and settings, which cannot be told apart.",
                 label(day)
             ));
         }
@@ -460,20 +463,6 @@ fn summary(d: &mut UsageData, all: &[UsageDay]) {
             note: new_before.map_or_else(|| "First counted in the week".into(), |b| format!("{b} the week before")),
             bars: Vec::new(),
         });
-        let by_client: Vec<String> = CLIENT_NAMES
-            .iter()
-            .map(|(key, _, phrase)| (total(week, |r| dim(r, &format!("new-client:{key}"))), phrase))
-            .filter(|(n, _)| *n > 0)
-            .map(|(n, phrase)| format!("{n} {phrase}"))
-            .collect();
-        d.headline_detail = format!(
-            "Of those, {} a day were returning{}. {new} were new in the week{}.{}",
-            whole(back),
-            back_before.map_or(String::new(), |b| format!(" ({} the week before)", whole(b))),
-            new_before.map_or(String::new(), |b| format!(" ({b} before)")),
-            // A reader new to one client may have been counted on another, so these can pass the total.
-            if by_client.is_empty() { String::new() } else { format!(" New to each client: {}.", by_client.join(", ")) },
-        );
     }
     tiles.push(today);
     d.tiles = tiles;
@@ -486,6 +475,7 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
     let Some(today) = Date::parse(&all[0].day) else { return };
     let reported = |r: &&UsageDay, key: &str| family(r, key) > 0;
     let mut partial = false;
+    let mut withheld: Vec<(&str, (i64, i64))> = Vec::new();
     for (key, noun, this_start, last_start) in [
         ("week", "week", week_start(today), week_start(today).add_days(-7)),
         ("month", "month", Date::new(today.year(), today.month() as i32, 1), {
@@ -510,13 +500,23 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
             (Some(a), _) => date_label(&a.day, year),
             _ => String::new(),
         };
-        // The share of the counted days' readers whose client said either word.
+        // The counted days' readers whose client said either word, and all of them.
+        let said = |rows: &[&UsageDay]| rows.iter().fold((0, 0), |(said, of), r| (said + family(r, key).min(r.users), of + r.users));
         let coverage = |rows: &[&UsageDay]| {
-            let (said, of) = rows.iter().fold((0, 0), |(said, of), r| (said + family(r, key).min(r.users), of + r.users));
+            let (said, of) = said(rows);
             (of > 0 && said * 20 < of * 19).then(|| format!("{} of its readers reporting", percent(said, of)))
         };
-        let so_far = (!this.is_empty()).then(|| sum(&this));
-        let (mut tile, counted): (UsageTile, Option<String>) = if last_whole && last.iter().any(|r| reported(r, key)) {
+        // Too few reporting, and the sum is a count of the clients that have updated, not of the
+        // readers: it can fall below a single day's readers. It is withheld, and the note says why.
+        let enough = |rows: &[&UsageDay]| {
+            let (said, of) = said(rows);
+            of == 0 || said * 10 >= of * REPORTING
+        };
+        if !this.is_empty() && !enough(&this) {
+            withheld.push((noun, said(&this)));
+        }
+        let so_far = (!this.is_empty() && enough(&this)).then(|| sum(&this));
+        let (mut tile, counted): (UsageTile, Option<String>) = if last_whole && last.iter().any(|r| reported(r, key)) && enough(&last) {
             let tile = UsageTile {
                 label: format!("Readers, last {noun}"),
                 value: sum(&last).to_string(),
@@ -555,6 +555,17 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
     if partial {
         d.period_note =
             "A browser or app reports these once it has the version that counts weeks, so they run low until all have it.".into();
+    }
+    // A period withheld: say why there is no figure, and how near it is.
+    if let Some(&(_, (said, of))) = withheld.first() {
+        let nouns = withheld.iter().map(|(noun, _)| format!("this {noun}")).collect::<Vec<_>>().join(" and ");
+        d.period_note = format!(
+            "Readers {nouns} wait until most browsers and apps have the version that reports them: {} of readers do so far, \
+             and the {} at {}0%.",
+            percent(said, of),
+            if withheld.len() > 1 { "figures appear" } else { "figure appears" },
+            REPORTING
+        );
     }
 }
 
@@ -637,12 +648,8 @@ fn chart(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay]) {
 }
 
 /// The clients as the report names them: stored value, name, and how a new reader arrived.
-const CLIENT_NAMES: [(&str, &str, &str); 4] = [
-    ("browser", "Browser tab", "in a browser"),
-    ("pwa", "Home-screen web app", "as a home-screen web app"),
-    ("android", "Android app", "on Android"),
-    ("ios", "iOS app", "on iOS"),
-];
+const CLIENT_NAMES: [(&str, &str); 4] =
+    [("browser", "Browser tab"), ("pwa", "Home-screen web app"), ("android", "Android app"), ("ios", "iOS app")];
 
 /// Each client's readers a day over the last seven completed days, against the seven before.
 fn clients(all: &[UsageDay]) -> Vec<UsageClient> {
@@ -656,7 +663,7 @@ fn clients(all: &[UsageDay]) -> Vec<UsageClient> {
     let before = before.filter(|b| reported(b));
     let rows: Vec<(&str, f64, Option<f64>, i64)> = CLIENT_NAMES
         .iter()
-        .map(|(key, name, _)| {
+        .map(|(key, name)| {
             let count = |r: &UsageDay| Some(dim(r, &format!("client:{key}")));
             (
                 *name,
@@ -820,7 +827,7 @@ fn habits(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay]) {
         new,
         format!("of {new} on their first day, {:.1} hours each", hours as f64 / opened.max(1) as f64),
     );
-    row("Opened an hour that could not report", sum("offline:yes"), reporting, "since their last report: no network, or no answer".into());
+    row("Opened an hour offline", sum("offline:yes"), reporting, "so it went uncounted, since their last report".into());
     let (on, off) = (sum("reminder:on"), sum("reminder:off"));
     row("Reminders on, in the apps", on, on + off, format!("of {} app readers", on + off));
 }
@@ -844,7 +851,7 @@ pub const TREND_LABELS: [(&str, &str, &[&str]); 17] = [
     ("tenure", "How long they have read", &["First week", "First month", "Longer"]),
     ("last-week", "Days read the week before", &["One", "Two or three", "Four to six", "All seven"]),
     ("new-offices", "Hours a new reader opened", &["One", "Two", "Three", "Four or more"]),
-    ("offline", "Opened an hour that could not report", &["Yes"]),
+    ("offline", "Opened an hour offline", &["Yes"]),
     ("reminder", "Reminders, in the apps", &["On", "Off"]),
 ];
 
@@ -1035,14 +1042,10 @@ mod tests {
         let tiles: Vec<(&str, &str, &str)> = d.tiles.iter().map(|t| (t.label.as_str(), t.value.as_str(), t.note.as_str())).collect();
         assert_eq!(tiles[1], ("Returning, a day", "7", "9 the week before"));
         assert_eq!(tiles[2], ("New, in 7 days", "21", "7 the week before"));
-        assert_eq!(
-            d.headline_detail,
-            "Of those, 7 a day were returning (9 the week before). 21 were new in the week (7 before). New to each client: 14 in a browser, 7 on Android."
-        );
         // New readers were first told apart fourteen days ago: the days before show none, not zero.
         assert_eq!(d.rows.iter().map(|r| r.new_readers).collect::<Vec<_>>(), [Some(3); 7]);
         let d = data(days(0, &[5; 20]), 30, "2026-01-01");
-        assert!(d.rows.iter().chain(&d.more_rows).all(|r| r.new_readers.is_none()) && d.tiles.len() == 2 && d.headline_detail.is_empty());
+        assert!(d.rows.iter().chain(&d.more_rows).all(|r| r.new_readers.is_none()) && d.tiles.len() == 2);
         assert!(d.chart_plain && !d.chart_split);
     }
 
@@ -1239,12 +1242,18 @@ mod tests {
         );
         // Clients that have not updated say nothing, and the report says how many did.
         for row in &mut rows[..2] {
-            row.users = 20;
+            row.users = 12;
         }
         let d = data(rows.clone(), 7, "2026-01-01");
-        assert!(!d.period_note.is_empty());
-        assert_eq!(d.period_tiles[0].note, "Sep 28 – Oct 4 · this week so far 13");
-        assert_eq!(d.period_tiles[1].note, "Oct 1 – Oct 6 · 75% of its readers reporting");
+        assert_eq!(d.period_tiles[1].note, "Oct 1 – Oct 6 · 94% of its readers reporting");
+        // Too few, and this week's figure would count the clients that updated rather than the
+        // readers, below a single day's: it is withheld, and the note says how near it is.
+        assert_eq!(d.period_tiles[0].note, "Sep 28 – Oct 4");
+        assert_eq!(
+            d.period_note,
+            "Readers this week wait until most browsers and apps have the version that reports them: 83% of readers do so far, \
+             and the figure appears at 90%."
+        );
         // A month whose first days went unreported is counted from the day reports began, and
         // its share is of those days' readers.
         for key in ["month:first", "month:again"] {
@@ -1254,18 +1263,27 @@ mod tests {
         let month = &d.period_tiles[1];
         assert_eq!(
             (month.label.as_str(), month.value.as_str(), month.note.as_str()),
-            ("Readers since Oct 2", "16", "Not the whole month: Oct 2 – Oct 6 · 71% of its readers reporting")
+            ("Readers since Oct 2", "16", "Not the whole month: Oct 2 – Oct 6 · 93% of its readers reporting")
         );
         // A first day nobody read on had nothing to report, and the month is whole without it.
         rows[5].users = 0;
         assert_eq!(data(rows.clone(), 7, "2026-01-01").period_tiles[1].label, "Readers, this month so far");
-        // Last week's share stands beside last week, before this week's figure.
+        // Last week's share stands beside last week.
         for row in &mut rows[2..9] {
-            row.users = 20;
+            row.users = 11;
         }
+        assert_eq!(data(rows.clone(), 7, "2026-01-01").period_tiles[0].note, "Sep 28 – Oct 4 · 91% of its readers reporting");
+        // When most clients have not updated, no period is shown: 81 this week beside 103 today
+        // read as a count, and was one of the updated clients.
+        for row in &mut rows[..9] {
+            row.users = 30;
+        }
+        let d = data(rows.clone(), 7, "2026-01-01");
+        assert!(d.period_tiles.is_empty());
         assert_eq!(
-            data(rows.clone(), 7, "2026-01-01").period_tiles[0].note,
-            "Sep 28 – Oct 4 · 50% of its readers reporting · this week so far 13"
+            d.period_note,
+            "Readers this week and this month wait until most browsers and apps have the version that reports them: 33% of \
+             readers do so far, and the figures appear at 90%."
         );
         assert!(data(days(10, &[10; 20]), 7, "2026-01-01").period_tiles.is_empty());
     }
@@ -1314,7 +1332,7 @@ mod tests {
                 ("In their first week", "20%", "of 10 who said; 30% in their first month, 50% longer"),
                 ("Four or more days last week", "75%", "of 4 back for a new week; one day 25%, two or three 0%, all seven 75%"),
                 ("New readers who opened an hour", "75%", "of 4 on their first day, 1.7 hours each"),
-                ("Opened an hour that could not report", "8%", "since their last report: no network, or no answer"),
+                ("Opened an hour offline", "8%", "so it went uncounted, since their last report"),
                 ("Reminders on, in the apps", "25%", "of 4 app readers"),
             ]
         );

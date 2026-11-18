@@ -12328,8 +12328,7 @@ body.page-home::before {
 /* The report in a sentence, then its figures. */
 .usage-headline { max-width: 36rem; margin: 1.7rem 0 0; font-size: 1.75rem; line-height: 1.25; text-wrap: balance; }
 .usage-headline strong { color: var(--accent); font-weight: 400; }
-.usage-headline-detail { max-width: 40rem; margin: .7rem 0 0; color: var(--muted); font-size: 1rem; line-height: 1.55; }
-.usage-headline + .usage-summary, .usage-headline-detail + .usage-summary { margin-top: 1.6rem; border-top: 1px solid var(--border); }
+.usage-headline + .usage-summary { margin-top: 1.6rem; border-top: 1px solid var(--border); }
 .usage-periods { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: -2rem; }
 .usage-period-note { margin: -1.2rem 0 2rem; }
 .usage-weeks { display: block; width: 3.4rem; height: 1.15rem; margin-top: .5rem; fill: var(--gold-line); transform: scaleY(-1); }

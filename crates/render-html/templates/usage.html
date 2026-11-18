@@ -17,7 +17,6 @@
     {% for t in tabs %}<a href="?days={{ t.days }}"{% if t.current %} aria-current="page"{% endif %}>{{ t.label }}</a>{% endfor %}
   </nav>
   <p class="usage-headline">{% if headline_figure %}<strong>{{ headline_figure }}</strong>{% endif %}{{ headline_rest }}</p>
-  {% if headline_detail %}<p class="usage-headline-detail">{{ headline_detail }}</p>{% endif %}
   {# The last week whatever the period, so a launch is not averaged in with quiet months. #}
   <dl class="usage-summary">{{ tile_list(tiles) }}</dl>
   {% if period_tiles %}<dl class="usage-summary usage-periods">{{ tile_list(period_tiles) }}</dl>
@@ -52,7 +51,7 @@
     <p class="usage-splits-note">A reader who moves from the browser to an app is new there, and one fewer here.</p>
   </section>{% endif %}
   <section class="usage-panel" aria-labelledby="usage-popular-title">
-    <div class="usage-section-heading"><div><h2 id="usage-popular-title">What they open</h2><p>Share of the period’s {{ readers }} daily readers who opened each</p></div></div>
+    <div class="usage-section-heading"><div><h2 id="usage-popular-title">What they open</h2><p>Share of the period’s {{ readers }} readers who opened each, a reader counted once on each day they read</p></div></div>
     <dl class="usage-office-totals">{% for o in opens %}<div><dt>{{ o.name|titlecase }}</dt><dd><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect width="{{ o.width }}" height="8"/></svg><span class="usage-share">{{ o.value }}</span><span class="usage-count">{{ o.detail }}</span></dd></div>{% endfor %}</dl>
     <dl class="usage-office-totals usage-office-extra">{% for o in opens_extra %}<div><dt>{{ o.name|capitalize }}</dt><dd><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect width="{{ o.width }}" height="8"/></svg><span class="usage-share">{{ o.value }}</span><span class="usage-count">{{ o.detail }}</span></dd></div>{% endfor %}</dl>
     {% if offices_note %}<p class="usage-splits-note">{{ offices_note }}</p>{% endif %}
@@ -119,10 +118,9 @@
       <li>Days are Eastern time. Today is still filling, and is left out of every average.</li>
       <li>New means first counted on that device; clearing site data or reinstalling makes a reader new again.</li>
       <li>Hours and settings overlap: a reader who opens Lauds and Vespers counts in both, and one who changes a setting during the day counts under both of its values.</li>
-      <li>A week’s and a month’s readers are devices too, added up without anything that links one day to another.</li>
+      <li>A week’s or a month’s readers count each device once in it, without keeping anything that links one day to another.</li>
       {% for c in corrections %}<li>{{ c }}</li>{% endfor %}
     </ul>
-    <p>The full rules are in <a href="https://github.com/orthodoxwest/office/blob/master/DEPLOYMENT.md#usage-metrics">DEPLOYMENT.md, Usage metrics</a>.</p>
   </aside>
 </section>
 {% endblock %}
