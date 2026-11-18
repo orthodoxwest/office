@@ -39,7 +39,7 @@ then, once clients report them, the readers of the last calendar week and
 month. The chart splits each day's bar into returning and new and draws a
 trailing seven-day average. "Where they read" sets each client's week against
 the one before; "What they open" gives each hour, the ordo and reminders as a
-share of the period's readers, and how many hours a reader opens; "Settings in
+share of the period's readers, and how many hours a reader opens (once a week of it has been kept); "Settings in
 use" gives one share of each setting's reports, with every family's series over time behind a
 disclosure (weekly by default; a part week stands apart at either end).
 
