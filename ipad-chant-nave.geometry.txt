@@ -1,0 +1,3 @@
+home.card: (24.0, 454.96, 72.19999999999997, 2115.6879999999996) of 496.8 at zoom 0.9 in (0.0, 0.0)
+home.niche: (24.0, 454.96000000000004, 72.19999999999997, 2115.6879999999996)
+hour.reading: ratio 0.5002701599970352, rows 150, frames 5, heights 20, viewport (834.0, 1190.0) (first ratio 0.0, rows 0, frames 0, heights 0, viewport (834.0, 1158.0), changed 36 times)
