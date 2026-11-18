@@ -4358,8 +4358,12 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
 .day-monastic p { margin: 0.15rem 0 0; }
 .day-monastic abbr { font-style: normal; }
 .day-monastic-office { display: block; }
-/* At the head of the opened details, the way on to the day. */
+/* At the head of the opened details, the way on to the day. It stands over
+   the summary's thumb box, which reaches down over it on the phone, so a tap
+   on it leads to the day rather than closing the details again. */
 .day-office-open {
+  position: relative;
+  z-index: 2;
   display: inline-block;
   margin: 0.15rem 0 0.35rem;
   font-size: 0.85rem;
@@ -4630,6 +4634,12 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
     content: "";
     position: absolute;
     inset: -0.3rem -0.6rem -1.35rem;
+  }
+  /* The way on to the day is a thumb target of its own, over the summary's. */
+  .day-office-open::before {
+    content: "";
+    position: absolute;
+    inset: -0.15rem -0.6rem -0.35rem;
   }
   .month-table tr::before {
     top: 0.8rem;

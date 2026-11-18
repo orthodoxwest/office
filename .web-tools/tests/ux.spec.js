@@ -4470,6 +4470,19 @@ test("a tap on an ordo day's row opens its office details; only the date leads t
   await expect(page).toHaveURL(/date=2026-03-01/);
 });
 
+// The summary's thumb box reaches down over the way on to the day; the link
+// stands over it, so a tap there leads on rather than closing the details.
+test("an open ordo day's Open this day leads to the day", async ({ page }) => {
+  await openDatedPage(page, "/calendar/2026/03");
+  const row = page.locator("#d-2026-03-01");
+  const details = row.locator(".day-office-details");
+  await row.locator(".day-feast-name").click();
+  await expect(details).toHaveAttribute("open", "");
+  // A click checks that the link, not the summary over it, takes the tap.
+  await details.locator(".day-office-open").click();
+  await expect(page).toHaveURL(/date=2026-03-01/);
+});
+
 // The row's other answers: a tap that puts a mark's note away does only that;
 // the wide table's empty width and its weekday toggle the row too, a second
 // tap beside the open details closes them, and the date's whole cell leads to
