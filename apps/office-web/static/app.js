@@ -4517,8 +4517,12 @@ function plainClickOpensHere(e, link) {
     function rowUnits() {
       var out = [];
       // (With the header's words: they too change ink in one move, not through
-      // a half-mix in which neither ink reads.)
-      [".site-header .site-brand", ".site-header details > summary", ".site-header nav", ".page-home .pray-now-label", ".page-home .pray-now-gloss", ".page-home .home-hour-group", ".page-home .home-day-meta"].forEach(function (sel) {
+      // a half-mix in which neither ink reads.) The invitation's words and
+      // gloss are not a unit of their own: they turn with the card, as they
+      // always have (home's first-paint script used to set the link's text
+      // whole, so its .pray-now-label was never there to be found), and as
+      // a group of their own WebKit leaves the card's words faint after the play.
+      [".site-header .site-brand", ".site-header details > summary", ".site-header nav", ".page-home .home-hour-group", ".page-home .home-day-meta"].forEach(function (sel) {
         Array.prototype.forEach.call(document.querySelectorAll(sel), function (el) {
           if (el.getClientRects().length) {
             out.push(el);
