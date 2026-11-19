@@ -422,6 +422,8 @@ pub struct CrownPlan {
     pub veil_from: u32,
     pub veil_to: u32,
     pub end: u32,
+    /// The veil's colour where it is faint, and at its height (`presentation::crown`).
+    pub veil_warm: CrownRgb,
     pub veil_ink: CrownRgb,
     pub veil_peak: f32,
     pub ink_at: f32,
@@ -435,8 +437,6 @@ pub struct CrownPlan {
     pub spread_glow_part: f32,
     pub veil_lead: f32,
     pub veil_part: f32,
-    pub dawn_veil_umber: CrownRgb,
-    pub dawn_veil_low: f32,
     pub ink_handover: u32,
     pub sky_ochre: CrownRgb,
     pub sky_red_ochre: CrownRgb,
@@ -448,6 +448,10 @@ pub struct CrownPlan {
     /// How many times slower than these figures the play is performed: the apps multiply their
     /// clock by it (`tap_apart` and `rush` stay real ms).
     pub pace: f32,
+    /// The coloured light: through this stretch of the timetable the play's clock runs `linger`
+    /// times slower (every part together); a rushed play drops it.
+    pub linger_span: CrownSpan,
+    pub linger: f32,
     /// The frieze's own change: dark first at dusk, light last at dawn.
     pub frieze: CrownSpan,
     /// The veil is multiplied over the page: its strength rises to `veil_peak` by `veil_top` of
@@ -461,6 +465,15 @@ pub struct CrownPlan {
     pub sky_peach: CrownRgb,
     pub sky_teal: CrownRgb,
     pub cross_ember: CrownRgb,
+    /// The cross's answer to the hand, in real ms from the tap (not slowed by `pace`): it gives
+    /// to `cross_press` of its size and back, catches the light (brightest `cross_catch_peak` of
+    /// the way through `cross_catch_len`), and at dusk takes its ember gold at once.
+    pub cross_press: f32,
+    pub cross_press_len: u32,
+    pub cross_catch_len: u32,
+    pub cross_catch_peak: f32,
+    pub cross_ember_at: u32,
+    pub cross_ember_in: u32,
     /// The stars by magnitude and the ending beat (`presentation::crown` says how).
     pub star_kindle: u32,
     pub star_over: f32,
@@ -490,6 +503,7 @@ pub fn crown_plan(to_dark: bool) -> CrownPlan {
         veil_from: play.veil.0,
         veil_to: play.veil.1,
         end: play.end,
+        veil_warm: rgb(play.veil_warm),
         veil_ink: rgb(play.veil_ink),
         veil_peak: play.veil_peak,
         ink_at: play.ink_at,
@@ -503,8 +517,6 @@ pub fn crown_plan(to_dark: bool) -> CrownPlan {
         spread_glow_part: c::SPREAD_GLOW_PART,
         veil_lead: c::VEIL_LEAD,
         veil_part: c::VEIL_PART,
-        dawn_veil_umber: rgb(c::DAWN_VEIL_UMBER),
-        dawn_veil_low: c::DAWN_VEIL_LOW,
         ink_handover: c::INK_HANDOVER,
         sky_ochre: rgb(c::SKY_OCHRE),
         sky_red_ochre: rgb(c::SKY_RED_OCHRE),
@@ -514,6 +526,8 @@ pub fn crown_plan(to_dark: bool) -> CrownPlan {
         tap_apart: c::TAP_APART,
         rush: c::RUSH,
         pace: c::PACE,
+        linger_span: span(play.linger),
+        linger: c::LINGER,
         frieze: span(play.frieze),
         veil_top: play.veil_top,
         veil_gone: play.veil_gone,
@@ -523,6 +537,12 @@ pub fn crown_plan(to_dark: bool) -> CrownPlan {
         sky_peach: rgb(c::SKY_PEACH),
         sky_teal: rgb(c::SKY_TEAL),
         cross_ember: rgb(c::CROSS_EMBER),
+        cross_press: c::CROSS_PRESS,
+        cross_press_len: c::CROSS_PRESS_LEN,
+        cross_catch_len: c::CROSS_CATCH_LEN,
+        cross_catch_peak: c::CROSS_CATCH_PEAK,
+        cross_ember_at: c::CROSS_EMBER_AT,
+        cross_ember_in: c::CROSS_EMBER_IN,
         star_kindle: c::STAR_KINDLE,
         star_over: c::STAR_OVER,
         star_snuff: c::STAR_SNUFF,

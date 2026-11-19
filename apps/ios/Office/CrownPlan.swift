@@ -27,7 +27,8 @@ struct CrownFigures {
     let veilTo: Double
     /// The play's length; later only where the page's far corner is not yet covered.
     let end: Double
-    /// The veil's colour and its strength at its height.
+    /// The veil's colour where it is faint and at its height, and its strength at its height.
+    let veilWarm: Pigment
     let veilInk: Pigment
     let veilPeak: Double
     /// The share of the new look under a line at which its ink is handed over.
@@ -62,6 +63,10 @@ struct CrownFigures {
     let rush: Double
     /// How many times slower than its timetable the play is performed (the clock is divided by it).
     let pace: Double
+    /// The sky's coloured light: through this stretch of the timetable the clock runs `lingerBy`
+    /// times slower still, every part together (a rushed play drops it).
+    let linger: Span
+    let lingerBy: Double
     /// The frieze's own change: dark first at dusk, light last at dawn.
     let frieze: Span
     /// The veil is multiplied over the page: its strength rises to `veilPeak` by `veilTop` of its
@@ -76,6 +81,16 @@ struct CrownFigures {
     let skyPeach: Pigment
     let skyTeal: Pigment
     let crossEmber: Pigment
+    /// The cross's answer to the hand, in real ms from the tap (not slowed by `pace`): it gives to
+    /// `crossPress` of its size and back in `crossPressLen`, catches the light (brightest
+    /// `crossCatchPeak` of the way through `crossCatchLen`), and at dusk takes its ember gold in
+    /// `crossEmberIn` from `crossEmberAt`.
+    let crossPress: Double
+    let crossPressLen: Double
+    let crossCatchLen: Double
+    let crossCatchPeak: Double
+    let crossEmberAt: Double
+    let crossEmberIn: Double
     /// Each star kindles in `starKindle`, to `starOver` of its size and back, and goes out in
     /// `starSnuff`.
     let starKindle: Double
@@ -95,6 +110,23 @@ struct CrownFigures {
 }
 
 extension CrownFigures {
+    /// The clock `dt` ms (at the play's pace) on from timetable moment `from`, slowed through the
+    /// linger (presentation::crown's `CrownPlay::advance`).
+    func advance(_ from: Double, by dt: Double) -> Double {
+        var at = from, left = max(0, dt)
+        if at < linger.at {
+            let d = min(left, linger.at - at)
+            at += d
+            left -= d
+        }
+        if at < linger.end && left > 0 {
+            let d = min(left, (linger.end - at) * lingerBy)
+            at += d / lingerBy
+            left -= d
+        }
+        return at + left
+    }
+
     /// The Rust core's plan (`crownPlan(toDark:)`, presentation::crown), for a dusk or a dawn.
     static func of(dusk: Bool) -> CrownFigures {
         let p = crownPlan(toDark: dusk)
@@ -105,6 +137,7 @@ extension CrownFigures {
             veilFrom: Double(p.veilFrom),
             veilTo: Double(p.veilTo),
             end: Double(p.end),
+            veilWarm: Pigment(p.veilWarm),
             veilInk: Pigment(p.veilInk),
             veilPeak: Double(p.veilPeak),
             inkAt: Double(p.inkAt),
@@ -127,6 +160,8 @@ extension CrownFigures {
             tapApart: Double(p.tapApart),
             rush: Double(p.rush),
             pace: Double(p.pace),
+            linger: Span(at: Double(p.lingerSpan.at), len: Double(p.lingerSpan.len)),
+            lingerBy: Double(p.linger),
             frieze: Span(at: Double(p.frieze.at), len: Double(p.frieze.len)),
             veilTop: Double(p.veilTop),
             veilGone: Double(p.veilGone),
@@ -136,6 +171,12 @@ extension CrownFigures {
             skyPeach: Pigment(p.skyPeach),
             skyTeal: Pigment(p.skyTeal),
             crossEmber: Pigment(p.crossEmber),
+            crossPress: Double(p.crossPress),
+            crossPressLen: Double(p.crossPressLen),
+            crossCatchLen: Double(p.crossCatchLen),
+            crossCatchPeak: Double(p.crossCatchPeak),
+            crossEmberAt: Double(p.crossEmberAt),
+            crossEmberIn: Double(p.crossEmberIn),
             starKindle: Double(p.starKindle),
             starOver: Double(p.starOver),
             starSnuff: Double(p.starSnuff),
@@ -704,14 +745,14 @@ struct CrownScene {
 
     /// How far a line's old ink has gone at `t` (0...1).
     func inkOut(_ key: String, _ t: Double) -> Double {
-        if let w = words[key] { return CubicEase(0.4, 0, 0.7, 1).at(crownRun(t, w - 230, 240)) }
+        if let w = words[key] { return CubicEase(0.4, 0, 0.7, 1).at(crownRun(t, w - 200, 280)) }
         if let r = rows[key] { return crownRun(t, r - fig.inkHandover / 2, fig.inkHandover) }
         return 0
     }
 
     /// How far a line's new ink has come at `t` (0...1).
     func inkIn(_ key: String, _ t: Double) -> Double {
-        if let w = words[key] { return CubicEase(0.3, 0, 0.4, 1).at(crownRun(t, w - 80, 360)) }
+        if let w = words[key] { return CubicEase(0.3, 0, 0.4, 1).at(crownRun(t, w - 180, 320)) }
         if let r = rows[key] { return crownRun(t, r - fig.inkHandover / 2, fig.inkHandover) }
         return 1
     }

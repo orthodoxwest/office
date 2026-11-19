@@ -223,8 +223,8 @@ test("full-size raised alphabet — light", async ({ page }) => {
 // the wall shaded, crossed and nearly at rest. The ending beat is not
 // here: it is played from script after the stills go.
 for (const [dir, moments] of [
-  ["dusk", [1000, 1700, 2300, 2900, 3400, 3900]],
-  ["dawn", [1000, 1400, 1900, 2300, 2800, 3400]],
+  ["dusk", [1000, 1500, 2000, 2500, 2900, 3200]],
+  ["dawn", [1000, 1300, 1700, 2000, 2400, 2700]],
 ]) {
   test(`the crown's ${dir}, held at six moments`, async ({ page }) => {
     await holdCrown(page, dir);

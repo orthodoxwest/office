@@ -10,12 +10,15 @@ import zlib from "node:zlib";
 import { expect } from "@playwright/test";
 
 // presentation::crown: the play's pace and the moment the look turns.
-export const PACE = 1.625;
+export const PACE = 3.0;
 export const TURN = 650;
+// presentation::crown's LINGER and each play's linger (ms of the timetable).
+export const LINGER = 1.8;
+export const LINGER_SPAN = { dusk: [800, 1500], dawn: [400, 1400] };
 // The page's rest is no earlier than this (ms from the tap, by the
 // timetable); the frames a test may ask for end a little before it, where
 // app.js begins to top the picture up from script.
-export const LAST = { dusk: 3900, dawn: 3400 };
+export const LAST = { dusk: 3200, dawn: 2700 };
 
 // Opens home in the look the play leaves, taps the cross, and holds the
 // play just after the transition's first frame. No screenshot may be taken

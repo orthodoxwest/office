@@ -175,6 +175,12 @@ fun Modifier.check(checked: Boolean, onChange: (Boolean) -> Unit): Modifier =
 fun HapticFeedback.chose() = performHapticFeedback(HapticFeedbackType.SegmentTick)
 
 /**
+ * The softest tick, as home's crown play comes to rest (its ending beat): the answer to the tap
+ * that began it, under the same phone setting. The iOS app gives a soft impact there.
+ */
+fun HapticFeedback.cameToRest() = performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+
+/**
  * The tick of a checkbox turned on or off. Before Android 14, whose segment and toggle constants
  * (API 34) an older phone does not know, Compose plays them through `ViewCompat`, which falls back
  * to the context click (a tick, and on) and the clock's tick (off), so no guard is needed here.

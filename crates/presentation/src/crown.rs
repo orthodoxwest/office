@@ -67,10 +67,12 @@ pub type Rgb = [u8; 3];
 /// crosses it; and while the front is still crossing, the page begins to take the new light,
 /// spreading out of the arch from under the frieze. The page is not crossed with its other look
 /// straight (cream and navy meet in grey): a veil of the hour's colour is multiplied over the
-/// turning wall, so dusk dims the plaster with blue until it is near the night's own value and
-/// only then crosses, and dawn brings the plaster in under a warm shade and lifts it. Every ramp
-/// ends on a long tail. Light arrives faster than it leaves. Every front plays to these figures;
-/// app.js mirrors them and office-web tests the two agree.
+/// turning wall, so dusk dims the plaster toward the night's own slate until it is near the
+/// night's value and only then crosses, and dawn brings the plaster in under a rose shade and
+/// lifts it. Where the veil is faint it is warm: the room takes the sky's afterglow before it
+/// darkens, and the plaster's first light as it lifts. Every ramp ends on a long tail. Light
+/// arrives faster than it leaves. Every front plays to these figures; app.js mirrors them and
+/// office-web tests the two agree.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct CrownPlay {
     /// When the look itself changes under the play (the saved choice is written at the tap).
@@ -92,7 +94,12 @@ pub struct CrownPlay {
     /// beat). It ends later only where the page's far corner is not yet covered.
     pub end: u32,
     /// The veil's colour, multiplied over the wall (so it only ever shades: plaster keeps its
-    /// texture and every line its ink), and its strength at its height.
+    /// texture and every line its ink), and its strength at its height. Its colour is
+    /// `veil_warm` where it is faint and `veil_ink` at its height, mixed by the share of its
+    /// height it stands at: dusk's room takes the afterglow before the slate, and dawn's plaster
+    /// is rose under the veil and warm as it lifts. The colours are low in chroma, so the room
+    /// in the middle of the change is a shade of the light, never a third colour.
+    pub veil_warm: Rgb,
     pub veil_ink: Rgb,
     pub veil_peak: f32,
     /// The veil reaches its height at this share of its span, by `veil_in`, and is gone by
@@ -106,43 +113,83 @@ pub struct CrownPlay {
     pub ink_at: f32,
     /// How the page's own opacity rises through the spread: late, and with a long tail.
     pub glow_ease: Ease,
+    /// The coloured light: the stretch of the timetable where the sky is between its looks
+    /// (dusk's afterglow under the coming night, dawn's teal, rose and peach). The play's clock
+    /// runs [`LINGER`] times slower through it, every part of the play together, so the colours
+    /// are there to be looked at; outside it the play keeps its pace.
+    pub linger: Span,
 }
 
-/// Nave to Apse: eight seconds and a little on the glass.
+/// Nave to Apse: about seventeen seconds on the glass, a sunset to be watched.
 pub const DUSK: CrownPlay = CrownPlay {
     turn: 650,
     front: Span { at: 800, len: 1900 },
-    spread: Span { at: 1500, len: 2700 },
-    veil: (1500, 4200),
+    spread: Span { at: 1100, len: 2300 },
+    veil: (1100, 3400),
     frieze: Span { at: 700, len: 1500 },
-    end: 5200,
-    veil_ink: [96, 104, 200],
-    veil_peak: 0.8,
+    end: 4400,
+    veil_warm: [240, 204, 160],
+    veil_ink: [92, 102, 140],
+    veil_peak: 0.78,
     veil_top: 0.5,
     veil_gone: 1.0,
-    veil_in: [0.4, 0.0, 0.7, 1.0],
+    veil_in: [0.3, 0.0, 0.6, 1.0],
     veil_out: [0.2, 0.0, 0.3, 1.0],
     ink_at: 0.34,
     glow_ease: [0.8, 0.0, 0.4, 1.0],
+    linger: Span { at: 800, len: 1500 },
 };
 
-/// Apse to Nave: seven and a half seconds and a little.
+/// Apse to Nave: about fifteen seconds.
 pub const DAWN: CrownPlay = CrownPlay {
     turn: 650,
     front: Span { at: 800, len: 1700 },
-    spread: Span { at: 1300, len: 2400 },
-    veil: (1300, 3700),
-    frieze: Span { at: 2600, len: 1100 },
-    end: 4700,
-    veil_ink: [200, 128, 100],
-    veil_peak: 0.8,
+    spread: Span { at: 1000, len: 2000 },
+    veil: (1000, 3000),
+    frieze: Span { at: 2000, len: 1000 },
+    end: 4000,
+    veil_warm: [246, 214, 182],
+    veil_ink: [214, 158, 164],
+    veil_peak: 0.7,
     veil_top: 0.4,
     veil_gone: 0.8,
     veil_in: [0.6, 0.0, 0.7, 1.0],
     veil_out: [0.4, 0.0, 0.5, 1.0],
     ink_at: 0.6,
     glow_ease: [0.5, 0.0, 0.15, 1.0],
+    linger: Span { at: 400, len: 1400 },
 };
+
+impl CrownPlay {
+    /// The play's clock after `dt` ms of its own pace from timetable moment `from`: slowed
+    /// [`LINGER`] times through [`CrownPlay::linger`]. (Multiply real ms by `1 / PACE` first.)
+    pub fn advance(&self, from: f32, dt: f32) -> f32 {
+        let (a, b) = (self.linger.at as f32, (self.linger.at + self.linger.len) as f32);
+        let (mut at, mut dt) = (from, dt.max(0.0));
+        if at < a {
+            let d = dt.min(a - at);
+            at += d;
+            dt -= d;
+        }
+        if at < b && dt > 0.0 {
+            let d = dt.min((b - at) * LINGER);
+            at += d / LINGER;
+            dt -= d;
+        }
+        at + dt
+    }
+
+    /// How long, at the play's own pace (times [`PACE`] for ms on the glass), the timetable takes
+    /// from `from` to `to`: the inverse of [`CrownPlay::advance`].
+    pub fn performed(&self, from: f32, to: f32) -> f32 {
+        let (a, b) = (self.linger.at as f32, (self.linger.at + self.linger.len) as f32);
+        let held = (to.min(b) - from.max(a)).max(0.0);
+        (to - from) + held * (LINGER - 1.0)
+    }
+}
+
+/// How many times slower the play's clock runs through its [`CrownPlay::linger`].
+pub const LINGER: f32 = 1.8;
 
 /// The play for a tap that turns the page dark (dusk) or light (dawn).
 pub fn crown_play(to_dark: bool) -> CrownPlay {
@@ -151,10 +198,10 @@ pub fn crown_play(to_dark: bool) -> CrownPlay {
 
 /// How many times slower than its timetable the play is performed. The timetable above, and every
 /// front's own smaller timings, are written at the pace the play was composed at; each front
-/// multiplies its clock by this, so a figure of 1000 is 1625 ms on the glass. Only what answers
-/// the reader's own hand keeps real time: the cross's first catch of the light, [`TAP_APART`] and
-/// [`RUSH`].
-pub const PACE: f32 = 1.625;
+/// multiplies its clock by this, so a figure of 1000 is 3000 ms on the glass. Only what answers
+/// the reader's own hand keeps real time: the cross's answer to the tap ([`CROSS_PRESS`] and the
+/// figures beside it), [`TAP_APART`] and [`RUSH`].
+pub const PACE: f32 = 3.0;
 
 /// The front in the head of the arch: quickest in its middle, and a long time coming to rest on
 /// the horizon (or in the point).
@@ -182,10 +229,6 @@ pub const VEIL_LEAD: f32 = 1.4;
 pub const VEIL_PART: f32 = 0.18;
 /// The veil thins outward from the arch to this share of itself at the screen's edge.
 pub const VEIL_FAR: f32 = 0.7;
-/// Dawn's veil once changed ink through the wall's grey passage. The veil is multiplied now
-/// and has no grey passage; the native players read these until they follow.
-pub const DAWN_VEIL_UMBER: Rgb = [200, 100, 74];
-pub const DAWN_VEIL_LOW: f32 = 0.15;
 /// A line's ink changes hands in this long (old ink out and new ink in, never both), in ms.
 pub const INK_HANDOVER: u32 = 140;
 /// The sky's pigments, fresco earths: the afterglow is yellow ochre with red ochre only at the
@@ -203,6 +246,19 @@ pub const SKY_TEAL: Rgb = [72, 112, 118];
 /// The cross's ember gold: the last light it keeps at dusk, the first it takes at dawn (deep
 /// enough to stand on cream plaster, where leaf alone is lost).
 pub const CROSS_EMBER: Rgb = [186, 118, 52];
+
+/// The cross answers the hand at once, in real ms from the tap (not slowed by [`PACE`]): it
+/// gives a little under the finger, [`CROSS_PRESS`] of its size and back in [`CROSS_PRESS_LEN`],
+/// and catches the light, at its brightest [`CROSS_CATCH_PEAK`] of the way through
+/// [`CROSS_CATCH_LEN`]. At dusk it takes its ember gold in [`CROSS_EMBER_IN`] from
+/// [`CROSS_EMBER_AT`], over the paint and before the afterglow, and keeps it until the ending
+/// beat, when the gold gives way to the night's leaf.
+pub const CROSS_PRESS: f32 = 0.9;
+pub const CROSS_PRESS_LEN: u32 = 260;
+pub const CROSS_CATCH_LEN: u32 = 900;
+pub const CROSS_CATCH_PEAK: f32 = 0.2;
+pub const CROSS_EMBER_AT: u32 = 30;
+pub const CROSS_EMBER_IN: u32 = 240;
 
 /// The stars come by magnitude (stars.json's `r`), each from the change of look ([`CrownPlay::turn`]).
 /// Dusk: the evening star, the one nearest the cross, kindles alone as the dark first reaches it
@@ -224,8 +280,9 @@ pub const STARS_BRIGHT_APART: u32 = 150;
 pub const DAWN_FIELD_OUT: f32 = 0.62;
 pub const DAWN_STAR_LINGER: u32 = 250;
 /// The ending beat. When everything is still the play holds its breath for [`BEAT_HOLD`], and
-/// then one thing happens, in [`BEAT_LEN`]: at dusk the last, faintest star; at dawn the morning
-/// star goes out and the cross turns from gold to its red.
+/// then one thing happens, in [`BEAT_LEN`]: at dusk the cross lets its ember gold go to the
+/// night's leaf as the last, faintest star kindles; at dawn the morning star goes out and the
+/// cross turns from gold to its red. The phones mark it with a soft tick, the tap's answer.
 pub const BEAT_HOLD: u32 = 370;
 pub const BEAT_LEN: u32 = 600;
 /// A second tap on the cross while the page is turning is kept, once, and plays the way back at
@@ -281,10 +338,32 @@ mod tests {
             assert!(play.veil.0 == play.spread.at && play.veil.1 <= play.spread.at + play.spread.len);
             assert!(play.veil_top < play.veil_gone && play.veil_gone <= 1.0);
             assert!(play.veil_peak < 0.9 && (0.0..1.0).contains(&play.ink_at));
-            // The ending beat has its room after the page is still, and nothing passes nine
-            // seconds on the glass.
+            // The veil's inks are shades of the light, low in chroma: no third colour.
+            for ink in [play.veil_warm, play.veil_ink] {
+                let (hi, lo) = (ink.iter().max().unwrap(), ink.iter().min().unwrap());
+                assert!(hi - lo <= 80, "{ink:?} is loud");
+            }
+            // The warm ink is the lighter: faint, it is a light on the wall, not a shade.
+            let sum = |c: Rgb| c.iter().map(|&v| u32::from(v)).sum::<u32>();
+            assert!(sum(play.veil_warm) > sum(play.veil_ink));
+            // The ending beat has its room after the page is still, and nothing passes seventeen
+            // and a half seconds on the glass: slow enough to watch a sunset, short of a wait.
             assert!(play.spread.at + play.spread.len + BEAT_HOLD + BEAT_LEN <= play.end);
-            assert!((play.end + SPREAD_WIDE) as f32 * PACE <= 9000.0);
+            assert!(play.performed(0.0, (play.end + SPREAD_WIDE) as f32) * PACE <= 17500.0);
+            // The colours linger once the cross has answered (its real-time figures are done
+            // before the clock slows) and before the page's ending beat.
+            assert!(play.linger.at as f32 * PACE >= CROSS_CATCH_LEN as f32);
+            assert!(play.linger.at + play.linger.len < play.end - BEAT_HOLD - BEAT_LEN);
+            // And it is over before the web tops the page up for its last quarter second (those
+            // last animations are made at the play's own pace).
+            assert!(play.linger.at + play.linger.len + 250 <= play.spread.at + play.spread.len);
+            // The slowed clock and its inverse agree.
+            for t in [0.0, 300.0, 600.0, 1000.0, 1700.0, 2500.0, 4000.0] {
+                let back = play.advance(0.0, play.performed(0.0, t));
+                assert!((back - t).abs() < 0.01, "{t} came back as {back}");
+                let mid = play.advance(t, play.performed(t, t + 900.0));
+                assert!((mid - t - 900.0).abs() < 0.01);
+            }
             // Every ramp ends on a tail: an ease's last tenth takes at least a quarter of its time.
             for ease in [play.glow_ease, FRONT_EASE] {
                 assert!(ease[2] <= 0.4 && ease[3] == 1.0, "{ease:?} stops short");
@@ -295,6 +374,8 @@ mod tests {
         const { assert!(DAWN.frieze.at + DAWN.frieze.len == DAWN.spread.at + DAWN.spread.len) };
         // Light arrives faster than it leaves.
         const { assert!(DAWN.end < DUSK.end) };
+        // The cross answers before anything else moves, and well inside a breath.
+        const { assert!(CROSS_EMBER_AT + CROSS_EMBER_IN <= 300 && CROSS_PRESS_LEN <= 300) };
         assert_eq!(crown_play(true), DUSK);
         assert_eq!(crown_play(false), DAWN);
     }

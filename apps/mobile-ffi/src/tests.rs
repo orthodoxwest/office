@@ -776,13 +776,28 @@ fn crown_plan_carries_presentations_figures() {
                 plan.spread_glow_part,
                 plan.veil_lead,
                 plan.veil_part,
-                plan.dawn_veil_low
+                plan.cross_press,
+                plan.cross_catch_peak
             ],
-            [c::SPREAD_FEATHER, c::SPREAD_SHAPE_PART, c::SPREAD_BEND, c::SPREAD_GLOW_PART, c::VEIL_LEAD, c::VEIL_PART, c::DAWN_VEIL_LOW]
+            [
+                c::SPREAD_FEATHER,
+                c::SPREAD_SHAPE_PART,
+                c::SPREAD_BEND,
+                c::SPREAD_GLOW_PART,
+                c::VEIL_LEAD,
+                c::VEIL_PART,
+                c::CROSS_PRESS,
+                c::CROSS_CATCH_PEAK
+            ]
+        );
+        assert_eq!(
+            (plan.cross_press_len, plan.cross_catch_len, plan.cross_ember_at, plan.cross_ember_in),
+            (c::CROSS_PRESS_LEN, c::CROSS_CATCH_LEN, c::CROSS_EMBER_AT, c::CROSS_EMBER_IN)
         );
         let rgb = |p: crate::CrownRgb| [p.r, p.g, p.b];
-        assert_eq!(rgb(plan.dawn_veil_umber), c::DAWN_VEIL_UMBER);
+        assert_eq!(rgb(plan.veil_warm), play.veil_warm);
         assert_eq!(plan.pace, c::PACE);
+        assert_eq!((plan.linger_span.at, plan.linger_span.len, plan.linger), (play.linger.at, play.linger.len, c::LINGER));
         assert_eq!(
             [rgb(plan.sky_ochre), rgb(plan.sky_red_ochre), rgb(plan.sky_ember), rgb(plan.sky_lime), rgb(plan.sky_rose_lilac)],
             [c::SKY_OCHRE, c::SKY_RED_OCHRE, c::SKY_EMBER, c::SKY_LIME, c::SKY_ROSE_LILAC]
