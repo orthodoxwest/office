@@ -769,10 +769,10 @@ private fun AnnotatedString.Builder.prefName(name: String) {
 /**
  * By night the menu opens on home's blue plaster (the phone panel's baked Apse plaster, its ground,
  * limewash and veil), not a flat slab of the surface: the web's `.site-menu-panel` by night. The
- * plaster is fitted to the panel's width from the top, and covers it. A panel taller than the
- * plaster's proportion (as the Chant row makes it) scales it by height, wider than the panel, so
- * it is clipped to the panel as iOS's `.clipped()` and the web's background are: drawing behind
- * does not clip, and the overhang showed past the border once the opening's transition let go.
+ * plaster is fitted to the panel's width from the top, and covers it. The phone's menu is taller
+ * than the plaster's proportion, so it scales by height, wider than the panel, and is clipped to
+ * the panel as iOS's `.clipped()` and the web's background are: drawing behind does not clip, and
+ * the overhang showed past the border once the opening's transition let go.
  */
 private fun DrawScope.nightPlaster(plaster: ImageBitmap) {
     val scale = maxOf(size.width / plaster.width, size.height / plaster.height)
