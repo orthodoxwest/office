@@ -354,6 +354,9 @@ mod tests {
             // before the clock slows) and before the page's ending beat.
             assert!(play.linger.at as f32 * PACE >= CROSS_CATCH_LEN as f32);
             assert!(play.linger.at + play.linger.len < play.end - BEAT_HOLD - BEAT_LEN);
+            // And it is over before the web tops the page up for its last quarter second (those
+            // last animations are made at the play's own pace).
+            assert!(play.linger.at + play.linger.len + 250 <= play.spread.at + play.spread.len);
             // The slowed clock and its inverse agree.
             for t in [0.0, 300.0, 600.0, 1000.0, 1700.0, 2500.0, 4000.0] {
                 let back = play.advance(0.0, play.performed(0.0, t));

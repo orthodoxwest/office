@@ -118,6 +118,21 @@ class CrownTest {
         assertEquals(ThemeChoice.DEFAULT, crown.next())
     }
 
+    /** The clock's linger, against figures worked by presentation::crown's own (crown.rs). */
+    @Test
+    fun theClockLingersAsTheSharedRuleDoes() {
+        val dusk = crownPlan(true)
+        val dawn = crownPlan(false)
+        assertEquals(911.111f, dusk.advance(0f, 1000f), 0.01f)
+        assertEquals(5600f, dusk.performed(0f, 4400f), 0.01f)
+        assertEquals(5120f, dawn.performed(0f, 4000f), 0.01f)
+        assertEquals(2460f, dawn.advance(500f, 3000f), 0.01f)
+        assertEquals(300f, dawn.advance(300f, -5f), 0.01f)
+        for (t in listOf(0f, 350f, 900f, 1700f, 2600f)) {
+            assertEquals(t, dusk.advance(0f, dusk.performed(0f, t)), 0.01f)
+        }
+    }
+
     @Test
     fun duskPlaysAndSettlesOnTheApse() {
         val stage = Stage(ThemeChoice.NAVE)
@@ -230,12 +245,14 @@ class CrownTest {
         val stage = Stage(ThemeChoice.NAVE)
         show(stage)
         compose.onNodeWithContentDescription("Switch to Apse").performClick()
-        advance(1500)
+        // Past the turn (and into the linger): a touch now rushes the rest, not the plain change.
+        advance(played(crownPlan(true).turn.toLong() + 300))
         assertTrue("not playing: ${stage.crown.plainBecause}", stage.crown.playing)
         compose.onNodeWithText(stage.view.prayNowLabel).performClick()
         advance(crownPlan(true).rush.toLong() + 200)
         compose.waitForIdle()
         assertFalse(stage.crown.playing)
+        assertEquals(0, stage.plain)
         assertEquals(ThemeChoice.APSE, stage.theme)
     }
 

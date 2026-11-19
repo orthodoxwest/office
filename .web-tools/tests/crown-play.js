@@ -12,6 +12,9 @@ import { expect } from "@playwright/test";
 // presentation::crown: the play's pace and the moment the look turns.
 export const PACE = 3.0;
 export const TURN = 650;
+// presentation::crown's LINGER and each play's linger (ms of the timetable).
+export const LINGER = 1.8;
+export const LINGER_SPAN = { dusk: [800, 1500], dawn: [400, 1400] };
 // The page's rest is no earlier than this (ms from the tap, by the
 // timetable); the frames a test may ask for end a little before it, where
 // app.js begins to top the picture up from script.

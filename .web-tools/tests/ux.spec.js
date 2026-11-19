@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
-import { LAST as CROWN_LAST, centile, contrast, holdCrown, lumas, mean, pixels, seekCrown } from "./crown-play.js";
+import { LAST as CROWN_LAST, LINGER, LINGER_SPAN, PACE as CROWN_PACE, centile, contrast, holdCrown, lumas, mean, pixels, seekCrown } from "./crown-play.js";
 
 const testDate = "2026-03-15";
 
@@ -1765,6 +1765,37 @@ test("the crown keeps Default with the device and gives a chosen Apse back", asy
   expect(await crownState(page)).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
 });
 
+// The play's clock slows through its linger (the sky's coloured light), every
+// part together, and keeps its pace on either side; the page's own timers keep
+// time with it. Measured on the running play, not a held one.
+for (const dir of ["dusk", "dawn"]) {
+  test(`the crown's ${dir} lingers on the coloured light, every part together`, async ({ page }) => {
+    test.setTimeout(60_000);
+    const dark = dir === "dusk";
+    await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
+    await openCrown(page, { stored: dark ? null : "dark", hurry: false });
+    const [x, y] = await crownPoint(page);
+    const [a, len] = LINGER_SPAN[dir];
+    // Real ms from the tap to timetable moment t.
+    const real = (t) => CROWN_PACE * (t + Math.max(0, Math.min(t, a + len) - a) * (LINGER - 1));
+    const rates = () => page.evaluate(() => [...new Set(document.getAnimations()
+      .filter((an) => (an.animationName || "").startsWith("crown-") || String(an.effect?.pseudoElement || "").startsWith("::view-transition"))
+      .filter((an) => an.playState !== "finished")
+      .map((an) => Math.round(an.playbackRate * 1000) / 1000))]);
+    const t0 = Date.now();
+    await page.mouse.click(x, y);
+    const at = async (t) => page.waitForTimeout(Math.max(0, real(t) - (Date.now() - t0)));
+    await crownPlayed(page);
+    await at(a + len * 0.5);
+    expect(await rates()).toEqual([Math.round(1000 / LINGER) / 1000]);
+    await at(a + len + 250);
+    expect(await rates()).toEqual([1]);
+    await crownAtRest(page);
+    // The page's own end kept time with its parts: no later than the play's end and a margin.
+    expect(Date.now() - t0).toBeLessThan(real(dark ? 4400 + 100 : 4000 + 100) + 2500);
+  });
+}
+
 test("a second tap while the crown plays is kept and plays the way back", async ({ page }) => {
   // A whole dusk and a whole dawn, unhurried.
   test.setTimeout(60_000);
@@ -1880,7 +1911,10 @@ const CROWN_LIGHT = {
 // under 2:1 for some 8 or 9 moments where Chromium's stands for 3.
 // (dusk: arch back 5.52, wall step 13.49, card step 13.21, faint 8, after
 // 3.64; dawn: wall step 21.26 and kick 6.2, card step 15.14, faint 9,
-// after 2.96.)
+// after 2.96.) Those were before the page began to turn with the front;
+// since, dusk's arch back and dawn's card step and kick are raised by the
+// same ratio as Chromium's measured change, not yet from WebKit's own
+// figures, which CI's crown-light.json attachments give.
 const CROWN_LIGHT_WEBKIT = {
   dusk: { ...CROWN_LIGHT.dusk, arch: { back: 11, step: 24, kick: 8 }, wall: { back: 2, step: 20, kick: 4 }, card: { back: 2, step: 20, kick: 4.5 }, faint: 12 },
   dawn: { ...CROWN_LIGHT.dawn, wall: { back: 5, step: 30, kick: 9 }, card: { back: 2, step: 26, kick: 7.5 }, faint: 13, after: 2.5 },

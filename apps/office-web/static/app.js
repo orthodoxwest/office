@@ -4448,6 +4448,7 @@ function plainClickOpensHere(e, link) {
       if (p.rushing) {
         return;
       }
+      p.rate = rate;
       document.getAnimations().forEach(function (a) {
         var name = a.animationName || "";
         var pseudo = a.effect && a.effect.pseudoElement || "";
@@ -5053,7 +5054,7 @@ function plainClickOpensHere(e, link) {
       var plan = CROWN_PLAY[dir];
       var p = playing = {
         dir: dir, choice: choice, plan: plan, k: K(), t0: performance.now(), g: g,
-        timers: [], undo: [], painted: false, vt: null, ready: 0,
+        timers: [], undo: [], painted: false, vt: null, ready: 0, rate: 1,
         covered: g.covered, end: g.end, geom: g.geom,
       };
       // Writes only from here.
@@ -5080,6 +5081,10 @@ function plainClickOpensHere(e, link) {
         mark(null);
         setTurns(g.stars, g.starTurns(g.stars), clock);
         mark(g.evening, g.morningAt === undefined ? undefined : g.morningAt - clock);
+        // Stars that land in the linger take its clock with the rest.
+        if (p.rate !== 1) {
+          lingerAt(p, p.rate);
+        }
         if (dir === "dawn") {
           pinStars();
         }

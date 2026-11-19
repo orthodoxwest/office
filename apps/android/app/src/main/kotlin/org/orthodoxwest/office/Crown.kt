@@ -534,8 +534,10 @@ internal class Play(val plan: CrownPlan, val choice: ThemeChoice, val sums: Sums
     var ticked = false
     /** A second tap on the cross, kept for the settle. */
     var again = false
-    /** When the cross was last tapped, in ms of the play's clock (the tap that began it at 0). */
+    /** When the cross was last tapped, in real ms since the tap that began it ([wall]). */
     var lastTap = 0f
+    /** Real ms since the tap, as the frames have counted them (the play's clock slows in the linger). */
+    var wall = 0f
     var rate = 1f
     var job: Job? = null
 }
@@ -592,12 +594,12 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
             val t = this.t
             if (t < p.sums.settle) {
                 // Kept, once: the way back plays at the settle. Not the taps of a double tap or a
-                // flurry; and before the turn, only a tap well after the last. (Timed on the play's
-                // own clock, in real ms.)
+                // flurry; and before the turn, only a tap well after the last. (Timed in real ms,
+                // as the frames count them: the play's own clock slows through the linger.)
                 val apart = p.plan.tapApart.toFloat()
-                val since = (t - p.lastTap) * p.k
+                val since = p.wall - p.lastTap
                 if ((p.turned || since > 2 * apart) && since > apart) p.again = !p.again
-                p.lastTap = t
+                p.lastTap = p.wall
                 return
             }
             finish()
@@ -649,7 +651,9 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
             while (play === p) {
                 withFrameNanos { now ->
                     if (last >= 0) {
-                        val dt = (now - last) / 1_000_000f * p.rate / p.k
+                        val ms = (now - last) / 1_000_000f
+                        p.wall += ms
+                        val dt = ms * p.rate / p.k
                         // A rushed play drops the linger.
                         t = if (p.rate > 1f) t + dt else p.plan.advance(t, dt)
                     }
@@ -853,7 +857,9 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
             // is read when the frame is rendered, not when it is drawn here, so set and reset
             // around this call it was always whole (the frieze's new ground arrived in one frame
             // at the turn, and every line's new ink with it).
-            if (into > 0f) layered(unit.rect, into) {
+            if (into >= 1f) {
+                translate(unit.at.x, unit.at.y) { drawLayer(unit.layer) }
+            } else if (into > 0f) layered(unit.rect, into) {
                 translate(unit.at.x, unit.at.y) { drawLayer(unit.layer) }
             }
         }
