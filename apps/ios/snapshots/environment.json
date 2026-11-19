@@ -1,6 +1,6 @@
 {
-  "xcode": "26.6 17F113",
-  "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+  "xcode": "27.1 27A9275",
+  "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
   "phone": "iPhone 17",
   "ipad": "iPad Pro 11-inch (M5)"
 }

@@ -75,6 +75,9 @@ pub struct HomeData {
     pub response: String,
     pub calendar_link: String,
     pub pray_now_label: String,
+    /// What the hour the invitation opens is ("Evening prayer"), set under its words on a phone
+    /// so the hours' table keeps one shape whichever hour is now; empty for "Open Lauds".
+    pub pray_now_gloss: String,
     pub pray_now_link: String,
     pub hours: Vec<HomeHourLink>,
 }

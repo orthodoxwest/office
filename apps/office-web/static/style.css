@@ -7510,6 +7510,26 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   margin-bottom: 0.7rem;
 }
 
+/* The invitation's gloss: what the hour it opens is ("Evening prayer"), a
+   quiet italic line under its words on a phone, where the hours' table
+   glosses none (app.js and home.html's script keep it with the words). The
+   wide niche glosses every hour in its table, and leaves it out. */
+.page-home .pray-now-gloss {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .page-home .pray-now-gloss:not([hidden]) {
+    display: block;
+    margin-top: 0.08rem;
+    color: var(--now-gloss);
+    font-size: 0.86rem;
+    font-style: italic;
+    letter-spacing: 0;
+    line-height: 1.2;
+  }
+}
+
 :is(.page-home, .about-door) .pray-now,
 :is(.page-home, .about-door) .pray-now:hover {
   position: relative;
@@ -7696,8 +7716,10 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   margin-left: 0;
 }
 
-/* What the current hour is, for a newcomer: a quiet italic line under its
-   name. The others carry theirs unseen, for app.js to show as the hours turn. */
+/* What each hour is, for a newcomer: a quiet italic line under its name,
+   which only the wide niche shows (every hour's). On a phone the hours carry
+   theirs unseen, and the one that is now is said in the invitation instead
+   (.pray-now-gloss), so the table keeps one shape whichever hour is now. */
 .page-home .home-hour-link {
   flex-direction: column;
   gap: 0;
@@ -7723,7 +7745,6 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 }
 
 .page-home .home-hour-link.is-current .home-hour-link-note {
-  display: block;
   margin-inline: calc(6px - 0.2rem);
   color: var(--now-gloss);
   text-wrap: balance;

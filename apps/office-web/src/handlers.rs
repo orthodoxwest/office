@@ -396,6 +396,7 @@ impl Server {
             response,
             calendar_link: calendar_link(&slug),
             pray_now_label: invite.label,
+            pray_now_gloss: invite.gloss.into(),
             pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
             hours,
         };

@@ -158,15 +158,16 @@ fn home_invites_to_the_current_office_only_today() {
     assert_eq!(home.season, "");
     assert_eq!(home.color, "violet");
     assert_eq!((home.pray_now_label.as_str(), home.current_hour.as_str()), ("Pray Vespers", "vespers"));
-    assert_eq!(home.current_hour_note, "Evening prayer");
+    assert_eq!(home.pray_now_gloss, "Evening prayer");
     assert_eq!(crate::hour_note("prime".into()), "Prayer as work begins");
     assert_eq!(crate::hour_note("matins".into()), "");
     // Compline after midnight belongs to yesterday, and marks no hour today.
     let late = core.home(today, today, 1).unwrap();
     assert_eq!((late.pray_now_hour.as_str(), late.pray_now_date, late.current_hour.as_str()), ("compline", civil(2026, 3, 14), ""));
-    assert_eq!(late.current_hour_note, "");
+    // Its invitation still says what Compline is.
+    assert_eq!(late.pray_now_gloss, "Prayer before sleep");
     let other = core.home(civil(2026, 3, 16), today, 18).unwrap();
-    assert_eq!((other.pray_now_label.as_str(), other.is_today), ("Open Lauds", false));
+    assert_eq!((other.pray_now_label.as_str(), other.is_today, other.pray_now_gloss.as_str()), ("Open Lauds", false, ""));
     assert_eq!(core.home(civil(2026, 3, 30), today, 9).unwrap().ornament, "passiontide");
 }
 

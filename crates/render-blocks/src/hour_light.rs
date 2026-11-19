@@ -1,12 +1,13 @@
 //! The light moving with the hours on home. When the hour that is now changes while home is in
 //! front (never on arrival, never when a page or app is corrected on its return), the pool of light
-//! under the old hour dies as one gathers under the new, the rubric ink follows, the gloss changes,
-//! and the invitation's words ("Pray Sext", "Pray None") change in place. Every front plays the one
+//! under the old hour dies as one gathers under the new, the rubric ink follows, and the
+//! invitation's words ("Pray Sext", "Pray None") change in place, with the gloss a phone sets
+//! under them ("Midday prayer", "Afternoon prayer"). Every front plays the one
 //! pass on one clock: the web as Web Animations (app.js's `HOUR_LIGHT`, which a test holds to these
 //! figures), the apps by asking [`light_at`] for each frame.
 //!
-//! A word is never slid. A name whose seat changes (on a phone the hour that is now stands higher,
-//! to make room for its gloss; in the wide niche it is also larger) goes out where it stood and
+//! A word is never slid. A name whose seat changes (in the wide niche the hour that is now is
+//! larger) goes out where it stood and
 //! comes back where it belongs, behind the invitation's own 120ms out and 180ms in, at the moment
 //! the invitation's words change: the layout of the new hour takes over at [`HourLight::SEAT`],
 //! when they are out.
@@ -99,7 +100,8 @@ pub struct LightFrame {
     /// coming name from its plain ink toward the rubric (and in the wide niche, where every hour
     /// keeps its gloss, the glosses' inks with them).
     pub ink: f32,
-    /// The old gloss, where it is shown only under the hour that is now.
+    /// The old gloss, where a table shows it only under the hour that is now (none does since a
+    /// phone's gloss moved into the invitation, where it goes out and back with the words).
     pub leaving_gloss: f32,
     /// The new gloss, likewise.
     pub coming_gloss: f32,
