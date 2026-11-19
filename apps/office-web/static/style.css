@@ -5105,6 +5105,42 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
 .feast-text .liturgical-block { font-size: 1.08rem; line-height: 1.5; }
 .feast-text .liturgical-block p { margin: 0; }
 .feast-text.collect .liturgical-block .response-line { clear: left; }
+/* A hymn is folded under its label and Latin title, so the antiphons and
+   versicles stay near the top: the summary a touch target tall, its caret the
+   hours' disclosures' (.session-prayers summary::after), and nothing kept
+   between visits. Opened, it keeps the hours' rhythm: each stanza a stanza's
+   space apart (the steps .elements gives the hour). */
+.feast-hymn {
+  --line: 1.6em;
+  --space-line: calc(var(--line) * 0.15);
+  --space-bind: calc(var(--line) * 0.3);
+  --space-stanza: calc(var(--line) * 0.45);
+}
+.feast-hymn > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.5rem;
+  min-height: var(--touch-target);
+  padding: 0.2rem 0;
+  cursor: pointer;
+  list-style: none;
+}
+.feast-hymn > summary::-webkit-details-marker { display: none; }
+.feast-hymn > summary h3 { margin: 0; }
+.feast-hymn > summary h3::after {
+  content: "▾";
+  margin-inline-start: 0.35em;
+  color: color-mix(in srgb, currentColor 70%, transparent);
+  font-size: 0.75em;
+  font-variant: normal;
+  letter-spacing: 0;
+}
+.feast-hymn[open] > summary h3::after { content: "▴"; }
+.feast-hymn-title { flex-basis: 100%; color: var(--muted); font-size: 1.02rem; font-style: italic; }
+.feast-hymn .hymn-verses { margin-top: var(--space-bind); font-size: 1.08rem; }
+.feast-hymn .hymn-verses > * { margin-block: 0; }
+.feast-hymn .hymn-verses > * + * { margin-top: var(--space-stanza); }
 /* A black day is bare: its initial in the muted ink, as a bare hour's. */
 .feast-head.day-color-black ~ .feast-body { --cap-ink: var(--muted); }
 
@@ -5182,6 +5218,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   .feast-head.is-plain h1 { font-size: 2.1rem; }
   .feast-body { grid-template-columns: minmax(0, 35rem) 19rem; justify-content: space-between; column-gap: 3rem; }
   .feast-text .liturgical-block { font-size: 1.14rem; line-height: 1.55; }
+  .feast-hymn .hymn-verses { font-size: 1.14rem; }
   .feast-next-date { font-size: 1.3rem; }
 }
 
@@ -5879,7 +5916,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
     :root.motion-ready details.day-office-details::details-content,
     :root.motion-ready details.reminder-address::details-content,
     :root.motion-ready details.reminder-help::details-content,
-    :root.motion-ready details.reminder-calendar::details-content {
+    :root.motion-ready details.reminder-calendar::details-content,
+    :root.motion-ready details.feast-hymn::details-content {
       block-size: 0;
       opacity: 0;
       overflow: clip;
@@ -5894,7 +5932,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
     :root.motion-ready details.day-office-details[open]::details-content,
     :root.motion-ready details.reminder-address[open]::details-content,
     :root.motion-ready details.reminder-help[open]::details-content,
-    :root.motion-ready details.reminder-calendar[open]::details-content {
+    :root.motion-ready details.reminder-calendar[open]::details-content,
+    :root.motion-ready details.feast-hymn[open]::details-content {
       block-size: auto;
       opacity: 1;
       transition:
@@ -12243,6 +12282,22 @@ body.page-home::before {
 
   details.session-prayers > .session-prayers-content {
     display: grid;
+  }
+
+  /* And every feast hymn, under its label and title, without the caret. */
+  details.feast-hymn::details-content {
+    content-visibility: visible !important;
+    block-size: auto !important;
+    opacity: 1 !important;
+  }
+
+  details.feast-hymn > * {
+    display: block;
+  }
+
+  .feast-hymn > summary h3::after,
+  .feast-hymn[open] > summary h3::after {
+    content: none;
   }
 
   /* The home head's painted courses are screen furniture. */

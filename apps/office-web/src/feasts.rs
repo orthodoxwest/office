@@ -181,7 +181,14 @@ impl Server {
             texts: texts
                 .texts
                 .into_iter()
-                .map(|t| FeastTextRow { label: t.label, text: t.text, common: t.common, prayer: t.prayer })
+                .map(|t| FeastTextRow {
+                    label: t.label,
+                    text: t.text,
+                    common: t.common,
+                    prayer: t.prayer,
+                    hymn: t.hymn.is_some(),
+                    hymn_title: t.hymn.unwrap_or_default(),
+                })
                 .collect(),
             whole_office,
         };

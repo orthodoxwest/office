@@ -196,6 +196,10 @@ struct FeastScreen: View {
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
+    /// The hymns opened, by their place among the texts: each folded until tapped, and nothing
+    /// kept between visits (the web's `details.feast-hymn`).
+    @State private var openHymns: Set<Int> = []
+    @State private var openHymnsOf = ""
 
     private var note: TextStyle { Scale.small.sized(14.7, line: 21) }
 
@@ -305,19 +309,60 @@ struct FeastScreen: View {
 
     private var texts: some View {
         let w = feastWordsShared
+        // A hymn's stanzas stand in a column as wide as its longest line, centred, as the hours
+        // set them (the web's `.feast-hymn .hymn-verses`).
+        let opened = openHymnsOf == view.id ? openHymns : []
+        let columns = hymnColumns(view.texts.map { SectionView(label: "", collapsible: false, bare: false, blocks: $0.blocks) }, p, o, m)
         return VStack(alignment: .leading, spacing: 0) {
             SectionHeading(text: w.textsHeading, seed: 71).padding(.bottom, m.px(4.8))
             Text(view.textsSource).type(TextStyle(size: 14.4, line: 21, italic: true)).foregroundStyle(p.muted).padding(.top, m.px(6.4))
             ForEach(Array(view.texts.enumerated()), id: \.offset) { n, t in
-                TextLabel(label: t.label, common: t.common ? w.commonMark : "")
-                    .padding(.top, m.px(n == 0 ? 20.8 : 16)).padding(.bottom, m.px(2.4))
-                // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.
-                ForEach(Array(blocks(t, first: n == 0).enumerated()), id: \.offset) { i, b in
-                    BlockRow(block: b).padding(.top, i == 0 ? 0 : m.space(b.space))
+                if let title = t.hymnTitle {
+                    // The hymn's fold: its label and caret, its Latin title beneath, one touch target.
+                    let expanded = opened.contains(n)
+                    Button {
+                        withAnimation(disclosing(!expanded)) {
+                            var now = opened
+                            if expanded { now.remove(n) } else { now.insert(n) }
+                            openHymns = now
+                            openHymnsOf = view.id
+                        }
+                    } label: {
+                        VStack(alignment: .leading, spacing: 0) {
+                            TextLabel(label: t.label, common: t.common ? w.commonMark : "", caret: expanded)
+                            if !title.isEmpty {
+                                Text(title).type(TextStyle(size: 16.3, line: 22, italic: true)).foregroundStyle(p.muted)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                        .padding(.vertical, m.px(3.2))
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(Quiet())
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityValue(expanded ? "Expanded" : "Collapsed")
+                    .padding(.top, m.px(n == 0 ? 17.6 : 12.8))
+                    if expanded {
+                        VStack(alignment: .leading, spacing: 0) {
+                            ForEach(Array(t.blocks.enumerated()), id: \.offset) { i, b in
+                                BlockRow(block: b, column: columns[BlockAt(section: n, block: i)])
+                                    .padding(.top, i == 0 ? m.space(.bind) : m.space(b.space))
+                            }
+                        }
+                        .transition(.unfold)
+                    }
+                } else {
+                    TextLabel(label: t.label, common: t.common ? w.commonMark : "")
+                        .padding(.top, m.px(n == 0 ? 20.8 : 16)).padding(.bottom, m.px(2.4))
+                    // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.
+                    ForEach(Array(blocks(t, first: n == 0).enumerated()), id: \.offset) { i, b in
+                        BlockRow(block: b, column: columns[BlockAt(section: n, block: i)]).padding(.top, i == 0 ? 0 : m.space(b.space))
+                    }
+                    // A black day's initial is left ungilt, in the muted ink, as a bare hour's (the
+                    // web's `--cap-ink` under `.feast-head.day-color-black`).
+                    .environment(\.ornament, capInk)
                 }
-                // A black day's initial is left ungilt, in the muted ink, as a bare hour's (the
-                // web's `--cap-ink` under `.feast-head.day-color-black`).
-                .environment(\.ornament, capInk)
             }
             if let whole = view.wholeOffice {
                 Button { model.open(.home(whole.date)) } label: {
@@ -558,6 +603,8 @@ private struct StandingBox: View {
 private struct TextLabel: View {
     let label: String
     let common: String
+    /// A hymn's fold: its caret, open or not, after the label (the web's `summary h3::after`).
+    var caret: Bool? = nil
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
@@ -565,10 +612,14 @@ private struct TextLabel: View {
         let caps = TextStyle(size: 16, line: 22, tracking: 0.8, smallCaps: true)
         let name = Text(label).font(Font(caps.uiFont(m))).foregroundColor(p.titulus).tracking(0.8 * m.type)
         let mark = Text(common.isEmpty ? "" : "  " + common).font(Font(TextStyle(size: 13.6, line: 22, italic: true).uiFont(m))).foregroundColor(p.muted)
-        return (name + mark)
-            .lineSpacing(max(0, caps.line * m.type - caps.uiFont(m).lineHeight))
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityAddTraits(.isHeader)
+        return HStack(spacing: 0) {
+            (name + mark)
+                .lineSpacing(max(0, caps.line * m.type - caps.uiFont(m).lineHeight))
+            if let caret { Caret(open: caret, color: p.titulus) }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
     }
 }
 

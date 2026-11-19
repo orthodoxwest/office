@@ -380,25 +380,29 @@ fn a_feasts_texts_carry_the_same_text_as_the_web() {
     let offices = office::resolve_office_days(&cal);
     let days: Vec<office::Day> = cal.days.into_iter().zip(offices).map(|(c, o)| office::Day::new(c, o)).collect();
     let moveable = MoveableDates::compute(2027);
-    let mut checked = 0;
+    let (mut checked, mut hymns) = (0, 0);
     for (i, day) in days.iter().enumerate() {
-        let ids: Vec<String> = day.celebration.iter().chain(&day.commemorations).map(|f| f.id.clone()).collect();
-        for id in ids {
-            let is_it = |i: &str, _: &str| i == id;
+        let feasts: Vec<(String, String)> =
+            day.celebration.iter().chain(&day.commemorations).map(|f| (f.id.clone(), f.name.clone())).collect();
+        for (id, name) in feasts {
+            // By id in a commemoration's heading, by name in an hour's title, as the feast page has it.
+            let is_it = |i: &str, n: &str| i == id || (i.is_empty() && n == name);
             let eve = i.checked_sub(1).map(|e| DayOf { day: &days[e], moveable: &moveable });
             for t in feast_texts(&engine, &is_it, eve, DayOf { day, moveable: &moveable }).texts {
-                let html = if t.prayer {
-                    render_html::html::render_flowing_block(&t.text)
-                } else {
-                    render_html::html::render_liturgical_block(&t.text)
+                let (html, native) = match &t.hymn {
+                    Some(_) => (render_html::html::render_feast_hymn(&t.text), crate::feast_hymn_blocks(&t.text)),
+                    None if t.prayer => (render_html::html::render_flowing_block(&t.text), text_blocks(&t.text, true)),
+                    None => (render_html::html::render_liturgical_block(&t.text), text_blocks(&t.text, false)),
                 };
-                let native: String = text_blocks(&t.text, t.prayer).iter().map(|b| squeeze(&b.plain_text())).collect();
+                hymns += usize::from(t.hymn.is_some());
+                let native: String = native.iter().map(|b| squeeze(&b.plain_text())).collect();
                 assert_eq!(native, squeeze(&html_text(&html)), "{id} {} {}", day.date, t.label);
                 checked += 1;
             }
         }
     }
     assert!(checked > 1_000, "only {checked} texts checked");
+    assert!(hymns > 200, "only {hymns} hymns checked");
 }
 
 /// Each block of `hour` on `date` in private prayer, as shown with Chant off: kind, opening an

@@ -6,7 +6,7 @@ use minijinja::value::{Serde, Value};
 use minijinja::{AutoEscape, Environment};
 
 use crate::escape::{url_norm, url_part, url_start};
-use crate::html::{render_flowing_block, render_liturgical_block, render_section_heading_in, typeset};
+use crate::html::{render_feast_hymn, render_flowing_block, render_liturgical_block, render_section_heading_in, typeset};
 use crate::leader::leader_sections;
 use crate::links::{home_link, hour_link, nav_link};
 use crate::usage::UsageData;
@@ -59,6 +59,8 @@ impl Pages {
         env.add_filter("feast_text", |s: String| Value::from_safe_string(render_liturgical_block(&s)));
         // A feast's collect, flowing as the hours set it.
         env.add_filter("feast_prayer", |s: String| Value::from_safe_string(render_flowing_block(&s)));
+        // A feast's hymn, in stanzas as the hours set it.
+        env.add_filter("feast_hymn", |s: String| Value::from_safe_string(render_feast_hymn(&s)));
         let w = &presentation::feast::FEAST_WORDS;
         env.add_global(
             "feast_words",

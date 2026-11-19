@@ -557,6 +557,9 @@ pub struct FeastTextRow {
     pub common: bool,
     /// A prayer, set flowing; an antiphon or versicle keeps its lines.
     pub prayer: bool,
+    /// A hymn, set in stanzas under its Latin title (`hymn_title`, which may be empty).
+    pub hymn: bool,
+    pub hymn_title: String,
 }
 
 /// A labelled link.
