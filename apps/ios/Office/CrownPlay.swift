@@ -490,7 +490,9 @@ final class CrownRun {
 
     func clock() -> Double {
         guard let since else { return base }
-        return base + rate * (CrownPlayer.now() - since) / fig.pace
+        let dt = rate * (CrownPlayer.now() - since) / fig.pace
+        // A rushed play drops the linger.
+        return rate > 1 ? base + dt : fig.advance(base, by: dt)
     }
 
     func hold() {

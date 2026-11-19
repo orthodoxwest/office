@@ -648,7 +648,11 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
             var last = -1L
             while (play === p) {
                 withFrameNanos { now ->
-                    if (last >= 0) t += (now - last) / 1_000_000f * p.rate / p.k
+                    if (last >= 0) {
+                        val dt = (now - last) / 1_000_000f * p.rate / p.k
+                        // A rushed play drops the linger.
+                        t = if (p.rate > 1f) t + dt else p.plan.advance(t, dt)
+                    }
                     last = now
                 }
                 if (play !== p) break
@@ -1215,4 +1219,33 @@ internal fun CrownHeadEffect(crown: Crown?, head: CrownHead?) {
             }
         }
     }
+}
+
+/**
+ * The play's clock `dt` ms (at its pace) on from timetable moment `from`, slowed `linger` times
+ * through the sky's coloured light (presentation::crown's `CrownPlay::advance`).
+ */
+fun CrownPlan.advance(from: Float, dt: Float): Float {
+    val a = lingerSpan.at.toFloat()
+    val b = a + lingerSpan.len.toFloat()
+    var at = from
+    var left = max(0f, dt)
+    if (at < a) {
+        val d = min(left, a - at)
+        at += d
+        left -= d
+    }
+    if (at < b && left > 0f) {
+        val d = min(left, (b - at) * linger)
+        at += d / linger
+        left -= d
+    }
+    return at + left
+}
+
+/** How long, at the play's pace, the timetable takes from `from` to `to` (the inverse of [advance]). */
+fun CrownPlan.performed(from: Float, to: Float): Float {
+    val a = lingerSpan.at.toFloat()
+    val b = a + lingerSpan.len.toFloat()
+    return (to - from) + max(0f, min(to, b) - max(from, a)) * (linger - 1f)
 }

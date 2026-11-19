@@ -63,6 +63,10 @@ struct CrownFigures {
     let rush: Double
     /// How many times slower than its timetable the play is performed (the clock is divided by it).
     let pace: Double
+    /// The sky's coloured light: through this stretch of the timetable the clock runs `lingerBy`
+    /// times slower still, every part together (a rushed play drops it).
+    let linger: Span
+    let lingerBy: Double
     /// The frieze's own change: dark first at dusk, light last at dawn.
     let frieze: Span
     /// The veil is multiplied over the page: its strength rises to `veilPeak` by `veilTop` of its
@@ -106,6 +110,23 @@ struct CrownFigures {
 }
 
 extension CrownFigures {
+    /// The clock `dt` ms (at the play's pace) on from timetable moment `from`, slowed through the
+    /// linger (presentation::crown's `CrownPlay::advance`).
+    func advance(_ from: Double, by dt: Double) -> Double {
+        var at = from, left = max(0, dt)
+        if at < linger.at {
+            let d = min(left, linger.at - at)
+            at += d
+            left -= d
+        }
+        if at < linger.end && left > 0 {
+            let d = min(left, (linger.end - at) * lingerBy)
+            at += d / lingerBy
+            left -= d
+        }
+        return at + left
+    }
+
     /// The Rust core's plan (`crownPlan(toDark:)`, presentation::crown), for a dusk or a dawn.
     static func of(dusk: Bool) -> CrownFigures {
         let p = crownPlan(toDark: dusk)
@@ -139,6 +160,8 @@ extension CrownFigures {
             tapApart: Double(p.tapApart),
             rush: Double(p.rush),
             pace: Double(p.pace),
+            linger: Span(at: Double(p.lingerSpan.at), len: Double(p.lingerSpan.len)),
+            lingerBy: Double(p.linger),
             frieze: Span(at: Double(p.frieze.at), len: Double(p.frieze.len)),
             veilTop: Double(p.veilTop),
             veilGone: Double(p.veilGone),

@@ -1766,6 +1766,8 @@ test("the crown keeps Default with the device and gives a chosen Apse back", asy
 });
 
 test("a second tap while the crown plays is kept and plays the way back", async ({ page }) => {
+  // A whole dusk and a whole dawn, unhurried.
+  test.setTimeout(60_000);
   await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
   await openCrown(page, { hurry: false });
   const [x, y] = await crownPoint(page);

@@ -113,9 +113,14 @@ pub struct CrownPlay {
     pub ink_at: f32,
     /// How the page's own opacity rises through the spread: late, and with a long tail.
     pub glow_ease: Ease,
+    /// The coloured light: the stretch of the timetable where the sky is between its looks
+    /// (dusk's afterglow under the coming night, dawn's teal, rose and peach). The play's clock
+    /// runs [`LINGER`] times slower through it, every part of the play together, so the colours
+    /// are there to be looked at; outside it the play keeps its pace.
+    pub linger: Span,
 }
 
-/// Nave to Apse: about thirteen seconds on the glass, a sunset to be watched.
+/// Nave to Apse: about seventeen seconds on the glass, a sunset to be watched.
 pub const DUSK: CrownPlay = CrownPlay {
     turn: 650,
     front: Span { at: 800, len: 1900 },
@@ -132,9 +137,10 @@ pub const DUSK: CrownPlay = CrownPlay {
     veil_out: [0.2, 0.0, 0.3, 1.0],
     ink_at: 0.34,
     glow_ease: [0.8, 0.0, 0.4, 1.0],
+    linger: Span { at: 800, len: 1500 },
 };
 
-/// Apse to Nave: twelve seconds.
+/// Apse to Nave: about fifteen seconds.
 pub const DAWN: CrownPlay = CrownPlay {
     turn: 650,
     front: Span { at: 800, len: 1700 },
@@ -151,7 +157,39 @@ pub const DAWN: CrownPlay = CrownPlay {
     veil_out: [0.4, 0.0, 0.5, 1.0],
     ink_at: 0.6,
     glow_ease: [0.5, 0.0, 0.15, 1.0],
+    linger: Span { at: 400, len: 1400 },
 };
+
+impl CrownPlay {
+    /// The play's clock after `dt` ms of its own pace from timetable moment `from`: slowed
+    /// [`LINGER`] times through [`CrownPlay::linger`]. (Multiply real ms by `1 / PACE` first.)
+    pub fn advance(&self, from: f32, dt: f32) -> f32 {
+        let (a, b) = (self.linger.at as f32, (self.linger.at + self.linger.len) as f32);
+        let (mut at, mut dt) = (from, dt.max(0.0));
+        if at < a {
+            let d = dt.min(a - at);
+            at += d;
+            dt -= d;
+        }
+        if at < b && dt > 0.0 {
+            let d = dt.min((b - at) * LINGER);
+            at += d / LINGER;
+            dt -= d;
+        }
+        at + dt
+    }
+
+    /// How long, at the play's own pace (times [`PACE`] for ms on the glass), the timetable takes
+    /// from `from` to `to`: the inverse of [`CrownPlay::advance`].
+    pub fn performed(&self, from: f32, to: f32) -> f32 {
+        let (a, b) = (self.linger.at as f32, (self.linger.at + self.linger.len) as f32);
+        let held = (to.min(b) - from.max(a)).max(0.0);
+        (to - from) + held * (LINGER - 1.0)
+    }
+}
+
+/// How many times slower the play's clock runs through its [`CrownPlay::linger`].
+pub const LINGER: f32 = 1.8;
 
 /// The play for a tap that turns the page dark (dusk) or light (dawn).
 pub fn crown_play(to_dark: bool) -> CrownPlay {
@@ -308,10 +346,21 @@ mod tests {
             // The warm ink is the lighter: faint, it is a light on the wall, not a shade.
             let sum = |c: Rgb| c.iter().map(|&v| u32::from(v)).sum::<u32>();
             assert!(sum(play.veil_warm) > sum(play.veil_ink));
-            // The ending beat has its room after the page is still, and nothing passes fourteen
-            // seconds on the glass: slow enough to watch a sunset, short of a wait.
+            // The ending beat has its room after the page is still, and nothing passes seventeen
+            // and a half seconds on the glass: slow enough to watch a sunset, short of a wait.
             assert!(play.spread.at + play.spread.len + BEAT_HOLD + BEAT_LEN <= play.end);
-            assert!((play.end + SPREAD_WIDE) as f32 * PACE <= 14000.0);
+            assert!(play.performed(0.0, (play.end + SPREAD_WIDE) as f32) * PACE <= 17500.0);
+            // The colours linger once the cross has answered (its real-time figures are done
+            // before the clock slows) and before the page's ending beat.
+            assert!(play.linger.at as f32 * PACE >= CROSS_CATCH_LEN as f32);
+            assert!(play.linger.at + play.linger.len < play.end - BEAT_HOLD - BEAT_LEN);
+            // The slowed clock and its inverse agree.
+            for t in [0.0, 300.0, 600.0, 1000.0, 1700.0, 2500.0, 4000.0] {
+                let back = play.advance(0.0, play.performed(0.0, t));
+                assert!((back - t).abs() < 0.01, "{t} came back as {back}");
+                let mid = play.advance(t, play.performed(t, t + 900.0));
+                assert!((mid - t - 900.0).abs() < 0.01);
+            }
             // Every ramp ends on a tail: an ease's last tenth takes at least a quarter of its time.
             for ease in [play.glow_ease, FRONT_EASE] {
                 assert!(ease[2] <= 0.4 && ease[3] == 1.0, "{ease:?} stops short");

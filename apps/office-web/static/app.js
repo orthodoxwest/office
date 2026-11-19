@@ -4095,8 +4095,8 @@ function plainClickOpensHere(e, link) {
     // begins to turn while the front is still crossing the head) and every
     // ramp ends on a long tail. Light arrives faster than it leaves.
     var CROWN_PLAY = {
-      dusk: { turn: 650, front: [800, 1900], spread: [1100, 2300], veil: [1100, 3400], frieze: [700, 1500], end: 4400, inkAt: 0.34, glowEase: [0.8, 0, 0.4, 1] },
-      dawn: { turn: 650, front: [800, 1700], spread: [1000, 2000], veil: [1000, 3000], frieze: [2000, 1000], end: 4000, inkAt: 0.6, glowEase: [0.5, 0, 0.15, 1] },
+      dusk: { turn: 650, front: [800, 1900], spread: [1100, 2300], veil: [1100, 3400], frieze: [700, 1500], end: 4400, inkAt: 0.34, glowEase: [0.8, 0, 0.4, 1], linger: [800, 1500] },
+      dawn: { turn: 650, front: [800, 1700], spread: [1000, 2000], veil: [1000, 3000], frieze: [2000, 1000], end: 4000, inkAt: 0.6, glowEase: [0.5, 0, 0.15, 1], linger: [400, 1400] },
     };
     var FRONT_EASE = [0.4, 0, 0.3, 1];
     // Near enough even: it starts from nothing under the frieze, so it must
@@ -4133,6 +4133,9 @@ function plainClickOpensHere(e, link) {
     // performed this many times slower (style.css's --crown-pace). A reader's
     // own taps are counted in real time.
     var PACE = 3;
+    // Through the play's linger (the sky's coloured light) its clock runs
+    // LINGER times slower, every part together.
+    var LINGER = 1.8;
     var TAP_APART = 450;
     var RUSH = 300;
     // Where in a mask's radius its feather is half through (style.css's stops).
@@ -4253,6 +4256,28 @@ function plainClickOpensHere(e, link) {
 
     function K() {
       return (parseFloat(getComputedStyle(root).getPropertyValue("--crown-k")) || 1) * PACE;
+    }
+    // presentation::crown's CrownPlay::advance and ::performed: the clock
+    // `dt` (at the play's pace) on from timetable moment `from`, and the time
+    // the timetable takes from `from` to `to`, both slowed through the linger.
+    function advance(plan, from, dt) {
+      var a = plan.linger[0], b = a + plan.linger[1];
+      dt = Math.max(0, dt);
+      if (from < a) {
+        var d = Math.min(dt, a - from);
+        from += d;
+        dt -= d;
+      }
+      if (from < b && dt > 0) {
+        var d2 = Math.min(dt, (b - from) * LINGER);
+        from += d2 / LINGER;
+        dt -= d2;
+      }
+      return from + dt;
+    }
+    function performed(plan, from, to) {
+      var a = plan.linger[0], b = a + plan.linger[1];
+      return (to - from) + Math.max(0, Math.min(to, b) - Math.max(from, a)) * (LINGER - 1);
     }
     function px(n) {
       return n.toFixed(1) + "px";
@@ -4384,7 +4409,8 @@ function plainClickOpensHere(e, link) {
       p.rushing = true;
       p.timers.forEach(clearTimeout);
       p.timers = [];
-      var left = (p.end - p.plan.turn - (performance.now() - p.ready) / p.k) * p.k;
+      // (A rush drops the linger: every part goes at the rush's rate.)
+      var left = (p.end - clockAt(p)) * p.k;
       var rate = Math.max(1, left / ms);
       document.getAnimations().forEach(function (a) {
         var name = a.animationName || "";
@@ -4400,12 +4426,44 @@ function plainClickOpensHere(e, link) {
       }, ms + 30);
     }
 
-    function later(p, ms, fn) {
+    // `ms` of the timetable on from moment `from` (the tap's, unless given).
+    function later(p, ms, fn, from) {
+      from = from || 0;
       p.timers.push(setTimeout(function () {
         if (playing === p) {
           fn();
         }
-      }, ms * p.k));
+      }, performed(p.plan, from, from + ms) * p.k));
+    }
+
+    // Where the play's timetable stands: from the transition's first frame,
+    // which is the turn.
+    function clockAt(p) {
+      return advance(p.plan, p.plan.turn, (performance.now() - p.ready) / p.k);
+    }
+
+    // The linger: every part of the play at `rate` (1 / LINGER inside it,
+    // 1 outside). Each part keeps where it stands; only its clock changes.
+    function lingerAt(p, rate) {
+      if (p.rushing) {
+        return;
+      }
+      document.getAnimations().forEach(function (a) {
+        var name = a.animationName || "";
+        var pseudo = a.effect && a.effect.pseudoElement || "";
+        if (name.indexOf("crown-") === 0 || pseudo.indexOf("::view-transition") === 0) {
+          try { a.playbackRate = rate; } catch { /* already gone */ }
+        }
+      });
+    }
+    // The linger's edges still to come after timetable moment `from`.
+    function lingerFrom(p, from) {
+      var a = p.plan.linger[0], b = a + p.plan.linger[1];
+      [[a, 1 / LINGER], [b, 1]].forEach(function (edge) {
+        if (edge[0] > from) {
+          later(p, edge[0] - from, function () { lingerAt(p, edge[1]); }, from);
+        }
+      });
     }
 
     // ---- Set-up: everything that reads the page is done in
@@ -5018,7 +5076,7 @@ function plainClickOpensHere(e, link) {
           return;
         }
         g.stars = readStars();
-        var clock = p.ready ? (performance.now() - p.ready) / p.k : 0;
+        var clock = p.ready ? clockAt(p) - plan.turn : 0;
         mark(null);
         setTurns(g.stars, g.starTurns(g.stars), clock);
         mark(g.evening, g.morningAt === undefined ? undefined : g.morningAt - clock);
@@ -5029,6 +5087,11 @@ function plainClickOpensHere(e, link) {
       });
       p.watch.observe(starHost, { childList: true });
 
+      // The linger's edges before the turn are timed from the tap; the rest
+      // from the transition's first frame (the turn), below.
+      if (plan.linger[0] < plan.turn) {
+        later(p, plan.linger[0], function () { lingerAt(p, 1 / LINGER); });
+      }
       later(p, plan.turn, function () {
         g.vars.forEach(function (kv) { root.style.setProperty(kv[0], kv[1]); });
         root.style.setProperty("--crown-m-arch", maskFor(g, true));
@@ -5185,12 +5248,16 @@ function plainClickOpensHere(e, link) {
             p.timers.push(setTimeout(done, 1200));
             return;
           }
+          // The transition's own parts take the linger's clock where it stands.
+          var a = plan.linger[0], b = a + plan.linger[1];
+          lingerAt(p, plan.turn >= a && plan.turn < b ? 1 / LINGER : 1);
+          lingerFrom(p, plan.turn);
           resume();
           later(p, plan.spread[0] + 0.45 * plan.spread[1] - plan.turn, function () {
             if (p.bars) {
               p.bars();
             }
-          });
+          }, plan.turn);
           // The stills go when the page has visibly turned, not when the
           // shape has finished growing off-screen: from then the page is live.
           // The last few hundredths are brought up over 250ms first, so
@@ -5205,10 +5272,10 @@ function plainClickOpensHere(e, link) {
               opts = { duration: 250 * p.k, fill: "forwards", easing: "ease-out", pseudoElement: "::view-transition-new(crown-veil)" };
               p.extra.push(root.animate({ opacity: [0] }, opts));
             } catch { /* already gone */ }
-          });
+          }, plan.turn);
           later(p, settle, function () {
             try { vt.skipTransition(); } catch { /* already gone */ }
-          });
+          }, plan.turn);
         }, function (err) {
           // The browser would not play it (a resize while it made its
           // stills, a hidden tab): the change is simply made.
@@ -5231,7 +5298,7 @@ function plainClickOpensHere(e, link) {
           }
           // A browser that drops the stills before the page has turned has
           // cut the play short; that is left on the root too.
-          var ran = (performance.now() - p.ready) / p.k;
+          var ran = clockAt(p) - plan.turn;
           if (ran < g.settle - plan.turn - 200) {
             root.setAttribute("data-crown-early", Math.round(ran) + " of " + Math.round(g.settle - plan.turn) + "ms");
           }
@@ -5258,9 +5325,10 @@ function plainClickOpensHere(e, link) {
               p.back = compute(g.m, dir === "dusk" ? "dawn" : "dusk");
             }
           }, 0);
-          var remains = p.end - plan.turn - (performance.now() - p.ready) / p.k;
+          var now = clockAt(p);
+          var remains = p.end - now;
           if (remains > 0) {
-            later(p, remains, teardown);
+            later(p, remains, teardown, now);
           } else {
             teardown();
           }

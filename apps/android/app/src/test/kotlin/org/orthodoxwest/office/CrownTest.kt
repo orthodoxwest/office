@@ -89,8 +89,12 @@ class CrownTest {
 
     private fun advance(ms: Long) = compose.mainClock.advanceTimeBy(ms)
 
-    /** A stretch of the play's own timetable, as the clock runs it: the plan's pace times longer. */
-    private fun played(ms: Long) = (ms * crownPlan(true).pace).toLong()
+    /**
+     * A stretch of the play's own timetable, `ms` on from moment `from`, as the clock runs it: the
+     * plan's pace times longer, and longer still through the linger.
+     */
+    private fun played(ms: Long, from: Long = 0, dark: Boolean = true) =
+        crownPlan(dark).let { (it.performed(from.toFloat(), (from + ms).toFloat()) * it.pace).toLong() }
 
     private fun shoot(name: String) = compose.onRoot().captureRoboImage("build/screenshots/$name.png")
 
@@ -124,7 +128,7 @@ class CrownTest {
         assertTrue(stage.crown.playing)
         assertEquals(ThemeChoice.APSE, stage.saved)
         assertEquals(ThemeChoice.NAVE, stage.theme)
-        advance(played(1000))
+        advance(played(1000, 200))
         assertEquals(ThemeChoice.APSE, stage.theme)
         assertEquals("took the plain change: ${stage.crown.plainBecause}", 0, stage.plain)
         // The play's frames at the web strip's moments (ms of the timetable from the tap), the
@@ -132,12 +136,12 @@ class CrownTest {
         var at = 1200L
         shoot("crown-dusk-1200")
         for (next in listOf(1700L, 2200L, 2700L, 3200L, 3700L, 4400L)) {
-            advance(played(next - at))
+            advance(played(next - at, at))
             at = next
             shoot("crown-dusk-$next")
         }
         val end = stage.crown.play!!.sums.end
-        advance(played(end.toLong() - at) + 1500)
+        advance(played(end.toLong() - at, at) + 1500)
         compose.waitForIdle()
         assertFalse(stage.crown.playing)
         assertTrue(stage.crown.lifted.isEmpty())
@@ -152,19 +156,19 @@ class CrownTest {
         val stage = Stage(ThemeChoice.APSE)
         show(stage)
         compose.onNodeWithContentDescription("Switch to Nave").performClick()
-        advance(played(1000))
+        advance(played(1000, dark = false))
         assertEquals("took the plain change: ${stage.crown.plainBecause}", 0, stage.plain)
         // Nave on a light phone is the device's look: shown as Default from the turn.
         assertEquals(ThemeChoice.DEFAULT, stage.theme)
         var at = 1000L
         shoot("crown-dawn-1000")
         for (next in listOf(1500L, 2000L, 2500L, 3000L, 3500L, 4000L)) {
-            advance(played(next - at))
+            advance(played(next - at, at, dark = false))
             at = next
             shoot("crown-dawn-$next")
         }
         val end = stage.crown.play!!.sums.end
-        advance(played(end.toLong() - at) + 1500)
+        advance(played(end.toLong() - at, at, dark = false) + 1500)
         compose.waitForIdle()
         assertFalse(stage.crown.playing)
         // Nave on a light phone is the device's look: saved as Default.
@@ -181,7 +185,7 @@ class CrownTest {
         val stage = Stage(if (dark) ThemeChoice.NAVE else ThemeChoice.APSE)
         show(stage)
         compose.onNodeWithContentDescription(if (dark) "Switch to Apse" else "Switch to Nave").performClick()
-        val turn = played(crownPlan(dark).turn.toLong())
+        val turn = played(crownPlan(dark).turn.toLong(), dark = dark)
         advance(turn - 64)
         var at = turn - 64
         var changing = 0
@@ -214,7 +218,7 @@ class CrownTest {
         compose.onNodeWithContentDescription("Switch to Nave").performClick()
         advance(played(crownPlan(true).end.toLong()) + 500)
         // The way back is under way, or done.
-        advance(played(crownPlan(false).end.toLong()) + 1500)
+        advance(played(crownPlan(false).end.toLong(), dark = false) + 1500)
         compose.waitForIdle()
         assertFalse(stage.crown.playing)
         assertEquals(ThemeChoice.NAVE, stage.theme)

@@ -771,7 +771,7 @@ mod tests {
         let rgb = |c: Rgb| format!("{}, {}, {}", c[0], c[1], c[2]);
         let play = |name: &str, p: CrownPlay| {
             format!(
-                "{name}: {{ turn: {}, front: [{}, {}], spread: [{}, {}], veil: [{}, {}], frieze: [{}, {}], end: {}, inkAt: {}, glowEase: {} }},",
+                "{name}: {{ turn: {}, front: [{}, {}], spread: [{}, {}], veil: [{}, {}], frieze: [{}, {}], end: {}, inkAt: {}, glowEase: {}, linger: [{}, {}] }},",
                 p.turn,
                 p.front.at,
                 p.front.len,
@@ -783,7 +783,9 @@ mod tests {
                 p.frieze.len,
                 p.end,
                 p.ink_at,
-                ease(p.glow_ease)
+                ease(p.glow_ease),
+                p.linger.at,
+                p.linger.len
             )
         };
         let mut lines = vec![play("dusk", crown::DUSK), play("dawn", crown::DAWN)];
@@ -806,6 +808,7 @@ mod tests {
         lines.push(format!("var BEAT_LEN = {};", crown::BEAT_LEN));
         lines.push(format!("var TAP_APART = {};", crown::TAP_APART));
         lines.push(format!("var PACE = {};", crown::PACE));
+        lines.push(format!("var LINGER = {};", crown::LINGER));
         lines.push(format!("var RUSH = {};", crown::RUSH));
         for line in &lines {
             assert!(js.contains(line), "app.js lacks {line:?}");

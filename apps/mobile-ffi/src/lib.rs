@@ -448,6 +448,10 @@ pub struct CrownPlan {
     /// How many times slower than these figures the play is performed: the apps multiply their
     /// clock by it (`tap_apart` and `rush` stay real ms).
     pub pace: f32,
+    /// The coloured light: through this stretch of the timetable the play's clock runs `linger`
+    /// times slower (every part together); a rushed play drops it.
+    pub linger_span: CrownSpan,
+    pub linger: f32,
     /// The frieze's own change: dark first at dusk, light last at dawn.
     pub frieze: CrownSpan,
     /// The veil is multiplied over the page: its strength rises to `veil_peak` by `veil_top` of
@@ -522,6 +526,8 @@ pub fn crown_plan(to_dark: bool) -> CrownPlan {
         tap_apart: c::TAP_APART,
         rush: c::RUSH,
         pace: c::PACE,
+        linger_span: span(play.linger),
+        linger: c::LINGER,
         frieze: span(play.frieze),
         veil_top: play.veil_top,
         veil_gone: play.veil_gone,
