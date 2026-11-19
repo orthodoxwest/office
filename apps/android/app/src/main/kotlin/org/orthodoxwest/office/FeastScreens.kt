@@ -502,7 +502,8 @@ private fun FeastTexts(view: FeastPageView, onDay: (LocalDate) -> Unit, modifier
     val w = FEAST_WORDS
     val note = noteType()
     val columns = hymnColumns(view.texts.map { SectionView(label = "", collapsible = false, bare = false, blocks = it.blocks) })
-    val open = remember(view) { mutableStateMapOf<Int, Boolean>() }
+    // Saved with the list: the texts are one item of it, disposed when scrolled away or turned.
+    val open = rememberSaveable(view.id, saver = OpenSections) { mutableStateMapOf<Int, Boolean>() }
     Column(modifier) {
         SectionHeading(w.textsHeading, seed = 71)
         Text(view.textsSource, Modifier.padding(top = 1.6.dp, bottom = 4.8.dp), style = note.copy(fontSize = 14.4.sp, fontStyle = FontStyle.Italic))
@@ -536,19 +537,19 @@ private fun FeastTexts(view: FeastPageView, onDay: (LocalDate) -> Unit, modifier
                         Block(b, Modifier.padding(top = if (i == 0) Space.BIND.of(line) else b.space.of(line)), column = columns[n to i])
                     }
                 }
-                return@forEachIndexed
-            }
-            Text(label, Modifier.padding(top = 16.dp, bottom = 2.4.dp).semantics { heading() }, style = labelStyle)
-            // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.
-            // The collect, the first text when a feast has one, opens as a collect does in the hours.
-            val collect = n == 0 && t.prayer
-            // A black day's initial is left ungilt, in the muted ink, as a bare hour's (the web's
-            // `--cap-ink` under `.feast-head.day-color-black`).
-            val gilding = LocalOrnament.current
-            CompositionLocalProvider(LocalOrnament provides if (view.color == "black") gilding.copy(cap = p.muted) else gilding) {
-                t.blocks.forEachIndexed { i, b ->
-                    val block = if (collect && i == 0 && b.kind == BlockKind.PARAGRAPH) b.copy(dropCap = true) else b
-                    Block(block, Modifier.padding(top = if (i == 0) 0.dp else b.space.of(line)), column = columns[n to i])
+            } else {
+                Text(label, Modifier.padding(top = 16.dp, bottom = 2.4.dp).semantics { heading() }, style = labelStyle)
+                // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.
+                // The collect, the first text when a feast has one, opens as a collect does in the hours.
+                val collect = n == 0 && t.prayer
+                // A black day's initial is left ungilt, in the muted ink, as a bare hour's (the web's
+                // `--cap-ink` under `.feast-head.day-color-black`).
+                val gilding = LocalOrnament.current
+                CompositionLocalProvider(LocalOrnament provides if (view.color == "black") gilding.copy(cap = p.muted) else gilding) {
+                    t.blocks.forEachIndexed { i, b ->
+                        val block = if (collect && i == 0 && b.kind == BlockKind.PARAGRAPH) b.copy(dropCap = true) else b
+                        Block(block, Modifier.padding(top = if (i == 0) 0.dp else b.space.of(line)), column = columns[n to i])
+                    }
                 }
             }
         }

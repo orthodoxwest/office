@@ -91,8 +91,9 @@ pub struct FeastTextView {
     pub common: bool,
     /// A prayer (the collect), set flowing: the first opens on the hours' dropped initial.
     pub prayer: bool,
-    /// A hymn's Latin title (empty where it has none): a hymn is folded under its label and
-    /// title, and opens on a tap to its stanzas (the web's `details.feast-hymn`).
+    /// Set for a hymn, to its Latin title (empty where the hymn has none); `None` for any other
+    /// text. A hymn is folded under its label and title, and opens on a tap to its stanzas (the
+    /// web's `details.feast-hymn`).
     pub hymn_title: Option<String>,
     /// Laid out as the hours lay them out; a hymn's are its stanzas.
     pub blocks: Vec<BlockView>,

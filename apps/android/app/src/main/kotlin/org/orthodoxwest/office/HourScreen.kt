@@ -670,8 +670,8 @@ internal fun placeSaver(
     },
 )
 
-/** Which collapsible sections are open, as saved state can hold it. */
-private val OpenSections = listSaver<SnapshotStateMap<Int, Boolean>, Int>(
+/** Which collapsible sections (or a feast page's hymns) are open, as saved state can hold it. */
+internal val OpenSections = listSaver<SnapshotStateMap<Int, Boolean>, Int>(
     save = { m -> m.flatMap { (i, open) -> listOf(i, if (open) 1 else 0) } },
     restore = { l -> mutableStateMapOf<Int, Boolean>().apply { l.chunked(2).forEach { (i, open) -> put(i, open == 1) } } },
 )

@@ -5116,6 +5116,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   --space-bind: calc(var(--line) * 0.3);
   --space-stanza: calc(var(--line) * 0.45);
 }
+.feast-text.feast-hymn { margin-top: 0.8rem; }
 .feast-hymn > summary {
   display: flex;
   flex-wrap: wrap;
@@ -5129,14 +5130,14 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
 .feast-hymn > summary::-webkit-details-marker { display: none; }
 .feast-hymn > summary h3 { margin: 0; }
 .feast-hymn > summary h3::after {
-  content: "▾";
+  content: "▾" / "";
   margin-inline-start: 0.35em;
   color: color-mix(in srgb, currentColor 70%, transparent);
   font-size: 0.75em;
   font-variant: normal;
   letter-spacing: 0;
 }
-.feast-hymn[open] > summary h3::after { content: "▴"; }
+.feast-hymn[open] > summary h3::after { content: "▴" / ""; }
 .feast-hymn-title { flex-basis: 100%; color: var(--muted); font-size: 1.02rem; font-style: italic; }
 .feast-hymn .hymn-verses { margin-top: var(--space-bind); font-size: 1.08rem; }
 .feast-hymn .hymn-verses > * { margin-block: 0; }

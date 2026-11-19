@@ -686,6 +686,11 @@ fn finds_a_feast_and_gives_its_page() {
     assert!(words.contains("blessed Raphael") && words.contains("world without end"), "{words}");
     assert!(page.whole_office.is_some());
     assert_eq!(page.texts[0].label, "Collect", "the collect leads the texts, as on the web");
+    assert_eq!(collect.hymn_title, None, "only a hymn is folded under a title");
+    let hymn = page.texts.iter().find(|t| t.label == "Hymn at I Vespers").unwrap();
+    assert_eq!(hymn.hymn_title.as_deref(), Some("Iste Confessor"));
+    assert!(hymn.common);
+    assert!(hymn.blocks.iter().all(|b| b.kind == BlockKind::Stanza && !b.drop_cap), "its stanzas alone, the title in the fold");
     assert!(!found.results[0].years.iter().any(|y| y.usual), "the search says every year's status");
     for y in &page.years {
         assert_eq!(y.usual, y.kind == "kept", "{} {}: a year kept as usual leaves its status unsaid", y.year, y.kind);
