@@ -83,6 +83,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.shadow.Shadow
@@ -768,13 +769,16 @@ private fun AnnotatedString.Builder.prefName(name: String) {
 /**
  * By night the menu opens on home's blue plaster (the phone panel's baked Apse plaster, its ground,
  * limewash and veil), not a flat slab of the surface: the web's `.site-menu-panel` by night. The
- * plaster is fitted to the panel's width from the top, and covers it.
+ * plaster is fitted to the panel's width from the top, and covers it. The phone's menu is taller
+ * than the plaster's proportion, so it scales by height, wider than the panel, and is clipped to
+ * the panel as iOS's `.clipped()` and the web's background are: drawing behind does not clip, and
+ * the overhang showed past the border once the opening's transition let go.
  */
 private fun DrawScope.nightPlaster(plaster: ImageBitmap) {
     val scale = maxOf(size.width / plaster.width, size.height / plaster.height)
     val w = kotlin.math.ceil(plaster.width * scale).toInt()
     val h = kotlin.math.ceil(plaster.height * scale).toInt()
-    drawImage(plaster, dstOffset = IntOffset((size.width.toInt() - w) / 2, 0), dstSize = IntSize(w, h))
+    clipRect { drawImage(plaster, dstOffset = IntOffset((size.width.toInt() - w) / 2, 0), dstSize = IntSize(w, h)) }
 }
 
 /** The room the menu panel's popup keeps about it for the panel's shadow: at its sides and foot, and above it. */
