@@ -1788,8 +1788,11 @@ for (const dir of ["dusk", "dawn"]) {
     await crownPlayed(page);
     await at(a + len * 0.5);
     expect(await rates()).toEqual([Math.round(1000 / LINGER) / 1000]);
-    await at(a + len + 250);
-    expect(await rates()).toEqual([1]);
+    // (The play's clock stands still while the browser makes its stills at
+    // the turn, longer in WebKit, so the linger ends that much after this
+    // reckoning from the tap.)
+    await at(a + len);
+    await expect.poll(rates, { timeout: 4000 }).toEqual([1]);
     await crownAtRest(page);
     // The page's own end kept time with its parts: no later than the play's end and a margin.
     expect(Date.now() - t0).toBeLessThan(real(dark ? 4400 + 100 : 4000 + 100) + 2500);
