@@ -623,6 +623,18 @@ pub fn render_hymn_stanzas(text: &str) -> String {
 /// A hymn whose tune, if it has a score, is offered over its first stanza: the score stands
 /// beside the stanza's words, and the reader's Chant setting shows one.
 pub fn render_hymn_stanzas_scored(text: &str, score: Option<&ChantScore>) -> String {
+    hymn_stanzas_html(text, score, true)
+}
+
+/// A feast page's hymn, its stanzas under the fold whose summary names it. The page opens only its
+/// collect on a dropped initial, so the hymn's first stanza has none (as
+/// `render_blocks::feast_hymn_blocks`).
+pub fn render_feast_hymn(text: &str) -> String {
+    hymn_stanzas_html(text, None, false)
+}
+
+/// A hymn's stanzas, the first on the hours' dropped initial when `initial`.
+fn hymn_stanzas_html(text: &str, score: Option<&ChantScore>, initial: bool) -> String {
     let hymn = parse_hymn(text);
     let mut sb = String::from("<div class=\"hymn-verses\">");
     if !hymn.title.is_empty() {
@@ -642,7 +654,7 @@ pub fn render_hymn_stanzas_scored(text: &str, score: Option<&ChantScore>) -> Str
             }
             continue;
         }
-        let class = if opening { "hymn-stanza hymn-stanza-opening" } else { "hymn-stanza" };
+        let class = if opening && initial { "hymn-stanza hymn-stanza-opening" } else { "hymn-stanza" };
         let variant = match score.filter(|_| opening) {
             Some(score) => {
                 sb.push_str(&crate::chant::score_html(score, &score.gabc, &stanza.join(" ")));

@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -86,6 +87,8 @@ import kotlinx.coroutines.delay
 import org.orthodoxwest.office.core.FeastPageView
 import org.orthodoxwest.office.core.FeastYearView
 import org.orthodoxwest.office.core.FindView
+import org.orthodoxwest.office.core.SectionView
+import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.feastBackToDay
 import org.orthodoxwest.office.core.feastBackToOrdo
 import org.orthodoxwest.office.core.feastWords
@@ -489,40 +492,64 @@ private fun Standing(view: FeastPageView, narrow: Boolean, onFeast: (String) -> 
 /**
  * The feast's texts under their heading and source, the collect first, then the day it is said in
  * full (`.feast-texts`). Each text's label is in the tituli's ink, and the collect opens on the
- * hours' dropped initial.
+ * hours' dropped initial. A hymn is folded under its label and Latin title, and a tap opens it
+ * (`details.feast-hymn`), nothing kept between visits; its stanzas stand in a column as wide as
+ * its longest line, centred, as the hours set them (`.feast-hymn .hymn-verses`).
  */
 @Composable
 private fun FeastTexts(view: FeastPageView, onDay: (LocalDate) -> Unit, modifier: Modifier) {
     val p = LocalPalette.current
     val w = FEAST_WORDS
     val note = noteType()
+    val columns = hymnColumns(view.texts.map { SectionView(label = "", collapsible = false, bare = false, blocks = it.blocks) })
+    // Saved with the list: the texts are one item of it, disposed when scrolled away or turned.
+    val open = rememberSaveable(view.id, saver = OpenSections) { mutableStateMapOf<Int, Boolean>() }
     Column(modifier) {
         SectionHeading(w.textsHeading, seed = 71)
         Text(view.textsSource, Modifier.padding(top = 1.6.dp, bottom = 4.8.dp), style = note.copy(fontSize = 14.4.sp, fontStyle = FontStyle.Italic))
         view.texts.forEachIndexed { n, t ->
-            Text(
-                buildAnnotatedString {
-                    append(t.label)
-                    if (t.common) {
-                        withStyle(SpanStyle(color = p.muted, fontStyle = FontStyle.Italic, fontFeatureSettings = "", letterSpacing = 0.sp, fontSize = 13.6.sp)) {
-                            append("  " + w.commonMark)
-                        }
+            val label = buildAnnotatedString {
+                append(t.label)
+                if (t.common) {
+                    withStyle(SpanStyle(color = p.muted, fontStyle = FontStyle.Italic, fontFeatureSettings = "", letterSpacing = 0.sp, fontSize = 13.6.sp)) {
+                        append("  " + w.commonMark)
                     }
-                },
-                Modifier.padding(top = 16.dp, bottom = 2.4.dp).semantics { heading() },
-                style = Type.body.copy(fontSize = 16.sp, lineHeight = 22.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 0.8.sp),
-            )
-            // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.
-            // The collect, the first text when a feast has one, opens as a collect does in the hours.
+                }
+            }
+            val labelStyle = Type.body.copy(fontSize = 16.sp, lineHeight = 22.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 0.8.sp)
             val line = LocalDensity.current.bodyLine()
-            val collect = n == 0 && t.prayer
-            // A black day's initial is left ungilt, in the muted ink, as a bare hour's (the web's
-            // `--cap-ink` under `.feast-head.day-color-black`).
-            val gilding = LocalOrnament.current
-            CompositionLocalProvider(LocalOrnament provides if (view.color == "black") gilding.copy(cap = p.muted) else gilding) {
-                t.blocks.forEachIndexed { i, b ->
-                    val block = if (collect && i == 0 && b.kind == BlockKind.PARAGRAPH) b.copy(dropCap = true) else b
-                    Block(block, Modifier.padding(top = if (i == 0) 0.dp else b.space.of(line)))
+            val title = t.hymnTitle
+            if (title != null) {
+                // The hymn's fold: its label and caret, its Latin title beneath, one touch target.
+                val expanded = open[n] == true
+                Column(
+                    Modifier.padding(top = 12.8.dp).fillMaxWidth().heightIn(min = 44.dp).semantics { heading() }
+                        .tap { open[n] = !expanded }.disclosed(expanded).padding(vertical = 3.2.dp),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(label, style = labelStyle)
+                        Caret(expanded, p.titulus)
+                    }
+                    if (title.isNotEmpty()) Text(title, style = Type.body.copy(fontSize = 16.3.sp, lineHeight = 22.sp, color = p.muted, fontStyle = FontStyle.Italic))
+                }
+                Unfold(expanded) {
+                    t.blocks.forEachIndexed { i, b ->
+                        Block(b, Modifier.padding(top = if (i == 0) Space.BIND.of(line) else b.space.of(line)), column = columns[n to i])
+                    }
+                }
+            } else {
+                Text(label, Modifier.padding(top = 16.dp, bottom = 2.4.dp).semantics { heading() }, style = labelStyle)
+                // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.
+                // The collect, the first text when a feast has one, opens as a collect does in the hours.
+                val collect = n == 0 && t.prayer
+                // A black day's initial is left ungilt, in the muted ink, as a bare hour's (the web's
+                // `--cap-ink` under `.feast-head.day-color-black`).
+                val gilding = LocalOrnament.current
+                CompositionLocalProvider(LocalOrnament provides if (view.color == "black") gilding.copy(cap = p.muted) else gilding) {
+                    t.blocks.forEachIndexed { i, b ->
+                        val block = if (collect && i == 0 && b.kind == BlockKind.PARAGRAPH) b.copy(dropCap = true) else b
+                        Block(block, Modifier.padding(top = if (i == 0) 0.dp else b.space.of(line)), column = columns[n to i])
+                    }
                 }
             }
         }

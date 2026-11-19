@@ -29,10 +29,17 @@
       <h2 id="feast-texts-heading">{{ feast_words.texts_heading }}</h2>
       <p class="feast-source">{{ texts_source|typeset }}</p>
       {% for t in texts %}
+      {% if t.hymn %}
+      <details class="feast-text feast-hymn">
+        <summary><h3>{{ t.label }}{% if t.common %} <span class="feast-text-common">{{ feast_words.common_mark }}</span>{% endif %}</h3>{% if t.hymn_title %}<span class="feast-hymn-title" lang="la">{{ t.hymn_title }}</span>{% endif %}</summary>
+        {{ t.text|feast_hymn }}
+      </details>
+      {% else %}
       <div class="feast-text{% if loop.first and t.prayer %} collect{% endif %}">
         <h3>{{ t.label }}{% if t.common %} <span class="feast-text-common">{{ feast_words.common_mark }}</span>{% endif %}</h3>
         {% if t.prayer %}{{ t.text|feast_prayer }}{% else %}{{ t.text|feast_text }}{% endif %}
       </div>
+      {% endif %}
       {% endfor %}
       {% if whole_office %}<p class="feast-see">{{ feast_words.whole_office }} <a href="{{ whole_office.href|url }}">{{ whole_office.label }}</a></p>{% endif %}
     </section>

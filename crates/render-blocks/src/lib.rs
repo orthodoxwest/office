@@ -384,6 +384,19 @@ pub fn text_blocks(text: &str, prayer: bool) -> Vec<Block> {
     out
 }
 
+/// A feast page's hymn: its stanzas, spaced as the hours space them, under the fold that names it
+/// (its label and Latin title). The page opens only its collect on a dropped initial, so the
+/// hymn's first stanza has none (as render-html's `render_feast_hymn`).
+pub fn feast_hymn_blocks(text: &str) -> Vec<Block> {
+    let mut out = Vec::new();
+    hymn_stanzas(&mut out, text);
+    for b in &mut out {
+        b.drop_cap = false;
+    }
+    space_blocks(&mut out);
+    out
+}
+
 /// A section heading, separating a commemoration's lead-in from its feast.
 pub fn section_heading(label: &str) -> Block {
     if let Some(name) = label.strip_prefix("Commemoration of ").filter(|n| !n.is_empty()) {

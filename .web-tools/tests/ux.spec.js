@@ -6511,6 +6511,34 @@ test("a feast's page leads with its standing, then its texts, then its years, be
   expect(Math.abs(await top(".feast-standing") - await top(".feast-texts"))).toBeLessThan(24);
 });
 
+test("a feast's hymns are folded under their labels and Latin titles, and open on a tap", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/feast/assumption-bvm");
+  const hymns = page.locator("details.feast-hymn");
+  await expect(hymns).toHaveCount(2);
+  await expect(hymns.first().locator("summary h3")).toHaveText("Hymn at I and II Vespers");
+  await expect(hymns.first().locator(".feast-hymn-title")).toHaveText("Ave, maris stella");
+  // Folded, the antiphons and versicles stay near the top: the Benedictus within two screens.
+  await expect(hymns.first().locator(".hymn-stanza").first()).toBeHidden();
+  const benedictus = page.locator(".feast-text h3", { hasText: "At Lauds · Benedictus" });
+  expect(await benedictus.evaluate((n) => n.getBoundingClientRect().top)).toBeLessThan(2 * 844);
+  // Each hymn comes before its hour's antiphon.
+  const lauds = page.locator("details.feast-hymn summary h3", { hasText: "Hymn at Lauds" });
+  expect(await lauds.evaluate((n) => n.getBoundingClientRect().top)).toBeLessThan(await benedictus.evaluate((n) => n.getBoundingClientRect().top));
+  // The summary is one touch target, and a tap opens the hymn's stanzas, without a dropped initial.
+  const summary = hymns.first().locator("summary");
+  expect((await summary.boundingBox()).height).toBeGreaterThanOrEqual(44);
+  await summary.click();
+  await expect(hymns.first()).toHaveAttribute("open", "");
+  await expect(hymns.first().locator(".hymn-stanza").first()).toBeVisible();
+  await expect(hymns.first().locator(".hymn-stanza").first()).toContainText("Star of ocean fairest");
+  await expect(hymns.first().locator(".hymn-stanza-opening")).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  // A commemoration has no hymn.
+  await page.goto("/feast/comm-12-25-st-anastasia-virgin-and-martyr");
+  await expect(page.locator("details.feast-hymn")).toHaveCount(0);
+});
+
 test("Chant On notes every verse of a whole hymn, its mode's figure once over the initial", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await openDatedPage(page, "/lauds/2026-10-28");

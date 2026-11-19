@@ -1656,7 +1656,7 @@ function plainClickOpensHere(e, link) {
       });
       return at;
     };
-    document.querySelectorAll("details.hour-date-nav, details.session-prayers, details.day-office-details, details.reminder-address, details.reminder-help, details.reminder-calendar").forEach(function (details) {
+    document.querySelectorAll("details.hour-date-nav, details.session-prayers, details.day-office-details, details.reminder-address, details.reminder-help, details.reminder-calendar, details.feast-hymn").forEach(function (details) {
       var summary = details.querySelector(":scope > summary");
       if (!summary) {
         return;
