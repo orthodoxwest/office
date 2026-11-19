@@ -560,6 +560,13 @@ func chose() {
     Haptics.selection.prepare()
 }
 
+/// The softest tick, as home's crown play comes to rest (its ending beat): the answer to the tap
+/// that began it. Android gives its lightest tick there.
+func cameToRest() {
+    Haptics.off.impactOccurred(intensity: 0.45)
+    Haptics.off.prepare()
+}
+
 /// The tap of a checkbox turned on, firm, or off, softer: Android's ToggleOn and ToggleOff.
 func toggled(_ on: Bool) {
     if on {

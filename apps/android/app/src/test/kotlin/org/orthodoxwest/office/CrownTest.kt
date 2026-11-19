@@ -131,7 +131,7 @@ class CrownTest {
         // last after the ending beat's last star.
         var at = 1200L
         shoot("crown-dusk-1200")
-        for (next in listOf(1700L, 2200L, 2700L, 3200L, 3700L, 4300L, 5000L)) {
+        for (next in listOf(1700L, 2200L, 2700L, 3200L, 3700L, 4400L)) {
             advance(played(next - at))
             at = next
             shoot("crown-dusk-$next")
@@ -158,7 +158,7 @@ class CrownTest {
         assertEquals(ThemeChoice.DEFAULT, stage.theme)
         var at = 1000L
         shoot("crown-dawn-1000")
-        for (next in listOf(1500L, 2000L, 2500L, 3000L, 3500L, 4000L, 4600L)) {
+        for (next in listOf(1500L, 2000L, 2500L, 3000L, 3500L, 4000L)) {
             advance(played(next - at))
             at = next
             shoot("crown-dawn-$next")

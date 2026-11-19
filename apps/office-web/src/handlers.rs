@@ -812,7 +812,12 @@ mod tests {
         }
         let mut rules = Vec::new();
         for (name, p) in [("dusk", crown::DUSK), ("dawn", crown::DAWN)] {
-            rules.push(format!(":root.crown-{name} {{ --crown-veil-ink: {}; --crown-veil-peak: {}; }}", rgb(p.veil_ink), p.veil_peak));
+            rules.push(format!(
+                ":root.crown-{name} {{ --crown-veil-warm: {}; --crown-veil-ink: {}; --crown-veil-peak: {}; }}",
+                rgb(p.veil_warm),
+                rgb(p.veil_ink),
+                p.veil_peak
+            ));
         }
         for (name, c) in [
             ("ochre", crown::SKY_OCHRE),
@@ -837,6 +842,13 @@ mod tests {
                 p.veil_top * 100.0,
                 bez(p.veil_out)
             ));
+            // The veil's colour rides the same clock and curves as its strength.
+            rules.push(format!(
+                "@keyframes crown-veil-ink-{name} {{\n  0% {{ --crown-veil-c: rgb(var(--crown-veil-warm)); animation-timing-function: {}; }}\n  {}% {{ --crown-veil-c: rgb(var(--crown-veil-ink)); animation-timing-function: {}; }}\n  {gone} {{ --crown-veil-c: rgb(var(--crown-veil-warm)); }}\n}}",
+                bez(p.veil_in),
+                p.veil_top * 100.0,
+                bez(p.veil_out)
+            ));
         }
         rules.push(format!("--crown-veil-far: {};", crown::VEIL_FAR));
         rules.push(format!("animation-timing-function: {};\n  }}\n  95% {{", bez(crown::FRONT_EASE)));
@@ -846,6 +858,16 @@ mod tests {
         rules.push(format!("crown-snuff calc({}ms * var(--crown-kp))", crown::BEAT_LEN));
         rules.push(format!("--crown-ink-handover: {}ms;", crown::INK_HANDOVER));
         rules.push(format!("--crown-pace: {};", crown::PACE));
+        // The cross's answer to the hand, in real time.
+        rules.push(format!("animation: crown-press calc({}ms * var(--crown-k))", crown::CROSS_PRESS_LEN));
+        rules.push(format!("from {{ transform: translateX(-50%) scale({}); }}", crown::CROSS_PRESS));
+        rules.push(format!("animation: crown-catch calc({}ms * var(--crown-k))", crown::CROSS_CATCH_LEN));
+        rules.push(format!("{}% {{ opacity: 0.7; }}", crown::CROSS_CATCH_PEAK * 100.0));
+        rules.push(format!(
+            "crown-ember-in calc({}ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.3, 1) calc({}ms * var(--crown-k)) both",
+            crown::CROSS_EMBER_IN,
+            crown::CROSS_EMBER_AT
+        ));
         for rule in &rules {
             assert!(css.contains(rule), "style.css lacks {rule:?}");
         }

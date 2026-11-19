@@ -510,7 +510,6 @@ private fun Frontispiece(
         head.arch = tier.arch
         head.black = black
         head.picking = picking
-        head.gilt = !night && first
         head.catchInk = mix(Leaf(ornament(Apse, season)).hi, Color.White, 0.62f)
         head.cross = { dark ->
             val base = if (dark) Apse else Nave

@@ -153,6 +153,10 @@ private object Ease {
     val inOut = Bezier(0.4f, 0f, 0.4f, 1f)
     val catch = Bezier(0.4f, 0f, 0.6f, 1f)
     val rise = Bezier(0.3f, 0f, 0.3f, 1f)
+    /** The golden hour's wash on the niche: under way from the tap. */
+    val wash = Bezier(0.2f, 0.4f, 0.3f, 1f)
+    /** The cross giving under the finger and coming back. */
+    val press = Bezier(0.2f, 0.6f, 0.35f, 1f)
     val warm = Bezier(0.3f, 0f, 0.5f, 1f)
     val kindle = Bezier(0.3f, 0.2f, 0.3f, 1f)
     val inkOut = Bezier(0.4f, 0f, 0.7f, 1f)
@@ -192,8 +196,6 @@ internal class CrownHead {
     var cross: DrawScope.(dark: Boolean) -> Unit = {}
     /** The leaf's highlight on the night, for the light the cross catches. */
     var catchInk: Color = Color.White
-    /** A first-class feast's gilt cross by day. */
-    var gilt = false
 }
 
 /**
@@ -528,7 +530,8 @@ internal class Play(val plan: CrownPlan, val choice: ThemeChoice, val sums: Sums
     var crossEmber: ImageBitmap? = null
     /** The stars' turns, for the stars the sky last drew. */
     var stars: Sums.StarTurns? = null
-    var gilt = false
+    /** The ending beat has been marked under the finger. */
+    var ticked = false
     /** A second tap on the cross, kept for the settle. */
     var again = false
     /** When the cross was last tapped, in ms of the play's clock (the tap that began it at 0). */
@@ -551,6 +554,8 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
     var save: (ThemeChoice) -> Unit = {}
     var apply: (ThemeChoice) -> Unit = {}
     var plain: (ThemeChoice) -> Unit = {}
+    /** A soft tick under the finger at the ending beat: the tap's answer, as the page comes to rest. */
+    var closing: () -> Unit = {}
     /** Why the last tap took the Menu's change rather than the play, for tests and debugging. */
     internal var plainBecause: String? = null
 
@@ -629,7 +634,6 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
         save(choice)
         // The timetable is performed plan.pace times slower than it is written.
         val p = Play(plan, choice, sums, k * plan.pace)
-        p.gilt = toDark && h.gilt
         val cross = units["cross"]!!
         p.crossNew = look(cross.size) { h.cross(this, toDark) }
         p.crossCatch = look(cross.size) { consecrationCross(h.catchInk) }
@@ -652,6 +656,10 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
                     capture(p)
                     last = -1L
                     continue
+                }
+                if (!p.ticked && t >= p.sums.beat && !p.again && p.rate == 1f) {
+                    p.ticked = true
+                    closing()
                 }
                 if (p.again && t >= p.sums.settle) {
                     finish()
@@ -742,8 +750,6 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
 
     // ---- Drawing. ----
 
-    private val catchKeys = Keys(floatArrayOf(0f, 0.4f, 1f), floatArrayOf(0f, 0.6f, 0f), arrayOf(Ease.catch, Ease.catch))
-    private val catchHold = Keys(floatArrayOf(0f, 0.34f, 1f), floatArrayOf(0f, 0.55f, 0f), arrayOf(Ease.inOut, Ease.catch))
     private val kindleAlpha = Keys(floatArrayOf(0f, 0.55f, 1f), floatArrayOf(0f, 1f, 1f), arrayOf(Ease.kindle, Ease.kindle))
 
     internal fun draw(scope: DrawScope, p: Play) = with(scope) {
@@ -826,10 +832,12 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
             if (key == "cross" || lifted[key] != true) continue
             val (out, into) = when {
                 !p.turned -> 1f to 0f
-                key == "frieze" -> Ease.tail.at((t - p.plan.frieze.at.toFloat()) / p.plan.frieze.len.toFloat()).let { 1f - it to it }
+                // The band is opaque: the new one comes over the old, which stays whole under it
+                // (crossed, the two let the screen's hole under the band show through mid-way).
+                key == "frieze" -> Ease.tail.at((t - p.plan.frieze.at.toFloat()) / p.plan.frieze.len.toFloat()).let { (if (it < 1f) 1f else 0f) to it }
                 key.startsWith("w-") -> {
                     val w = s.words[key] ?: turn
-                    (1f - Ease.inkOut.at((t - w + 230f) / 240f)) to Ease.inkIn.at((t - w + 80f) / 360f)
+                    (1f - Ease.inkOut.at((t - w + 200f) / 280f)) to Ease.inkIn.at((t - w + 180f) / 320f)
                 }
                 else -> {
                     val r = s.rows[key] ?: s.settle
@@ -837,37 +845,55 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
                 }
             }
             if (out > 0f) unit.old?.let { drawImage(it, unit.at, alpha = out) }
-            if (into > 0f) translate(unit.at.x, unit.at.y) {
-                unit.layer.alpha = into
-                drawLayer(unit.layer)
-                unit.layer.alpha = 1f
+            // The new ink through a layer of its own at its share: a graphics layer's own alpha
+            // is read when the frame is rendered, not when it is drawn here, so set and reset
+            // around this call it was always whole (the frieze's new ground arrived in one frame
+            // at the turn, and every line's new ink with it).
+            if (into > 0f) layered(unit.rect, into) {
+                translate(unit.at.x, unit.at.y) { drawLayer(unit.layer) }
             }
         }
 
         // The cross, in its two looks, the ember gold it keeps (dusk) or takes first (dawn), and
-        // the light it catches.
+        // the light it catches. Its answer to the hand is in real time (`real`, not slowed by
+        // the pace): it gives a little under the finger and catches the light at once, and at
+        // dusk takes its ember gold over the paint, keeping it until the ending beat.
         val cross = units["cross"]
         if (cross != null && lifted["cross"] == true) {
+            val plan = p.plan
+            val real = t * plan.pace
             val oldAlpha: Float
             val newAlpha: Float
             val emberAlpha: Float
-            val catchAlpha: Float
+            val beat = Ease.inOut.at((t - s.beat) / plan.beatLen.toFloat())
+            val catchAlpha = catchAt(plan, real)
             if (p.dusk) {
-                oldAlpha = 1f - Ease.inOut.at((t - 780f) / 300f)
-                newAlpha = Ease.inOut.at((t - 80f) / 760f)
-                catchAlpha = if (p.gilt) catchKeys.at((t - 80f) / 760f) else 0f
-                emberAlpha = 0.85f * Ease.rise.at((t - turn - 500f) / 900f) * (1f - Ease.rise.at((t - s.beat + 970f) / 600f))
+                oldAlpha = 1f - Ease.inOut.at((real - 200f) / 300f)
+                newAlpha = Ease.inOut.at((real - 80f) / 760f)
+                emberAlpha = 0.85f * Ease.rise.at((real - plan.crossEmberAt.toFloat()) / plan.crossEmberIn.toFloat()) * (1f - beat)
             } else {
-                val beat = Ease.inOut.at((t - s.beat) / p.plan.beatLen.toFloat())
                 oldAlpha = 1f - beat
                 newAlpha = beat
-                catchAlpha = catchHold.at((t - 60f) / 1300f)
                 emberAlpha = 0.85f * Ease.rise.at((t - turn - 900f) / 800f) * (1f - beat)
             }
-            p.crossOld?.let { if (oldAlpha > 0f) drawImage(it, cross.at, alpha = oldAlpha) }
-            p.crossNew?.let { if (newAlpha > 0f) drawImage(it, cross.at, alpha = newAlpha) }
-            p.crossEmber?.let { if (emberAlpha > 0f) drawImage(it, cross.at, alpha = emberAlpha) }
-            p.crossCatch?.let { if (catchAlpha > 0f) drawImage(it, cross.at, alpha = catchAlpha) }
+            val pressed = plan.crossPress + (1f - plan.crossPress) * Ease.press.at(real / plan.crossPressLen.toFloat())
+            scale(pressed, pivot = cross.rect.center) {
+                p.crossOld?.let { if (oldAlpha > 0f) drawImage(it, cross.at, alpha = oldAlpha) }
+                p.crossNew?.let { if (newAlpha > 0f) drawImage(it, cross.at, alpha = newAlpha) }
+                p.crossEmber?.let { if (emberAlpha > 0f) drawImage(it, cross.at, alpha = emberAlpha) }
+                p.crossCatch?.let { if (catchAlpha > 0f) drawImage(it, cross.at, alpha = catchAlpha) }
+            }
+        }
+    }
+
+    /** The light the cross catches at `real` ms from the tap: up to 0.7 at once, then away. */
+    private fun catchAt(plan: CrownPlan, real: Float): Float {
+        val x = real / plan.crossCatchLen.toFloat()
+        val peak = plan.crossCatchPeak
+        return when {
+            x <= 0f || x >= 1f -> 0f
+            x < peak -> 0.7f * Ease.catch.at(x / peak)
+            else -> 0.7f * (1f - Ease.catch.at((x - peak) / (1f - peak)))
         }
     }
 
@@ -922,7 +948,8 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
             else -> 0f
         }
         if (opacity <= 0f) return
-        val ink = rgb(plan.veilInk)
+        // Warm where it is faint, the hour's own shade at its height.
+        val ink = mix(rgb(plan.veilInk), rgb(plan.veilWarm), opacity / plan.veilPeak)
         val full = Rect(Offset.Zero, size)
         val c = Offset(s.ax, s.ys)
         multiplied(full) {
@@ -979,7 +1006,7 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
             if (p.dusk) {
                 val gone = clamp01((t - turn - 1750f) / 500f)
                 // The golden hour on the whole niche, deeper toward the horizon.
-                val wash = Ease.rise.at((t - 120f) / 1300f) * (1f - gone)
+                val wash = Ease.wash.at(t / 1300f) * (1f - gone)
                 if (wash > 0f) {
                     drawRect(
                         Brush.verticalGradient(
@@ -989,7 +1016,7 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
                         s.vault.topLeft, s.vault.size, alpha = wash,
                     )
                 }
-                val x = Ease.rise.at((t - 250f) / 1250f)
+                val x = Ease.rise.at((t - 100f) / 1250f)
                 val dense = screenDp <= 700f
                 val ochre = Brush.verticalGradient(
                     0f to rgb(plan.skyOchre, 0f), 0.32f to rgb(plan.skyOchre, if (dense) 0.2f else 0.1f),
@@ -1009,7 +1036,7 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
                 val stops = arrayOf(0f to Color.Black, 0.3f to Color.Black.copy(alpha = 0.9f), 0.64f to Color.Black.copy(alpha = 0.45f), 1f to Color.Transparent)
                 val gone = clamp01((t - turn - 1100f) / 700f)
                 // One wash, three pigments deep, rising: the teal leads, then rose, then peach.
-                val first = Ease.rise.at((t - 150f) / 1100f)
+                val first = Ease.rise.at((t - 60f) / 1100f)
                 val high = Rect(rect.left, rect.bottom - 1.5f * s.room, rect.right, rect.bottom)
                 mound(
                     high,

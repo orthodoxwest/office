@@ -1862,9 +1862,14 @@ test("the crown makes the Menu's change in an Android app's own browser, whose s
 // furthest any place steps against its travel, `step` the most between two
 // moments, `kick` the most a step differs from the one before; `faint` the
 // moments, of some sixty, at which the ink stands under 2:1).
+// (The page's act is a sixth shorter since the page began to turn with the
+// front: dusk's stars kindle closer together, and their light lifts the
+// arch a little against the night (5.06); dawn's card takes larger steps
+// (14.0, and a turn of 4.7 between them). The bounds follow, half as much
+// again.)
 const CROWN_LIGHT = {
-  dusk: { arch: { back: 5, step: 24, kick: 8 }, wall: { back: 2, step: 12, kick: 4 }, card: { back: 2, step: 12, kick: 4 }, faint: 5, after: 3.5 },
-  dawn: { arch: { back: 5, step: 24, kick: 7 }, wall: { back: 5, step: 22, kick: 7 }, card: { back: 2, step: 13.5, kick: 4.5 }, faint: 6, after: 3.5 },
+  dusk: { arch: { back: 7.5, step: 24, kick: 8 }, wall: { back: 2, step: 12, kick: 4 }, card: { back: 2, step: 12, kick: 4 }, faint: 5, after: 3.5 },
+  dawn: { arch: { back: 5, step: 24, kick: 7 }, wall: { back: 5, step: 22, kick: 7 }, card: { back: 2, step: 21, kick: 7 }, faint: 6, after: 3.5 },
 };
 // WebKit's figures, by the same rule from its own first run in CI. Its
 // stills and its thinner text read differently: the light takes its steps
@@ -1875,8 +1880,8 @@ const CROWN_LIGHT = {
 // 3.64; dawn: wall step 21.26 and kick 6.2, card step 15.14, faint 9,
 // after 2.96.)
 const CROWN_LIGHT_WEBKIT = {
-  dusk: { ...CROWN_LIGHT.dusk, arch: { back: 8, step: 24, kick: 8 }, wall: { back: 2, step: 20, kick: 4 }, card: { back: 2, step: 20, kick: 4.5 }, faint: 12 },
-  dawn: { ...CROWN_LIGHT.dawn, wall: { back: 5, step: 30, kick: 9 }, card: { back: 2, step: 22, kick: 5 }, faint: 13, after: 2.5 },
+  dusk: { ...CROWN_LIGHT.dusk, arch: { back: 11, step: 24, kick: 8 }, wall: { back: 2, step: 20, kick: 4 }, card: { back: 2, step: 20, kick: 4.5 }, faint: 12 },
+  dawn: { ...CROWN_LIGHT.dawn, wall: { back: 5, step: 30, kick: 9 }, card: { back: 2, step: 26, kick: 7.5 }, faint: 13, after: 2.5 },
 };
 for (const dir of ["dusk", "dawn"]) {
   test(`the crown's ${dir} moves its light one way, without a leap, and keeps the hours readable`, async ({ page }, testInfo) => {

@@ -4095,8 +4095,8 @@ function plainClickOpensHere(e, link) {
     // begins to turn while the front is still crossing the head) and every
     // ramp ends on a long tail. Light arrives faster than it leaves.
     var CROWN_PLAY = {
-      dusk: { turn: 650, front: [800, 1900], spread: [1500, 2700], veil: [1500, 4200], frieze: [700, 1500], end: 5200, inkAt: 0.34, glowEase: [0.8, 0, 0.4, 1] },
-      dawn: { turn: 650, front: [800, 1700], spread: [1300, 2400], veil: [1300, 3700], frieze: [2600, 1100], end: 4700, inkAt: 0.6, glowEase: [0.5, 0, 0.15, 1] },
+      dusk: { turn: 650, front: [800, 1900], spread: [1100, 2300], veil: [1100, 3400], frieze: [700, 1500], end: 4400, inkAt: 0.34, glowEase: [0.8, 0, 0.4, 1] },
+      dawn: { turn: 650, front: [800, 1700], spread: [1000, 2000], veil: [1000, 3000], frieze: [2000, 1000], end: 4000, inkAt: 0.6, glowEase: [0.5, 0, 0.15, 1] },
     };
     var FRONT_EASE = [0.4, 0, 0.3, 1];
     // Near enough even: it starts from nothing under the frieze, so it must
@@ -4453,7 +4453,7 @@ function plainClickOpensHere(e, link) {
     var looks = {}, boxes = {};
     function readLooks(name, v, zoom) {
       var ccs = getComputedStyle(crown);
-      var L = looks[name] = { crown: readLook(ccs), gilt: /gild\.png|gradient/.test(ccs.backgroundImage) };
+      var L = looks[name] = { crown: readLook(ccs) };
       [["sky", sky], ["fill", fill]].forEach(function (pair) {
         var cs = getComputedStyle(pair[1]), q = pair[1].getBoundingClientRect(), out = {};
         GROUND.forEach(function (k) { out[k] = cs[k]; });
@@ -4547,7 +4547,6 @@ function plainClickOpensHere(e, link) {
       var cur = dir === "dusk" ? "light" : "dark", other = dir === "dusk" ? "dark" : "light";
       g.oldLook = looks[cur].crown;
       g.newLook = looks[other].crown;
-      g.gilt = looks[cur].gilt;
       g.hi = looks.dark.hi;
       // The frieze is live throughout (a still of it goes soft): it keeps its
       // old ground under the new theme until the page's front leaves it.
@@ -4956,9 +4955,6 @@ function plainClickOpensHere(e, link) {
       var catchLight = mk("crown-cross-catch", null);
       if (g.hi) {
         catchLight.style.setProperty("--crown-catch-ink", g.hi);
-      }
-      if (p.dir === "dusk" && g.gilt) {
-        hero.classList.add("crown-gilt");
       }
       crown.insertAdjacentElement("afterend", cross);
       p.cross = cross;

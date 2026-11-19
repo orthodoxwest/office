@@ -261,6 +261,11 @@ final class CrownPlayer: NSObject, ObservableObject {
         case .playing:
             if t >= run.scene.settle { settle(run) }
         case .settled:
+            // A soft tick at the ending beat, unless the play is hurried or turning back.
+            if !run.ticked, t >= run.scene.beat {
+                run.ticked = true
+                if !run.rushing && !run.again { cameToRest() }
+            }
             if t >= run.scene.end { teardown(.end) }
         }
     }
@@ -408,6 +413,8 @@ final class CrownRun {
     /// A second tap was kept: the way back plays at the settle.
     var again = false
     var rushing = false
+    /// The ending beat has been marked under the finger.
+    var ticked = false
     var oldShot: Image?
     var groundShot: Image?
 
@@ -421,8 +428,6 @@ final class CrownRun {
     /// The cross's ember gold: the last light it keeps at dusk, the first it takes at dawn.
     private let emberCross: Crown
     private let catchInk: Color
-    /// A gilt cross by day answers dusk with a catch of light at once.
-    private let gilt: Bool
     private let crown: CGRect
     /// The frieze, the land under the sky: it changes on its own span, over everything else.
     private let frieze: CGRect?
@@ -477,7 +482,6 @@ final class CrownRun {
         let ember = fig.crossEmber.color()
         emberCross = Crown(size: crown.width, ink: ember, shading: .color(ember))
         catchInk = mix(leaf.hi, .white, 0.62)
-        gilt = dusk && head.first
         pigment = UIImage(named: "pigment.png")
         since = CrownPlayer.now()
     }
@@ -514,40 +518,39 @@ final class CrownRun {
 
     // MARK: The cross
 
-    /// The cross's two looks, its ember gold and the leaf's catch of light, at `t`.
+    /// The cross's two looks, its ember gold and the leaf's catch of light, at `t`. Its answer to
+    /// the hand is in real time (`real`, not slowed by the pace): it gives a little under the
+    /// finger and catches the light at once, both ways.
     func crosses(_ t: Double) -> some View {
         let old: Double
         let new: Double
-        let gleam: Double
         var ember = 0.0
         let rise = CubicEase(0.3, 0, 0.3, 1)
+        let ease = CubicEase(0.4, 0, 0.4, 1)
+        let real = t * fig.pace
+        let catchEase = CubicEase(0.4, 0, 0.6, 1)
+        let gleam = CrownTrack(stops: [(0, 0, catchEase), (fig.crossCatchPeak, 0.7, catchEase), (1, 0, CubicEase.linear)])
+            .value(crownRun(real, 0, fig.crossCatchLen))
+        let beat = ease.at(crownRun(t, scene.beat, fig.beatLen))
         if dusk {
-            // The leaf is laid over the paint first, then the paint goes; a cross already gilt
-            // answers with a catch of light at once. Then it keeps the last of the light: an
-            // ember gold that comes with the afterglow and stays on it after the wall is dark,
-            // going only as the page comes to rest.
-            let ease = CubicEase(0.4, 0, 0.4, 1)
-            new = ease.at(crownRun(t, 80, 760))
-            old = 1 - ease.at(crownRun(t, 780, 300))
-            let flash = CrownTrack(stops: [(0, 0, CubicEase(0.4, 0, 0.6, 1)), (0.4, 0.6, CubicEase(0.4, 0, 0.6, 1)), (1, 0, CubicEase.linear)])
-            gleam = gilt ? flash.value(crownRun(t, 80, 760)) : 0
-            if switched {
-                ember = 0.85 * rise.at(crownRun(t, fig.turn + 500, 900)) * (1 - rise.at(crownRun(t, scene.beat - 970, 600)))
-            }
+            // The ember gold comes at once, over the paint and while the cross is still on
+            // plaster, where gold stands and leaf alone is lost; the leaf comes under it and the
+            // paint goes. It keeps that last of the light after the wall is dark, and at the
+            // ending beat lets it go to the night's leaf.
+            new = ease.at(crownRun(real, 80, 760))
+            old = 1 - ease.at(crownRun(real, 200, 300))
+            ember = 0.85 * rise.at(crownRun(real, fig.crossEmberAt, fig.crossEmberIn)) * (switched ? 1 - beat : 1)
         } else {
-            // The leaf lifts at once and settles. As the plaster nears it the cross deepens to
-            // the ember gold, which stands on cream where leaf alone is lost; and it is the last
-            // thing to change: at the ending beat, with the morning star, it turns from gold to
-            // its red.
-            let ease = CubicEase(0.4, 0, 0.4, 1)
-            gleam = CrownTrack(stops: [(0, 0, CubicEase(0.4, 0, 0.4, 1)), (0.34, 0.55, CubicEase(0.4, 0, 0.6, 1)), (1, 0, CubicEase.linear)]).value(crownRun(t, 60, 1300))
-            let beat = ease.at(crownRun(t, scene.beat, fig.beatLen))
+            // As the plaster nears it the cross deepens to the ember gold, which stands on cream
+            // where leaf alone is lost; and it is the last thing to change: at the ending beat,
+            // with the morning star, it turns from gold to its red.
             new = switched ? beat : 0
             old = switched ? 1 - beat : 1
             if switched {
                 ember = 0.85 * rise.at(crownRun(t, fig.turn + 900, 800)) * (1 - beat)
             }
         }
+        let pressed = fig.crossPress + (1 - fig.crossPress) * CubicEase(0.2, 0.6, 0.35, 1).at(crownRun(real, 0, fig.crossPressLen))
         return ZStack {
             oldCross.opacity(old)
             newCross.opacity(new)
@@ -555,6 +558,7 @@ final class CrownRun {
             Crown(size: crown.width, ink: catchInk, shading: .color(catchInk)).opacity(gleam)
         }
         .frame(width: crown.width, height: crown.height)
+        .scaleEffect(pressed)
         .position(x: crown.midX, y: crown.midY)
     }
 
@@ -646,7 +650,7 @@ final class CrownRun {
                     veil.clip(to: s.vaultPath, options: .inverse)
                     if let frieze { veil.clip(to: Path(frieze), options: .inverse) }
                     veil.clip(to: Path(crown), options: .inverse)
-                    paintVeil(&veil, whole)
+                    paintVeil(&veil, whole, t)
                     veil.blendMode = .destinationIn
                     veil.draw(mask, in: rect)
                 }
@@ -738,7 +742,7 @@ final class CrownRun {
             // Golden hour on the plaster: an ochre laid thin over the whole niche, deeper toward
             // the horizon, before the dark comes down; the night covers it from above.
             let gone = 1 - crownRun(t, f.turn + 1750, 500)
-            let raking = CubicEase(0.3, 0, 0.3, 1).at(crownRun(t, 120, 1300)) * gone
+            let raking = CubicEase(0.2, 0.4, 0.3, 1).at(crownRun(t, 0, 1300)) * gone
             if raking > 0 {
                 var w = c
                 w.opacity = raking
@@ -747,7 +751,7 @@ final class CrownRun {
                     startPoint: CGPoint(x: v.midX, y: v.maxY), endPoint: CGPoint(x: v.midX, y: v.minY)
                 ))
             }
-            let rise = CubicEase(0.3, 0, 0.3, 1).at(crownRun(t, 250, 1250))
+            let rise = CubicEase(0.3, 0, 0.3, 1).at(crownRun(t, 100, 1250))
             let shown = rise * gone
             guard shown > 0 else { return }
             // On a phone the afterglow is the cue that something has begun: denser.
@@ -767,7 +771,7 @@ final class CrownRun {
             let gone = 1 - crownRun(t, f.turn + 1100, 700)
             let rx = scene.washRadius
             let mask: [(Double, Double)] = [(0, 1), (0.3, 0.9), (0.64, 0.45), (1, 0)]
-            let first = CubicEase(0.3, 0, 0.3, 1).at(crownRun(t, 150, 1100))
+            let first = CubicEase(0.3, 0, 0.3, 1).at(crownRun(t, 60, 1100))
             if first * gone > 0 {
                 let box = washBox(1.5 * scene.washHeight, scale: 0.3 + 0.7 * first)
                 let dawn: [Gradient.Stop] = [
@@ -848,8 +852,9 @@ final class CrownRun {
 
     /// The veil's ink, thinning only a little outward from the springing's middle (style.css's
     /// `.crown-veil`).
-    private func paintVeil(_ ctx: inout GraphicsContext, _ whole: CGRect) {
-        let ink = fig.veilInk
+    private func paintVeil(_ ctx: inout GraphicsContext, _ whole: CGRect, _ t: Double) {
+        // Warm where it is faint, the hour's own shade at its height.
+        let ink = fig.veilWarm.toward(fig.veilInk, scene.veilOpacity(t) / fig.veilPeak)
         let shares: [Double] = [1, 0.94, 0.82, fig.veilFar]
         let stops = zip(shares, [0, 0.28, 0.58, 1.0]).map { Gradient.Stop(color: ink.color($0.0), location: $0.1) }
         let rx = 1.5 * scene.width
