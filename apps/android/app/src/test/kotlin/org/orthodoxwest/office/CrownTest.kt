@@ -210,7 +210,7 @@ class CrownTest {
         val stage = Stage(ThemeChoice.NAVE)
         show(stage)
         compose.onNodeWithContentDescription("Switch to Apse").performClick()
-        advance(1500)
+        advance(played(crownPlan(true).turn.toLong()) + 300)
         compose.onNodeWithContentDescription("Switch to Nave").performClick()
         advance(played(crownPlan(true).end.toLong()) + 500)
         // The way back is under way, or done.

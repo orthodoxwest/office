@@ -12783,7 +12783,7 @@ body.page-home::before {
      many times slower (presentation::crown::PACE): every time below is
      multiplied by --crown-kp. Only the cross's own answer to the tap keeps
      the composed pace (--crown-k): it answers at once. */
-  --crown-pace: 2;
+  --crown-pace: 3;
   --crown-kp: calc(var(--crown-k) * var(--crown-pace));
   /* A line's ink changes hands in this long: old ink out and new ink in,
      never both. */

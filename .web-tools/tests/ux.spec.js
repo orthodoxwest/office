@@ -1692,8 +1692,8 @@ async function crownPlayed(page) {
 }
 
 async function crownAtRest(page) {
-  await expect(page.locator(".home-hero")).not.toHaveClass(/crown-/, { timeout: 15_000 });
-  await expect(page.locator("html")).not.toHaveClass(/crown-|theme-anim|vault-hidden/, { timeout: 15_000 });
+  await expect(page.locator(".home-hero")).not.toHaveClass(/crown-/, { timeout: 30_000 });
+  await expect(page.locator("html")).not.toHaveClass(/crown-|theme-anim|vault-hidden/, { timeout: 30_000 });
 }
 
 const crownState = (page) => page.evaluate(() => ({

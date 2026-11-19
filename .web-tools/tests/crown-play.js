@@ -10,7 +10,7 @@ import zlib from "node:zlib";
 import { expect } from "@playwright/test";
 
 // presentation::crown: the play's pace and the moment the look turns.
-export const PACE = 2.0;
+export const PACE = 3.0;
 export const TURN = 650;
 // The page's rest is no earlier than this (ms from the tap, by the
 // timetable); the frames a test may ask for end a little before it, where

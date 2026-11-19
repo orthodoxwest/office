@@ -4132,7 +4132,7 @@ function plainClickOpensHere(e, link) {
     // The timetable is written at the pace it was composed at; the play is
     // performed this many times slower (style.css's --crown-pace). A reader's
     // own taps are counted in real time.
-    var PACE = 2;
+    var PACE = 3;
     var TAP_APART = 450;
     var RUSH = 300;
     // Where in a mask's radius its feather is half through (style.css's stops).

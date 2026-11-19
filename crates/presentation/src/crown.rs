@@ -115,7 +115,7 @@ pub struct CrownPlay {
     pub glow_ease: Ease,
 }
 
-/// Nave to Apse: nearly nine seconds on the glass.
+/// Nave to Apse: about thirteen seconds on the glass, a sunset to be watched.
 pub const DUSK: CrownPlay = CrownPlay {
     turn: 650,
     front: Span { at: 800, len: 1900 },
@@ -134,7 +134,7 @@ pub const DUSK: CrownPlay = CrownPlay {
     glow_ease: [0.8, 0.0, 0.4, 1.0],
 };
 
-/// Apse to Nave: eight seconds.
+/// Apse to Nave: twelve seconds.
 pub const DAWN: CrownPlay = CrownPlay {
     turn: 650,
     front: Span { at: 800, len: 1700 },
@@ -160,10 +160,10 @@ pub fn crown_play(to_dark: bool) -> CrownPlay {
 
 /// How many times slower than its timetable the play is performed. The timetable above, and every
 /// front's own smaller timings, are written at the pace the play was composed at; each front
-/// multiplies its clock by this, so a figure of 1000 is 2000 ms on the glass. Only what answers
+/// multiplies its clock by this, so a figure of 1000 is 3000 ms on the glass. Only what answers
 /// the reader's own hand keeps real time: the cross's answer to the tap ([`CROSS_PRESS`] and the
 /// figures beside it), [`TAP_APART`] and [`RUSH`].
-pub const PACE: f32 = 2.0;
+pub const PACE: f32 = 3.0;
 
 /// The front in the head of the arch: quickest in its middle, and a long time coming to rest on
 /// the horizon (or in the point).
@@ -308,10 +308,10 @@ mod tests {
             // The warm ink is the lighter: faint, it is a light on the wall, not a shade.
             let sum = |c: Rgb| c.iter().map(|&v| u32::from(v)).sum::<u32>();
             assert!(sum(play.veil_warm) > sum(play.veil_ink));
-            // The ending beat has its room after the page is still, and nothing passes nine
-            // seconds on the glass.
+            // The ending beat has its room after the page is still, and nothing passes fourteen
+            // seconds on the glass: slow enough to watch a sunset, short of a wait.
             assert!(play.spread.at + play.spread.len + BEAT_HOLD + BEAT_LEN <= play.end);
-            assert!((play.end + SPREAD_WIDE) as f32 * PACE <= 9000.0);
+            assert!((play.end + SPREAD_WIDE) as f32 * PACE <= 14000.0);
             // Every ramp ends on a tail: an ease's last tenth takes at least a quarter of its time.
             for ease in [play.glow_ease, FRONT_EASE] {
                 assert!(ease[2] <= 0.4 && ease[3] == 1.0, "{ease:?} stops short");
