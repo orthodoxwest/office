@@ -197,7 +197,11 @@ jobs:
         uses: actions/upload-artifact@v7.0.2
         with:
           name: ios-snapshot-candidates
-          path: apps/ios/build/review/snapshots/
+          # The geometry notes are for review only; the baselines are the PNGs and environment.json,
+          # all the validator below accepts (as ios.yml's upload, #903).
+          path: |
+            apps/ios/build/review/snapshots/
+            !apps/ios/build/review/snapshots/*.geometry.txt
           if-no-files-found: error
           retention-days: 1
 
