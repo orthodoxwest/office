@@ -1786,16 +1786,20 @@ for (const dir of ["dusk", "dawn"]) {
     await page.mouse.click(x, y);
     const at = async (t) => page.waitForTimeout(Math.max(0, real(t) - (Date.now() - t0)));
     await crownPlayed(page);
-    await at(a + len * 0.5);
-    expect(await rates()).toEqual([Math.round(1000 / LINGER) / 1000]);
-    // (The play's clock stands still while the browser makes its stills at
-    // the turn, longer in WebKit, so the linger ends that much after this
-    // reckoning from the tap.)
-    await at(a + len);
-    await expect.poll(rates, { timeout: 4000 }).toEqual([1]);
+    // The play's clock stands still while the browser makes its stills at the
+    // turn, longer in WebKit and on a busy machine, so a linger after the turn
+    // starts and ends that much after this reckoning from the tap: it is
+    // watched for from its reckoned start, not looked for at one instant.
+    await at(a);
+    await expect.poll(rates, { timeout: real(a + len) - real(a) + 8000, intervals: [100] }).toEqual([Math.round(1000 / LINGER) / 1000]);
+    const lingering = Date.now();
+    await expect.poll(rates, { timeout: real(a + len) - real(a) + 4000, intervals: [100] }).toEqual([1]);
+    // It held for its length, not a moment.
+    expect(Date.now() - lingering).toBeGreaterThan((real(a + len) - real(a)) * 0.75);
     await crownAtRest(page);
-    // The page's own end kept time with its parts: no later than the play's end and a margin.
-    expect(Date.now() - t0).toBeLessThan(real(dark ? 4400 + 100 : 4000 + 100) + 2500);
+    // The page's own end kept time with its parts: from the linger, no later
+    // than the rest of the play and a margin.
+    expect(Date.now() - lingering).toBeLessThan(real(dark ? 4400 + 100 : 4000 + 100) - real(a) + 2500);
   });
 }
 
@@ -5358,7 +5362,12 @@ test("a browser opens its week and month on the first day it is counted in them"
   const monday = new Date(`${today}T12:00:00Z`);
   monday.setUTCDate(monday.getUTCDate() - (monday.getUTCDay() + 6) % 7);
   const weekStart = monday.toISOString().slice(0, 10);
-  const earlier = (day) => page.evaluate((d) => { localStorage.setItem("office-counted", d); localStorage.removeItem("office-counted-before"); }, day);
+  // Leave for a page that never reports before changing the kept days: the last visit's beacon,
+  // still settling, would otherwise report again in the words the change gives it.
+  const earlier = async (day) => {
+    await page.goto("/privacy");
+    await page.evaluate((d) => { localStorage.setItem("office-counted", d); localStorage.removeItem("office-counted-before"); }, day);
+  };
   if (weekStart !== today && weekStart.slice(0, 7) === today.slice(0, 7)) {
     await earlier(weekStart);
     expect(await visit()).toBe("week:again month:again");
