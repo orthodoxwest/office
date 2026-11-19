@@ -115,7 +115,7 @@ pub struct CrownPlay {
     pub glow_ease: Ease,
 }
 
-/// Nave to Apse: seven seconds and a little on the glass.
+/// Nave to Apse: nearly nine seconds on the glass.
 pub const DUSK: CrownPlay = CrownPlay {
     turn: 650,
     front: Span { at: 800, len: 1900 },
@@ -134,7 +134,7 @@ pub const DUSK: CrownPlay = CrownPlay {
     glow_ease: [0.8, 0.0, 0.4, 1.0],
 };
 
-/// Apse to Nave: six and a half seconds.
+/// Apse to Nave: eight seconds.
 pub const DAWN: CrownPlay = CrownPlay {
     turn: 650,
     front: Span { at: 800, len: 1700 },
@@ -160,10 +160,10 @@ pub fn crown_play(to_dark: bool) -> CrownPlay {
 
 /// How many times slower than its timetable the play is performed. The timetable above, and every
 /// front's own smaller timings, are written at the pace the play was composed at; each front
-/// multiplies its clock by this, so a figure of 1000 is 1625 ms on the glass. Only what answers
+/// multiplies its clock by this, so a figure of 1000 is 2000 ms on the glass. Only what answers
 /// the reader's own hand keeps real time: the cross's answer to the tap ([`CROSS_PRESS`] and the
 /// figures beside it), [`TAP_APART`] and [`RUSH`].
-pub const PACE: f32 = 1.625;
+pub const PACE: f32 = 2.0;
 
 /// The front in the head of the arch: quickest in its middle, and a long time coming to rest on
 /// the horizon (or in the point).
