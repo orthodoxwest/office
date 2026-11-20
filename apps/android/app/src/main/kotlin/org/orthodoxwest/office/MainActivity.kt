@@ -335,7 +335,7 @@ fun OfficeApp(
         page is Page.Ordo -> ordo?.takeIf { it.year == page.year && it.month == page.month }?.let(Content::Ordo)
         page is Page.Find -> find?.let(Content::Find)
         page is Page.Feast -> feast?.takeIf { it.id == page.id }?.let(Content::Feast)
-        page is Page.Year -> Content.Year(course.orEmpty())
+        page is Page.Year || page is Page.About -> Content.Year(course.orEmpty())
         else -> Content.Drawn
     }
     OfficeApp(
@@ -658,6 +658,7 @@ fun OfficeApp(
                                 chrome = chrome,
                                 insets = insets,
                                 onOpen = onOpen,
+                                course = (content as? Content.Year)?.course,
                             )
                             else -> Preparing(insets)
                         }

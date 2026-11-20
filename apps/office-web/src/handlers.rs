@@ -263,7 +263,8 @@ impl Server {
 
     pub fn about(&self, req: &Req) -> Response<Body> {
         let (now, now_hour) = now_in(&self.user_location(req));
-        let data = AboutData::new(
+        let course = self.cache.get(now.year()).map(|entry| presentation::course::year_course(entry.days.iter().map(|d| &**d))).ok();
+        let mut data = AboutData::new(
             Chrome {
                 page: "about".into(),
                 nav_date: date_slug(now),
@@ -274,6 +275,9 @@ impl Server {
             now,
             now_hour,
         );
+        if let Some(course) = course {
+            data = data.with_course(now, &course);
+        }
         match self.pages.about(&data) {
             Ok(body) => html(StatusCode::OK, body),
             Err(e) => render_failed(&e),
