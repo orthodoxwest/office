@@ -416,7 +416,11 @@ val WideFrom: Dp = 701.dp
 /** Whether the page is laid out at the web's desktop widths: a tablet, or a phone on its side. */
 val LocalWide = staticCompositionLocalOf { false }
 
-/** Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 999px`). */
+/**
+ * Where the hours' header holds its links, About among them, beside the brand and Settings
+ * (style.css `max-width: 999px`, and 1099px at Larger text): in the page's own dp, which text size
+ * scales, so Larger text keeps the rank to 1100 of the screen's.
+ */
 val RankedBelow: Dp = 1000.dp
 
 /**
@@ -482,7 +486,7 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
     val wide = LocalWide.current && nav != null
     // From 701 to 999dp an hour's links don't fit beside the brand and Settings: left in the row
     // they would crowd it, so they take a centred rank of their own beneath, as a book sets its
-    // running head over the page.
+    // running head over the page. About, which that rank has no room for, stands beside Settings.
     val rank = wide && LocalRanked.current && nav?.onHour != null
     Column {
         Row(
@@ -516,7 +520,7 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
         }
         if (rank) {
             Box(Modifier.fillMaxWidth().padding(top = 2.4.dp, bottom = 5.6.dp), contentAlignment = Alignment.Center) {
-                InlineNav(nav!!, settings = false, modifier = Modifier.crownUnit("r-links"))
+                InlineNav(nav!!, about = false, settings = false, modifier = Modifier.crownUnit("r-links"))
             }
         }
         // The beam: a 4dp course of oak, its upper edge catching the light as a timber's arris does.
@@ -531,11 +535,11 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
 
 /**
  * The desktop header's links (`.site-menu nav`): muted, the current one in ink over the lining's
- * rule; Reminders quieter. `links` and `settings` choose the pages' links and Settings after them,
- * which a ranked header sets apart.
+ * rule; Reminders and About quieter. `links`, `about` and `settings` choose the pages' links, About
+ * and Settings after them, which a ranked header sets apart.
  */
 @Composable
-private fun InlineNav(nav: SiteNav, links: Boolean = true, settings: Boolean = true, modifier: Modifier = Modifier) {
+private fun InlineNav(nav: SiteNav, links: Boolean = true, about: Boolean = true, settings: Boolean = true, modifier: Modifier = Modifier) {
     val p = LocalPalette.current
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         @Composable
@@ -559,10 +563,9 @@ private fun InlineNav(nav: SiteNav, links: Boolean = true, settings: Boolean = t
             }
             link("Ordo", nav.ordoCurrent, onClick = nav.onOrdo)
             link("Reminders", nav.remindersCurrent, secondary = true, onClick = nav.onReminders)
-            // A wide hour's header is full with the seven hours: About is left to the other pages'
-            // headers, as on the web.
-            if (nav.onHour == null) link(nav.about, nav.aboutCurrent, secondary = true, onClick = nav.onAbout)
         }
+        // Every page's header reaches About, an hour's too (#927).
+        if (about) link(nav.about, nav.aboutCurrent, secondary = true, onClick = nav.onAbout)
         // Settings closes the links, quiet as Reminders; its panel holds the theme and text size.
         if (settings) {
             Row(
