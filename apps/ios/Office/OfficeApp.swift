@@ -144,7 +144,9 @@ struct RootView: View {
                 if was != nil { model.closeOverlay() }
             }
             .environment(\.wide, geo.size.width >= wideFrom)
-            .environment(\.ranked, geo.size.width >= wideFrom && geo.size.width < rankedBelow)
+            // Ranked below 1000 of the page's own measure, which Larger text makes 1100pt, as the
+            // Android app's scaled dp do: the header's words grow with it (#927).
+            .environment(\.ranked, geo.size.width >= wideFrom && geo.size.width < rankedBelow * m.layout)
         }
         .environment(\.palette, palette)
         // The page's season for the chrome over it (the menu); a home or an hour sets its own within.

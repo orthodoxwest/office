@@ -245,6 +245,11 @@
         </div>
         </div>
       </details>
+      {# A wide hour too narrow for its links beside the brand sets them in a rank of their own, which
+           has no room for About: it stands up here beside Settings instead (style.css). #}
+      {%- if on_hour %}
+      <a class="site-about" href="/about" data-nav="about">{{ about_menu }}</a>
+      {%- endif %}
       {# Wide screens: the same preferences behind their own disclosure at the
            end of the header, so no page ends in a settings panel. Hidden on
            phones, whose menu carries them. #}
