@@ -1385,6 +1385,19 @@ test("the wide niche glosses every hour and keeps the day and the hours above th
   }
 });
 
+test("in the wide niche, the current Day hour's gloss shares every other hour's size", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T10:00:00-04:00"));
+  for (const [width, height] of [[1024, 768], [1280, 1200]]) {
+    await page.setViewportSize({ width, height });
+    await page.goto(`/?date=${testDate}`);
+    await expect(page.locator('.home-hour-link[data-hour="terce"]')).toHaveClass(/is-current/);
+    const sizes = await page.evaluate(() =>
+      [...document.querySelectorAll(".home-hour-link-note")].map((note) => getComputedStyle(note).fontSize),
+    );
+    expect(new Set(sizes).size, `${width}x${height}: ${sizes.join(", ")}`).toBe(1);
+  }
+});
+
 test("the wide niche scales by one computed zoom, never under its least", async ({ page }) => {
   // One formula, not a table of steps: the height left under the chrome over
   // the niche's own, capped by a share of the width; 0.96 at least on its
