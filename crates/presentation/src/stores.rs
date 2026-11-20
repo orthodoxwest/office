@@ -24,8 +24,8 @@ pub const PLAY_LABEL: &str = "Get it on Google Play";
 pub const APP_STORE_LABEL: &str = "Download on the App Store";
 
 /// The About page's paragraph on the apps, after "This app" (web only: the apps have no need of it).
-pub const ABOUT_APPS: &str = "The Daily Office is also an app for your phone. It keeps every hour to hand without a \
-     connection, and reminds you of the hours you keep with a notification that opens the office.";
+pub const ABOUT_APPS: &str = "The Daily Office is also available as a mobile app, with full offline access and prayer \
+     reminders that open straight to the hour.";
 
 /// The Reminders page's first word: the app.
 pub const REMINDERS_APP: &str = "The Daily Office app is the best way to be reminded. At each hour you choose, a \

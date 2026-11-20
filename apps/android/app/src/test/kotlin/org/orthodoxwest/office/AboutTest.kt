@@ -16,10 +16,17 @@ class AboutTest {
 
     @Test
     fun thePageHasItsTitleAndTheSevenHours() {
+        assertTrue(view.kicker.isNotBlank())
         assertTrue(view.title.isNotBlank())
         assertEquals(hourNames(), view.periods.flatMap { p -> p.hours.map { it.hour } })
-        assertTrue(view.periods.flatMap { it.hours }.all { it.name.isNotBlank() && it.gloss.isNotBlank() && it.time.isNotBlank() })
+        val hours = view.periods.flatMap { it.hours }
+        assertTrue(hours.all { it.name.isNotBlank() && it.gloss.isNotBlank() && it.time.isNotBlank() })
+        assertTrue(hours.zipWithNext().all { (a, b) -> a.angle > b.angle })
         assertEquals(1, view.blocks.count { it.kind == "hours" })
+        assertEquals(1, view.blocks.count { it.kind == "specimen" })
+        assertEquals(1, view.blocks.count { it.kind == "ordo_ribbon" })
+        assertEquals(6, view.ordoColors.size)
+        assertTrue(view.specimen.rubric.isNotBlank())
     }
 
     /** AboutScreen opens the ordo and the reminders itself, and leaves the rest to the browser. */

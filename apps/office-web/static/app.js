@@ -249,6 +249,7 @@ document.documentElement.classList.add("js");
     ".short-responsory-opening .sigil-text",
     ".hymn-stanza-opening .hymn-line:first-child",
     ".marian-antiphon .chant-line-opening",
+    ".about-intro",
   ].join(",")));
   if (!openings.length) return;
 
@@ -3665,6 +3666,12 @@ function plainClickOpensHere(e, link) {
       door.setAttribute("href", "/" + info.slug + "/" + localDateSlug(officeDate));
       setPrayNowLabel(door, "Pray " + (HOUR_NAMES[info.slug] || info.slug));
     }
+    var horologium = document.querySelector(".about-horologium");
+    if (horologium) {
+      var nowSlug = info.offset === 0 ? info.slug : "";
+      horologium.setAttribute("data-now", nowSlug);
+      if (horologium._syncNow) horologium._syncNow(nowSlug);
+    }
   }
 
   // Home, About, Ordo, and an open office may remain visible across a time boundary
@@ -6175,51 +6182,437 @@ function plainClickOpensHere(e, link) {
   if (document.fonts) document.fonts.ready.then(draw);
 })();
 
-// About's foot: home's invitation, ruled as home rules it (the lining, and
-// inside it the frontal stopping short of the corners), with home's seeds.
-// Without script its frame is the CSS border.
+// About the Office (style.css "About the Office"): ruled with home's pen, plus
+// its three quiet interactive pieces (the Horologium solar arc, the live
+// specimen leaf in Reading the page, and the Ordo's liturgical color ribbon).
+// Without script every rule is a CSS border and every section reads whole.
 (function () {
-  var tablet = document.querySelector(".about-door .pray-now");
-  if (!tablet) return;
+  var page = document.querySelector(".page-about .about");
+  if (!page) return;
   var NS = "http://www.w3.org/2000/svg";
-  function draw() {
-    var w = tablet.offsetWidth, h = tablet.offsetHeight, g = 3.5;
-    if (!w || !h) return;
-    var svg = tablet.querySelector(":scope > svg.home-rules");
+  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  function layer(host, cls) {
+    var name = cls || "about-rules";
+    var svg = host.querySelector(":scope > svg." + name);
     if (!svg) {
       svg = document.createElementNS(NS, "svg");
-      svg.setAttribute("class", "home-rules");
+      svg.setAttribute("class", name);
       svg.setAttribute("aria-hidden", "true");
       svg.setAttribute("focusable", "false");
-      tablet.appendChild(svg);
-      tablet.classList.add("is-ruled");
+      host.appendChild(svg);
+      host.classList.add("is-ruled");
     }
     svg.textContent = "";
-    [
-      ["r-lining", 0, 0.5, w, 0.5, 1.25, 21],
-      ["r-lining", 0, h - 0.5, w, h - 0.5, 1.25, 22],
-      ["r-lining", 0.5, 0, 0.5, h, 1.25, 23],
-      ["r-lining", w - 0.5, 0, w - 0.5, h, 1.25, 24],
-      ["r-day", g + 1.5, g, w - g - 1.5, g, 0.7, 25],
-      ["r-day", g + 1.5, h - g, w - g - 1.5, h - g, 0.7, 26],
-      ["r-day", g, g + 1.5, g, h - g - 1.5, 0.7, 27],
-      ["r-day", w - g, g + 1.5, w - g, h - g - 1.5, 0.7, 28],
-    ].forEach(function (s) {
-      var path = document.createElementNS(NS, "path");
-      path.setAttribute("class", s[0]);
-      path.setAttribute("d", rule(s[1], s[2], s[3], s[4], s[5], s[6]));
-      svg.appendChild(path);
+    return svg;
+  }
+
+  function stroke(svg, cls, d) {
+    var path = document.createElementNS(NS, "path");
+    path.setAttribute("class", cls);
+    path.setAttribute("d", d);
+    svg.appendChild(path);
+  }
+
+  function frameDouble(host, cls, seedBase) {
+    var w = host.offsetWidth, h = host.offsetHeight, g = 3.5;
+    if (!w || !h) return;
+    var svg = layer(host, cls);
+    stroke(svg, "r-lining", rule(0, 0.5, w, 0.5, 1.25, seedBase));
+    stroke(svg, "r-lining", rule(0, h - 0.5, w, h - 0.5, 1.25, seedBase + 1));
+    stroke(svg, "r-lining", rule(0.5, 0, 0.5, h, 1.25, seedBase + 2));
+    stroke(svg, "r-lining", rule(w - 0.5, 0, w - 0.5, h, 1.25, seedBase + 3));
+    stroke(svg, "r-day", rule(g + 1.5, g, w - g - 1.5, g, 0.7, seedBase + 4));
+    stroke(svg, "r-day", rule(g + 1.5, h - g, w - g - 1.5, h - g, 0.7, seedBase + 5));
+    stroke(svg, "r-day", rule(g, g + 1.5, g, h - g - 1.5, 0.7, seedBase + 6));
+    stroke(svg, "r-day", rule(w - g, g + 1.5, w - g, h - g - 1.5, 0.7, seedBase + 7));
+  }
+
+  function ruleAll() {
+    var head = page.querySelector(".about-head");
+    if (head && head.offsetWidth) {
+      var hw = head.offsetWidth, mid = hw / 2, gap = 24;
+      var hs = layer(head);
+      stroke(hs, "r-lining", rule(0, 0.5, mid - gap, 0.5, 1.25, 101));
+      stroke(hs, "r-lining", rule(mid + gap, 0.5, hw, 0.5, 1.25, 102));
+    }
+
+    page.querySelectorAll(".about-section > h2").forEach(function (h2, i) {
+      if (!h2.offsetWidth) return;
+      var s = layer(h2);
+      stroke(s, "r-frame", rule(0, h2.offsetHeight - 0.5, h2.offsetWidth, h2.offsetHeight - 0.5, 1.25, 110 + i));
     });
+
+    var hours = page.querySelector(".about-hours");
+    if (hours && hours.offsetWidth) {
+      var hSvg = layer(hours);
+      var hb = hours.getBoundingClientRect();
+      var w = hours.offsetWidth;
+      var groups = hours.querySelectorAll(".about-hour-group");
+      groups.forEach(function (group, gi) {
+        var gr = group.getBoundingClientRect();
+        var gy = gr.top - hb.top + 0.5;
+        stroke(hSvg, gi === 0 ? "r-frame" : "r-inner", rule(0, gy, w, gy, gi === 0 ? 1.25 : 0.9, 130 + gi));
+        var dl = group.querySelector("dl");
+        if (!dl) return;
+        var x0 = dl.getBoundingClientRect().left - hb.left;
+        group.querySelectorAll(".about-hour").forEach(function (row, ri) {
+          if (ri === 0) return;
+          var ry = row.getBoundingClientRect().top - hb.top + 0.5;
+          stroke(hSvg, "r-hair", rule(x0, ry, w, ry, 0.75, 140 + gi * 5 + ri));
+        });
+      });
+      if (groups.length) {
+        var last = groups[groups.length - 1].getBoundingClientRect();
+        stroke(hSvg, "r-frame", rule(0, last.bottom - hb.top - 0.5, w, last.bottom - hb.top - 0.5, 1.25, 139));
+      }
+    }
+
+    var specimen = page.querySelector(".about-specimen");
+    if (specimen && specimen.offsetWidth) {
+      frameDouble(specimen, "about-rules", 161);
+      var bar = specimen.querySelector(".about-specimen-bar");
+      if (bar && bar.offsetWidth) {
+        stroke(layer(bar), "r-inner", rule(0, bar.offsetHeight - 0.5, bar.offsetWidth, bar.offsetHeight - 0.5, 0.85, 169));
+      }
+      var formLines = specimen.querySelector(".about-specimen-form-lines");
+      if (formLines && formLines.offsetWidth) {
+        stroke(layer(formLines), "r-hair", rule(0, 0.5, formLines.offsetWidth, 0.5, 0.75, 170));
+      }
+      var secret = specimen.querySelector(".about-specimen-secret");
+      if (secret && secret.offsetWidth) {
+        stroke(layer(secret), "r-hair", rule(0, 0.5, secret.offsetWidth, 0.5, 0.75, 171));
+      }
+    }
+
+    var keys = page.querySelector(".about-keys");
+    if (keys && keys.offsetWidth) {
+      var kSvg = layer(keys);
+      var kb = keys.getBoundingClientRect();
+      var kw = keys.offsetWidth;
+      var rows = keys.querySelectorAll(".about-key-row");
+      rows.forEach(function (row, i) {
+        if (i === 0) return;
+        var ry = row.getBoundingClientRect().top - kb.top + 0.5;
+        stroke(kSvg, "r-hair", rule(0, ry, kw, ry, 0.8, 180 + i));
+      });
+      if (rows.length) {
+        var bottom = rows[rows.length - 1].getBoundingClientRect().bottom - kb.top - 0.5;
+        stroke(kSvg, "r-inner", rule(0, bottom, kw, bottom, 0.9, 189));
+      }
+    }
+
+    var lineage = page.querySelector(".about-lineage");
+    if (lineage && lineage.offsetHeight) {
+      var eras = lineage.querySelectorAll(".about-era");
+      if (eras.length > 1) {
+        var lb = lineage.getBoundingClientRect();
+        var y0 = eras[0].getBoundingClientRect().top - lb.top + 10;
+        var y1 = eras[eras.length - 1].getBoundingClientRect().top - lb.top + 10;
+        stroke(layer(lineage), "r-inner", rule(0.5, y0, 0.5, y1, 0.9, 195));
+      }
+    }
+
+    var apps = page.querySelector(".about-apps");
+    if (apps && apps.offsetWidth) {
+      stroke(layer(apps), "r-hair", rule(0, 0.5, apps.offsetWidth, 0.5, 0.85, 198));
+    }
+
+    var tablet = page.querySelector(".about-door .pray-now");
+    if (tablet) frameDouble(tablet, "home-rules", 21);
   }
-  // As the feast page's: WebKit can run this before style.css applies.
+
+  // As the feast page's: WebKit can run this deferred script before style.css applies.
   if (getComputedStyle(document.documentElement).getPropertyValue("--bg")) {
-    draw();
+    ruleAll();
   } else {
-    window.addEventListener("load", draw);
+    window.addEventListener("load", ruleAll);
   }
-  if ("ResizeObserver" in window) new ResizeObserver(draw).observe(tablet);
-  else window.addEventListener("resize", draw);
-  if (document.fonts) document.fonts.ready.then(draw);
+  var lastBox = page.offsetWidth + "x" + page.offsetHeight;
+  function remeasure() {
+    var nextBox = page.offsetWidth + "x" + page.offsetHeight;
+    if (nextBox !== lastBox) {
+      lastBox = nextBox;
+      ruleAll();
+    }
+  }
+  if ("ResizeObserver" in window) new ResizeObserver(remeasure).observe(page);
+  else window.addEventListener("resize", remeasure);
+  if (document.fonts) document.fonts.ready.then(ruleAll);
+
+  // ── 1. Interactive Horologium (Arc of the Day) ──
+  // Tapping or hovering any station glides the sun/moon smoothly along the
+  // painted arc and previews that hour in the directory below.
+  var horologium = page.querySelector(".about-horologium");
+  if (horologium) {
+    var CX = 160, CY = 128, RX = 118, RY = 104;
+    var DAWN_RAD = (168 * Math.PI) / 180;
+    var DAWN_X = CX + Math.cos(DAWN_RAD) * RX;
+    var DAWN_Y = CY - Math.sin(DAWN_RAD) * RY;
+    var orb = horologium.querySelector(".about-horologium-orb");
+    var wash = horologium.querySelector("#about-horologium-wash");
+    var litArc = horologium.querySelector(".about-horologium-lit");
+    var timeEl = horologium.querySelector(".about-horologium-time");
+    var titleEl = horologium.querySelector(".about-horologium-title");
+    var stopButtons = Array.from(horologium.querySelectorAll(".about-horologium-stop"));
+    var hourRows = Array.from(page.querySelectorAll(".about-hour[data-hour]"));
+    var stopBySlug = {};
+    stopButtons.forEach(function (btn) {
+      stopBySlug[btn.getAttribute("data-hour")] = {
+        btn: btn,
+        slug: btn.getAttribute("data-hour"),
+        name: btn.getAttribute("data-name"),
+        gloss: btn.getAttribute("data-gloss"),
+        time: btn.getAttribute("data-time"),
+        angle: parseFloat(btn.getAttribute("data-angle")) || 90,
+        night: btn.getAttribute("data-night") === "true",
+      };
+    });
+
+    var currentSlug = horologium.getAttribute("data-active") || "none";
+    var pinnedSlug = null;
+    var renderedAngle = (stopBySlug[currentSlug] || stopBySlug.compline).angle;
+    var animId = null;
+
+    function placeOrb(deg) {
+      var rad = (deg * Math.PI) / 180;
+      var x = CX + Math.cos(rad) * RX;
+      var y = CY - Math.sin(rad) * RY;
+      if (orb) orb.setAttribute("transform", "translate(" + x.toFixed(1) + ", " + y.toFixed(1) + ")");
+      if (wash) {
+        wash.setAttribute("cx", (x / 320 * 100).toFixed(1) + "%");
+        wash.setAttribute("cy", (y / 144 * 100).toFixed(1) + "%");
+      }
+      if (litArc) {
+        litArc.setAttribute("d", "M " + DAWN_X.toFixed(1) + " " + DAWN_Y.toFixed(1) + " A " + RX + " " + RY + " 0 0 1 " + x.toFixed(1) + " " + y.toFixed(1));
+      }
+    }
+
+    function showStop(slug, isPreview) {
+      var stop = stopBySlug[slug];
+      if (!stop) return;
+      currentSlug = slug;
+      horologium.setAttribute("data-active", slug);
+      horologium.setAttribute("data-night", stop.night ? "true" : "false");
+      if (orb) orb.classList.toggle("is-night", stop.night);
+      stopButtons.forEach(function (btn) {
+        var on = btn.getAttribute("data-hour") === slug;
+        btn.classList.toggle("is-active", on);
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+      hourRows.forEach(function (row) {
+        row.classList.toggle("is-preview", isPreview && row.getAttribute("data-hour") === slug);
+      });
+      var nowSlug = horologium.getAttribute("data-now") || "";
+      if (timeEl) timeEl.textContent = (slug === nowSlug ? "Now · " : "") + stop.time;
+      if (titleEl) {
+        titleEl.textContent = "";
+        var strong = document.createElement("strong");
+        strong.textContent = stop.name;
+        var em = document.createElement("em");
+        em.textContent = " · " + stop.gloss;
+        titleEl.appendChild(strong);
+        titleEl.appendChild(em);
+      }
+
+      var targetAngle = stop.angle;
+      if (animId) cancelAnimationFrame(animId);
+      if ((reduced && reduced.matches) || Math.abs(targetAngle - renderedAngle) < 0.2) {
+        renderedAngle = targetAngle;
+        placeOrb(renderedAngle);
+        return;
+      }
+      var startAngle = renderedAngle;
+      var startTime = performance.now();
+      var duration = 420;
+      function step(now) {
+        var t = Math.min(1, (now - startTime) / duration);
+        // Smooth cubic ease-out along the painted arc.
+        var ease = 1 - Math.pow(1 - t, 3);
+        renderedAngle = startAngle + (targetAngle - startAngle) * ease;
+        placeOrb(renderedAngle);
+        if (t < 1) animId = requestAnimationFrame(step);
+        else animId = null;
+      }
+      animId = requestAnimationFrame(step);
+    }
+
+    function restSlug() {
+      return horologium.getAttribute("data-now") || "compline";
+    }
+
+    horologium._syncNow = function (nowSlug) {
+      if (!pinnedSlug) showStop(nowSlug || "compline", false);
+    };
+
+    // updateAboutNow() runs earlier in app.js and stamps the device's local
+    // hour onto data-now; snap to it immediately if it differs from SSR.
+    var initialTarget = restSlug();
+    if (initialTarget !== currentSlug && stopBySlug[initialTarget]) {
+      renderedAngle = stopBySlug[initialTarget].angle;
+      showStop(initialTarget, false);
+    }
+
+    stopButtons.forEach(function (btn) {
+      var slug = btn.getAttribute("data-hour");
+      btn.addEventListener("click", function () {
+        if (pinnedSlug === slug) {
+          pinnedSlug = null;
+          showStop(restSlug(), false);
+        } else {
+          pinnedSlug = slug;
+          showStop(slug, slug !== horologium.getAttribute("data-now"));
+        }
+      });
+      btn.addEventListener("mouseenter", function () {
+        if (!pinnedSlug) showStop(slug, slug !== horologium.getAttribute("data-now"));
+      });
+    });
+
+    horologium.addEventListener("mouseleave", function () {
+      if (!pinnedSlug) showStop(restSlug(), false);
+    });
+
+    hourRows.forEach(function (row) {
+      var slug = row.getAttribute("data-hour");
+      row.addEventListener("mouseenter", function () {
+        if (!pinnedSlug) showStop(slug, slug !== horologium.getAttribute("data-now"));
+      });
+      row.addEventListener("focusin", function () {
+        if (!pinnedSlug) showStop(slug, slug !== horologium.getAttribute("data-now"));
+      });
+    });
+
+    var hoursTable = page.querySelector(".about-hours");
+    if (hoursTable) {
+      hoursTable.addEventListener("mouseleave", function () {
+        if (!pinnedSlug) showStop(restSlug(), false);
+      });
+      hoursTable.addEventListener("focusout", function (e) {
+        if (!pinnedSlug && !hoursTable.contains(e.relatedTarget)) showStop(restSlug(), false);
+      });
+    }
+  }
+
+  // ── 2. Live Illuminated Specimen Leaf ("Reading the page") ──
+  // Toggling Alone / With a priest swaps the greeting versicle live; hovering
+  // or tapping any row in the key casts home's soft pool of light onto the
+  // matching line(s) inside the specimen above.
+  var specimen = page.querySelector(".about-specimen");
+  if (specimen) {
+    var formOpts = Array.from(specimen.querySelectorAll(".about-specimen-opt"));
+    var formBox = specimen.querySelector(".about-specimen-form-lines");
+    var vText = formBox && formBox.querySelector(".about-specimen-v-text");
+    var rText = formBox && formBox.querySelector(".about-specimen-r-text");
+    var specimenTargets = Array.from(specimen.querySelectorAll("[data-key]"));
+    var keyBtns = Array.from(page.querySelectorAll(".about-key-btn"));
+    var pinnedKey = null;
+
+    function setForm(form) {
+      specimen.setAttribute("data-form", form);
+      formOpts.forEach(function (btn) {
+        var on = btn.getAttribute("data-form") === form;
+        btn.classList.toggle("is-selected", on);
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+      if (formBox && vText && rText) {
+        vText.textContent = formBox.getAttribute(form === "priest" ? "data-priest-v" : "data-alone-v") || "";
+        rText.textContent = formBox.getAttribute(form === "priest" ? "data-priest-r" : "data-alone-r") || "";
+      }
+      ruleAll();
+    }
+
+    formOpts.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        setForm(btn.getAttribute("data-form"));
+      });
+    });
+
+    function illuminateKey(key) {
+      specimenTargets.forEach(function (el) {
+        var list = (el.getAttribute("data-key") || "").split(/\s+/);
+        el.classList.toggle("is-lit", Boolean(key && list.indexOf(key) >= 0));
+      });
+      keyBtns.forEach(function (btn) {
+        var on = key && btn.getAttribute("data-key") === key;
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+        if (btn.parentElement) btn.parentElement.classList.toggle("is-active", Boolean(on));
+      });
+    }
+
+    keyBtns.forEach(function (btn) {
+      var key = btn.getAttribute("data-key");
+      btn.addEventListener("click", function () {
+        pinnedKey = pinnedKey === key ? null : key;
+        illuminateKey(pinnedKey);
+      });
+      btn.addEventListener("mouseenter", function () {
+        if (!pinnedKey) illuminateKey(key);
+      });
+      btn.addEventListener("focus", function () {
+        if (!pinnedKey) illuminateKey(key);
+      });
+    });
+
+    var keyList = page.querySelector(".about-keys");
+    if (keyList) {
+      keyList.addEventListener("mouseleave", function () {
+        if (!pinnedKey) illuminateKey(null);
+      });
+      keyList.addEventListener("focusout", function (e) {
+        if (!pinnedKey && !keyList.contains(e.relatedTarget)) illuminateKey(null);
+      });
+    }
+  }
+
+  // ── 3. Interactive Ordo Liturgical Color Ribbon ──
+  // Selecting or hovering a color diamond highlights every matching day on the
+  // 365-day ribbon and quietly names when the Church uses that color.
+  var ribbon = page.querySelector(".about-ordo-ribbon");
+  if (ribbon) {
+    var swatches = Array.from(ribbon.querySelectorAll(".about-ordo-swatch"));
+    var meaning = ribbon.querySelector(".about-ordo-meaning");
+    var pinnedColor = null;
+
+    function showColor(slug) {
+      if (slug) ribbon.setAttribute("data-selected-color", slug);
+      else ribbon.removeAttribute("data-selected-color");
+      var active = null;
+      swatches.forEach(function (btn) {
+        var on = slug && btn.getAttribute("data-color") === slug;
+        btn.classList.toggle("is-selected", Boolean(on));
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+        if (on) active = btn;
+      });
+      if (meaning) {
+        meaning.textContent = active ? active.getAttribute("data-name") + " — " + active.getAttribute("data-meaning") : "";
+      }
+    }
+
+    swatches.forEach(function (btn) {
+      var slug = btn.getAttribute("data-color");
+      btn.addEventListener("click", function () {
+        pinnedColor = pinnedColor === slug ? null : slug;
+        showColor(pinnedColor);
+      });
+      btn.addEventListener("mouseenter", function () {
+        if (!pinnedColor) showColor(slug);
+      });
+      btn.addEventListener("focus", function () {
+        if (!pinnedColor) showColor(slug);
+      });
+    });
+
+    var legend = ribbon.querySelector(".about-ordo-legend");
+    if (legend) {
+      legend.addEventListener("mouseleave", function () {
+        if (!pinnedColor) showColor(null);
+      });
+      legend.addEventListener("focusout", function (e) {
+        if (!pinnedColor && !legend.contains(e.relatedTarget)) showColor(null);
+      });
+    }
+  }
 })();
 
 // The feast page (style.css "The feast page"): ruled with home's pen. The

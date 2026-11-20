@@ -505,7 +505,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                         refreshReminderStatus()
                         Content.Drawn
                     }
-                    Page.About -> Content.Drawn
+                    Page.About -> Content.Year(withContext(Dispatchers.Default) { office.ordoCourse(now.year) })
                 }
             } catch (e: CancellationException) {
                 throw e

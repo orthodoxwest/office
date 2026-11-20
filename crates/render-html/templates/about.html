@@ -1,60 +1,197 @@
-{% extends "layout.html" %}{% block title %}{{ title }} — Daily Office{% endblock %}{% block description %}What the Divine Office is and where it comes from, the seven hours and when each is prayed, how to begin, and how to read the page.{% endblock %}{% block content %}{% from "macros.html" import headpiece, period_ornament, store_buttons %}
-{# The words are presentation::about's, which the native apps set too. The hour it is now is
-   marked as on home (presentation::about::about_current_hour; app.js keeps it by the device's
-   clock). #}
+{% extends "layout.html" %}{% block title %}{{ title }} — Daily Office{% endblock %}{% block description %}What the Divine Office is and where it comes from, the seven hours and when each is prayed, how to begin, and how to read the page.{% endblock %}{% block content %}{% from "macros.html" import period_ornament, store_buttons %}
+{# The words are presentation::about's, which the native apps set too. On mobile (< 840px) the
+   five direct children stack in reading order (Head → Drop-cap Intro → Hours → Prose → Closing
+   Door); from 840px CSS Grid sets the Hours and Door as a right rail beside the Intro and Prose,
+   keeping .about-door the last child in DOM order. #}
 <div class="about">
-  {{ headpiece() }}
-  <h1>{{ title }}</h1>
-  {%- for b in blocks %}
-  {%- if b.kind == "intro" %}
-  <p class="about-intro">{{ b.text }}</p>
-  {%- elif b.kind == "verse" %}
-  <blockquote class="about-verse">
-    <p>{{ b.text }}</p>
-    <cite>{{ b.cite }}</cite>
-  </blockquote>
-  {%- elif b.kind == "heading" %}
-  <h2>{{ b.text }}</h2>
-  {%- elif b.kind == "paragraph" %}
-  <p>{{ b.html|safe }}</p>
-  {%- elif b.kind == "note" %}
-  <p class="about-note">{{ b.text }}</p>
-  {%- elif b.kind == "key" %}
-  {%- if loop.previtem is undefined or loop.previtem.kind != "key" %}
-  <ul class="about-keys">
-  {%- endif %}
-    <li><span class="about-key about-key-{{ b.ink }}">{{ b.mark }}</span> {{ b.text }}</li>
-  {%- if loop.nextitem is undefined or loop.nextitem.kind != "key" %}
-  </ul>
-  {%- endif %}
-  {%- elif b.kind == "hours" %}
-  <div class="about-hours">
-    {%- for period in about_hours %}
-    <section class="about-hour-group">
-      <h3 class="about-hour-group-label">{{ period_ornament(period.label|lower) }}<span>{{ period.label }}</span></h3>
-      <dl>
-        {%- for h in period.hours %}
-        <div class="about-hour{% if h.is_current %} is-current{% endif %}" data-hour="{{ h.slug }}">
-          <dt><a href="{{ h.url|url }}"{% if h.is_current %} aria-current="time"{% endif %}>{{ h.name }}</a></dt>
-          <dd><span class="about-hour-gloss">{{ h.gloss }}</span> <span class="about-hour-time">{{ h.time }}</span></dd>
+  <header class="about-head">
+    <span class="about-crown" aria-hidden="true"></span>
+    <p class="about-kicker">{{ kicker }}</p>
+    <h1>{{ title }}</h1>
+    <blockquote class="about-verse">
+      <p>{{ verse_text }}</p>
+      <cite>{{ verse_cite }}</cite>
+    </blockquote>
+  </header>
+
+  <p class="about-intro">{{ intro }}</p>
+
+  <section class="about-section about-hours-section" aria-labelledby="about-hours-heading">
+    <h2 id="about-hours-heading">{{ hours_heading }}</h2>
+    <div class="about-horologium" data-active="{{ horologium.active_slug }}" data-now="{{ horologium.active_slug if horologium.active_is_now else '' }}" data-night="{{ 'true' if horologium.active_night else 'false' }}">
+      <div class="about-horologium-stage">
+        <svg class="about-horologium-svg" viewBox="0 0 320 144" aria-hidden="true" focusable="false">
+          <defs>
+            <radialGradient id="about-horologium-wash" cx="{{ horologium.active_cx_pct }}" cy="{{ horologium.active_cy_pct }}" r="68%">
+              <stop class="h-wash-0" offset="0%"/>
+              <stop class="h-wash-1" offset="52%"/>
+              <stop class="h-wash-2" offset="100%"/>
+            </radialGradient>
+            <radialGradient id="about-horologium-halo" cx="50%" cy="50%" r="50%">
+              <stop class="h-halo-0" offset="0%"/>
+              <stop class="h-halo-1" offset="55%"/>
+              <stop class="h-halo-2" offset="100%"/>
+            </radialGradient>
+            <clipPath id="about-horologium-dome">
+              <path d="M 42 128 A 118 104 0 0 1 278 128 Z"/>
+            </clipPath>
+          </defs>
+          <path class="about-horologium-fill" d="M 42 128 A 118 104 0 0 1 278 128 Z" fill="url(#about-horologium-wash)"/>
+          <g class="about-horologium-stars" clip-path="url(#about-horologium-dome)">
+            <circle cx="102" cy="56" r="1.3"/><circle cx="134" cy="38" r="1.6"/>
+            <circle cx="176" cy="35" r="1.2"/><circle cx="218" cy="52" r="1.5"/>
+            <circle cx="82" cy="84" r="1.1"/><circle cx="154" cy="54" r="1.0"/>
+            <circle cx="238" cy="82" r="1.2"/><circle cx="192" cy="62" r="1.0"/>
+          </g>
+          {%- for s in horologium.stops %}
+          <line class="about-horologium-tick" x1="{{ s.tick_x1 }}" y1="{{ s.tick_y1 }}" x2="{{ s.x }}" y2="{{ s.y }}"/>
+          {%- endfor %}
+          <path class="about-horologium-inner" d="M 50.3 128 A 109.7 96.7 0 0 1 269.7 128"/>
+          <path class="about-horologium-arc" d="M 42 128 A 118 104 0 0 1 278 128"/>
+          <path class="about-horologium-lit" d="M {{ horologium.dawn_x }} {{ horologium.dawn_y }} A 118 104 0 0 1 {{ horologium.active_x }} {{ horologium.active_y }}"/>
+          <text class="about-horologium-cardinal" x="42" y="141" text-anchor="start">Dawn</text>
+          <text class="about-horologium-cardinal" x="160" y="15" text-anchor="middle">Noon</text>
+          <text class="about-horologium-cardinal" x="278" y="141" text-anchor="end">Night</text>
+          <line class="about-horologium-horizon" x1="16" y1="128" x2="304" y2="128"/>
+          <g class="about-horologium-orb{% if horologium.active_night %} is-night{% endif %}" transform="translate({{ horologium.active_x }}, {{ horologium.active_y }})">
+            <circle class="about-horologium-halo" r="15" fill="url(#about-horologium-halo)"/>
+            <g class="about-horologium-sun" transform="translate(-10.5,-10.5) scale(0.875)">
+              <path d="M17.20,12.00A5.2,5.2 0 1,0 6.80,12.00A5.2,5.2 0 1,0 17.20,12.00ZM13.45,5.60 12.00,0.40 10.55,5.60ZM16.46,7.18 16.70,3.86 13.94,5.73ZM18.27,10.06 22.05,6.20 16.82,7.54ZM18.40,13.45 21.40,12.00 18.40,10.55ZM16.82,16.46 22.05,17.80 18.27,13.94ZM13.94,18.27 16.70,20.14 16.46,16.82ZM10.55,18.40 12.00,23.60 13.45,18.40ZM7.54,16.82 7.30,20.14 10.06,18.27ZM5.73,13.94 1.95,17.80 7.18,16.46ZM5.60,10.55 2.60,12.00 5.60,13.45ZM7.18,7.54 1.95,6.20 5.73,10.06ZM10.06,5.73 7.30,3.86 7.54,7.18Z"/>
+            </g>
+            <g class="about-horologium-moon" transform="translate(-9.5,-9.5) scale(0.8)">
+              <path d="M14.00 2.61A9.6 9.6 0 1 0 20.18 17.02A7.9 7.9 0 0 1 14.00 2.61Z"/>
+            </g>
+          </g>
+        </svg>
+        <div class="about-horologium-stops" role="group" aria-label="Hours along the arc of the day">
+          {%- for s in horologium.stops %}
+          <button type="button" class="about-horologium-stop{% if s.slug == horologium.active_slug %} is-active{% endif %}{% if s.night %} is-night-stop{% endif %}" style="left: {{ s.left_pct }}; top: {{ s.top_pct }};" data-hour="{{ s.slug }}" data-name="{{ s.name }}" data-gloss="{{ s.gloss }}" data-time="{{ s.time }}" data-angle="{{ s.angle }}" data-night="{{ 'true' if s.night else 'false' }}" aria-label="{{ s.name }}: {{ s.gloss }}, {{ s.time }}" aria-pressed="{{ 'true' if s.slug == horologium.active_slug else 'false' }}"></button>
+          {%- endfor %}
         </div>
-        {%- endfor %}
-      </dl>
+        <div class="about-horologium-readout" aria-live="polite">
+          <span class="about-horologium-time">{% if horologium.active_is_now %}Now · {% endif %}{{ horologium.active_time }}</span>
+          <span class="about-horologium-title"><strong>{{ horologium.active_name }}</strong> <em>· {{ horologium.active_gloss }}</em></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-hours">
+      {%- for period in about_hours %}
+      <section class="about-hour-group">
+        <h3 class="about-hour-group-label">{{ period_ornament(period.label|lower) }}<span>{{ period.label }}</span></h3>
+        <dl>
+          {%- for h in period.hours %}
+          <div class="about-hour{% if h.is_current %} is-current{% endif %}" data-hour="{{ h.slug }}">
+            <dt><a href="{{ h.url|url }}"{% if h.is_current %} aria-current="time"{% endif %}>{{ h.name }}</a></dt>
+            <dd><span class="about-hour-gloss">{{ h.gloss }}</span> <span class="about-hour-time">{{ h.time }}</span></dd>
+          </div>
+          {%- endfor %}
+        </dl>
+      </section>
+      {%- endfor %}
+    </div>
+    {%- if hours_note %}
+    <p class="about-note">{{ hours_note }}</p>
+    {%- endif %}
+  </section>
+
+  <div class="about-prose">
+    {%- for sec in sections %}
+    <section class="about-section">
+      <h2>{{ sec.heading }}</h2>
+      {%- for b in sec.blocks %}
+      {%- if b.kind == "paragraph" %}
+      <p>{{ b.html|safe }}</p>
+      {%- elif b.kind == "note" %}
+      <p class="about-note">{{ b.text }}</p>
+      {%- elif b.kind == "specimen" %}
+      <div class="about-specimen" data-form="alone">
+        <div class="about-specimen-bar" data-key="form">
+          <span class="about-specimen-label">{{ specimen.label }}</span>
+          <div class="about-specimen-toggle" role="group" aria-label="Specimen prayer form">
+            <button type="button" class="about-specimen-opt is-selected" data-form="alone" aria-pressed="true">{{ specimen.alone_label }}</button>
+            <span class="about-gilt-point" aria-hidden="true"></span>
+            <button type="button" class="about-specimen-opt" data-form="priest" aria-pressed="false">{{ specimen.priest_label }}</button>
+          </div>
+        </div>
+        <p class="about-specimen-line about-specimen-rubric" data-key="rubric">{{ specimen.rubric }}</p>
+        <p class="about-specimen-line about-specimen-vr" data-key="vr cross"><span class="about-specimen-sigil">℣.</span><span><span class="about-specimen-cross" aria-hidden="true">✠</span>{{ specimen.opening_versicle }}</span></p>
+        <p class="about-specimen-line about-specimen-vr" data-key="vr"><span class="about-specimen-sigil">℟.</span><span>{{ specimen.opening_response }}</span></p>
+        <div class="about-specimen-form-lines" data-key="form" data-alone-v="{{ specimen.alone_versicle }}" data-alone-r="{{ specimen.alone_response }}" data-priest-v="{{ specimen.priest_versicle }}" data-priest-r="{{ specimen.priest_response }}">
+          <p class="about-specimen-line about-specimen-vr"><span class="about-specimen-sigil">℣.</span><span class="about-specimen-v-text">{{ specimen.alone_versicle }}</span></p>
+          <p class="about-specimen-line about-specimen-vr"><span class="about-specimen-sigil">℟.</span><span class="about-specimen-r-text">{{ specimen.alone_response }}</span></p>
+        </div>
+        <p class="about-specimen-line about-specimen-secret" data-key="secret"><span>{{ specimen.secret_voiced }}</span> <span class="about-specimen-unsaid">{{ specimen.secret_silent }}</span></p>
+      </div>
+      {%- elif b.kind == "key" %}
+      {%- if loop.previtem is undefined or loop.previtem.kind != "key" %}
+      <ul class="about-keys">
+      {%- endif %}
+        <li class="about-key-row" data-key="{{ b.id }}">
+          <button type="button" class="about-key-btn" data-key="{{ b.id }}" aria-pressed="false">
+            <span class="about-key about-key-{{ b.ink }}">
+              {%- if b.ink == "secret" %}<span class="about-key-voiced">{{ b.mark }}</span> <span class="about-key-unsaid">{{ b.tail }}</span>{% else %}{{ b.mark }}{% endif -%}
+            </span>
+            <span class="about-key-desc">{{ b.text }}</span>
+          </button>
+        </li>
+      {%- if loop.nextitem is undefined or loop.nextitem.kind != "key" %}
+      </ul>
+      {%- endif %}
+      {%- elif b.kind == "era" %}
+      {%- if loop.previtem is undefined or loop.previtem.kind != "era" %}
+      <ol class="about-lineage">
+      {%- endif %}
+        <li class="about-era">
+          <p class="about-era-head">{{ b.period }}</p>
+          <p>{{ b.text }}</p>
+        </li>
+      {%- if loop.nextitem is undefined or loop.nextitem.kind != "era" %}
+      </ol>
+      {%- endif %}
+      {%- elif b.kind == "ordo_ribbon" %}
+      <div class="about-ordo-ribbon">
+        {%- if ordo_ribbon.months %}
+        <div class="about-ordo-track">
+          <svg class="about-ordo-svg" viewBox="0 0 {{ ordo_ribbon.width }} 5" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            {%- for m in ordo_ribbon.months %}
+              {%- for r in m.runs %}
+            <rect class="about-ordo-run day-color-{{ r.color }}" data-color="{{ r.color }}" x="{{ m.offset_x + r.start }}" y="0" width="{{ r.days }}" height="5"/>
+              {%- endfor %}
+              {%- if m.short_days > 0 %}
+            <rect class="about-ordo-short" x="{{ m.offset_x + m.short_start }}" y="2" width="{{ m.short_days }}" height="1"/>
+              {%- endif %}
+            {%- endfor %}
+          </svg>
+          <span class="about-ordo-today" style="left: {{ ordo_ribbon.today_pct }}" aria-hidden="true"></span>
+        </div>
+        <div class="about-ordo-months" aria-hidden="true">
+          <span>Jan</span><span>Mar</span><span>May</span><span>Jul</span><span>Sep</span><span>Nov</span>
+        </div>
+        {%- endif %}
+        <div class="about-ordo-legend" role="group" aria-label="Liturgical colors">
+          {%- for c in ordo_colors %}
+          <button type="button" class="about-ordo-swatch day-color-{{ c.slug }}" data-color="{{ c.slug }}" data-name="{{ c.name }}" data-meaning="{{ c.meaning }}" aria-pressed="false"><i aria-hidden="true"></i>{{ c.name }}</button>
+          {%- endfor %}
+        </div>
+        <p class="about-ordo-meaning" aria-live="polite"></p>
+      </div>
+      {%- elif b.kind == "elsewhere" %}
+      {# The web's word on the other fronts: the apps and their stores (presentation::stores). Hidden
+           on an iPhone or iPad until the App Store listing is set, as the colophon's line is. #}
+      <div class="about-apps app-offer{% if app_store_url %} has-ios{% endif %}">
+        <p>{{ about_apps }}</p>
+        {{ store_buttons(false) }}
+      </div>
+      {%- endif %}
+      {%- endfor %}
     </section>
     {%- endfor %}
   </div>
-  {%- elif b.kind == "elsewhere" %}
-  {# The web's word on the other fronts: the apps and their stores (presentation::stores). Hidden
-       on an iPhone or iPad until the App Store listing is set, as the colophon's line is. #}
-  <div class="about-apps app-offer{% if app_store_url %} has-ios{% endif %}">
-    <p>{{ about_apps }}</p>
-    {{ store_buttons(false) }}
-  </div>
-  {%- elif b.kind == "invitation" %}
+
   {# Home's invitation, still: its tablet, words and link (app.js restates them by the device's
-     clock, as on home, and rules the frame with home's pen). #}
+     clock, as on home, and rules the frame with home's pen). Last child in DOM order for mobile;
+     from 840px CSS Grid places it in the right rail under the seven hours. #}
   <p class="pray-now-wrap about-door"><a class="pray-now" href="{{ pray_now_link|url }}">{{ pray_now_label }}</a></p>
-  {%- endif %}
-  {%- endfor %}
 </div>
 {% endblock %}

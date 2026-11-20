@@ -3326,7 +3326,8 @@ html[data-newcomer] .home-season {
 .collect .liturgical-block .plain-line:first-child::first-letter,
 .hymn-stanza-opening .hymn-line:first-child::first-letter,
 .marian-antiphon .chant-line-opening::first-letter,
-.corporate-lord-prayer-officiant::first-letter {
+.corporate-lord-prayer-officiant::first-letter,
+.about-intro::first-letter {
   font-size: 3.05em;
   line-height: 1;
   float: left;
@@ -8174,60 +8175,171 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   line-height: 1.5;
 }
 
-/* About the Office: the privacy page's prose measure, with the seven hours set
-   as home's table of periods (the period labels in the frieze's green earth
-   thinned, the frame in the lining) and the verse as red work. */
+/* ── About the Office ──
+   A leaf of home's painted wall: the feast page's consecration cross on a
+   hand-ruled terracotta course, an illuminated two-line opening initial, the
+   painted Horologium over an open hours directory (no vertical rules, no
+   shaded cells), a live specimen leaf for Reading the page, chronological
+   marginalia for history, and the year's liturgical color course in the Ordo.
+   From 840px CSS Grid sets the hours and closing invitation as a right rail
+   beside the intro and prose, keeping .about-door the last child in DOM order. */
 .about {
   /* Grey type on the plaster: the hours set it on their paper field, so here
      the Nave takes the muted ink to keep its contrast. */
   --unsaid-on-plaster: var(--muted);
-  --frontispiece-rule: rgba(107, 58, 31, 0.22);
-  --frontispiece-band: color-mix(in srgb, var(--inscription-ground) 9%, transparent);
-  --panel-rule: color-mix(in srgb, var(--lining) 45%, transparent);
+  --about-rule-frame: color-mix(in srgb, var(--lining) 78%, transparent);
+  --about-rule-inner: color-mix(in srgb, var(--lining) 36%, transparent);
+  --about-rule-hair: color-mix(in srgb, var(--lining) 19%, transparent);
+  --about-period-ink: color-mix(in srgb, var(--accent) 45%, var(--muted));
+  /* Horologium wash (Nave: honest limewash light, never a dark sky patch). */
+  --h-wash-0: rgba(216, 166, 86, 0.22);
+  --h-wash-1: rgba(216, 166, 86, 0.07);
+  --h-wash-2: rgba(250, 243, 233, 0);
+  --h-halo-0: color-mix(in srgb, var(--ornament-hi) 36%, transparent);
+  --h-halo-1: color-mix(in srgb, var(--ornament) 12%, transparent);
+  --h-halo-2: transparent;
   max-width: 38rem;
   margin: 0 auto;
-  line-height: 1.55;
+  line-height: 1.56;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .about {
     --unsaid-on-plaster: var(--unsaid);
-    --frontispiece-rule: rgba(208, 176, 106, 0.24);
-    --frontispiece-band: rgba(208, 176, 106, 0.045);
+    --h-wash-0: rgba(214, 178, 108, 0.22);
+    --h-wash-1: rgba(46, 72, 108, 0.28);
+    --h-wash-2: rgba(18, 28, 40, 0);
+    --h-halo-0: color-mix(in srgb, var(--ornament-hi) 42%, transparent);
   }
 }
 
 :root[data-theme="dark"] .about {
   --unsaid-on-plaster: var(--unsaid);
-  --frontispiece-rule: rgba(208, 176, 106, 0.24);
-  --frontispiece-band: rgba(208, 176, 106, 0.045);
+  --h-wash-0: rgba(214, 178, 108, 0.22);
+  --h-wash-1: rgba(46, 72, 108, 0.28);
+  --h-wash-2: rgba(18, 28, 40, 0);
+  --h-halo-0: color-mix(in srgb, var(--ornament-hi) 42%, transparent);
 }
 
-.about .ornament-headpiece {
-  width: 5rem;
-  margin: 0 0 0.55rem;
-  font-size: 0.75rem;
+.about-rules {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
 }
 
-.about h1 {
-  margin-bottom: 0.55rem;
-  color: var(--text);
-  font-size: 1.8rem;
-  font-weight: normal;
-  line-height: 1.2;
+.about-rules .r-lining { fill: var(--lining); }
+.about-rules .r-frame { fill: var(--about-rule-frame); }
+.about-rules .r-inner { fill: var(--about-rule-inner); }
+.about-rules .r-hair { fill: var(--about-rule-hair); }
+.about-rules .r-day { fill: color-mix(in srgb, var(--ornament) 58%, transparent); }
+
+/* ── Frontispiece head (echoing the feast page) ── */
+.about-head {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1.15rem 0 0;
+  padding: 1.75rem 0.5rem 1.35rem;
+  --course-gap: 24px;
+  border-top: 1px solid transparent;
+  background:
+    linear-gradient(var(--lining), var(--lining)) left 0 top 0 / calc(50% - var(--course-gap)) 1px no-repeat,
+    linear-gradient(var(--lining), var(--lining)) right 0 top 0 / calc(50% - var(--course-gap)) 1px no-repeat;
+  text-align: center;
 }
 
-.about h2 {
-  margin: 1.8rem 0 0.45rem;
+.about-head.is-ruled {
+  background: none;
+}
+
+.about-head::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -2.2rem -1rem -1.2rem;
+  background: radial-gradient(ellipse 52% 48% at 50% 42%, rgba(255, 253, 248, 0.92), transparent);
+  pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .about-head::before {
+    background: radial-gradient(ellipse 52% 48% at 50% 42%, rgba(150, 178, 220, 0.16), transparent);
+  }
+}
+
+:root[data-theme="dark"] .about-head::before {
+  background: radial-gradient(ellipse 52% 48% at 50% 42%, rgba(150, 178, 220, 0.16), transparent);
+}
+
+.about-crown {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2.15rem;
+  height: 2.15rem;
+  transform: translate(-50%, -50%);
+  background: var(--lining);
+  -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat, url("pigment.png") 0 0 / 96px 96px;
+  -webkit-mask-composite: source-in;
+  mask: url("ornaments/consecration.svg") center / contain no-repeat, url("pigment.png") 0 0 / 96px 96px;
+  mask-composite: intersect;
+}
+
+.about-kicker {
+  margin: 0 -0.16em 0.15rem 0;
   color: var(--titulus);
-  font-size: 0.95rem;
-  font-weight: normal;
+  font-size: 0.88rem;
   font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.16em;
+  line-height: 1.4;
+}
+
+.about-head h1 {
+  margin: 0;
+  color: var(--text);
+  font-size: 2.1rem;
+  font-weight: normal;
+  line-height: 1.12;
+  letter-spacing: 0.005em;
+}
+
+.about-verse {
+  margin: 0.7rem 0 0;
+  color: var(--rubric);
+  text-align: center;
+}
+
+.about .about-verse p {
+  margin: 0;
+  font-size: 1.1rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.about-verse cite {
+  display: block;
+  margin-top: 0.12rem;
+  font-size: 0.78rem;
+  font-style: normal;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  opacity: 0.92;
+}
+
+/* ── Opening intro (uses the app's painted two-line drop cap) ── */
+.about-intro {
+  margin: 0.25rem 0 1.4rem;
+  font-size: 1.08rem;
+  line-height: 1.58;
 }
 
 .about p {
-  margin-bottom: 0.8rem;
+  margin: 0 0 0.9rem;
 }
 
 .about a {
@@ -8237,40 +8349,295 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   text-underline-offset: 0.2em;
 }
 
-.about-verse {
-  margin: 1.2rem 0 0;
-  color: var(--rubric);
-  text-align: center;
+/* ── Ruled section headings (matching Feast & Reminders) ── */
+.about-section {
+  margin-top: 2.1rem;
 }
 
-.about-verse p {
-  margin: 0;
-  font-style: italic;
+.about-hours-section {
+  margin-top: 1.45rem;
 }
 
-.about-verse cite {
-  font-size: 0.82rem;
-  font-style: normal;
+.about-section > h2 {
+  position: relative;
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.38rem;
+  border-bottom: 1px solid var(--about-rule-frame);
+  color: var(--titulus);
+  font-size: 0.98rem;
+  font-weight: normal;
   font-variant-caps: all-small-caps;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.15em;
+  line-height: 1.3;
 }
 
+.about-section > h2.is-ruled {
+  border-bottom-color: transparent;
+}
+
+/* ── Painted Horologium (Arc of the Day) ── */
+.about-horologium {
+  position: relative;
+  margin: 0.2rem 0 0.85rem;
+}
+
+/* Theme-faithful light shift along the arc:
+   - Nave stays honest warm plaster: soft rose-terracotta at dawn/dusk,
+     warm sunlit ochre across the day, quiet pearl-umber for Compline.
+   - Apse stays vaulted night sky with gold-leaf stars, shifting the orb's
+     lantern glow from amber-rose at dawn/dusk to warm gold at noon and cool
+     moonlight at Compline. */
+.about-horologium[data-active="lauds"],
+.about-horologium[data-active="vespers"] {
+  --h-wash-0: rgba(196, 118, 92, 0.2);
+  --h-wash-1: rgba(216, 166, 86, 0.08);
+}
+
+.about-horologium[data-active="sext"] {
+  --h-wash-0: rgba(224, 178, 86, 0.26);
+  --h-wash-1: rgba(224, 178, 86, 0.09);
+}
+
+.about-horologium[data-active="compline"] {
+  --h-wash-0: rgba(146, 134, 122, 0.16);
+  --h-wash-1: rgba(146, 134, 122, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .about-horologium[data-active="lauds"],
+  :root:not([data-theme="light"]) .about-horologium[data-active="vespers"] {
+    --h-wash-0: rgba(208, 134, 102, 0.22);
+    --h-wash-1: rgba(46, 72, 108, 0.28);
+  }
+  :root:not([data-theme="light"]) .about-horologium[data-active="sext"] {
+    --h-wash-0: rgba(232, 198, 122, 0.26);
+    --h-wash-1: rgba(46, 72, 108, 0.26);
+  }
+  :root:not([data-theme="light"]) .about-horologium[data-active="compline"] {
+    --h-wash-0: rgba(154, 182, 224, 0.22);
+    --h-wash-1: rgba(34, 56, 88, 0.32);
+  }
+}
+
+:root[data-theme="dark"] .about-horologium[data-active="lauds"],
+:root[data-theme="dark"] .about-horologium[data-active="vespers"] {
+  --h-wash-0: rgba(208, 134, 102, 0.22);
+  --h-wash-1: rgba(46, 72, 108, 0.28);
+}
+
+:root[data-theme="dark"] .about-horologium[data-active="sext"] {
+  --h-wash-0: rgba(232, 198, 122, 0.26);
+  --h-wash-1: rgba(46, 72, 108, 0.26);
+}
+
+:root[data-theme="dark"] .about-horologium[data-active="compline"] {
+  --h-wash-0: rgba(154, 182, 224, 0.22);
+  --h-wash-1: rgba(34, 56, 88, 0.32);
+}
+
+.about-horologium-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 320 / 144;
+}
+
+.about-horologium-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.about-horologium-svg .h-wash-0 { stop-color: var(--h-wash-0); }
+.about-horologium-svg .h-wash-1 { stop-color: var(--h-wash-1); }
+.about-horologium-svg .h-wash-2 { stop-color: var(--h-wash-2); }
+.about-horologium-svg .h-halo-0 { stop-color: var(--h-halo-0); }
+.about-horologium-svg .h-halo-1 { stop-color: var(--h-halo-1); }
+.about-horologium-svg .h-halo-2 { stop-color: var(--h-halo-2); }
+
+/* Stars belong only to Apse's night vault, never painted onto Nave's limewash. */
+.about-horologium-stars {
+  display: none;
+  fill: var(--ornament-hi);
+  opacity: 0.62;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .about-horologium-stars {
+    display: block;
+  }
+}
+
+:root[data-theme="dark"] .about-horologium-stars {
+  display: block;
+}
+
+.about-horologium-tick {
+  stroke: var(--lining);
+  stroke-width: 0.7;
+  opacity: 0.32;
+}
+
+.about-horologium-inner {
+  fill: none;
+  stroke: var(--lining);
+  stroke-width: 0.6;
+  stroke-dasharray: 2 4;
+  opacity: 0.32;
+}
+
+.about-horologium-arc {
+  fill: none;
+  stroke: var(--lining);
+  stroke-width: 1.15;
+  opacity: 0.52;
+}
+
+.about-horologium-lit {
+  fill: none;
+  stroke: var(--ornament);
+  stroke-width: 1.5;
+  opacity: 0.78;
+}
+
+.about-horologium-horizon {
+  stroke: var(--lining);
+  stroke-width: 0.85;
+  opacity: 0.38;
+}
+
+.about-horologium-cardinal {
+  fill: var(--muted);
+  font-size: 8.2px;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.14em;
+}
+
+.about-horologium-sun,
+.about-horologium-moon {
+  fill: var(--ornament);
+  transition: opacity 0.25s ease;
+}
+
+.about-horologium-moon {
+  opacity: 0;
+}
+
+.about-horologium-orb.is-night .about-horologium-sun {
+  opacity: 0;
+}
+
+.about-horologium-orb.is-night .about-horologium-moon {
+  opacity: 1;
+}
+
+.about-horologium-stops {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.about-horologium-stop {
+  position: absolute;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-horologium-stop::after {
+  content: "";
+  width: 5.5px;
+  height: 5.5px;
+  background: var(--bg);
+  border: 1.2px solid var(--lining);
+  opacity: 0.85;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.about-horologium-stop:hover::after {
+  border-color: var(--ornament);
+  background: color-mix(in srgb, var(--ornament) 35%, var(--bg));
+  transform: rotate(45deg) scale(1.25);
+}
+
+.about-horologium-stop.is-active::after {
+  opacity: 0;
+  transform: rotate(45deg) scale(0.5);
+}
+
+.about-horologium-stop:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -4px;
+  border-radius: 50%;
+}
+
+.about-horologium-readout {
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  bottom: 22%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.about-horologium-time {
+  display: block;
+  color: var(--titulus);
+  font-size: 0.7rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.14em;
+  line-height: 1.3;
+}
+
+.about-horologium-title {
+  display: block;
+  margin-top: 0.06rem;
+  font-size: 1.15rem;
+  color: var(--text);
+  line-height: 1.22;
+}
+
+.about-horologium-title strong {
+  font-weight: normal;
+}
+
+.about-horologium-title em {
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
+/* ── Open painted-page Hours Directory (no vertical rules, no shaded boxes) ── */
 .about-hours {
-  border-inline: 1px solid var(--panel-rule);
+  position: relative;
 }
 
 .about-hour-group {
   display: grid;
-  grid-template-columns: 5.2rem minmax(0, 1fr);
-  border-top: 1px solid var(--frontispiece-rule);
+  grid-template-columns: 4.9rem minmax(0, 1fr);
+  border-top: 1px solid var(--about-rule-inner);
 }
 
-.about-hour-group:first-child {
-  border-top-color: var(--panel-rule);
+.about-hour-group:first-of-type {
+  border-top-color: var(--about-rule-frame);
 }
 
-.about-hour-group:last-child {
-  border-bottom: 1px solid var(--panel-rule);
+.about-hour-group:last-of-type {
+  border-bottom: 1px solid var(--about-rule-frame);
+}
+
+.about-hours.is-ruled .about-hour-group,
+.about-hours.is-ruled .about-hour + .about-hour {
+  border-color: transparent;
 }
 
 .about-hour-group-label {
@@ -8280,23 +8647,21 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   justify-content: center;
   gap: 0.16rem;
   margin: 0;
-  padding: 0 0.4rem;
-  border-right: 1px solid var(--frontispiece-rule);
-  background: var(--frontispiece-band);
-  color: var(--muted);
-  font-size: 0.72rem;
+  padding: 0.45rem 0.25rem;
+  color: var(--about-period-ink);
+  font-size: 0.7rem;
   font-weight: normal;
   font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   line-height: 1.2;
 }
 
 .about .period-ornament {
   display: block;
-  width: 1.2rem;
-  height: 0.8rem;
+  width: 1.15rem;
+  height: 0.78rem;
   fill: var(--ornament);
-  opacity: 0.7;
+  opacity: 0.9;
 }
 
 .about-hour-group dl {
@@ -8306,18 +8671,19 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 .about-hour {
   position: relative;
   display: grid;
-  grid-template-columns: 5.5rem minmax(0, 1fr);
+  grid-template-columns: 5.2rem minmax(0, 1fr);
   align-items: baseline;
-  gap: 0.75rem;
-  padding: 0.5rem 0.85rem;
+  gap: 0.65rem;
+  padding: 0.48rem 0.55rem 0.48rem 0.45rem;
 }
 
 .about-hour + .about-hour {
-  border-top: 1px solid var(--frontispiece-rule);
+  border-top: 1px solid var(--about-rule-hair);
 }
 
 .about-hour dt {
-  font-size: 1.2rem;
+  font-size: 1.16rem;
+  line-height: 1.25;
 }
 
 .about-hour dt a {
@@ -8333,22 +8699,21 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   inset: 0;
 }
 
-/* Only where :has() is read: elsewhere the name keeps its own ring. */
 @supports selector(:has(*)) {
   .about-hour dt a:focus-visible {
     outline: none;
   }
 
   .about-hour:has(dt a:focus-visible) {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--gold);
     outline-offset: -2px;
   }
 }
 
 .about-hour dd {
   margin: 0;
-  font-size: 1.1rem;
-  line-height: 1.3;
+  font-size: 1.02rem;
+  line-height: 1.28;
 }
 
 .about-hour-gloss {
@@ -8358,7 +8723,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 .about-hour-time {
   display: block;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.84rem;
 }
 
 /* One name column for the seven, as wide as the widest name (the apps
@@ -8368,7 +8733,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 @supports (grid-template-columns: subgrid) {
   .about-hours {
     display: grid;
-    grid-template-columns: 5.2rem max-content minmax(0, 1fr);
+    grid-template-columns: 4.9rem max-content minmax(0, 1fr);
   }
 
   .about-hour-group {
@@ -8389,20 +8754,19 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   }
 
   .about-hour dt {
-    margin-inline-end: 0.75rem;
+    margin-inline-end: 0.65rem;
   }
 }
 
-/* The hour it is now, marked as home marks it: the light rests on it, a
-   pool with no edge (home's --now-pool and its stops) laid along the row,
-   brightest behind the name and gone before the row's rules, and its name
-   in the tituli's ink. Still: it arrives with the page, and moves only when
-   the hour does (app.js). */
-.about-hour.is-current {
+/* The hour it is now, marked as home marks it: an edgeless pool of light
+   laid along the row, brightest behind the name, and the name rubricated. */
+.about-hour.is-current,
+.about-hour.is-preview {
   isolation: isolate;
 }
 
-.about-hour.is-current::before {
+.about-hour.is-current::before,
+.about-hour.is-preview::before {
   content: "";
   position: absolute;
   inset: 1px 0;
@@ -8413,16 +8777,512 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   pointer-events: none;
 }
 
+.about-hour.is-preview:not(.is-current)::before {
+  opacity: 0.65;
+}
+
 .about-hour.is-current dt a {
   color: var(--titulus-now, var(--titulus));
 }
 
-/* Home's invitation as the page's last word, before the tailpiece: the
-   same tablet (see "The invitation" below, which it shares with home), a
-   size down by width only, still. With no day of its own, its frontal is
-   home's for a day without a colour, the lining. */
+.about-note {
+  margin: 0.65rem 0 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+  font-style: italic;
+}
+
+/* ── Live Illuminated Specimen Leaf ("Reading the page") ── */
+.about-specimen {
+  --frontal: var(--lining);
+  position: relative;
+  isolation: isolate;
+  margin: 0.15rem 0 1rem;
+  padding: 0.95rem 1.15rem 1.05rem;
+  border: 1px solid var(--about-rule-frame);
+}
+
+.about-specimen.is-ruled {
+  border-color: transparent;
+}
+
+.about-specimen::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--tablet-wash);
+  -webkit-mask: url("tablet.png") center / 100% 100% no-repeat;
+  mask: url("tablet.png") center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+.about-specimen-bar {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.35rem 0.6rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.65rem;
+  border-bottom: 1px solid var(--about-rule-inner);
+}
+
+.about-specimen-bar.is-ruled {
+  border-bottom-color: transparent;
+}
+
+.about-specimen-label {
+  color: var(--titulus);
+  font-size: 0.74rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.14em;
+}
+
+.about-specimen-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.about-specimen-opt {
+  margin: 0;
+  padding: 0.15rem 0.05rem;
+  border: 0;
+  border-bottom: 1.5px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.about-specimen-opt:hover {
+  color: var(--text);
+}
+
+.about-specimen-opt.is-selected {
+  color: var(--text);
+  border-bottom-color: var(--gold);
+}
+
+.about-specimen-opt:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.about-gilt-point {
+  display: inline-block;
+  flex: none;
+  width: 3.5px;
+  height: 3.5px;
+  background: var(--ornament);
+  opacity: 0.72;
+  transform: rotate(45deg);
+}
+
+.about-specimen-line {
+  position: relative;
+  isolation: isolate;
+  margin: 0 0 0.4rem !important;
+  font-size: 1.03rem;
+  line-height: 1.46;
+}
+
+.about-specimen-line:last-child {
+  margin-bottom: 0 !important;
+}
+
+.about-specimen-rubric {
+  color: var(--rubric);
+  font-style: italic;
+  font-size: 0.94rem;
+}
+
+.about-specimen-vr {
+  display: grid;
+  grid-template-columns: 1.7rem minmax(0, 1fr);
+  align-items: baseline;
+}
+
+.about-specimen-sigil {
+  color: var(--rubric);
+}
+
+.about-specimen-cross {
+  color: var(--rubric);
+  font-family: "Office Cross", "EB Garamond", serif;
+  font-size: 0.9em;
+  margin-right: 0.28rem;
+}
+
+.about-specimen-form-lines {
+  position: relative;
+  isolation: isolate;
+  margin-top: 0.45rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--about-rule-hair);
+}
+
+.about-specimen-form-lines.is-ruled {
+  border-top-color: transparent;
+}
+
+.about-specimen-secret {
+  margin-top: 0.5rem !important;
+  padding-top: 0.48rem;
+  border-top: 1px solid var(--about-rule-hair);
+}
+
+.about-specimen-secret.is-ruled {
+  border-top-color: transparent;
+}
+
+.about-specimen-unsaid {
+  color: var(--unsaid-on-plaster);
+}
+
+/* Soft pool of light cast onto the matching element inside the specimen leaf */
+.about-specimen .is-lit::before {
+  content: "";
+  position: absolute;
+  inset: -0.18rem -0.55rem;
+  z-index: -1;
+  border-radius: 2px;
+  background: radial-gradient(ellipse 68% 85% at 32% 50%, var(--now-pool), transparent 85%);
+  pointer-events: none;
+}
+
+/* ── Open hand-ruled Typographic Key ── */
+.about-keys {
+  position: relative;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  list-style: none;
+}
+
+.about-key-row {
+  position: relative;
+  border-top: 1px solid var(--about-rule-hair);
+}
+
+.about-key-row:first-child {
+  border-top: 0;
+}
+
+.about-key-row:last-child {
+  border-bottom: 1px solid var(--about-rule-inner);
+}
+
+.about-keys.is-ruled .about-key-row {
+  border-color: transparent;
+}
+
+.about-key-btn {
+  display: grid;
+  grid-template-columns: 6.1rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.65rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.52rem 0.2rem;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+}
+
+.about-key-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+
+.about-key-row.is-active .about-key-btn::before,
+.about-key-btn:hover::before {
+  content: "";
+  position: absolute;
+  inset: 1px 0;
+  z-index: -1;
+  background: radial-gradient(ellipse 52% 65% at 24% 50%, var(--now-pool), transparent 85%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.about-key-row.is-active .about-key-btn::before {
+  opacity: 0.9;
+}
+
+.about-key {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.about-key-rubric {
+  color: var(--rubric);
+  font-style: italic;
+}
+
+.about-key-symbol {
+  color: var(--rubric);
+  letter-spacing: 0.08em;
+}
+
+.about-key-cross {
+  color: var(--rubric);
+  font-family: "Office Cross", "EB Garamond", serif;
+  font-size: 1.05rem;
+}
+
+.about-key-voiced {
+  color: var(--text);
+}
+
+.about-key-unsaid {
+  color: var(--unsaid-on-plaster);
+}
+
+.about-key-form {
+  color: var(--titulus);
+  font-size: 0.84rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+}
+
+.about-key-desc {
+  font-size: 0.97rem;
+  line-height: 1.48;
+  color: var(--text);
+}
+
+/* ── Chronological Marginalia ("An ancient prayer") ── */
+.about-lineage {
+  position: relative;
+  margin: 0.25rem 0 0;
+  padding: 0 0 0 1.25rem;
+  list-style: none;
+  border-left: 1px solid var(--about-rule-inner);
+}
+
+.about-lineage.is-ruled {
+  border-left-color: transparent;
+}
+
+.about-era {
+  position: relative;
+  padding-bottom: 1.05rem;
+}
+
+.about-era:last-child {
+  padding-bottom: 0;
+}
+
+.about-era::before {
+  content: "";
+  position: absolute;
+  left: -1.25rem;
+  top: 0.42rem;
+  width: 5.5px;
+  height: 5.5px;
+  background: var(--ornament);
+  transform: translate(-50%, 0) rotate(45deg);
+}
+
+.about-era-head {
+  margin: 0 0 0.25rem !important;
+  color: var(--titulus);
+  font-size: 0.82rem;
+  font-variant-caps: all-small-caps;
+  font-variant-numeric: oldstyle-nums;
+  letter-spacing: 0.11em;
+  line-height: 1.35;
+}
+
+.about-era p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Liturgical Year Ribbon ("The Ordo") ── */
+.about-ordo-ribbon {
+  margin: 1rem 0 0.25rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .about-ordo-ribbon .day-color-red { --day-color: #c9503f; }
+  :root:not([data-theme="light"]) .about-ordo-ribbon .day-color-green { --day-color: #4f8a52; }
+  :root:not([data-theme="light"]) .about-ordo-ribbon .day-color-violet { --day-color: #8d62ad; }
+  :root:not([data-theme="light"]) .about-ordo-ribbon .day-color-black { --day-color: #6a7380; }
+}
+
+:root[data-theme="dark"] .about-ordo-ribbon .day-color-red { --day-color: #c9503f; }
+:root[data-theme="dark"] .about-ordo-ribbon .day-color-green { --day-color: #4f8a52; }
+:root[data-theme="dark"] .about-ordo-ribbon .day-color-violet { --day-color: #8d62ad; }
+:root[data-theme="dark"] .about-ordo-ribbon .day-color-black { --day-color: #6a7380; }
+
+.about-ordo-track {
+  position: relative;
+  padding-bottom: 0.55rem;
+}
+
+.about-ordo-svg {
+  display: block;
+  width: 100%;
+  height: 5px;
+}
+
+.about-ordo-run {
+  fill: var(--day-color);
+  transition: opacity 0.2s ease;
+}
+
+.about-ordo-short {
+  fill: var(--lining);
+  opacity: 0.22;
+}
+
+.about-ordo-ribbon[data-selected-color] .about-ordo-run {
+  opacity: 0.16;
+}
+
+.about-ordo-ribbon[data-selected-color="white"] .about-ordo-run[data-color="white"],
+.about-ordo-ribbon[data-selected-color="red"] .about-ordo-run[data-color="red"],
+.about-ordo-ribbon[data-selected-color="violet"] .about-ordo-run[data-color="violet"],
+.about-ordo-ribbon[data-selected-color="green"] .about-ordo-run[data-color="green"],
+.about-ordo-ribbon[data-selected-color="rose"] .about-ordo-run[data-color="rose"],
+.about-ordo-ribbon[data-selected-color="black"] .about-ordo-run[data-color="black"] {
+  opacity: 1;
+}
+
+.about-ordo-today {
+  position: absolute;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  background: var(--ornament);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.about-ordo-months {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.2rem;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+}
+
+.about-ordo-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+  margin-top: 0.65rem;
+}
+
+.about-ordo-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36rem;
+  margin: 0;
+  padding: 0.2rem 0.05rem;
+  border: 0;
+  border-bottom: 1.5px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.about-ordo-swatch:hover,
+.about-ordo-swatch.is-selected {
+  color: var(--text);
+}
+
+.about-ordo-swatch.is-selected {
+  border-bottom-color: var(--gold);
+}
+
+.about-ordo-swatch:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.about-ordo-swatch i {
+  display: inline-block;
+  width: 5.5px;
+  height: 5.5px;
+  background: var(--day-color);
+  transform: rotate(45deg);
+}
+
+.about-ordo-meaning {
+  min-height: 1.4em;
+  margin: 0.4rem 0 0 !important;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.about-ordo-meaning:empty {
+  min-height: 0;
+  margin-top: 0 !important;
+}
+
+/* ── Elsewhere / Mobile Apps inline store links ── */
+.about-apps {
+  position: relative;
+  margin-top: 1.15rem;
+  padding-top: 0.95rem;
+  border-top: 1px solid var(--about-rule-hair);
+}
+
+.about-apps.is-ruled {
+  border-top-color: transparent;
+}
+
+.about-apps .store-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.85rem;
+  margin: 0.35rem 0 0;
+}
+
+@media (min-width: 480px) {
+  .about-apps .store-buttons {
+    gap: 0.35rem 0.75rem;
+  }
+
+  .about-apps .store-buttons .app-store + .app-store {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .about-apps .store-buttons .app-store + .app-store::before {
+    content: "";
+    width: 4px;
+    height: 4px;
+    background: var(--ornament);
+    opacity: 0.75;
+    transform: rotate(45deg);
+    pointer-events: none;
+  }
+}
+
+/* ── Home's invitation as the page's closing door ── */
 .about .about-door {
   --frontal: var(--lining);
+  width: 100%;
   max-width: 17.5rem;
   margin: 2.1rem auto 0.4rem;
 }
@@ -8432,28 +9292,94 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   outline-offset: 3px;
 }
 
-.about-note {
-  margin-top: 0.55rem;
-  color: var(--muted);
-  font-size: 1.05rem;
+/* ── Desktop two-column folio + right rail (≥ 840px, mirroring Feast) ──
+   The five direct children of .about stay in mobile reading order in the DOM
+   (Head → Intro → Hours → Prose → Door); four grid rows align the Intro and
+   Prose down the left column and the Hours + Door down the right rail with
+   zero vertical gap on either side. */
+@media (min-width: 840px) {
+  .page-about main {
+    max-width: 64rem;
+  }
+
+  .about {
+    max-width: none;
+    display: grid;
+    grid-template-columns: minmax(0, 35.5rem) minmax(20.5rem, 23.5rem);
+    grid-template-rows: auto auto auto 1fr;
+    justify-content: space-between;
+    column-gap: 3.2rem;
+    align-items: start;
+  }
+
+  .about-head {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    padding: 1.9rem 1rem 1.85rem;
+  }
+
+  .about-head h1 {
+    font-size: 2.5rem;
+  }
+
+  .about-verse p {
+    font-size: 1.16rem;
+  }
+
+  .about-intro {
+    grid-column: 1;
+    grid-row: 2;
+    margin: 0.5rem 0 0;
+    font-size: 1.14rem;
+  }
+
+  .about-prose {
+    grid-column: 1;
+    grid-row: 3 / 5;
+  }
+
+  .about-hours-section {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    margin-top: 0.5rem;
+  }
+
+  .about .about-door {
+    grid-column: 2;
+    grid-row: 4;
+    max-width: none;
+    margin: 1.35rem 0 0;
+  }
 }
 
-.about-keys {
-  margin: 0 0 0.8rem;
-  padding: 0;
-  list-style: none;
+@media (forced-colors: active) {
+  .about-head::before,
+  .about-specimen::before,
+  .about-specimen .is-lit::before,
+  .about-key-btn::before,
+  .about-rules,
+  .about-horologium-fill,
+  .about-horologium-stars,
+  .about-horologium-halo {
+    display: none;
+  }
+
+  .about-crown,
+  .about-gilt-point,
+  .about-era::before,
+  .about-ordo-today,
+  .about-ordo-swatch i {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
 }
 
-.about-keys li {
-  margin-bottom: 0.55rem;
-}
-
-.about-key-rubric {
-  color: var(--rubric);
-}
-
-.about-key-unsaid {
-  color: var(--unsaid-on-plaster);
+@media print {
+  .about-horologium-stops,
+  .about-specimen-toggle,
+  .about-ordo-meaning {
+    display: none;
+  }
 }
 
 /* The privacy policy: the reminders page's measure and headings, set as prose. */
@@ -9187,7 +10113,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 .hymn-stanza-opening .hymn-line:first-child::first-letter,
 .marian-antiphon .chant-line-opening::first-letter,
 .corporate-lord-prayer-officiant::first-letter,
-.short-responsory-opening .sigil-text::first-letter {
+.short-responsory-opening .sigil-text::first-letter,
+.about-intro::first-letter {
   color: var(--cap-ink);
   text-shadow: 0 1px 0 color-mix(in srgb, var(--cap-ink) 30%, transparent);
 }
@@ -9204,7 +10131,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   .hymn-stanza-opening .hymn-line:first-child::first-letter,
   .marian-antiphon .chant-line-opening::first-letter,
   .corporate-lord-prayer-officiant::first-letter,
-  .short-responsory-opening .sigil-text::first-letter {
+  .short-responsory-opening .sigil-text::first-letter,
+  .about-intro::first-letter {
     initial-letter: 2;
     margin-top: 0.1em;
     margin-bottom: calc(-0.1em + var(--initial-depth, 0) * 1em);
@@ -9245,7 +10173,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   .collect .liturgical-block .plain-line:first-child,
   .hymn-stanza-opening .hymn-line:first-child,
   .marian-antiphon .chant-line-opening,
-  .corporate-lord-prayer-officiant {
+  .corporate-lord-prayer-officiant,
+  .about-intro {
     --opening-line: 1lh;
     --opening-text: 1em;
   }
@@ -9256,7 +10185,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   .collect .liturgical-block .plain-line:first-child::first-letter,
   .hymn-stanza-opening .hymn-line:first-child::first-letter,
   .marian-antiphon .chant-line-opening::first-letter,
-  .corporate-lord-prayer-officiant::first-letter {
+  .corporate-lord-prayer-officiant::first-letter,
+  .about-intro::first-letter {
     --opening-em: calc(3.05 * var(--opening-text));
     font-size: calc(var(--opening-text) + var(--opening-line) / 0.65);
     line-height: 0.88;
@@ -9304,6 +10234,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 .elements [data-initial="R"] { --initial-gap: 0.08; --initial-tuck: -0.8; }
 .elements [data-initial="S"] { --initial-gap: 0.06; --initial-tuck: -0.05; }
 .elements [data-initial="T"] { --initial-gap: -0.15; --initial-tuck: 0.65; --initial-hang: -0.06; }
+.about-intro[data-initial="T"] { --initial-gap: -0.15; --initial-tuck: 0.65; --initial-hang: -0.06; }
 .elements [data-initial="U"] { --initial-gap: -0.055; --initial-tuck: 0.35; }
 .elements [data-initial="V"] { --initial-gap: -0.265; --initial-tuck: 1; --initial-hang: -0.025; }
 .elements [data-initial="W"] { --initial-gap: -0.215; --initial-tuck: 0.85; --initial-hang: -0.025; }

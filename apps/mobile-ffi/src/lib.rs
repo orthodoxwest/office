@@ -1071,42 +1071,79 @@ pub struct AboutRunView {
     pub link: String,
 }
 
-/// One block of the About page, as `presentation::about` words it: `kind` is intro, verse,
-/// heading, paragraph, hours, note or key. A paragraph's words are its `runs`.
+/// One block of the About page, as `presentation::about` words it: `kind` is verse, intro,
+/// heading, paragraph, hours, note, specimen, key, era, ordo_ribbon or invitation. A paragraph's
+/// words are its `runs`.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct AboutBlockView {
     pub kind: String,
+    pub id: String,
     pub text: String,
     pub runs: Vec<AboutRunView>,
     pub cite: String,
+    pub period: String,
     pub mark: String,
+    pub tail: String,
     pub ink: String,
 }
 
-/// An hour on the About page's table: its slug, name, what it is and when it is said.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+/// An hour on the About page's table and Horologium: its slug, name, what it is, when it is said,
+/// its angle along the solar arc (degrees, 180 = dawn, 90 = noon, 0 = night), and whether the
+/// Horologium marks it with the crescent moon.
+#[derive(Clone, Debug, PartialEq, uniffi::Record)]
 pub struct AboutHourView {
     pub hour: String,
     pub name: String,
     pub gloss: String,
     pub time: String,
+    pub angle: f64,
+    pub night: bool,
 }
 
 /// One of the table's periods (Morning, Day, Evening).
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, uniffi::Record)]
 pub struct AboutPeriodView {
     pub label: String,
     pub hours: Vec<AboutHourView>,
 }
 
-/// The About page: its title, blocks, the hours' table, and the menu's and home's names for it.
+/// The miniature office leaf shown in "Reading the page".
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct AboutSpecimenView {
+    pub label: String,
+    pub alone_label: String,
+    pub priest_label: String,
+    pub rubric: String,
+    pub opening_versicle: String,
+    pub opening_response: String,
+    pub alone_versicle: String,
+    pub alone_response: String,
+    pub priest_versicle: String,
+    pub priest_response: String,
+    pub secret_voiced: String,
+    pub secret_silent: String,
+}
+
+/// One liturgical color explained under the Ordo's year ribbon.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct AboutOrdoColorView {
+    pub slug: String,
+    pub name: String,
+    pub meaning: String,
+}
+
+/// The About page: its kicker, title, blocks, hours, specimen, liturgical color key, and the
+/// menu's and home's names for it.
+#[derive(Clone, Debug, PartialEq, uniffi::Record)]
 pub struct AboutView {
+    pub kicker: String,
     pub title: String,
     pub menu: String,
     pub introduction: String,
     pub blocks: Vec<AboutBlockView>,
     pub periods: Vec<AboutPeriodView>,
+    pub specimen: AboutSpecimenView,
+    pub ordo_colors: Vec<AboutOrdoColorView>,
 }
 
 /// The hour it is now on the About page, as home has it: the hour its table lights (empty from
@@ -1139,14 +1176,18 @@ pub fn about_now(today: CivilDate, clock_hour: i32) -> Result<AboutNow, OfficeEr
 #[uniffi::export]
 pub fn about() -> AboutView {
     use presentation::about::{
-        ABOUT, ABOUT_HOURS, ABOUT_INTRODUCTION, ABOUT_MENU, ABOUT_ON_THE_WEB, ABOUT_TITLE, AboutBlock, AboutRun, about_runs,
+        ABOUT, ABOUT_HOURS, ABOUT_INTRODUCTION, ABOUT_KICKER, ABOUT_MENU, ABOUT_ON_THE_WEB, ABOUT_ORDO_COLORS, ABOUT_SPECIMEN, ABOUT_TITLE,
+        AboutBlock, AboutRun, about_horologium_angle, about_horologium_is_night, about_runs,
     };
     let block = |kind: &str| AboutBlockView {
         kind: kind.into(),
+        id: String::new(),
         text: String::new(),
         runs: Vec::new(),
         cite: String::new(),
+        period: String::new(),
         mark: String::new(),
+        tail: String::new(),
         ink: String::new(),
     };
     let paragraph = |text: &str| AboutBlockView {
@@ -1162,17 +1203,25 @@ pub fn about() -> AboutView {
     let blocks = ABOUT
         .iter()
         .map(|b| match *b {
-            AboutBlock::Intro(text) => AboutBlockView { text: text.into(), ..block("intro") },
             AboutBlock::Verse { text, cite } => AboutBlockView { text: text.into(), cite: cite.into(), ..block("verse") },
+            AboutBlock::Intro(text) => AboutBlockView { text: text.into(), ..block("intro") },
             AboutBlock::Heading(text) => AboutBlockView { text: text.into(), ..block("heading") },
             AboutBlock::Paragraph(text) => paragraph(text),
             // The apps' word on the other front is the website, set as any paragraph.
             AboutBlock::Elsewhere => paragraph(ABOUT_ON_THE_WEB),
             AboutBlock::Hours => block("hours"),
             AboutBlock::Note(text) => AboutBlockView { text: text.into(), ..block("note") },
-            AboutBlock::Key { mark, ink, text } => {
-                AboutBlockView { text: text.into(), mark: mark.into(), ink: ink.name().into(), ..block("key") }
-            }
+            AboutBlock::Specimen => block("specimen"),
+            AboutBlock::Key { id, mark, tail, ink, text } => AboutBlockView {
+                id: id.into(),
+                text: text.into(),
+                mark: mark.into(),
+                tail: tail.into(),
+                ink: ink.name().into(),
+                ..block("key")
+            },
+            AboutBlock::Era { period, text } => AboutBlockView { period: period.into(), text: text.into(), ..block("era") },
+            AboutBlock::OrdoRibbon => block("ordo_ribbon"),
             AboutBlock::Invitation => block("invitation"),
         })
         .collect();
@@ -1187,11 +1236,40 @@ pub fn about() -> AboutView {
                     name: presentation::title_case(slug),
                     gloss: presentation::hour_gloss(slug).into(),
                     time: (*time).into(),
+                    angle: about_horologium_angle(slug),
+                    night: about_horologium_is_night(slug),
                 })
                 .collect(),
         })
         .collect();
-    AboutView { title: ABOUT_TITLE.into(), menu: ABOUT_MENU.into(), introduction: ABOUT_INTRODUCTION.into(), blocks, periods }
+    let specimen = AboutSpecimenView {
+        label: ABOUT_SPECIMEN.label.into(),
+        alone_label: ABOUT_SPECIMEN.alone_label.into(),
+        priest_label: ABOUT_SPECIMEN.priest_label.into(),
+        rubric: ABOUT_SPECIMEN.rubric.into(),
+        opening_versicle: ABOUT_SPECIMEN.opening_versicle.into(),
+        opening_response: ABOUT_SPECIMEN.opening_response.into(),
+        alone_versicle: ABOUT_SPECIMEN.alone_versicle.into(),
+        alone_response: ABOUT_SPECIMEN.alone_response.into(),
+        priest_versicle: ABOUT_SPECIMEN.priest_versicle.into(),
+        priest_response: ABOUT_SPECIMEN.priest_response.into(),
+        secret_voiced: ABOUT_SPECIMEN.secret_voiced.into(),
+        secret_silent: ABOUT_SPECIMEN.secret_silent.into(),
+    };
+    let ordo_colors = ABOUT_ORDO_COLORS
+        .iter()
+        .map(|c| AboutOrdoColorView { slug: c.slug.into(), name: c.name.into(), meaning: c.meaning.into() })
+        .collect();
+    AboutView {
+        kicker: ABOUT_KICKER.into(),
+        title: ABOUT_TITLE.into(),
+        menu: ABOUT_MENU.into(),
+        introduction: ABOUT_INTRODUCTION.into(),
+        blocks,
+        periods,
+        specimen,
+        ordo_colors,
+    }
 }
 
 /// Whether home offers the introduction: the app's first day is within the newcomer week.

@@ -9,20 +9,30 @@
 /// One block of the About page, in reading order.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AboutBlock {
-    /// The opening paragraph, under the title.
-    Intro(&'static str),
-    /// A verse set as red work, with its reference.
+    /// The opening epigraph verse set as red work in the painted head, with its reference.
     Verse { text: &'static str, cite: &'static str },
-    /// A section's titulus.
+    /// The opening paragraph, set with the app's painted two-line dropped initial.
+    Intro(&'static str),
+    /// A section's ruled titulus.
     Heading(&'static str),
     /// A paragraph of prose, which may carry links.
     Paragraph(&'static str),
-    /// The seven hours in home's three periods ([`ABOUT_HOURS`]).
+    /// The painted Horologium (solar arc) and the seven hours in home's three periods ([`ABOUT_HOURS`]).
     Hours,
-    /// A quiet line set under the block before it.
+    /// A quiet italic note set under the block before it.
     Note(&'static str),
-    /// A key to the page's marks: the mark, set in its `ink`, then what it means.
-    Key { mark: &'static str, ink: KeyInk, text: &'static str },
+    /// A live miniature slice of an office page ([`ABOUT_SPECIMEN`]) demonstrating rubrics,
+    /// versicles, the sign of the cross, silent prayer, and Prayer form.
+    Specimen,
+    /// A row of the ruled typographic key under the specimen: `id` links the row to the
+    /// matching line in the specimen (`rubric`, `vr`, `cross`, `secret`, `form`); `tail`, when
+    /// non-empty, is set in the unsaid ink after `mark` (e.g. `Our` + `Father…`).
+    Key { id: &'static str, mark: &'static str, tail: &'static str, ink: KeyInk, text: &'static str },
+    /// One chronological beat in "An ancient prayer", set beside a fine marginal thread.
+    Era { period: &'static str, text: &'static str },
+    /// The current year's liturgical color ribbon (`presentation::course`) and interactive color key
+    /// ([`ABOUT_ORDO_COLORS`]).
+    OrdoRibbon,
     /// Where else the Office is found, which each front words for itself: the web names the
     /// native apps and their stores ([`crate::stores::ABOUT_APPS`]), and the apps name the
     /// website ([`ABOUT_ON_THE_WEB`]), for those who found one and not the other.
@@ -32,27 +42,61 @@ pub enum AboutBlock {
     Invitation,
 }
 
-/// The ink a key's mark is set in, so it shows what it names.
+/// The ink and treatment a key's mark takes, so it shows what it names.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum KeyInk {
-    /// The body text's.
-    Text,
-    /// The rubrics' red.
+    /// Red italic rubric text.
     Rubric,
-    /// The faded ink of words said silently.
-    Unsaid,
+    /// Red upright liturgical sigils (`℣. ℟.`).
+    Symbol,
+    /// Red Maltese cross (`✠`).
+    Cross,
+    /// Voiced opening word in body ink followed by silent grey tail.
+    Secret,
+    /// Small-caps titulus matching the hour's Prayer form control.
+    Form,
 }
 
 impl KeyInk {
     /// The ink's name, as the web's class and the native apps read it.
     pub fn name(self) -> &'static str {
         match self {
-            KeyInk::Text => "text",
             KeyInk::Rubric => "rubric",
-            KeyInk::Unsaid => "unsaid",
+            KeyInk::Symbol => "symbol",
+            KeyInk::Cross => "cross",
+            KeyInk::Secret => "secret",
+            KeyInk::Form => "form",
         }
     }
 }
+
+/// The live miniature office specimen shown in "Reading the page".
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct AboutSpecimen {
+    pub label: &'static str,
+    pub alone_label: &'static str,
+    pub priest_label: &'static str,
+    pub rubric: &'static str,
+    pub opening_versicle: &'static str,
+    pub opening_response: &'static str,
+    pub alone_versicle: &'static str,
+    pub alone_response: &'static str,
+    pub priest_versicle: &'static str,
+    pub priest_response: &'static str,
+    pub secret_voiced: &'static str,
+    pub secret_silent: &'static str,
+}
+
+/// One liturgical color explained beneath the Ordo's year ribbon.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct AboutOrdoColor {
+    pub slug: &'static str,
+    pub name: &'static str,
+    pub meaning: &'static str,
+}
+
+/// The small-caps kicker over the title in the painted head.
+pub const ABOUT_KICKER: &str = "Benedictine Divine Office";
 
 /// The page's title.
 pub const ABOUT_TITLE: &str = "About the Office";
@@ -74,77 +118,141 @@ pub const ABOUT_HOURS: [(&str, &[(&str, &str)]); 3] = [
     ("Evening", &[("vespers", "toward sunset"), ("compline", "late in the evening")]),
 ];
 
+/// Each hour's station angle along the Horologium's semicircular arc, in degrees from the western
+/// horizon (180° = dawn at left, 90° = solar noon at zenith, 0° = night at right).
+pub fn about_horologium_angle(slug: &str) -> f64 {
+    match slug {
+        "lauds" => 168.0,
+        "prime" => 144.0,
+        "terce" => 118.0,
+        "sext" => 90.0,
+        "none" => 62.0,
+        "vespers" => 34.0,
+        "compline" => 10.0,
+        _ => 90.0,
+    }
+}
+
+/// Whether the Horologium marks an hour with the crescent moon rather than the sun.
+pub fn about_horologium_is_night(slug: &str) -> bool {
+    matches!(slug, "vespers" | "compline")
+}
+
+/// The miniature office leaf shown in "Reading the page".
+pub const ABOUT_SPECIMEN: AboutSpecimen = AboutSpecimen {
+    label: "From an hour",
+    alone_label: "Alone",
+    priest_label: "With a priest",
+    rubric: "All make the sign of the cross as the hour begins.",
+    opening_versicle: "O God, make speed to save me.",
+    opening_response: "O Lord, make haste to help me.",
+    alone_versicle: "O Lord, hear my prayer.",
+    alone_response: "And let my cry come unto thee.",
+    priest_versicle: "The Lord be with you.",
+    priest_response: "And with thy spirit.",
+    secret_voiced: "Our Father,",
+    secret_silent: "who art in heaven, hallowed be thy Name…",
+};
+
+/// The six liturgical colors shown beneath the Ordo's year ribbon.
+pub const ABOUT_ORDO_COLORS: &[AboutOrdoColor] = &[
+    AboutOrdoColor { slug: "white", name: "White", meaning: "Feasts of the Lord, Eastertide, and most saints" },
+    AboutOrdoColor { slug: "red", name: "Red", meaning: "Pentecost, apostles, and martyrs" },
+    AboutOrdoColor { slug: "violet", name: "Violet", meaning: "Advent, Lent, and days of penance" },
+    AboutOrdoColor { slug: "green", name: "Green", meaning: "Ordinary days after Epiphany and Pentecost" },
+    AboutOrdoColor { slug: "rose", name: "Rose", meaning: "Gaudete and Laetare Sundays" },
+    AboutOrdoColor { slug: "black", name: "Black", meaning: "Good Friday and All Souls’ Day" },
+];
+
 /// The page, in reading order.
 pub const ABOUT: &[AboutBlock] = &[
-    AboutBlock::Intro(
-        "The Divine Office is the Church’s prayer through the day: psalms, hymns, and prayers said at set \
-         hours, morning to night. This is the Benedictine Office as used in the Antiochian Western Rite Vicariate. \
-         Each hour is assembled for the day, with the feast, the season and the psalms in place, so \
-         you need only begin.",
-    ),
     AboutBlock::Verse { text: "“Seven times a day do I praise thee.”", cite: "Psalm 118 (119):164" },
-    AboutBlock::Heading("An ancient prayer"),
-    AboutBlock::Paragraph(
-        "The Church has prayed at set hours since the Apostles, who kept the hours of prayer they had known in \
-         Israel. The Holy Spirit came at Pentecost at the third hour; St Peter went up to pray at the sixth; St Peter \
-         and St John went into the Temple at the ninth, “the hour of prayer.” By the third century Tertullian and St \
-         Cyprian of Carthage wrote of prayer at the third, sixth and ninth hours, and at morning and evening. In the \
-         deserts of Egypt and Palestine the monks made the psalms their unceasing prayer, and St John Cassian carried \
-         their way of prayer to the West.",
-    ),
-    AboutBlock::Paragraph(
-        "In the sixth century St Benedict of Nursia established his Rule for monks, taking the \
-         Psalmist’s “seven times a day” as his measure and giving out the whole Psalter in each week. His life was \
-         written by St Gregory the Great, whom the East honors as St Gregory the Dialogist. \
-         The Benedictine Office spread through the monasteries of the West in the centuries \
-         before the Great Schism. Since 1958 the Antiochian Archdiocese has kept a Western Rite, and within it the \
-         Benedictine hours are prayed again in the Orthodox Church.",
+    AboutBlock::Intro(
+        "The Divine Office is the Church’s daily rhythm of psalms, hymns, and prayers, prayed at set \
+         hours from morning to night. This app presents the Benedictine Office of the Antiochian \
+         Western Rite Vicariate—assembled automatically for each day’s feast and season, so you can \
+         simply open an hour and pray.",
     ),
     AboutBlock::Heading("The seven hours"),
     AboutBlock::Hours,
-    AboutBlock::Note("The night office, Matins, is not yet included."),
+    AboutBlock::Note("Matins, the night office, is not yet included."),
     AboutBlock::Heading("Where to begin"),
     AboutBlock::Paragraph(
-        "No one is expected to keep every hour at once. Many begin with one, Prime in the morning or Compline at \
-         night, and add others as they can. Your parish priest can help you determine an appropriate prayer rule. The \
-         button on the home page always opens the hour for the time of day.",
+        "No one is expected to pray all seven hours at once. Most people begin with one—Prime in the \
+         morning or Compline before sleep—and add others gradually. Your parish priest can help you \
+         establish a prayer rule that fits your life. Whenever you open the home page, the main button \
+         takes you straight to the hour for the current time of day.",
     ),
     AboutBlock::Heading("Reading the page"),
+    AboutBlock::Specimen,
     AboutBlock::Key {
-        mark: "Red words",
+        id: "rubric",
+        mark: "Rubrics",
+        tail: "",
         ink: KeyInk::Rubric,
-        text: "are rubrics, directions for the one praying, and are not read aloud.",
-    },
-    AboutBlock::Key { mark: "℣. ℟.", ink: KeyInk::Rubric, text: "mark a versicle and its response. Praying alone, you say both." },
-    AboutBlock::Key { mark: "✠", ink: KeyInk::Rubric, text: "marks where to make the sign of the cross." },
-    AboutBlock::Key {
-        mark: "Grey type",
-        ink: KeyInk::Unsaid,
-        text: "is said silently. A secret prayer’s opening words stand out and are said aloud, the rest in silence; \
-               some Our Fathers and Creeds also end aloud, with a closing line in full type.",
+        text: "Directions for posture, gestures, and order—not read aloud.",
     },
     AboutBlock::Key {
-        mark: "Prayer form,",
-        ink: KeyInk::Text,
-        text: "at the head of each hour, sets the page for praying alone or with others led by a deacon or a priest.",
+        id: "vr",
+        mark: "℣. ℟.",
+        tail: "",
+        ink: KeyInk::Symbol,
+        text: "A versicle and its response. When praying alone, say both.",
+    },
+    AboutBlock::Key { id: "cross", mark: "✠", tail: "", ink: KeyInk::Cross, text: "Make the sign of the cross." },
+    AboutBlock::Key {
+        id: "secret",
+        mark: "Our",
+        tail: "Father…",
+        ink: KeyInk::Secret,
+        text: "Grey text is prayed silently; lines in full ink at the start or close of a silent prayer are spoken aloud.",
+    },
+    AboutBlock::Key {
+        id: "form",
+        mark: "Prayer form",
+        tail: "",
+        ink: KeyInk::Form,
+        text: "At the top of each hour, switches between praying alone or in a group led by a deacon or priest.",
+    },
+    AboutBlock::Heading("An ancient prayer"),
+    AboutBlock::Era {
+        period: "1st Century · Apostolic Tradition",
+        text: "Christians have prayed at set hours since the Apostles, who continued the daily times \
+               of prayer they had known in Israel—the third hour at Pentecost, the sixth with St Peter, \
+               and the ninth in the Temple. By the third century, Tertullian and St Cyprian describe \
+               regular prayer at morning, evening, and the third, sixth, and ninth hours.",
+    },
+    AboutBlock::Era {
+        period: "4th–6th Century · The Desert & St Benedict",
+        text: "In the deserts of Egypt and Palestine, monastics made the psalms their unceasing prayer, \
+               and St John Cassian carried their practice west. In the sixth century, St Benedict shaped \
+               it in his Rule: seven daytime hours and a night watch, praying through the entire Psalter \
+               each week.",
+    },
+    AboutBlock::Era {
+        period: "1958 to Today · The Western Rite",
+        text: "The Benedictine Office was prayed across Western Christendom for centuries before the \
+               Great Schism. Since 1958, the Antiochian Archdiocese has maintained a Western Rite, \
+               restoring this ancient Orthodox heritage to active liturgical life.",
     },
     AboutBlock::Heading("The Ordo"),
     AboutBlock::Paragraph(
-        "Each day keeps a feast or the office of its season, as the archdiocese’s printed ordo appoints. \
-         The app’s [Ordo](/calendar) sets out the year a month at a time: each \
-         day’s feast, rank and color, its fasts, and the antiphons and commemorations of Lauds and Vespers. \
-         You can search it for a feast or saint. Each has a page with its collect, antiphons and versicles, \
-         and when it is kept in the years ahead.",
+        "Every day follows the archdiocese’s printed ordo, observing either a feast or the office of \
+         the season. Browse the [Ordo](/calendar) month by month to see each day’s feast, rank, \
+         liturgical color, fasts, and commemorations—or search for any feast or saint to read its \
+         collect, antiphons, versicles, and hymns, and see when it falls in coming years.",
     ),
+    AboutBlock::OrdoRibbon,
     AboutBlock::Heading("This app"),
     AboutBlock::Paragraph(
-        "The psalm translation is from the Coverdale Psalter, and each text is checked against the printed books they \
-         come from. The mobile apps work without a connection. [Reminders](/reminders) can call you to the hours \
-         you keep. In Settings (in the Menu on a phone) you can change the theme and text size, \
-         have Prime include the Martyrology (the saints of the coming day), and show the office with \
-         chant notation where it is available. Your settings are kept on your device. \
-         There are no accounts and no advertising. See \
-         [Privacy](/privacy). If you find a mistake, please tell us through the \
+        "The psalms follow the Coverdale translation, and the texts are checked against the printed \
+         Western Rite books. You can set up [Reminders](/reminders) for the hours you pray, or open \
+         Settings (under Menu on a phone) to switch between the Nave and Apse themes, adjust text \
+         size, include the Martyrology at Prime, or display chant notation where available.",
+    ),
+    AboutBlock::Paragraph(
+        "Your preferences stay on your device—there are no accounts, no tracking, and no ads \
+         (see [Privacy](/privacy)). If you spot a typo or a rubrical error, please report it on the \
          [issue tracker](https://github.com/orthodoxwest/office/issues/new).",
     ),
     AboutBlock::Elsewhere,
@@ -153,8 +261,8 @@ pub const ABOUT: &[AboutBlock] = &[
 
 /// The native apps' word on the website, in their [`AboutBlock::Elsewhere`]: a paragraph, which
 /// may carry links as the page's paragraphs do.
-pub const ABOUT_ON_THE_WEB: &str = "The Daily Office is also on the web at \
-     [orthodoxwestbreviary.com](https://orthodoxwestbreviary.com), to pray from a computer or any other device.";
+pub const ABOUT_ON_THE_WEB: &str = "You can also pray from a computer or browser at \
+     [orthodoxwestbreviary.com](https://orthodoxwestbreviary.com).";
 
 /// The hour the table marks as now at a clock hour (0–23), as home's directory marks it: none
 /// from midnight to 2 am, when the office being prayed is yesterday's Compline.
@@ -244,6 +352,13 @@ mod tests {
     fn the_hours_are_the_seven_in_order() {
         let slugs: Vec<_> = ABOUT_HOURS.iter().flat_map(|(_, hours)| hours.iter().map(|(slug, _)| *slug)).collect();
         assert_eq!(slugs, ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"]);
+        // Solar angles progress strictly from east (dawn) to west (night), with Sext at zenith.
+        let angles: Vec<_> = slugs.iter().map(|s| about_horologium_angle(s)).collect();
+        assert!(angles.windows(2).all(|w| w[0] > w[1]));
+        assert_eq!(about_horologium_angle("sext"), 90.0);
+        assert!(about_horologium_is_night("vespers"));
+        assert!(about_horologium_is_night("compline"));
+        assert!(!about_horologium_is_night("none"));
     }
 
     #[test]
