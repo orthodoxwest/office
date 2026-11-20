@@ -69,6 +69,7 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -320,12 +321,26 @@ private fun HourRow(
             Modifier.weight(1f).heightIn(min = 46.dp).check(h.chosen) {
                 haptics.toggled(it)
                 onChange(settings.withHour(h.copy(chosen = it)))
-            },
+            }.padding(vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Tick(h.chosen)
-            // Muted until chosen, as the web's `.reminder-hour-row.is-selected`.
-            Text(h.name, Modifier.padding(start = 12.dp), style = body.copy(color = name))
+            // Muted until chosen, as the web's `.reminder-hour-row.is-selected`; gloss stays quiet beneath.
+            Column(Modifier.padding(start = 12.dp, end = 8.dp)) {
+                Text(h.name, style = body.copy(color = name))
+                if (h.gloss.isNotEmpty()) {
+                    Text(
+                        h.gloss,
+                        Modifier.padding(top = 1.dp),
+                        style = Type.small.copy(
+                            fontSize = 12.48.sp,
+                            lineHeight = 16.sp,
+                            color = p.muted.copy(alpha = if (h.chosen) 0.85f else 0.7f),
+                            fontStyle = FontStyle.Italic,
+                        ),
+                    )
+                }
+            }
         }
         val bySun = sun?.get(h.hour)?.takeIf { h.hour != "compline" }
         val label = (bySun ?: h.time).format(clock)

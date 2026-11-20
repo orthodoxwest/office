@@ -70,6 +70,7 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
@@ -91,7 +92,9 @@ import org.orthodoxwest.office.core.EndLeaf
 import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.PrayedReading
+import org.orthodoxwest.office.core.ReadingKeyView
 import org.orthodoxwest.office.core.blockWords
+import org.orthodoxwest.office.core.readingKey
 import org.orthodoxwest.office.core.reopensAtPlace
 
 /** How many hours hold each window awake. */
@@ -111,6 +114,8 @@ fun HourScreen(
     onForm: (String) -> Unit,
     onHour: (LocalDate, String) -> Unit,
     onAllHours: () -> Unit,
+    onFeast: (String) -> Unit = {},
+    onAbout: () -> Unit = {},
 ) {
     val p = LocalPalette.current
     // Like the web's wake lock: the screen stays on while an hour is open.
@@ -217,7 +222,7 @@ fun HourScreen(
         ) {
             item(key = "band") { Box(Modifier.fillMaxWidth().height(3.dp).background(bandColor(view.color, p))) }
             item(key = "chrome") { chrome() }
-            item(key = "title") { Box(Modifier.padding(horizontal = inset)) { HourTitle(view, date, today, form, onDate, onForm) } }
+            item(key = "title") { Box(Modifier.padding(horizontal = inset)) { HourTitle(view, date, today, form, onDate, onForm, onFeast, onAbout) } }
             // Each block's space depends on the one before it, across sections.
             var prev: BlockView? = null
             var afterClosed = false
@@ -445,10 +450,21 @@ private fun officeRead(info: LazyListLayoutInfo, heights: Map<Int, Int>): Float 
 }
 
 @Composable
-private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: String, onDate: (LocalDate) -> Unit, onForm: (String) -> Unit) {
+private fun HourTitle(
+    view: HourView,
+    date: LocalDate,
+    today: LocalDate,
+    form: String,
+    onDate: (LocalDate) -> Unit,
+    onForm: (String) -> Unit,
+    onFeast: (String) -> Unit,
+    onAbout: () -> Unit,
+) {
     val p = LocalPalette.current
+    val key = remember { readingKey() }
     var picking by remember { mutableStateOf(false) }
     var choosing by remember { mutableStateOf(false) }
+    var reading by remember { mutableStateOf(false) }
     // What a screen reader hears when the form changes (the web's `#leader-status`).
     var status by remember { mutableStateOf("") }
     // Once said, the words are taken down, so a later swipe does not find them lingering.
@@ -497,7 +513,7 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
                     if (part == view.dateLabel && j == 0) {
                         Text(
                             text,
-                            Modifier.tap(label = part, action = "change date") { picking = !picking; choosing = false }.disclosed(picking),
+                            Modifier.tap(label = part, action = "change date") { picking = !picking; choosing = false; reading = false }.disclosed(picking),
                             style = Type.meta.copy(color = if (picking) p.accent else p.muted, textAlign = TextAlign.Center),
                         )
                     } else {
@@ -506,7 +522,10 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
                 }
             }
             if (view.feast.isNotEmpty()) {
-                Text(view.feast, Modifier.padding(top = 1.9.dp), style = Type.dayName.copy(color = p.text))
+                val feastMod = Modifier.padding(top = 1.9.dp).then(
+                    if (view.feastId.isNotEmpty()) Modifier.tap(label = view.feast, action = "about this feast") { onFeast(view.feastId) } else Modifier,
+                )
+                Text(view.feast, feastMod, style = Type.dayName.copy(color = p.text))
             }
         }
         if (date != today) {
@@ -516,9 +535,15 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
                 style = Type.label(16f, 0.08f).copy(color = p.accent, fontFeatureSettings = ALL_SMALL_CAPS),
             )
         }
-        // In home's foot letter, kept to one line: on a first-class day the frame narrows the
-        // measure and "Prayer form: Private" lost its caret to a line of its own.
-        Disclosure("Prayer form:", choosing, { choosing = !choosing; picking = false }, value = PRAYER_FORMS.first { it.first == form }.second, modifier = Modifier.padding(top = 4.dp), style = Type.smallCapsControl, upper = false)
+        // In home's foot letter, kept to one line each: Prayer form and How to read sit side by side
+        // and stack cleanly when a narrow screen or large text leaves no room.
+        FlowRow(
+            Modifier.padding(top = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+        ) {
+            Disclosure("Prayer form:", choosing, { choosing = !choosing; picking = false; reading = false }, value = PRAYER_FORMS.first { it.first == form }.second, style = Type.smallCapsControl, upper = false)
+            Disclosure(key.label, reading, { reading = !reading; choosing = false; picking = false }, style = Type.smallCapsControl, upper = false)
+        }
         // Previous · Today · Next keep to the edges up to 540dp, and gather in the middle above it.
         Unfold(picking) { DatePicker(date, today, centred = LocalConfiguration.current.screenWidthDp > 540) { picking = false; onDate(it) } }
         Unfold(choosing) {
@@ -528,8 +553,61 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
                 onForm(it)
             }
         }
+        Unfold(reading) { ReadingKeyPanel(key) { reading = false; onAbout() } }
         Spacer(Modifier.fillMaxWidth().height(7.2.dp).semantics { liveRegion = LiveRegionMode.Polite; if (status.isNotEmpty()) contentDescription = status })
         Hairline(p.lining.copy(alpha = 0.3f))
+    }
+}
+
+/** In-hour "How to read" legend panel (matches web's `.reading-key-panel`). */
+@Composable
+private fun ReadingKeyPanel(key: ReadingKeyView, onAbout: () -> Unit) {
+    val p = LocalPalette.current
+    Column(Modifier.padding(top = 10.dp, bottom = 8.dp).widthIn(max = 384.dp).fillMaxWidth()) {
+        Text(
+            key.title.uppercase(),
+            Modifier.padding(bottom = 8.8.dp),
+            style = Type.label(11.2f, 0.1f).copy(color = p.muted),
+        )
+        Hairline(p.border)
+        key.items.forEachIndexed { i, item ->
+            if (i > 0) Hairline(p.surfaceEdge)
+            Row(Modifier.fillMaxWidth().padding(vertical = 8.3.dp, horizontal = 3.2.dp), verticalAlignment = Alignment.Top) {
+                val markMod = Modifier.width(82.dp).padding(end = 12.dp)
+                when (item.style) {
+                    "rubric" -> Text(item.mark, markMod, style = Type.small.copy(fontSize = 14.1.sp, lineHeight = 20.4.sp, color = p.rubric, fontStyle = FontStyle.Italic), softWrap = false)
+                    "titulus" -> Text(item.mark, markMod, style = Type.small.copy(fontSize = 14.1.sp, lineHeight = 20.4.sp, color = p.titulus, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 1.1.sp), softWrap = false)
+                    "unsaid" -> Text(item.mark, markMod, style = Type.small.copy(fontSize = 14.1.sp, lineHeight = 20.4.sp, color = p.unsaid), softWrap = false)
+                    "psalm" -> {
+                        val parts = item.mark.split(" ", limit = 2)
+                        Text(
+                            buildAnnotatedString {
+                                withStyle(SpanStyle(color = p.titulus)) { append(parts[0]) }
+                                if (parts.size == 2) {
+                                    append(" ")
+                                    withStyle(SpanStyle(color = p.muted, fontSize = 11.8.sp)) { append(parts[1]) }
+                                }
+                            },
+                            markMod,
+                            style = Type.small.copy(fontSize = 14.1.sp, lineHeight = 20.4.sp, fontFeatureSettings = "lnum"),
+                            softWrap = false,
+                        )
+                    }
+                    else -> Text(item.mark, markMod, style = Type.small.copy(fontSize = 14.1.sp, lineHeight = 20.4.sp, color = p.text), softWrap = false)
+                }
+                Text(item.text, Modifier.weight(1f), style = Type.small.copy(fontSize = 14.1.sp, lineHeight = 20.4.sp, color = p.text))
+            }
+        }
+        Hairline(p.border)
+        Text(
+            buildAnnotatedString {
+                append(key.footBefore)
+                withStyle(SpanStyle(color = p.accent, textDecoration = TextDecoration.Underline)) { append(key.footLink) }
+                append(key.footAfter)
+            },
+            Modifier.padding(top = 10.4.dp).tap(label = key.footLink, action = "open about the office", onClick = onAbout),
+            style = Type.small.copy(fontSize = 12.8.sp, lineHeight = 19.2.sp, color = p.muted),
+        )
     }
 }
 

@@ -124,7 +124,7 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         contentDescription = spoken(block)
         if (block.kind == BlockKind.HEADING || block.kind == BlockKind.COMMEMORATION_HEADING) heading()
         if (glossed.isNotEmpty()) {
-            customActions = glossed.map { (i, gloss) -> CustomAccessibilityAction("Explain “${gloss.title.lowercase()}”") { open = i; true } }
+            customActions = glossed.map { (i, gloss) -> CustomAccessibilityAction(explain(gloss)) { open = i; true } }
         }
     }
     @Composable
@@ -141,10 +141,11 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         // Tituli, as painted in red ochre on the limewash (gilt on the Apse night), clear of the rubrics' red.
         BlockKind.HEADING, BlockKind.COMMEMORATION_HEADING -> Column(m.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             if (cross) PaintedCross(Modifier.padding(bottom = Space.BIND.of(LocalDensity.current.bodyLine())).size(9.92.dp))
-            val style = if (block.kind == BlockKind.COMMEMORATION_HEADING) Type.commemorationName else Type.heading
-            Text(runs(block), Modifier.fillMaxWidth(), style = style.copy(color = p.titulus))
+            val style = (if (block.kind == BlockKind.COMMEMORATION_HEADING) Type.commemorationName else Type.heading).copy(color = p.titulus)
+            if (glossed.isEmpty()) Text(runs(block), Modifier.fillMaxWidth(), style = style)
+            else GlossedText(runs(block), block, open, { open = it }, Modifier.fillMaxWidth(), style)
         }
-        BlockKind.ITEM_LABEL -> ItemLabel(block, m.fillMaxWidth(), Type.itemLabel.copy(color = p.titulus))
+        BlockKind.ITEM_LABEL -> ItemLabel(block, glossed.isNotEmpty(), open, { open = it }, m.fillMaxWidth(), Type.itemLabel.copy(color = p.titulus))
         BlockKind.LATIN_TITLE, BlockKind.CANTICLE_SECTION -> Text(
             runs(block),
             m.fillMaxWidth(),
@@ -165,19 +166,22 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         BlockKind.SPEAKER -> Text(runs(block), m.fillMaxWidth(), style = Type.speaker.copy(color = p.rubric))
         // Body antiphons hang left: the sigil opens the line, wrapped lines clear it. An announcement's
         // opening words stand centred over the psalm's label, as the web's `.antiphon-announce`.
-        BlockKind.ANTIPHON, BlockKind.ANNOUNCED_ANTIPHON -> Text(
-            buildAnnotatedString {
+        BlockKind.ANTIPHON, BlockKind.ANNOUNCED_ANTIPHON -> {
+            val antText = buildAnnotatedString {
+                if (block.markerGloss != null) pushStringAnnotation(GLOSS, "-1")
                 withStyle(SpanStyle(color = p.titulus, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 1.4.sp)) { append(block.marker) }
+                if (block.markerGloss != null) pop()
                 append(" ")
                 append(runs(block))
-            },
-            m.fillMaxWidth(),
-            style = if (block.kind == BlockKind.ANNOUNCED_ANTIPHON) {
+            }
+            val antStyle = if (block.kind == BlockKind.ANNOUNCED_ANTIPHON) {
                 text.copy(textAlign = TextAlign.Center)
             } else {
                 text.copy(textIndent = TextIndent(restLine = 21.6.sp))
-            },
-        )
+            }
+            if (glossed.isEmpty()) Text(antText, m.fillMaxWidth(), style = antStyle)
+            else GlossedText(antText, block, open, { open = it }, m.fillMaxWidth(), antStyle)
+        }
         BlockKind.VERSE -> when {
             block.dropCap -> Opening(block, verse, m, textStart = VerseGutter)
             block.marker.isEmpty() -> Text(runs(block), m.fillMaxWidth().padding(start = VerseGutter), style = verse)
@@ -616,10 +620,22 @@ fun hymnColumns(sections: List<SectionView>, density: Density = LocalDensity.cur
  * `.item-label.stacked`): a separator ending a line alone separates nothing.
  */
 @Composable
-private fun ItemLabel(block: BlockView, modifier: Modifier, style: TextStyle) {
+private fun ItemLabel(
+    block: BlockView,
+    hasGloss: Boolean,
+    open: Int?,
+    onOpen: (Int?) -> Unit,
+    modifier: Modifier,
+    style: TextStyle,
+) {
+    @Composable
+    fun labelText(text: AnnotatedString, sub: BlockView, mod: Modifier) {
+        if (hasGloss) GlossedText(text, sub, open, onOpen, mod, style)
+        else Text(text, mod, style = style)
+    }
     val latin = block.runs.indexOfFirst { it.style == RunStyle.LATIN }
     if (latin < 1) {
-        Text(runs(block), modifier, style = style)
+        labelText(runs(block), block, modifier)
         return
     }
     val whole = runs(block)
@@ -630,10 +646,11 @@ private fun ItemLabel(block: BlockView, modifier: Modifier, style: TextStyle) {
             !measurer.measure(whole, style, softWrap = false, maxLines = 1, constraints = Constraints(maxWidth = width)).didOverflowWidth
         }
         if (fits) {
-            Text(whole, Modifier.fillMaxWidth(), style = style)
+            labelText(whole, block, Modifier.fillMaxWidth())
         } else {
+            val head = block.copy(runs = block.runs.subList(0, latin - 1))
             Column(Modifier.fillMaxWidth()) {
-                Text(runs(block.copy(runs = block.runs.subList(0, latin - 1))), Modifier.fillMaxWidth(), style = style)
+                labelText(runs(head), head, Modifier.fillMaxWidth())
                 Text(runs(block.copy(runs = block.runs.subList(latin, block.runs.size))), Modifier.fillMaxWidth(), style = style)
             }
         }

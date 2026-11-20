@@ -57,18 +57,20 @@ extension NSAttributedString.Key {
 final class GlossNote: NSObject {
     let title: String
     let note: String
+    let quiet: Bool
 
     init(_ gloss: GlossView) {
         title = gloss.title
         note = gloss.note
+        quiet = gloss.quiet
     }
 
     override func isEqual(_ object: Any?) -> Bool {
         guard let other = object as? GlossNote else { return false }
-        return title == other.title && note == other.note
+        return title == other.title && note == other.note && quiet == other.quiet
     }
 
-    override var hash: Int { title.hashValue ^ note.hashValue }
+    override var hash: Int { title.hashValue ^ note.hashValue ^ quiet.hashValue }
 }
 
 /// A block's runs as styled text in `style`, each run in its web class's colour and face.
@@ -278,6 +280,9 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics, ha
         sigil.smallCaps = true
         sigil.tracking = 1.4
         let t = marked(block.marker, sigil, p.titulus)
+        if let mg = block.markerGloss {
+            t.addAttribute(.gloss, value: GlossNote(mg), range: NSRange(location: 0, length: t.length))
+        }
         t.append(NSAttributedString(string: " ", attributes: [.font: font]))
         t.append(text)
         spec.text = t
@@ -392,28 +397,32 @@ struct BlockRow: View {
             ScoreRow(block: block)
         } else {
             let spec = proseSpec(block, p, o, m, hangsWords: wide && !ranked, flushDropCap: flushDropCap)
-            let glosses = block.runs.compactMap(\.gloss)
+            let glosses: [GlossView] = (block.markerGloss.map { [$0] } ?? []) + block.runs.compactMap(\.gloss)
+            let tapGloss: ((Int, CGRect) -> Void)? = glosses.isEmpty ? nil : { i, rect in
+                glossRect = rect
+                if openGloss != i { shownGloss = i }
+                openGloss = openGloss == i ? nil : i
+            }
             let prose = Prose(
                 spec: spec,
                 spoken: spoken(block),
                 header: block.kind == .heading || block.kind == .commemorationHeading,
                 openGloss: openGloss,
-                onGloss: glosses.isEmpty ? nil : { i, rect in
-                    glossRect = rect
-                    if openGloss != i { shownGloss = i }
-                    openGloss = openGloss == i ? nil : i
-                }
+                onGloss: tapGloss
             )
+            let popoverBinding = Binding(get: { openGloss != nil }, set: { if !$0 { openGloss = nil } })
             if block.kind == .itemLabel, let latin = block.runs.firstIndex(where: { $0.style == .latin }), latin > 0 {
                 // A psalm's number and its Latin incipit share a line, a dot between them. When the
                 // line cannot hold both, the incipit stands on its own line beneath and the dot goes
                 // (the web's `.item-label.stacked`): a separator ending a line alone separates nothing.
                 let title = labelPart(block, block.runs[..<(latin - 1)])
                 let incipit = labelPart(block, block.runs[latin...])
+                // The note hangs from the Prose that was tapped, whose box `glossRect` is measured in,
+                // so its arrow points at the number however the label is centred.
                 ViewThatFits(in: .horizontal) {
-                    prose.fixedSize(horizontal: true, vertical: false)
+                    noted(prose.fixedSize(horizontal: true, vertical: false), glosses, popoverBinding)
                     VStack(spacing: 0) {
-                        Prose(spec: proseSpec(title, p, o, m))
+                        noted(Prose(spec: proseSpec(title, p, o, m), openGloss: openGloss, onGloss: tapGloss), glosses, popoverBinding)
                         Prose(spec: proseSpec(incipit, p, o, m))
                     }
                 }
@@ -425,23 +434,23 @@ struct BlockRow: View {
                 // as the web's fit-content `.hymn-verses`.
                 prose.frame(maxWidth: column ?? .infinity).frame(maxWidth: .infinity)
             } else if !glosses.isEmpty {
-                // A rubric term's note opens over the word, so it never covers the prayer it
+                // A glossed term's note opens over the word, so it never covers the prayer it
                 // explains (the web's `.gloss-note`); a tap elsewhere puts it away.
-                prose
-                    // The arrow on the card's bottom edge, pointing down to the word; iOS may still
-                    // place the card itself where the room above is short.
-                    .popover(
-                        isPresented: Binding(get: { openGloss != nil }, set: { if !$0 { openGloss = nil } }),
-                        attachmentAnchor: .rect(.rect(glossRect)),
-                        arrowEdge: .bottom
-                    ) {
-                        if shownGloss < glosses.count { NoteCard(title: glosses[shownGloss].title, note: glosses[shownGloss].note) }
-                    }
+                noted(prose, glosses, popoverBinding)
                     .padding(.leading, -spec.hang)
             } else {
                 // A sigil hung into the margin ("All:") takes the room it hangs into.
                 prose.padding(.leading, -spec.hang)
             }
+        }
+    }
+
+    /// `prose` with its glossed terms' note, the arrow on the card's bottom edge pointing down to
+    /// the word (`glossRect`, in that Prose's own box); iOS may still place the card itself where
+    /// the room above is short.
+    private func noted<V: View>(_ prose: V, _ glosses: [GlossView], _ isPresented: Binding<Bool>) -> some View {
+        prose.popover(isPresented: isPresented, attachmentAnchor: .rect(.rect(glossRect)), arrowEdge: .bottom) {
+            if shownGloss < glosses.count { NoteCard(title: glosses[shownGloss].title, note: glosses[shownGloss].note) }
         }
     }
 }

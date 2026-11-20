@@ -607,6 +607,11 @@ pub fn back_to_ordo(d: Date) -> String {
     format!("Ordo, {} {}", MONTHS[d.month() as usize - 1], crate::format_year(d.year()))
 }
 
+/// The feast page's way back to the ordo's year (its Tabula) it was opened from: "2026 Ordo".
+pub fn back_to_ordo_year(year: i32) -> String {
+    format!("{} Ordo", crate::format_year(year))
+}
+
 /// The Common a category's texts come from, as the Diurnal names it.
 pub fn common_name(c: Category) -> &'static str {
     match c {
@@ -760,6 +765,7 @@ pub(crate) mod tests {
         assert_eq!(back_to_day(today, today), "Today");
         assert_eq!(back_to_day(Date::new(2027, 2, 27), today), "February 27");
         assert_eq!(back_to_ordo(today), "Ordo, November 2026");
+        assert_eq!(back_to_ordo_year(2026), "2026 Ordo");
         assert_eq!(next_label(&Keeping::Kept, false), "Next kept");
         assert_eq!(next_label(&Keeping::Kept, true), "Kept today");
         assert_eq!(next_label(&Keeping::Commemorated { holder: "Feria".into() }, true), "Commemorated today");

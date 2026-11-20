@@ -77,7 +77,7 @@ document.documentElement.classList.add("js");
 // did. The note fades in and out on Tempo's settle (style.css), a cut under
 // reduced motion; it never rises or slides.
 (function () {
-  var terms = Array.prototype.slice.call(document.querySelectorAll(".gloss-term[data-gloss]"));
+  var terms = Array.prototype.slice.call(document.querySelectorAll(".gloss-term[data-gloss], .gloss-quiet[data-gloss]"));
   var marks = Array.prototype.slice.call(document.querySelectorAll(".month-table abbr[title], .find-rank[title]"));
   if (!terms.length && !marks.length) return;
   // Kept in the page and emptied rather than hidden, so a screen reader
@@ -130,10 +130,16 @@ document.documentElement.classList.add("js");
     return (parseFloat(s.transitionDuration) + parseFloat(s.transitionDelay)) * 1000 || 0;
   }
 
+  // Only a button says whether its note is out; the class marks it for the eye.
+  function expanded(term, out) {
+    term.classList.toggle("gloss-out", out);
+    if (term.getAttribute("role") === "button") term.setAttribute("aria-expanded", out ? "true" : "false");
+  }
+
   function close(refocus) {
     if (!open) return;
     var was = open;
-    open.setAttribute("aria-expanded", "false");
+    expanded(open, false);
     open = null;
     by = null;
     note.classList.add("faded");
@@ -150,12 +156,12 @@ document.documentElement.classList.add("js");
 
   function show(term, how) {
     clearTimeout(leaving);
-    if (open) open.setAttribute("aria-expanded", "false");
+    if (open) expanded(open, false);
     open = term;
     by = how;
     title.textContent = "";
     body.textContent = "";
-    term.setAttribute("aria-expanded", "true");
+    expanded(term, true);
     // Written a frame after it was emptied, so reopening the same term is
     // still a change the live region announces.
     requestAnimationFrame(function () {
@@ -180,6 +186,15 @@ document.documentElement.classList.add("js");
   }
 
   function control(term) {
+    // A quiet gloss in the running text (each antiphon's "Ant.", each psalm's
+    // Hebrew number) answers a tap but is no tab stop or button: an hour has
+    // a dozen or more, and the reading key already explains both to every
+    // reader. Quiet glosses on headings (Chapter, Preces, Suffrage) are few
+    // and stay keyboard controls.
+    if (term.classList.contains("gloss-quiet") && !term.closest(".section-heading")) {
+      term.addEventListener("click", function () { toggle(term); });
+      return;
+    }
     term.setAttribute("role", "button");
     term.setAttribute("tabindex", "0");
     term.setAttribute("aria-expanded", "false");
@@ -1627,6 +1642,17 @@ function plainClickOpensHere(e, link) {
   // the header turns it through details.turnFold, and the ordo's "Show office
   // details" lands a fold mid-turn through details.stopFold before it changes
   // the day. Without motion it is the native toggle.
+  document.querySelectorAll(".hour-context-controls > details").forEach(function (details) {
+    details.addEventListener("toggle", function () {
+      if (!details.open) return;
+      details.parentElement.querySelectorAll(":scope > details[open]").forEach(function (other) {
+        if (other === details) return;
+        if (other.stopFold) other.stopFold();
+        other.open = false;
+      });
+    });
+  });
+
   var easesToAuto = window.CSS && typeof CSS.supports === "function" && CSS.supports("interpolate-size", "allow-keywords");
   if (!easesToAuto && window.matchMedia && typeof document.documentElement.animate === "function") {
     var foldStillness = window.matchMedia("(prefers-reduced-motion: no-preference)");
@@ -1657,7 +1683,7 @@ function plainClickOpensHere(e, link) {
       });
       return at;
     };
-    document.querySelectorAll("details.hour-date-nav, details.session-prayers, details.day-office-details, details.reminder-address, details.reminder-help, details.reminder-calendar, details.feast-hymn").forEach(function (details) {
+    document.querySelectorAll("details.hour-date-nav, details.reading-key, details.session-prayers, details.day-office-details, details.reminder-address, details.reminder-help, details.reminder-calendar, details.feast-hymn").forEach(function (details) {
       var summary = details.querySelector(":scope > summary");
       if (!summary) {
         return;

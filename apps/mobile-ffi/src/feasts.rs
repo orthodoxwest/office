@@ -8,9 +8,9 @@ use corpus::typography::typeset;
 use office::feast::{DayOf, FeastTexts, feast_texts};
 use presentation::feast::{
     FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearIndex, YearKeeping, back_to_day, back_to_ordo,
-    feast_date, feast_register, feast_subtitle, feast_titulus, is_entry, is_feast_id, is_usual, keeping_class, keeping_label, keeping_note,
-    kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count, row_date, search_years,
-    texts_keeping, texts_source, whole_office_label,
+    back_to_ordo_year, feast_date, feast_register, feast_subtitle, feast_titulus, is_entry, is_feast_id, is_usual, keeping_class,
+    keeping_label, keeping_note, kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count,
+    row_date, search_years, texts_keeping, texts_source, whole_office_label,
 };
 use presentation::long_date;
 
@@ -187,6 +187,12 @@ pub fn feast_back_to_day(date: CivilDate, today: CivilDate) -> String {
 #[uniffi::export]
 pub fn feast_back_to_ordo(date: CivilDate) -> String {
     date.parse().map(back_to_ordo).unwrap_or_else(|_| FEAST_WORDS.find_title.into())
+}
+
+/// The feast page's way back to the ordo's year it was opened from, as the web's: "2026 Ordo".
+#[uniffi::export]
+pub fn feast_back_to_ordo_year(year: i32) -> String {
+    back_to_ordo_year(year)
 }
 
 /// `usual` leaves its status unsaid, as the feast page does for a year kept as the feast usually is.

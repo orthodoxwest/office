@@ -131,6 +131,7 @@ pub fn build_month(days: &[Day], rails: &[Rail], engine: &Engine, moveable: &Mov
             lead_to: rail.lead_to.map(|c| c.as_str().to_string()).unwrap_or_default(),
             lead_from: rail.lead_from.map(|c| c.as_str().to_string()).unwrap_or_default(),
             feast_name: day_name(d),
+            feast_href: d.celebration.as_ref().map(|c| feast_href(feasts, &c.id, &c.name, d.date, &ordo_from(d.date))).unwrap_or_default(),
             fast: o.fast,
             abstinence: o.abstinence,
             commemoration_hrefs: d.commemorations.iter().map(|c| feast_href(feasts, &c.id, &c.name, d.date, &ordo_from(d.date))).collect(),
@@ -218,14 +219,28 @@ fn loose_month(s: &str) -> Option<u32> {
     MONTHS.iter().zip(1..).find(|(name, _)| name.eq_ignore_ascii_case(s) || name[..3].eq_ignore_ascii_case(s)).map(|(_, m)| m)
 }
 
-/// The Tabula Temporaria (presentation::tabula), each date leading to its row.
-fn tabula(year: i32) -> TabulaData {
+/// The Tabula Temporaria (presentation::tabula), each date leading to its row and each moveable
+/// feast leading directly to its feast overview page.
+fn tabula(year: i32, feasts: &FeastIndex) -> TabulaData {
+    let from = format!("ordo-{year}");
     let rows = |rows: Vec<presentation::TabulaRow>| {
         rows.into_iter()
-            .map(|r| TabulaRow {
-                label: r.label.into(),
-                value: r.value,
-                href: r.date.map(|d| calendar_link(&date_slug(d))).unwrap_or_default(),
+            .map(|r| {
+                let feast_href = r
+                    .date
+                    .filter(|_| !r.feast_id.is_empty())
+                    .map(|d| feast_href(feasts, r.feast_id, r.label, d, &from))
+                    .unwrap_or_default();
+                let (gloss_title, gloss_note) =
+                    presentation::gloss::tabula_figure_gloss(r.label).map(|g| (g.title.into(), g.note.into())).unwrap_or_default();
+                TabulaRow {
+                    label: r.label.into(),
+                    value: r.value,
+                    href: r.date.map(|d| calendar_link(&date_slug(d))).unwrap_or_default(),
+                    feast_href,
+                    gloss_title,
+                    gloss_note,
+                }
             })
             .collect()
     };
@@ -518,6 +533,11 @@ impl Server {
             hour: HourHeader {
                 title: hour.title.clone(),
                 color: hour.color.map(|c| c.as_str()).unwrap_or("").into(),
+                feast_href: if hour.feast.is_empty() {
+                    String::new()
+                } else {
+                    feast_href(self.cache.feasts(), "", &hour.feast, date, &format!("{hour_name}-{date_str}"))
+                },
                 feast: hour.feast.clone(),
                 season: season_str(&hour).into(),
             },
@@ -670,7 +690,7 @@ impl Server {
                 12 => None,
                 m => Some(step(year, m + 1)),
             }),
-            tabula: (view == OrdoView::Year).then(|| tabula(year)),
+            tabula: (view == OrdoView::Year).then(|| tabula(year, self.cache.feasts())),
         };
         match self.pages.calendar(&data) {
             Ok(body) => html(StatusCode::OK, body),
@@ -698,6 +718,7 @@ impl Server {
                         .filter_map(|(slug, _)| REMINDER_DEFAULTS.iter().find(|d| d.0 == *slug))
                         .map(|&(slug, name, hh, mm, checked)| ReminderHour {
                             name: name.into(),
+                            gloss: hour_gloss(slug).into(),
                             slug: slug.into(),
                             default: format!("{hh:02}:{mm:02}"),
                             checked,
@@ -1023,8 +1044,10 @@ mod tests {
     fn prime_carries_the_martyrology_for_the_setting() {
         let (status, _, body) = get("/prime/2026-09-07");
         assert_eq!(status, StatusCode::OK);
-        let off =
-            body.find("<div data-martyrology-variant=\"off\"><p class=\"rubric\">Then the Martyrology is read").expect("rubric variant");
+        let off = body
+            .find("<div data-martyrology-variant=\"off\"><p class=\"rubric\">Then the <span class=\"gloss-term\"")
+            .expect("rubric variant");
+        assert!(body[off..off + 400].contains(">Martyrology</span> is read"));
         let on = body
             .find("<div data-martyrology-variant=\"on\"><h2 class=\"section-heading\">Martyrology for tomorrow, September 8</h2>")
             .expect("reading");
@@ -1480,5 +1503,46 @@ mod tests {
         // and a white feast in a penitential season is.
         assert!(!framed(&format!("/lauds/{}", date_slug(m.passion_sunday.add_days(-7)))));
         assert!(framed("/lauds/2026-03-25"));
+    }
+
+    #[test]
+    fn newcomer_guidance_and_feast_links() {
+        // Hour page: collapsed-by-default How to read disclosure + quiet header feast link.
+        let (status, _, lauds) = get("/lauds/2026-03-25");
+        assert_eq!(status, StatusCode::OK);
+        assert!(lauds.contains(r#"<details class="reading-key" name="hour-controls">"#));
+        assert!(lauds.contains("<summary>How to read</summary>"));
+        assert!(lauds.contains(r#"<a href="/about">About the Office</a>"#));
+        assert!(lauds.contains(r#"class="feast-link hour-feast-link""#));
+        assert!(lauds.contains("?from=lauds-2026-03-25"));
+
+        // Reminders page: plain-English hour glosses beneath each hour name.
+        let (status, _, reminders) = get("/reminders");
+        assert_eq!(status, StatusCode::OK);
+        assert!(reminders.contains(r#"<span class="reminder-hour-gloss">Morning praise</span>"#));
+        assert!(reminders.contains(r#"<span class="reminder-hour-gloss">Prayer before sleep</span>"#));
+
+        // Tabula Temporaria: figure & Ember days glosses + moveable feast overview links.
+        let (status, _, year) = get("/calendar/2026");
+        assert_eq!(status, StatusCode::OK);
+        let year = year.replace("&#x2f;", "/");
+        assert!(year.contains(r#"data-gloss-title="Golden Number""#));
+        assert!(year.contains(r#"data-gloss-title="Dominical Letter""#));
+        assert!(year.contains(r#"data-gloss-title="Ember days""#));
+        assert!(
+            year.contains(r#"<a class="feast-link" href="/feast/ash-wednesday?from=ordo-2026" title="About this feast">Ash Wednesday</a>"#)
+        );
+        assert!(year.contains(
+            r#"<a class="feast-link" href="/feast/easter-sunday?from=ordo-2026" title="About this feast">Easter (Pascha) Day</a>"#
+        ));
+
+        // Month Ordo: inline feast link on feast days + Office details abbreviation glosses.
+        let (status, _, march) = get("/calendar/2026/03");
+        assert_eq!(status, StatusCode::OK);
+        let march = march.replace("&#x2f;", "/");
+        assert!(march.contains(r#"href="/feast/annunciation?from=ordo-2026-03-25" title="About this feast""#));
+        assert!(march.contains(r#"data-gloss-title="Benedictus antiphon""#));
+        assert!(march.contains(r#"data-gloss-title="Magnificat antiphon""#));
+        assert!(march.contains(r#"data-gloss-title="Commemoration""#));
     }
 }

@@ -219,9 +219,12 @@ fn blocks_carry_the_same_text_as_the_web() {
                         let (native, web) = (shown(&section_blocks, on), web_words(&html, on));
                         assert_eq!(native, web, "{hour_name} {} {} section {:?} chant {on}", day.date, form.as_str(), section.label);
                     }
-                    // Every rubric term the web glosses, the apps gloss too.
-                    let glossed = section_blocks.iter().flat_map(|b| &b.runs).filter(|r| r.gloss.is_some()).count();
-                    assert_eq!(glossed, html.matches("class=\"gloss-term\"").count(), "{hour_name} {} glosses", day.date);
+                    // Every rubric term and quiet structural mark the web glosses, the apps gloss too.
+                    let underlined = section_blocks.iter().flat_map(|b| &b.runs).filter(|r| r.gloss.is_some() && !r.quiet_gloss).count();
+                    assert_eq!(underlined, html.matches("class=\"gloss-term\"").count(), "{hour_name} {} rubric glosses", day.date);
+                    let quiet = section_blocks.iter().filter(|b| b.marker_gloss.is_some()).count()
+                        + section_blocks.iter().flat_map(|b| &b.runs).filter(|r| r.gloss.is_some() && r.quiet_gloss).count();
+                    assert_eq!(quiet, html.matches("gloss-quiet").count(), "{hour_name} {} quiet glosses", day.date);
                     checked += 1;
                 }
             }

@@ -293,10 +293,19 @@ struct RemindersScreen: View {
                     HStack(spacing: m.px(12)) {
                         Tick(checked: h.chosen)
                         // An hour not chosen stands back in the muted ink (the web's `.reminder-hour-name`).
-                        Text(h.name).type(Scale.body).foregroundStyle(h.chosen ? p.text : p.muted)
-                            .animation(tickMotion(h.chosen, still: still), value: h.chosen)
+                        VStack(alignment: .leading, spacing: m.px(1)) {
+                            Text(h.name).type(Scale.body).foregroundStyle(h.chosen ? p.text : p.muted)
+                                .animation(tickMotion(h.chosen, still: still), value: h.chosen)
+                            if !h.gloss.isEmpty {
+                                Text(h.gloss)
+                                    .type(TextStyle(size: 12.48, line: 16, italic: true))
+                                    .foregroundStyle(p.muted.opacity(h.chosen ? 0.85 : 0.7))
+                                    .multilineTextAlignment(.leading)
+                            }
+                        }
                         Spacer(minLength: 0)
                     }
+                    .padding(.vertical, m.px(5))
                     .frame(minHeight: 46)
                 }
                 .buttonStyle(Quiet())

@@ -70,7 +70,7 @@
          way into the date picker below (app.js), so the header carries no
          "Change date" label; without it the disclosure keeps its summary. #}
     {%- set season = hour.season|season_label %}
-    <p class="hour-meta"><span class="hour-meta-line"><span class="hour-meta-part hour-meta-date">{{ date_str }}</span>{% if season %}<span class="hour-meta-sep">&nbsp;&middot; </span><span class="hour-meta-part">{{ season }}</span>{% endif %}</span>{% if hour.feast %}<span class="sr-only">. </span><span class="hour-meta-part hour-meta-feast">{{ hour.feast|typeset }}</span>{% endif %}</p>
+    <p class="hour-meta"><span class="hour-meta-line"><span class="hour-meta-part hour-meta-date">{{ date_str }}</span>{% if season %}<span class="hour-meta-sep">&nbsp;&middot; </span><span class="hour-meta-part">{{ season }}</span>{% endif %}</span>{% if hour.feast %}<span class="sr-only">. </span><span class="hour-meta-part hour-meta-feast">{% if hour.feast_href %}<a class="feast-link hour-feast-link" href="{{ hour.feast_href|url }}" title="About this feast">{{ hour.feast|typeset }}</a>{% else %}{{ hour.feast|typeset }}{% endif %}</span>{% endif %}</p>
     {# Always visible when not local today — recovery from an overnight tab
          must not require opening "Change date". Secondary Today stays in the form. #}
     {# No role=status on server markup — see home.html. Client inject uses a live region. #}
@@ -80,7 +80,7 @@
     </p>
     {% endif %}
     <div class="hour-context-controls">
-    <details class="hour-date-nav" id="hour-date-nav">
+    <details class="hour-date-nav" id="hour-date-nav" name="hour-controls">
       <summary>Change date</summary>
       <nav class="day-nav" aria-label="Date navigation">
         <a href="{{ prev_link|url }}"><span aria-hidden="true">&larr;&nbsp;</span>{{ previous_day }}</a>
@@ -94,7 +94,7 @@
       </nav>
     </details>
     {% if leader_forms %}
-    <details class="leader-selector">
+    <details class="leader-selector" name="hour-controls">
       <summary>Prayer form: {% for f in leader_forms %}<span data-leaders="{{ f.form }}">{{ f.label }}</span>{% endfor %}</summary>
       <fieldset disabled aria-describedby="leader-preference-note">
         <legend>How are you praying?</legend>
@@ -108,6 +108,16 @@
     <p class="leader-print-label">Prayer form: {% for f in leader_forms %}<span data-leaders="{{ f.form }}">{{ f.label }}</span>{% endfor %}</p>
     <span class="sr-only" id="leader-status" role="status"></span>
     {% endif %}
+    <details class="reading-key" name="hour-controls">
+      <summary>{{ reading_key.label }}</summary>
+      <div class="reading-key-panel">
+        <p class="reading-key-title">{{ reading_key.title }}</p>
+        <ul class="reading-key-list">
+          {% for item in reading_key.items %}<li><span class="rk-mark rk-{{ item.style }}">{% if item.style == "psalm" %}{% set pp = item.mark|split(" ", 1)|list %}{{ pp[0] }}{% if pp|length == 2 %} <span>{{ pp[1] }}</span>{% endif %}{% else %}{{ item.mark }}{% endif %}</span><span class="rk-desc">{{ item.text }}</span></li>{% endfor %}
+        </ul>
+        <p class="reading-key-foot">{{ reading_key.foot_before }}<a href="/about">{{ reading_key.foot_link }}</a>{{ reading_key.foot_after }}</p>
+      </div>
+    </details>
     </div>
   </div>
   <div class="elements">
