@@ -226,10 +226,11 @@ pub const ABOUT: &[AboutBlock] = &[
     AboutBlock::Heading("An ancient prayer"),
     AboutBlock::Era {
         period: "From the Apostles",
-        text: "Christians have prayed at set hours since the Apostles, who continued the daily times \
-               of prayer they had known in Israel—the third hour at Pentecost, the sixth with St Peter, \
-               and the ninth in the Temple. By the third century, Tertullian and St Cyprian describe \
-               regular prayer at morning, evening, and the third, sixth, and ninth hours.",
+        text: "The Church has prayed at set hours since the Apostles, who kept the hours of prayer they \
+               had known in Israel. The Holy Spirit came at Pentecost at the third hour; St Peter went up \
+               to pray at the sixth; St Peter and St John went into the Temple at the ninth, “the hour of \
+               prayer.” By the third century Tertullian and St Cyprian of Carthage wrote of prayer at the \
+               third, sixth and ninth hours, and at morning and evening.",
     },
     AboutBlock::Era {
         period: "The Desert & St Benedict",
