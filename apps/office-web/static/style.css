@@ -11769,11 +11769,12 @@ body.page-hour::before {
   }
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice))) {
+html:where(:has(> body:is(.page-home, .page-about, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice))) {
   background-color: var(--bg);
 }
 
 body.page-home,
+body.page-about,
 body.page-calendar,
 body.page-find,
 body.page-feast,
@@ -11784,7 +11785,7 @@ body.page-notice {
   background: transparent;
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice)))::before {
+html:where(:has(> body:is(.page-home, .page-about, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice)))::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -11792,7 +11793,7 @@ html:where(:has(> body:is(.page-home, .page-calendar, .page-find, .page-feast, .
   pointer-events: none;
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice)))::before,
+html:where(:has(> body:is(.page-home, .page-about, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice)))::before,
 .page-calendar .month h2 {
   background: var(--plaster-layers);
   background-blend-mode: normal, multiply, screen, color-dodge, darken, normal;
