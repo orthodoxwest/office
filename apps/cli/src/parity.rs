@@ -11,7 +11,34 @@ use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
 use crate::dump::{FORMAT, HOUR_NAMES, PRAYER_FORMS, Record, Selection, generate_year};
-use crate::dump_tools::{key, validate};
+
+fn validate(v: &Value) -> Result<(), String> {
+    match v {
+        Value::String(s) if s.is_empty() => Err("empty string (absent values are null)".into()),
+        Value::Number(n) if !n.is_i64() => Err("dump numbers must be signed integers".into()),
+        Value::Array(a) => a.iter().try_for_each(validate),
+        Value::Object(o) => o.values().try_for_each(validate),
+        _ => Ok(()),
+    }
+}
+
+fn key(r: &Value) -> String {
+    let kind = r["kind"].as_str().unwrap_or("unknown");
+    let fields: &[&str] = match kind {
+        "calendar_year" => &["year"],
+        "calendar_day" | "office_day" => &["date"],
+        "corpus_entry" => &["key"],
+        "appointment_scope" => &["id"],
+        "hour" => &["date", "hour", "form"],
+        _ => &[],
+    };
+    let mut key = kind.to_string();
+    for field in fields {
+        key.push(' ');
+        key.push_str(&r[*field].as_str().map(str::to_string).unwrap_or_else(|| r[*field].to_string()));
+    }
+    key
+}
 
 const GROUPS: [&str; 4] = ["content", "presentation", "sources", "decisions"];
 

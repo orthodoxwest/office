@@ -1,50 +1,13 @@
-//! Review tooling: text provenance, the zero-occurrence ledger, and the composition diagnostics.
+//! Review tooling: text provenance and composition explanations.
 
-pub mod assurance;
-pub mod gate;
-pub mod manifest;
-pub mod prescreen;
+pub mod explain;
 pub mod provenance;
-pub mod queue;
-pub mod resolution;
 pub mod sweep;
-pub mod zero_occurrence;
 
-use calendar::{Date, Rank, Weekday};
 use liturgy::OfficeHour;
 use office::concurrence::VespersOwner;
 use office::day::Day;
 use sha2::{Digest, Sha256};
-
-/// The deployed site, prefixed to review links.
-pub const DEFAULT_BASE_URL: &str = "https://orthodoxwestbreviary.com";
-
-/// The hour's place in liturgical order.
-pub fn hour_order(hour: &str) -> usize {
-    office::engine::HOUR_NAMES.iter().position(|h| *h == hour).unwrap_or(0)
-}
-
-/// Review tiers: Lauds and Vespers, then Prime and Compline, then the minor
-/// hours.
-pub fn hour_tier(hour: &str) -> usize {
-    match hour {
-        "lauds" | "vespers" => 0,
-        "prime" | "compline" => 1,
-        _ => 2,
-    }
-}
-
-/// A: Sundays and 1st/2nd class; B: greater doubles and doubles; C: the rest.
-pub fn priority(rank: Option<Rank>, date: Date) -> &'static str {
-    let weight = rank.map_or(0, Rank::weight);
-    if weight >= Rank::Double2ndClass.weight() || date.weekday() == Weekday::Sunday {
-        "A"
-    } else if weight >= Rank::Double.weight() {
-        "B"
-    } else {
-        "C"
-    }
-}
 
 /// A short content hash of a composed hour, the date excluded so identical
 /// compositions on different dates hash alike. Source keys and decision
@@ -124,34 +87,6 @@ pub fn celebration_name(day: &Day) -> String {
     format!("{}{} feria", season[..1].to_uppercase(), &season[1..])
 }
 
-pub fn celebration_rank(day: &Day, hour_name: &str) -> Option<Rank> {
-    if hour_name == "vespers"
-        && let Some(f) = day.vespers.feast()
-    {
-        return Some(f.rank);
-    }
-    day.celebration.as_ref().map(|c| c.rank)
-}
-
-/// Octave, commemoration, and I-Vespers notes.
-pub fn context_note(day: &Day, hour_name: &str) -> String {
-    let mut parts = Vec::new();
-    if hour_name == "vespers"
-        && day.vespers.owner() == VespersOwner::IOfFollowing
-        && let Some(f) = day.vespers.feast()
-    {
-        parts.push(format!("I Vespers of {}", f.name));
-    }
-    if let Some(o) = day.within_octave_of.as_deref().filter(|o| !o.is_empty()) {
-        parts.push(format!("within octave of {o}"));
-    }
-    if !day.commemorations.is_empty() {
-        let names: Vec<&str> = day.commemorations.iter().map(|c| c.name.as_str()).collect();
-        parts.push(format!("comm: {}", names.join("; ")));
-    }
-    parts.join(" | ")
-}
-
 fn slugify(s: &str) -> String {
     let mut b = String::new();
     let mut prev_dash = false;
@@ -165,9 +100,4 @@ fn slugify(s: &str) -> String {
         }
     }
     b.trim_end_matches('-').to_string()
-}
-
-/// The base URL without trailing slashes; empty selects the default.
-pub fn base_url(base: &str) -> &str {
-    if base.is_empty() { DEFAULT_BASE_URL } else { base.trim_end_matches('/') }
 }

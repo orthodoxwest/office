@@ -7,7 +7,6 @@ mod args;
 mod checks;
 mod commands;
 mod dump;
-mod dump_tools;
 mod edit;
 mod parity;
 mod review;
@@ -65,18 +64,11 @@ fn main() -> ExitCode {
     };
     let stdout = std::io::stdout();
     let mut out = std::io::BufWriter::with_capacity(1 << 20, stdout.lock());
-    // File inspection does not need an installed corpus.
-    let result = match (name.as_str(), rest.first().map(String::as_str)) {
-        ("dump", Some("diff")) => dump_tools::cmd_diff(&rest[1..], &mut out),
-        _ => {
-            let Some(data) = tools::fs::FsData::find() else {
-                eprintln!("Cannot find data directory");
-                return ExitCode::FAILURE;
-            };
-            command(&data, rest, &mut out)
-        }
-    }
-    .and_then(|()| out.flush().map_err(|e| e.to_string()));
+    let Some(data) = tools::fs::FsData::find() else {
+        eprintln!("Cannot find data directory");
+        return ExitCode::FAILURE;
+    };
+    let result = command(&data, rest, &mut out).and_then(|()| out.flush().map_err(|e| e.to_string()));
     match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {

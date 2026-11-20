@@ -1,4 +1,4 @@
-.PHONY: help neuma-web build test test-ux parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean sweep-targets mutate mutate-diff test-coverage android android-bundle android-screenshots ios discover-resume
+.PHONY: help neuma-web build test test-ux parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-provenance pages tex pdf golden rust-check clean sweep-targets mutate mutate-diff test-coverage android android-bundle android-screenshots ios
 
 .DEFAULT_GOAL := help
 
@@ -25,19 +25,12 @@ test: ## Run Rust and Python tests
 	python3 scripts/test_project_status.py
 	python3 scripts/test_update_golden_workflow.py
 	python3 scripts/test_diurnal_pages.py
-	python3 scripts/test_diurnal_transcribe.py
-	python3 scripts/test_diurnal_discover.py
 	python3 scripts/test_ios_snapshots.py
 
 # Optional local diagnostic; normal checks do not collect coverage.
 test-coverage: ## Inspect local Rust coverage (requires cargo-llvm-cov and llvm-tools-preview)
 	mkdir -p output/coverage
 	cargo llvm-cov --workspace --locked --lcov --output-path output/coverage/lcov.info
-
-diurnal-test: ## Run page-image, transcription, and discovery unit tests
-	python3 scripts/test_diurnal_pages.py
-	python3 scripts/test_diurnal_transcribe.py
-	python3 scripts/test_diurnal_discover.py
 
 BOOKS_DIR ?= ../resources/books
 DIURNAL_PDF ?= $(BOOKS_DIR)/Monastic Diurnal.pdf
@@ -49,24 +42,6 @@ pages: ## Render and index the Monastic Diurnal and supplement PDFs
 	@if test -d "$(BOOKS_DIR)/supplements"; then \
 		find "$(BOOKS_DIR)/supplements" -maxdepth 1 -type f -name '*.pdf' -exec sh -c 'for pdf do base=$$(basename "$$pdf" .pdf); key=$$(printf "%s" "$$base" | tr "[:upper:]" "[:lower:]" | sed "s/[^a-z0-9._-]/-/g; s/--*/-/g; s/^-//; s/-$$//"); python3 scripts/diurnal-pages.py render "$$pdf" --key "supplement-$$key" --dpi "$(DPI)" || exit; done' sh {} +; \
 	fi
-
-transcribe: build ## Prepare prompts by default; APPLY=1 invokes readers and applies gated results
-	python3 scripts/diurnal-transcribe.py run --page-key "$(DIURNAL_PAGE_KEY)" $(if $(filter 1,$(APPLY)),--apply,--dry-run) $(if $(KEYS),--keys "$(KEYS)",)
-
-transcribe-report: ## Print markdown for RUN=<run-id-or-directory>
-	@test -n "$(RUN)" || (echo "RUN is required" >&2; exit 2)
-	python3 scripts/diurnal-transcribe.py report "$(RUN)"
-
-discover: build ## Prepare a scan work queue; SLOTS=collect,chapter-lauds narrows the search
-	python3 scripts/diurnal-discover.py run --page-key "$(DIURNAL_PAGE_KEY)" $(if $(filter 1,$(APPLY)),--apply,--dry-run) $(if $(FEASTS),--feasts "$(FEASTS)",) $(if $(MONTH),--month "$(MONTH)",) $(if $(LIMIT),--limit "$(LIMIT)",) $(if $(SLOTS),--slots "$(SLOTS)",)
-
-discover-resume: build ## Read the next 3 prepared tasks; APPLY=1 enables existing application checks
-	@test -n "$(RUN)" || (echo "RUN is required" >&2; exit 2)
-	python3 scripts/diurnal-discover.py resume "$(RUN)" $(if $(LIMIT),--limit "$(LIMIT)",) $(if $(FEASTS),--feasts "$(FEASTS)",) $(if $(filter 1,$(RETRY)),--retry,) $(if $(filter 1,$(APPLY)),--apply,)
-
-discover-report: ## Print discovery PR markdown for RUN=<run-id-or-directory>
-	@test -n "$(RUN)" || (echo "RUN is required" >&2; exit 2)
-	python3 scripts/diurnal-discover.py report "$(RUN)"
 
 test-ux: build ## Run Playwright UX regression tests against Rust
 	npm --prefix .web-tools run test:ux
@@ -103,35 +78,14 @@ audit: build ## Report placeholder texts and missing feast propers
 scaffold-propers: build ## Ensure proper text files exist with commented key catalogs (never overwrites live sections)
 	./office scaffold propers
 
-project-status: build ## Generate clergy-facing proper, assurance, and YEAR ordo status
+project-status: build ## Generate clergy-facing proper, provenance, and YEAR ordo status
 	python3 scripts/project-status.py --year $(YEAR)
 
 verify-psalms: ## Compare the Coverdale psalter against the official 1662 BCP witness
 	python3 scripts/verify-psalms.py
 
-review-manifest: build ## Inventory distinct rendered compositions for current year (START=2026 YEARS=1)
-	./office review manifest $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
-
 review-provenance: build ## Report generated corpus provenance coverage (+ usage-weighted %; START/YEARS scope the sweep)
 	./office review provenance $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
-
-review-provenance-queue: build ## Rank atomic text review by rendered dependency fan-out
-	./office review provenance-queue $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
-
-review-zero-occurrences: build ## List unrendered atomic texts with classification heuristics
-	./office review zero-occurrences $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
-
-review-resolution-inventory: build ## Inventory proper-resolution paths (default 28y; START/YEARS override)
-	./office review resolution-inventory -json $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
-
-review-suspects: build ## Print only pre-flagged/lint-flagged texts — the findings-sprint list
-	./office review provenance-queue -suspect-only $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
-
-review-plan: build ## Sample observed engine behavior (default 28y; START/YEARS override)
-	./office review plan $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
-
-review-assurance: build ## Check text-provenance floor and print summary
-	./office review assurance
 
 DATE ?= $(shell date +%Y-%m-%d)
 CHANT ?=
@@ -167,7 +121,7 @@ rust-check: ## Rust workspace: fmt, clippy, and tests
 parity: build ## Check every snapshot, including the 2026–2053 digest
 	python3 scripts/golden.py --check
 
-golden: build ## Regenerate rendered-office and assurance golden files
+golden: build ## Regenerate rendered-office and parity golden files
 	python3 scripts/golden.py
 
 neuma-web: ## Build neuma's browser module at the pinned rev into static/neuma.mjs (after moving the neuma pin)
