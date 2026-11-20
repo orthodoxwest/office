@@ -203,7 +203,7 @@ fun AboutScreen(
                     space = Space.NONE,
                 )
             }
-            Block(dropCapBlock, Modifier.padding(top = 4.dp))
+            Opening(dropCapBlock, body, Modifier.padding(top = 4.dp), textStart = 0.dp)
         }
     }
 
@@ -502,134 +502,10 @@ private fun Horologium(
         }
     }
 
-    BoxWithConstraints(Modifier.fillMaxWidth().padding(top = 3.dp, bottom = 13.6.dp).aspectRatio(320f / 144f)) {
-        val boxW = maxWidth
-        val boxH = maxHeight
-        val density = LocalDensity.current
-
-        Canvas(Modifier.fillMaxSize()) {
-            val sx = size.width / 320f
-            val sy = size.height / 144f
-            val cx = 160f * sx
-            val cy = 128f * sy
-            val rx = 118f * sx
-            val ry = 104f * sy
-
-            fun arcPt(deg: Float, factor: Float = 1f): Offset {
-                val rad = Math.toRadians(deg.toDouble())
-                return Offset(cx + cos(rad).toFloat() * rx * factor, cy - sin(rad).toFloat() * ry * factor)
-            }
-
-            val dome = Path().apply {
-                moveTo(cx - rx, cy)
-                arcTo(Rect(cx - rx, cy - ry, cx + rx, cy + ry), 180f, 180f, false)
-                close()
-            }
-            val orb = arcPt(animatedAngle)
-            val washRadius = max(size.width, size.height) * 0.68f
-            drawPath(dome, Brush.radialGradient(0f to wash0, 0.52f to wash1, 1f to wash2, center = orb, radius = washRadius))
-
-            if (p.dark) {
-                clipPath(dome) {
-                    val stars = listOf(
-                        Triple(102f, 56f, 1.3f), Triple(134f, 38f, 1.6f), Triple(176f, 35f, 1.2f), Triple(218f, 52f, 1.5f),
-                        Triple(82f, 84f, 1.1f), Triple(154f, 54f, 1.0f), Triple(238f, 82f, 1.2f), Triple(192f, 62f, 1.0f),
-                    )
-                    stars.forEach { (x, y, r) ->
-                        drawCircle(o.hi.copy(alpha = 0.62f), r * sx, Offset(x * sx, y * sy))
-                    }
-                }
-            }
-
-            // Station ticks
-            hours.forEach { h ->
-                val a = h.angle.toFloat()
-                drawLine(p.lining.copy(alpha = 0.32f), arcPt(a, 0.91f), arcPt(a, 1f), 0.7f * sx)
-            }
-
-            // Inner dashed arc
-            val innerArc = Path().apply {
-                arcTo(Rect(cx - rx * 0.93f, cy - ry * 0.93f, cx + rx * 0.93f, cy + ry * 0.93f), 180f, 180f, false)
-            }
-            drawPath(
-                innerArc,
-                p.lining.copy(alpha = 0.32f),
-                style = Stroke(width = 0.6f * sx, pathEffect = PathEffect.dashPathEffect(floatArrayOf(2f * sx, 4f * sx))),
-            )
-
-            // Main solar arc
-            val mainArc = Path().apply {
-                arcTo(Rect(cx - rx, cy - ry, cx + rx, cy + ry), 180f, 180f, false)
-            }
-            drawPath(mainArc, p.lining.copy(alpha = 0.52f), style = Stroke(width = 1.15f * sx))
-
-            // Lit arc from Lauds (168°) to the current orb angle
-            val startSweep = 180f + (180f - 168f)
-            val sweep = (168f - animatedAngle).coerceAtLeast(0.5f)
-            val litArc = Path().apply {
-                arcTo(Rect(cx - rx, cy - ry, cx + rx, cy + ry), startSweep, sweep, false)
-            }
-            drawPath(litArc, o.flat.copy(alpha = 0.78f), style = Stroke(width = 1.5f * sx))
-
-            // Horizon line
-            drawLine(p.lining.copy(alpha = 0.38f), Offset(16f * sx, cy), Offset(304f * sx, cy), 0.85f * sx)
-
-            // Non-active diamond stations
-            hours.forEach { h ->
-                if (h.hour == active.hour) return@forEach
-                val pt = arcPt(h.angle.toFloat())
-                val side = 5.4f * sx
-                val half = side / 2f
-                val d = Path().apply {
-                    moveTo(pt.x, pt.y - half * 1.414f)
-                    lineTo(pt.x + half * 1.414f, pt.y)
-                    lineTo(pt.x, pt.y + half * 1.414f)
-                    lineTo(pt.x - half * 1.414f, pt.y)
-                    close()
-                }
-                drawPath(d, p.bg)
-                drawPath(d, p.lining.copy(alpha = 0.85f), style = Stroke(width = 1.2f * sx))
-            }
-
-            // Active Sun or Moon orb with radial halo
-            val haloR = 15f * sx
-            drawCircle(
-                Brush.radialGradient(
-                    0f to o.hi.copy(alpha = if (p.dark) 0.42f else 0.36f),
-                    0.55f to o.flat.copy(alpha = 0.12f),
-                    1f to Color.Transparent,
-                    center = orb,
-                    radius = haloR,
-                ),
-                haloR,
-                orb,
-            )
-            val glyphScale = (if (active.night) 0.80f else 0.875f) * sx
-            val glyphHalf = 12f * glyphScale
-            translate(orb.x - glyphHalf, orb.y - glyphHalf) {
-                scale(glyphScale, glyphScale, pivot = Offset.Zero) {
-                    drawPath(if (active.night) Moon else Sun, o.flat)
-                }
-            }
-        }
-
-        // Cardinal labels (Dawn / Noon / Night)
-        val cardinalStyle = Type.body.copy(
-            fontSize = 8.5.sp,
-            lineHeight = 11.sp,
-            letterSpacing = 1.2.sp,
-            color = p.muted,
-            fontFeatureSettings = ALL_SMALL_CAPS,
-        )
-        Text("Dawn", Modifier.align(Alignment.BottomStart).padding(start = boxW * (42f / 320f)), style = cardinalStyle)
-        Text("Noon", Modifier.align(Alignment.TopCenter).padding(top = 2.dp), style = cardinalStyle)
-        Text("Night", Modifier.align(Alignment.BottomEnd).padding(end = boxW * (42f / 320f)), style = cardinalStyle)
-
-        // Centered readout inside the dome belly, cleanly clear of the horizon line
-        Column(
-            Modifier.align(Alignment.BottomCenter).padding(bottom = boxH * 0.22f, start = boxW * 0.14f, end = boxW * 0.14f),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+    val density = LocalDensity.current
+    val largeFont = density.fontScale > 1.35f
+    val readout: @Composable (Modifier) -> Unit = { mod ->
+        Column(mod, horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 (if (isNow) "Now · " else "") + active.time,
                 style = Type.body.copy(
@@ -638,6 +514,7 @@ private fun Horologium(
                     letterSpacing = 1.5.sp,
                     color = p.titulus,
                     fontFeatureSettings = ALL_SMALL_CAPS,
+                    textAlign = TextAlign.Center,
                 ),
             )
             Text(
@@ -651,20 +528,155 @@ private fun Horologium(
                 style = Type.body.copy(fontSize = 18.4.sp, lineHeight = 22.5.sp, color = p.text, textAlign = TextAlign.Center),
             )
         }
+    }
 
-        // Accessible 36dp tap targets over each of the seven stations
-        val tapPx = with(density) { 36.dp.toPx() }
-        hours.forEach { h ->
-            val rad = Math.toRadians(h.angle)
-            val fracX = (160.0 + cos(rad) * 118.0) / 320.0
-            val fracY = (128.0 - sin(rad) * 104.0) / 144.0
-            val xPx = with(density) { (boxW.toPx() * fracX - tapPx / 2f).roundToInt() }
-            val yPx = with(density) { (boxH.toPx() * fracY - tapPx / 2f).roundToInt() }
-            Box(
-                Modifier.offset { IntOffset(xPx, yPx) }
-                    .size(36.dp)
-                    .tap(label = "${h.name}: ${h.gloss}, ${h.time}", selected = h.hour == active.hour) { onSelect(h.hour) },
+    Column(Modifier.fillMaxWidth().padding(top = 3.dp, bottom = 13.6.dp)) {
+        BoxWithConstraints(Modifier.fillMaxWidth().aspectRatio(320f / 144f)) {
+            val boxW = maxWidth
+            val boxH = maxHeight
+
+            Canvas(Modifier.fillMaxSize()) {
+                val sx = size.width / 320f
+                val sy = size.height / 144f
+                val cx = 160f * sx
+                val cy = 128f * sy
+                val rx = 118f * sx
+                val ry = 104f * sy
+
+                fun arcPt(deg: Float, factor: Float = 1f): Offset {
+                    val rad = Math.toRadians(deg.toDouble())
+                    return Offset(cx + cos(rad).toFloat() * rx * factor, cy - sin(rad).toFloat() * ry * factor)
+                }
+
+                val dome = Path().apply {
+                    moveTo(cx - rx, cy)
+                    arcTo(Rect(cx - rx, cy - ry, cx + rx, cy + ry), 180f, 180f, false)
+                    close()
+                }
+                val orb = arcPt(animatedAngle)
+                val washRadius = max(size.width, size.height) * 0.68f
+                drawPath(dome, Brush.radialGradient(0f to wash0, 0.52f to wash1, 1f to wash2, center = orb, radius = washRadius))
+
+                if (p.dark) {
+                    clipPath(dome) {
+                        val stars = listOf(
+                            Triple(102f, 56f, 1.3f), Triple(134f, 38f, 1.6f), Triple(176f, 35f, 1.2f), Triple(218f, 52f, 1.5f),
+                            Triple(82f, 84f, 1.1f), Triple(154f, 54f, 1.0f), Triple(238f, 82f, 1.2f), Triple(192f, 62f, 1.0f),
+                        )
+                        stars.forEach { (x, y, r) ->
+                            drawCircle(o.hi.copy(alpha = 0.62f), r * sx, Offset(x * sx, y * sy))
+                        }
+                    }
+                }
+
+                // Station ticks
+                hours.forEach { h ->
+                    val a = h.angle.toFloat()
+                    drawLine(p.lining.copy(alpha = 0.32f), arcPt(a, 0.91f), arcPt(a, 1f), 0.7f * sx)
+                }
+
+                // Inner dashed arc
+                val innerArc = Path().apply {
+                    arcTo(Rect(cx - rx * 0.93f, cy - ry * 0.93f, cx + rx * 0.93f, cy + ry * 0.93f), 180f, 180f, false)
+                }
+                drawPath(
+                    innerArc,
+                    p.lining.copy(alpha = 0.32f),
+                    style = Stroke(width = 0.6f * sx, pathEffect = PathEffect.dashPathEffect(floatArrayOf(2f * sx, 4f * sx))),
+                )
+
+                // Main solar arc
+                val mainArc = Path().apply {
+                    arcTo(Rect(cx - rx, cy - ry, cx + rx, cy + ry), 180f, 180f, false)
+                }
+                drawPath(mainArc, p.lining.copy(alpha = 0.52f), style = Stroke(width = 1.15f * sx))
+
+                // Lit arc from Lauds (168°) to the current orb angle
+                val startSweep = 180f + (180f - 168f)
+                val sweep = (168f - animatedAngle).coerceAtLeast(0.5f)
+                val litArc = Path().apply {
+                    arcTo(Rect(cx - rx, cy - ry, cx + rx, cy + ry), startSweep, sweep, false)
+                }
+                drawPath(litArc, o.flat.copy(alpha = 0.78f), style = Stroke(width = 1.5f * sx))
+
+                // Horizon line
+                drawLine(p.lining.copy(alpha = 0.38f), Offset(16f * sx, cy), Offset(304f * sx, cy), 0.85f * sx)
+
+                // Non-active diamond stations
+                hours.forEach { h ->
+                    if (h.hour == active.hour) return@forEach
+                    val pt = arcPt(h.angle.toFloat())
+                    val side = 5.4f * sx
+                    val half = side / 2f
+                    val d = Path().apply {
+                        moveTo(pt.x, pt.y - half * 1.414f)
+                        lineTo(pt.x + half * 1.414f, pt.y)
+                        lineTo(pt.x, pt.y + half * 1.414f)
+                        lineTo(pt.x - half * 1.414f, pt.y)
+                        close()
+                    }
+                    drawPath(d, p.bg)
+                    drawPath(d, p.lining.copy(alpha = 0.85f), style = Stroke(width = 1.2f * sx))
+                }
+
+                // Active Sun or Moon orb with radial halo
+                val haloR = 15f * sx
+                drawCircle(
+                    Brush.radialGradient(
+                        0f to o.hi.copy(alpha = if (p.dark) 0.42f else 0.36f),
+                        0.55f to o.flat.copy(alpha = 0.12f),
+                        1f to Color.Transparent,
+                        center = orb,
+                        radius = haloR,
+                    ),
+                    haloR,
+                    orb,
+                )
+                val glyphScale = (if (active.night) 0.80f else 0.875f) * sx
+                val glyphHalf = 12f * glyphScale
+                translate(orb.x - glyphHalf, orb.y - glyphHalf) {
+                    scale(glyphScale, glyphScale, pivot = Offset.Zero) {
+                        drawPath(if (active.night) Moon else Sun, o.flat)
+                    }
+                }
+            }
+
+            // Cardinal labels (Dawn / Noon / Night)
+            val cardinalSp = with(density) { 8.5.dp.toSp() }
+            val cardinalStyle = Type.body.copy(
+                fontSize = cardinalSp,
+                lineHeight = cardinalSp * 1.25f,
+                letterSpacing = cardinalSp * 0.14f,
+                color = p.muted,
+                fontFeatureSettings = ALL_SMALL_CAPS,
             )
+            Text("Dawn", Modifier.align(Alignment.BottomStart).padding(start = boxW * (42f / 320f)), style = cardinalStyle)
+            Text("Noon", Modifier.align(Alignment.TopCenter).padding(top = 2.dp), style = cardinalStyle)
+            Text("Night", Modifier.align(Alignment.BottomEnd).padding(end = boxW * (42f / 320f)), style = cardinalStyle)
+
+            // Centered readout inside the dome belly at standard font scale
+            if (!largeFont) {
+                readout(Modifier.align(Alignment.BottomCenter).padding(bottom = boxH * 0.22f, start = boxW * 0.14f, end = boxW * 0.14f))
+            }
+
+            // Accessible 36dp tap targets over each of the seven stations
+            val tapPx = with(density) { 36.dp.toPx() }
+            hours.forEach { h ->
+                val rad = Math.toRadians(h.angle)
+                val fracX = (160.0 + cos(rad) * 118.0) / 320.0
+                val fracY = (128.0 - sin(rad) * 104.0) / 144.0
+                val xPx = with(density) { (boxW.toPx() * fracX - tapPx / 2f).roundToInt() }
+                val yPx = with(density) { (boxH.toPx() * fracY - tapPx / 2f).roundToInt() }
+                Box(
+                    Modifier.offset { IntOffset(xPx, yPx) }
+                        .size(36.dp)
+                        .tap(label = "${h.name}: ${h.gloss}, ${h.time}", selected = h.hour == active.hour) { onSelect(h.hour) },
+                )
+            }
+        }
+        // At large accessibility font scales, set the readout cleanly beneath the arc.
+        if (largeFont) {
+            readout(Modifier.fillMaxWidth().padding(top = 8.dp))
         }
     }
 }
@@ -759,6 +771,7 @@ private fun HoursDirectory(
  * course over the feathered tablet wash, with an interactive Alone / With a priest switch and
  * soft pool-of-light illumination tied to the ruled key below.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SpecimenLeaf(
     specimen: AboutSpecimenView,
@@ -779,14 +792,17 @@ private fun SpecimenLeaf(
             invitationRules(p.lining, o.flat, seed = 161, day = 0.58f)
         }.padding(horizontal = 18.dp, vertical = 15.dp),
     ) {
-        // Header bar: "From an hour" + Alone ◆ With a priest
-        Row(
+        // Header bar: "From an hour" + Alone ◆ With a priest (wraps cleanly at 200% font scale)
+        FlowRow(
             Modifier.fillMaxWidth().litPool(litKey == "form", pool).padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 specimen.label,
+                Modifier.padding(end = 10.dp),
+                softWrap = false,
                 style = Type.body.copy(
                     fontSize = 11.84.sp,
                     lineHeight = 16.sp,
@@ -795,7 +811,11 @@ private fun SpecimenLeaf(
                     fontFeatureSettings = ALL_SMALL_CAPS,
                 ),
             )
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
                 SpecimenFormTab(specimen.aloneLabel, form == "alone") { onForm("alone") }
                 Box(Modifier.size(3.5.dp).rotate(45f).background(o.flat.copy(alpha = 0.72f)))
                 SpecimenFormTab(specimen.priestLabel, form == "priest") { onForm("priest") }
@@ -881,6 +901,7 @@ private fun SpecimenFormTab(label: String, selected: Boolean, onClick: () -> Uni
                 }
             }
             .padding(vertical = 3.dp),
+        softWrap = false,
         style = Type.body.copy(
             fontSize = 12.48.sp,
             lineHeight = 16.sp,
@@ -908,7 +929,7 @@ private fun RuledKeyList(keys: List<AboutBlockView>, litKey: String?, onToggle: 
                     .padding(vertical = 8.3.dp, horizontal = 3.dp),
                 verticalAlignment = Alignment.Top,
             ) {
-                val markMod = Modifier.width(98.dp).padding(end = 10.dp)
+                val markMod = Modifier.width(108.dp).padding(end = 10.dp)
                 when (k.ink) {
                     "rubric" -> Text(k.mark, markMod, style = descStyle.copy(color = p.rubric, fontStyle = FontStyle.Italic))
                     "symbol" -> Text(k.mark, markMod, style = descStyle.copy(color = p.rubric, letterSpacing = 1.3.sp))

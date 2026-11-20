@@ -159,7 +159,7 @@ struct AboutScreen: View {
                 score: "",
                 phrases: false,
                 space: .none
-            ))
+            ), flushDropCap: true)
             .padding(.top, m.px(4))
         }
     }
@@ -486,62 +486,75 @@ private struct AboutHorologium: View {
         let activeSlug = pinned ?? (current.isEmpty ? "compline" : current)
         if let active = hours.first(where: { $0.hour == activeSlug }) ?? hours.last {
             let isNow = active.hour == current && !current.isEmpty
-            ZStack {
-                HorologiumCanvas(
-                    hours: hours,
-                    activeSlug: active.hour,
-                    activeNight: active.night,
-                    angle: active.angle,
-                    p: p,
-                    o: o
-                )
-                .animation(reduceMotion ? nil : .easeOut(duration: 0.42), value: active.angle)
+            let largeType = m.type > 1.35
+            let readout = VStack(spacing: m.px(1)) {
+                Text((isNow ? "Now · " : "") + active.time)
+                    .type(TextStyle(size: 11.2, line: 14.5, tracking: 1.5, smallCaps: true))
+                    .foregroundStyle(p.titulus)
+                    .multilineTextAlignment(.center)
+                (Text(active.name).foregroundColor(p.text)
+                    + Text(" · " + active.gloss).italic().foregroundColor(p.muted))
+                    .type(Scale.body.sized(18, line: 22))
+                    .multilineTextAlignment(.center)
+            }
+            VStack(spacing: 0) {
+                ZStack {
+                    HorologiumCanvas(
+                        hours: hours,
+                        activeSlug: active.hour,
+                        activeNight: active.night,
+                        angle: active.angle,
+                        p: p,
+                        o: o
+                    )
+                    .animation(reduceMotion ? nil : .easeOut(duration: 0.42), value: active.angle)
 
-                GeometryReader { geo in
-                    let w = geo.size.width
-                    let h = geo.size.height
-                    let cardinal = TextStyle(size: 8.5, line: 11, tracking: 1.2, smallCaps: true)
+                    GeometryReader { geo in
+                        let w = geo.size.width
+                        let h = geo.size.height
+                        let cardinal = TextStyle(size: 8.5, line: 11, tracking: 1.2, smallCaps: true)
 
-                    Text("Dawn").type(cardinal).foregroundStyle(p.muted)
-                        .position(x: w * (42.0 / 320.0) + 14, y: h - 6)
-                        .allowsHitTesting(false).accessibilityHidden(true)
-                    Text("Noon").type(cardinal).foregroundStyle(p.muted)
-                        .position(x: w / 2, y: 8)
-                        .allowsHitTesting(false).accessibilityHidden(true)
-                    Text("Night").type(cardinal).foregroundStyle(p.muted)
-                        .position(x: w * (278.0 / 320.0) - 14, y: h - 6)
-                        .allowsHitTesting(false).accessibilityHidden(true)
+                        Text("Dawn").type(cardinal).foregroundStyle(p.muted)
+                            .position(x: w * (42.0 / 320.0) + 14, y: h - 6)
+                            .allowsHitTesting(false).accessibilityHidden(true)
+                        Text("Noon").type(cardinal).foregroundStyle(p.muted)
+                            .position(x: w / 2, y: 8)
+                            .allowsHitTesting(false).accessibilityHidden(true)
+                        Text("Night").type(cardinal).foregroundStyle(p.muted)
+                            .position(x: w * (278.0 / 320.0) - 14, y: h - 6)
+                            .allowsHitTesting(false).accessibilityHidden(true)
 
-                    // Centered readout inside the dome belly, cleanly clear of the horizon line
-                    VStack(spacing: m.px(1)) {
-                        Text((isNow ? "Now · " : "") + active.time)
-                            .type(TextStyle(size: 11.2, line: 14.5, tracking: 1.5, smallCaps: true))
-                            .foregroundStyle(p.titulus)
-                        (Text(active.name).foregroundColor(p.text)
-                            + Text(" · " + active.gloss).italic().foregroundColor(p.muted))
-                            .type(Scale.body.sized(18, line: 22))
-                            .multilineTextAlignment(.center)
-                    }
-                    .frame(width: w * 0.72)
-                    .position(x: w / 2, y: h * 0.67)
-                    .allowsHitTesting(false)
-
-                    // Accessible 36pt tap targets over each of the seven stations
-                    ForEach(Array(hours.enumerated()), id: \.offset) { _, hr in
-                        let rad = hr.angle * .pi / 180.0
-                        let px = w * CGFloat((160.0 + cos(rad) * 118.0) / 320.0)
-                        let py = h * CGFloat((128.0 - sin(rad) * 104.0) / 144.0)
-                        Button { onSelect(hr.hour) } label: {
-                            Color.clear.frame(width: 36, height: 36).contentShape(Rectangle())
+                        // Centered readout inside the dome belly at standard Dynamic Type
+                        if !largeType {
+                            readout
+                                .frame(width: w * 0.72)
+                                .position(x: w / 2, y: h * 0.67)
+                                .allowsHitTesting(false)
                         }
-                        .buttonStyle(.plain)
-                        .position(x: px, y: py)
-                        .accessibilityLabel("\(hr.name): \(hr.gloss), \(hr.time)")
-                        .accessibilityAddTraits(hr.hour == active.hour ? .isSelected : [])
+
+                        // Accessible 36pt tap targets over each of the seven stations
+                        ForEach(Array(hours.enumerated()), id: \.offset) { _, hr in
+                            let rad = hr.angle * .pi / 180.0
+                            let px = w * CGFloat((160.0 + cos(rad) * 118.0) / 320.0)
+                            let py = h * CGFloat((128.0 - sin(rad) * 104.0) / 144.0)
+                            Button { onSelect(hr.hour) } label: {
+                                Color.clear.frame(width: 36, height: 36).contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .position(x: px, y: py)
+                            .accessibilityLabel("\(hr.name): \(hr.gloss), \(hr.time)")
+                            .accessibilityAddTraits(hr.hour == active.hour ? .isSelected : [])
+                        }
                     }
                 }
+                .aspectRatio(320.0 / 144.0, contentMode: .fit)
+
+                if largeType {
+                    readout
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, m.px(8))
+                }
             }
-            .aspectRatio(320.0 / 144.0, contentMode: .fit)
             .padding(.top, m.px(3))
             .padding(.bottom, m.px(13.6))
         }
@@ -804,15 +817,26 @@ private struct AboutSpecimenLeaf: View {
     var body: some View {
         let wash = HomeInk.of(p).tabletWash
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(specimen.label)
-                    .type(TextStyle(size: 11.84, line: 16, tracking: 1.65, smallCaps: true))
-                    .foregroundStyle(p.titulus)
-                Spacer(minLength: 8)
-                HStack(spacing: m.px(8)) {
-                    formTab(specimen.aloneLabel, selected: form == "alone") { onForm("alone") }
-                    Rectangle().fill(o.flat.opacity(0.72)).frame(width: 3.5, height: 3.5).rotationEffect(.degrees(45))
-                    formTab(specimen.priestLabel, selected: form == "priest") { onForm("priest") }
+            let label = Text(specimen.label)
+                .type(TextStyle(size: 11.84, line: 16, tracking: 1.65, smallCaps: true))
+                .foregroundStyle(p.titulus)
+                .fixedSize(horizontal: true, vertical: false)
+            let toggle = HStack(spacing: m.px(8)) {
+                formTab(specimen.aloneLabel, selected: form == "alone") { onForm("alone") }
+                Rectangle().fill(o.flat.opacity(0.72)).frame(width: 3.5, height: 3.5).rotationEffect(.degrees(45))
+                formTab(specimen.priestLabel, selected: form == "priest") { onForm("priest") }
+            }
+            .fixedSize(horizontal: true, vertical: false)
+
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline) {
+                    label
+                    Spacer(minLength: 8)
+                    toggle
+                }
+                VStack(alignment: .leading, spacing: m.px(4)) {
+                    label
+                    toggle
                 }
             }
             .padding(.bottom, m.px(8))
@@ -942,7 +966,7 @@ private struct AboutRuledKeyList: View {
                 Button { onToggle(k.id) } label: {
                     HStack(alignment: .firstTextBaseline, spacing: m.px(10)) {
                         keyMark(k, desc: desc)
-                            .frame(width: m.px(92), alignment: .leading)
+                            .frame(width: m.px(104), alignment: .leading)
                         Text(k.text).type(desc).foregroundStyle(p.text)
                             .multilineTextAlignment(.leading)
                             .frame(maxWidth: .infinity, alignment: .leading)
