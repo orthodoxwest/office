@@ -1371,9 +1371,9 @@ struct HourLightPass: Equatable {
 
 /**
  * One frame of a pass. The pool under the old hour dies as the new one's gathers, the names' ink
- * turns, the old gloss goes and the new comes; a name whose seat changes, and the invitation's
- * words, go out where they stood and come back where they belong (`lit` changes while they are
- * out), never sliding.
+ * turns, and a name whose seat changes, along with the invitation's words (and a phone's gloss
+ * under them), go out where they stood and come back where they belong (`lit` changes while they
+ * are out), never sliding.
  */
 struct HourLightNow {
     let pass: HourLightPass

@@ -15,7 +15,7 @@
 //! These are motion figures, but they stay beside [`crate::Tempo`] rather than in it. Tempo is the
 //! table of transitions each front writes by hand in its own idiom (a CSS transition, a SwiftUI
 //! animation, a Compose tween), copied as literals and held together by drift tests; this pass is
-//! one choreography of eight marks on one clock, which the apps never write: they sample
+//! one choreography of six marks on one clock, which the apps never write: they sample
 //! [`light_at`] through the bindings each frame, so its figures already have one home, and only
 //! app.js copies them (held by the test below). Its curves are its own too (a slow ease in and out
 //! for the light, CSS's `ease-in` and `ease-out` for the words), and taking Tempo's three instead
@@ -27,8 +27,6 @@ pub struct HourLight;
 impl HourLight {
     /// The whole pass: the old pool dies and the new gathers over it.
     pub const TOTAL: u32 = 1400;
-    /// The old gloss is gone by here, before its name changes seat.
-    pub const GLOSS_OUT: u32 = 500;
     /// The names' ink, rubric to plain and plain to rubric, from here …
     pub const INK_FROM: u32 = 300;
     /// … for this long.
@@ -39,10 +37,8 @@ impl HourLight {
     pub const SEAT: u32 = 620;
     /// … and are back here.
     pub const WORDS_BACK: u32 = 800;
-    /// The new gloss comes in from here to the end, after its name is seated.
-    pub const GLOSS_IN: u32 = 800;
 
-    /// The pool, the ink and the glosses: a gentle ease in and out.
+    /// The pool and the ink: a gentle ease in and out.
     pub const EASE: Curve = Curve(0.45, 0.0, 0.55, 1.0);
     /// The words going out (CSS's `ease-in`).
     pub const OUT: Curve = Curve(0.42, 0.0, 1.0, 1.0);
@@ -100,15 +96,10 @@ pub struct LightFrame {
     /// coming name from its plain ink toward the rubric (and in the wide niche, where every hour
     /// keeps its gloss, the glosses' inks with them).
     pub ink: f32,
-    /// The old gloss, where a table shows it only under the hour that is now (none does since a
-    /// phone's gloss moved into the invitation, where it goes out and back with the words).
-    pub leaving_gloss: f32,
-    /// The new gloss, likewise.
-    pub coming_gloss: f32,
-    /// The words that change seat or say: a name re-seated, the invitation's words.
+    /// The words that change seat or say: a name re-seated, the invitation's words and gloss.
     pub words: f32,
-    /// Whether the new hour's layout has taken over (its seat, its gloss, the invitation's new
-    /// words).
+    /// Whether the new hour's layout has taken over (its seat, the invitation's new words and
+    /// gloss).
     pub seated: bool,
     /// Whether the pass is over: the page is drawn at rest, exactly as it would be fresh.
     pub done: bool,
@@ -131,8 +122,6 @@ pub fn light_at(ms: f32) -> LightFrame {
         leaving_pool: 1.0 - pool,
         coming_pool: pool,
         ink: span(HourLight::INK_FROM, HourLight::INK_FOR, HourLight::EASE),
-        leaving_gloss: 1.0 - span(0, HourLight::GLOSS_OUT, HourLight::EASE),
-        coming_gloss: span(HourLight::GLOSS_IN, HourLight::TOTAL - HourLight::GLOSS_IN, HourLight::EASE),
         words: if done { 1.0 } else { words },
         seated: ms >= h(HourLight::SEAT),
         done,
@@ -148,27 +137,13 @@ mod tests {
     fn the_pass_begins_as_the_page_was_and_ends_as_a_fresh_one() {
         let start = light_at(0.0);
         assert_eq!((start.leaving_pool, start.coming_pool, start.ink, start.words), (1.0, 0.0, 0.0, 1.0));
-        assert_eq!((start.leaving_gloss, start.coming_gloss), (1.0, 0.0));
         assert!(!start.seated && !start.done);
         let end = light_at(HourLight::TOTAL as f32);
-        assert_eq!(
-            end,
-            LightFrame {
-                leaving_pool: 0.0,
-                coming_pool: 1.0,
-                ink: 1.0,
-                leaving_gloss: 0.0,
-                coming_gloss: 1.0,
-                words: 1.0,
-                seated: true,
-                done: true
-            }
-        );
+        assert_eq!(end, LightFrame { leaving_pool: 0.0, coming_pool: 1.0, ink: 1.0, words: 1.0, seated: true, done: true });
         assert_eq!(light_at(5000.0), end);
     }
 
-    // The layout changes only while the words that move are out of sight, the old gloss gone and
-    // the new not yet come.
+    // The layout changes only while the words that move are out of sight.
     #[test]
     fn the_seat_changes_while_the_moving_words_are_out() {
         let seat = HourLight::SEAT as f32;
@@ -176,7 +151,6 @@ mod tests {
         let after = light_at(seat);
         assert!(!before.seated && after.seated);
         assert!(before.words < 0.01 && after.words < 0.01, "{} {}", before.words, after.words);
-        assert_eq!((before.leaving_gloss, after.coming_gloss), (0.0, 0.0));
         assert_eq!(light_at(HourLight::WORDS_OUT as f32).words, 1.0);
         assert!((light_at(HourLight::WORDS_BACK as f32).words - 1.0).abs() < 1e-4);
     }
@@ -215,15 +189,13 @@ mod tests {
         let js =
             std::fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../apps/office-web/static/app.js")).expect("app.js");
         let expected = format!(
-            "var HOUR_LIGHT = {{ total: {}, glossOut: {}, inkFrom: {}, inkFor: {}, wordsOut: {}, seat: {}, wordsBack: {}, glossIn: {}, ease: \"{}\", out: \"{}\", back: \"{}\" }};",
+            "var HOUR_LIGHT = {{ total: {}, inkFrom: {}, inkFor: {}, wordsOut: {}, seat: {}, wordsBack: {}, ease: \"{}\", out: \"{}\", back: \"{}\" }};",
             HourLight::TOTAL,
-            HourLight::GLOSS_OUT,
             HourLight::INK_FROM,
             HourLight::INK_FOR,
             HourLight::WORDS_OUT,
             HourLight::SEAT,
             HourLight::WORDS_BACK,
-            HourLight::GLOSS_IN,
             HourLight::EASE.css(),
             HourLight::OUT.css(),
             HourLight::BACK.css(),
