@@ -793,7 +793,7 @@ async function atHourEnd(page) {
 }
 
 test("scrolling through an hour in seconds does not mark it prayed", async ({ page }) => {
-  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.clock.pauseAt(new Date("2026-10-07T21:00:00"));
   await page.goto("/compline/2026-10-07");
   for (let i = 0; i < 3 && !(await atHourEnd(page)); i++) {
     await scrollHourBy(page, 3000);
@@ -807,7 +807,7 @@ test("scrolling through an hour in seconds does not mark it prayed", async ({ pa
 });
 
 test("an hour read through at a praying pace is marked prayed on home", async ({ page }) => {
-  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.clock.pauseAt(new Date("2026-10-07T21:00:00"));
   await page.goto("/compline/2026-10-07");
   for (let i = 0; i < 60 && !(await atHourEnd(page)); i++) {
     await page.clock.runFor(20_000);
@@ -827,10 +827,9 @@ test("an hour read through at a praying pace is marked prayed on home", async ({
 // The cross under the last Amen takes its gold (presentation::EndLeaf). The
 // hour is read through at a praying pace until the cross's top first peeps in,
 // and the watch marks the hour with only its top 8px showing; the gold waits
-// until the cross stands whole. The installed clock also runs in real time, so
-// the watch may tick between any two steps here: no step may show more of the
-// cross than those 8px, or the mark and the whole cross could meet before the
-// test stands there (the app would rightly gild).
+// until the cross stands whole. The clock is paused between steps and no step
+// shows more than those 8px, so the mark and the whole cross never meet before
+// the test stands there.
 async function prayToTheCross(page, day, hour) {
   for (let i = 0; i < 80; i++) {
     await page.clock.runFor(20_000);
@@ -871,7 +870,7 @@ async function endLeaf(page) {
 
 test("the end cross takes its gold once the hour is marked and the cross stands whole", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.clock.pauseAt(new Date("2026-10-07T21:00:00"));
   await page.goto("/compline/2026-10-07");
   const cross = page.locator(".hour-end-mark");
   // Scrolled through in seconds and left standing at the cross: not prayed, no gold.
@@ -899,7 +898,7 @@ test("the end cross takes its gold once the hour is marked and the cross stands 
 
 test("an hour prayed before opens with its cross gilt, and nothing moves", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.clock.install({ time: new Date("2026-10-07T21:30:00") });
+  await page.clock.pauseAt(new Date("2026-10-07T21:30:00"));
   await page.addInitScript(() => localStorage.setItem("office-prayed", JSON.stringify({ "2026-10-07": ["compline"] })));
   // Gilt before app.js could run: the page's own script under the cross lays it.
   await page.route("**/app.js*", (route) => route.abort());
@@ -916,7 +915,7 @@ test("an hour prayed before opens with its cross gilt, and nothing moves", async
 
 test("a bare hour's cross takes no leaf, prayed or not", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.clock.install({ time: new Date("2026-11-02T09:00:00") });
+  await page.clock.pauseAt(new Date("2026-11-02T09:00:00"));
   // All Souls' Lauds, the Office of the Dead.
   await page.goto("/lauds/2026-11-02");
   const cross = page.locator(".hour-end-mark");
@@ -934,7 +933,7 @@ test("a bare hour's cross takes no leaf, prayed or not", async ({ page }) => {
 
 test("an hour ending in a bare section takes no leaf", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.clock.install({ time: new Date("2026-11-01T19:00:00") });
+  await page.clock.pauseAt(new Date("2026-11-01T19:00:00"));
   // Vespers of All Saints, then Vespers of the Dead: not a bare hour, but it ends bare.
   await page.goto("/vespers/2026-11-01");
   await expect(page.locator("body")).not.toHaveClass(/hour-bare/);
@@ -949,7 +948,7 @@ test("an hour ending in a bare section takes no leaf", async ({ page }) => {
 
 test("under reduced motion the end cross is simply gilt", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.clock.pauseAt(new Date("2026-10-07T21:00:00"));
   await page.goto("/compline/2026-10-07");
   await prayToTheCross(page, "2026-10-07", "compline");
   expect((await endLeaf(page)).opacity).toBe("0");
@@ -1211,7 +1210,7 @@ test("a place hidden by another prayer form or the Martyrology opens where the w
 
 test("an hour reopened at its place can still be marked prayed", async ({ page }) => {
   await losable(page);
-  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.clock.pauseAt(new Date("2026-10-07T21:00:00"));
   const hour = "/compline/2026-10-07";
   const readOn = async (until) => {
     for (let i = 0; i < 60 && !(await until()); i++) {
@@ -1787,30 +1786,42 @@ for (const dir of ["dusk", "dawn"]) {
     await openCrown(page, { stored: dark ? null : "dark", hurry: false });
     const [x, y] = await crownPoint(page);
     const [a, len] = LINGER_SPAN[dir];
+    const slow = Math.round(1000 / LINGER) / 1000;
     // Real ms from the tap to timetable moment t.
     const real = (t) => CROWN_PACE * (t + Math.max(0, Math.min(t, a + len) - a) * (LINGER - 1));
-    const rates = () => page.evaluate(() => [...new Set(document.getAnimations()
-      .filter((an) => (an.animationName || "").startsWith("crown-") || String(an.effect?.pseudoElement || "").startsWith("::view-transition"))
-      .filter((an) => an.playState !== "finished")
-      .map((an) => Math.round(an.playbackRate * 1000) / 1000))]);
+    const state = () => page.evaluate(() => {
+      const anims = document.getAnimations()
+        .filter((an) => (an.animationName || "").startsWith("crown-") || String(an.effect?.pseudoElement || "").startsWith("::view-transition"))
+        .filter((an) => an.playState !== "finished");
+      return {
+        vt: anims.some((an) => String(an.effect?.pseudoElement || "").startsWith("::view-transition")),
+        rates: [...new Set(anims.map((an) => Math.round(an.playbackRate * 1000) / 1000))],
+      };
+    });
     const t0 = Date.now();
     await page.mouse.click(x, y);
     const at = async (t) => page.waitForTimeout(Math.max(0, real(t) - (Date.now() - t0)));
     await crownPlayed(page);
     // The play's clock stands still while the browser makes its stills at the
-    // turn, longer in WebKit and on a busy machine, so a linger after the turn
-    // starts and ends that much after this reckoning from the tap: it is
-    // watched for from its reckoned start, not looked for at one instant.
+    // turn (650ms), longer in WebKit under load. Dawn's linger starts before
+    // the turn (400ms) and dusk's after it (800ms), so timing the rest of the
+    // linger and the play's end starts once the transition's own parts are up
+    // and every part is running at the linger's rate together.
     await at(a);
-    await expect.poll(rates, { timeout: real(a + len) - real(a) + 8000, intervals: [100] }).toEqual([Math.round(1000 / LINGER) / 1000]);
+    const mark = Math.max(a, 650);
+    const postLinger = real(a + len) - real(mark);
+    if (a < 650) {
+      await expect.poll(() => state().then((s) => s.rates), { timeout: real(650) - real(a) + 8000, intervals: [100] }).toEqual([slow]);
+    }
+    await expect.poll(state, { timeout: 20_000, intervals: [100] }).toEqual({ vt: true, rates: [slow] });
     const lingering = Date.now();
-    await expect.poll(rates, { timeout: real(a + len) - real(a) + 4000, intervals: [100] }).toEqual([1]);
-    // It held for its length, not a moment.
-    expect(Date.now() - lingering).toBeGreaterThan((real(a + len) - real(a)) * 0.75);
+    await expect.poll(() => state().then((s) => s.rates), { timeout: postLinger + 6000, intervals: [100] }).toEqual([1]);
+    // It held for its post-turn length, not a moment.
+    expect(Date.now() - lingering).toBeGreaterThan(postLinger * 0.75);
     await crownAtRest(page);
-    // The page's own end kept time with its parts: from the linger, no later
-    // than the rest of the play and a margin.
-    expect(Date.now() - lingering).toBeLessThan(real(dark ? 4400 + 100 : 4000 + 100) - real(a) + 2500);
+    // The page's own end kept time with its parts: from the post-turn mark, no
+    // later than the rest of the play and a margin.
+    expect(Date.now() - lingering).toBeLessThan(real(dark ? 4400 + 100 : 4000 + 100) - real(mark) + 4000);
   });
 }
 
@@ -1922,20 +1933,18 @@ const CROWN_LIGHT = {
   dusk: { arch: { back: 7.5, step: 24, kick: 8 }, wall: { back: 2, step: 12, kick: 4 }, card: { back: 2, step: 12, kick: 4 }, faint: 5, after: 3.5 },
   dawn: { arch: { back: 5, step: 24, kick: 7 }, wall: { back: 5, step: 22, kick: 7 }, card: { back: 2, step: 21, kick: 7 }, faint: 6, after: 3.5 },
 };
-// WebKit's figures, by the same rule from its own first run in CI. Its
+// WebKit's figures, by the same rule from its own CI crown-light.json
+// attachments (master runs 44796624197 and 44778557572, identical). Its
 // stills and its thinner text read differently: the light takes its steps
 // a little more sharply on the wall and the card, and the hand-over of the
 // ink, measured by the darkest and lightest hundredth of the card, stands
-// under 2:1 for some 8 or 9 moments where Chromium's stands for 3.
-// (dusk: arch back 5.52, wall step 13.49, card step 13.21, faint 8, after
-// 3.64; dawn: wall step 21.26 and kick 6.2, card step 15.14, faint 9,
-// after 2.96.) Those were before the page began to turn with the front;
-// since, dusk's arch back and dawn's card step and kick are raised by the
-// same ratio as Chromium's measured change, not yet from WebKit's own
-// figures, which CI's crown-light.json attachments give.
+// under 2:1 for 7 or 8 moments where Chromium's stands for 3.
+// (dusk: arch back 1.18, wall step 15.76 and kick 2.51, card step 15.49 and
+// kick 3.22, faint 7, after 3.64; dawn: arch step 16.05, wall step 24.79 and
+// kick 8.35, card step 18.28 and kick 4.06, faint 8, after 2.94.)
 const CROWN_LIGHT_WEBKIT = {
-  dusk: { ...CROWN_LIGHT.dusk, arch: { back: 11, step: 24, kick: 8 }, wall: { back: 2, step: 20, kick: 4 }, card: { back: 2, step: 20, kick: 4.5 }, faint: 12 },
-  dawn: { ...CROWN_LIGHT.dawn, wall: { back: 5, step: 30, kick: 9 }, card: { back: 2, step: 26, kick: 7.5 }, faint: 13, after: 2.5 },
+  dusk: { ...CROWN_LIGHT.dusk, wall: { back: 2, step: 24, kick: 4 }, card: { back: 2, step: 23.5, kick: 5 }, faint: 11 },
+  dawn: { ...CROWN_LIGHT.dawn, wall: { back: 5, step: 37, kick: 12.5 }, card: { back: 2, step: 27.5, kick: 7 }, faint: 12, after: 2.5 },
 };
 for (const dir of ["dusk", "dawn"]) {
   test(`the crown's ${dir} moves its light one way, without a leap, and keeps the hours readable`, async ({ page }, testInfo) => {
@@ -2018,10 +2027,12 @@ for (const dir of ["dusk", "dawn"]) {
 // a second just before the hold, and every part must be held no earlier
 // than the clock then stood.
 test("the crown's first act is held at the turn where the glass has it", async ({ page }) => {
+  test.setTimeout(60_000);
   await page.addInitScript(() => {
     const real = Document.prototype.getAnimations;
     Document.prototype.getAnimations = function (...args) {
-      if (!document.documentElement.classList.contains("crown-vt") || window.__crownHold) return real.apply(this, args);
+      if (!document.documentElement.classList.contains("crown-vt")) return real.apply(this, args);
+      Document.prototype.getAnimations = real;
       const until = performance.now() + 125;
       while (performance.now() < until) { /* busy */ }
       const list = real.apply(this, args);
@@ -2038,6 +2049,10 @@ test("the crown's first act is held at the turn where the glass has it", async (
     };
   });
   const tap = await openCrown(page, { stored: "dark", hurry: false });
+  // Half pace keeps over a second of first-act headroom past the turn for the
+  // 125ms busy-wait while keeping the rest of the play well inside crownAtRest
+  // on a busy WebKit runner.
+  await page.addStyleTag({ content: ":root { --crown-k: 0.5; }" });
   await tap.click();
   await expect.poll(() => page.evaluate(() => (window.__crownHold || []).length)).toBeGreaterThan(0);
   const held = await page.evaluate(() => window.__crownHold);
@@ -7001,7 +7016,7 @@ test("the prayed watch measures the hour's words again only when they move", asy
     const rects = Range.prototype.getClientRects;
     Range.prototype.getClientRects = function () { window.__measured++; return rects.call(this); };
   });
-  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.clock.pauseAt(new Date("2026-10-07T21:00:00"));
   // After the clock, so the watch's one-second tick (app.js) is the fake clock's.
   await page.addInitScript(() => {
     window.__holdWatch = true;
