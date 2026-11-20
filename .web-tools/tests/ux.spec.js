@@ -1584,24 +1584,35 @@ test("a feast's familiar name is set apart in italic and never broken", async ({
 test("a tablet's hour header sets the hours as one rank, with no link stranded", async ({ page }) => {
   // Wide widths hold the same: the prayer's softened field once reached past
   // the column and, with Large text at the 1000px threshold, past the viewport.
-  for (const size of ["default", "large"]) {
-    for (const width of [701, 820, 999, 1000, 1100, 1280, 1920]) {
+  // About is reached from every wide hour (#927): among the links where they
+  // stand beside the brand, and beside Settings where they take their own rank.
+  for (const size of ["small", "default", "large"]) {
+    for (const width of [701, 820, 999, 1000, 1030, 1099, 1100, 1280, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
       await openDatedPage(page, `/vespers/${testDate}`);
       const header = await page.evaluate(() => {
-        // About stands down from a wide hour's header (it has no box there).
         const links = [...document.querySelectorAll(".site-menu nav a")].filter((a) => a.getClientRects().length);
         // Links on one baseline have boxes a pixel or two apart in height
         // (Reminders is set smaller); a new row begins a whole line lower.
         const tops = links.map((a) => a.getBoundingClientRect().top).sort((a, b) => a - b);
+        const about = [...document.querySelectorAll(".site-header [data-nav='about']")].filter((a) => a.getClientRects().length);
+        const shell = document.querySelector(".site-nav-shell").getBoundingClientRect();
+        const brand = document.querySelector(".site-brand").getBoundingClientRect();
         return {
           rows: tops.filter((top, i) => i === 0 || top - tops[i - 1] > 8).length,
           overflow: document.documentElement.scrollWidth - innerWidth,
+          about: about.length,
+          aboutInside: about.every((a) => a.getBoundingClientRect().right <= shell.right),
+          // On the brand's line or the links', never stranded on one of its own.
+          aboutPlaced: about.every((a) => [brand, links[0].getBoundingClientRect()].some((r) => Math.abs(a.getBoundingClientRect().bottom - r.bottom) < 8)),
         };
       });
       expect(header.rows, `${width}px ${size} text`).toBe(1);
       expect(header.overflow, `${width}px ${size} text`).toBe(0);
+      expect(header.about, `${width}px ${size} text`).toBe(1);
+      expect(header.aboutInside, `${width}px ${size} text`).toBe(true);
+      expect(header.aboutPlaced, `${width}px ${size} text`).toBe(true);
     }
   }
 });
@@ -7258,6 +7269,8 @@ test("a page turn goes through the wall, and the beam stands where both pages sh
         const t = a.effect.getTiming();
         return `${a.effect.pseudoElement} ${a.animationName} ${t.duration}/${t.delay}`;
       }).sort();
+      // The last page's beam, under the new one: it must not be drawn (#926).
+      sessionStorage.setItem("old-beam", getComputedStyle(document.documentElement, "::view-transition-old(site-header)").display);
       sessionStorage.setItem("turn", JSON.stringify(turn));
     });
   }));
@@ -7276,8 +7289,11 @@ test("a page turn goes through the wall, and the beam stands where both pages sh
   test.skip(fromHome === null, "no cross-document view transitions in this engine");
   expect(fromHome).toContain("::view-transition-old(root) vt-leave 90/0");
   expect(fromHome).toContain("::view-transition-new(root) vt-arrive 210/90");
-  // The beam was in view on both pages: held, so it neither fades nor moves.
+  // The beam was in view on both pages: held, so it neither fades nor moves,
+  // and only the new page's is drawn: the old one, left standing over it,
+  // set every word of the header twice a pixel apart until the turn ended.
   expect(fromHome.filter((a) => a.includes("(site-header)")), JSON.stringify(fromHome)).toEqual([]);
+  expect(await page.evaluate(() => sessionStorage.getItem("old-beam"))).toBe("none");
   // At the foot of a long hour the beam is out of sight: it comes up with the next page.
   await page.locator("a.next-hour").scrollIntoViewIfNeeded();
   await expect.poll(() => page.locator(".site-header").evaluate((el) => el.getBoundingClientRect().bottom)).toBeLessThanOrEqual(0);

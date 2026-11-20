@@ -232,9 +232,10 @@ struct SiteHeader: View {
 
     var body: some View {
         let nav = SiteNav(model)
-        // From 701 to 999pt an hour's links don't fit beside the brand and Settings: left in the
-        // row they would crowd it, so they take a centred rank of their own beneath, as a book sets
-        // its running head over the page.
+        // From 701 to 999pt (1099 at Larger text) an hour's links don't fit beside the brand and
+        // Settings: left in the row they would crowd it, so they take a centred rank of their own
+        // beneath, as a book sets its running head over the page. About, which that rank has no
+        // room for, stands beside Settings.
         let rank = wide && ranked && nav.onHour != nil
         VStack(spacing: 0) {
             HStack(spacing: 0) {
@@ -284,7 +285,7 @@ struct SiteHeader: View {
             .frame(maxWidth: wide ? m.px(1088) : .infinity)
             .frame(maxWidth: .infinity)
             if rank {
-                InlineNav(nav: nav, settings: false)
+                InlineNav(nav: nav, about: false, settings: false)
                     .padding(.top, m.px(2.4))
                     .padding(.bottom, m.px(5.6))
                     .frame(maxWidth: .infinity)
@@ -302,8 +303,9 @@ struct SiteHeader: View {
 /// The desktop header's links (`.site-menu nav`), muted: the current one in ink over the lining's terracotta; Reminders and About quieter.
 private struct InlineNav: View {
     let nav: SiteNav
-    /// The pages' links, and Settings after them; a ranked header sets them apart.
+    /// The pages' links, About, and Settings after them; a ranked header sets the links apart.
     var links = true
+    var about = true
     var settings = true
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
@@ -318,11 +320,10 @@ private struct InlineNav: View {
                 }
                 link("Ordo", nav.ordoCurrent, action: nav.onOrdo)
                 link("Reminders", nav.remindersCurrent, secondary: true, action: nav.onReminders)
-                // An hour's header is already full with the seven hours, so About stays out of
-                // it, as on the web; the phone's menu keeps it everywhere.
-                if nav.onHour == nil {
-                    link(aboutPage.menu, nav.aboutCurrent, secondary: true, action: nav.onAbout)
-                }
+            }
+            // Every page's header reaches About, an hour's too (#927).
+            if about {
+                link(aboutPage.menu, nav.aboutCurrent, secondary: true, action: nav.onAbout)
             }
             // Settings closes the links, quiet as Reminders; its panel holds the theme and text size.
             if settings {
