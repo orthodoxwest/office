@@ -263,12 +263,14 @@ by its version code, without rebuilding. It carries the release notes the build 
 testing.
 
 - **Every day** at 15:00 UTC: a staged rollout the workflow started two days before is
-  finished (all users). Otherwise the build on Closed testing, once it has been there 24 hours and
-  if it is newer than production's, goes to 20% of users. So a merge reaches a fifth of the public
-  1 to 2 days after testers get it, and everyone two days later. Google's review of each new
-  release (usually hours) comes out of the 20% stage. A build's time on Closed testing is when
-  its Publish to Play run finished, and only the build on Closed testing now is promoted: while
-  merges land less than a day apart, promotion waits for a quiet day.
+  finished (all users). Otherwise the newest build uploaded to Closed testing at least 24 hours
+  before, if it is newer than production's, goes to 20% of users. So a merge reaches a fifth of
+  the public 1 to 2 days after testers get it, and everyone two days later. Google's review of
+  each new release (usually hours) comes out of the 20% stage. A build's upload time is when its
+  Publish to Play run finished. A build a later merge has replaced on Closed testing still
+  qualifies, with the notes it was uploaded with (`whatsnew.txt` at its commit): merges land more
+  than once a day, so the build on Closed testing now is seldom a day old. A version code Play
+  has no bundle for is skipped.
 - **The staged release's name** in Play Console ("0.1.120 staged 2026-11-12T15:00Z") records when
   it started; that is how the next runs know its age.
 - **Halting** a rollout in Play Console (*Production → Halt rollout*), or starting one there,
