@@ -139,13 +139,29 @@ jobs:
             apps/ios/screenshots.sh devices >> "$GITHUB_OUTPUT"
           fi
 
+      # rustup's download of the toolchain ran 5 to 13 minutes on the macOS runners; the cache's
+      # comes in seconds. Only the pinned toolchain is kept (the key follows the pin below), not
+      # the image's own, and update-ios-snapshots.yml restores the same key.
+      - name: Cache the Rust toolchain
+        uses: actions/cache@v6.1.0
+        with:
+          path: |
+            ~/.rustup/toolchains/1.100.0-aarch64-apple-darwin
+            ~/.rustup/update-hashes/1.100.0-aarch64-apple-darwin
+          key: rustup-${{ runner.os }}-${{ runner.arch }}-1.100.0-ios-sim
+
+      # Only the simulator's target: the device's library is TestFlight's.
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@1.100.0
         with:
-          targets: aarch64-apple-ios, aarch64-apple-ios-sim
+          targets: aarch64-apple-ios-sim
 
+      # Shared by name with update-ios-snapshots.yml, which can only read caches and so, under its
+      # own job's key, never found one: its core build ran cold, 11 to 13 minutes instead of 2½.
       - name: Cache Cargo
         uses: Swatinem/rust-cache@v2.9.3
+        with:
+          shared-key: ios-simulator
 
       - name: Install XcodeGen
         run: brew install xcodegen
