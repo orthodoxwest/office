@@ -5873,18 +5873,26 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
      other over the whole turn rather than at its start. */
   ::view-transition-group(site-header),
   ::view-transition-group(color-band) { animation: none; }
-  ::view-transition-old(site-header):not(:only-child) { display: none; }
-  ::view-transition-new(site-header):not(:only-child) { animation: none; mix-blend-mode: normal; }
-  ::view-transition-old(color-band):not(:only-child),
-  ::view-transition-new(color-band):not(:only-child) {
-    animation-duration: calc(var(--tempo-turn-in-delay) + var(--tempo-turn-in));
-    animation-timing-function: linear;
+  /* These are written for both pages having it and then overridden by
+     :only-child below, never as :not(:only-child): Chromium parses that but
+     never matches it, and the old header then stood unfaded over the new one
+     until the turn ended, two sets of words a pixel apart (#926). */
+  ::view-transition-old(site-header) { display: none; }
+  ::view-transition-new(site-header) { animation: none; mix-blend-mode: normal; }
+  /* The new band comes up over the old, which stands under it to the end:
+     a band of the same colour never dips toward the wall mid-turn, as two
+     fading at once let it. */
+  ::view-transition-old(color-band) { animation: none; }
+  ::view-transition-new(color-band) {
+    animation: vt-arrive calc(var(--tempo-turn-in-delay) + var(--tempo-turn-in)) linear both;
+    mix-blend-mode: normal;
   }
 
   /* One page has it and the other not (a header out of sight, the band of an
      hour left for home): it goes and comes with its page. */
   ::view-transition-old(site-header):only-child,
   ::view-transition-old(color-band):only-child {
+    display: block;
     animation: vt-leave var(--tempo-turn-out) var(--tempo-turn-out-curve) both;
   }
   ::view-transition-new(site-header):only-child,

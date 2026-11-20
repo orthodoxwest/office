@@ -7189,6 +7189,8 @@ test("a page turn goes through the wall, and the beam stands where both pages sh
         const t = a.effect.getTiming();
         return `${a.effect.pseudoElement} ${a.animationName} ${t.duration}/${t.delay}`;
       }).sort();
+      // The last page's beam, under the new one: it must not be drawn (#926).
+      sessionStorage.setItem("old-beam", getComputedStyle(document.documentElement, "::view-transition-old(site-header)").display);
       sessionStorage.setItem("turn", JSON.stringify(turn));
     });
   }));
@@ -7207,8 +7209,11 @@ test("a page turn goes through the wall, and the beam stands where both pages sh
   test.skip(fromHome === null, "no cross-document view transitions in this engine");
   expect(fromHome).toContain("::view-transition-old(root) vt-leave 90/0");
   expect(fromHome).toContain("::view-transition-new(root) vt-arrive 210/90");
-  // The beam was in view on both pages: held, so it neither fades nor moves.
+  // The beam was in view on both pages: held, so it neither fades nor moves,
+  // and only the new page's is drawn: the old one, left standing over it,
+  // set every word of the header twice a pixel apart until the turn ended.
   expect(fromHome.filter((a) => a.includes("(site-header)")), JSON.stringify(fromHome)).toEqual([]);
+  expect(await page.evaluate(() => sessionStorage.getItem("old-beam"))).toBe("none");
   // At the foot of a long hour the beam is out of sight: it comes up with the next page.
   await page.locator("a.next-hour").scrollIntoViewIfNeeded();
   await expect.poll(() => page.locator(".site-header").evaluate((el) => el.getBoundingClientRect().bottom)).toBeLessThanOrEqual(0);
