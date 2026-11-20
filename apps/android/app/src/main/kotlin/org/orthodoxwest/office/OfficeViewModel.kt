@@ -505,7 +505,10 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                         refreshReminderStatus()
                         Content.Drawn
                     }
-                    Page.About -> Content.Year(withContext(Dispatchers.Default) { office.ordoCourse(now.year) })
+                    // About's words are fixed: should the year's colors fail, it shows without its ribbon.
+                    Page.About -> Content.Year(
+                        withContext(Dispatchers.Default) { runCatching { office.ordoCourse(now.year) }.getOrDefault(emptyList()) },
+                    )
                 }
             } catch (e: CancellationException) {
                 throw e

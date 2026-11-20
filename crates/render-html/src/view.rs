@@ -403,6 +403,8 @@ pub struct AboutData {
     pub ordo_ribbon: AboutOrdoRibbon,
     /// The six liturgical colors explained beneath the ribbon.
     pub ordo_colors: Vec<AboutOrdoColorView>,
+    /// What a screen reader hears for the ribbon.
+    pub ribbon_label: String,
     /// Home's invitation at the page's foot, by the server's clock in the reader's zone (app.js
     /// restates it by the device's): "Pray None", and the hour it opens.
     pub pray_now_label: String,
@@ -489,9 +491,13 @@ pub struct AboutHorologium {
 pub struct AboutSpecimenView {
     pub label: String,
     pub alone_label: String,
+    pub deacon_label: String,
     pub priest_label: String,
     pub rubric: String,
     pub opening_versicle: String,
+    /// The opening versicle's words either side of its ✠, which the leaf sets in red.
+    pub opening_before: String,
+    pub opening_after: String,
     pub opening_response: String,
     pub alone_versicle: String,
     pub alone_response: String,
@@ -522,10 +528,25 @@ pub struct AboutCourseMonth {
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct AboutOrdoRibbon {
     pub year: i32,
+    /// The days each month's band spans, and the days' widths between two bands.
+    pub span: u32,
+    pub gap: u32,
     pub width: u32,
     pub today_pct: String,
     pub months: Vec<AboutCourseMonth>,
+    /// Every other month's name, set at its own month's start (a percentage of the width).
+    pub labels: Vec<AboutRibbonLabel>,
 }
+
+/// A month's name under the ribbon, at the start of its band.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct AboutRibbonLabel {
+    pub name: &'static str,
+    pub left_pct: String,
+}
+
+/// The gap between two months' bands on About's ribbon, in days' widths.
+pub const ABOUT_RIBBON_GAP: u32 = 3;
 
 impl AboutData {
     /// The page as presentation words it, for the page chrome given, with the hour it is now
@@ -548,7 +569,7 @@ impl AboutData {
         let mut sections: Vec<AboutSection> = Vec::new();
         let mut in_hours = false;
 
-        for b in ABOUT {
+        for (i, b) in ABOUT.iter().enumerate() {
             match *b {
                 AboutBlock::Verse { text, cite } => {
                     verse_text = text.into();
@@ -556,7 +577,8 @@ impl AboutData {
                 }
                 AboutBlock::Intro(text) => intro = text.into(),
                 AboutBlock::Heading(text) => {
-                    if text == "The seven hours" {
+                    // The heading over the hours heads the rail, whatever its words.
+                    if matches!(ABOUT.get(i + 1), Some(AboutBlock::Hours)) {
                         hours_heading = text.into();
                         in_hours = true;
                     } else {
@@ -692,12 +714,17 @@ impl AboutData {
             dawn_y: format!("{dy:.1}"),
         };
 
+        let (opening_before, opening_after) =
+            ABOUT_SPECIMEN.opening_versicle.split_once('✠').unwrap_or((ABOUT_SPECIMEN.opening_versicle, ""));
         let specimen = AboutSpecimenView {
             label: ABOUT_SPECIMEN.label.into(),
             alone_label: ABOUT_SPECIMEN.alone_label.into(),
+            deacon_label: ABOUT_SPECIMEN.deacon_label.into(),
             priest_label: ABOUT_SPECIMEN.priest_label.into(),
             rubric: ABOUT_SPECIMEN.rubric.into(),
             opening_versicle: ABOUT_SPECIMEN.opening_versicle.into(),
+            opening_before: opening_before.into(),
+            opening_after: opening_after.into(),
             opening_response: ABOUT_SPECIMEN.opening_response.into(),
             alone_versicle: ABOUT_SPECIMEN.alone_versicle.into(),
             alone_response: ABOUT_SPECIMEN.alone_response.into(),
@@ -727,6 +754,7 @@ impl AboutData {
             specimen,
             ordo_ribbon: AboutOrdoRibbon { year: now.year(), ..AboutOrdoRibbon::default() },
             ordo_colors,
+            ribbon_label: presentation::about::ABOUT_RIBBON_LABEL.into(),
             pray_now_label: invite.label,
             pray_now_link: crate::links::hour_link(invite.hour, &presentation::date_slug(invite.date)),
         }
@@ -736,7 +764,7 @@ impl AboutData {
     /// so "The Ordo" renders the full 12-month ribbon with today's gilt lozenge.
     pub fn with_course(mut self, now: calendar::Date, course: &[Vec<presentation::course::CourseRun>]) -> Self {
         let span = presentation::course::COURSE_SPAN;
-        let gap = 3_u32;
+        let gap = ABOUT_RIBBON_GAP;
         let total = 12 * span + 11 * gap;
         let months = course
             .iter()
@@ -753,8 +781,23 @@ impl AboutData {
             })
             .collect();
         let today_x = f64::from((now.month() - 1) * (span + gap)) + f64::from(now.day().clamp(1, span)) - 0.5;
-        self.ordo_ribbon =
-            AboutOrdoRibbon { year: now.year(), width: total, today_pct: format!("{:.3}%", today_x / f64::from(total) * 100.0), months };
+        let labels = ["Jan", "Mar", "May", "Jul", "Sep", "Nov"]
+            .into_iter()
+            .enumerate()
+            .map(|(i, name)| AboutRibbonLabel {
+                name,
+                left_pct: format!("{:.3}%", f64::from(2 * i as u32 * (span + gap)) / f64::from(total) * 100.0),
+            })
+            .collect();
+        self.ordo_ribbon = AboutOrdoRibbon {
+            year: now.year(),
+            span,
+            gap,
+            width: total,
+            today_pct: format!("{:.3}%", today_x / f64::from(total) * 100.0),
+            months,
+            labels,
+        };
         self
     }
 }

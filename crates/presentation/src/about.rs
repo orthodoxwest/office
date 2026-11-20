@@ -70,11 +70,15 @@ impl KeyInk {
     }
 }
 
-/// The live miniature office specimen shown in "Reading the page".
+/// The live miniature office specimen shown in "Reading the page": lines an hour prints, in
+/// the order it prints them (Lauds' opening, then its close). Its switch offers the hour's three
+/// prayer forms by their own labels ([`liturgy::PrayerForm::label`]); a deacon and a priest
+/// greet alike, as the composed hour does, so `priest_*` serves both.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct AboutSpecimen {
     pub label: &'static str,
     pub alone_label: &'static str,
+    pub deacon_label: &'static str,
     pub priest_label: &'static str,
     pub rubric: &'static str,
     pub opening_versicle: &'static str,
@@ -94,6 +98,9 @@ pub struct AboutOrdoColor {
     pub name: &'static str,
     pub meaning: &'static str,
 }
+
+/// What a screen reader hears for the year's ribbon of colors, which is drawn and not read.
+pub const ABOUT_RIBBON_LABEL: &str = "This year’s liturgical colors, day by day. The Ordo gives each day’s.";
 
 /// The small-caps kicker over the title in the painted head.
 pub const ABOUT_KICKER: &str = "Benedictine Divine Office";
@@ -141,17 +148,19 @@ pub fn about_horologium_is_night(slug: &str) -> bool {
 /// The miniature office leaf shown in "Reading the page".
 pub const ABOUT_SPECIMEN: AboutSpecimen = AboutSpecimen {
     label: "From an hour",
-    alone_label: "Alone",
-    priest_label: "With a priest",
-    rubric: "All make the sign of the cross as the hour begins.",
-    opening_versicle: "O God, make speed to save me.",
+    alone_label: liturgy::PrayerForm::Private.label(),
+    deacon_label: liturgy::PrayerForm::Deacon.label(),
+    priest_label: liturgy::PrayerForm::Priest.label(),
+    // The rubric and the opening are the corpus's own (Lauds), the ✠ where the hour prints it.
+    rubric: "The Our Father and Hail Mary are said secretly.",
+    opening_versicle: "O God, ✠ make speed to save me.",
     opening_response: "O Lord, make haste to help me.",
     alone_versicle: "O Lord, hear my prayer.",
     alone_response: "And let my cry come unto thee.",
     priest_versicle: "The Lord be with you.",
     priest_response: "And with thy spirit.",
     secret_voiced: "Our Father,",
-    secret_silent: "who art in heaven, hallowed be thy Name…",
+    secret_silent: "who art in heaven, Hallowed be thy Name…",
 };
 
 /// The six liturgical colors shown beneath the Ordo's year ribbon.
@@ -159,7 +168,7 @@ pub const ABOUT_ORDO_COLORS: &[AboutOrdoColor] = &[
     AboutOrdoColor { slug: "white", name: "White", meaning: "Feasts of the Lord, Eastertide, and most saints" },
     AboutOrdoColor { slug: "red", name: "Red", meaning: "Pentecost, apostles, and martyrs" },
     AboutOrdoColor { slug: "violet", name: "Violet", meaning: "Advent, Lent, and days of penance" },
-    AboutOrdoColor { slug: "green", name: "Green", meaning: "Ordinary days after Epiphany and Pentecost" },
+    AboutOrdoColor { slug: "green", name: "Green", meaning: "Sundays and weekdays after Epiphany and Pentecost" },
     AboutOrdoColor { slug: "rose", name: "Rose", meaning: "Gaudete and Laetare Sundays" },
     AboutOrdoColor { slug: "black", name: "Black", meaning: "Good Friday and All Souls’ Day" },
 ];
@@ -216,7 +225,7 @@ pub const ABOUT: &[AboutBlock] = &[
     },
     AboutBlock::Heading("An ancient prayer"),
     AboutBlock::Era {
-        period: "1st Century · Apostolic Tradition",
+        period: "1st–3rd Century · From the Apostles",
         text: "Christians have prayed at set hours since the Apostles, who continued the daily times \
                of prayer they had known in Israel—the third hour at Pentecost, the sixth with St Peter, \
                and the ninth in the Temple. By the third century, Tertullian and St Cyprian describe \
@@ -227,7 +236,8 @@ pub const ABOUT: &[AboutBlock] = &[
         text: "In the deserts of Egypt and Palestine, monastics made the psalms their unceasing prayer, \
                and St John Cassian carried their practice west. In the sixth century, St Benedict shaped \
                it in his Rule: seven daytime hours and a night watch, praying through the entire Psalter \
-               each week.",
+               each week. His life was written by St Gregory the Great, whom the East honors as St \
+               Gregory the Dialogist.",
     },
     AboutBlock::Era {
         period: "1958 to Today · The Western Rite",
@@ -248,11 +258,12 @@ pub const ABOUT: &[AboutBlock] = &[
         "The psalms follow the Coverdale translation, and the texts are checked against the printed \
          Western Rite books. You can set up [Reminders](/reminders) for the hours you pray, or open \
          Settings (under Menu on a phone) to switch between the Nave and Apse themes, adjust text \
-         size, include the Martyrology at Prime, or display chant notation where available.",
+         size, include the Martyrology at Prime, or display chant notation where available. The mobile \
+         apps work without a connection.",
     ),
     AboutBlock::Paragraph(
-        "Your preferences stay on your device—there are no accounts, no tracking, and no ads \
-         (see [Privacy](/privacy)). If you spot a typo or a rubrical error, please report it on the \
+        "Your preferences stay on your device—there are no accounts, no third-party trackers, and \
+         no ads (see [Privacy](/privacy)). If you spot a typo or a rubrical error, please report it on the \
          [issue tracker](https://github.com/orthodoxwest/office/issues/new).",
     ),
     AboutBlock::Elsewhere,
@@ -346,6 +357,16 @@ mod tests {
             Some(("orthodoxwestbreviary.com".into(), "https://orthodoxwestbreviary.com".into()))
         );
         assert!(crate::usage::ENDPOINT.starts_with("https://orthodoxwestbreviary.com/"));
+    }
+
+    /// Every front sets the hours, their heading and their note as one column (a rail when
+    /// wide), finding the heading as the block before them: so the hours have one, and a note.
+    #[test]
+    fn the_hours_stand_under_their_heading() {
+        let at = ABOUT.iter().position(|b| *b == AboutBlock::Hours).unwrap();
+        assert!(matches!(ABOUT[at - 1], AboutBlock::Heading(_)));
+        assert!(matches!(ABOUT.get(at + 1), Some(AboutBlock::Note(_))));
+        assert_eq!(ABOUT.iter().filter(|b| **b == AboutBlock::Hours).count(), 1);
     }
 
     #[test]

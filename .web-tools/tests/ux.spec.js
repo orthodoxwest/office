@@ -5409,6 +5409,11 @@ test("the beacon says how a reader keeps the hours", async ({ page }) => {
   await page.waitForTimeout(200);
   expect(await page.evaluate(() => localStorage.getItem("office-offline"))).toBe(null);
   await page.context().setOffline(false);
+  // WebKit lifts the emulated outage asynchronously: a navigation sent before the page can reach
+  // the server again fails as "WebKit encountered an internal error" (CI, PR #921). Leave only
+  // once a request from the page goes through.
+  await expect.poll(() => page.evaluate(() =>
+    fetch(`/sw.js?online-check=${Date.now()}`, { method: "HEAD", cache: "no-store" }).then((r) => r.ok, () => false))).toBe(true);
   // Lauds now is out of its time; its beacon fails, and the next that arrives says so, once.
   online = false;
   await page.goto(`/lauds/${today}`);
@@ -5512,8 +5517,15 @@ test("About's Horologium, live specimen leaf, and Ordo ribbon respond to interac
   await page.locator('.about-horologium-stop[data-hour="compline"]').click();
   await expect(horo).toHaveAttribute("data-active", "none");
 
-  // Specimen leaf toggles Alone / With a priest and illuminates lines from the ruled key.
+  // The specimen sets lines as the hour prints them, the ✠ after "O God,"; its switch offers the
+  // hour's three forms, and a deacon greets as a priest does.
   const specimen = page.locator(".about-specimen");
+  await expect(specimen.locator(".about-specimen-opening")).toContainText("O God, ✠ make speed to save me.");
+  await expect(specimen.locator(".about-specimen-opt")).toHaveText(["Private", "Deacon", "Priest"]);
+  await expect(specimen.locator(".about-specimen-v-text")).toHaveText("O Lord, hear my prayer.");
+  await specimen.locator('.about-specimen-opt[data-form="deacon"]').click();
+  await expect(specimen.locator(".about-specimen-v-text")).toHaveText("The Lord be with you.");
+  await specimen.locator('.about-specimen-opt[data-form="private"]').click();
   await expect(specimen.locator(".about-specimen-v-text")).toHaveText("O Lord, hear my prayer.");
   await specimen.locator('.about-specimen-opt[data-form="priest"]').click();
   await expect(specimen.locator(".about-specimen-v-text")).toHaveText("The Lord be with you.");
@@ -5525,6 +5537,30 @@ test("About's Horologium, live specimen leaf, and Ordo ribbon respond to interac
 
   // Ordo ribbon highlights matching days and explains the chosen liturgical color.
   const ribbon = page.locator(".about-ordo-ribbon");
+  // Each month's name stands at its own month's start, and today's lozenge at today (15 March:
+  // two months of 31 days and 3 between, then 14.5 days).
+  const placed = await page.evaluate(() => {
+    const track = document.querySelector(".about-ordo-track").getBoundingClientRect();
+    const at = (el) => (el.getBoundingClientRect().left - track.left) / track.width;
+    return {
+      months: [...document.querySelectorAll(".about-ordo-months span")].map(at),
+      today: parseFloat(document.querySelector(".about-ordo-today").style.left) / 100,
+    };
+  });
+  const total = 12 * 31 + 11 * 3;
+  placed.months.forEach((x, i) => expect(Math.abs(x - (2 * i * 34) / total)).toBeLessThan(0.005));
+  expect(Math.abs(placed.today - (2 * 34 + 14.5) / total)).toBeLessThan(0.001);
+  // A copy kept from last year (the page is served from the cache first) shows no year's band.
+  await page.evaluate(() => {
+    const r = document.querySelector(".about-ordo-ribbon");
+    r._syncToday(new Date(Number(r.dataset.year) + 1, 0, 5));
+  });
+  await expect(ribbon.locator(".about-ordo-track")).toBeHidden();
+  await page.evaluate(() => {
+    const r = document.querySelector(".about-ordo-ribbon");
+    r._syncToday(new Date(Number(r.dataset.year), 2, 15));
+  });
+  await expect(ribbon.locator(".about-ordo-track")).toBeVisible();
   await ribbon.locator('.about-ordo-swatch[data-color="violet"]').click();
   await expect(ribbon).toHaveAttribute("data-selected-color", "violet");
   await expect(ribbon.locator(".about-ordo-meaning")).toContainText("Advent, Lent");

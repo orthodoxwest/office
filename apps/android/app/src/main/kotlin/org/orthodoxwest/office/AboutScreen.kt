@@ -142,7 +142,7 @@ fun AboutScreen(
 
     // Interactive states shared across the Horologium + hours list, specimen + key, and Ordo ribbon.
     var pinnedHour by remember { mutableStateOf<String?>(null) }
-    var specimenForm by remember { mutableStateOf("alone") }
+    var specimenForm by remember { mutableStateOf("private") }
     var litKey by remember { mutableStateOf<String?>(null) }
     var selectedColor by remember { mutableStateOf<String?>(null) }
 
@@ -256,6 +256,7 @@ fun AboutScreen(
                                 course = course,
                                 today = today,
                                 colors = view.ordoColors,
+                                label = view.ribbonLabel,
                                 selected = selectedColor,
                                 onSelect = { slug -> selectedColor = if (selectedColor == slug) null else slug },
                             )
@@ -326,11 +327,12 @@ private fun partitionAboutBlocks(blocks: List<AboutBlockView>): AboutPartition {
         curHeading = null
         curBlocks = mutableListOf()
     }
-    for (b in blocks) {
+    blocks.forEachIndexed { i, b ->
         when (b.kind) {
             "verse", "intro", "invitation" -> Unit
             "heading" -> {
-                if (b.text == "The seven hours") {
+                // The heading over the hours heads their column, whatever its words.
+                if (blocks.getOrNull(i + 1)?.kind == "hours") {
                     flush()
                     hoursHeading = b.text
                     inHours = true
@@ -659,8 +661,8 @@ private fun Horologium(
                 readout(Modifier.align(Alignment.BottomCenter).padding(bottom = boxH * 0.22f, start = boxW * 0.14f, end = boxW * 0.14f))
             }
 
-            // Accessible 36dp tap targets over each of the seven stations
-            val tapPx = with(density) { 36.dp.toPx() }
+            // 44dp tap targets over each of the seven stations (Lauds and Prime sit about 48dp apart on a phone)
+            val tapPx = with(density) { 44.dp.toPx() }
             hours.forEach { h ->
                 val rad = Math.toRadians(h.angle)
                 val fracX = (160.0 + cos(rad) * 118.0) / 320.0
@@ -669,7 +671,7 @@ private fun Horologium(
                 val yPx = with(density) { (boxH.toPx() * fracY - tapPx / 2f).roundToInt() }
                 Box(
                     Modifier.offset { IntOffset(xPx, yPx) }
-                        .size(36.dp)
+                        .size(44.dp)
                         .tap(label = "${h.name}: ${h.gloss}, ${h.time}", selected = h.hour == active.hour) { onSelect(h.hour) },
                 )
             }
@@ -768,7 +770,7 @@ private fun HoursDirectory(
 
 /**
  * The live miniature office specimen in "Reading the page": framed in home's double hand-ruled
- * course over the feathered tablet wash, with an interactive Alone / With a priest switch and
+ * course over the feathered tablet wash, with the hour's Private / Deacon / Priest switch and
  * soft pool-of-light illumination tied to the ruled key below.
  */
 @OptIn(ExperimentalLayoutApi::class)
@@ -792,7 +794,7 @@ private fun SpecimenLeaf(
             invitationRules(p.lining, o.flat, seed = 161, day = 0.58f)
         }.padding(horizontal = 18.dp, vertical = 15.dp),
     ) {
-        // Header bar: "From an hour" + Alone ◆ With a priest (wraps cleanly at 200% font scale)
+        // Header bar: "From an hour" + Private ◆ Deacon ◆ Priest (wraps cleanly at 200% font scale)
         FlowRow(
             Modifier.fillMaxWidth().litPool(litKey == "form", pool).padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -816,7 +818,9 @@ private fun SpecimenLeaf(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) {
-                SpecimenFormTab(specimen.aloneLabel, form == "alone") { onForm("alone") }
+                SpecimenFormTab(specimen.aloneLabel, form == "private") { onForm("private") }
+                Box(Modifier.size(3.5.dp).rotate(45f).background(o.flat.copy(alpha = 0.72f)))
+                SpecimenFormTab(specimen.deaconLabel, form == "deacon") { onForm("deacon") }
                 Box(Modifier.size(3.5.dp).rotate(45f).background(o.flat.copy(alpha = 0.72f)))
                 SpecimenFormTab(specimen.priestLabel, form == "priest") { onForm("priest") }
             }
@@ -824,20 +828,34 @@ private fun SpecimenLeaf(
         RuledDivider(p.lining.copy(alpha = 0.36f), 0.85f, seed = 169)
         Spacer(Modifier.height(10.dp))
 
-        // Rubric
+        // Lauds' opening as the hour prints it: its rubric, the secret Our Father, the ✠ where it falls.
         Text(
             specimen.rubric,
             Modifier.fillMaxWidth().litPool(litKey == "rubric", pool).padding(bottom = 6.dp),
             style = lineStyle.copy(fontSize = 15.sp, color = p.rubric, fontStyle = FontStyle.Italic),
         )
+        Text(
+            buildAnnotatedString {
+                append(specimen.secretVoiced)
+                append(" ")
+                withStyle(SpanStyle(color = if (p.dark) p.unsaid else p.muted)) { append(specimen.secretSilent) }
+            },
+            Modifier.fillMaxWidth().litPool(litKey == "secret", pool).padding(bottom = 8.dp),
+            style = lineStyle,
+        )
 
-        // Opening V/R with sign of the cross
+        RuledDivider(p.lining.copy(alpha = 0.19f), 0.75f, seed = 171)
+        Spacer(Modifier.height(8.dp))
         Row(Modifier.fillMaxWidth().litPool(litKey == "vr" || litKey == "cross", pool).padding(bottom = 4.dp)) {
             Text("℣.", Modifier.width(27.dp), style = lineStyle.copy(color = p.rubric))
             Text(
                 buildAnnotatedString {
-                    withStyle(SpanStyle(color = p.rubric)) { append("✠ ") }
-                    append(specimen.openingVersicle)
+                    val parts = specimen.openingVersicle.split("✠", limit = 2)
+                    append(parts[0])
+                    if (parts.size == 2) {
+                        withStyle(SpanStyle(color = p.rubric)) { append("✠") }
+                        append(parts[1])
+                    }
                 },
                 style = lineStyle,
             )
@@ -847,30 +865,19 @@ private fun SpecimenLeaf(
             Text(specimen.openingResponse, style = lineStyle)
         }
 
-        // Prayer form greeting (live swap between Alone and With a priest)
+        // The close's greeting, as the chosen form gives it: a deacon greets as a priest does.
         RuledDivider(p.lining.copy(alpha = 0.19f), 0.75f, seed = 170)
-        Column(Modifier.fillMaxWidth().litPool(litKey == "form", pool).padding(vertical = 7.dp)) {
+        val clergy = form != "private"
+        Column(Modifier.fillMaxWidth().litPool(litKey == "form", pool).padding(top = 7.dp)) {
             Row(Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
                 Text("℣.", Modifier.width(27.dp), style = lineStyle.copy(color = p.rubric))
-                Text(if (form == "priest") specimen.priestVersicle else specimen.aloneVersicle, style = lineStyle)
+                Text(if (clergy) specimen.priestVersicle else specimen.aloneVersicle, style = lineStyle)
             }
             Row(Modifier.fillMaxWidth()) {
                 Text("℟.", Modifier.width(27.dp), style = lineStyle.copy(color = p.rubric))
-                Text(if (form == "priest") specimen.priestResponse else specimen.aloneResponse, style = lineStyle)
+                Text(if (clergy) specimen.priestResponse else specimen.aloneResponse, style = lineStyle)
             }
         }
-
-        // Secret prayer: voiced incipit + silent grey tail
-        RuledDivider(p.lining.copy(alpha = 0.19f), 0.75f, seed = 171)
-        Text(
-            buildAnnotatedString {
-                append(specimen.secretVoiced)
-                append(" ")
-                withStyle(SpanStyle(color = if (p.dark) p.unsaid else p.muted)) { append(specimen.secretSilent) }
-            },
-            Modifier.fillMaxWidth().litPool(litKey == "secret", pool).padding(top = 8.dp),
-            style = lineStyle,
-        )
     }
 }
 
@@ -1008,6 +1015,7 @@ private fun OrdoRibbon(
     course: List<CourseMonthView>?,
     today: LocalDate,
     colors: List<AboutOrdoColorView>,
+    label: String,
     selected: String?,
     onSelect: (String) -> Unit,
 ) {
@@ -1020,7 +1028,7 @@ private fun OrdoRibbon(
     Column(Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 4.dp)) {
         if (!course.isNullOrEmpty()) {
             val todayFrac = ((today.monthValue - 1) * (span + gap) + today.dayOfMonth.coerceIn(1, span) - 0.5f) / total.toFloat()
-            Box(Modifier.fillMaxWidth().height(15.dp)) {
+            Box(Modifier.fillMaxWidth().height(15.dp).clearAndSetSemantics { contentDescription = label }) {
                 Canvas(Modifier.fillMaxWidth().height(5.dp)) {
                     val unit = size.width / total.toFloat()
                     course.forEachIndexed { mi, month ->
@@ -1059,10 +1067,13 @@ private fun OrdoRibbon(
                     drawPath(lozenge, o.flat)
                 }
             }
-            Row(Modifier.fillMaxWidth().padding(top = 2.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                listOf("Jan", "Mar", "May", "Jul", "Sep", "Nov").forEach { m ->
+            // Each name stands at its own month's start, as the web's (view.rs AboutRibbonLabel).
+            BoxWithConstraints(Modifier.fillMaxWidth().padding(top = 2.dp)) {
+                listOf("Jan", "Mar", "May", "Jul", "Sep", "Nov").forEachIndexed { i, m ->
                     Text(
                         m,
+                        Modifier.offset(x = maxWidth * (2 * i * (span + gap)).toFloat() / total.toFloat()),
+                        softWrap = false,
                         style = Type.body.copy(
                             fontSize = 10.88.sp,
                             lineHeight = 14.sp,

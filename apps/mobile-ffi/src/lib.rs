@@ -1112,6 +1112,7 @@ pub struct AboutPeriodView {
 pub struct AboutSpecimenView {
     pub label: String,
     pub alone_label: String,
+    pub deacon_label: String,
     pub priest_label: String,
     pub rubric: String,
     pub opening_versicle: String,
@@ -1144,6 +1145,8 @@ pub struct AboutView {
     pub periods: Vec<AboutPeriodView>,
     pub specimen: AboutSpecimenView,
     pub ordo_colors: Vec<AboutOrdoColorView>,
+    /// What a screen reader hears for the year's ribbon of colors, which is drawn and not read.
+    pub ribbon_label: String,
 }
 
 /// The hour it is now on the About page, as home has it: the hour its table lights (empty from
@@ -1245,6 +1248,7 @@ pub fn about() -> AboutView {
     let specimen = AboutSpecimenView {
         label: ABOUT_SPECIMEN.label.into(),
         alone_label: ABOUT_SPECIMEN.alone_label.into(),
+        deacon_label: ABOUT_SPECIMEN.deacon_label.into(),
         priest_label: ABOUT_SPECIMEN.priest_label.into(),
         rubric: ABOUT_SPECIMEN.rubric.into(),
         opening_versicle: ABOUT_SPECIMEN.opening_versicle.into(),
@@ -1269,6 +1273,7 @@ pub fn about() -> AboutView {
         periods,
         specimen,
         ordo_colors,
+        ribbon_label: presentation::about::ABOUT_RIBBON_LABEL.into(),
     }
 }
 

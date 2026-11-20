@@ -68,7 +68,9 @@
           <button type="button" class="about-horologium-stop{% if s.slug == horologium.active_slug %} is-active{% endif %}{% if s.night %} is-night-stop{% endif %}" style="left: {{ s.left_pct }}; top: {{ s.top_pct }};" data-hour="{{ s.slug }}" data-name="{{ s.name }}" data-gloss="{{ s.gloss }}" data-time="{{ s.time }}" data-angle="{{ s.angle }}" data-night="{{ 'true' if s.night else 'false' }}" aria-label="{{ s.name }}: {{ s.gloss }}, {{ s.time }}" aria-pressed="{{ 'true' if s.slug == horologium.active_slug else 'false' }}"></button>
           {%- endfor %}
         </div>
-        <div class="about-horologium-readout" aria-live="polite">
+        {# Not a live region: each stop's button already names its hour, and a readout spoken at
+           every pointer pass would talk over the page. #}
+        <div class="about-horologium-readout">
           <span class="about-horologium-time">{% if horologium.active_is_now %}Now · {% endif %}{{ horologium.active_time }}</span>
           <span class="about-horologium-title"><strong>{{ horologium.active_name }}</strong> <em>· {{ horologium.active_gloss }}</em></span>
         </div>
@@ -105,23 +107,26 @@
       {%- elif b.kind == "note" %}
       <p class="about-note">{{ b.text }}</p>
       {%- elif b.kind == "specimen" %}
-      <div class="about-specimen" data-form="alone">
+      <div class="about-specimen" data-form="private">
         <div class="about-specimen-bar" data-key="form">
           <span class="about-specimen-label">{{ specimen.label }}</span>
-          <div class="about-specimen-toggle" role="group" aria-label="Specimen prayer form">
-            <button type="button" class="about-specimen-opt is-selected" data-form="alone" aria-pressed="true">{{ specimen.alone_label }}</button>
+          <div class="about-specimen-toggle" role="group" aria-label="Prayer form">
+            <button type="button" class="about-specimen-opt is-selected" data-form="private" aria-pressed="true">{{ specimen.alone_label }}</button>
+            <span class="about-gilt-point" aria-hidden="true"></span>
+            <button type="button" class="about-specimen-opt" data-form="deacon" aria-pressed="false">{{ specimen.deacon_label }}</button>
             <span class="about-gilt-point" aria-hidden="true"></span>
             <button type="button" class="about-specimen-opt" data-form="priest" aria-pressed="false">{{ specimen.priest_label }}</button>
           </div>
         </div>
+        {# Lauds' opening as the hour prints it, then its close, where the form sets the greeting. #}
         <p class="about-specimen-line about-specimen-rubric" data-key="rubric">{{ specimen.rubric }}</p>
-        <p class="about-specimen-line about-specimen-vr" data-key="vr cross"><span class="about-specimen-sigil">℣.</span><span><span class="about-specimen-cross" aria-hidden="true">✠</span>{{ specimen.opening_versicle }}</span></p>
+        <p class="about-specimen-line about-specimen-secret" data-key="secret"><span>{{ specimen.secret_voiced }}</span> <span class="about-specimen-unsaid">{{ specimen.secret_silent }}</span></p>
+        <p class="about-specimen-line about-specimen-vr about-specimen-opening" data-key="vr cross"><span class="about-specimen-sigil">℣.</span><span>{{ specimen.opening_before }}<span class="about-specimen-cross">✠</span>{{ specimen.opening_after }}</span></p>
         <p class="about-specimen-line about-specimen-vr" data-key="vr"><span class="about-specimen-sigil">℟.</span><span>{{ specimen.opening_response }}</span></p>
         <div class="about-specimen-form-lines" data-key="form" data-alone-v="{{ specimen.alone_versicle }}" data-alone-r="{{ specimen.alone_response }}" data-priest-v="{{ specimen.priest_versicle }}" data-priest-r="{{ specimen.priest_response }}">
           <p class="about-specimen-line about-specimen-vr"><span class="about-specimen-sigil">℣.</span><span class="about-specimen-v-text">{{ specimen.alone_versicle }}</span></p>
           <p class="about-specimen-line about-specimen-vr"><span class="about-specimen-sigil">℟.</span><span class="about-specimen-r-text">{{ specimen.alone_response }}</span></p>
         </div>
-        <p class="about-specimen-line about-specimen-secret" data-key="secret"><span>{{ specimen.secret_voiced }}</span> <span class="about-specimen-unsaid">{{ specimen.secret_silent }}</span></p>
       </div>
       {%- elif b.kind == "key" %}
       {%- if loop.previtem is undefined or loop.previtem.kind != "key" %}
@@ -150,7 +155,7 @@
       </ol>
       {%- endif %}
       {%- elif b.kind == "ordo_ribbon" %}
-      <div class="about-ordo-ribbon">
+      <div class="about-ordo-ribbon"{% if ordo_ribbon.months %} data-year="{{ ordo_ribbon.year }}" data-span="{{ ordo_ribbon.span }}" data-gap="{{ ordo_ribbon.gap }}"{% endif %}>
         {%- if ordo_ribbon.months %}
         <div class="about-ordo-track">
           <svg class="about-ordo-svg" viewBox="0 0 {{ ordo_ribbon.width }} 5" preserveAspectRatio="none" aria-hidden="true" focusable="false">
@@ -164,9 +169,10 @@
             {%- endfor %}
           </svg>
           <span class="about-ordo-today" style="left: {{ ordo_ribbon.today_pct }}" aria-hidden="true"></span>
+          <span class="sr-only">{{ ribbon_label }}</span>
         </div>
         <div class="about-ordo-months" aria-hidden="true">
-          <span>Jan</span><span>Mar</span><span>May</span><span>Jul</span><span>Sep</span><span>Nov</span>
+          {%- for l in ordo_ribbon.labels %}<span style="left: {{ l.left_pct }}">{{ l.name }}</span>{% endfor %}
         </div>
         {%- endif %}
         <div class="about-ordo-legend" role="group" aria-label="Liturgical colors">

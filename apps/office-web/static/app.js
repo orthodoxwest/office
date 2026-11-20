@@ -3666,6 +3666,8 @@ function plainClickOpensHere(e, link) {
       door.setAttribute("href", "/" + info.slug + "/" + localDateSlug(officeDate));
       setPrayNowLabel(door, "Pray " + (HOUR_NAMES[info.slug] || info.slug));
     }
+    var ribbon = document.querySelector(".about-ordo-ribbon");
+    if (ribbon && ribbon._syncToday) ribbon._syncToday(now);
     var horologium = document.querySelector(".about-horologium");
     if (horologium) {
       var nowSlug = info.offset === 0 ? info.slug : "";
@@ -6279,9 +6281,9 @@ function plainClickOpensHere(e, link) {
       if (formLines && formLines.offsetWidth) {
         stroke(layer(formLines), "r-hair", rule(0, 0.5, formLines.offsetWidth, 0.5, 0.75, 170));
       }
-      var secret = specimen.querySelector(".about-specimen-secret");
-      if (secret && secret.offsetWidth) {
-        stroke(layer(secret), "r-hair", rule(0, 0.5, secret.offsetWidth, 0.5, 0.75, 171));
+      var opening = specimen.querySelector(".about-specimen-opening");
+      if (opening && opening.offsetWidth) {
+        stroke(layer(opening), "r-hair", rule(0, 0.5, opening.offsetWidth, 0.5, 0.75, 171));
       }
     }
 
@@ -6495,7 +6497,7 @@ function plainClickOpensHere(e, link) {
   }
 
   // ── 2. Live Illuminated Specimen Leaf ("Reading the page") ──
-  // Toggling Alone / With a priest swaps the greeting versicle live; hovering
+  // Choosing Private, Deacon or Priest swaps the greeting versicle live; hovering
   // or tapping any row in the key casts home's soft pool of light onto the
   // matching line(s) inside the specimen above.
   var specimen = page.querySelector(".about-specimen");
@@ -6516,8 +6518,10 @@ function plainClickOpensHere(e, link) {
         btn.setAttribute("aria-pressed", on ? "true" : "false");
       });
       if (formBox && vText && rText) {
-        vText.textContent = formBox.getAttribute(form === "priest" ? "data-priest-v" : "data-alone-v") || "";
-        rText.textContent = formBox.getAttribute(form === "priest" ? "data-priest-r" : "data-alone-r") || "";
+        // A deacon greets as a priest does (presentation::about::AboutSpecimen).
+        var clergy = form !== "private";
+        vText.textContent = formBox.getAttribute(clergy ? "data-priest-v" : "data-alone-v") || "";
+        rText.textContent = formBox.getAttribute(clergy ? "data-priest-r" : "data-alone-r") || "";
       }
       ruleAll();
     }
@@ -6570,6 +6574,21 @@ function plainClickOpensHere(e, link) {
   // 365-day ribbon and quietly names when the Church uses that color.
   var ribbon = page.querySelector(".about-ordo-ribbon");
   if (ribbon) {
+    // The server placed today by its own clock, and the page may come from the cache: the
+    // gilt lozenge follows the device's date, and a band kept from another year stands down
+    // (as view.rs places it: months on equal spans, ABOUT_RIBBON_GAP days apart).
+    var ribbonToday = ribbon.querySelector(".about-ordo-today");
+    var ribbonYear = parseInt(ribbon.getAttribute("data-year"), 10);
+    var ribbonSpan = parseInt(ribbon.getAttribute("data-span"), 10);
+    var ribbonGap = parseInt(ribbon.getAttribute("data-gap"), 10);
+    ribbon._syncToday = function (now) {
+      if (!ribbonToday || !ribbonYear || !ribbonSpan) return;
+      ribbon.classList.toggle("is-other-year", now.getFullYear() !== ribbonYear);
+      var width = 12 * ribbonSpan + 11 * ribbonGap;
+      var x = now.getMonth() * (ribbonSpan + ribbonGap) + Math.min(Math.max(now.getDate(), 1), ribbonSpan) - 0.5;
+      ribbonToday.style.left = ((x / width) * 100).toFixed(3) + "%";
+    };
+    ribbon._syncToday(new Date());
     var swatches = Array.from(ribbon.querySelectorAll(".about-ordo-swatch"));
     var meaning = ribbon.querySelector(".about-ordo-meaning");
     var pinnedColor = null;

@@ -8917,7 +8917,6 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   color: var(--rubric);
   font-family: "Office Cross", "EB Garamond", serif;
   font-size: 0.9em;
-  margin-right: 0.28rem;
 }
 
 .about-specimen-form-lines {
@@ -8932,13 +8931,13 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   border-top-color: transparent;
 }
 
-.about-specimen-secret {
+.about-specimen-opening {
   margin-top: 0.5rem !important;
   padding-top: 0.48rem;
   border-top: 1px solid var(--about-rule-hair);
 }
 
-.about-specimen-secret.is-ruled {
+.about-specimen-opening.is-ruled {
   border-top-color: transparent;
 }
 
@@ -9169,14 +9168,29 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   transform: translateX(-50%) rotate(45deg);
 }
 
+/* Each name stands at its own month's start (view.rs's AboutRibbonLabel), as the band's
+   months are drawn on equal spans with a gap between. */
 .about-ordo-months {
-  display: flex;
-  justify-content: space-between;
+  position: relative;
+  height: 1.1em;
+  line-height: 1.1;
   margin-top: 0.2rem;
   color: var(--muted);
   font-size: 0.68rem;
   font-variant-caps: all-small-caps;
   letter-spacing: 0.08em;
+}
+
+.about-ordo-months > span {
+  position: absolute;
+  top: 0;
+}
+
+/* A copy kept from another year (the page is served from the cache first) shows its legend
+   alone until a fresh copy arrives (app.js). */
+.about-ordo-ribbon.is-other-year .about-ordo-track,
+.about-ordo-ribbon.is-other-year .about-ordo-months {
+  display: none;
 }
 
 .about-ordo-legend {

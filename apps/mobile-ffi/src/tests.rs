@@ -192,6 +192,31 @@ fn about_lights_and_invites_to_the_hour_home_does() {
     assert!(web.runs.iter().any(|r| r.link == "https://orthodoxwestbreviary.com"));
 }
 
+/// About's specimen sets lines an hour prints, as it prints them (the ✠ where it falls, the
+/// rubric's own words), and each form's greeting is the one that form's hour gives.
+#[test]
+fn abouts_specimen_is_lines_the_hour_prints() {
+    let core = OfficeCore::new().unwrap();
+    let s = crate::about().specimen;
+    let lines = |form: &str| -> Vec<String> {
+        let hour = core.compose("lauds".into(), 2026, 11, 19, form.into(), false, false).unwrap();
+        hour.sections.iter().flat_map(|sec| &sec.blocks).map(|b| b.runs.iter().map(|r| r.text.as_str()).collect::<String>()).collect()
+    };
+    let has = |lines: &[String], want: &str| lines.iter().any(|l| l.trim() == want);
+    for form in ["private", "deacon", "priest"] {
+        let l = lines(form);
+        assert!(has(&l, &s.rubric), "{form}: {}", s.rubric);
+        assert!(has(&l, &s.opening_versicle), "{form}: {}", s.opening_versicle);
+        assert!(has(&l, &s.opening_response), "{form}: {}", s.opening_response);
+        let secret = format!("{} {}", s.secret_voiced, s.secret_silent.trim_end_matches('…'));
+        assert!(l.iter().any(|line| line.starts_with(&secret)), "{form}: {secret}");
+        let (v, r) = if form == "private" { (&s.alone_versicle, &s.alone_response) } else { (&s.priest_versicle, &s.priest_response) };
+        assert!(has(&l, v) && has(&l, r), "{form}: {v} / {r}");
+    }
+    let labels = [&s.alone_label, &s.deacon_label, &s.priest_label];
+    assert_eq!(labels.map(|l| l.as_str()), liturgy::PrayerForm::ALL.map(|f| f.label()));
+}
+
 #[test]
 fn home_sets_the_days_versicle_on_a_plain_day() {
     let core = OfficeCore::new().unwrap();

@@ -527,7 +527,7 @@ impl PrayerForm {
             .ok_or_else(|| format!("invalid prayer form {}: choose private, deacon, or priest", data_format::quote(value)))
     }
 
-    pub fn label(self) -> &'static str {
+    pub const fn label(self) -> &'static str {
         match self {
             PrayerForm::Private => "Private",
             PrayerForm::Deacon => "Deacon",

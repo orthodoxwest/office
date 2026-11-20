@@ -60,7 +60,7 @@ struct AboutScreen: View {
     @Environment(\.openURL) private var openURL
 
     @State private var pinnedHour: String?
-    @State private var specimenForm = "alone"
+    @State private var specimenForm = "private"
     @State private var litKey: String?
     @State private var selectedColor: String?
 
@@ -240,6 +240,7 @@ struct AboutScreen: View {
                             course: course,
                             today: model.today,
                             colors: view.ordoColors,
+                            label: view.ribbonLabel,
                             selected: selectedColor,
                             onSelect: { slug in selectedColor = selectedColor == slug ? nil : slug }
                         )
@@ -295,11 +296,12 @@ private func partitionAboutBlocks(_ blocks: [AboutBlockView]) -> AboutPartition 
         curHeading = nil
         curBlocks = []
     }
-    for b in blocks {
+    for (i, b) in blocks.enumerated() {
         switch b.kind {
         case "verse", "intro", "invitation": break
         case "heading":
-            if b.text == "The seven hours" {
+            // The heading over the hours heads their column, whatever its words.
+            if i + 1 < blocks.count && blocks[i + 1].kind == "hours" {
                 flush()
                 hoursHeading = b.text
                 inHours = true
@@ -532,13 +534,13 @@ private struct AboutHorologium: View {
                                 .allowsHitTesting(false)
                         }
 
-                        // Accessible 36pt tap targets over each of the seven stations
+                        // 44pt tap targets over each of the seven stations (Apple's minimum)
                         ForEach(Array(hours.enumerated()), id: \.offset) { _, hr in
                             let rad = hr.angle * .pi / 180.0
                             let px = w * CGFloat((160.0 + cos(rad) * 118.0) / 320.0)
                             let py = h * CGFloat((128.0 - sin(rad) * 104.0) / 144.0)
                             Button { onSelect(hr.hour) } label: {
-                                Color.clear.frame(width: 36, height: 36).contentShape(Rectangle())
+                                Color.clear.frame(width: 44, height: 44).contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
                             .position(x: px, y: py)
@@ -800,7 +802,7 @@ private struct AboutHoursDirectory: View {
 
 /**
  * The live miniature office specimen in "Reading the page": framed in home's double hand-ruled
- * course over the feathered tablet wash, with an interactive Alone / With a priest switch and
+ * course over the feathered tablet wash, with the hour's Private / Deacon / Priest switch and
  * soft pool-of-light illumination tied to the ruled key below.
  */
 private struct AboutSpecimenLeaf: View {
@@ -822,7 +824,9 @@ private struct AboutSpecimenLeaf: View {
                 .foregroundStyle(p.titulus)
                 .fixedSize(horizontal: true, vertical: false)
             let toggle = HStack(spacing: m.px(8)) {
-                formTab(specimen.aloneLabel, selected: form == "alone") { onForm("alone") }
+                formTab(specimen.aloneLabel, selected: form == "private") { onForm("private") }
+                Rectangle().fill(o.flat.opacity(0.72)).frame(width: 3.5, height: 3.5).rotationEffect(.degrees(45))
+                formTab(specimen.deaconLabel, selected: form == "deacon") { onForm("deacon") }
                 Rectangle().fill(o.flat.opacity(0.72)).frame(width: 3.5, height: 3.5).rotationEffect(.degrees(45))
                 formTab(specimen.priestLabel, selected: form == "priest") { onForm("priest") }
             }
@@ -845,6 +849,7 @@ private struct AboutSpecimenLeaf: View {
             RuledDivider(color: p.lining.opacity(0.36), weight: 0.85, seed: 169)
                 .padding(.bottom, m.px(10))
 
+            // Lauds' opening as the hour prints it: its rubric, the secret Our Father, the ✠ where it falls.
             Text(specimen.rubric)
                 .type(Scale.bodyItalic.sized(15, line: 22))
                 .foregroundStyle(p.rubric)
@@ -852,9 +857,19 @@ private struct AboutSpecimenLeaf: View {
                 .padding(.bottom, m.px(6))
                 .background { if litKey == "rubric" { SpecimenLitPool() } }
 
+            (Text(specimen.secretVoiced + " ").foregroundColor(p.text)
+                + Text(specimen.secretSilent).foregroundColor(p.dark ? p.unsaid : p.muted))
+                .type(lineStyle)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.bottom, m.px(8))
+                .background { if litKey == "secret" { SpecimenLitPool() } }
+
+            RuledDivider(color: p.lining.opacity(0.19), weight: 0.75, seed: 171)
+                .padding(.bottom, m.px(8))
+
             HStack(alignment: .firstTextBaseline, spacing: 0) {
                 Text("℣.").type(lineStyle).foregroundStyle(p.rubric).frame(width: m.px(27), alignment: .leading)
-                (Text("✠ ").foregroundColor(p.rubric) + Text(specimen.openingVersicle).foregroundColor(p.text))
+                openingVersicle
                     .type(lineStyle)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -869,31 +884,24 @@ private struct AboutSpecimenLeaf: View {
             .padding(.bottom, m.px(8))
             .background { if litKey == "vr" { SpecimenLitPool() } }
 
+            // The close's greeting, as the chosen form gives it: a deacon greets as a priest does.
             RuledDivider(color: p.lining.opacity(0.19), weight: 0.75, seed: 170)
 
+            let clergy = form != "private"
             VStack(alignment: .leading, spacing: m.px(4)) {
                 HStack(alignment: .firstTextBaseline, spacing: 0) {
                     Text("℣.").type(lineStyle).foregroundStyle(p.rubric).frame(width: m.px(27), alignment: .leading)
-                    Text(form == "priest" ? specimen.priestVersicle : specimen.aloneVersicle).type(lineStyle).foregroundStyle(p.text)
+                    Text(clergy ? specimen.priestVersicle : specimen.aloneVersicle).type(lineStyle).foregroundStyle(p.text)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 HStack(alignment: .firstTextBaseline, spacing: 0) {
                     Text("℟.").type(lineStyle).foregroundStyle(p.rubric).frame(width: m.px(27), alignment: .leading)
-                    Text(form == "priest" ? specimen.priestResponse : specimen.aloneResponse).type(lineStyle).foregroundStyle(p.text)
+                    Text(clergy ? specimen.priestResponse : specimen.aloneResponse).type(lineStyle).foregroundStyle(p.text)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
-            .padding(.vertical, m.px(7))
+            .padding(.top, m.px(7))
             .background { if litKey == "form" { SpecimenLitPool() } }
-
-            RuledDivider(color: p.lining.opacity(0.19), weight: 0.75, seed: 171)
-
-            (Text(specimen.secretVoiced + " ").foregroundColor(p.text)
-                + Text(specimen.secretSilent).foregroundColor(p.dark ? p.unsaid : p.muted))
-                .type(lineStyle)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, m.px(8))
-                .background { if litKey == "secret" { SpecimenLitPool() } }
         }
         .padding(.horizontal, m.px(18))
         .padding(.vertical, m.px(15))
@@ -908,6 +916,13 @@ private struct AboutSpecimenLeaf: View {
                 .allowsHitTesting(false)
                 .accessibilityHidden(true)
         }
+    }
+
+    /// The opening versicle with its ✠ in the rubrics' red, where the hour prints it.
+    private var openingVersicle: Text {
+        let parts = specimen.openingVersicle.components(separatedBy: "✠")
+        guard parts.count == 2 else { return Text(specimen.openingVersicle).foregroundColor(p.text) }
+        return Text(parts[0]).foregroundColor(p.text) + Text("✠").foregroundColor(p.rubric) + Text(parts[1]).foregroundColor(p.text)
     }
 
     private func formTab(_ label: String, selected: Bool, action: @escaping () -> Void) -> some View {
@@ -1045,6 +1060,8 @@ private struct AboutOrdoRibbon: View {
     let course: [CourseMonthView]?
     let today: CivilDate
     let colors: [AboutOrdoColorView]
+    /// What VoiceOver says for the drawn ribbon.
+    let label: String
     let selected: String?
     let onSelect: (String) -> Void
     @Environment(\.palette) private var p
@@ -1100,14 +1117,18 @@ private struct AboutOrdoRibbon: View {
                     ctx.fill(lozenge, with: .color(o.flat))
                 }
                 .frame(height: 15)
-                .accessibilityHidden(true)
+                .accessibilityElement()
+                .accessibilityLabel(label)
 
-                HStack {
-                    ForEach(["Jan", "Mar", "May", "Jul", "Sep", "Nov"], id: \.self) { label in
-                        if label != "Jan" { Spacer() }
+                // Each name stands at its own month's start, as the web's (view.rs AboutRibbonLabel).
+                GeometryReader { geo in
+                    ForEach(Array(["Jan", "Mar", "May", "Jul", "Sep", "Nov"].enumerated()), id: \.offset) { i, label in
                         Text(label).type(TextStyle(size: 10.88, line: 14, tracking: 0.9, smallCaps: true)).foregroundStyle(p.muted)
+                            .fixedSize()
+                            .offset(x: geo.size.width * CGFloat(2 * i * (span + gap)) / CGFloat(total))
                     }
                 }
+                .frame(height: m.px(14))
                 .padding(.top, 2)
                 .accessibilityHidden(true)
             }
