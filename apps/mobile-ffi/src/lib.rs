@@ -1058,11 +1058,7 @@ pub fn ordo_year(year: i32) -> OrdoYearView {
                 value: r.value,
                 date: r.date.map(CivilDate::from),
                 feast_id: r.feast_id.into(),
-                gloss: presentation::gloss::tabula_figure_gloss(r.label).map(|g| GlossView {
-                    title: g.title.into(),
-                    note: g.note.into(),
-                    quiet: false,
-                }),
+                gloss: presentation::gloss::tabula_figure_gloss(r.label).map(|g| GlossView::of(g, false)),
             })
             .collect()
     };
@@ -1112,7 +1108,7 @@ pub fn reading_key() -> ReadingKeyView {
 #[uniffi::export]
 pub fn ember_days_gloss() -> GlossView {
     let g = &presentation::gloss::EMBER_DAYS_GLOSS;
-    GlossView { title: g.title.into(), note: g.note.into(), quiet: false }
+    GlossView::of(g, false)
 }
 
 /// The notes opened by tapping abbreviations inside Ordo "Office details".
@@ -1127,7 +1123,7 @@ pub struct OrdoDetailGlosses {
 
 #[uniffi::export]
 pub fn ordo_detail_glosses() -> OrdoDetailGlosses {
-    let to_view = |g: &presentation::gloss::Gloss| GlossView { title: g.title.into(), note: g.note.into(), quiet: false };
+    let to_view = |g: &presentation::gloss::Gloss| GlossView::of(g, false);
     OrdoDetailGlosses {
         benedictus: to_view(&presentation::gloss::ORDO_BENEDICTUS_GLOSS),
         magnificat: to_view(&presentation::gloss::ORDO_MAGNIFICAT_GLOSS),
@@ -1659,7 +1655,7 @@ impl From<render_blocks::Block> for BlockView {
         BlockView {
             kind: b.kind.into(),
             marker: b.marker,
-            marker_gloss: b.marker_gloss.map(|g| GlossView { title: g.title.to_string(), note: g.note.to_string(), quiet: true }),
+            marker_gloss: b.marker_gloss.map(|g| GlossView::of(g, true)),
             drop_cap: b.drop_cap,
             starts_element: b.starts_element,
             space: b.space.into(),
@@ -1668,11 +1664,7 @@ impl From<render_blocks::Block> for BlockView {
             runs: b
                 .runs
                 .into_iter()
-                .map(|r| RunView {
-                    text: r.text,
-                    style: r.style.into(),
-                    gloss: r.gloss.map(|g| GlossView { title: g.title.to_string(), note: g.note.to_string(), quiet: r.quiet_gloss }),
-                })
+                .map(|r| RunView { text: r.text, style: r.style.into(), gloss: r.gloss.map(|g| GlossView::of(g, r.quiet_gloss)) })
                 .collect(),
         }
     }
@@ -1695,6 +1687,15 @@ pub struct GlossView {
     pub note: String,
     #[uniffi(default = false)]
     pub quiet: bool,
+    /// The words the note explains, as the web prints them ("Ben.", "Golden Number").
+    #[uniffi(default = "")]
+    pub term: String,
+}
+
+impl GlossView {
+    fn of(g: &presentation::gloss::Gloss, quiet: bool) -> Self {
+        GlossView { title: g.title.into(), note: g.note.into(), quiet, term: g.term.into() }
+    }
 }
 
 /// `render_blocks::BlockKind`, for the bindings.

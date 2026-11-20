@@ -124,7 +124,7 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         contentDescription = spoken(block)
         if (block.kind == BlockKind.HEADING || block.kind == BlockKind.COMMEMORATION_HEADING) heading()
         if (glossed.isNotEmpty()) {
-            customActions = glossed.map { (i, gloss) -> CustomAccessibilityAction("Explain “${gloss.title.lowercase()}”") { open = i; true } }
+            customActions = glossed.map { (i, gloss) -> CustomAccessibilityAction(explain(gloss)) { open = i; true } }
         }
     }
     @Composable

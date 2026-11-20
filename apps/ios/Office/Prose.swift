@@ -435,7 +435,7 @@ final class ProseView: UIView, UIGestureRecognizerDelegate {
         }
         let terms = layout(spec, width: bounds.width).glossTerms
         accessibilityCustomActions = terms.isEmpty ? nil : terms.enumerated().map { i, term in
-            UIAccessibilityCustomAction(name: "Explain “\(term.note.title.lowercased())”") { [weak self] _ in
+            UIAccessibilityCustomAction(name: "Explain “\(term.note.title)”") { [weak self] _ in
                 self?.onGloss?(i, term.rects.first ?? .zero)
                 return true
             }

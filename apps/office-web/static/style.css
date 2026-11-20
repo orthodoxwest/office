@@ -1094,8 +1094,8 @@ summary:focus-visible {
   }
 
   /* Six tracks so the hours fall into home's Morning / Day / Evening bands:
-     two, three, two — no Compline stranded on a row of its own. Ordo and
-     Reminders take halves like the outer bands. Centred like the home
+     two, three, two — no Compline stranded on a row of its own. Ordo,
+     Reminders and About take thirds, like the middle band. Centred like the home
      directory, since the day row's cells have their own edges. */
   .site-menu nav {
     display: grid;
@@ -2841,14 +2841,15 @@ html[data-newcomer] .home-season {
 
 /* Structural marks inside an hour (Ant., psalm Hebrew number, Chapter, Preces,
    Suffrage): tappable for their note with no underline at rest, so repeating
-   readers see uncluttered typography. */
-.gloss-quiet[role="button"] {
+   readers see uncluttered typography. Those in the running text (Ant., the
+   Hebrew number) answer a tap but are no tab stop (app.js). */
+.js .gloss-quiet {
   position: relative;
   border-radius: 2px;
   cursor: pointer;
 }
 
-.gloss-quiet[aria-expanded="true"] {
+.gloss-quiet.gloss-out {
   text-decoration: underline solid color-mix(in srgb, currentColor 55%, transparent);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.24em;
@@ -2864,7 +2865,7 @@ html[data-newcomer] .home-season {
 /* A finger needs more than one word of 0.9em type. */
 @media (pointer: coarse) {
   .gloss-term[role="button"]::before,
-  .gloss-quiet[role="button"]::before {
+  .js .gloss-quiet::before {
     content: "";
     position: absolute;
     inset: 50% -0.25rem auto;
@@ -12827,6 +12828,16 @@ body.page-home::before {
   }
   .page-hour .hour-context-controls:has(> :is(.leader-selector, .reading-key)) > details { display: block; }
   .page-hour .hour-meta-line { white-space: normal; }
+}
+/* Without script Change date keeps its summary, so all three stand in the
+   row, and need more than a phone's measure: they stack sooner. */
+@container hour-header (max-width: 28rem) {
+  :root:not(.js) .page-hour .hour-context-controls:has(> .leader-selector):has(> .reading-key) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  :root:not(.js) .page-hour .hour-context-controls:has(> .leader-selector):has(> .reading-key) > details { display: block; }
 }
 .page-hour .not-today-notice .not-today-link {
   font-variant-caps: all-small-caps;

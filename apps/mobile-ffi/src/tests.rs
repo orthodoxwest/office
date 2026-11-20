@@ -713,6 +713,7 @@ fn a_feast_page_names_its_way_back() {
     let no_day = CivilDate { year: 2026, month: 2, day: 30 };
     assert_eq!(feast_back_to_day(no_day, today), "Find a feast");
     assert_eq!(feast_back_to_ordo(no_day), "Find a feast");
+    assert_eq!(feast_back_to_ordo_year(2026), "2026 Ordo");
 }
 
 #[test]

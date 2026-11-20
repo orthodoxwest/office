@@ -4592,9 +4592,10 @@ test("an ordo row's tap leaves a mark's note alone, and its date's cell leads to
   const note = page.locator("#gloss-note");
   await row.locator(".day-mobile-rank").tap();
   await expect(note).not.toHaveClass(/closed/);
-  // Tapping blank space on the row (off the feast link) dismisses the note without opening details.
-  const feastCell = await row.locator("td.day-feast").boundingBox();
-  await page.touchscreen.tap(feastCell.x + feastCell.width - 12, feastCell.y + feastCell.height - 8);
+  // A tap on the row's blank line beside the feast link (clear of the note,
+  // which hangs below the mark) dismisses the note without opening details.
+  const feastLink = await row.locator(".day-feast-name a.feast-link").boundingBox();
+  await page.touchscreen.tap(feastLink.x + feastLink.width + 16, feastLink.y + feastLink.height / 2);
   await expect(note).toHaveClass(/closed/);
   await expect(details).not.toHaveAttribute("open", "");
   await expect(row.locator(".day-mobile-date")).toHaveAccessibleDescription(/\S/);

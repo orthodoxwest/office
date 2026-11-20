@@ -91,6 +91,7 @@ import org.orthodoxwest.office.core.SectionView
 import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.feastBackToDay
 import org.orthodoxwest.office.core.feastBackToOrdo
+import org.orthodoxwest.office.core.feastBackToOrdoYear
 import org.orthodoxwest.office.core.feastWords
 
 /** The search and feast page's fixed words, as every front sets them. */
@@ -174,7 +175,7 @@ fun FindScreen(
 fun feastBack(under: Page?, today: LocalDate): String? = when (under) {
     is Page.Home -> feastBackToDay(under.date.toCivil(), today.toCivil())
     is Page.Ordo -> feastBackToOrdo(CivilDate(under.year, under.month, 1))
-    is Page.Year -> "${under.year} Ordo"
+    is Page.Year -> feastBackToOrdoYear(under.year)
     is Page.Hour -> hourLabel(under.hour)
     else -> null
 }

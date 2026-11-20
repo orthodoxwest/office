@@ -89,13 +89,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.orthodoxwest.office.core.RuleHourChoice
-import org.orthodoxwest.office.core.reminderDefaults
 import org.orthodoxwest.office.core.reminderNext
 import org.orthodoxwest.office.core.reminderPeriods
 import org.orthodoxwest.office.core.reminderRule
 import org.orthodoxwest.office.core.sunUnavailableNote
-
-private val HOUR_GLOSSES: Map<String, String> by lazy { reminderDefaults().associate { it.hour to it.gloss } }
 
 /** Whether the phone will let reminders through, and on the minute, and tell the app where it is. */
 data class ReminderStatus(val notificationsAllowed: Boolean, val exactAllowed: Boolean, val locationAllowed: Boolean = true)
@@ -328,13 +325,12 @@ private fun HourRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Tick(h.chosen)
-            val gloss = h.gloss.ifEmpty { HOUR_GLOSSES[h.hour].orEmpty() }
             // Muted until chosen, as the web's `.reminder-hour-row.is-selected`; gloss stays quiet beneath.
             Column(Modifier.padding(start = 12.dp, end = 8.dp)) {
-                Text(h.name, style = body.copy(color = name, lineHeight = 20.sp))
-                if (gloss.isNotEmpty()) {
+                Text(h.name, style = body.copy(color = name))
+                if (h.gloss.isNotEmpty()) {
                     Text(
-                        gloss,
+                        h.gloss,
                         Modifier.padding(top = 1.dp),
                         style = Type.small.copy(
                             fontSize = 12.48.sp,

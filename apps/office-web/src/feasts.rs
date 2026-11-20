@@ -9,10 +9,10 @@ use calendar::Date;
 use office::HOUR_NAMES;
 use office::feast::{DayOf, FeastTexts, feast_texts};
 use presentation::feast::{
-    FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearKeeping, back_to_day, back_to_ordo, feast_date,
-    feast_register, feast_subtitle, feast_titulus, is_entry, is_feast_id, is_usual, keeping_class, keeping_label, keeping_note,
-    kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count, row_date, search_years,
-    texts_keeping, texts_source, whole_office_label,
+    FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearKeeping, back_to_day, back_to_ordo,
+    back_to_ordo_year, feast_date, feast_register, feast_subtitle, feast_titulus, is_entry, is_feast_id, is_usual, keeping_class,
+    keeping_label, keeping_note, kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count,
+    row_date, search_years, texts_keeping, texts_source, whole_office_label,
 };
 use presentation::{date_slug, long_date, title_case};
 use render_html::links::{calendar_link, calendar_year_link, feast_link, find_link, home_from_feast, home_link, hour_link};
@@ -52,7 +52,7 @@ fn back_link(from: &str, today: Date) -> LinkRow {
             && let Ok(year) = rest.parse::<i32>()
             && crate::cache::offered_year(year)
         {
-            return LinkRow { label: format!("{year} Ordo"), href: calendar_year_link(year) };
+            return LinkRow { label: back_to_ordo_year(year), href: calendar_year_link(year) };
         }
     }
     if let Some((hour, slug)) = from.split_once('-')

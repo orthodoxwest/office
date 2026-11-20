@@ -1506,7 +1506,7 @@ mod tests {
         // Hour page: collapsed-by-default How to read disclosure + quiet header feast link.
         let (status, _, lauds) = get("/lauds/2026-03-25");
         assert_eq!(status, StatusCode::OK);
-        assert!(lauds.contains(r#"<details class="reading-key">"#));
+        assert!(lauds.contains(r#"<details class="reading-key" name="hour-controls">"#));
         assert!(lauds.contains("<summary>How to read</summary>"));
         assert!(lauds.contains(r#"<a href="/about">About the Office</a>"#));
         assert!(lauds.contains(r#"class="feast-link hour-feast-link""#));

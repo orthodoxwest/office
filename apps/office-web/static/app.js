@@ -130,10 +130,16 @@ document.documentElement.classList.add("js");
     return (parseFloat(s.transitionDuration) + parseFloat(s.transitionDelay)) * 1000 || 0;
   }
 
+  // Only a button says whether its note is out; the class marks it for the eye.
+  function expanded(term, out) {
+    term.classList.toggle("gloss-out", out);
+    if (term.getAttribute("role") === "button") term.setAttribute("aria-expanded", out ? "true" : "false");
+  }
+
   function close(refocus) {
     if (!open) return;
     var was = open;
-    open.setAttribute("aria-expanded", "false");
+    expanded(open, false);
     open = null;
     by = null;
     note.classList.add("faded");
@@ -150,12 +156,12 @@ document.documentElement.classList.add("js");
 
   function show(term, how) {
     clearTimeout(leaving);
-    if (open) open.setAttribute("aria-expanded", "false");
+    if (open) expanded(open, false);
     open = term;
     by = how;
     title.textContent = "";
     body.textContent = "";
-    term.setAttribute("aria-expanded", "true");
+    expanded(term, true);
     // Written a frame after it was emptied, so reopening the same term is
     // still a change the live region announces.
     requestAnimationFrame(function () {
@@ -180,6 +186,15 @@ document.documentElement.classList.add("js");
   }
 
   function control(term) {
+    // A quiet gloss in the running text (each antiphon's "Ant.", each psalm's
+    // Hebrew number) answers a tap but is no tab stop or button: an hour has
+    // a dozen or more, and the reading key already explains both to every
+    // reader. Quiet glosses on headings (Chapter, Preces, Suffrage) are few
+    // and stay keyboard controls.
+    if (term.classList.contains("gloss-quiet") && !term.closest(".section-heading")) {
+      term.addEventListener("click", function () { toggle(term); });
+      return;
+    }
     term.setAttribute("role", "button");
     term.setAttribute("tabindex", "0");
     term.setAttribute("aria-expanded", "false");

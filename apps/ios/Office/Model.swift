@@ -364,7 +364,7 @@ final class AppModel: ObservableObject {
         switch under {
         case let .home(d): return feastBackToDay(date: d, today: today)
         case let .ordo(y, m, _): return feastBackToOrdo(date: CivilDate(year: Int32(y), month: Int32(m), day: 1))
-        case let .year(y): return "\(y) Ordo"
+        case let .year(y): return feastBackToOrdoYear(year: Int32(y))
         case let .hour(_, h): return hourLabel(h)
         default: return nil
         }

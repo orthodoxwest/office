@@ -1060,10 +1060,9 @@ private struct Digest: View {
             ForEach(notes, id: \.self) { Text($0).type(line).foregroundStyle(p.muted) }
             if let antiphon, let kind = antiphonKind {
                 let g = kind == "ben" ? detailGlosses.benedictus : detailGlosses.magnificat
-                let abbr = kind == "ben" ? "Ben." : "Mag."
                 HStack(alignment: .firstTextBaseline, spacing: m.px(4)) {
-                    GlossMark(gloss: g, label: g.title) {
-                        Text(abbr).type(line).foregroundStyle(p.muted)
+                    GlossMark(gloss: g, label: g.title, reaches: false) {
+                        Text(g.term).type(line).foregroundStyle(p.muted)
                     }
                     Text("“\(antiphon)”").type(line).foregroundStyle(p.muted)
                         .multilineTextAlignment(.leading)
@@ -1073,13 +1072,13 @@ private struct Digest: View {
             if preces || suffrage || cross {
                 HStack(alignment: .firstTextBaseline, spacing: m.px(10)) {
                     if preces {
-                        GlossMark(gloss: detailGlosses.preces, label: "Preces", underlineColor: p.rubric) {
-                            Text("Preces").type(rubricLine).foregroundStyle(p.rubric)
+                        GlossMark(gloss: detailGlosses.preces, label: detailGlosses.preces.title, underlineColor: p.rubric, reaches: false) {
+                            Text(detailGlosses.preces.term).type(rubricLine).foregroundStyle(p.rubric)
                         }
                     }
                     if suffrage {
-                        GlossMark(gloss: detailGlosses.suffrage, label: "Suffrage", underlineColor: p.rubric) {
-                            Text("Suffrage").type(rubricLine).foregroundStyle(p.rubric)
+                        GlossMark(gloss: detailGlosses.suffrage, label: detailGlosses.suffrage.title, underlineColor: p.rubric, reaches: false) {
+                            Text(detailGlosses.suffrage.term).type(rubricLine).foregroundStyle(p.rubric)
                         }
                     }
                     if cross {
@@ -1090,8 +1089,8 @@ private struct Digest: View {
             // "Com." opens its note; a commemoration's name leads to its feast's page, underlined as `.feast-link`.
             ForEach(comms, id: \.self) { c in
                 HStack(alignment: .firstTextBaseline, spacing: m.px(4)) {
-                    GlossMark(gloss: detailGlosses.commemoration, label: "Commemoration") {
-                        Text("Com.").type(line).foregroundStyle(p.muted)
+                    GlossMark(gloss: detailGlosses.commemoration, label: detailGlosses.commemoration.title, reaches: false) {
+                        Text(detailGlosses.commemoration.term).type(line).foregroundStyle(p.muted)
                     }
                     if c.feastId.isEmpty {
                         Text(c.name + (c.incipit.isEmpty ? "" : " “\(c.incipit)”"))
@@ -1145,13 +1144,13 @@ struct OrdoYearScreen: View {
                         Figures(figures: view.figures, perRow: 4).padding(.top, m.px(24))
                         HStack(alignment: .top, spacing: 40) {
                             TabulaTable(title: "Moveable feasts", rows: view.moveable)
-                            TabulaTable(title: "Ember days", rows: view.ember, titleGloss: emberGloss)
+                            TabulaTable(title: emberGloss.term, rows: view.ember, titleGloss: emberGloss)
                         }
                         .padding(.top, m.px(24))
                     } else {
                         Figures(figures: view.figures, perRow: 2).padding(.top, m.px(24))
                         TabulaTable(title: "Moveable feasts", rows: view.moveable).padding(.top, m.px(24))
-                        TabulaTable(title: "Ember days", rows: view.ember, titleGloss: emberGloss).padding(.top, m.px(24))
+                        TabulaTable(title: emberGloss.term, rows: view.ember, titleGloss: emberGloss).padding(.top, m.px(24))
                     }
                 }
                 .ordoColumn(m, wide: wide)
@@ -1218,6 +1217,8 @@ private struct Figures: View {
                             }
                         }
                         .frame(maxWidth: .infinity)
+                        // One stop, the value with its name; a figure's note is its action.
+                        .accessibilityElement(children: .combine)
                     }
                 }
             }
@@ -1283,34 +1284,18 @@ private struct TabulaTable: View {
             Hairline(color: p.border)
             ForEach(rows, id: \.label) { r in
                 if !r.feastId.isEmpty {
-                    let feastButton = Button { model.open(.feast(r.feastId)) } label: {
-                        Text(r.label).underline(true, color: p.goldLine).type(rowStyle).foregroundStyle(p.text).fixedSize()
-                    }
-                    .buttonStyle(Quiet())
-                    .accessibilityLabel(r.label)
-                    .accessibilityHint("Opens the feast's page")
-                    let dateButton = Button {
-                        if let date = r.date { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) }
-                    } label: {
-                        Text(r.value).type(rowStyle).foregroundStyle(p.accent).fixedSize()
-                    }
-                    .buttonStyle(Quiet())
-                    .disabled(r.date == nil)
-                    .accessibilityLabel("\(r.label), \(r.value)")
-                    .accessibilityHint(r.date == nil ? "" : "Opens the day in the ordo")
+                    // The whole row, but its date, opens the feast, at the row's full height; the
+                    // date opens the day.
                     ViewThatFits(in: .horizontal) {
                         HStack(spacing: m.px(8)) {
-                            feastButton
-                            Spacer(minLength: 0)
-                            dateButton
+                            feastButton(r, rowStyle, stacked: false)
+                            dateButton(r, rowStyle, stacked: false)
                         }
                         VStack(alignment: .leading, spacing: 0) {
-                            feastButton
-                            dateButton.frame(maxWidth: .infinity, alignment: .trailing)
+                            feastButton(r, rowStyle, stacked: true)
+                            dateButton(r, rowStyle, stacked: true)
                         }
                     }
-                    .padding(.vertical, m.px(8.8))
-                    .frame(minHeight: 44)
                 } else {
                     Button {
                         if let date = r.date { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) }
@@ -1340,6 +1325,37 @@ private struct TabulaTable: View {
         }
         .frame(maxWidth: .infinity)
     }
+
+    /// A moveable feast's name, opening its page: the row's height and all its width the date
+    /// leaves, or, stacked, its own line.
+    private func feastButton(_ r: TabulaRowView, _ style: TextStyle, stacked: Bool) -> some View {
+        Button { model.open(.feast(r.feastId)) } label: {
+            Text(r.label).underline(true, color: p.goldLine).type(style).foregroundStyle(p.text)
+                .fixedSize(horizontal: !stacked, vertical: true)
+                .padding(stacked ? Edge.Set.top : Edge.Set.vertical, m.px(8.8))
+                .frame(maxWidth: .infinity, minHeight: stacked ? nil : CGFloat(44), alignment: .leading)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(Quiet())
+        .accessibilityLabel(r.label)
+        .accessibilityHint("Opens the feast's page")
+    }
+
+    /// A moveable feast's date, opening its day: the row's height, or, stacked, its own line.
+    private func dateButton(_ r: TabulaRowView, _ style: TextStyle, stacked: Bool) -> some View {
+        Button {
+            if let date = r.date { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) }
+        } label: {
+            Text(r.value).type(style).foregroundStyle(p.accent).fixedSize()
+                .padding(stacked ? Edge.Set.bottom : Edge.Set.vertical, m.px(8.8))
+                .frame(maxWidth: stacked ? CGFloat.infinity : nil, minHeight: stacked ? nil : CGFloat(44), alignment: .trailing)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(Quiet())
+        .disabled(r.date == nil)
+        .accessibilityLabel("\(r.label), \(r.value)")
+        .accessibilityHint(r.date == nil ? "" : "Opens the day in the ordo")
+    }
 }
 
 /// What the § and the fish say in their notes, as the web's titles word them (`presentation::FAST_DAY`).
@@ -1347,26 +1363,30 @@ private let markWords = ordoMarkWords()
 
 /**
  * A labelled term with a titled plaster note (Tabula figures, "Ember days", Ordo details
- * abbreviations): underlined in a subtle hairline at 45% (solid while open), opening its `NoteCard`
- * popover above.
+ * abbreviations): underlined in a hairline of its ink at 40% (solid while open, the web's
+ * `.gloss-term`), opening its `NoteCard` popover above. Its touch reaches 44pt each way round the
+ * mark without moving it (`Reach`); the Ordo details' close lines (`reaches: false`) keep a
+ * finger's slop, so one line's target does not cover the next.
  */
 struct GlossMark<Mark: View>: View {
     let gloss: GlossView
     let label: String
     var underlineColor: Color? = nil
+    var reaches = true
     let mark: () -> Mark
     @Environment(\.palette) private var p
     @State private var open = false
 
-    init(gloss: GlossView, label: String, underlineColor: Color? = nil, @ViewBuilder mark: @escaping () -> Mark) {
+    init(gloss: GlossView, label: String, underlineColor: Color? = nil, reaches: Bool = true, @ViewBuilder mark: @escaping () -> Mark) {
         self.gloss = gloss
         self.label = label
         self.underlineColor = underlineColor
+        self.reaches = reaches
         self.mark = mark
     }
 
     var body: some View {
-        let ink = (underlineColor ?? p.muted).opacity(open ? 1 : 0.45)
+        let ink = (underlineColor ?? p.muted).opacity(open ? 1 : 0.4)
         Button { open.toggle() } label: {
             mark()
                 .overlay(alignment: .bottom) {
@@ -1374,11 +1394,24 @@ struct GlossMark<Mark: View>: View {
                 }
         }
         .buttonStyle(Quiet())
-        .contentShape(Rectangle().inset(by: -8))
+        .contentShape(Reach(least: reaches ? 44 : 0, slop: 8))
         .accessibilityLabel(label)
         .accessibilityHint("Explains \(label)")
         .accessibilityValue(open ? "Expanded" : "Collapsed")
         .popover(isPresented: $open, arrowEdge: .bottom) { NoteCard(title: gloss.title, note: gloss.note) }
+    }
+}
+
+/// A small mark's touch area: `slop` round it, and at least `least` each way, centred on it,
+/// reaching past its frame so the layout stays as it was.
+struct Reach: Shape {
+    var least: CGFloat
+    var slop: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let dx = max(slop, (least - rect.width) / 2)
+        let dy = max(slop, (least - rect.height) / 2)
+        return Path(rect.insetBy(dx: -dx, dy: -dy))
     }
 }
 

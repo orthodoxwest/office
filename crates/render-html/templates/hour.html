@@ -80,7 +80,7 @@
     </p>
     {% endif %}
     <div class="hour-context-controls">
-    <details class="hour-date-nav" id="hour-date-nav">
+    <details class="hour-date-nav" id="hour-date-nav" name="hour-controls">
       <summary>Change date</summary>
       <nav class="day-nav" aria-label="Date navigation">
         <a href="{{ prev_link|url }}"><span aria-hidden="true">&larr;&nbsp;</span>{{ previous_day }}</a>
@@ -94,7 +94,7 @@
       </nav>
     </details>
     {% if leader_forms %}
-    <details class="leader-selector">
+    <details class="leader-selector" name="hour-controls">
       <summary>Prayer form: {% for f in leader_forms %}<span data-leaders="{{ f.form }}">{{ f.label }}</span>{% endfor %}</summary>
       <fieldset disabled aria-describedby="leader-preference-note">
         <legend>How are you praying?</legend>
@@ -108,7 +108,7 @@
     <p class="leader-print-label">Prayer form: {% for f in leader_forms %}<span data-leaders="{{ f.form }}">{{ f.label }}</span>{% endfor %}</p>
     <span class="sr-only" id="leader-status" role="status"></span>
     {% endif %}
-    <details class="reading-key">
+    <details class="reading-key" name="hour-controls">
       <summary>{{ reading_key.label }}</summary>
       <div class="reading-key-panel">
         <p class="reading-key-title">{{ reading_key.title }}</p>

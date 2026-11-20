@@ -66,7 +66,7 @@ pub fn heading_gloss(label: &str) -> Option<&'static Gloss> {
     match label.trim() {
         "Chapter" => Some(&CHAPTER_GLOSS),
         "Preces" => Some(&PRECES_GLOSS),
-        "Suffrage" | "Suffrage of the Saints" => Some(&SUFFRAGE_GLOSS),
+        "Suffrage" | "Suffrage of All Saints" => Some(&SUFFRAGE_GLOSS),
         _ => None,
     }
 }
@@ -164,7 +164,11 @@ pub const READING_KEY_ITEMS: &[ReadingKeyItem] = &[
         text: "Pause briefly at * in each psalm verse, and take a breath at †.",
     },
     ReadingKeyItem { mark: "✠", style: ReadingKeyStyle::Rubric, text: "Make the sign of the cross." },
-    ReadingKeyItem { mark: "Ant.", style: ReadingKeyStyle::Titulus, text: "Antiphon: a short verse framing a psalm or canticle." },
+    ReadingKeyItem {
+        mark: "Ant.",
+        style: ReadingKeyStyle::Titulus,
+        text: "Antiphon: a short verse framing a psalm or canticle. Tap it, a psalm’s number in parentheses or a heading like Chapter for a note.",
+    },
     ReadingKeyItem {
         mark: "Grey type",
         style: ReadingKeyStyle::Unsaid,
@@ -292,6 +296,24 @@ mod tests {
         let dead = "After Let us bless the Lord, Vespers of the Dead are begun immediately under the rite of a Double, with the Antiphon I will walk.";
         assert_eq!(terms(dead), ["under the rite of a Double"]);
         assert_eq!(joined(dead), dead);
+    }
+
+    #[test]
+    fn the_hours_section_labels_take_their_heading_gloss() {
+        // The labels as data/office writes them, so a renamed section is caught here.
+        for (file, label) in [
+            ("lauds.txt", "Chapter"),
+            ("prime.txt", "Preces"),
+            ("lauds.txt", "Suffrage of All Saints"),
+            ("vespers.txt", "Suffrage of All Saints"),
+        ] {
+            let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data/office").join(file);
+            let text = std::fs::read_to_string(&path).unwrap();
+            if label != "Chapter" {
+                assert!(text.lines().any(|l| l.trim() == format!("Label = {label}")), "{file} has no {label}");
+            }
+            assert!(heading_gloss(label).is_some(), "{label}");
+        }
     }
 
     #[test]

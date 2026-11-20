@@ -72,14 +72,19 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -467,12 +472,12 @@ fun OrdoYearScreen(
                     Figures(view.figures, 4, Modifier.padding(top = 24.dp))
                     Row(Modifier.padding(top = 24.dp), horizontalArrangement = Arrangement.spacedBy(40.dp)) {
                         TabulaTable("Moveable feasts", view.moveable, onDay, Modifier.weight(1f), onFeast = onFeast)
-                        TabulaTable("Ember days", view.ember, onDay, Modifier.weight(1f), titleGloss = emberGloss)
+                        TabulaTable(emberGloss.term, view.ember, onDay, Modifier.weight(1f), titleGloss = emberGloss)
                     }
                 } else {
                     Figures(view.figures, 2, Modifier.padding(top = 24.dp))
                     TabulaTable("Moveable feasts", view.moveable, onDay, Modifier.padding(top = 24.dp), onFeast = onFeast)
-                    TabulaTable("Ember days", view.ember, onDay, Modifier.padding(top = 24.dp), titleGloss = emberGloss)
+                    TabulaTable(emberGloss.term, view.ember, onDay, Modifier.padding(top = 24.dp), titleGloss = emberGloss)
                 }
             }
         }
@@ -533,16 +538,30 @@ private fun Figures(figures: List<TabulaRowView>, perRow: Int, modifier: Modifie
         figures.chunked(perRow).forEach { pair ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 pair.forEach { f ->
+                    val gloss = f.gloss
+                    // One stop for a screen reader, the value with its name; a figure with a note
+                    // opens it from there, as the iOS app's combined figure does.
+                    val open = remember(f.label) { mutableStateOf(false) }
                     Column(
-                        Modifier.weight(1f).semantics(mergeDescendants = f.gloss == null) {},
+                        Modifier.weight(1f).then(
+                            if (gloss == null) {
+                                Modifier.semantics(mergeDescendants = true) {}
+                            } else {
+                                Modifier.clearAndSetSemantics {
+                                    contentDescription = "${f.value}, ${f.label}"
+                                    stateDescription = if (open.value) "Expanded" else "Collapsed"
+                                    role = Role.Button
+                                    onClick(label = "explain") { open.value = !open.value; true }
+                                }
+                            },
+                        ),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         // Lining figures stand 4 and 25 level with XIII and D.
                         Text(f.value, style = Type.body.copy(fontSize = 25.6.sp, lineHeight = 30.7.sp, color = p.accent, fontFeatureSettings = "lnum"))
                         val labelStyle = Type.label(11.2f, 0.06f).copy(color = p.muted, textAlign = TextAlign.Center)
-                        val gloss = f.gloss
                         if (gloss != null) {
-                            GlossMark(gloss, f.label, Modifier.padding(top = 3.dp)) {
+                            GlossMark(gloss, f.label, Modifier.padding(top = 3.dp), open = open) {
                                 Text(f.label.uppercase(), style = labelStyle)
                             }
                         } else {
@@ -569,8 +588,9 @@ private fun TabulaTable(
     Column(modifier.fillMaxWidth()) {
         val headingStyle = Type.label(11.2f, 0.06f).copy(color = p.muted)
         if (titleGloss != null) {
-            Box(Modifier.fillMaxWidth().padding(vertical = 5.6.dp).semantics { heading() }) {
-                GlossMark(titleGloss, title) { Text(title.uppercase(), style = headingStyle) }
+            // The heading is the mark's target, which TalkBack stops on: it says both.
+            Box(Modifier.fillMaxWidth().padding(vertical = 5.6.dp)) {
+                GlossMark(titleGloss, title, isHeading = true) { Text(title.uppercase(), style = headingStyle) }
             }
         } else {
             Text(title.uppercase(), Modifier.fillMaxWidth().semantics { heading() }.padding(vertical = 5.6.dp), style = headingStyle)
@@ -580,25 +600,29 @@ private fun TabulaTable(
             val date = r.date?.toLocalDate()
             val hasFeast = r.feastId.isNotEmpty()
             val rowStyle = Type.body.copy(fontSize = 15.2.sp, lineHeight = 22.sp)
+            // A moveable feast's whole row opens its page, and its date, a target of its own over
+            // the row, the day; any other row opens its day.
+            val rowTap = when {
+                hasFeast -> Modifier.tap(label = r.label, action = "open the feast's page") { onFeast(r.feastId) }
+                date != null -> Modifier.tap(label = "${r.label}, ${r.value}", action = "open the day in the ordo") { onDay(date) }
+                else -> Modifier
+            }
             FlowRow(
                 Modifier.fillMaxWidth().heightIn(min = 44.dp)
-                    .then(if (!hasFeast && date != null) Modifier.tap(label = "${r.label}, ${r.value}", action = "open the day in the ordo") { onDay(date) } else Modifier)
+                    .then(rowTap)
                     .padding(vertical = 8.8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalArrangement = Arrangement.Center,
             ) {
-                if (hasFeast) {
-                    Text(
-                        r.label,
-                        Modifier.padding(end = 8.dp).tap(label = r.label, action = "open the feast's page") { onFeast(r.feastId) }.goldUnderline(true, p.goldLine),
-                        style = rowStyle.copy(color = p.text),
-                    )
-                } else {
-                    Text(r.label, Modifier.padding(end = 8.dp), style = rowStyle.copy(color = p.text))
-                }
+                Text(
+                    r.label,
+                    Modifier.padding(end = 8.dp).goldUnderline(hasFeast, p.goldLine),
+                    style = rowStyle.copy(color = p.text),
+                )
                 Text(
                     r.value,
-                    Modifier.weight(1f, fill = false).fillMaxWidth()
+                    // Its own width only, at the line's end, so the rest of the row is the feast's.
+                    Modifier.weight(1f, fill = false).fillMaxWidth().wrapContentWidth(Alignment.End)
                         .then(if (hasFeast && date != null) Modifier.tap(label = "${r.label}, ${r.value}", action = "open the day in the ordo") { onDay(date) } else Modifier),
                     softWrap = false,
                     style = rowStyle.copy(color = p.accent, textAlign = TextAlign.End),
@@ -1041,19 +1065,38 @@ private fun FeastName(d: OrdoDayView, style: TextStyle, modifier: Modifier, onFe
     val p = LocalPalette.current
     val first = d.rank == "1cl"
     val linked = d.feastId.isNotEmpty()
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    // The cross's placeholder stands before the name; the hairline is the name's alone.
+    val from = if (first) 1 else 0
     val mod = if (linked) {
-        modifier.tap(label = d.feast, action = "open the feast's page") { onFeast(d.feastId) }
+        // The name's gold hairline under each of its lines, whatever the rank's ink (the web's
+        // `.feast-link`, the iOS app's gold underline), as the Tabula's feasts are ruled.
+        modifier.tap(label = d.feast, action = "open the feast's page") { onFeast(d.feastId) }.drawBehind {
+            val l = layout ?: return@drawBehind
+            val w = 1.dp.toPx()
+            val drop = style.fontSize.toPx() * 0.14f
+            for (line in 0 until l.lineCount) {
+                val start = maxOf(l.getLineStart(line), from)
+                val end = l.getLineEnd(line, visibleEnd = true)
+                if (end <= start) continue
+                val left = l.getHorizontalPosition(start, usePrimaryDirection = true)
+                val right = l.getLineRight(line)
+                val y = l.getLineBaseline(line) + drop
+                drawLine(p.goldLine, Offset(left, y), Offset(right, y), w)
+            }
+        }
     } else {
         modifier.semantics { hideFromAccessibility() }
     }
     Text(
         buildAnnotatedString {
             if (first) appendInlineContent("cross", "✠")
-            withStyle(SpanStyle(textDecoration = if (linked) TextDecoration.Underline else null)) { append(d.feast) }
+            append(d.feast)
         },
         mod,
         style = style.copy(color = rankInk(d.rank, p)),
         inlineContent = if (first) FirstClassCross else emptyMap(),
+        onTextLayout = { layout = it },
     )
 }
 
@@ -1146,7 +1189,7 @@ private fun DigestHour(
             val text = buildAnnotatedString {
                 if (antiphon != null && antiphonKey != null) {
                     pushStringAnnotation(GLOSS, antiphonKey)
-                    append(if (antiphonKey == "ben") "Ben." else "Mag.")
+                    append(DETAIL_GLOSSES.getValue(antiphonKey).term)
                     pop()
                     append(" “$antiphon”")
                 }
@@ -1154,13 +1197,13 @@ private fun DigestHour(
                     if (preces) {
                         if (length > 0) append("  ")
                         pushStringAnnotation(GLOSS, "preces")
-                        append("Preces")
+                        append(DETAIL_GLOSSES.getValue("preces").term)
                         pop()
                     }
                     if (suffrage) {
                         if (length > 0) append("  ")
                         pushStringAnnotation(GLOSS, "suffrage")
-                        append("Suffrage")
+                        append(DETAIL_GLOSSES.getValue("suffrage").term)
                         pop()
                     }
                     if (cross) append((if (length > 0) "  " else "") + "Commemoration of the Cross")
@@ -1172,7 +1215,7 @@ private fun DigestHour(
         comms.forEach { c ->
             val text = buildAnnotatedString {
                 pushStringAnnotation(GLOSS, "com")
-                append("Com.")
+                append(DETAIL_GLOSSES.getValue("com").term)
                 pop()
                 append(" ")
                 if (c.feastId.isNotEmpty()) {

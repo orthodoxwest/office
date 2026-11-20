@@ -416,23 +416,18 @@ struct BlockRow: View {
                 // (the web's `.item-label.stacked`): a separator ending a line alone separates nothing.
                 let title = labelPart(block, block.runs[..<(latin - 1)])
                 let incipit = labelPart(block, block.runs[latin...])
-                let labelView = ViewThatFits(in: .horizontal) {
-                    prose.fixedSize(horizontal: true, vertical: false)
+                // The note hangs from the Prose that was tapped, whose box `glossRect` is measured in,
+                // so its arrow points at the number however the label is centred.
+                ViewThatFits(in: .horizontal) {
+                    noted(prose.fixedSize(horizontal: true, vertical: false), glosses, popoverBinding)
                     VStack(spacing: 0) {
-                        Prose(spec: proseSpec(title, p, o, m), openGloss: openGloss, onGloss: tapGloss)
+                        noted(Prose(spec: proseSpec(title, p, o, m), openGloss: openGloss, onGloss: tapGloss), glosses, popoverBinding)
                         Prose(spec: proseSpec(incipit, p, o, m))
                     }
                 }
                 .frame(maxWidth: .infinity)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(spoken(block))
-                if glosses.isEmpty {
-                    labelView
-                } else {
-                    labelView.popover(isPresented: popoverBinding, attachmentAnchor: .rect(.rect(glossRect)), arrowEdge: .bottom) {
-                        if shownGloss < glosses.count { NoteCard(title: glosses[shownGloss].title, note: glosses[shownGloss].note) }
-                    }
-                }
             } else if block.kind == .stanza || block.kind == .hymnRubric {
                 // The hymn's column, centred: the rag balanced by an equal indent on the left,
                 // as the web's fit-content `.hymn-verses`.
@@ -440,21 +435,21 @@ struct BlockRow: View {
             } else if !glosses.isEmpty {
                 // A glossed term's note opens over the word, so it never covers the prayer it
                 // explains (the web's `.gloss-note`); a tap elsewhere puts it away.
-                prose
-                    // The arrow on the card's bottom edge, pointing down to the word; iOS may still
-                    // place the card itself where the room above is short.
-                    .popover(
-                        isPresented: popoverBinding,
-                        attachmentAnchor: .rect(.rect(glossRect)),
-                        arrowEdge: .bottom
-                    ) {
-                        if shownGloss < glosses.count { NoteCard(title: glosses[shownGloss].title, note: glosses[shownGloss].note) }
-                    }
+                noted(prose, glosses, popoverBinding)
                     .padding(.leading, -spec.hang)
             } else {
                 // A sigil hung into the margin ("All:") takes the room it hangs into.
                 prose.padding(.leading, -spec.hang)
             }
+        }
+    }
+
+    /// `prose` with its glossed terms' note, the arrow on the card's bottom edge pointing down to
+    /// the word (`glossRect`, in that Prose's own box); iOS may still place the card itself where
+    /// the room above is short.
+    private func noted<V: View>(_ prose: V, _ glosses: [GlossView], _ isPresented: Binding<Bool>) -> some View {
+        prose.popover(isPresented: isPresented, attachmentAnchor: .rect(.rect(glossRect)), arrowEdge: .bottom) {
+            if shownGloss < glosses.count { NoteCard(title: glosses[shownGloss].title, note: glosses[shownGloss].note) }
         }
     }
 }
