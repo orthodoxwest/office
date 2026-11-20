@@ -5409,9 +5409,9 @@ test("the beacon says how a reader keeps the hours", async ({ page }) => {
   await page.waitForTimeout(200);
   expect(await page.evaluate(() => localStorage.getItem("office-offline"))).toBe(null);
   await page.context().setOffline(false);
-  // WebKit lifts the emulated outage asynchronously: a navigation sent before the page can reach
-  // the server again fails as "WebKit encountered an internal error" (CI, PR #921). Leave only
-  // once a request from the page goes through.
+  // Leave only once a request from the page reaches the server again. This guards against the
+  // emulated outage lingering; whether that caused WebKit's "internal error" on CI is not
+  // established (#924).
   await expect.poll(() => page.evaluate(() =>
     fetch(`/sw.js?online-check=${Date.now()}`, { method: "HEAD", cache: "no-store" }).then((r) => r.ok, () => false))).toBe(true);
   // Lauds now is out of its time; its beacon fails, and the next that arrives says so, once.
