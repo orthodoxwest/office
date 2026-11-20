@@ -28,9 +28,12 @@ jobs:
       github.event.label.name == 'update-ios-snapshots' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    # Long enough to wait out a running ios.yml (the candidates step below).
+    timeout-minutes: 90
     permissions:
       actions: read
       contents: read
+      pull-requests: read
     outputs:
       candidates_run: ${{ steps.candidates.outputs.run_id }}
 
@@ -60,25 +63,51 @@ jobs:
 
       # ios.yml uploads the set it would check in on every pull request run it compares.
       # Reusing it skips a macOS build and a new set of shots; it gets the same validation below.
+      # A label put on while that run is still going waits for it here, on Linux, rather than
+      # taking the same shots beside it on a second macOS runner for an hour.
       - name: Find iOS snapshot candidates for this head
         id: candidates
         uses: actions/github-script@v9.0.0
         with:
           script: |
             const head = context.payload.pull_request.head.sha;
-            const { data } = await github.rest.actions.listWorkflowRuns({
+            const ours = `${context.repo.owner}/${context.repo.repo}`;
+            const listRuns = async () => {
+              const { data } = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'ios.yml',
+                event: 'pull_request',
+                head_sha: head,
+                per_page: 20,
+              });
+              return data.workflow_runs.filter(run =>
+                run.head_sha === head && run.head_repository?.full_name === ours
+              );
+            };
+            // A run of ios.yml takes 30 to 70 minutes; past 80 the shots are taken here instead.
+            const running = new Set(['requested', 'queued', 'pending', 'in_progress']);
+            const deadline = Date.now() + 80 * 60 * 1000;
+            let pending = (await listRuns()).filter(run => running.has(run.status));
+            if (pending.length) {
+              core.notice(`Waiting for iOS run ${pending[0].html_url} to finish.`);
+            }
+            while (pending.length && Date.now() < deadline) {
+              await new Promise(resolve => setTimeout(resolve, 60 * 1000));
+              pending = (await listRuns()).filter(run => running.has(run.status));
+            }
+            // A push while it waited cancels that run, and shots of this head could no longer be
+            // pushed over the new one.
+            const { data: pull } = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: 'ios.yml',
-              event: 'pull_request',
-              head_sha: head,
-              per_page: 20,
+              pull_number: context.payload.pull_request.number,
             });
-            const runs = data.workflow_runs.filter(run =>
-              run.head_sha === head &&
-              run.status === 'completed' &&
-              run.head_repository?.full_name === `${context.repo.owner}/${context.repo.repo}`
-            );
+            if (pull.head.sha !== head) {
+              core.setFailed(`The pull request moved on to ${pull.head.sha.slice(0, 7)}; add the label again.`);
+              return;
+            }
+            const runs = (await listRuns()).filter(run => run.status === 'completed');
             for (const run of runs) {
               const { data: listing } = await github.rest.actions.listWorkflowRunArtifacts({
                 owner: context.repo.owner,
@@ -119,13 +148,30 @@ jobs:
         id: sim
         run: apps/ios/screenshots.sh devices >> "$GITHUB_OUTPUT"
 
+      # rustup's download of the toolchain ran 5 to 13 minutes on the macOS runners; the cache's
+      # comes in seconds. Only the pinned toolchain is kept (the key follows the pin below), not
+      # the image's own. This job can only read caches, so it restores the one ios.yml saves on
+      # master.
+      - name: Cache the Rust toolchain
+        uses: actions/cache@v6.1.0
+        with:
+          path: |
+            ~/.rustup/toolchains/1.100.0-aarch64-apple-darwin
+            ~/.rustup/update-hashes/1.100.0-aarch64-apple-darwin
+          key: rustup-${{ runner.os }}-${{ runner.arch }}-1.100.0-ios-sim
+
+      # Only the simulator's target, as ios.yml (whose toolchain cache this is).
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@1.100.0
         with:
-          targets: aarch64-apple-ios, aarch64-apple-ios-sim
+          targets: aarch64-apple-ios-sim
 
+      # ios.yml's cache, by name: this job can only read caches, and under its own job's key it
+      # never found one, so its core build ran cold, 11 to 13 minutes instead of 2½.
       - name: Cache Cargo
         uses: Swatinem/rust-cache@v2.9.3
+        with:
+          shared-key: ios-simulator
 
       - name: Install XcodeGen
         run: brew install xcodegen
