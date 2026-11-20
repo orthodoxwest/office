@@ -231,7 +231,7 @@ private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: M
 
 /// How a block is typeset: its text, face, measure and any initial, as the Android app's `Block`.
 /// `hangsWords`: the page is 1000pt wide or more, where "Blessing." hangs into the margin as "All:" does.
-func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics, hangsWords: Bool = false) -> ProseSpec {
+func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics, hangsWords: Bool = false, flushDropCap: Bool = false) -> ProseSpec {
     let look = setting(block.kind)
     let style = look.style
     let color = p[keyPath: look.color]
@@ -352,7 +352,7 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics, ha
     case .paragraph:
         // A prose opening (a chapter, a collect, the Our Father) turns over below its initial at the
         // edge its ℟'s words share, the initial hung in the gutter, as a psalm's first verse does.
-        if block.dropCap { return opening(textStart: gutter) }
+        if block.dropCap { return opening(textStart: flushDropCap ? 0 : gutter) }
     case .chantLine:
         // A sung line's wrap hangs beneath its own start (`.chant-line`, 1.2rem).
         spec.restIndent = 19.2 * m.type
@@ -377,6 +377,7 @@ private func labelPart(_ block: BlockView, _ runs: ArraySlice<RunView>) -> Block
 struct BlockRow: View {
     let block: BlockView
     var column: CGFloat?
+    var flushDropCap: Bool = false
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
@@ -395,7 +396,7 @@ struct BlockRow: View {
         } else if block.kind == .score {
             ScoreRow(block: block)
         } else {
-            let spec = proseSpec(block, p, o, m, hangsWords: wide && !ranked)
+            let spec = proseSpec(block, p, o, m, hangsWords: wide && !ranked, flushDropCap: flushDropCap)
             let glosses: [GlossView] = (block.markerGloss.map { [$0] } ?? []) + block.runs.compactMap(\.gloss)
             let tapGloss: ((Int, CGRect) -> Void)? = glosses.isEmpty ? nil : { i, rect in
                 glossRect = rect

@@ -5478,6 +5478,11 @@ test("the beacon says how a reader keeps the hours", async ({ page }) => {
   await page.waitForTimeout(200);
   expect(await page.evaluate(() => localStorage.getItem("office-offline"))).toBe(null);
   await page.context().setOffline(false);
+  // Leave only once a request from the page reaches the server again. This guards against the
+  // emulated outage lingering; whether that caused WebKit's "internal error" on CI is not
+  // established (#924).
+  await expect.poll(() => page.evaluate(() =>
+    fetch(`/sw.js?online-check=${Date.now()}`, { method: "HEAD", cache: "no-store" }).then((r) => r.ok, () => false))).toBe(true);
   // Lauds now is out of its time; its beacon fails, and the next that arrives says so, once.
   online = false;
   await page.goto(`/lauds/${today}`);
@@ -5561,8 +5566,112 @@ test("About lights no hour from midnight to 2am, as home does", async ({ page })
   await expect(door).toHaveAttribute("href", "/compline/2026-03-14");
 });
 
+test("About's Horologium, live specimen leaf, and Ordo ribbon respond to interaction", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T15:00:00-04:00"));
+  await openDatedPage(page, "/about");
+  // Opening paragraph carries the app's painted drop cap with optical profile.
+  await expect(page.locator(".about-intro")).toHaveAttribute("data-initial", "T");
+  await expect(page.locator(".about-intro .initial-word")).toHaveText("he");
+  // Horologium rests on None (sun) in Nave without stars; tapping Compline switches to the moon.
+  const horo = page.locator(".about-horologium");
+  await expect(horo).toHaveAttribute("data-active", "none");
+  await expect(horo).toHaveAttribute("data-night", "false");
+  await expect(page.locator(".about-horologium-stars")).toBeHidden();
+  await page.locator('.about-horologium-stop[data-hour="compline"]').click();
+  await expect(horo).toHaveAttribute("data-active", "compline");
+  await expect(horo).toHaveAttribute("data-night", "true");
+  await expect(page.locator(".about-horologium-orb")).toHaveClass(/is-night/);
+  await expect(page.locator('.about-hour[data-hour="compline"]')).toHaveClass(/is-preview/);
+  // Tapping again settles back to Now.
+  await page.locator('.about-horologium-stop[data-hour="compline"]').click();
+  await expect(horo).toHaveAttribute("data-active", "none");
+
+  // The specimen sets lines as the hour prints them, the ✠ after "O God,"; its switch offers the
+  // hour's three forms, and a deacon greets as a priest does.
+  const specimen = page.locator(".about-specimen");
+  await expect(specimen.locator(".about-specimen-opening")).toContainText("O God, ✠ make speed to save me.");
+  await expect(specimen.locator(".about-specimen-opt")).toHaveText(["Private", "Deacon", "Priest"]);
+  await expect(specimen.locator(".about-specimen-v-text")).toHaveText("O Lord, hear my prayer.");
+  await specimen.locator('.about-specimen-opt[data-form="deacon"]').click();
+  await expect(specimen.locator(".about-specimen-v-text")).toHaveText("The Lord be with you.");
+  await specimen.locator('.about-specimen-opt[data-form="private"]').click();
+  await expect(specimen.locator(".about-specimen-v-text")).toHaveText("O Lord, hear my prayer.");
+  await specimen.locator('.about-specimen-opt[data-form="priest"]').click();
+  await expect(specimen.locator(".about-specimen-v-text")).toHaveText("The Lord be with you.");
+  await expect(specimen.locator(".about-specimen-r-text")).toHaveText("And with thy spirit.");
+  await page.locator('.about-key-btn[data-key="rubric"]').click();
+  await expect(specimen.locator(".about-specimen-rubric")).toHaveClass(/is-lit/);
+  await page.locator('.about-key-btn[data-key="rubric"]').click();
+  await expect(specimen.locator(".about-specimen-rubric")).not.toHaveClass(/is-lit/);
+
+  // Ordo ribbon highlights matching days and explains the chosen liturgical color.
+  const ribbon = page.locator(".about-ordo-ribbon");
+  // Each month's name stands at its own month's start, and today's lozenge at today (15 March:
+  // two months of 31 days and 3 between, then 14.5 days).
+  const placed = await page.evaluate(() => {
+    const track = document.querySelector(".about-ordo-track").getBoundingClientRect();
+    const at = (el) => (el.getBoundingClientRect().left - track.left) / track.width;
+    return {
+      months: [...document.querySelectorAll(".about-ordo-months span")].map(at),
+      today: parseFloat(document.querySelector(".about-ordo-today").style.left) / 100,
+    };
+  });
+  const total = 12 * 31 + 11 * 3;
+  placed.months.forEach((x, i) => expect(Math.abs(x - (2 * i * 34) / total)).toBeLessThan(0.005));
+  expect(Math.abs(placed.today - (2 * 34 + 14.5) / total)).toBeLessThan(0.001);
+  // A copy kept from last year (the page is served from the cache first) shows no year's band.
+  await page.evaluate(() => {
+    const r = document.querySelector(".about-ordo-ribbon");
+    r._syncToday(new Date(Number(r.dataset.year) + 1, 0, 5));
+  });
+  await expect(ribbon.locator(".about-ordo-track")).toBeHidden();
+  await page.evaluate(() => {
+    const r = document.querySelector(".about-ordo-ribbon");
+    r._syncToday(new Date(Number(r.dataset.year), 2, 15));
+  });
+  await expect(ribbon.locator(".about-ordo-track")).toBeVisible();
+  await ribbon.locator('.about-ordo-swatch[data-color="violet"]').click();
+  await expect(ribbon).toHaveAttribute("data-selected-color", "violet");
+  await expect(ribbon.locator(".about-ordo-meaning")).toContainText("Advent, Lent");
+  await ribbon.locator('.about-ordo-swatch[data-color="violet"]').click();
+  await expect(ribbon).not.toHaveAttribute("data-selected-color");
+  await expect(ribbon.locator(".about-ordo-meaning")).toHaveText("");
+
+  // No horizontal overflow on a 390px phone.
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+});
+
 test.describe("on a screen with a mouse", () => {
   test.use({ isMobile: false, hasTouch: false, viewport: { width: 1280, height: 900 } });
+
+  test("About lays out a two-column folio on desktop and reveals stars in Apse", async ({ page }) => {
+    await page.clock.setFixedTime(new Date("2026-03-15T15:00:00-04:00"));
+    await openDatedPage(page, "/about");
+    const layout = await page.evaluate(() => {
+      const intro = document.querySelector(".about-intro").getBoundingClientRect();
+      const prose = document.querySelector(".about-prose").getBoundingClientRect();
+      const hours = document.querySelector(".about-hours-section").getBoundingClientRect();
+      const door = document.querySelector(".about-door").getBoundingClientRect();
+      return {
+        introRight: intro.right,
+        proseRight: prose.right,
+        hoursLeft: hours.left,
+        doorLeft: door.left,
+        doorTop: door.top,
+        hoursBottom: hours.bottom,
+        overflow: document.documentElement.scrollWidth - window.innerWidth,
+      };
+    });
+    expect(layout.hoursLeft).toBeGreaterThan(layout.introRight);
+    expect(layout.doorLeft).toBeGreaterThan(layout.proseRight);
+    expect(layout.doorTop).toBeGreaterThanOrEqual(layout.hoursBottom - 1);
+    expect(layout.overflow).toBeLessThanOrEqual(1);
+
+    // Apse theme reveals the vaulted stars behind the Horologium arc.
+    await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
+    await expect(page.locator(".about-horologium-stars")).toBeVisible();
+  });
 
   test("the beacon separates a desk from a narrowed window", async ({ page }) => {
     const events = [];

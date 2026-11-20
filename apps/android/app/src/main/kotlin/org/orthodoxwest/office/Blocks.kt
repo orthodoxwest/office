@@ -262,7 +262,7 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
  * A line that turns over below the capital keeps its style's hanging indent (a hymn's, a sung line's).
  */
 @Composable
-private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, textStart: Dp, raised: Boolean = false) {
+internal fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, textStart: Dp, raised: Boolean = false) {
     val (letter, rest) = splitInitial(block, runs(block))
     if (letter == null) {
         Text(rest, modifier.fillMaxWidth().padding(start = textStart), style = style)

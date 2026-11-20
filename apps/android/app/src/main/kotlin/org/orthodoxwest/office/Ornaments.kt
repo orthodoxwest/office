@@ -78,7 +78,7 @@ private val CrossArms = svg(
 )
 
 // The Lauds sun and the Vespers and Compline moon, viewBox 24×24.
-private val Sun = svg(
+internal val Sun = svg(
     "M17.20,12.00A5.2,5.2 0 1,0 6.80,12.00A5.2,5.2 0 1,0 17.20,12.00Z" +
         "M13.45,5.60 12.00,0.40 10.55,5.60Z" +
         "M16.46,7.18 16.70,3.86 13.94,5.73Z" +
@@ -93,7 +93,7 @@ private val Sun = svg(
         "M7.18,7.54 1.95,6.20 5.73,10.06Z" +
         "M10.06,5.73 7.30,3.86 7.54,7.18Z",
 )
-private val Moon = svg("M14.00 2.61A9.6 9.6 0 1 0 20.18 17.02A7.9 7.9 0 0 1 14.00 2.61Z")
+internal val Moon = svg("M14.00 2.61A9.6 9.6 0 1 0 20.18 17.02A7.9 7.9 0 0 1 14.00 2.61Z")
 
 /** Home's period glyphs (home.html), viewBox 24×16, filled: the rising sun, the sun, the moon. */
 enum class Period(val path: Path) {

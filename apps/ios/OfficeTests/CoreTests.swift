@@ -50,8 +50,16 @@ final class CoreTests: XCTestCase {
     func testTheAboutPageHasTheSevenHoursAndLinksOnlyWhereTheAppCanGo() {
         let page = about()
         XCTAssertFalse(page.title.isEmpty)
-        XCTAssertEqual(page.periods.flatMap(\.hours).map(\.hour), hourNames())
-        XCTAssertEqual(page.periods.flatMap(\.hours).count, 7)
+        XCTAssertFalse(page.kicker.isEmpty)
+        let hours = page.periods.flatMap(\.hours)
+        XCTAssertEqual(hours.map(\.hour), hourNames())
+        XCTAssertEqual(hours.count, 7)
+        XCTAssertEqual(hours.first?.night, false)
+        XCTAssertEqual(hours.last?.night, true)
+        XCTAssertTrue(zip(hours, hours.dropFirst()).allSatisfy { $0.angle > $1.angle })
+        XCTAssertFalse(page.specimen.aloneVersicle.isEmpty)
+        XCTAssertFalse(page.specimen.priestVersicle.isEmpty)
+        XCTAssertEqual(page.ordoColors.count, 6)
         let links = page.blocks.flatMap(\.runs).map(\.link).filter { !$0.isEmpty }
         XCTAssertFalse(links.isEmpty)
         for link in links {
