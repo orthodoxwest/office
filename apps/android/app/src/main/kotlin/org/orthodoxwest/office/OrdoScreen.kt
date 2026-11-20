@@ -33,6 +33,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -70,14 +72,19 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -98,12 +105,15 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.CommemorationView
 import org.orthodoxwest.office.core.CourseMonthView
+import org.orthodoxwest.office.core.GlossView
 import org.orthodoxwest.office.core.OrdoDayView
 import org.orthodoxwest.office.core.OrdoMonthView
 import org.orthodoxwest.office.core.OrdoYearView
 import org.orthodoxwest.office.core.TabulaRowView
 import org.orthodoxwest.office.core.coursePlace
 import org.orthodoxwest.office.core.courseSpan
+import org.orthodoxwest.office.core.emberDaysGloss
+import org.orthodoxwest.office.core.ordoDetailGlosses
 
 /** One month of the ordo, as the web's month page: year and month navigation, then the days. */
 @Composable
@@ -430,8 +440,10 @@ fun OrdoYearScreen(
     onYear: (Int) -> Unit,
     onDay: (LocalDate) -> Unit,
     onFind: () -> Unit = {},
+    onFeast: (String) -> Unit = {},
 ) {
     val p = LocalPalette.current
+    val emberGloss = remember { emberDaysGloss() }
     val listState = rememberSaveable(view.year, saver = LazyListState.Saver) { LazyListState() }
     // The year's course is laid in by one stroke across the twelve months, the first time a
     // frontispiece shows it this launch (the web's once a session); with animations off the
@@ -459,13 +471,13 @@ fun OrdoYearScreen(
                     // The web's desktop tabula: the figures in one line, the two tables side by side.
                     Figures(view.figures, 4, Modifier.padding(top = 24.dp))
                     Row(Modifier.padding(top = 24.dp), horizontalArrangement = Arrangement.spacedBy(40.dp)) {
-                        TabulaTable("Moveable feasts", view.moveable, onDay, Modifier.weight(1f))
-                        TabulaTable("Ember days", view.ember, onDay, Modifier.weight(1f))
+                        TabulaTable("Moveable feasts", view.moveable, onDay, Modifier.weight(1f), onFeast = onFeast)
+                        TabulaTable(emberGloss.term, view.ember, onDay, Modifier.weight(1f), titleGloss = emberGloss)
                     }
                 } else {
                     Figures(view.figures, 2, Modifier.padding(top = 24.dp))
-                    TabulaTable("Moveable feasts", view.moveable, onDay, Modifier.padding(top = 24.dp))
-                    TabulaTable("Ember days", view.ember, onDay, Modifier.padding(top = 24.dp))
+                    TabulaTable("Moveable feasts", view.moveable, onDay, Modifier.padding(top = 24.dp), onFeast = onFeast)
+                    TabulaTable(emberGloss.term, view.ember, onDay, Modifier.padding(top = 24.dp), titleGloss = emberGloss)
                 }
             }
         }
@@ -526,13 +538,35 @@ private fun Figures(figures: List<TabulaRowView>, perRow: Int, modifier: Modifie
         figures.chunked(perRow).forEach { pair ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 pair.forEach { f ->
+                    val gloss = f.gloss
+                    // One stop for a screen reader, the value with its name; a figure with a note
+                    // opens it from there, as the iOS app's combined figure does.
+                    val open = remember(f.label) { mutableStateOf(false) }
                     Column(
-                        Modifier.weight(1f).semantics(mergeDescendants = true) {},
+                        Modifier.weight(1f).then(
+                            if (gloss == null) {
+                                Modifier.semantics(mergeDescendants = true) {}
+                            } else {
+                                Modifier.clearAndSetSemantics {
+                                    contentDescription = "${f.value}, ${f.label}"
+                                    stateDescription = if (open.value) "Expanded" else "Collapsed"
+                                    role = Role.Button
+                                    onClick(label = "explain") { open.value = !open.value; true }
+                                }
+                            },
+                        ),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         // Lining figures stand 4 and 25 level with XIII and D.
                         Text(f.value, style = Type.body.copy(fontSize = 25.6.sp, lineHeight = 30.7.sp, color = p.accent, fontFeatureSettings = "lnum"))
-                        Text(f.label.uppercase(), Modifier.padding(top = 3.dp), style = Type.label(11.2f, 0.06f).copy(color = p.muted, textAlign = TextAlign.Center))
+                        val labelStyle = Type.label(11.2f, 0.06f).copy(color = p.muted, textAlign = TextAlign.Center)
+                        if (gloss != null) {
+                            GlossMark(gloss, f.label, Modifier.padding(top = 3.dp), open = open) {
+                                Text(f.label.uppercase(), style = labelStyle)
+                            }
+                        } else {
+                            Text(f.label.uppercase(), Modifier.padding(top = 3.dp), style = labelStyle)
+                        }
                     }
                 }
             }
@@ -540,24 +574,59 @@ private fun Figures(figures: List<TabulaRowView>, perRow: Int, modifier: Modifie
     }
 }
 
-/** A titled list of dates, ruled between rows; a date that cannot share its row takes the next line whole. */
+/** A titled list of dates, ruled between rows; a moveable feast name opens its feast overview while its date opens the ordo day. */
 @Composable
-private fun TabulaTable(title: String, rows: List<TabulaRowView>, onDay: (LocalDate) -> Unit, modifier: Modifier) {
+private fun TabulaTable(
+    title: String,
+    rows: List<TabulaRowView>,
+    onDay: (LocalDate) -> Unit,
+    modifier: Modifier,
+    onFeast: (String) -> Unit = {},
+    titleGloss: GlossView? = null,
+) {
     val p = LocalPalette.current
     Column(modifier.fillMaxWidth()) {
-        Text(title.uppercase(), Modifier.fillMaxWidth().semantics { heading() }.padding(vertical = 5.6.dp), style = Type.label(11.2f, 0.06f).copy(color = p.muted))
+        val headingStyle = Type.label(11.2f, 0.06f).copy(color = p.muted)
+        if (titleGloss != null) {
+            // The heading is the mark's target, which TalkBack stops on: it says both.
+            Box(Modifier.fillMaxWidth().padding(vertical = 5.6.dp)) {
+                GlossMark(titleGloss, title, isHeading = true) { Text(title.uppercase(), style = headingStyle) }
+            }
+        } else {
+            Text(title.uppercase(), Modifier.fillMaxWidth().semantics { heading() }.padding(vertical = 5.6.dp), style = headingStyle)
+        }
         Hairline(p.border)
         rows.forEach { r ->
             val date = r.date?.toLocalDate()
+            val hasFeast = r.feastId.isNotEmpty()
+            val rowStyle = Type.body.copy(fontSize = 15.2.sp, lineHeight = 22.sp)
+            // A moveable feast's whole row opens its page, and its date, a target of its own over
+            // the row, the day; any other row opens its day.
+            val rowTap = when {
+                hasFeast -> Modifier.tap(label = r.label, action = "open the feast's page") { onFeast(r.feastId) }
+                date != null -> Modifier.tap(label = "${r.label}, ${r.value}", action = "open the day in the ordo") { onDay(date) }
+                else -> Modifier
+            }
             FlowRow(
                 Modifier.fillMaxWidth().heightIn(min = 44.dp)
-                    .then(if (date != null) Modifier.tap(label = "${r.label}, ${r.value}", action = "open the day in the ordo") { onDay(date) } else Modifier)
+                    .then(rowTap)
                     .padding(vertical = 8.8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text(r.label, Modifier.padding(end = 16.dp), style = Type.body.copy(color = p.text))
-                Text(r.value, Modifier.weight(1f, fill = false).fillMaxWidth(), softWrap = false, style = Type.body.copy(color = p.accent, textAlign = TextAlign.End))
+                Text(
+                    r.label,
+                    Modifier.padding(end = 8.dp).goldUnderline(hasFeast, p.goldLine),
+                    style = rowStyle.copy(color = p.text),
+                )
+                Text(
+                    r.value,
+                    // Its own width only, at the line's end, so the rest of the row is the feast's.
+                    Modifier.weight(1f, fill = false).fillMaxWidth().wrapContentWidth(Alignment.End)
+                        .then(if (hasFeast && date != null) Modifier.tap(label = "${r.label}, ${r.value}", action = "open the day in the ordo") { onDay(date) } else Modifier),
+                    softWrap = false,
+                    style = rowStyle.copy(color = p.accent, textAlign = TextAlign.End),
+                )
             }
             Hairline(p.border)
         }
@@ -622,11 +691,11 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
         Unfold(details && hasDetails, reveal = open["details"] != null, instant = turningAll) { Digest(d, { onDay(date) }, onFeast) }
     }
     val anyOpen = details && hasDetails
-    if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, rowTap, modifier, anyOpen, buttons, unfolded)
+    if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, onFeast, rowTap, modifier, anyOpen, buttons, unfolded)
     val secondLine: @Composable ColumnScope.() -> Unit = {
         // Today is said once, in the gold of its number, at the right of today's second line, which
         // is otherwise empty: no row keeps a line for it.
-        Row(Modifier.fillMaxWidth().padding(top = 1.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().padding(top = 2.5.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp), verticalAlignment = Alignment.CenterVertically) {
             buttons()
             if (isToday) {
                 Spacer(Modifier.weight(1f))
@@ -682,8 +751,10 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
             Column(Modifier.weight(1f)) {
                 Column(rowTap) {
                     Row(verticalAlignment = Alignment.Top) {
-                        // The date's stop already says the feast.
-                        FeastName(d, Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp), Modifier.weight(1f).semantics { hideFromAccessibility() })
+                        // Feast name wraps only its own text so tapping empty row space still toggles Office details.
+                        Box(Modifier.weight(1f), contentAlignment = Alignment.TopStart) {
+                            FeastName(d, Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp), Modifier.wrapContentWidth(Alignment.Start), onFeast)
+                        }
                         // The phone's marks stay quiet, as the web's card sets them: the name carries the rank's ink.
                         // Each names itself in a note when tapped ([OrdoMarks]).
                         Row(Modifier.padding(start = 8.dp, top = 2.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -813,6 +884,7 @@ private fun DayTableRow(
     isToday: Boolean,
     spoken: String,
     onDay: (LocalDate) -> Unit,
+    onFeast: (String) -> Unit,
     rowTap: Modifier,
     modifier: Modifier,
     anyOpen: Boolean,
@@ -868,18 +940,17 @@ private fun DayTableRow(
             }
             Text(d.weekday, Modifier.width(WeekCol).fillMaxHeight().then(rowTap).padding(horizontal = 7.2.dp, vertical = 3.dp).clearAndSetSemantics {}, style = Type.small.copy(fontSize = 12.8.sp, color = p.muted))
             Column(Modifier.weight(1f).padding(horizontal = 7.2.dp)) {
-                // The date's stop already says the feast.
                 val name = Type.body.copy(fontSize = 16.sp, lineHeight = 22.4.sp)
                 // A bracketed line sits under the name, so the disclosures drop below it as on the web.
                 if (anyOpen || d.monastic.isNotEmpty()) {
                     Column(rowTap) {
-                        FeastName(d, name, Modifier.semantics { hideFromAccessibility() })
+                        FeastName(d, name, Modifier.wrapContentWidth(Alignment.Start), onFeast)
                         Monastic(d)
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
                     }
                 } else {
                     Row(Modifier.fillMaxWidth().then(rowTap)) {
-                        FeastName(d, name, Modifier.weight(1f, fill = false).alignByBaseline().semantics { hideFromAccessibility() })
+                        FeastName(d, name, Modifier.weight(1f, fill = false).alignByBaseline(), onFeast)
                         Row(Modifier.padding(start = 20.dp).alignByBaseline(), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
                     }
                 }
@@ -988,18 +1059,44 @@ private val FirstClassCross = mapOf(
     },
 )
 
-/** A feast's name in its rank's ink, a first-class feast's after a small painted cross. */
+/** A feast's name in its rank's ink, a first-class feast's after a small painted cross; when backed by a feast page, taps straight to it. */
 @Composable
-private fun FeastName(d: OrdoDayView, style: TextStyle, modifier: Modifier) {
+private fun FeastName(d: OrdoDayView, style: TextStyle, modifier: Modifier, onFeast: (String) -> Unit) {
+    val p = LocalPalette.current
     val first = d.rank == "1cl"
+    val linked = d.feastId.isNotEmpty()
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    // The cross's placeholder stands before the name; the hairline is the name's alone.
+    val from = if (first) 1 else 0
+    val mod = if (linked) {
+        // The name's gold hairline under each of its lines, whatever the rank's ink (the web's
+        // `.feast-link`, the iOS app's gold underline), as the Tabula's feasts are ruled.
+        modifier.tap(label = d.feast, action = "open the feast's page") { onFeast(d.feastId) }.drawBehind {
+            val l = layout ?: return@drawBehind
+            val w = 1.dp.toPx()
+            val drop = style.fontSize.toPx() * 0.14f
+            for (line in 0 until l.lineCount) {
+                val start = maxOf(l.getLineStart(line), from)
+                val end = l.getLineEnd(line, visibleEnd = true)
+                if (end <= start) continue
+                val left = l.getHorizontalPosition(start, usePrimaryDirection = true)
+                val right = l.getLineRight(line)
+                val y = l.getLineBaseline(line) + drop
+                drawLine(p.goldLine, Offset(left, y), Offset(right, y), w)
+            }
+        }
+    } else {
+        modifier.semantics { hideFromAccessibility() }
+    }
     Text(
         buildAnnotatedString {
             if (first) appendInlineContent("cross", "✠")
             append(d.feast)
         },
-        modifier,
-        style = style.copy(color = rankInk(d.rank, LocalPalette.current)),
+        mod,
+        style = style.copy(color = rankInk(d.rank, p)),
         inlineContent = if (first) FirstClassCross else emptyMap(),
+        onTextLayout = { layout = it },
     )
 }
 
@@ -1032,15 +1129,27 @@ private fun SmallDisclosure(label: String, open: Boolean, onToggle: () -> Unit) 
 private val TodayNote: TextStyle
     @Composable get() = Type.label(13.12f, 0.1f).copy(color = LocalPalette.current.let { if (it.dark) it.gold else Color(0xFF76561A) }, fontFeatureSettings = ALL_SMALL_CAPS)
 
+/** Notes for abbreviations inside Ordo Office details (`presentation::gloss`). */
+private val DETAIL_GLOSSES by lazy {
+    val g = ordoDetailGlosses()
+    mapOf(
+        "ben" to g.benedictus,
+        "mag" to g.magnificat,
+        "com" to g.commemoration,
+        "preces" to g.preces,
+        "suffrage" to g.suffrage,
+    )
+}
+
 /** The office digest: each hour's gospel antiphon, preces, suffrage, and commemorations. */
 @Composable
 private fun ColumnScope.Digest(d: OrdoDayView, onDay: () -> Unit, onFeast: (String) -> Unit) {
     val p = LocalPalette.current
     // The row's tap opens these in place; this, above the digest's rule, leads on to the day (the
-    // web's `.day-office-open`).
+    // web's `.day-office-open`), sized to a full 44dp thumb target.
     Text(
         "${MARK_WORDS.openDay} ›",
-        Modifier.padding(top = 2.4.dp, bottom = 5.6.dp).tap(onClick = onDay),
+        Modifier.heightIn(min = 44.dp).tap(onClick = onDay).wrapContentHeight(Alignment.CenterVertically),
         style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.accent),
     )
     Column(
@@ -1048,48 +1157,77 @@ private fun ColumnScope.Digest(d: OrdoDayView, onDay: () -> Unit, onFeast: (Stri
     ) {
         // The day's commemorations first, under "Day", as the hours' rows are set.
         val day = d.dayComms()
-        if (day.isNotEmpty()) DigestHour("Day", emptyList(), null, preces = false, suffrage = false, comms = day, onFeast = onFeast)
+        if (day.isNotEmpty()) DigestHour("Day", emptyList(), null, null, preces = false, suffrage = false, comms = day, onFeast = onFeast)
         if (d.hasLauds()) {
-            DigestHour("Lauds", emptyList(), d.benedictusAntiphon.takeIf { it.isNotEmpty() }?.let { "Ben. “$it”" }, d.laudsPreces, d.laudsSuffrage, d.laudsCross, d.laudsComms, onFeast)
+            DigestHour("Lauds", emptyList(), "ben", d.benedictusAntiphon.takeIf { it.isNotEmpty() }, d.laudsPreces, d.laudsSuffrage, d.laudsCross, d.laudsComms, onFeast)
         }
-        if (d.hoursPreces) DigestHour("Hours", emptyList(), null, preces = true, suffrage = false, comms = emptyList(), onFeast = onFeast)
+        if (d.hoursPreces) DigestHour("Hours", emptyList(), null, null, preces = true, suffrage = false, comms = emptyList(), onFeast = onFeast)
         if (d.hasVespers()) {
-            DigestHour("Vespers", listOfNotNull(d.vespersNote.takeIf { it.isNotEmpty() }), d.magnificatAntiphon.takeIf { it.isNotEmpty() }?.let { "Mag. “$it”" }, d.vespersPreces, d.vespersSuffrage, d.vespersCross, d.vespersComms, onFeast)
+            DigestHour("Vespers", listOfNotNull(d.vespersNote.takeIf { it.isNotEmpty() }), "mag", d.magnificatAntiphon.takeIf { it.isNotEmpty() }, d.vespersPreces, d.vespersSuffrage, d.vespersCross, d.vespersComms, onFeast)
         }
     }
 }
 
 @Composable
-private fun DigestHour(name: String, notes: List<String>, antiphon: String?, preces: Boolean, suffrage: Boolean, cross: Boolean = false, comms: List<CommemorationView>, onFeast: (String) -> Unit) {
+private fun DigestHour(
+    name: String,
+    notes: List<String>,
+    antiphonKey: String?,
+    antiphon: String?,
+    preces: Boolean,
+    suffrage: Boolean,
+    cross: Boolean = false,
+    comms: List<CommemorationView>,
+    onFeast: (String) -> Unit,
+) {
     val p = LocalPalette.current
     val line = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)
     Column(Modifier.padding(bottom = 4.dp)) {
         Text(name.uppercase(), Modifier.padding(bottom = 2.4.dp), style = Type.label(12f, 0.06f).copy(color = p.accent, lineHeight = 18.sp))
         notes.forEach { Text(it, style = line) }
         if (antiphon != null || preces || suffrage || cross) {
-            Text(
-                buildAnnotatedString {
-                    if (antiphon != null) append(antiphon)
-                    withStyle(SpanStyle(color = p.rubric, fontStyle = FontStyle.Normal)) {
-                        if (preces) append((if (length > 0) "  " else "") + "Preces")
-                        if (suffrage) append((if (length > 0) "  " else "") + "Suffrage")
-                        if (cross) append((if (length > 0) "  " else "") + "Commemoration of the Cross")
+            val text = buildAnnotatedString {
+                if (antiphon != null && antiphonKey != null) {
+                    pushStringAnnotation(GLOSS, antiphonKey)
+                    append(DETAIL_GLOSSES.getValue(antiphonKey).term)
+                    pop()
+                    append(" “$antiphon”")
+                }
+                withStyle(SpanStyle(color = p.rubric, fontStyle = FontStyle.Normal)) {
+                    if (preces) {
+                        if (length > 0) append("  ")
+                        pushStringAnnotation(GLOSS, "preces")
+                        append(DETAIL_GLOSSES.getValue("preces").term)
+                        pop()
                     }
-                },
-                style = line,
-            )
+                    if (suffrage) {
+                        if (length > 0) append("  ")
+                        pushStringAnnotation(GLOSS, "suffrage")
+                        append(DETAIL_GLOSSES.getValue("suffrage").term)
+                        pop()
+                    }
+                    if (cross) append((if (length > 0) "  " else "") + "Commemoration of the Cross")
+                }
+            }
+            AnnotatedGlossText(text, DETAIL_GLOSSES, line)
         }
-        // A commemoration's name leads to its feast's page, underlined as the web's `.feast-link`.
+        // "Com." opens its note; a commemoration's name leads to its feast's page, underlined as `.feast-link`.
         comms.forEach { c ->
-            Text(
-                buildAnnotatedString {
-                    append("Com. ")
-                    withStyle(SpanStyle(textDecoration = if (c.feastId.isEmpty()) null else TextDecoration.Underline)) { append(c.name) }
-                    if (c.incipit.isNotEmpty()) append(" “${c.incipit}”")
-                },
-                if (c.feastId.isEmpty()) Modifier else Modifier.tap(action = "open the feast's page") { onFeast(c.feastId) },
-                style = line,
-            )
+            val text = buildAnnotatedString {
+                pushStringAnnotation(GLOSS, "com")
+                append(DETAIL_GLOSSES.getValue("com").term)
+                pop()
+                append(" ")
+                if (c.feastId.isNotEmpty()) {
+                    pushStringAnnotation(LINK, c.feastId)
+                    withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) { append(c.name) }
+                    pop()
+                } else {
+                    append(c.name)
+                }
+                if (c.incipit.isNotEmpty()) append(" “${c.incipit}”")
+            }
+            AnnotatedGlossText(text, DETAIL_GLOSSES, line, onLink = if (c.feastId.isNotEmpty()) onFeast else null)
         }
     }
 }

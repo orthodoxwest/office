@@ -7,6 +7,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Column
@@ -19,6 +21,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,21 +36,28 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
@@ -64,12 +74,23 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-/** Marks a glossed term's run in a block's styled text; the item is the run's index in the block. */
+/** Marks a glossed term's run in a block's styled text; the item is the run's index in the block (or -1 for `markerGloss`). */
 internal const val GLOSS = "gloss"
 
-/** A block's glossed rubric terms ("secretly"), by the index of their run. */
-fun glosses(block: BlockView): List<Pair<Int, GlossView>> =
-    block.runs.withIndex().mapNotNull { (i, run) -> run.gloss?.let { i to it } }
+/** Marks an inline action (such as a feast link) inside [AnnotatedGlossText]. */
+internal const val LINK = "link"
+
+/** A note's action, as TalkBack and VoiceOver name it alike: `Explain “Benedictus antiphon”`. */
+internal fun explain(gloss: GlossView): String = "Explain “${gloss.title}”"
+
+/** A block's glossed rubric terms and structural markers, by index (-1 for `markerGloss`). */
+fun glosses(block: BlockView): List<Pair<Int, GlossView>> = buildList {
+    block.markerGloss?.let { add(-1 to it) }
+    block.runs.forEachIndexed { i, run -> run.gloss?.let { add(i to it) } }
+}
+
+private fun glossAt(block: BlockView, index: Int): GlossView? =
+    if (index < 0) block.markerGloss else block.runs.getOrNull(index)?.gloss
 
 /** The web's `.gloss-note`: 19rem wide, set in 0.95rem, its heading 0.95em of that. */
 private val NoteWidth = 304.dp
@@ -82,10 +103,11 @@ private val NoteText = TextStyle(fontFamily = Garamond, fontSize = 15.2.sp, line
 private val NoteTitle = NoteText.copy(fontSize = 14.44.sp, lineHeight = 20.sp, fontFeatureSettings = "smcp", letterSpacing = 0.72.sp)
 
 /**
- * A rubric whose terms a newcomer stumbles on, as the web's `.gloss-term`: each term carries a
- * hairline in the rubric's red at 40% (solid while its note is open), and a tap on it opens its
- * note above the word, so the note never covers the prayer it explains; below only where the top
- * of the window leaves no room. A tap elsewhere or Back closes it. `open` is the open term's run.
+ * A block whose terms open a note on tap, as the web's `.gloss-term` and `.gloss-quiet`: rubric
+ * terms carry a hairline in the rubric's red at 40% (solid while open), while quiet structural
+ * marks (`Ant.`, `(63)`, `Chapter`, `Preces`, `Suffrage`) carry no underline at rest so repeating
+ * readers see pure typography. A tap opens the note above the word, or below where the top of the
+ * window leaves no room. A tap elsewhere or Back closes it. `open` is the open term's index.
  */
 @Composable
 fun GlossedText(text: AnnotatedString, block: BlockView, open: Int?, onOpen: (Int?) -> Unit, modifier: Modifier, style: TextStyle) {
@@ -107,7 +129,10 @@ fun GlossedText(text: AnnotatedString, block: BlockView, open: Int?, onOpen: (In
                 .drawBehind {
                     val l = layout ?: return@drawBehind
                     for (term in terms) {
-                        val ink = p.rubric.copy(alpha = if (term.item.toInt() == open) 1f else 0.4f)
+                        val index = term.item.toInt()
+                        val g = glossAt(block, index) ?: continue
+                        if (g.quiet) continue
+                        val ink = p.rubric.copy(alpha = if (index == open) 1f else 0.4f)
                         for (r in termRects(l, term.start, term.end)) {
                             val y = l.getLineBaseline(l.getLineForVerticalPosition(r.center.y)) + rise
                             drawLine(ink, Offset(r.left, y), Offset(r.right, y), strokeWidth = 1.dp.toPx())
@@ -126,7 +151,7 @@ fun GlossedText(text: AnnotatedString, block: BlockView, open: Int?, onOpen: (In
             style = style,
             onTextLayout = { layout = it },
         )
-        val gloss = open?.let { block.runs.getOrNull(it)?.gloss }
+        val gloss = open?.let { glossAt(block, it) }
         val term = open?.let { i -> terms.firstOrNull { it.item.toInt() == i } }
         val words = if (gloss != null && term != null) NoteWords(gloss.title, gloss.note) else null
         val rects = term?.let {
@@ -141,6 +166,173 @@ fun GlossedText(text: AnnotatedString, block: BlockView, open: Int?, onOpen: (In
             }
         }
         Note(words, rects ?: { emptyList() }, onDismiss = { onOpen(null) })
+    }
+}
+
+/**
+ * A labelled term with a plaster note (Tabula figures, "Ember days"): underlined in the muted
+ * hairline at 40% (solid while open) unless `underline` is false, opening its titled note
+ * above. Its touch target reaches 48dp each way round the mark without moving it ([reach]), and
+ * speaks as `label`; `isHeading` makes it the heading it stands for. A parent that speaks for the
+ * whole (a Tabula figure, its value with its label) passes `open` and clears the mark's semantics.
+ */
+@Composable
+fun GlossMark(
+    gloss: GlossView,
+    label: String,
+    modifier: Modifier = Modifier,
+    underline: Boolean = !gloss.quiet,
+    isHeading: Boolean = false,
+    open: MutableState<Boolean> = remember { mutableStateOf(false) },
+    mark: @Composable () -> Unit,
+) {
+    val p = LocalPalette.current
+    var isOpen by open
+    val coordinates = remember { arrayOfNulls<LayoutCoordinates>(1) }
+    // The target over the mark presses; the mark dims, as a control's words do ([Dim]).
+    val press = remember { MutableInteractionSource() }
+    Box(
+        modifier
+            .onGloballyPositioned { coordinates[0] = it }
+            .indication(press, Dim)
+            .then(
+                if (!underline) Modifier else Modifier.drawBehind {
+                    val line = p.muted.copy(alpha = if (isOpen) 1f else 0.4f)
+                    val w = 1.dp.toPx()
+                    drawLine(line, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), strokeWidth = w)
+                },
+            ),
+    ) {
+        // The target speaks for the mark.
+        Box(Modifier.clearAndSetSemantics {}) { mark() }
+        Box(
+            Modifier
+                .matchParentSize()
+                .reach()
+                .tap(label = label, action = "explain", source = press) { isOpen = !isOpen }
+                .semantics {
+                    stateDescription = if (isOpen) "Expanded" else "Collapsed"
+                    if (isHeading) heading()
+                },
+        )
+    }
+    Note(
+        if (isOpen) NoteWords(gloss.title, gloss.note) else null,
+        rects = { coordinates[0]?.takeIf { it.isAttached }?.let { listOf(it.boundsInWindow()) } ?: emptyList() },
+        onDismiss = { isOpen = false },
+    )
+}
+
+/** The platform's minimum touch target (48dp), as Material's controls keep. */
+private val Reach = 48.dp
+
+/**
+ * A touch target at least [Reach] each way, centred on a small mark, that leaves the mark's place
+ * in the layout as it was: the target stands out over the room about it, as the iOS app's
+ * `contentShape` does.
+ */
+private fun Modifier.reach(): Modifier = this.layout { measurable, constraints ->
+    val w = max(constraints.maxWidth, Reach.roundToPx())
+    val h = max(constraints.maxHeight, Reach.roundToPx())
+    val target = measurable.measure(Constraints.fixed(w, h))
+    layout(constraints.maxWidth, constraints.maxHeight) {
+        target.place((constraints.maxWidth - w) / 2, (constraints.maxHeight - h) / 2)
+    }
+}
+
+/**
+ * Inline prose containing tappable gloss terms ([GLOSS] annotations keyed into `glossMap`) and
+ * optional inline links ([LINK] annotations passed to `onLink`). Used in Ordo office details so
+ * abbreviations ("Ben.", "Mag.", "Com.", "Preces", "Suffrage") open notes without breaking flow.
+ */
+@Composable
+fun AnnotatedGlossText(
+    text: AnnotatedString,
+    glossMap: Map<String, GlossView>,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+    onLink: ((String) -> Unit)? = null,
+) {
+    val density = LocalDensity.current
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    var openKey by remember { mutableStateOf<String?>(null) }
+    val coordinates = remember { arrayOfNulls<LayoutCoordinates>(1) }
+    val terms = text.getStringAnnotations(GLOSS, 0, text.length)
+    val links = text.getStringAnnotations(LINK, 0, text.length)
+    val currentOpen by rememberUpdatedState(openKey)
+    val rise = with(density) { style.fontSize.toPx() * 0.24f }
+    val a11yActions = buildList {
+        terms.forEach { t ->
+            val g = glossMap[t.item] ?: return@forEach
+            add(CustomAccessibilityAction(explain(g)) { openKey = t.item; true })
+        }
+        if (onLink != null) {
+            links.forEach { l ->
+                val name = text.substring(l.start, l.end)
+                add(CustomAccessibilityAction("Open $name") { onLink(l.item); true })
+            }
+        }
+    }
+    // Each term's hairline in its own ink at 40%, solid while open (the web's `.gloss-term`):
+    // the line's muted for "Ben.", the rubric's red for "Preces".
+    fun inkAt(i: Int): Color =
+        text.spanStyles.lastOrNull { it.start <= i && i < it.end && it.item.color.isSpecified }?.item?.color ?: style.color
+    // One stop for TalkBack, the line read whole: its notes and its feast are its actions, and a
+    // line's one feast opens on a double tap, as a tap on its name does.
+    val link = links.singleOrNull()?.takeIf { onLink != null }
+    Box(
+        modifier.semantics(mergeDescendants = true) {
+            if (a11yActions.isNotEmpty()) customActions = a11yActions
+            if (link != null && onLink != null) onClick(label = "open the feast's page") { onLink(link.item); true }
+        },
+    ) {
+        Text(
+            text,
+            Modifier
+                .onGloballyPositioned { coordinates[0] = it }
+                .drawBehind {
+                    val l = layout ?: return@drawBehind
+                    for (term in terms) {
+                        val ink = inkAt(term.start).copy(alpha = if (term.item == openKey) 1f else 0.4f)
+                        for (r in termRects(l, term.start, term.end)) {
+                            val y = l.getLineBaseline(l.getLineForVerticalPosition(r.center.y)) + rise
+                            drawLine(ink, Offset(r.left, y), Offset(r.right, y), strokeWidth = 1.dp.toPx())
+                        }
+                    }
+                }
+                .pointerInput(text, onLink) {
+                    val slop = 8.dp.toPx()
+                    detectTapGestures { at ->
+                        val l = layout ?: return@detectTapGestures
+                        val hitTerm = terms.firstOrNull { t -> termRects(l, t.start, t.end).any { it.inflate(slop).contains(at) } }
+                        if (hitTerm != null) {
+                            openKey = hitTerm.item.takeIf { it != currentOpen }
+                            return@detectTapGestures
+                        }
+                        if (onLink != null) {
+                            val hitLink = links.firstOrNull { t -> termRects(l, t.start, t.end).any { it.inflate(slop).contains(at) } }
+                            if (hitLink != null) onLink(hitLink.item)
+                        }
+                    }
+                },
+            style = style,
+            onTextLayout = { layout = it },
+        )
+        val gloss = openKey?.let { glossMap[it] }
+        val term = openKey?.let { k -> terms.firstOrNull { it.item == k } }
+        val words = if (gloss != null && term != null) NoteWords(gloss.title, gloss.note) else null
+        val rects = term?.let {
+            {
+                val l = layout
+                val at = coordinates[0]
+                if (l == null || at == null || !at.isAttached) {
+                    emptyList()
+                } else {
+                    termRects(l, it.start, it.end).map { r -> Rect(at.localToWindow(r.topLeft), at.localToWindow(r.bottomRight)) }
+                }
+            }
+        }
+        Note(words, rects ?: { emptyList() }, onDismiss = { openKey = null })
     }
 }
 

@@ -422,7 +422,8 @@ fn psalm_label_carries_latin_incipit() {
     has(
         &html,
         concat!(
-            "<h3 class=\"item-label\">Psalm <span class=\"psalm-num\">66\u{a0}<span class=\"psalm-heb\">(67)</span></span>",
+            "<h3 class=\"item-label\">Psalm <span class=\"psalm-num\">66\u{a0}",
+            "<span class=\"psalm-heb gloss-quiet\" data-gloss-title=\"Psalm numbering\" data-gloss=\"The first number follows the traditional Septuagint and Vulgate psalter; the number in parentheses follows the Hebrew and King James numbering.\">(67)</span></span>",
             "<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}· </span>",
             r#"<span class="psalm-incipit" lang="la">Deus misereatur nostri</span></h3>"#
         ),
@@ -436,7 +437,13 @@ fn psalm_label_carries_latin_incipit() {
     has(&html, r#"<span class="psalm-incipit" lang="la">Magnificat anima mea Dominum</span>"#);
     // Without a recorded incipit there is no empty span or orphaned separator.
     let html = render_section_elements(&[psalm_67("")]);
-    has(&html, "<h3 class=\"item-label\">Psalm <span class=\"psalm-num\">66\u{a0}<span class=\"psalm-heb\">(67)</span></span></h3>");
+    has(
+        &html,
+        concat!(
+            "<h3 class=\"item-label\">Psalm <span class=\"psalm-num\">66\u{a0}",
+            "<span class=\"psalm-heb gloss-quiet\" data-gloss-title=\"Psalm numbering\" data-gloss=\"The first number follows the traditional Septuagint and Vulgate psalter; the number in parentheses follows the Hebrew and King James numbering.\">(67)</span></span></h3>",
+        ),
+    );
     lacks(&html, "label-sep");
     lacks(&html, "psalm-incipit");
     let html = render_section_elements(&[psalm_67("Deus <b>misereatur</b> & nostri")]);

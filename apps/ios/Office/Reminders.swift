@@ -11,6 +11,7 @@ struct HourReminder: Equatable {
     var chosen: Bool
     var hourOfDay: Int
     var minute: Int
+    var gloss: String = ""
 }
 
 /// Minutes before the hour, as the web's "Remind me" offers them (without its alert-less option).
@@ -90,9 +91,9 @@ enum ReminderStore {
         let hours = reminderDefaults().map { d -> HourReminder in
             let saved = defaults.string(forKey: "reminders.hour.\(d.hour)")?.split(separator: ",").compactMap { Int($0) }
             if let saved, saved.count == 3 {
-                return HourReminder(hour: d.hour, name: d.name, chosen: saved[0] == 1, hourOfDay: saved[1], minute: saved[2])
+                return HourReminder(hour: d.hour, name: d.name, chosen: saved[0] == 1, hourOfDay: saved[1], minute: saved[2], gloss: d.gloss)
             }
-            return HourReminder(hour: d.hour, name: d.name, chosen: d.chosen, hourOfDay: Int(d.hourOfDay), minute: Int(d.minute))
+            return HourReminder(hour: d.hour, name: d.name, chosen: d.chosen, hourOfDay: Int(d.hourOfDay), minute: Int(d.minute), gloss: d.gloss)
         }
         let days = defaults.string(forKey: "reminders.days").map { Set($0.split(separator: ",").compactMap { Int($0) }) }
         return ReminderSettings(

@@ -106,17 +106,17 @@
   <section class="tabula" aria-labelledby="tabula-heading">
     <h2 id="tabula-heading">Tabula Temporaria</h2>
     <dl class="tabula-figures">
-      {% for r in tabula.figures %}<div><dt>{{ r.label }}</dt><dd>{{ r.value }}</dd></div>{% endfor %}
+      {% for r in tabula.figures %}<div><dt>{% if r.gloss_note %}<span class="gloss-term" data-gloss-title="{{ r.gloss_title }}" data-gloss="{{ r.gloss_note }}">{{ r.label }}</span>{% else %}{{ r.label }}{% endif %}</dt><dd>{{ r.value }}</dd></div>{% endfor %}
     </dl>
     <div class="tabula-tables">
       <section aria-labelledby="tabula-moveable">
         <h3 id="tabula-moveable">Moveable feasts</h3>
         <dl>
-          {% for r in tabula.moveable %}<div><dt>{{ r.label }}</dt><dd><a href="{{ r.href|url }}">{{ r.value }}</a></dd></div>{% endfor %}
+          {% for r in tabula.moveable %}<div><dt>{% if r.feast_href %}<a class="feast-link" href="{{ r.feast_href|url }}" title="About this feast">{{ r.label }}</a>{% else %}{{ r.label }}{% endif %}</dt><dd><a href="{{ r.href|url }}">{{ r.value }}</a></dd></div>{% endfor %}
         </dl>
       </section>
       <section aria-labelledby="tabula-ember">
-        <h3 id="tabula-ember">Ember days</h3>
+        <h3 id="tabula-ember"><span class="gloss-term" data-gloss-title="{{ ember_days_gloss.title }}" data-gloss="{{ ember_days_gloss.note }}">Ember days</span></h3>
         <dl>
           {% for r in tabula.ember %}<div><dt>{{ r.label }}</dt><dd><a href="{{ r.href|url }}">{{ r.value }}</a></dd></div>{% endfor %}
         </dl>
@@ -173,9 +173,9 @@
                 {% if d.rank %}{% if d.rank_full %}<abbr class="day-mobile-rank" tabindex="0" title="{{ d.rank_full }}">{{ d.rank }}</abbr>{% else %}<span class="day-mobile-rank">{{ d.rank }}</span>{% endif %}{% endif %}
               </span>
             </div>
-            {# Only the date leads to the day, and says the feast as it is described; a tap on the
-               rest of the row opens its office details (app.js). #}
-            <span class="day-feast-name" id="n-{{ d.date_slug }}">{{ d.feast_name|typeset }}</span>
+            {# The date leads to the day; a feast name with a feast page links inline to it;
+               tapping Office details or the rest of the row opens its office details (app.js). #}
+            <span class="day-feast-name" id="n-{{ d.date_slug }}">{% if d.feast_href %}<a class="feast-link" href="{{ d.feast_href|url }}" title="About this feast">{{ d.feast_name|typeset }}</a>{% else %}{{ d.feast_name|typeset }}{% endif %}</span>
             {# Kept by monastics and oblates only: the ordo's bracketed line, never the day's office. #}
             {% if d.monastic %}<div class="day-monastic">{% for o in d.monastic %}<p>[{{ o.heading|typeset }}] <abbr tabindex="0" title="{{ o.rank_full }}">{{ o.rank }}</abbr>{% if o.office %}<span class="day-monastic-office">{{ o.office|typeset }}</span>{% endif %}</p>{% endfor %}</div>{% endif %}
             {# One disclosure holds the day's commemorations and its office. #}
@@ -189,25 +189,25 @@
               {% if d.commemorations %}
               <div class="day-office-hour">
                 <dt>Day</dt>
-                <dd>{% for c in d.commemorations %}{% set href = d.commemoration_hrefs[loop.index0] if loop.index0 < d.commemoration_hrefs|length else "" %}<span class="day-office-comm">Com. {% if href %}<a class="feast-link" href="{{ href|url }}">{{ c|typeset }}</a>{% else %}{{ c|typeset }}{% endif %}</span>{% endfor %}</dd>
+                <dd>{% for c in d.commemorations %}{% set href = d.commemoration_hrefs[loop.index0] if loop.index0 < d.commemoration_hrefs|length else "" %}<span class="day-office-comm"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_com.title }}" data-gloss="{{ ordo_gloss_com.note }}">Com.</span> {% if href %}<a class="feast-link" href="{{ href|url }}">{{ c|typeset }}</a>{% else %}{{ c|typeset }}{% endif %}</span>{% endfor %}</dd>
               </div>
               {% endif %}
               {% if d.benedictus_antiphon or d.lauds_preces or d.lauds_suffrage or d.lauds_cross or d.lauds_comms %}
               <div class="day-office-hour">
                 <dt>Lauds</dt>
                 <dd>
-                  {% if d.benedictus_antiphon %}<span class="day-office-incipit">Ben. &ldquo;{{ d.benedictus_antiphon }}&rdquo;</span>{% endif %}
-                  {% if d.lauds_preces %}<span class="day-office-badge">Preces</span>{% endif %}
-                  {% if d.lauds_suffrage %}<span class="day-office-badge">Suffrage</span>{% endif %}
+                  {% if d.benedictus_antiphon %}<span class="day-office-incipit"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_ben.title }}" data-gloss="{{ ordo_gloss_ben.note }}">Ben.</span> &ldquo;{{ d.benedictus_antiphon }}&rdquo;</span>{% endif %}
+                  {% if d.lauds_preces %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_preces.title }}" data-gloss="{{ ordo_gloss_preces.note }}">Preces</span></span>{% endif %}
+                  {% if d.lauds_suffrage %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_suffrage.title }}" data-gloss="{{ ordo_gloss_suffrage.note }}">Suffrage</span></span>{% endif %}
                   {% if d.lauds_cross %}<span class="day-office-badge">Commemoration of the Cross</span>{% endif %}
-                  {% for c in d.lauds_comms %}<span class="day-office-comm">Com. {% if c.href %}<a class="feast-link" href="{{ c.href|url }}">{{ c.name|typeset }}</a>{% else %}{{ c.name|typeset }}{% endif %}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
+                  {% for c in d.lauds_comms %}<span class="day-office-comm"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_com.title }}" data-gloss="{{ ordo_gloss_com.note }}">Com.</span> {% if c.href %}<a class="feast-link" href="{{ c.href|url }}">{{ c.name|typeset }}</a>{% else %}{{ c.name|typeset }}{% endif %}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
                 </dd>
               </div>
               {% endif %}
               {% if d.hours_preces %}
               <div class="day-office-hour">
                 <dt>Hours</dt>
-                <dd><span class="day-office-badge">Preces</span></dd>
+                <dd><span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_preces.title }}" data-gloss="{{ ordo_gloss_preces.note }}">Preces</span></span></dd>
               </div>
               {% endif %}
               {% if d.magnificat_antiphon or d.vespers_preces or d.vespers_suffrage or d.vespers_cross or d.vespers_comms or d.vespers_note %}
@@ -215,11 +215,11 @@
                 <dt>Vespers</dt>
                 <dd>
                   {% if d.vespers_note %}<span class="day-office-note">{{ d.vespers_note }}</span>{% endif %}
-                  {% if d.magnificat_antiphon %}<span class="day-office-incipit">Mag. &ldquo;{{ d.magnificat_antiphon }}&rdquo;</span>{% endif %}
-                  {% if d.vespers_preces %}<span class="day-office-badge">Preces</span>{% endif %}
-                  {% if d.vespers_suffrage %}<span class="day-office-badge">Suffrage</span>{% endif %}
+                  {% if d.magnificat_antiphon %}<span class="day-office-incipit"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_mag.title }}" data-gloss="{{ ordo_gloss_mag.note }}">Mag.</span> &ldquo;{{ d.magnificat_antiphon }}&rdquo;</span>{% endif %}
+                  {% if d.vespers_preces %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_preces.title }}" data-gloss="{{ ordo_gloss_preces.note }}">Preces</span></span>{% endif %}
+                  {% if d.vespers_suffrage %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_suffrage.title }}" data-gloss="{{ ordo_gloss_suffrage.note }}">Suffrage</span></span>{% endif %}
                   {% if d.vespers_cross %}<span class="day-office-badge">Commemoration of the Cross</span>{% endif %}
-                  {% for c in d.vespers_comms %}<span class="day-office-comm">Com. {% if c.href %}<a class="feast-link" href="{{ c.href|url }}">{{ c.name|typeset }}</a>{% else %}{{ c.name|typeset }}{% endif %}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
+                  {% for c in d.vespers_comms %}<span class="day-office-comm"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_com.title }}" data-gloss="{{ ordo_gloss_com.note }}">Com.</span> {% if c.href %}<a class="feast-link" href="{{ c.href|url }}">{{ c.name|typeset }}</a>{% else %}{{ c.name|typeset }}{% endif %}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
                 </dd>
               </div>
               {% endif %}

@@ -685,17 +685,12 @@ fun MenuPanel(
                     Hairline(p.border, Modifier.padding(vertical = 4.dp))
                 }
                 if (!prefsOnly) {
+                    // Ordo, Reminders and About share one three-up row, matching Terce · Sext · None above.
                     MenuRow {
                         MenuCell("ORDO", onOrdoCurrent, nav, page = true, onClick = onOrdo)
-                        // Habit setup, not an hour: quieter than the Ordo, as on the web (`.nav-secondary`).
+                        // Habit setup and introduction: quieter than the Ordo, as on the web (`.nav-secondary`).
                         MenuCell("REMINDERS", onRemindersCurrent, Type.label(11.52f, 0.04f), page = true, onClick = onReminders)
-                    }
-                    // About as quiet as Reminders, in the first half of a row of its own, as the
-                    // web's grid sets it.
-                    Spacer(Modifier.height(2.4.dp))
-                    MenuRow {
                         MenuCell(about.uppercase(), onAboutCurrent, Type.label(11.52f, 0.04f), page = true, onClick = onAbout)
-                        Spacer(Modifier.weight(1f))
                     }
                     Hairline(p.border, Modifier.padding(top = 6.4.dp))
                     Spacer(Modifier.height(6.4.dp))

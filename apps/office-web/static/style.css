@@ -1147,8 +1147,8 @@ summary:focus-visible {
   }
 
   /* Six tracks so the hours fall into home's Morning / Day / Evening bands:
-     two, three, two — no Compline stranded on a row of its own. Ordo and
-     Reminders take halves like the outer bands. Centred like the home
+     two, three, two — no Compline stranded on a row of its own. Ordo,
+     Reminders and About take thirds, like the middle band. Centred like the home
      directory, since the day row's cells have their own edges. */
   .site-menu nav {
     display: grid;
@@ -1164,7 +1164,10 @@ summary:focus-visible {
 
   .site-menu nav a[data-hour="terce"],
   .site-menu nav a[data-hour="sext"],
-  .site-menu nav a[data-hour="none"] {
+  .site-menu nav a[data-hour="none"],
+  .site-menu nav a[data-nav="calendar"],
+  .site-menu nav a[data-nav="reminders"],
+  .site-menu nav a[data-nav="about"] {
     grid-column: span 2;
   }
 
@@ -1822,6 +1825,20 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   text-wrap: balance;
 }
 
+.hour-meta-feast .hour-feast-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.hour-meta-feast .hour-feast-link:hover,
+.hour-meta-feast .hour-feast-link:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: var(--gold-line);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
 /* With script the date opens the date picker (app.js), and the disclosure's
    "Change date" goes, so the header carries no control between the day and
    the prayer. The date stays set as the line's text: no underline, rule or
@@ -1949,6 +1966,7 @@ button.hour-meta-date[aria-expanded="true"] {
    as they do in the block-level disclosures elsewhere. */
 .hour-date-nav > summary,
 .leader-selector > summary,
+.reading-key > summary,
 .session-prayers > summary {
   flex-wrap: wrap;
   align-content: center;
@@ -2874,19 +2892,45 @@ html[data-newcomer] .home-season {
   text-decoration-color: currentColor;
 }
 
-.gloss-term:focus-visible {
+/* Structural marks inside an hour (Ant., psalm Hebrew number, Chapter, Preces,
+   Suffrage): tappable for their note with no underline at rest, so repeating
+   readers see uncluttered typography. Those in the running text (Ant., the
+   Hebrew number) answer a tap but are no tab stop (app.js). */
+.js .gloss-quiet {
+  position: relative;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.gloss-quiet.gloss-out {
+  text-decoration: underline solid color-mix(in srgb, currentColor 55%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.24em;
+  text-decoration-skip-ink: none;
+}
+
+.gloss-term:focus-visible,
+.gloss-quiet:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
 }
 
 /* A finger needs more than one word of 0.9em type. */
 @media (pointer: coarse) {
-  .gloss-term[role="button"]::before {
+  .gloss-term[role="button"]::before,
+  .js .gloss-quiet::before {
     content: "";
     position: absolute;
     inset: 50% -0.25rem auto;
     height: var(--touch-target);
     transform: translateY(-50%);
+  }
+  /* Compact adjacent lines in Ordo Office details (Ben. above Com.) must not
+     have the lower line's touch box cover the line above it. */
+  .day-office-digest .gloss-term[role="button"]::before {
+    inset: -0.15rem -0.25rem;
+    height: auto;
+    transform: none;
   }
 }
 
@@ -4087,9 +4131,28 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0 1rem;
+  gap: 0.15rem 0.5rem;
   padding: 0.55rem 0;
   border-bottom: 1px solid var(--border);
+}
+.tabula-tables dt a.feast-link {
+  position: relative;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--gold-line) 75%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+.tabula-tables dt a.feast-link::after {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto;
+  height: var(--touch-target);
+  transform: translateY(-50%);
+}
+.tabula-tables dt a.feast-link:hover {
+  color: var(--accent);
+  text-decoration-color: var(--gold);
 }
 .tabula-tables dd {
   margin: 0 0 0 auto;
@@ -4119,6 +4182,10 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
 @media (max-width: 700px) {
   .tabula-figures { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem 1rem; }
   .tabula-tables { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 420px) {
+  .tabula-tables dt,
+  .tabula-tables dd { font-size: 1.04rem; }
 }
 .month-table {
   width: 100%;
@@ -4412,15 +4479,28 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
 .day-monastic p { margin: 0.15rem 0 0; }
 .day-monastic abbr { font-style: normal; }
 .day-monastic-office { display: block; }
+.day-feast-name a.feast-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--gold-line) 72%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+.day-feast-name a.feast-link:hover {
+  text-decoration-color: var(--gold);
+}
 /* At the head of the opened details, the way on to the day. It stands over
    the summary's thumb box, which reaches down over it on the phone, so a tap
    on it leads to the day rather than closing the details again. */
 .day-office-open {
   position: relative;
   z-index: 2;
-  display: inline-block;
-  margin: 0.15rem 0 0.35rem;
-  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  padding: 0.2rem 0.5rem 0.2rem 0;
+  margin: 0.05rem 0 0.15rem;
+  font-size: 0.9rem;
   color: var(--accent);
   text-decoration: none;
 }
@@ -4673,7 +4753,7 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
   }
   .day-disclosures {
     align-items: center;
-    margin-top: 0.05rem;
+    margin-top: 0.16rem;
   }
   /* The summary's drawn box is a whole thumb target: it clears the day's
      name above and reaches down over the rule into the next row's top
@@ -5318,12 +5398,13 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
     --text: #ddd6c3;
     --bg: #121c28;
     /* Apse's dark ground has headroom above it, so its knee is white:
-       the full texture, base × screen(texture, tint), solved to --bg. */
-    --plaster-base: #182332;
-    --plaster-tint: #7d949c;
+       the full texture, base × texture, solved to --bg (#121c28) at 65% strength
+       so the limewash clouds read calmly without washing out to a flat fill. */
+    --plaster-base: #243850;
+    --plaster-tint: #000;
     --plaster-knee: #fff;
     --plaster-dodge: #000;
-    --plaster-strength: 52%;
+    --plaster-strength: 65%;
     --accent: #d0b06a;
     --gold: #d8bc74;
     --today-ink: var(--gold);
@@ -5399,12 +5480,13 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   --text: #ddd6c3;
   --bg: #121c28;
   /* Apse's dark ground has headroom above it, so its knee is white:
-     the full texture, base × screen(texture, tint), solved to --bg. */
-  --plaster-base: #182332;
-  --plaster-tint: #7d949c;
+     the full texture, base × texture, solved to --bg (#121c28) at 65% strength
+     so the limewash clouds read calmly without washing out to a flat fill. */
+  --plaster-base: #243850;
+  --plaster-tint: #000;
   --plaster-knee: #fff;
   --plaster-dodge: #000;
-  --plaster-strength: 52%;
+  --plaster-strength: 65%;
   --accent: #d0b06a;
   --gold: #d8bc74;
   --today-ink: var(--gold);
@@ -9635,7 +9717,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   align-items: center;
   gap: 0.75rem;
   min-height: var(--touch-target);
-  padding-inline: 0.15rem;
+  padding: 0.32rem 0.15rem;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 58%, transparent);
 }
 
@@ -9655,6 +9737,19 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 .reminder-hour-name {
   color: var(--muted);
   transition: color 140ms ease;
+}
+
+.reminder-hour-label-stack {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.reminder-hour-gloss {
+  font-size: 0.84rem;
+  font-style: italic;
+  color: var(--muted);
+  margin-top: 0.08rem;
 }
 
 /* The boxes are set by hand, as the prayer form's choices are: a ruled
@@ -11385,6 +11480,8 @@ html {
   .reminders-privacy a,
   .reminder-help a,
   .leader-selector > summary,
+  .reading-key > summary,
+  .reading-key-foot a,
   .report-issue a,
   .find-meta a,
   .feast-everyone a,
@@ -11434,6 +11531,8 @@ html {
   .reminders-privacy a,
   .reminder-help a,
   .leader-selector > summary,
+  .reading-key > summary,
+  .reading-key-foot a,
   .report-issue a,
   .find-meta a,
   .feast-everyone a,
@@ -11734,11 +11833,12 @@ body.page-hour::before {
   }
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice))) {
+html:where(:has(> body:is(.page-home, .page-about, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice))) {
   background-color: var(--bg);
 }
 
 body.page-home,
+body.page-about,
 body.page-calendar,
 body.page-find,
 body.page-feast,
@@ -11749,7 +11849,7 @@ body.page-notice {
   background: transparent;
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice)))::before {
+html:where(:has(> body:is(.page-home, .page-about, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice)))::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -11757,7 +11857,7 @@ html:where(:has(> body:is(.page-home, .page-calendar, .page-find, .page-feast, .
   pointer-events: none;
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice)))::before,
+html:where(:has(> body:is(.page-home, .page-about, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice)))::before,
 .page-calendar .month h2 {
   background: var(--plaster-layers);
   background-blend-mode: normal, multiply, screen, color-dodge, darken, normal;
@@ -13640,36 +13740,50 @@ body.page-home::before {
 :root[data-leader="priest"] [data-leaders~="priest"] { display: revert !important; }
 .hour-context-controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: start; gap: 0 .75rem; }
 .hour-context-controls > .hour-date-nav { margin: 0; }
-/* Change date and Prayer form keep their row while either is open: the
-   disclosures give their parts to one grid, the two summaries side by side
+/* Change date, Prayer form, and How to read keep their row while any is open:
+   the disclosures give their parts to one grid, the summaries side by side
    and the open panel across the row beneath them, so opening one never moves
-   the other. The outer columns take the slack, so a wide panel does not push
+   the others. The outer columns take the slack, so a wide panel does not push
    the summaries apart. Without ::details-content (older Safari) the row
    wraps as before. Screen only, so print still hides the picker. */
 @media screen { @supports selector(::details-content) {
-  .hour-context-controls:has(> .leader-selector) {
+  .hour-context-controls:has(> :is(.leader-selector, .reading-key)) {
     display: grid;
     grid-template-columns: 1fr auto auto 1fr;
     column-gap: .75rem;
     align-items: start;
   }
-  .hour-context-controls:has(> .leader-selector) > details { display: contents; }
-  .hour-context-controls:has(> .leader-selector) > .hour-date-nav > summary { grid-area: 1 / 2; }
+  .hour-context-controls:has(> .leader-selector):has(> .reading-key) {
+    grid-template-columns: 1fr auto auto auto 1fr;
+  }
+  .hour-context-controls:has(> :is(.leader-selector, .reading-key)) > details { display: contents; }
+  .hour-context-controls:has(> :is(.leader-selector, .reading-key)) > .hour-date-nav > summary { grid-area: 1 / 2; }
   .hour-context-controls:has(> .leader-selector) > .leader-selector > summary { grid-area: 1 / 3; }
-  /* With script the date opens the picker and Change date's summary is gone, so Prayer form
-     stands alone in the middle of the row. */
-  .js .hour-context-controls:has(> .leader-selector) > .leader-selector > summary { grid-column: 2 / 4; }
-  .hour-context-controls:has(> .leader-selector) > details::details-content {
+  .hour-context-controls:has(> .reading-key):not(:has(> .leader-selector)) > .reading-key > summary { grid-area: 1 / 3; }
+  .hour-context-controls:has(> .leader-selector):has(> .reading-key) > .reading-key > summary { grid-area: 1 / 4; }
+  /* With script the date opens the picker and Change date's summary is gone, so
+     Prayer form and How to read stand side by side centered in the row (or
+     whichever is present stands alone in the middle). */
+  .js .hour-context-controls:has(> :is(.leader-selector, .reading-key)) {
+    grid-template-columns: 1fr auto auto 1fr;
+  }
+  .js .hour-context-controls:has(> .leader-selector):has(> .reading-key) > .leader-selector > summary { grid-area: 1 / 2; }
+  .js .hour-context-controls:has(> .leader-selector):has(> .reading-key) > .reading-key > summary { grid-area: 1 / 3; }
+  .js .hour-context-controls:has(> .leader-selector):not(:has(> .reading-key)) > .leader-selector > summary { grid-column: 2 / 4; }
+  .js .hour-context-controls:has(> .reading-key):not(:has(> .leader-selector)) > .reading-key > summary { grid-column: 2 / 4; }
+  .hour-context-controls:has(> :is(.leader-selector, .reading-key)) > details::details-content {
     grid-column: 1 / -1;
     grid-row: 2;
     justify-self: center;
     width: min(100%, 34rem);
   }
 } }
-.leader-selector { max-width: 100%; color: var(--text); font-size: .9rem; }
+.leader-selector,
+.reading-key { max-width: 100%; color: var(--text); font-size: .9rem; }
 /* Match the adjacent date disclosure. The chosen form remains legible while
    the shared heading, rather than a preference label, leads the prayer. */
-.leader-selector > summary {
+.leader-selector > summary,
+.reading-key > summary {
   cursor: pointer;
   list-style: none;
   min-height: var(--touch-target);
@@ -13685,18 +13799,22 @@ body.page-home::before {
   text-transform: uppercase;
 }
 .leader-selector > summary [data-leaders] { color: var(--text); }
-.leader-selector[open] > summary { color: var(--accent); }
-.leader-selector > summary::-webkit-details-marker { display: none; }
-.leader-selector > summary::after { content: "▾"; margin-inline-start: .1em; color: color-mix(in srgb, currentColor 70%, transparent); font-size: .85em; letter-spacing: 0; }
-.leader-selector[open] > summary::after { content: "▴"; }
-/* On an hour the two disclosures take home's foot letter, true small
+.leader-selector[open] > summary,
+.reading-key[open] > summary { color: var(--accent); }
+.leader-selector > summary::-webkit-details-marker,
+.reading-key > summary::-webkit-details-marker { display: none; }
+.leader-selector > summary::after,
+.reading-key > summary::after { content: "▾"; margin-inline-start: .1em; color: color-mix(in srgb, currentColor 70%, transparent); font-size: .85em; letter-spacing: 0; }
+.leader-selector[open] > summary::after,
+.reading-key[open] > summary::after { content: "▴"; }
+/* On an hour the header disclosures take home's foot letter, true small
    capitals (not capitals shrunk to 0.72rem), and each keeps one line: on a
    first-class day the frame narrows the measure by 24px, and "Prayer form:
    Private ▾" dropped its caret onto a line of its own (390px) or broke after
    the colon (375px). The pair closes up a little so it fits a 375px phone
    on Christmas; at the reader's larger sizes it wraps between the two,
    never inside one. "Go to today" follows. */
-.page-hour :is(.hour-date-nav, .leader-selector) > summary {
+.page-hour :is(.hour-date-nav, .leader-selector, .reading-key) > summary {
   font-variant-caps: all-small-caps;
   text-transform: none;
   font-size: 0.9rem;
@@ -13705,21 +13823,31 @@ body.page-home::before {
   white-space: nowrap;
   padding-inline: 0.35rem;
 }
-.page-hour .leader-selector > summary { gap: 0.3em; }
+.page-hour :is(.leader-selector, .reading-key) > summary { gap: 0.3em; }
 .page-hour .hour-context-controls { gap: 0 0.35rem; }
-.page-hour .hour-context-controls:has(> .leader-selector) { column-gap: 0.35rem; }
+.page-hour .hour-context-controls:has(> :is(.leader-selector, .reading-key)) { column-gap: 0.35rem; }
 /* Where the measure is narrower than the pair (a 320px phone, or the
    reader's Large size inside a first-class frame), they stand one above the
    other rather than overhang it. */
 .page-hour .hour-header { container: hour-header / inline-size; }
 @container hour-header (max-width: 19.6rem) {
-  .page-hour .hour-context-controls:has(> .leader-selector) {
+  .page-hour .hour-context-controls:has(> :is(.leader-selector, .reading-key)) {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
-  .page-hour .hour-context-controls:has(> .leader-selector) > details { display: block; }
+  .page-hour .hour-context-controls:has(> :is(.leader-selector, .reading-key)) > details { display: block; }
   .page-hour .hour-meta-line { white-space: normal; }
+}
+/* Without script Change date keeps its summary, so all three stand in the
+   row, and need more than a phone's measure: they stack sooner. */
+@container hour-header (max-width: 28rem) {
+  :root:not(.js) .page-hour .hour-context-controls:has(> .leader-selector):has(> .reading-key) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  :root:not(.js) .page-hour .hour-context-controls:has(> .leader-selector):has(> .reading-key) > details { display: block; }
 }
 .page-hour .not-today-notice .not-today-link {
   font-variant-caps: all-small-caps;
@@ -13727,7 +13855,8 @@ body.page-home::before {
   font-size: 1rem;
   letter-spacing: 0.08em;
 }
-.leader-selector[open] { flex: 1 1 100%; }
+.leader-selector[open],
+.reading-key[open] { flex: 1 1 100%; }
 .leader-selector fieldset {
   text-align: left;
   border: 0;
@@ -13784,14 +13913,86 @@ body.page-home::before {
   margin-top: .7rem;
   line-height: 1.45;
 }
+.reading-key-panel {
+  text-align: left;
+  margin: 0.65rem auto 0.5rem;
+  width: min(100%, 24rem);
+  color: var(--text);
+}
+.reading-key-title {
+  margin: 0 0 0.55rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.reading-key-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-block: 1px solid var(--border);
+}
+.reading-key-list li {
+  display: grid;
+  grid-template-columns: 5.1rem 1fr;
+  column-gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.52rem 0.2rem;
+  line-height: 1.45;
+  font-size: 0.88rem;
+}
+.reading-key-list li + li {
+  border-top: 1px solid var(--surface-edge);
+}
+.rk-mark {
+  white-space: nowrap;
+  font-size: 0.88rem;
+}
+.rk-rubric {
+  color: var(--rubric);
+  font-style: italic;
+}
+.rk-titulus {
+  color: var(--titulus);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+}
+.rk-unsaid {
+  color: var(--unsaid);
+}
+.rk-psalm {
+  color: var(--titulus);
+  font-variant-numeric: lining-nums;
+}
+.rk-psalm span {
+  color: var(--muted);
+  font-size: 0.84em;
+}
+.rk-desc {
+  color: var(--text);
+}
+.reading-key-foot {
+  margin: 0.65rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.reading-key-foot a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: var(--gold-line);
+  text-underline-offset: 0.2em;
+}
 .leader-selector summary:focus-visible,
+.reading-key summary:focus-visible,
+.reading-key-foot a:focus-visible,
 .leader-option:has(input:focus-visible) { outline: 2px solid var(--gold); outline-offset: 3px; }
 .leader-option input:focus-visible { outline: none; }
 @media (forced-colors: active) {
   .leader-option input { appearance: auto; }
 }
 .leader-print-label { display: none; }
-@media print { .leader-selector { display: none; } .leader-print-label { display: block; } }
+@media print { .leader-selector, .reading-key { display: none; } .leader-print-label { display: block; } }
 .usage-trend-details { margin-top: 1rem; }
 .usage-trend-details summary { cursor: pointer; min-height: var(--touch-target); }
 
