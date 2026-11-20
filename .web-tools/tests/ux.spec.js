@@ -1786,30 +1786,42 @@ for (const dir of ["dusk", "dawn"]) {
     await openCrown(page, { stored: dark ? null : "dark", hurry: false });
     const [x, y] = await crownPoint(page);
     const [a, len] = LINGER_SPAN[dir];
+    const slow = Math.round(1000 / LINGER) / 1000;
     // Real ms from the tap to timetable moment t.
     const real = (t) => CROWN_PACE * (t + Math.max(0, Math.min(t, a + len) - a) * (LINGER - 1));
-    const rates = () => page.evaluate(() => [...new Set(document.getAnimations()
-      .filter((an) => (an.animationName || "").startsWith("crown-") || String(an.effect?.pseudoElement || "").startsWith("::view-transition"))
-      .filter((an) => an.playState !== "finished")
-      .map((an) => Math.round(an.playbackRate * 1000) / 1000))]);
+    const state = () => page.evaluate(() => {
+      const anims = document.getAnimations()
+        .filter((an) => (an.animationName || "").startsWith("crown-") || String(an.effect?.pseudoElement || "").startsWith("::view-transition"))
+        .filter((an) => an.playState !== "finished");
+      return {
+        vt: anims.some((an) => String(an.effect?.pseudoElement || "").startsWith("::view-transition")),
+        rates: [...new Set(anims.map((an) => Math.round(an.playbackRate * 1000) / 1000))],
+      };
+    });
     const t0 = Date.now();
     await page.mouse.click(x, y);
     const at = async (t) => page.waitForTimeout(Math.max(0, real(t) - (Date.now() - t0)));
     await crownPlayed(page);
     // The play's clock stands still while the browser makes its stills at the
-    // turn, longer in WebKit and on a busy machine, so a linger after the turn
-    // starts and ends that much after this reckoning from the tap: it is
-    // watched for from its reckoned start, not looked for at one instant.
+    // turn (650ms), longer in WebKit under load. Dawn's linger starts before
+    // the turn (400ms) and dusk's after it (800ms), so timing the rest of the
+    // linger and the play's end starts once the transition's own parts are up
+    // and every part is running at the linger's rate together.
     await at(a);
-    await expect.poll(rates, { timeout: real(a + len) - real(a) + 8000, intervals: [100] }).toEqual([Math.round(1000 / LINGER) / 1000]);
+    const mark = Math.max(a, 650);
+    const postLinger = real(a + len) - real(mark);
+    if (a < 650) {
+      await expect.poll(() => state().then((s) => s.rates), { timeout: real(650) - real(a) + 8000, intervals: [100] }).toEqual([slow]);
+    }
+    await expect.poll(state, { timeout: 20_000, intervals: [100] }).toEqual({ vt: true, rates: [slow] });
     const lingering = Date.now();
-    await expect.poll(rates, { timeout: real(a + len) - real(a) + 4000, intervals: [100] }).toEqual([1]);
-    // It held for its length, not a moment.
-    expect(Date.now() - lingering).toBeGreaterThan((real(a + len) - real(a)) * 0.75);
+    await expect.poll(() => state().then((s) => s.rates), { timeout: postLinger + 6000, intervals: [100] }).toEqual([1]);
+    // It held for its post-turn length, not a moment.
+    expect(Date.now() - lingering).toBeGreaterThan(postLinger * 0.75);
     await crownAtRest(page);
-    // The page's own end kept time with its parts: from the linger, no later
-    // than the rest of the play and a margin.
-    expect(Date.now() - lingering).toBeLessThan(real(dark ? 4400 + 100 : 4000 + 100) - real(a) + 2500);
+    // The page's own end kept time with its parts: from the post-turn mark, no
+    // later than the rest of the play and a margin.
+    expect(Date.now() - lingering).toBeLessThan(real(dark ? 4400 + 100 : 4000 + 100) - real(mark) + 4000);
   });
 }
 
