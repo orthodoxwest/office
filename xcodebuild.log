@@ -1,0 +1,29 @@
+Command line invocation:
+    /Applications/Xcode_27.1.app/Contents/Developer/usr/bin/xcodebuild test -project Office.xcodeproj -scheme Office -destination id=247EFC25-EEE8-48D1-958F-9ECE939B1200 -derivedDataPath build/dd
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (3 targets)
+    Target 'OfficeTests' in project 'Office'
+        ➜ Explicit dependency on target 'Office' in project 'Office'
+    Target 'Office' in project 'Office'
+        ➜ Explicit dependency on target 'Neuma' in project 'Office'
+    Target 'Neuma' in project 'Office' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode_27.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode_27.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode_27.1.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/runner/work/office/office/apps/ios/Office/Assets.xcassets
