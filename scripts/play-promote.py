@@ -5,14 +5,17 @@ Run by .github/workflows/play-promote.yml; see apps/android/README.md ("Promotin
 
   auto       Once a day. If production has a staged rollout this script started at least
              --stage-hours ago, finish it (all users); while it is younger, wait. Otherwise
-             release to --rollout of users the newest build that is on Closed testing now, has
-             been there for at least --min-age hours, and is newer than production's. A halted
+             release to --rollout of users the newest build that was uploaded to Closed testing
+             at least --min-age hours ago and is newer than production's, whether or not a later
+             merge has since replaced it there (merges land more often than once a day, so the
+             build on Closed testing now is seldom a day old). A halted
              rollout, or a staged one started elsewhere, is left alone, and nothing newer goes
              out until it is finished, resumed or replaced in Play Console.
   manual     Release --version-code (default: Closed testing's newest) to --rollout of users now.
 
-Nothing is rebuilt: production gets the bundle testers already have, by its version code, with
-the release notes it carried on Closed testing. A staged release is named with the time it
+Nothing is rebuilt: production gets a bundle Play already has, by its version code, with the
+release notes it carried on Closed testing (apps/android/whatsnew.txt as of its commit, the same
+text, once a later build has replaced it there). A staged release is named with the time it
 started ("0.1.120 staged 2026-11-12T15:00Z"), which is how a later run knows its age; Google's
 review comes out of that time. --dry-run reads Play and says what it would do.
 
@@ -20,7 +23,7 @@ Needs PLAY_SERVICE_ACCOUNT_JSON (the Play upload's service account). In auto mod
 build comes from the Publish to Play workflow's runs (GITHUB_TOKEN, GITHUB_REPOSITORY): each push
 run that succeeded uploaded the build whose version code is its commit's count (as
 apps/android/app/build.gradle.kts numbers them), so the run's finishing time is when the build
-reached Closed testing.
+reached Closed testing. A version code Play has no bundle for is skipped.
 """
 
 from __future__ import annotations
@@ -38,6 +41,7 @@ PACKAGE = "org.orthodoxwest.office"
 API = f"https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{PACKAGE}"
 TESTING = "alpha"  # Closed testing
 PRODUCTION = "production"
+NOTES_FILE = "apps/android/whatsnew.txt"
 STAGED = re.compile(r"staged (\d{4}-\d\d-\d\dT\d\d:\d\dZ)")
 
 
@@ -70,6 +74,10 @@ class Play:
         if r.status_code >= 400:
             sys.exit(f"::error::Play API {method} {path}: {r.status_code} {r.text}")
         return r.json() if r.content else {}
+
+    def bundles(self) -> set[int]:
+        """The version codes of every bundle uploaded to the app."""
+        return {int(b["versionCode"]) for b in self._call("GET", f"/edits/{self.edit}/bundles").get("bundles", [])}
 
     def track(self, name: str) -> list[dict]:
         return self._call("GET", f"/edits/{self.edit}/tracks/{name}").get("releases", [])
@@ -107,8 +115,8 @@ def staged_at(release: dict) -> dt.datetime | None:
     return dt.datetime.strptime(m.group(1), "%Y-%m-%dT%H:%MZ").replace(tzinfo=dt.timezone.utc) if m else None
 
 
-def uploads(min_age: float) -> list[int]:
-    """Version codes of the builds Publish to Play's push runs uploaded at least min_age hours ago, newest first."""
+def uploads(min_age: float) -> list[tuple[int, str]]:
+    """(version code, commit) of the builds Publish to Play's push runs uploaded at least min_age hours ago, newest first."""
     repo, token = os.environ["GITHUB_REPOSITORY"], os.environ["GITHUB_TOKEN"]
     url = (
         f"https://api.github.com/repos/{repo}/actions/workflows/play.yml/runs"
@@ -125,17 +133,29 @@ def uploads(min_age: float) -> list[int]:
             continue
         count = subprocess.run(["git", "rev-list", "--count", run["head_sha"]], capture_output=True, text=True)
         if count.returncode == 0:  # a commit no longer in master's history is skipped
-            found.append(int(count.stdout.strip()))
+            found.append((int(count.stdout.strip()), run["head_sha"]))
     return sorted(found, reverse=True)
 
 
-def release_of(code: int, testing: list[dict], fraction: float) -> dict:
+def notes_at(commit: str) -> list[dict]:
+    """The release notes Publish to Play gave the build of `commit`: apps/android/whatsnew.txt there, without # lines."""
+    r = subprocess.run(["git", "show", f"{commit}:{NOTES_FILE}"], capture_output=True, text=True, check=False)
+    lines = [line for line in r.stdout.splitlines() if not line.startswith("#")] if r.returncode == 0 else []
+    text = "\n".join(lines).strip()
+    return [{"language": "en-US", "text": text}] if text else []
+
+
+def release_of(code: int, testing: list[dict], fraction: float, commit: str | None = None) -> dict:
     """A production release of `code`, carrying the notes it had on Closed testing."""
     rel: dict = {"versionCodes": [str(code)], "status": "completed"}
     for r in testing:
         if code in codes(r) and r.get("releaseNotes"):
             rel["releaseNotes"] = r["releaseNotes"]
             break
+    else:
+        notes = notes_at(commit) if commit else []
+        if notes:
+            rel["releaseNotes"] = notes
     if fraction < 1:
         rel["status"], rel["userFraction"] = "inProgress", fraction
         rel["name"] = f"0.1.{code} staged {now():%Y-%m-%dT%H:%MZ}"
@@ -145,7 +165,7 @@ def release_of(code: int, testing: list[dict], fraction: float) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("mode", choices=["auto", "manual"])
-    ap.add_argument("--min-age", type=float, default=24.0, help="hours a build must have been on Closed testing (auto)")
+    ap.add_argument("--min-age", type=float, default=24.0, help="hours since a build was uploaded to Closed testing (auto)")
     ap.add_argument("--rollout", type=float, default=0.2, help="share of users for a new release, above 0 and at most 1")
     ap.add_argument("--stage-hours", type=float, default=47.0, help="hours a staged rollout runs before it is finished (auto)")
     ap.add_argument("--version-code", type=int, default=0, help="the build to release (manual; default Closed testing's newest)")
@@ -187,15 +207,18 @@ def main() -> None:
                 release = {k: v for k, v in staged[0].items() if k != "userFraction"} | {"status": "completed"}
                 message = f"Finishing the staged rollout of {codes(staged[0])}: all users now get it"
         else:
-            # Only a build on Closed testing now, out of review: one replaced while in review, or never
-            # uploaded, never reached a tester.
-            on_testing = {c for r in testing if r.get("status") == "completed" for c in codes(r)}
-            ready = [c for c in uploads(args.min_age) if c > live_code and c in on_testing]
+            # The newest build a day old, even one a later merge has replaced on Closed testing: merges
+            # land more often than daily, so waiting for the build there now to age never promotes.
+            # Every such build went to Internal testing unreviewed, and Google reviews the release.
+            candidates = [(c, sha) for c, sha in uploads(args.min_age) if c > live_code]
+            uploaded = play.bundles() if candidates else set()
+            ready = [(c, sha) for c, sha in candidates if c in uploaded]
             if ready:
-                release = release_of(ready[0], testing, args.rollout)
-                message = f"Releasing {ready[0]} to {args.rollout:.0%} of production (on Closed testing at least {args.min_age:g} hours)"
+                code, sha = ready[0]
+                release = release_of(code, testing, args.rollout, sha)
+                message = f"Releasing {code} to {args.rollout:.0%} of production (uploaded at least {args.min_age:g} hours ago)"
             else:
-                summary(f"Nothing to promote: production has {live_code or 'nothing'}, and no newer build has been on Closed testing for {args.min_age:g} hours.")
+                summary(f"Nothing to promote: production has {live_code or 'nothing'}, and no newer build was uploaded {args.min_age:g} hours ago or more.")
 
     if release is None:
         play.abandon()

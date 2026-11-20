@@ -23,13 +23,19 @@ TESTING = [{"status": "completed", "versionCodes": ["120"], "releaseNotes": NOTE
 NOW = PROMOTE.dt.datetime(2026, 11, 12, 15, 0, tzinfo=PROMOTE.dt.timezone.utc)
 
 
-def run(argv, production, testing=TESTING, uploads=()):
-    """main()'s production release for these tracks and uploads, or None when it sends nothing."""
+def run(argv, production, testing=TESTING, uploads=(), bundles=None, notes=()):
+    """main()'s production release for these tracks and uploads, or None when it sends nothing.
+
+    `uploads` are version codes (their commit is "c<code>"); Play has a bundle for each unless
+    `bundles` says otherwise; `notes` is whatsnew.txt's text at every commit."""
     sent = []
 
     class Play:
         def __init__(self, _key):
             pass
+
+        def bundles(self):
+            return set(uploads if bundles is None else bundles)
 
         def track(self, name):
             return testing if name == "alpha" else production
@@ -41,7 +47,8 @@ def run(argv, production, testing=TESTING, uploads=()):
             pass
 
     with mock.patch.object(PROMOTE, "Play", Play), \
-            mock.patch.object(PROMOTE, "uploads", lambda _hours: list(uploads)), \
+            mock.patch.object(PROMOTE, "uploads", lambda _hours: [(c, f"c{c}") for c in uploads]), \
+            mock.patch.object(PROMOTE, "notes_at", lambda _sha: list(notes)), \
             mock.patch.object(PROMOTE, "now", lambda: NOW), \
             mock.patch.dict(os.environ, {"PLAY_SERVICE_ACCOUNT_JSON": "{}"}), \
             mock.patch.object(sys, "argv", ["play-promote.py", *argv]), \
@@ -63,10 +70,25 @@ class AutoTest(unittest.TestCase):
         self.assertEqual(release, {"versionCodes": ["120"], "status": "inProgress", "userFraction": 0.2,
                                    "releaseNotes": NOTES, "name": "0.1.120 staged 2026-11-12T15:00Z"})
 
-    def test_only_the_build_on_testing_now(self):
-        # 110 was replaced on Closed testing (perhaps while in review), so no tester has it.
-        self.assertIsNone(run(["auto"], [], uploads=[110]))
-        self.assertIsNone(run(["auto"], [], testing=[{"status": "inProgress", "versionCodes": ["120"]}], uploads=[120]))
+    def test_a_day_old_build_replaced_on_testing_is_still_promoted(self):
+        # Merges land more than once a day, so the build on Closed testing now (130) is never a day
+        # old; 120, uploaded a day ago and since replaced there, goes out with its own notes.
+        later = [{"status": "completed", "versionCodes": ["130"], "releaseNotes": NOTES}]
+        own = [{"language": "en-US", "text": "Compline's hymn corrected."}]
+        release = run(["auto"], [{"status": "completed", "versionCodes": ["100"]}], testing=later,
+                      uploads=[120, 110], notes=own)
+        self.assertEqual(release["versionCodes"], ["120"])
+        self.assertEqual(release["releaseNotes"], own)
+
+    def test_a_build_without_notes_goes_without(self):
+        release = run(["auto"], [], testing=[], uploads=[120])
+        self.assertEqual(release["versionCodes"], ["120"])
+        self.assertNotIn("releaseNotes", release)
+
+    def test_a_build_play_never_got_is_skipped(self):
+        release = run(["auto"], [{"status": "completed", "versionCodes": ["100"]}], uploads=[120, 110], bundles=[110, 100])
+        self.assertEqual(release["versionCodes"], ["110"])
+        self.assertIsNone(run(["auto"], [], uploads=[120], bundles=[]))
 
     def test_a_staged_rollout_is_finished_once_it_has_run_its_time(self):
         release = run(["auto"], [{"status": "completed", "versionCodes": ["100"]}, staged(110, 48)], uploads=[120])
@@ -112,7 +134,21 @@ class UploadsTest(unittest.TestCase):
             {"head_sha": "new", "updated_at": "2026-11-12T01:00:00Z"},
             {"head_sha": "old", "updated_at": "2026-11-11T14:59:00Z"},
             {"head_sha": "gone", "updated_at": "2026-11-01T00:00:00Z"},
-        ), [120, 110])
+        ), [(120, "old"), (110, "older")])
+
+
+class NotesTest(unittest.TestCase):
+    def notes(self, returncode, stdout):
+        with mock.patch.object(PROMOTE.subprocess, "run", lambda *_a, **_kw: mock.Mock(returncode=returncode, stdout=stdout)):
+            return PROMOTE.notes_at("abc")
+
+    def test_comment_lines_dropped(self):
+        self.assertEqual(self.notes(0, "# What's new\n#\n\nFeast pages redesigned.\n"),
+                         [{"language": "en-US", "text": "Feast pages redesigned."}])
+
+    def test_empty_or_missing_is_no_notes(self):
+        self.assertEqual(self.notes(0, "# only comments\n"), [])
+        self.assertEqual(self.notes(128, ""), [])
 
 
 class ManualTest(unittest.TestCase):

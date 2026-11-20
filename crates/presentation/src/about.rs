@@ -225,14 +225,14 @@ pub const ABOUT: &[AboutBlock] = &[
     },
     AboutBlock::Heading("An ancient prayer"),
     AboutBlock::Era {
-        period: "1st–3rd Century · From the Apostles",
+        period: "From the Apostles",
         text: "Christians have prayed at set hours since the Apostles, who continued the daily times \
                of prayer they had known in Israel—the third hour at Pentecost, the sixth with St Peter, \
                and the ninth in the Temple. By the third century, Tertullian and St Cyprian describe \
                regular prayer at morning, evening, and the third, sixth, and ninth hours.",
     },
     AboutBlock::Era {
-        period: "4th–6th Century · The Desert & St Benedict",
+        period: "The Desert & St Benedict",
         text: "In the deserts of Egypt and Palestine, monastics made the psalms their unceasing prayer, \
                and St John Cassian carried their practice west. In the sixth century, St Benedict shaped \
                it in his Rule: seven daytime hours and a night watch, praying through the entire Psalter \
@@ -240,10 +240,14 @@ pub const ABOUT: &[AboutBlock] = &[
                Gregory the Dialogist.",
     },
     AboutBlock::Era {
-        period: "1958 to Today · The Western Rite",
-        text: "The Benedictine Office was prayed across Western Christendom for centuries before the \
-               Great Schism. Since 1958, the Antiochian Archdiocese has maintained a Western Rite, \
-               restoring this ancient Orthodox heritage to active liturgical life.",
+        period: "Across the West",
+        text: "The Benedictine Office spread through the monasteries of the West in the centuries \
+               before the Great Schism.",
+    },
+    AboutBlock::Era {
+        period: "The Western Rite",
+        text: "Since 1958 the Antiochian Archdiocese has kept a Western Rite, and within it the \
+               Benedictine hours are prayed again in the Orthodox Church.",
     },
     AboutBlock::Heading("The Ordo"),
     AboutBlock::Paragraph(

@@ -1,12 +1,12 @@
 name: Promote to production
 
 # Moves the Android app from Closed testing to production on Google Play, without rebuilding:
-# production gets the bundle testers already have (scripts/play-promote.py,
+# production gets a bundle testers already had (scripts/play-promote.py,
 # apps/android/README.md "Promoting to production").
 #
 # Daily: a staged rollout this workflow started two days before is finished (all users);
-# otherwise the build on Closed testing, once it has been there 24 hours and if it is newer than
-# production's, goes to 20% of users. So a merge reaches a fifth of the public 1 to 2 days after
+# otherwise the newest build uploaded to Closed testing at least 24 hours before, if it is newer
+# than production's, goes to 20% of users, even when a later merge has replaced it there. So a merge reaches a fifth of the public 1 to 2 days after
 # testers get it and everyone two days later; Google's review of each new release comes out of
 # the 20% stage. A rollout halted, or started, in Play Console stops the promotions until it is
 # finished, resumed or replaced. Scheduled runs use the `play-auto` environment, with no reviewer.
