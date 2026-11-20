@@ -323,10 +323,12 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
         let glyphs = manager.glyphRange(for: container)
         manager.drawBackground(forGlyphRange: glyphs, at: CGPoint(x: 0, y: top))
         manager.drawGlyphs(forGlyphRange: glyphs, at: CGPoint(x: 0, y: top))
-        // Each glossed term's hairline in its own red at 40%, solid while its note is open, 0.24em
-        // under the baseline (the web's `.gloss-term`).
+        // Each underlined rubric term's hairline in its own red at 40%, solid while its note is
+        // open, 0.24em under the baseline (the web's `.gloss-term`). Quiet structural glosses
+        // (`Ant.`, `(63)`, `Chapter`, `Preces`, `Suffrage`) carry no underline at rest.
         let rise = spec.font.pointSize * 0.24
         for (i, term) in glossTerms.enumerated() {
+            if term.note.quiet { continue }
             ctx.setFillColor(term.color.withAlphaComponent(i == openGloss ? 1 : 0.4).cgColor)
             for r in term.rects {
                 let y = r.minY + baseline + rise

@@ -588,6 +588,8 @@ fun OfficeApp(
                                 onForm = onForm,
                                 onHour = { d, h -> onOpen(Page.Hour(d, h)) },
                                 onAllHours = { onOpen(Page.Home(page.date)) },
+                                onFeast = { onOpen(Page.Feast(it)) },
+                                onAbout = { onOpen(Page.About) },
                             )
                             page is Page.Ordo && content is Content.Ordo -> OrdoScreen(
                                 month = content.view,
@@ -636,6 +638,7 @@ fun OfficeApp(
                                 onYear = { onOpen(Page.Year(it)) },
                                 onDay = { onOpen(Page.Ordo(it.year, it.monthValue, it.dayOfMonth)) },
                                 onFind = { onOpen(Page.Find("")) },
+                                onFeast = { onOpen(Page.Feast(it)) },
                             )
                             page is Page.Reminders -> RemindersScreen(
                                 settings = reminders,

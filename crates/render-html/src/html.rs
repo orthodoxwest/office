@@ -12,7 +12,11 @@ pub(crate) use corpus::typography::soften_drop_cap_opening;
 pub use corpus::typography::typeset;
 
 use crate::escape::html_escape_string;
-use presentation::gloss::{GlossRun, gloss_runs};
+use presentation::gloss::{ANTIPHON_GLOSS, CHAPTER_GLOSS, Gloss, GlossRun, PSALM_NUMBER_GLOSS, gloss_runs, heading_gloss};
+
+fn quiet_gloss_attrs(gloss: &Gloss) -> String {
+    format!(" class=\"gloss-quiet\" data-gloss-title=\"{}\" data-gloss=\"{}\"", esc_text(gloss.title), esc_text(gloss.note))
+}
 
 // Sigil column classes: a single mark (℣. / ℟.) takes the narrow gutter;
 // spelled-out words take their own class so CSS can move them above the text
@@ -74,6 +78,9 @@ pub fn render_section_heading_in(label: &str, bare: bool) -> String {
             esc_text(name)
         );
     }
+    if let Some(gloss) = heading_gloss(label) {
+        return format!("<h2 class=\"section-heading{bare}\"><span{}>{}</span></h2>", quiet_gloss_attrs(gloss), esc_text(label));
+    }
     format!("<h2 class=\"section-heading{bare}\">{}</h2>", esc_text(label))
 }
 
@@ -90,7 +97,7 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
         ElementType::Antiphon => {
             if elem.label.is_empty() {
                 let class = if elem.announce { "antiphon antiphon-announce" } else { "antiphon" };
-                sb.push_str(&format!("<p class=\"{class}\"><em>Ant.</em> "));
+                sb.push_str(&format!("<p class=\"{class}\"><em{}>Ant.</em> ", quiet_gloss_attrs(&ANTIPHON_GLOSS)));
                 sb.push_str(&chant_line_html(&elem.display_text()));
                 sb.push_str("</p>");
             } else {
@@ -115,7 +122,11 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
                         sb.push_str("<span class=\"psalm-num\">");
                         sb.push_str(&esc_text(greek));
                         if !hebrew.is_empty() {
-                            sb.push_str("\u{a0}<span class=\"psalm-heb\">");
+                            sb.push_str(&format!(
+                                "\u{a0}<span class=\"psalm-heb gloss-quiet\" data-gloss-title=\"{}\" data-gloss=\"{}\">",
+                                esc_text(PSALM_NUMBER_GLOSS.title),
+                                esc_text(PSALM_NUMBER_GLOSS.note)
+                            ));
                             sb.push_str(&esc_text(hebrew));
                             sb.push_str("</span>");
                         }
@@ -187,7 +198,10 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
             }
         }
         ElementType::Chapter => {
-            sb.push_str("<div class=\"chapter\"><h2 class=\"section-heading\">Chapter</h2>");
+            sb.push_str(&format!(
+                "<div class=\"chapter\"><h2 class=\"section-heading\"><span{}>Chapter</span></h2>",
+                quiet_gloss_attrs(&CHAPTER_GLOSS)
+            ));
             if !elem.label.is_empty() {
                 sb.push_str("<p class=\"chapter-ref\">");
                 sb.push_str(&esc_text(&elem.label));

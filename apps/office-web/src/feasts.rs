@@ -6,6 +6,7 @@ use axum::http::{Response, StatusCode};
 use std::sync::Arc;
 
 use calendar::Date;
+use office::HOUR_NAMES;
 use office::feast::{DayOf, FeastTexts, feast_texts};
 use presentation::feast::{
     FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearKeeping, back_to_day, back_to_ordo, feast_date,
@@ -13,8 +14,8 @@ use presentation::feast::{
     kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count, row_date, search_years,
     texts_keeping, texts_source, whole_office_label,
 };
-use presentation::{date_slug, long_date};
-use render_html::links::{calendar_link, feast_link, find_link, home_from_feast, home_link};
+use presentation::{date_slug, long_date, title_case};
+use render_html::links::{calendar_link, calendar_year_link, feast_link, find_link, home_from_feast, home_link, hour_link};
 use render_html::view::{Chrome, FeastPageData, FeastResult, FeastTextRow, FeastYearRow, FindData, LinkRow, NextKeeping};
 
 use crate::Server;
@@ -39,16 +40,29 @@ fn year_row(id: &str, k: &YearKeeping, usual: bool) -> FeastYearRow {
     }
 }
 
-/// The feast page's way back: to the day (`from` "2026-11-10") or the ordo's row
-/// ("ordo-2026-11-10") it was opened from, else to the search.
+/// The feast page's way back: to the day (`2026-11-10`), the ordo's row (`ordo-2026-11-10`),
+/// the ordo's year (`ordo-2026`), or an hour (`lauds-2026-11-10`) it was opened from, else to
+/// the search.
 fn back_link(from: &str, today: Date) -> LinkRow {
-    let (ordo, slug) = match from.strip_prefix("ordo-") {
-        Some(slug) => (true, slug),
-        None => (false, from),
-    };
-    match Date::parse(slug) {
-        Some(d) if ordo => LinkRow { label: back_to_ordo(d), href: calendar_link(&date_slug(d)) },
-        Some(d) => LinkRow { label: back_to_day(d, today), href: home_link(if d == today { "" } else { slug }) },
+    if let Some(rest) = from.strip_prefix("ordo-") {
+        if let Some(d) = Date::parse(rest) {
+            return LinkRow { label: back_to_ordo(d), href: calendar_link(&date_slug(d)) };
+        }
+        if rest.len() == 4
+            && let Ok(year) = rest.parse::<i32>()
+            && crate::cache::offered_year(year)
+        {
+            return LinkRow { label: format!("{year} Ordo"), href: calendar_year_link(year) };
+        }
+    }
+    if let Some((hour, slug)) = from.split_once('-')
+        && HOUR_NAMES.contains(&hour)
+        && Date::parse(slug).is_some()
+    {
+        return LinkRow { label: title_case(hour), href: hour_link(hour, slug) };
+    }
+    match Date::parse(from) {
+        Some(d) => LinkRow { label: back_to_day(d, today), href: home_link(if d == today { "" } else { from }) },
         None => LinkRow { label: FEAST_WORDS.find_title.into(), href: find_link("") },
     }
 }
@@ -329,6 +343,10 @@ mod tests {
         assert!(from_day.contains(r#"<a class="find-back" href="/?date=2027-02-27">&lsaquo; February 27</a>"#));
         let from_ordo = page("/feast/st-raphael-of-brooklyn?from=ordo-2026-02-27");
         assert!(from_ordo.contains(r#"<a class="find-back" href="/calendar/2026/02#d-2026-02-27">&lsaquo; Ordo, February 2026</a>"#));
+        let from_year = page("/feast/ash-wednesday?from=ordo-2026");
+        assert!(from_year.contains(r#"<a class="find-back" href="/calendar/2026">&lsaquo; 2026 Ordo</a>"#));
+        let from_hour = page("/feast/st-raphael-of-brooklyn?from=lauds-2027-02-27");
+        assert!(from_hour.contains(r#"<a class="find-back" href="/lauds/2027-02-27">&lsaquo; Lauds</a>"#));
         assert!(page("/feast/st-raphael-of-brooklyn?from=nonsense").contains(r#"href="/calendar/find">&lsaquo; Find a feast"#));
     }
 

@@ -34,7 +34,7 @@
           <div class="reminder-hour-row{% if h.checked %} is-selected{% endif %}" data-reminder-hour="{{ h.slug }}">
             <label class="reminder-hour-name">
               <input type="checkbox" name="hour" value="{{ h.slug }}"{% if h.checked %} checked{% endif %}>
-              {{ h.name }}
+              <span class="reminder-hour-label-stack"><span>{{ h.name }}</span>{% if h.gloss %}<span class="reminder-hour-gloss">{{ h.gloss }}</span>{% endif %}</span>
             </label>
             {# An unchosen hour's greyed time lets a tap through to the row, which chooses the hour (app.js). #}
             <span class="reminder-time"><input type="time" name="time-{{ h.slug }}" value="{{ h.default }}" aria-label="Time for {{ h.name }}"{% if not h.checked %} disabled{% endif %}></span>

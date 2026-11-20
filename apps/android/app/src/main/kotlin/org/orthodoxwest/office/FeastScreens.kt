@@ -174,6 +174,8 @@ fun FindScreen(
 fun feastBack(under: Page?, today: LocalDate): String? = when (under) {
     is Page.Home -> feastBackToDay(under.date.toCivil(), today.toCivil())
     is Page.Ordo -> feastBackToOrdo(CivilDate(under.year, under.month, 1))
+    is Page.Year -> "${under.year} Ordo"
+    is Page.Hour -> hourLabel(under.hour)
     else -> null
 }
 

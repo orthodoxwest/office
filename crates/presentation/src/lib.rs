@@ -511,6 +511,8 @@ pub struct TabulaRow {
     pub label: &'static str,
     pub value: String,
     pub date: Option<Date>,
+    /// Feast identifier in `FeastIndex` when the row names a moveable feast, else empty.
+    pub feast_id: &'static str,
 }
 
 /// The Tabula Temporaria as the printed ordo opens: the year's figures, its moveable feasts, and
@@ -525,12 +527,13 @@ pub struct TabulaRows {
 pub fn tabula(year: i32) -> TabulaRows {
     let t = calendar::Tabula::compute(year);
     let moveable = calendar::MoveableDates::compute(year);
-    let figure = |label, value| TabulaRow { label, value, date: None };
-    let date = |label, d: Date| TabulaRow { label, value: format!("{} {}", month_name(d), d.day()), date: Some(d) };
+    let figure = |label, value| TabulaRow { label, value, date: None, feast_id: "" };
+    let date = |label, d: Date, feast_id| TabulaRow { label, value: format!("{} {}", month_name(d), d.day()), date: Some(d), feast_id };
     let ember = |label, e: &calendar::computus::EmberSet| TabulaRow {
         label,
         value: format!("{} {}, {}, {}", month_name(e.wed), e.wed.day(), e.fri.day(), e.sat.day()),
         date: Some(e.wed),
+        feast_id: "",
     };
     TabulaRows {
         figures: vec![
@@ -540,13 +543,13 @@ pub fn tabula(year: i32) -> TabulaRows {
             figure("Sundays after Pentecost", t.sundays_after_pentecost.to_string()),
         ],
         moveable: vec![
-            date("Septuagesima Sunday", moveable.septuagesima),
-            date("Ash Wednesday", moveable.ash_wednesday),
-            date("Easter (Pascha) Day", moveable.easter),
-            date("Ascension Day", moveable.ascension),
-            date("Pentecost", moveable.pentecost),
-            date("Corpus Christi", moveable.corpus_christi),
-            date("Advent Sunday", moveable.advent1),
+            date("Septuagesima Sunday", moveable.septuagesima, "septuagesima"),
+            date("Ash Wednesday", moveable.ash_wednesday, "ash-wednesday"),
+            date("Easter (Pascha) Day", moveable.easter, "easter-sunday"),
+            date("Ascension Day", moveable.ascension, "ascension"),
+            date("Pentecost", moveable.pentecost, "pentecost"),
+            date("Corpus Christi", moveable.corpus_christi, "corpus-christi"),
+            date("Advent Sunday", moveable.advent1, ""),
         ],
         ember: vec![
             ember("Spring (Lent)", &t.spring),

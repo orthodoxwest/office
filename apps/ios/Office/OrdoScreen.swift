@@ -579,16 +579,45 @@ private struct DayRow: View {
     }
 
     /// The feast's name in its rank's ink, a first-class feast's with a small painted cross before it;
-    /// `fill` takes the column's width, else the name's own, wrapped to what it is given.
+    /// when backed by a feast page, only the words themselves open it so blank row space still toggles
+    /// Office details.
+    @ViewBuilder
     private func feastName(_ style: TextStyle, fill: Bool = true) -> some View {
         let em = style.size * m.type
-        return HStack(alignment: .firstTextBaseline, spacing: 0) {
+        let linked = !d.feastId.isEmpty
+        let label = HStack(alignment: .firstTextBaseline, spacing: 0) {
             if d.rank == "1cl" {
                 PaintedMark(.cross, size: em * 0.62, color: p.lining).padding(.trailing, em * 0.32)
             }
-            Text(d.feast).type(style).foregroundStyle(rankInk ?? p.text).multilineTextAlignment(.leading)
+            Text(d.feast)
+                .underline(linked, color: p.goldLine)
+                .type(style)
+                .foregroundStyle(rankInk ?? p.text)
+                .multilineTextAlignment(.leading)
         }
-        .frame(maxWidth: fill ? .infinity : nil, alignment: .leading)
+        if linked {
+            let button = Button {
+                model.choseInOrdo(d.date)
+                model.open(.feast(d.feastId))
+            } label: {
+                label
+            }
+            .buttonStyle(Quiet())
+            .accessibilityLabel(d.feast)
+            .accessibilityHint("Opens the feast's page")
+            if fill {
+                HStack(spacing: 0) {
+                    button
+                    Spacer(minLength: 0)
+                }
+            } else {
+                button
+            }
+        } else {
+            label
+                .frame(maxWidth: fill ? .infinity : nil, alignment: .leading)
+                .accessibilityHidden(true)
+        }
     }
 
     /// The fast's §, as `glyph` draws it, naming itself in its note.
@@ -653,7 +682,7 @@ private struct DayRow: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, m.px(1))
+        .padding(.top, m.px(2.5))
     }
 
     /// "Today", in small caps and the gold of today's number, darkened by day (the web's
@@ -705,9 +734,7 @@ private struct DayRow: View {
                 VStack(alignment: .leading, spacing: 0) {
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(alignment: .top, spacing: 0) {
-                            // The date's stop already says the feast.
                             feastName(Scale.body.sized(16, line: 21.6))
-                                .accessibilityHidden(true)
                             // The card's marks stay quiet, as the web's: red in a row means rank. Each
                             // names itself in a note when tapped (`NoteMark`).
                             HStack(spacing: m.px(6)) {
@@ -770,8 +797,7 @@ private struct DayRow: View {
                     Group {
                         if anyOpen || !d.monastic.isEmpty {
                             VStack(alignment: .leading, spacing: 0) {
-                                // The date's stop already says the feast.
-                                feastName(name).accessibilityHidden(true)
+                                feastName(name)
                                 monastic
                                 disclosureButtons
                             }
@@ -779,7 +805,6 @@ private struct DayRow: View {
                         } else {
                             HStack(alignment: .firstTextBaseline, spacing: m.px(20)) {
                                 feastName(name, fill: false)
-                                    .accessibilityHidden(true)
                                     .layoutPriority(1)
                                 disclosureButtons.fixedSize()
                                 Spacer(minLength: 0)
@@ -974,6 +999,12 @@ private struct DayColumns: View {
     }
 }
 
+/// Notes for abbreviations inside Ordo Office details (`presentation::gloss`).
+private let detailGlosses = ordoDetailGlosses()
+
+/// Note for the "Ember days" heading on the Tabula Temporaria.
+private let emberGloss = emberDaysGloss()
+
 /// The office digest: each hour's gospel antiphon, preces, suffrage, and commemorations.
 private struct Digest: View {
     let d: OrdoDayView
@@ -988,16 +1019,16 @@ private struct Digest: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // The row's tap opens these in place; this, above the digest's rule, leads on to the
-            // day (the web's `.day-office-open`).
+            // day (the web's `.day-office-open`), sized to a comfortable 44pt thumb target.
             Button {
                 model.choseInOrdo(d.date)
                 model.open(.home(d.date))
             } label: {
                 Text("\(markWords.openDay) ›").type(Scale.small.sized(13.6, line: 20.4)).foregroundStyle(p.accent)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(Quiet())
-            .padding(.top, m.px(2.4))
-            .padding(.bottom, m.px(5.6))
             digest
         }
     }
@@ -1005,14 +1036,14 @@ private struct Digest: View {
     private var digest: some View {
         VStack(alignment: .leading, spacing: 0) {
             if !dayComms.isEmpty {
-                hour("Day", notes: [], antiphon: nil, preces: false, suffrage: false, comms: dayComms)
+                hour("Day", notes: [], antiphonKind: nil, antiphon: nil, preces: false, suffrage: false, comms: dayComms)
             }
             if hasLauds {
-                hour("Lauds", notes: [], antiphon: d.benedictusAntiphon.isEmpty ? nil : "Ben. “\(d.benedictusAntiphon)”", preces: d.laudsPreces, suffrage: d.laudsSuffrage, cross: d.laudsCross, comms: d.laudsComms)
+                hour("Lauds", notes: [], antiphonKind: "ben", antiphon: d.benedictusAntiphon.isEmpty ? nil : d.benedictusAntiphon, preces: d.laudsPreces, suffrage: d.laudsSuffrage, cross: d.laudsCross, comms: d.laudsComms)
             }
-            if d.hoursPreces { hour("Hours", notes: [], antiphon: nil, preces: true, suffrage: false, comms: []) }
+            if d.hoursPreces { hour("Hours", notes: [], antiphonKind: nil, antiphon: nil, preces: true, suffrage: false, comms: []) }
             if hasVespers {
-                hour("Vespers", notes: d.vespersNote.isEmpty ? [] : [d.vespersNote], antiphon: d.magnificatAntiphon.isEmpty ? nil : "Mag. “\(d.magnificatAntiphon)”", preces: d.vespersPreces, suffrage: d.vespersSuffrage, cross: d.vespersCross, comms: d.vespersComms)
+                hour("Vespers", notes: d.vespersNote.isEmpty ? [] : [d.vespersNote], antiphonKind: "mag", antiphon: d.magnificatAntiphon.isEmpty ? nil : d.magnificatAntiphon, preces: d.vespersPreces, suffrage: d.vespersSuffrage, cross: d.vespersCross, comms: d.vespersComms)
             }
         }
         .padding(m.px(8))
@@ -1021,33 +1052,62 @@ private struct Digest: View {
         .padding(.bottom, m.px(8))
     }
 
-    private func hour(_ name: String, notes: [String], antiphon: String?, preces: Bool, suffrage: Bool, cross: Bool = false, comms: [CommemorationView]) -> some View {
+    private func hour(_ name: String, notes: [String], antiphonKind: String?, antiphon: String?, preces: Bool, suffrage: Bool, cross: Bool = false, comms: [CommemorationView]) -> some View {
         let line = TextStyle(size: 13.6, line: 20.4, italic: true)
-        var marks = Text("")
-        if let antiphon { marks = marks + Text(antiphon) }
-        var rubric = [String]()
-        if preces { rubric.append("Preces") }
-        if suffrage { rubric.append("Suffrage") }
-        if cross { rubric.append("Commemoration of the Cross") }
-        if !rubric.isEmpty {
-            let lead = antiphon == nil ? "" : "  "
-            marks = marks + Text(lead + rubric.joined(separator: "  ")).font(Font(garamond(13.6 * m.type))).foregroundColor(p.rubric)
-        }
+        let rubricLine = TextStyle(size: 13.6, line: 20.4)
         return VStack(alignment: .leading, spacing: 0) {
             Text(name.uppercased()).type(TextStyle.label(12, 0.06).sized(12, line: 18)).foregroundStyle(p.accent).padding(.bottom, m.px(2.4))
             ForEach(notes, id: \.self) { Text($0).type(line).foregroundStyle(p.muted) }
-            if antiphon != nil || preces || suffrage || cross { marks.type(line).foregroundStyle(p.muted) }
-            // A commemoration's name leads to its feast's page, underlined as the web's `.feast-link`.
-            ForEach(comms, id: \.self) { c in
-                let text = Text("Com. ") + Text(c.name).underline(!c.feastId.isEmpty, color: p.goldLine) + Text(c.incipit.isEmpty ? "" : " “\(c.incipit)”")
-                if c.feastId.isEmpty {
-                    text.type(line).foregroundStyle(p.muted)
-                } else {
-                    Button { model.open(.feast(c.feastId)) } label: {
-                        text.type(line).foregroundStyle(p.muted).multilineTextAlignment(.leading)
+            if let antiphon, let kind = antiphonKind {
+                let g = kind == "ben" ? detailGlosses.benedictus : detailGlosses.magnificat
+                let abbr = kind == "ben" ? "Ben." : "Mag."
+                HStack(alignment: .firstTextBaseline, spacing: m.px(4)) {
+                    GlossMark(gloss: g, label: g.title) {
+                        Text(abbr).type(line).foregroundStyle(p.muted)
                     }
-                    .buttonStyle(Quiet())
-                    .accessibilityHint("Opens the feast's page")
+                    Text("“\(antiphon)”").type(line).foregroundStyle(p.muted)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            if preces || suffrage || cross {
+                HStack(alignment: .firstTextBaseline, spacing: m.px(10)) {
+                    if preces {
+                        GlossMark(gloss: detailGlosses.preces, label: "Preces", underlineColor: p.rubric) {
+                            Text("Preces").type(rubricLine).foregroundStyle(p.rubric)
+                        }
+                    }
+                    if suffrage {
+                        GlossMark(gloss: detailGlosses.suffrage, label: "Suffrage", underlineColor: p.rubric) {
+                            Text("Suffrage").type(rubricLine).foregroundStyle(p.rubric)
+                        }
+                    }
+                    if cross {
+                        Text("Commemoration of the Cross").type(rubricLine).foregroundStyle(p.rubric)
+                    }
+                }
+            }
+            // "Com." opens its note; a commemoration's name leads to its feast's page, underlined as `.feast-link`.
+            ForEach(comms, id: \.self) { c in
+                HStack(alignment: .firstTextBaseline, spacing: m.px(4)) {
+                    GlossMark(gloss: detailGlosses.commemoration, label: "Commemoration") {
+                        Text("Com.").type(line).foregroundStyle(p.muted)
+                    }
+                    if c.feastId.isEmpty {
+                        Text(c.name + (c.incipit.isEmpty ? "" : " “\(c.incipit)”"))
+                            .type(line).foregroundStyle(p.muted)
+                            .multilineTextAlignment(.leading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    } else {
+                        Button { model.open(.feast(c.feastId)) } label: {
+                            (Text(c.name).underline(true, color: p.goldLine) + Text(c.incipit.isEmpty ? "" : " “\(c.incipit)”"))
+                                .type(line).foregroundStyle(p.muted)
+                                .multilineTextAlignment(.leading)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .buttonStyle(Quiet())
+                        .accessibilityHint("Opens the feast's page")
+                    }
                 }
             }
         }
@@ -1085,13 +1145,13 @@ struct OrdoYearScreen: View {
                         Figures(figures: view.figures, perRow: 4).padding(.top, m.px(24))
                         HStack(alignment: .top, spacing: 40) {
                             TabulaTable(title: "Moveable feasts", rows: view.moveable)
-                            TabulaTable(title: "Ember days", rows: view.ember)
+                            TabulaTable(title: "Ember days", rows: view.ember, titleGloss: emberGloss)
                         }
                         .padding(.top, m.px(24))
                     } else {
                         Figures(figures: view.figures, perRow: 2).padding(.top, m.px(24))
                         TabulaTable(title: "Moveable feasts", rows: view.moveable).padding(.top, m.px(24))
-                        TabulaTable(title: "Ember days", rows: view.ember).padding(.top, m.px(24))
+                        TabulaTable(title: "Ember days", rows: view.ember, titleGloss: emberGloss).padding(.top, m.px(24))
                     }
                 }
                 .ordoColumn(m, wide: wide)
@@ -1148,10 +1208,16 @@ private struct Figures: View {
                         VStack(spacing: 0) {
                             // Lining figures stand 4 and 25 level with XIII and D.
                             Text(f.value).type(TextStyle(size: 25.6, line: 30.7, lining: true)).foregroundStyle(p.accent)
-                            Text(f.label.uppercased()).type(.label(11.2, 0.06)).foregroundStyle(p.muted).multilineTextAlignment(.center).padding(.top, m.px(3))
+                            if let gloss = f.gloss {
+                                GlossMark(gloss: gloss, label: f.label) {
+                                    Text(f.label.uppercased()).type(.label(11.2, 0.06)).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                                }
+                                .padding(.top, m.px(3))
+                            } else {
+                                Text(f.label.uppercased()).type(.label(11.2, 0.06)).foregroundStyle(p.muted).multilineTextAlignment(.center).padding(.top, m.px(3))
+                            }
                         }
                         .frame(maxWidth: .infinity)
-                        .accessibilityElement(children: .combine)
                     }
                 }
             }
@@ -1193,41 +1259,82 @@ private struct TabletFrame: View {
     }
 }
 
-/// A titled list of dates, ruled between rows; a date that cannot share its row takes the next line whole.
+/// A titled list of dates, ruled between rows; a moveable feast name opens its feast overview while its date opens the ordo day.
 private struct TabulaTable: View {
     let title: String
     let rows: [TabulaRowView]
+    var titleGloss: GlossView? = nil
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
+        let rowStyle = Scale.body.sized(15.2, line: 22)
         VStack(alignment: .leading, spacing: 0) {
-            Text(title.uppercased()).type(.label(11.2, 0.06)).foregroundStyle(p.muted).padding(.vertical, m.px(5.6)).accessibilityAddTraits(.isHeader)
+            if let titleGloss {
+                GlossMark(gloss: titleGloss, label: title) {
+                    Text(title.uppercased()).type(.label(11.2, 0.06)).foregroundStyle(p.muted)
+                }
+                .padding(.vertical, m.px(5.6))
+                .accessibilityAddTraits(.isHeader)
+            } else {
+                Text(title.uppercased()).type(.label(11.2, 0.06)).foregroundStyle(p.muted).padding(.vertical, m.px(5.6)).accessibilityAddTraits(.isHeader)
+            }
             Hairline(color: p.border)
             ForEach(rows, id: \.label) { r in
-                Button {
-                    if let date = r.date { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) }
-                } label: {
+                if !r.feastId.isEmpty {
+                    let feastButton = Button { model.open(.feast(r.feastId)) } label: {
+                        Text(r.label).underline(true, color: p.goldLine).type(rowStyle).foregroundStyle(p.text).fixedSize()
+                    }
+                    .buttonStyle(Quiet())
+                    .accessibilityLabel(r.label)
+                    .accessibilityHint("Opens the feast's page")
+                    let dateButton = Button {
+                        if let date = r.date { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) }
+                    } label: {
+                        Text(r.value).type(rowStyle).foregroundStyle(p.accent).fixedSize()
+                    }
+                    .buttonStyle(Quiet())
+                    .disabled(r.date == nil)
+                    .accessibilityLabel("\(r.label), \(r.value)")
+                    .accessibilityHint(r.date == nil ? "" : "Opens the day in the ordo")
                     ViewThatFits(in: .horizontal) {
-                        HStack(spacing: m.px(16)) {
-                            Text(r.label).type(Scale.body).foregroundStyle(p.text).fixedSize()
+                        HStack(spacing: m.px(8)) {
+                            feastButton
                             Spacer(minLength: 0)
-                            Text(r.value).type(Scale.body).foregroundStyle(p.accent).fixedSize()
+                            dateButton
                         }
                         VStack(alignment: .leading, spacing: 0) {
-                            Text(r.label).type(Scale.body).foregroundStyle(p.text)
-                            Text(r.value).type(Scale.body).foregroundStyle(p.accent).frame(maxWidth: .infinity, alignment: .trailing)
+                            feastButton
+                            dateButton.frame(maxWidth: .infinity, alignment: .trailing)
                         }
                     }
                     .padding(.vertical, m.px(8.8))
                     .frame(minHeight: 44)
+                } else {
+                    Button {
+                        if let date = r.date { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) }
+                    } label: {
+                        ViewThatFits(in: .horizontal) {
+                            HStack(spacing: m.px(8)) {
+                                Text(r.label).type(rowStyle).foregroundStyle(p.text).fixedSize()
+                                Spacer(minLength: 0)
+                                Text(r.value).type(rowStyle).foregroundStyle(p.accent).fixedSize()
+                            }
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text(r.label).type(rowStyle).foregroundStyle(p.text)
+                                Text(r.value).type(rowStyle).foregroundStyle(p.accent).frame(maxWidth: .infinity, alignment: .trailing)
+                            }
+                        }
+                        .padding(.vertical, m.px(8.8))
+                        .frame(minHeight: 44)
+                    }
+                    .buttonStyle(Quiet())
+                    .disabled(r.date == nil)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(r.label), \(r.value)")
+                    .accessibilityHint(r.date == nil ? "" : "Opens the day in the ordo")
                 }
-                .buttonStyle(Quiet())
-                .disabled(r.date == nil)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("\(r.label), \(r.value)")
-                .accessibilityHint(r.date == nil ? "" : "Opens the day in the ordo")
                 Hairline(color: p.border)
             }
         }
@@ -1237,6 +1344,43 @@ private struct TabulaTable: View {
 
 /// What the § and the fish say in their notes, as the web's titles word them (`presentation::FAST_DAY`).
 private let markWords = ordoMarkWords()
+
+/**
+ * A labelled term with a titled plaster note (Tabula figures, "Ember days", Ordo details
+ * abbreviations): underlined in a subtle hairline at 45% (solid while open), opening its `NoteCard`
+ * popover above.
+ */
+struct GlossMark<Mark: View>: View {
+    let gloss: GlossView
+    let label: String
+    var underlineColor: Color? = nil
+    let mark: () -> Mark
+    @Environment(\.palette) private var p
+    @State private var open = false
+
+    init(gloss: GlossView, label: String, underlineColor: Color? = nil, @ViewBuilder mark: @escaping () -> Mark) {
+        self.gloss = gloss
+        self.label = label
+        self.underlineColor = underlineColor
+        self.mark = mark
+    }
+
+    var body: some View {
+        let ink = (underlineColor ?? p.muted).opacity(open ? 1 : 0.45)
+        Button { open.toggle() } label: {
+            mark()
+                .overlay(alignment: .bottom) {
+                    if !gloss.quiet { Rectangle().fill(ink).frame(height: 1) }
+                }
+        }
+        .buttonStyle(Quiet())
+        .contentShape(Rectangle().inset(by: -8))
+        .accessibilityLabel(label)
+        .accessibilityHint("Explains \(label)")
+        .accessibilityValue(open ? "Expanded" : "Collapsed")
+        .popover(isPresented: $open, arrowEdge: .bottom) { NoteCard(title: gloss.title, note: gloss.note) }
+    }
+}
 
 /**
  * A mark whose meaning is not on its face (the ordo's rank letters, its § and fish), as the web's

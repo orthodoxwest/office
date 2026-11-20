@@ -11,6 +11,10 @@ struct RemindersPage: View {
     }
 }
 
+private let reminderHourGlosses: [String: String] = Dictionary(
+    uniqueKeysWithValues: reminderDefaults().map { ($0.hour, $0.gloss) }
+)
+
 /**
  * The reminders page, set as the web's: the hours with their times, the days, how long before;
  * then, where the web gives a calendar link, the switch that asks the phone itself.
@@ -290,13 +294,23 @@ struct RemindersScreen: View {
                     changed.chosen.toggle()
                     change(settings.with(changed))
                 } label: {
+                    let gloss = h.gloss.isEmpty ? (reminderHourGlosses[h.hour] ?? "") : h.gloss
                     HStack(spacing: m.px(12)) {
                         Tick(checked: h.chosen)
                         // An hour not chosen stands back in the muted ink (the web's `.reminder-hour-name`).
-                        Text(h.name).type(Scale.body).foregroundStyle(h.chosen ? p.text : p.muted)
-                            .animation(tickMotion(h.chosen, still: still), value: h.chosen)
+                        VStack(alignment: .leading, spacing: m.px(1)) {
+                            Text(h.name).type(Scale.body.sized(20, line: 22)).foregroundStyle(h.chosen ? p.text : p.muted)
+                                .animation(tickMotion(h.chosen, still: still), value: h.chosen)
+                            if !gloss.isEmpty {
+                                Text(gloss)
+                                    .type(TextStyle(size: 12.48, line: 16, italic: true))
+                                    .foregroundStyle(p.muted.opacity(h.chosen ? 0.85 : 0.7))
+                                    .multilineTextAlignment(.leading)
+                            }
+                        }
                         Spacer(minLength: 0)
                     }
+                    .padding(.vertical, m.px(5))
                     .frame(minHeight: 46)
                 }
                 .buttonStyle(Quiet())

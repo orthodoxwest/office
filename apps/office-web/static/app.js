@@ -77,7 +77,7 @@ document.documentElement.classList.add("js");
 // did. The note fades in and out on Tempo's settle (style.css), a cut under
 // reduced motion; it never rises or slides.
 (function () {
-  var terms = Array.prototype.slice.call(document.querySelectorAll(".gloss-term[data-gloss]"));
+  var terms = Array.prototype.slice.call(document.querySelectorAll(".gloss-term[data-gloss], .gloss-quiet[data-gloss]"));
   var marks = Array.prototype.slice.call(document.querySelectorAll(".month-table abbr[title], .find-rank[title]"));
   if (!terms.length && !marks.length) return;
   // Kept in the page and emptied rather than hidden, so a screen reader
@@ -1626,6 +1626,17 @@ function plainClickOpensHere(e, link) {
   // the header turns it through details.turnFold, and the ordo's "Show office
   // details" lands a fold mid-turn through details.stopFold before it changes
   // the day. Without motion it is the native toggle.
+  document.querySelectorAll(".hour-context-controls > details").forEach(function (details) {
+    details.addEventListener("toggle", function () {
+      if (!details.open) return;
+      details.parentElement.querySelectorAll(":scope > details[open]").forEach(function (other) {
+        if (other === details) return;
+        if (other.stopFold) other.stopFold();
+        other.open = false;
+      });
+    });
+  });
+
   var easesToAuto = window.CSS && typeof CSS.supports === "function" && CSS.supports("interpolate-size", "allow-keywords");
   if (!easesToAuto && window.matchMedia && typeof document.documentElement.animate === "function") {
     var foldStillness = window.matchMedia("(prefers-reduced-motion: no-preference)");
@@ -1656,7 +1667,7 @@ function plainClickOpensHere(e, link) {
       });
       return at;
     };
-    document.querySelectorAll("details.hour-date-nav, details.session-prayers, details.day-office-details, details.reminder-address, details.reminder-help, details.reminder-calendar, details.feast-hymn").forEach(function (details) {
+    document.querySelectorAll("details.hour-date-nav, details.reading-key, details.session-prayers, details.day-office-details, details.reminder-address, details.reminder-help, details.reminder-calendar, details.feast-hymn").forEach(function (details) {
       var summary = details.querySelector(":scope > summary");
       if (!summary) {
         return;

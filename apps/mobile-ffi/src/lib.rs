@@ -126,6 +126,9 @@ impl OfficeCore {
         };
         let composed = compose(martyrology)?;
         let mut view = HourView::new(&hour, &composed, chant);
+        if !composed.feast.is_empty() {
+            view.feast_id = self.feast_id("", &composed.feast, date);
+        }
         // Whether the setting had a reading to show or hide, as the usage beacon reports it.
         let has_reading = if martyrology { reads_martyrology(&composed) } else { hour == "prime" && reads_martyrology(&compose(true)?) };
         view.martyrology = has_reading.then_some(martyrology);
@@ -1015,6 +1018,8 @@ pub struct ReminderView {
 pub struct ReminderDefault {
     pub hour: String,
     pub name: String,
+    #[uniffi(default = "")]
+    pub gloss: String,
     pub hour_of_day: i32,
     pub minute: i32,
     pub chosen: bool,
@@ -1026,6 +1031,10 @@ pub struct TabulaRowView {
     pub label: String,
     pub value: String,
     pub date: Option<CivilDate>,
+    #[uniffi(default = "")]
+    pub feast_id: String,
+    #[uniffi(default = None)]
+    pub gloss: Option<GlossView>,
 }
 
 /// A year's ordo frontispiece: its title and the Tabula Temporaria.
@@ -1043,10 +1052,89 @@ pub struct OrdoYearView {
 #[uniffi::export]
 pub fn ordo_year(year: i32) -> OrdoYearView {
     let rows = |rows: Vec<presentation::TabulaRow>| {
-        rows.into_iter().map(|r| TabulaRowView { label: r.label.into(), value: r.value, date: r.date.map(CivilDate::from) }).collect()
+        rows.into_iter()
+            .map(|r| TabulaRowView {
+                label: r.label.into(),
+                value: r.value,
+                date: r.date.map(CivilDate::from),
+                feast_id: r.feast_id.into(),
+                gloss: presentation::gloss::tabula_figure_gloss(r.label).map(|g| GlossView {
+                    title: g.title.into(),
+                    note: g.note.into(),
+                    quiet: false,
+                }),
+            })
+            .collect()
     };
     let t = presentation::tabula(year);
     OrdoYearView { year, roman: presentation::year_roman(year), figures: rows(t.figures), moveable: rows(t.moveable), ember: rows(t.ember) }
+}
+
+/// One row of the in-hour "How to read" key (`presentation::gloss::READING_KEY_ITEMS`).
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct ReadingKeyItemView {
+    pub mark: String,
+    /// "rubric", "titulus", "unsaid", or "psalm".
+    pub style: String,
+    pub text: String,
+}
+
+/// The in-hour "How to read" disclosure (`presentation::gloss`).
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct ReadingKeyView {
+    pub label: String,
+    pub title: String,
+    pub items: Vec<ReadingKeyItemView>,
+    pub foot_before: String,
+    pub foot_link: String,
+    pub foot_after: String,
+}
+
+#[uniffi::export]
+pub fn reading_key() -> ReadingKeyView {
+    use presentation::gloss::{
+        READING_KEY_FOOT_AFTER, READING_KEY_FOOT_BEFORE, READING_KEY_FOOT_LINK, READING_KEY_ITEMS, READING_KEY_LABEL, READING_KEY_TITLE,
+    };
+    ReadingKeyView {
+        label: READING_KEY_LABEL.into(),
+        title: READING_KEY_TITLE.into(),
+        items: READING_KEY_ITEMS
+            .iter()
+            .map(|i| ReadingKeyItemView { mark: i.mark.into(), style: i.style.name().into(), text: i.text.into() })
+            .collect(),
+        foot_before: READING_KEY_FOOT_BEFORE.into(),
+        foot_link: READING_KEY_FOOT_LINK.into(),
+        foot_after: READING_KEY_FOOT_AFTER.into(),
+    }
+}
+
+/// The note opened by tapping "Ember days" on the Tabula Temporaria.
+#[uniffi::export]
+pub fn ember_days_gloss() -> GlossView {
+    let g = &presentation::gloss::EMBER_DAYS_GLOSS;
+    GlossView { title: g.title.into(), note: g.note.into(), quiet: false }
+}
+
+/// The notes opened by tapping abbreviations inside Ordo "Office details".
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct OrdoDetailGlosses {
+    pub benedictus: GlossView,
+    pub magnificat: GlossView,
+    pub commemoration: GlossView,
+    pub preces: GlossView,
+    pub suffrage: GlossView,
+}
+
+#[uniffi::export]
+pub fn ordo_detail_glosses() -> OrdoDetailGlosses {
+    let to_view = |g: &presentation::gloss::Gloss| GlossView { title: g.title.into(), note: g.note.into(), quiet: false };
+    OrdoDetailGlosses {
+        benedictus: to_view(&presentation::gloss::ORDO_BENEDICTUS_GLOSS),
+        magnificat: to_view(&presentation::gloss::ORDO_MAGNIFICAT_GLOSS),
+        commemoration: to_view(&presentation::gloss::ORDO_COMMEMORATION_GLOSS),
+        preces: to_view(&presentation::gloss::PRECES_GLOSS),
+        suffrage: to_view(&presentation::gloss::SUFFRAGE_GLOSS),
+    }
 }
 
 #[uniffi::export]
@@ -1056,6 +1144,7 @@ pub fn reminder_defaults() -> Vec<ReminderDefault> {
         .map(|&(hour, name, hh, mm, chosen)| ReminderDefault {
             hour: hour.to_string(),
             name: name.to_string(),
+            gloss: presentation::hour_gloss(hour).to_string(),
             hour_of_day: hh as i32,
             minute: mm as i32,
             chosen,
@@ -1328,6 +1417,9 @@ pub struct OrdoDayView {
     /// "Sun".
     pub weekday: String,
     pub feast: String,
+    /// Feast identifier for the day's principal celebration, or empty on plain ferias.
+    #[uniffi(default = "")]
+    pub feast_id: String,
     pub rank: String,
     pub rank_full: String,
     pub color: String,
@@ -1386,6 +1478,7 @@ impl OrdoDayView {
             date: CivilDate::from(d.date),
             weekday: d.date.weekday().name()[..3].to_string(),
             feast: typeset(&day_name(d)),
+            feast_id: d.celebration.as_ref().map(|c| core.feast_id(&c.id, &c.name, d.date)).unwrap_or_default(),
             rank: o.rank,
             rank_full: o.rank_full,
             color: o.color.as_str().to_string(),
@@ -1447,6 +1540,9 @@ pub struct HourView {
     pub date_label: String,
     /// The day's celebration; empty on a feria.
     pub feast: String,
+    /// Feast identifier for the hour's celebration, or empty when none.
+    #[uniffi(default = "")]
+    pub feast_id: String,
     /// The season in lower case ("pentecost"), empty when none.
     pub season: String,
     /// The season as the hour header names it ("Lent", "Eastertide"); empty after Pentecost.
@@ -1496,6 +1592,7 @@ impl HourView {
             title: hour.title.clone(),
             date_label: long_date(d),
             feast: typeset(&hour.feast),
+            feast_id: String::new(),
             season: hour.season.map(|s| s.as_str().to_string()).unwrap_or_default(),
             season_label: hour.season.map(|s| season_label(s.as_str())).unwrap_or_default(),
             ornament: ornament(gilding_class(hour.season, hour.color, hour.paschaltide)),
@@ -1552,6 +1649,9 @@ pub struct BlockView {
     pub phrases: bool,
     /// The space above the block, after the block shown before it; [`space_lines`] sizes it.
     pub space: Space,
+    /// A quiet note opened by tapping `marker` (e.g. "Ant."), with no underline at rest.
+    #[uniffi(default = None)]
+    pub marker_gloss: Option<GlossView>,
 }
 
 impl From<render_blocks::Block> for BlockView {
@@ -1559,6 +1659,7 @@ impl From<render_blocks::Block> for BlockView {
         BlockView {
             kind: b.kind.into(),
             marker: b.marker,
+            marker_gloss: b.marker_gloss.map(|g| GlossView { title: g.title.to_string(), note: g.note.to_string(), quiet: true }),
             drop_cap: b.drop_cap,
             starts_element: b.starts_element,
             space: b.space.into(),
@@ -1570,7 +1671,7 @@ impl From<render_blocks::Block> for BlockView {
                 .map(|r| RunView {
                     text: r.text,
                     style: r.style.into(),
-                    gloss: r.gloss.map(|g| GlossView { title: g.title.to_string(), note: g.note.to_string() }),
+                    gloss: r.gloss.map(|g| GlossView { title: g.title.to_string(), note: g.note.to_string(), quiet: r.quiet_gloss }),
                 })
                 .collect(),
         }
@@ -1586,11 +1687,14 @@ pub struct RunView {
     pub gloss: Option<GlossView>,
 }
 
-/// A rubric term's note: its heading and its words.
+/// A rubric term's or structural label's note: its heading, its words, and whether it stays
+/// un-underlined at rest (`quiet`).
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct GlossView {
     pub title: String,
     pub note: String,
+    #[uniffi(default = false)]
+    pub quiet: bool,
 }
 
 /// `render_blocks::BlockKind`, for the bindings.

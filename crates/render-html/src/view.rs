@@ -99,6 +99,8 @@ pub struct HourHeader {
     pub title: String,
     pub color: String,
     pub feast: String,
+    /// The feast's overview page, or empty when the day has none.
+    pub feast_href: String,
     pub season: String,
 }
 
@@ -185,6 +187,8 @@ pub struct DayRow {
     pub lead_to: String,
     pub lead_from: String,
     pub feast_name: String,
+    /// The principal feast's overview page, or empty on plain ferias without one.
+    pub feast_href: String,
     pub fast: bool,
     pub abstinence: bool,
     pub commemorations: Vec<String>,
@@ -242,12 +246,15 @@ pub struct CourseRunView {
 }
 
 /// A labelled figure or date in the Tabula Temporaria; `href` leads to the
-/// date's row when it has one.
+/// date's row when it has one, and `feast_href` leads to the feast overview page.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct TabulaRow {
     pub label: String,
     pub value: String,
     pub href: String,
+    pub feast_href: String,
+    pub gloss_title: String,
+    pub gloss_note: String,
 }
 
 /// The printed ordo's opening table for a year.
@@ -305,6 +312,7 @@ pub struct CalendarData {
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct ReminderHour {
     pub name: String,
+    pub gloss: String,
     pub slug: String,
     pub default: String,
     pub checked: bool,

@@ -888,6 +888,9 @@ private struct HourTitle: View {
     @State private var picking = false
     @Environment(\.reveal) private var reveal
     @State private var choosing = false
+    @State private var reading = false
+
+    private static let key = readingKey()
 
     var body: some View {
         let title = view.title.uppercased()
@@ -947,9 +950,19 @@ private struct HourTitle: View {
                     }
                 }
                 if !view.feast.isEmpty {
-                    Text(view.feast).type(Scale.dayName).foregroundStyle(p.text)
-                        .multilineTextAlignment(.center)
+                    if !view.feastId.isEmpty {
+                        Button { model.open(.feast(view.feastId)) } label: {
+                            Text(view.feast).type(Scale.dayName).foregroundStyle(p.text)
+                                .multilineTextAlignment(.center)
+                        }
+                        .buttonStyle(Quiet())
                         .padding(.top, m.px(1.9))
+                        .accessibilityHint("About this feast")
+                    } else {
+                        Text(view.feast).type(Scale.dayName).foregroundStyle(p.text)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, m.px(1.9))
+                    }
                 }
             }
             .padding(.top, m.px(2))
@@ -962,15 +975,26 @@ private struct HourTitle: View {
                 .buttonStyle(Quiet())
                 .padding(.top, m.px(5.6))
             }
-            // In home's foot letter, kept to one line (`.page-hour .leader-selector > summary`): on
-            // a first-class day the frame narrows the measure, and "Prayer form: Private" lost its
-            // caret to a line of its own.
-            Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label, style: Scale.smallCapsControl, upper: false) {
-                withAnimation(disclosing(!choosing)) {
-                    choosing.toggle()
-                    picking = false
-                } completion: {
-                    if choosing { reveal("disclosed") }
+            // In home's foot letter, kept to one line each: Prayer form and How to read sit side by
+            // side and wrap cleanly onto two centred lines when narrow or at large Dynamic Type.
+            MetaLine(space: m.px(4)) {
+                Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label, style: Scale.smallCapsControl, upper: false) {
+                    withAnimation(disclosing(!choosing)) {
+                        choosing.toggle()
+                        picking = false
+                        reading = false
+                    } completion: {
+                        if choosing { reveal("disclosed") }
+                    }
+                }
+                Disclosure(label: Self.key.label, open: reading, style: Scale.smallCapsControl, upper: false) {
+                    withAnimation(disclosing(!reading)) {
+                        reading.toggle()
+                        choosing = false
+                        picking = false
+                    } completion: {
+                        if reading { reveal("disclosed") }
+                    }
                 }
             }
             .padding(.top, m.px(4))
@@ -999,6 +1023,14 @@ private struct HourTitle: View {
                 .id("disclosed")
                 .transition(.unfold)
             }
+            if reading {
+                ReadingKeyPanel(key: Self.key) {
+                    reading = false
+                    model.open(.about)
+                }
+                .id("disclosed")
+                .transition(.unfold)
+            }
             Hairline(color: p.lining.opacity(0.3)).padding(.top, m.px(7.2))
         }
         .padding(.top, m.px(17.6))
@@ -1006,14 +1038,85 @@ private struct HourTitle: View {
         .accessibilityElement(children: .contain)
     }
 
-    /// The header's date opens and closes the date picker, closing the prayer form's chooser.
+    /// The header's date opens and closes the date picker, closing the other header disclosures.
     private func togglePicker() {
         withAnimation(disclosing(!picking)) {
             picking.toggle()
             choosing = false
+            reading = false
         } completion: {
             // Once unfolded, as Android waits on the transition rather than a clock.
             if picking { reveal("disclosed") }
+        }
+    }
+}
+
+/// In-hour "How to read" legend panel (matches web's `.reading-key-panel`).
+private struct ReadingKeyPanel: View {
+    let key: ReadingKeyView
+    let onAbout: () -> Void
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        let desc = TextStyle(size: 14.1, line: 20.4)
+        VStack(alignment: .leading, spacing: 0) {
+            Text(key.title.uppercased())
+                .type(.label(11.2, 0.1))
+                .foregroundStyle(p.muted)
+                .padding(.bottom, m.px(8.8))
+            Hairline(color: p.border)
+            ForEach(Array(key.items.enumerated()), id: \.offset) { i, item in
+                if i > 0 { Hairline(color: p.surfaceEdge) }
+                HStack(alignment: .firstTextBaseline, spacing: m.px(12)) {
+                    markView(item)
+                        .frame(width: m.px(82), alignment: .leading)
+                    Text(item.text)
+                        .type(desc)
+                        .foregroundStyle(p.text)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.vertical, m.px(8.3))
+                .padding(.horizontal, m.px(3.2))
+            }
+            Hairline(color: p.border)
+            Button(action: onAbout) {
+                (Text(key.footBefore).foregroundColor(p.muted)
+                    + Text(key.footLink).foregroundColor(p.accent).underline(true, color: p.goldLine)
+                    + Text(key.footAfter).foregroundColor(p.muted))
+                    .type(TextStyle(size: 12.8, line: 19.2))
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(Quiet())
+            .padding(.top, m.px(10.4))
+            .accessibilityLabel(key.footLink)
+            .accessibilityHint("Opens About the Office")
+        }
+        .frame(maxWidth: m.px(384))
+        .padding(.top, m.px(10))
+        .padding(.bottom, m.px(8))
+    }
+
+    @ViewBuilder
+    private func markView(_ item: ReadingKeyItemView) -> some View {
+        switch item.style {
+        case "rubric":
+            Text(item.mark).type(TextStyle(size: 14.1, line: 20.4, italic: true)).foregroundStyle(p.rubric).fixedSize()
+        case "titulus":
+            Text(item.mark).type(TextStyle(size: 14.1, line: 20.4, tracking: 1.1, smallCaps: true)).foregroundStyle(p.titulus).fixedSize()
+        case "unsaid":
+            Text(item.mark).type(TextStyle(size: 14.1, line: 20.4)).foregroundStyle(p.unsaid).fixedSize()
+        case "psalm":
+            let parts = item.mark.split(separator: " ", maxSplits: 1)
+            let primary = String(parts.first ?? "")
+            let secondary = parts.count > 1 ? " " + String(parts[1]) : ""
+            (Text(primary).foregroundColor(p.titulus)
+                + Text(secondary).font(Font(garamond(11.8 * m.type, lining: true))).foregroundColor(p.muted))
+                .type(TextStyle(size: 14.1, line: 20.4, lining: true))
+                .fixedSize()
+        default:
+            Text(item.mark).type(TextStyle(size: 14.1, line: 20.4)).foregroundStyle(p.text).fixedSize()
         }
     }
 }

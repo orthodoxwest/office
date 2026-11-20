@@ -4535,20 +4535,35 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
   await context.close();
 });
 
-test("a tap on an ordo day's row opens its office details; only the date leads to the day", async ({ page }) => {
+test("a tap on an ordo day's row opens its office details; its feast name opens the feast and its date leads to the day", async ({ page }) => {
   await openDatedPage(page, "/calendar/2026/03");
   const row = page.locator("#d-2026-03-01");
   const details = row.locator(".day-office-details");
-  await row.locator(".day-feast-name").click();
+  // Tapping the Office details summary opens details in place.
+  await details.locator("summary").click();
   await expect(details).toHaveAttribute("open", "");
   await expect(page).toHaveURL(/\/calendar\/2026\/03$/);
-  // Opened, its head leads on to the day.
+  // Opened, its head leads on to the day, and its abbreviation glosses open notes.
   await expect(details.locator(".day-office-open")).toHaveAttribute("href", /date=2026-03-01/);
-  // Again, it closes; the rank's mark answers with its note, not the row.
-  await row.locator(".day-feast-name").click();
+  await details.locator(".gloss-term").first().click();
+  await expect(page.locator("#gloss-note")).not.toHaveClass(/closed/);
+  await page.keyboard.press("Escape");
+  // Tapping the summary again closes details; the rank's mark answers with its note, not the row.
+  await details.locator("summary").click();
   await expect(details).not.toHaveAttribute("open", "");
   await row.locator(".day-mobile-rank").click();
   await expect(details).not.toHaveAttribute("open", "");
+  await page.keyboard.press("Escape");
+  // A plain feria (no feast link) still toggles details on a tap on its name.
+  const feria = page.locator("#d-2026-03-02");
+  await feria.locator(".day-feast-name").click();
+  await expect(feria.locator(".day-office-details")).toHaveAttribute("open", "");
+  await feria.locator(".day-feast-name").click();
+  await expect(feria.locator(".day-office-details")).not.toHaveAttribute("open", "");
+  // A feast day's inline feast link jumps straight to its feast overview page.
+  await row.locator(".day-feast-name a.feast-link").click();
+  await expect(page).toHaveURL(/\/feast\/lent-sunday-1\?from=ordo-2026-03-01$/);
+  await page.goBack();
   await row.locator(".day-mobile-date").click();
   await expect(page).toHaveURL(/date=2026-03-01/);
 });
@@ -4559,7 +4574,7 @@ test("an open ordo day's Open this day leads to the day", async ({ page }) => {
   await openDatedPage(page, "/calendar/2026/03");
   const row = page.locator("#d-2026-03-01");
   const details = row.locator(".day-office-details");
-  await row.locator(".day-feast-name").click();
+  await details.locator("summary").click();
   await expect(details).toHaveAttribute("open", "");
   // A click checks that the link, not the summary over it, takes the tap.
   await details.locator(".day-office-open").click();
@@ -4577,7 +4592,9 @@ test("an ordo row's tap leaves a mark's note alone, and its date's cell leads to
   const note = page.locator("#gloss-note");
   await row.locator(".day-mobile-rank").tap();
   await expect(note).not.toHaveClass(/closed/);
-  await row.locator(".day-feast-name").tap();
+  // Tapping blank space on the row (off the feast link) dismisses the note without opening details.
+  const feastCell = await row.locator("td.day-feast").boundingBox();
+  await page.touchscreen.tap(feastCell.x + feastCell.width - 12, feastCell.y + feastCell.height - 8);
   await expect(note).toHaveClass(/closed/);
   await expect(details).not.toHaveAttribute("open", "");
   await expect(row.locator(".day-mobile-date")).toHaveAccessibleDescription(/\S/);
@@ -4596,6 +4613,57 @@ test("an ordo row's tap leaves a mark's note alone, and its date's cell leads to
   // Its corner, off the numeral (the row may still be folding shut below).
   await page.mouse.click(cell.x + 4, cell.y + 4);
   await expect(page).toHaveURL(/date=2026-03-01/);
+});
+
+test("newcomer reading key, quiet structural glosses, 3-up menu, reminders glosses, and Tabula links", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  // 1A + 1B + 3E on an hour page.
+  await openDatedPage(page, "/lauds/2026-03-25");
+  const key = page.locator("details.reading-key");
+  await expect(key).not.toHaveAttribute("open", "");
+  await key.locator("> summary").click();
+  await expect(key).toHaveAttribute("open", "");
+  await expect(key.locator(".reading-key-foot a")).toHaveAttribute("href", "/about");
+  // Opening Prayer form closes How to read.
+  await page.locator(".leader-selector > summary").click();
+  await expect(key).not.toHaveAttribute("open", "");
+  // Quiet structural glosses carry no underline at rest yet open the gloss note on tap.
+  const quiet = page.locator(".gloss-quiet[data-gloss]").first();
+  await expect(quiet).toHaveCSS("text-decoration-line", "none");
+  await quiet.click();
+  await expect(page.locator("#gloss-note")).not.toHaveClass(/closed/);
+  await page.keyboard.press("Escape");
+  // Hour header feast links straight to the feast page and returns to the hour.
+  await page.locator(".hour-feast-link").click();
+  await expect(page).toHaveURL(/\/feast\/annunciation\?from=lauds-2026-03-25$/);
+  await expect(page.locator(".find-back")).toHaveText(/Lauds/);
+
+  // 3A: Mobile menu places Ordo, Reminders, and About on one 3-up row.
+  await page.locator(".site-menu > summary").click();
+  const rowTops = await page.locator('.site-menu nav a[data-nav="calendar"], .site-menu nav a[data-nav="reminders"], .site-menu nav a[data-nav="about"]').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
+  expect(rowTops.length).toBe(3);
+  expect(Math.max(...rowTops) - Math.min(...rowTops)).toBeLessThanOrEqual(4);
+
+  // 3B: Reminders shows plain-English gloss beneath each hour name.
+  await openDatedPage(page, "/reminders");
+  await expect(page.locator(".reminder-hour-gloss")).toHaveCount(7);
+
+  // 3C + 3E: Tabula figure & Ember glosses, single-line Ember fit at 390px, moveable feast link.
+  await openDatedPage(page, "/calendar/2026");
+  await page.locator('.tabula-figures .gloss-term[data-gloss-title="Golden Number"]').click();
+  await expect(page.locator("#gloss-note")).not.toHaveClass(/closed/);
+  await page.keyboard.press("Escape");
+  const emberRows = await page.locator("#tabula-ember + dl > div").evaluateAll((rows) => rows.map((r) => {
+    const dt = r.querySelector("dt").getBoundingClientRect();
+    const dd = r.querySelector("dd").getBoundingClientRect();
+    return Math.abs(Math.round(dt.top) - Math.round(dd.top));
+  }));
+  expect(emberRows.length).toBe(4);
+  for (const diff of emberRows) expect(diff).toBeLessThanOrEqual(4);
+  await page.locator('.tabula-tables dt a.feast-link', { hasText: "Ash Wednesday" }).click();
+  await expect(page).toHaveURL(/\/feast\/ash-wednesday\?from=ordo-2026$/);
+  await expect(page.locator(".find-back")).toHaveText(/2026 Ordo/);
 });
 
 // One theme: overflow and touch targets are geometry, which themes share

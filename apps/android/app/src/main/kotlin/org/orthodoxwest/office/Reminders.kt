@@ -39,7 +39,7 @@ object Office {
 }
 
 /** One hour on the reminder page: whether it is chosen, and its time. */
-data class HourReminder(val hour: String, val name: String, val chosen: Boolean, val time: LocalTime)
+data class HourReminder(val hour: String, val name: String, val chosen: Boolean, val time: LocalTime, val gloss: String = "")
 
 /** Minutes before the hour, as the web's "Remind me" offers them (without its alert-less option). */
 val REMINDER_LEADS = listOf(0 to "At the hour", 5 to "5 minutes before", 10 to "10 minutes before", 15 to "15 minutes before", 30 to "30 minutes before")
@@ -97,9 +97,9 @@ class ReminderStore(context: Context) {
         val hours = reminderDefaults().map { d ->
             val saved = prefs.getString("hour.${d.hour}", null)?.split(",")
             if (saved != null && saved.size == 3) {
-                HourReminder(d.hour, d.name, saved[0] == "1", LocalTime.of(saved[1].toInt(), saved[2].toInt()))
+                HourReminder(d.hour, d.name, saved[0] == "1", LocalTime.of(saved[1].toInt(), saved[2].toInt()), d.gloss)
             } else {
-                HourReminder(d.hour, d.name, d.chosen, LocalTime.of(d.hourOfDay, d.minute))
+                HourReminder(d.hour, d.name, d.chosen, LocalTime.of(d.hourOfDay, d.minute), d.gloss)
             }
         }
         val days = prefs.getString("days", null)?.split(",")?.mapNotNull { runCatching { DayOfWeek.valueOf(it) }.getOrNull() }?.toSet()

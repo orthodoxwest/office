@@ -13,13 +13,167 @@ pub struct Gloss {
     pub note: &'static str,
 }
 
-/// Longest first, so "entirely in secret" is never read as a shorter term inside it.
+/// Longest first, so "entirely in secret" and "out of Choir" are never read as shorter terms inside them.
 const GLOSSES: &[Gloss] = &[
     Gloss { term: "entirely in secret", title: "Entirely in secret", note: "The whole prayer, shown in grey, is said silently." },
+    Gloss {
+        term: "under the rite of a double",
+        title: "Rite of a Double",
+        note: "A fuller liturgical form where each antiphon is said in full before and after its psalm.",
+    },
+    Gloss { term: "out of choir", title: "Out of Choir", note: "Prayed privately or outside a church choir." },
+    Gloss {
+        term: "martyrology",
+        title: "Martyrology",
+        note: "The daily reading of the saints and martyrs commemorated on the coming day. You can turn it on in Settings.",
+    },
+    Gloss { term: "in choir", title: "In Choir", note: "Prayed together in church or community, rather than privately." },
     Gloss {
         term: "secretly",
         title: "Secretly",
         note: "Only the first words are said aloud. The rest of the prayer, shown in grey, is said silently.",
+    },
+];
+
+/// Quiet structural glosses inside an hour: tappable without an underline at rest, so repeating
+/// readers see uncluttered typography while a newcomer can tap an unfamiliar mark or heading.
+pub const ANTIPHON_GLOSS: Gloss = Gloss {
+    term: "Ant.",
+    title: "Antiphon",
+    note: "A short verse sung or read before and after a psalm, giving it the theme of the day or season. You do not read “Ant.” aloud.",
+};
+
+pub const PSALM_NUMBER_GLOSS: Gloss = Gloss {
+    term: "Psalm numbering",
+    title: "Psalm numbering",
+    note: "The first number follows the traditional Septuagint and Vulgate psalter; the number in parentheses follows the Hebrew and King James numbering.",
+};
+
+pub const CHAPTER_GLOSS: Gloss = Gloss {
+    term: "Chapter",
+    title: "Chapter",
+    note: "A brief Scripture reading (capitulum) appointed for this hour, usually a single verse.",
+};
+
+pub const PRECES_GLOSS: Gloss =
+    Gloss { term: "Preces", title: "Preces", note: "Ferial prayers: extra versicles and responses said kneeling on penitential weekdays." };
+
+pub const SUFFRAGE_GLOSS: Gloss =
+    Gloss { term: "Suffrage", title: "Suffrage", note: "A short prayer asking the intercession of the Blessed Virgin and all the Saints." };
+
+/// Returns a quiet gloss for an hour's section heading when the term is specialized liturgical vocabulary.
+pub fn heading_gloss(label: &str) -> Option<&'static Gloss> {
+    match label.trim() {
+        "Chapter" => Some(&CHAPTER_GLOSS),
+        "Preces" => Some(&PRECES_GLOSS),
+        "Suffrage" | "Suffrage of the Saints" => Some(&SUFFRAGE_GLOSS),
+        _ => None,
+    }
+}
+
+/// Tabula Temporaria & Ordo detail glosses, shared across Web, Android, and iOS.
+pub const GOLDEN_NUMBER_GLOSS: Gloss = Gloss {
+    term: "Golden Number",
+    title: "Golden Number",
+    note: "The year’s place (1–19) in the lunar cycle, used to reckon the date of Pascha (Easter).",
+};
+
+pub const DOMINICAL_LETTER_GLOSS: Gloss = Gloss {
+    term: "Dominical Letter",
+    title: "Dominical Letter",
+    note: "Marks which day of January is the first Sunday of the year (A–G; two letters in a leap year).",
+};
+
+pub const EMBER_DAYS_GLOSS: Gloss = Gloss {
+    term: "Ember days",
+    title: "Ember days",
+    note: "Four quarterly weeks of Wednesday, Friday, and Saturday fasting and prayer at the turning of the seasons.",
+};
+
+pub const ORDO_BENEDICTUS_GLOSS: Gloss = Gloss {
+    term: "Ben.",
+    title: "Benedictus antiphon",
+    note: "The short verse framing the Song of Zechariah (Benedictus) near the end of Lauds.",
+};
+
+pub const ORDO_MAGNIFICAT_GLOSS: Gloss = Gloss {
+    term: "Mag.",
+    title: "Magnificat antiphon",
+    note: "The short verse framing the Song of Mary (Magnificat) near the end of Vespers.",
+};
+
+pub const ORDO_COMMEMORATION_GLOSS: Gloss = Gloss {
+    term: "Com.",
+    title: "Commemoration",
+    note: "An additional antiphon, versicle, and collect for a lesser feast or season kept on the same day.",
+};
+
+/// Returns the gloss for a Tabula Temporaria figure label, if any.
+pub fn tabula_figure_gloss(label: &str) -> Option<&'static Gloss> {
+    match label {
+        "Golden Number" => Some(&GOLDEN_NUMBER_GLOSS),
+        "Dominical Letter" => Some(&DOMINICAL_LETTER_GLOSS),
+        _ => None,
+    }
+}
+
+/// The ink style of a mark in the in-hour "How to read" key.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ReadingKeyStyle {
+    Rubric,
+    Titulus,
+    Unsaid,
+    Psalm,
+}
+
+impl ReadingKeyStyle {
+    pub fn name(self) -> &'static str {
+        match self {
+            ReadingKeyStyle::Rubric => "rubric",
+            ReadingKeyStyle::Titulus => "titulus",
+            ReadingKeyStyle::Unsaid => "unsaid",
+            ReadingKeyStyle::Psalm => "psalm",
+        }
+    }
+}
+
+/// One row of the in-hour "How to read" disclosure, shared across every front.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ReadingKeyItem {
+    pub mark: &'static str,
+    pub style: ReadingKeyStyle,
+    pub text: &'static str,
+}
+
+pub const READING_KEY_LABEL: &str = "How to read";
+pub const READING_KEY_TITLE: &str = "Marks on this page";
+pub const READING_KEY_FOOT_BEFORE: &str = "Posture cues (Sit., Stand., Bow.) are for choir and optional alone. More in ";
+pub const READING_KEY_FOOT_LINK: &str = "About the Office";
+pub const READING_KEY_FOOT_AFTER: &str = ".";
+
+pub const READING_KEY_ITEMS: &[ReadingKeyItem] = &[
+    ReadingKeyItem {
+        mark: "Red words",
+        style: ReadingKeyStyle::Rubric,
+        text: "Directions, not read aloud. Underlined words open a note when tapped.",
+    },
+    ReadingKeyItem { mark: "℣.  ℟.", style: ReadingKeyStyle::Rubric, text: "Versicle and response. Praying alone, say both." },
+    ReadingKeyItem {
+        mark: "*  †",
+        style: ReadingKeyStyle::Rubric,
+        text: "Pause briefly at * in each psalm verse, and take a breath at †.",
+    },
+    ReadingKeyItem { mark: "✠", style: ReadingKeyStyle::Rubric, text: "Make the sign of the cross." },
+    ReadingKeyItem { mark: "Ant.", style: ReadingKeyStyle::Titulus, text: "Antiphon: a short verse framing a psalm or canticle." },
+    ReadingKeyItem {
+        mark: "Grey type",
+        style: ReadingKeyStyle::Unsaid,
+        text: "Said silently, or opening words already spoken in the antiphon.",
+    },
+    ReadingKeyItem {
+        mark: "62 (63)",
+        style: ReadingKeyStyle::Psalm,
+        text: "Traditional Septuagint psalm number first; Hebrew number in parentheses.",
     },
 ];
 
@@ -127,6 +281,17 @@ mod tests {
         };
         assert_eq!(gloss.title, "Entirely in secret");
         assert!(!gloss.note.contains("aloud"));
+    }
+
+    #[test]
+    fn prime_and_vespers_rubrics_gloss_liturgical_terms() {
+        let prime = "Then the Martyrology is read in Choir, and this may laudably be done also in the private recitation of the Office out of Choir.";
+        assert_eq!(terms(prime), ["Martyrology", "in Choir", "out of Choir"]);
+        assert_eq!(joined(prime), prime);
+
+        let dead = "After Let us bless the Lord, Vespers of the Dead are begun immediately under the rite of a Double, with the Antiphon I will walk.";
+        assert_eq!(terms(dead), ["under the rite of a Double"]);
+        assert_eq!(joined(dead), dead);
     }
 
     #[test]

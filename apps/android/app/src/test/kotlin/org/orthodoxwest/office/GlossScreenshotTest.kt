@@ -64,8 +64,11 @@ class GlossScreenshotTest {
     /** The apps gloss the same words the web does. */
     @Test
     fun theNotesAreTheWebs() {
-        val notes = Office.core.compose("compline", 2026, 3, 15, "private").sections.flatMap { it.blocks }.flatMap { it.runs }.mapNotNull { it.gloss }
-        assertEquals(listOf("Entirely in secret", "Secretly"), notes.map { it.title })
-        assertEquals("The whole prayer, shown in grey, is said silently.", notes[0].note)
+        val all = Office.core.compose("compline", 2026, 3, 15, "private").sections.flatMap { it.blocks }.flatMap { it.runs }.mapNotNull { it.gloss }
+        val rubric = all.filter { !it.quiet }
+        assertEquals(listOf("Entirely in secret", "Secretly"), rubric.map { it.title })
+        assertEquals("The whole prayer, shown in grey, is said silently.", rubric[0].note)
+        val quiet = all.filter { it.quiet }.map { it.title }
+        assert(quiet.contains("Psalm numbering") && quiet.contains("Chapter")) { "missing quiet structural glosses: $quiet" }
     }
 }
