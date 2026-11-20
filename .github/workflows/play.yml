@@ -135,8 +135,9 @@ jobs:
           fi
 
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@1.100.0
+        uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: 1.100.0
           targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
 
       - name: Cache Cargo

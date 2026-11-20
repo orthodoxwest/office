@@ -40,5 +40,5 @@ updates:
       actions:
         patterns: ["*"]
     ignore:
-      # The ref names the CI Rust version; raise it deliberately with rust-version.
+      # Pinned on master via actions.lock; the CI Rust version is passed as the toolchain input.
       - dependency-name: dtolnay/rust-toolchain
