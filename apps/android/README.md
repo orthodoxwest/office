@@ -269,8 +269,7 @@ testing.
   each new release (usually hours) comes out of the 20% stage. A build's upload time is when its
   Publish to Play run finished. A build a later merge has replaced on Closed testing still
   qualifies, with the notes it was uploaded with (`whatsnew.txt` at its commit): merges land more
-  than once a day, so the build on Closed testing now is seldom a day old. A version code Play
-  has no bundle for is skipped.
+  than once a day, so the build on Closed testing now is seldom a day old.
 - **The staged release's name** in Play Console ("0.1.120 staged 2026-11-12T15:00Z") records when
   it started; that is how the next runs know its age.
 - **Halting** a rollout in Play Console (*Production → Halt rollout*), or starting one there,
