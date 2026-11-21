@@ -87,6 +87,25 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6.4.1
 
+      # Robolectric fetches each SDK's android-all jar from Maven Central into
+      # ~/.m2 when the tests first run, outside Gradle's dependency cache, so
+      # without this every run downloads it again and a hiccup there fails
+      # every Robolectric class before a test runs. Keyed on the Robolectric
+      # version and the SDKs the tests ask for, so a bump fetches afresh.
+      - name: Read the Robolectric key
+        id: robolectric
+        run: |
+          version=$(sed -n 's/^robolectric = "\(.*\)"$/\1/p' apps/android/gradle/libs.versions.toml)
+          sdks=$(grep -rhoE '@Config\(sdk *= *\[[0-9, ]+\]' apps/android/app/src/test | grep -oE '[0-9]+' | sort -un | paste -sd- -)
+          test -n "$version" && test -n "$sdks"
+          echo "key=robolectric-$version-sdk-$sdks" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Robolectric's Android jars
+        uses: actions/cache@v6.1.0
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: ${{ steps.robolectric.outputs.key }}
+
       - name: Build the APK and render screenshots
         working-directory: apps/android
         run: ./gradlew --console=plain assemblePreview testDebugUnitTest
