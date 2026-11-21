@@ -2,6 +2,7 @@ import SwiftUI
 
 /// The search and feast page's fixed words, as every front sets them.
 let feastWordsShared = feastWords()
+private let feastGlossesShared = feastGlosses()
 
 /// The search for a feast or saint, as the web's /calendar/find.
 struct FindPage: View {
@@ -314,7 +315,7 @@ struct FeastScreen: View {
         let opened = openHymnsOf == view.id ? openHymns : []
         let columns = hymnColumns(view.texts.map { SectionView(label: "", collapsible: false, bare: false, blocks: $0.blocks) }, p, o, m)
         return VStack(alignment: .leading, spacing: 0) {
-            SectionHeading(text: w.textsHeading, seed: 71).padding(.bottom, m.px(4.8))
+            SectionHeading(text: w.textsHeading, seed: 71, gloss: feastGlossesShared.proper).padding(.bottom, m.px(4.8))
             Text(view.textsSource).type(TextStyle(size: 14.4, line: 21, italic: true)).foregroundStyle(p.muted).padding(.top, m.px(6.4))
             ForEach(Array(view.texts.enumerated()), id: \.offset) { n, t in
                 if let title = t.hymnTitle {
@@ -353,7 +354,7 @@ struct FeastScreen: View {
                         .transition(.unfold)
                     }
                 } else {
-                    TextLabel(label: t.label, common: t.common ? w.commonMark : "")
+                    TextLabel(label: t.label, common: t.common ? w.commonMark : "", labelGloss: t.labelGloss, commonGloss: t.common ? feastGlossesShared.common : nil)
                         .padding(.top, m.px(n == 0 ? 20.8 : 16)).padding(.bottom, m.px(2.4))
                     // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.
                     ForEach(Array(blocks(t, first: n == 0).enumerated()), id: \.offset) { i, b in
@@ -444,13 +445,18 @@ private struct FeastHead: View {
                         Rectangle().fill(frontal).frame(width: 5.5, height: 5.5)
                             .rotationEffect(.degrees(45))
                             .frame(height: rank.uiFont(m).lineHeight)
+                            .accessibilityHidden(true)
                     }
-                    Text(part).type(rank).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                    if i == 0, let rg = view.rankGloss {
+                        GlossMark(gloss: rg, label: part, reaches: false) {
+                            Text(part).type(rank).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                        }
+                    } else {
+                        Text(part).type(rank).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                    }
                 }
             }
             .padding(.top, m.px(8.8))
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(view.subtitle)
         }
         .accessibilityElement(children: .contain)
         .padding(.horizontal, m.px(8))
@@ -537,9 +543,11 @@ private struct StandingBox: View {
         let wash = view.next?.color == "black" ? Color.clear : HomeInk.of(p).tabletWash
         VStack(spacing: m.px(8)) {
             if monastic {
-                Text(w.monasticHeading).type(TextStyle(size: 15.2, line: 22, tracking: 2.28, smallCaps: true)).foregroundStyle(p.titulus)
-                    .multilineTextAlignment(.center)
-                    .accessibilityAddTraits(.isHeader)
+                GlossMark(gloss: feastGlossesShared.monastic, label: w.monasticHeading, reaches: false) {
+                    Text(w.monasticHeading).type(TextStyle(size: 15.2, line: 22, tracking: 2.28, smallCaps: true)).foregroundStyle(p.titulus)
+                        .multilineTextAlignment(.center)
+                }
+                .accessibilityAddTraits(.isHeader)
                 if let all = view.keptByAll {
                     Button { model.open(.feast(all.id)) } label: {
                         (Text(w.everyoneKeeps + " ") + Text(all.name).foregroundColor(p.accent) + Text(" " + view.keptByAllNote))
@@ -605,21 +613,48 @@ private struct TextLabel: View {
     let common: String
     /// A hymn's fold: its caret, open or not, after the label (the web's `summary h3::after`).
     var caret: Bool? = nil
+    var labelGloss: GlossView? = nil
+    var commonGloss: GlossView? = nil
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
         let caps = TextStyle(size: 16, line: 22, tracking: 0.8, smallCaps: true)
-        let name = Text(label).font(Font(caps.uiFont(m))).foregroundColor(p.titulus).tracking(0.8 * m.type)
-        let mark = Text(common.isEmpty ? "" : "  " + common).font(Font(TextStyle(size: 13.6, line: 22, italic: true).uiFont(m))).foregroundColor(p.muted)
-        return HStack(spacing: 0) {
-            (name + mark)
-                .lineSpacing(max(0, caps.line * m.type - caps.uiFont(m).lineHeight))
-            if let caret { Caret(open: caret, color: p.titulus) }
+        let commonStyle = TextStyle(size: 13.6, line: 22, italic: true)
+        if caret == nil && (labelGloss != nil || commonGloss != nil) {
+            HStack(alignment: .firstTextBaseline, spacing: m.px(8)) {
+                if let labelGloss {
+                    GlossMark(gloss: labelGloss, label: label, reaches: false) {
+                        Text(label).type(caps).foregroundStyle(p.titulus)
+                    }
+                    .accessibilityAddTraits(.isHeader)
+                } else {
+                    Text(label).type(caps).foregroundStyle(p.titulus)
+                        .accessibilityAddTraits(.isHeader)
+                }
+                if !common.isEmpty {
+                    if let commonGloss {
+                        GlossMark(gloss: commonGloss, label: common, reaches: false) {
+                            Text(common).type(commonStyle).foregroundStyle(p.muted)
+                        }
+                    } else {
+                        Text(common).type(commonStyle).foregroundStyle(p.muted)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            let name = Text(label).font(Font(caps.uiFont(m))).foregroundColor(p.titulus).tracking(0.8 * m.type)
+            let mark = Text(common.isEmpty ? "" : "  " + common).font(Font(commonStyle.uiFont(m))).foregroundColor(p.muted)
+            HStack(spacing: 0) {
+                (name + mark)
+                    .lineSpacing(max(0, caps.line * m.type - caps.uiFont(m).lineHeight))
+                if let caret { Caret(open: caret, color: p.titulus) }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isHeader)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isHeader)
     }
 }
 
@@ -651,15 +686,23 @@ private struct FeastHeader: View {
 private struct SectionHeading: View {
     let text: String
     let seed: UInt32
+    var gloss: GlossView? = nil
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
-        Text(text).type(TextStyle(size: 17.28, line: 24, tracking: 2.6, smallCaps: true)).foregroundStyle(p.titulus)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.bottom, m.px(6.4))
-            .overlay(alignment: .bottom) { Stroke(weight: 1.3, seed: seed, color: p.lining.opacity(0.78), foot: true) }
-            .accessibilityAddTraits(.isHeader)
+        let heading = Text(text).type(TextStyle(size: 17.28, line: 24, tracking: 2.6, smallCaps: true)).foregroundStyle(p.titulus)
+        Group {
+            if let gloss {
+                GlossMark(gloss: gloss, label: text, reaches: false) { heading }
+            } else {
+                heading
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.bottom, m.px(6.4))
+        .overlay(alignment: .bottom) { Stroke(weight: 1.3, seed: seed, color: p.lining.opacity(0.78), foot: true) }
+        .accessibilityAddTraits(.isHeader)
     }
 }
 

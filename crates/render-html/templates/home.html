@@ -39,17 +39,17 @@
            is set apart from the name, so it is kept whole and, when the two
            cannot share a line, takes the next line of its own. #}
         {% if feast_name %}<p class="feast{% if feast_alias %} has-alias{% endif %}">{% if feast_href %}<a class="feast-link" href="{{ feast_href|url }}" title="About this feast">{% endif %}{% if feast_alias %}<span class="feast-name">{{ feast_name|typeset }}</span> <span class="feast-alias">{{ feast_alias|typeset }}</span>{% else %}{{ feast_name|typeset }}{% endif %}{% if feast_href %}</a>{% endif %}</p>{% endif %}
-        {% if octave_note %}<p class="octave-note">{{ octave_note }}</p>{% endif %}
+        {% if octave_note %}<p class="octave-note"><span class="gloss-quiet" data-gloss-title="{{ octave_gloss.title }}" data-gloss="{{ octave_gloss.note }}">{{ octave_note }}</span></p>{% endif %}
         {% if penitential %}
         <p class="penitential">
-          {% for label in penitential %}{% if not loop.first %} {% endif %}<span class="penitential-badge">{{ label }}</span>{% endfor %}
+          {% for label in penitential %}{% if not loop.first %} {% endif %}{% set pg = label|penitential_gloss %}<span class="penitential-badge{% if pg %} gloss-quiet{% endif %}"{% if pg %} data-gloss-title="{{ pg.title }}" data-gloss="{{ pg.note }}"{% endif %}>{{ label }}</span>{% endfor %}
         </p>
         {% endif %}
         {# The day's versicle from Lauds, on a day plain enough to have room
            for it: never in Passiontide or on a violet day, when the head is
            stripped (presentation::home_shows_versicle). #}
         {% if versicle %}
-        <p class="home-versicle"><span class="home-versicle-line"><span class="home-versicle-sigil">℣.</span> {{ versicle|typeset }}</span> <span class="home-versicle-line"><span class="home-versicle-sigil">℟.</span> {{ response|typeset }}</span></p>
+        <p class="home-versicle"><span class="home-versicle-line"><span class="home-versicle-sigil gloss-quiet" data-gloss-title="{{ versicle_gloss.title }}" data-gloss="{{ versicle_gloss.note }}">℣.</span> {{ versicle|typeset }}</span> <span class="home-versicle-line"><span class="home-versicle-sigil gloss-quiet" data-gloss-title="{{ versicle_gloss.title }}" data-gloss="{{ versicle_gloss.note }}">℟.</span> {{ response|typeset }}</span></p>
         {% endif %}
         {% if commemorations %}
         <div class="commemorations">
@@ -143,7 +143,7 @@
     {# Season rides the secondary control row: context without interrupting
          the date → prayer invitation reading order. #}
     <div class="home-day-meta">
-      {% if season %}<p class="home-season">{{ season }}</p>{% endif %}
+      {% if season %}{% set sg = season|season_gloss %}<p class="home-season">{% if sg %}<span class="gloss-quiet" data-gloss-title="{{ sg.title }}" data-gloss="{{ sg.note }}">{{ season }}</span>{% else %}{{ season }}{% endif %}</p>{% endif %}
       {# Shown only in a reader's first week (layout.html's data-newcomer); the menu keeps About after. #}
       <a class="home-introduction" href="/about">{{ about_introduction }}</a>
       <details class="hour-date-nav home-date-nav">

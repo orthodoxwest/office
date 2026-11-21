@@ -77,7 +77,7 @@
   <div class="calendar-header" id="calendar-top">
     <div class="calendar-title">
       {{ headpiece() }}
-      <h1>{{ year }} Ordo</h1>
+      <h1>{{ year }} <span class="gloss-quiet" data-gloss-title="{{ ordo_gloss.title }}" data-gloss="{{ ordo_gloss.note }}">Ordo</span></h1>
       {# The frontispiece reads as the printed ordo's title page. #}
       <p class="calendar-subtitle">{% if view == "year" and year_roman %}Anno Domini {{ year_roman }}{% else %}Feasts &amp; daily observances{% endif %}</p>
     </div>
@@ -104,7 +104,7 @@
     <a class="calendar-whole-year" href="{{ all_link|url }}">The whole year on one page</a>
   </div>
   <section class="tabula" aria-labelledby="tabula-heading">
-    <h2 id="tabula-heading">Tabula Temporaria</h2>
+    <h2 id="tabula-heading"><span class="gloss-quiet" data-gloss-title="{{ tabula_temporaria_gloss.title }}" data-gloss="{{ tabula_temporaria_gloss.note }}">Tabula Temporaria</span></h2>
     <dl class="tabula-figures">
       {% for r in tabula.figures %}<div><dt>{% if r.gloss_note %}<span class="gloss-term" data-gloss-title="{{ r.gloss_title }}" data-gloss="{{ r.gloss_note }}">{{ r.label }}</span>{% else %}{{ r.label }}{% endif %}</dt><dd>{{ r.value }}</dd></div>{% endfor %}
     </dl>
@@ -177,7 +177,7 @@
                tapping Office details or the rest of the row opens its office details (app.js). #}
             <span class="day-feast-name" id="n-{{ d.date_slug }}">{% if d.feast_href %}<a class="feast-link" href="{{ d.feast_href|url }}" title="About this feast">{{ d.feast_name|typeset }}</a>{% else %}{{ d.feast_name|typeset }}{% endif %}</span>
             {# Kept by monastics and oblates only: the ordo's bracketed line, never the day's office. #}
-            {% if d.monastic %}<div class="day-monastic">{% for o in d.monastic %}<p>[{{ o.heading|typeset }}] <abbr tabindex="0" title="{{ o.rank_full }}">{{ o.rank }}</abbr>{% if o.office %}<span class="day-monastic-office">{{ o.office|typeset }}</span>{% endif %}</p>{% endfor %}</div>{% endif %}
+            {% if d.monastic %}<div class="day-monastic">{% for o in d.monastic %}<p><span class="gloss-quiet" data-gloss-title="{{ monastic_gloss.title }}" data-gloss="{{ monastic_gloss.note }}">[{{ o.heading|typeset }}]</span> <abbr tabindex="0" title="{{ o.rank_full }}">{{ o.rank }}</abbr>{% if o.office %}<span class="day-monastic-office">{{ o.office|typeset }}</span>{% endif %}</p>{% endfor %}</div>{% endif %}
             {# One disclosure holds the day's commemorations and its office. #}
             <div class="day-disclosures">
             {% if d.commemorations or d.benedictus_antiphon or d.magnificat_antiphon or d.lauds_preces or d.lauds_suffrage or d.lauds_cross or d.hours_preces or d.vespers_preces or d.vespers_suffrage or d.vespers_cross or d.vespers_note or d.lauds_comms or d.vespers_comms %}
@@ -199,7 +199,7 @@
                   {% if d.benedictus_antiphon %}<span class="day-office-incipit"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_ben.title }}" data-gloss="{{ ordo_gloss_ben.note }}">Ben.</span> &ldquo;{{ d.benedictus_antiphon }}&rdquo;</span>{% endif %}
                   {% if d.lauds_preces %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_preces.title }}" data-gloss="{{ ordo_gloss_preces.note }}">Preces</span></span>{% endif %}
                   {% if d.lauds_suffrage %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_suffrage.title }}" data-gloss="{{ ordo_gloss_suffrage.note }}">Suffrage</span></span>{% endif %}
-                  {% if d.lauds_cross %}<span class="day-office-badge">Commemoration of the Cross</span>{% endif %}
+                  {% if d.lauds_cross %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_cross.title }}" data-gloss="{{ ordo_gloss_cross.note }}">Commemoration of the Cross</span></span>{% endif %}
                   {% for c in d.lauds_comms %}<span class="day-office-comm"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_com.title }}" data-gloss="{{ ordo_gloss_com.note }}">Com.</span> {% if c.href %}<a class="feast-link" href="{{ c.href|url }}">{{ c.name|typeset }}</a>{% else %}{{ c.name|typeset }}{% endif %}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
                 </dd>
               </div>
@@ -214,11 +214,11 @@
               <div class="day-office-hour">
                 <dt>Vespers</dt>
                 <dd>
-                  {% if d.vespers_note %}<span class="day-office-note">{{ d.vespers_note }}</span>{% endif %}
+                  {% if d.vespers_note %}{% set vg = d.vespers_note|vespers_note_gloss %}<span class="day-office-note">{% if vg %}<span class="gloss-term" data-gloss-title="{{ vg.title }}" data-gloss="{{ vg.note }}">{{ d.vespers_note }}</span>{% else %}{{ d.vespers_note }}{% endif %}</span>{% endif %}
                   {% if d.magnificat_antiphon %}<span class="day-office-incipit"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_mag.title }}" data-gloss="{{ ordo_gloss_mag.note }}">Mag.</span> &ldquo;{{ d.magnificat_antiphon }}&rdquo;</span>{% endif %}
                   {% if d.vespers_preces %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_preces.title }}" data-gloss="{{ ordo_gloss_preces.note }}">Preces</span></span>{% endif %}
                   {% if d.vespers_suffrage %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_suffrage.title }}" data-gloss="{{ ordo_gloss_suffrage.note }}">Suffrage</span></span>{% endif %}
-                  {% if d.vespers_cross %}<span class="day-office-badge">Commemoration of the Cross</span>{% endif %}
+                  {% if d.vespers_cross %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_cross.title }}" data-gloss="{{ ordo_gloss_cross.note }}">Commemoration of the Cross</span></span>{% endif %}
                   {% for c in d.vespers_comms %}<span class="day-office-comm"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_com.title }}" data-gloss="{{ ordo_gloss_com.note }}">Com.</span> {% if c.href %}<a class="feast-link" href="{{ c.href|url }}">{{ c.name|typeset }}</a>{% else %}{{ c.name|typeset }}{% endif %}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
                 </dd>
               </div>
