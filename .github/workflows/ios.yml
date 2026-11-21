@@ -124,31 +124,20 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Choose and boot the simulators
+      - name: Choose the simulators
         id: sim
         env:
           STORE: ${{ inputs.store }}
         run: |
           # The Xcode, runtime and devices the baselines were taken with (their environment.json),
           # else the image's newest iPhone 17 and 11-inch iPad Pro. A manual run with `store` takes
-          # the sizes App Store Connect asks for instead. Both simulators start booting now,
-          # behind the builds.
+          # the sizes App Store Connect asks for instead. None boots yet: a booting simulator
+          # slowed every step behind it five- to tenfold (screenshots.sh devices).
           if [ "$STORE" = true ]; then
             apps/ios/screenshots.sh devices store >> "$GITHUB_OUTPUT"
           else
             apps/ios/screenshots.sh devices >> "$GITHUB_OUTPUT"
           fi
-
-      # rustup's download of the toolchain ran 5 to 13 minutes on the macOS runners; the cache's
-      # comes in seconds. Only the pinned toolchain is kept (the key follows the pin below), not
-      # the image's own, and update-ios-snapshots.yml restores the same key.
-      - name: Cache the Rust toolchain
-        uses: actions/cache@v6.1.0
-        with:
-          path: |
-            ~/.rustup/toolchains/1.100.0-aarch64-apple-darwin
-            ~/.rustup/update-hashes/1.100.0-aarch64-apple-darwin
-          key: rustup-${{ runner.os }}-${{ runner.arch }}-1.100.0-ios-sim
 
       # Only the simulator's target: the device's library is TestFlight's.
       - name: Set up Rust
@@ -176,10 +165,12 @@ jobs:
         working-directory: apps/ios
         run: xcodegen generate
 
-      # xcodebuild lists no simulator at all, only placeholders, and fails while the image is
-      # still making its simulator runtime ready (seen on macos-26 with a booting phone), so the
-      # build waits for the phone to finish booting first.
-      - name: Wait for the phone to boot
+      # The phone boots only now, with the core built: booted at the start, it and the iPad made
+      # the toolchain, the Cargo cache and the core's build five to ten times slower. xcodebuild
+      # lists no simulator at all, only placeholders, and fails while the image is still making
+      # its simulator runtime ready (seen on macos-26 with a booting phone), so the build waits
+      # for the boot to finish. The iPad boots after the phone's shots (screenshots.sh shoot).
+      - name: Boot the phone
         env:
           PHONE: ${{ steps.sim.outputs.phone }}
         run: |

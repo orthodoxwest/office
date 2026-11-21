@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # The simulator screenshots, for .github/workflows/ios.yml and update-ios-snapshots.yml.
 #
-#   screenshots.sh devices [store]   choose Xcode and the two simulators and start booting them;
-#                                    prints phone=, ipad= and pinned= lines for $GITHUB_OUTPUT
+#   screenshots.sh devices [store]   choose Xcode and the two simulators; prints phone=, ipad=
+#                                    and pinned= lines for $GITHUB_OUTPUT
 #   screenshots.sh shoot PHONE IPAD APP OUT
-#                                    install APP on both and shoot every page into OUT, with
-#                                    the environment they were taken in (environment.json)
+#                                    boot each simulator in turn, install APP and shoot every
+#                                    page into OUT, with the environment they were taken in
+#                                    (environment.json)
 #
 # The checked-in baselines (apps/ios/snapshots/) record the Xcode, runtime and devices they were
 # taken with (environment.json). `devices` takes the same ones when the runner has them, and says
@@ -111,11 +112,11 @@ PY
   fi
   local phone_id=${phone%%$'\t'*} ipad_id=${ipad%%$'\t'*}
   xcrun simctl list devices | grep -E "$phone_id|$ipad_id" >&2
-  # A simulator's first boot takes minutes, so both start now, behind the builds, and the
-  # screenshots wait for them (simctl bootstatus).
-  for sim in "$phone_id" "$ipad_id"; do
-    nohup xcrun simctl boot "$sim" > "${RUNNER_TEMP:-/tmp}/boot-$sim.log" 2>&1 &
-  done
+  # Nothing is booted here. A simulator's first boot keeps the runner's cores and disk busy for
+  # minutes: booted behind the Rust build, the two made it five to ten times slower (unpacking a
+  # cached toolchain took five minutes, the core's build seven to fourteen, against a minute and
+  # a half on TestFlight's runner of the same image, which boots none). The workflow boots the
+  # phone once the core is built, and `shoot` the iPad once the phone's shots are taken.
   echo "phone=$phone_id"
   echo "ipad=$ipad_id"
   echo "pinned=$pinned"
@@ -219,17 +220,20 @@ shoot() {
     fi
     echo "$(date +%T) $name (cleared and launched in $((launched - began))s, drawn after ${drawn}s, at rest $((settled + 1))s later)"
   }
-  for sim in "$phone" "$ipad"; do
+  # Each simulator is booted (if it is not already), set up and given the app just before its
+  # shots, so the iPad's boot does not slow the phone's launches.
+  ready() {
+    local sim=$1 start=$SECONDS
     echo "$(date +%T) waiting for $sim to boot"
     xcrun simctl bootstatus "$sim" -b > /dev/null
-    echo "$(date +%T) booted"
+    echo "$(date +%T) booted after $((SECONDS - start))s"
     xcrun simctl ui "$sim" appearance light
     # Dynamic Type at its default, whatever the image set.
     xcrun simctl ui "$sim" content_size large
     xcrun simctl status_bar "$sim" override --time 9:41 --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4
     xcrun simctl uninstall "$sim" "$id" > /dev/null 2>&1 || true
     xcrun simctl install "$sim" "$app"
-  done
+  }
   # The phone's shots, then the iPad's. (Taken at once, each simulator's launches waited on the
   # other's, and the pair took longer than the two one after the other.)
   phone_shots() {
@@ -270,7 +274,11 @@ shoot() {
     one "$ipad" "ipad-chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave
     one "$ipad" "ipad-settings-nave" -page home -theme nave -settings YES
   }
+  ready "$phone"
   phone_shots
+  # The phone is done with: shut down, it leaves the iPad's boot and shots the runner to themselves.
+  xcrun simctl shutdown "$phone" > /dev/null 2>&1 || true
+  ready "$ipad"
   ipad_shots
   # What they were taken with, which the baselines keep and the next run's `devices` follows.
   python3 - "$phone" "$ipad" "$out/environment.json" <<'PY'

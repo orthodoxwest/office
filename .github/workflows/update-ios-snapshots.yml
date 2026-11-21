@@ -144,23 +144,11 @@ jobs:
 
       # As ios.yml: the baselines' Xcode, runtime and devices where the runner has them, else
       # the image's newest, which the new set records.
-      - name: Choose and boot the simulators
+      - name: Choose the simulators
         id: sim
         run: apps/ios/screenshots.sh devices >> "$GITHUB_OUTPUT"
 
-      # rustup's download of the toolchain ran 5 to 13 minutes on the macOS runners; the cache's
-      # comes in seconds. Only the pinned toolchain is kept (the key follows the pin below), not
-      # the image's own. This job can only read caches, so it restores the one ios.yml saves on
-      # master.
-      - name: Cache the Rust toolchain
-        uses: actions/cache@v6.1.0
-        with:
-          path: |
-            ~/.rustup/toolchains/1.100.0-aarch64-apple-darwin
-            ~/.rustup/update-hashes/1.100.0-aarch64-apple-darwin
-          key: rustup-${{ runner.os }}-${{ runner.arch }}-1.100.0-ios-sim
-
-      # Only the simulator's target, as ios.yml (whose toolchain cache this is).
+      # Only the simulator's target, as ios.yml.
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@1.100.0
         with:
@@ -187,10 +175,12 @@ jobs:
         run: xcodegen generate
 
       # ios.yml runs the tests; the screenshots need only the app.
-      # xcodebuild lists no simulator at all, only placeholders, and fails while the image is
-      # still making its simulator runtime ready (seen on macos-26 with a booting phone), so the
-      # build waits for the phone to finish booting first.
-      - name: Wait for the phone to boot
+      # The phone boots only now, with the core built: booted at the start, it and the iPad made
+      # the toolchain, the Cargo cache and the core's build five to ten times slower. xcodebuild
+      # lists no simulator at all, only placeholders, and fails while the image is still making
+      # its simulator runtime ready (seen on macos-26 with a booting phone), so the build waits
+      # for the boot to finish. The iPad boots after the phone's shots (screenshots.sh shoot).
+      - name: Boot the phone
         env:
           PHONE: ${{ steps.sim.outputs.phone }}
         run: |
