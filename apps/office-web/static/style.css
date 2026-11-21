@@ -2936,7 +2936,8 @@ html[data-newcomer] .home-season {
   .penitential-badge.gloss-quiet::before,
   .home-season .gloss-quiet::before,
   .hour-meta .gloss-quiet::before,
-  .home-versicle .gloss-quiet::before {
+  .home-versicle .gloss-quiet::before,
+  .feast-text h3 .gloss-quiet::before {
     inset: -0.15rem -0.25rem;
     height: auto;
     transform: none;

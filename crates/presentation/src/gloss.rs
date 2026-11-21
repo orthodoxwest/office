@@ -85,6 +85,12 @@ pub const MARIAN_ANTIPHON_GLOSS: Gloss = Gloss {
     note: "One of the four seasonal antiphons of the Mother of God—Alma Redemptoris Mater, Ave Regina Caelorum, Regina Caeli, or Salve Regina—closing the office.",
 };
 
+pub const CANTICLE_ANTIPHON_GLOSS: Gloss = Gloss {
+    term: "Gospel canticle antiphon",
+    title: "Gospel canticle antiphon",
+    note: "The antiphon framing the Benedictus at Lauds and the Magnificat at Vespers, said at each hour named.",
+};
+
 pub const VERSICLE_GLOSS: Gloss =
     Gloss {
         term: "Versicle", title: "Versicle", note: "A short verse (℣.) paired with a response (℟.). When praying alone, say both."
@@ -93,7 +99,7 @@ pub const VERSICLE_GLOSS: Gloss =
 pub const COMMEMORATION_OF_CROSS_GLOSS: Gloss = Gloss {
     term: "Commemoration of the Cross",
     title: "Commemoration of the Cross",
-    note: "A short prayer honoring the Holy Cross, said from the Monday after Low Sunday to the Vigil of the Ascension, on days below a Double, in place of the Suffrage of All Saints.",
+    note: "A short prayer honoring the Holy Cross, said from the Monday after Low Sunday to the Vigil of the Ascension, on days below a Double and outside octaves, in place of the Suffrage of All Saints.",
 };
 
 pub const POSTURE_GLOSS: Gloss = Gloss {
@@ -176,7 +182,7 @@ pub const FIRST_VESPERS_GLOSS: Gloss = Gloss {
 pub const SECOND_VESPERS_GLOSS: Gloss = Gloss {
     term: "II Vespers",
     title: "Second Vespers",
-    note: "The evening office of the feast itself, as distinct from First Vespers sung the evening before.",
+    note: "Vespers of the day itself, as distinct from First Vespers said the evening before.",
 };
 
 pub const MONASTIC_OBSERVANCE_GLOSS: Gloss = Gloss {
@@ -225,7 +231,7 @@ pub const RANK_D_GLOSS: Gloss = Gloss {
 pub const RANK_SD_GLOSS: Gloss = Gloss {
     term: "Semi-double",
     title: "Semi-double",
-    note: "A lesser feast whose antiphons are only begun before each psalm and said in full after it.",
+    note: "A lesser office whose antiphons are only begun before each psalm and said in full after it.",
 };
 
 pub const RANK_F2_GLOSS: Gloss = Gloss {
@@ -332,9 +338,12 @@ pub fn feast_text_gloss(label: &str) -> Option<&'static Gloss> {
         Some(&ORDO_BENEDICTUS_GLOSS)
     } else if label.ends_with("· Magnificat") {
         Some(&ORDO_MAGNIFICAT_GLOSS)
+    } else if label.ends_with("· Antiphon") {
+        // The antiphon of the feast's commemoration in another day's office (`office::feast`).
+        Some(&ORDO_COMMEMORATION_GLOSS)
     } else if label.starts_with("At ") {
-        // "At … · Antiphon", or a canticle antiphon said at more than one hour ("At Lauds and II Vespers").
-        Some(&ANTIPHON_GLOSS)
+        // A canticle antiphon said at more than one hour ("At Lauds and II Vespers").
+        Some(&CANTICLE_ANTIPHON_GLOSS)
     } else {
         None
     }
@@ -568,6 +577,10 @@ mod tests {
         assert_eq!(penitential_gloss("Fasting").map(|g| g.title), Some("Day of Fasting"));
         assert_eq!(penitential_gloss("Abstinence").map(|g| g.title), Some("Day of Abstinence"));
         assert!(penitential_gloss("Other").is_none());
+        // Keyed on the badges the calendar actually writes.
+        for label in (calendar::Penitential { fast: true, abstinence: true }).labels() {
+            assert!(penitential_gloss(label).is_some(), "{label}");
+        }
 
         for rank in calendar::Rank::ALL {
             assert!(rank_gloss(rank.display_name()).is_some(), "missing rank gloss for {rank:?}");
@@ -576,11 +589,11 @@ mod tests {
         assert_eq!(feast_text_gloss("Collect").map(|g| g.title), Some("Collect"));
         assert_eq!(feast_text_gloss("At Lauds · Benedictus").map(|g| g.title), Some("Benedictus antiphon"));
         assert_eq!(feast_text_gloss("At II Vespers · Magnificat").map(|g| g.title), Some("Magnificat antiphon"));
-        assert_eq!(feast_text_gloss("At I Vespers · Antiphon").map(|g| g.title), Some("Antiphon"));
+        assert_eq!(feast_text_gloss("At I Vespers · Antiphon").map(|g| g.title), Some(ORDO_COMMEMORATION_GLOSS.title));
         assert_eq!(feast_text_gloss("Versicle at Lauds").map(|g| g.title), Some("Versicle"));
         // A canticle antiphon said at several hours is an antiphon, not a note on Vespers.
-        assert_eq!(feast_text_gloss("At Lauds and II Vespers").map(|g| g.title), Some("Antiphon"));
-        assert_eq!(feast_text_gloss("At I Vespers, Lauds and II Vespers").map(|g| g.title), Some("Antiphon"));
+        assert_eq!(feast_text_gloss("At Lauds and II Vespers").map(|g| g.title), Some("Gospel canticle antiphon"));
+        assert_eq!(feast_text_gloss("At I Vespers, Lauds and II Vespers").map(|g| g.title), Some("Gospel canticle antiphon"));
     }
 
     #[test]

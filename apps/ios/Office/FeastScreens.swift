@@ -622,24 +622,16 @@ private struct TextLabel: View {
         let caps = TextStyle(size: 16, line: 22, tracking: 0.8, smallCaps: true)
         let commonStyle = TextStyle(size: 13.6, line: 22, italic: true)
         if caret == nil && (labelGloss != nil || commonGloss != nil) {
-            HStack(alignment: .firstTextBaseline, spacing: m.px(8)) {
-                if let labelGloss {
-                    GlossMark(gloss: labelGloss, label: label, reaches: false) {
-                        Text(label).type(caps).foregroundStyle(p.titulus)
-                    }
-                    .accessibilityAddTraits(.isHeader)
-                } else {
-                    Text(label).type(caps).foregroundStyle(p.titulus)
-                        .accessibilityAddTraits(.isHeader)
+            // Beside the label where the line holds both; a long label takes its line and "Common"
+            // goes under it, as Android's FlowRow and the web's wrapping heading do.
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: m.px(8)) {
+                    labelMark(caps)
+                    commonMark(commonStyle)
                 }
-                if !common.isEmpty {
-                    if let commonGloss {
-                        GlossMark(gloss: commonGloss, label: common, reaches: false) {
-                            Text(common).type(commonStyle).foregroundStyle(p.muted)
-                        }
-                    } else {
-                        Text(common).type(commonStyle).foregroundStyle(p.muted)
-                    }
+                VStack(alignment: .leading, spacing: 0) {
+                    labelMark(caps)
+                    commonMark(commonStyle)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -654,6 +646,32 @@ private struct TextLabel: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isHeader)
+        }
+    }
+
+    @ViewBuilder
+    private func labelMark(_ caps: TextStyle) -> some View {
+        if let labelGloss {
+            GlossMark(gloss: labelGloss, label: label, reaches: false) {
+                Text(label).type(caps).foregroundStyle(p.titulus)
+            }
+            .accessibilityAddTraits(.isHeader)
+        } else {
+            Text(label).type(caps).foregroundStyle(p.titulus)
+                .accessibilityAddTraits(.isHeader)
+        }
+    }
+
+    @ViewBuilder
+    private func commonMark(_ style: TextStyle) -> some View {
+        if !common.isEmpty {
+            if let commonGloss {
+                GlossMark(gloss: commonGloss, label: common, reaches: false) {
+                    Text(common).type(style).foregroundStyle(p.muted)
+                }
+            } else {
+                Text(common).type(style).foregroundStyle(p.muted)
+            }
         }
     }
 }
