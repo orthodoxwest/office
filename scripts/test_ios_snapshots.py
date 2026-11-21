@@ -227,6 +227,25 @@ class CompareTest(unittest.TestCase):
 
 
 
+@unittest.skipIf(Image is None, "Pillow is not installed")
+class ProbeTest(unittest.TestCase):
+    def test_repeats_alike_pass_and_a_moved_one_fails_with_its_notes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            raw = pathlib.Path(tmp)
+            for n in (1, 2, 3):
+                image = Image.new("RGB", (300, 300), (244, 238, 226))
+                ImageDraw.Draw(image).text((40, 100 + (n == 3)), "Vespers", fill=(40, 30, 20), font_size=40)
+                image.save(raw / f"hymn-nave-{n}.png")
+                (raw / f"hymn-nave-{n}.geometry.txt").write_text(f"hour.rows: top {100 + (n == 3)}\n")
+                Image.new("RGB", (30, 30)).save(raw / f"psalm-apse-{n}.png")
+            summary = raw / "summary.md"
+            self.assertEqual(SNAP.probe(raw, summary), 1)
+            text = summary.read_text()
+            self.assertIn("hymn-nave: 3 shots, unlike the first: 3", text)
+            self.assertIn("psalm-apse: 3 shots, all alike", text)
+            self.assertIn("geometry of shots [3]", text)
+
+
 class EnvironmentTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

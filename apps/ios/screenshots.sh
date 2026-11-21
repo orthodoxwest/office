@@ -290,7 +290,23 @@ shoot_one() {
     one "$ipad" "ipad-chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave
     one "$ipad" "ipad-settings-nave" -page home -theme nave -settings YES
   }
-  "${role}_shots"
+  # PROBE=N: the anchored pages whose shots have differed by a hair between runs (#948), each N
+  # times on the phone and nothing on the iPad, for ios-snapshots.py probe to say whether every
+  # launch lands on the same pixels.
+  probe_shots() {
+    local i
+    for i in $(seq 1 "$PROBE"); do
+      one "$phone" "hymn-nave-$i" -page hour -hour vespers -anchor hymn -theme nave
+      one "$phone" "psalm-apse-$i" -page hour -hour vespers -anchor psalm -theme apse
+      one "$phone" "hymn-apse-$i" -page hour -hour vespers -anchor hymn -theme apse
+      one "$phone" "psalm-nave-$i" -page hour -hour vespers -anchor psalm -theme nave
+    done
+  }
+  if [ -z "${PROBE:-}" ]; then
+    "${role}_shots"
+  elif [ "$role" = phone ]; then
+    probe_shots
+  fi
   step "shots taken"
   # What they were taken with, which the baselines keep (joined with the other device's by
   # scripts/ios-snapshots.py environment) and the next run's `devices` follows.

@@ -3,6 +3,7 @@
 
     ios-snapshots.py compare RAW BASELINES --updates DIR --diffs DIR [--summary FILE] [--changes FILE]
     ios-snapshots.py environment RAW
+    ios-snapshots.py probe RAW [--summary FILE]
     ios-snapshots.py fetch BRANCH [--remote origin]
     ios-snapshots.py store RAW OUT
     ios-snapshots.py blank SHOT [--ipad]
@@ -32,6 +33,11 @@ object listing the changed, new and gone shots by name (ios.yml's comment shows 
 `environment` joins what each device's shots were taken with (environment-phone.json and
 environment-ipad.json, which apps/ios/screenshots.sh shoot-one writes on its own runner) into the
 one environment.json the baselines keep, refusing a pair from different Xcodes or runtimes.
+
+`probe` takes a probe run's shots (apps/ios/screenshots.sh with PROBE=N: each of a few pages
+shot N times, as NAME-1.png to NAME-N.png) and says, for each page, which launches drew it on
+other pixels than the first, at any difference at all, with the geometry notes that differ. It
+exits 1 when any did.
 
 `fetch` copies the comparable set a CI run published to ci/ios-screenshots/BRANCH (its
 snapshots/ folder) into apps/ios/snapshots/, for when the label cannot be used: on the pull
@@ -370,6 +376,46 @@ def store(raw, out):
             shot.save(out / folder / f"{n}-{name}.png", optimize=True)
 
 
+def probe(raw, summary=None):
+    """Whether each page's repeated shots in raw are alike to the pixel; see the module's docstring."""
+    from PIL import Image, ImageChops
+
+    def full(path):
+        with Image.open(path) as image:
+            return image.convert("RGB")
+
+    groups = {}
+    for path in sorted(raw.glob("*.png")):
+        m = re.fullmatch(r"(.+)-(\d+)", path.stem)
+        if m:
+            groups.setdefault(m.group(1), []).append((int(m.group(2)), path))
+    if not groups:
+        raise SystemExit(f"{raw}: no probe shots (NAME-N.png)")
+    lines, unstable = [], False
+    for name, shots in sorted(groups.items()):
+        shots.sort()
+        first = full(shots[0][1])
+        notes = lambda p: (p.parent / f"{p.stem}{GEOMETRY}").read_text() if (p.parent / f"{p.stem}{GEOMETRY}").is_file() else ""
+        odd = []
+        for n, path in shots[1:]:
+            box = ImageChops.difference(first, full(path)).getbbox()
+            if box:
+                odd.append(f"{n} (differs within {box})")
+        unstable |= bool(odd)
+        lines.append(f"{name}: {len(shots)} shots, " + (f"unlike the first: {', '.join(odd)}" if odd else "all alike"))
+        distinct = {}
+        for n, path in shots:
+            distinct.setdefault(notes(path), []).append(n)
+        if len(distinct) > 1:
+            for text, ns in distinct.items():
+                lines.append(f"  geometry of shots {ns}:\n" + "".join(f"    {line}\n" for line in text.splitlines()))
+    print("\n".join(lines))
+    if summary:
+        with open(summary, "a") as out:
+            out.write("## iOS probe\n\n```\n" + "\n".join(lines) + "\n```\n\n")
+    return 1 if unstable else 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -383,6 +429,9 @@ def main(argv=None):
     c.add_argument("--changes", help="a JSON file to write the changed, new and gone shots' names to")
     e = sub.add_parser("environment")
     e.add_argument("raw", type=pathlib.Path)
+    pr = sub.add_parser("probe")
+    pr.add_argument("raw", type=pathlib.Path)
+    pr.add_argument("--summary")
     f = sub.add_parser("fetch")
     f.add_argument("branch")
     f.add_argument("--remote", default="origin")
@@ -404,6 +453,8 @@ def main(argv=None):
     if args.command == "fetch":
         fetch(args.branch, args.remote)
         return 0
+    if args.command == "probe":
+        return probe(args.raw, args.summary)
     if args.command == "environment":
         print(json.dumps(join_environment(args.raw)))
         return 0

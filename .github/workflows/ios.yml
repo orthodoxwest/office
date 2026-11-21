@@ -69,6 +69,10 @@ on:
         description: "Shoot at the App Store's sizes (6.9-inch iPhone, 13-inch iPad)"
         type: boolean
         default: false
+      probe:
+        description: "Shoot the anchored hymn and psalm pages this many times each instead, and say whether every launch drew the same pixels (#948)"
+        type: string
+        default: ""
 
 concurrency:
   group: ios-${{ github.event.pull_request.number || github.ref }}
@@ -342,6 +346,7 @@ jobs:
         working-directory: apps/ios
         env:
           SNAPSHOT_PYTHON: ${{ runner.temp }}/snapshots/bin/python
+          PROBE: ${{ inputs.probe }}
           DEVICE: ${{ matrix.device }}
           SIM: ${{ steps.sim.outputs[matrix.device] }}
         run: ./screenshots.sh shoot-one "$DEVICE" "$SIM" build/dd/Build/Products/Debug-iphonesimulator/Office.app build/review
@@ -403,9 +408,14 @@ jobs:
         run: |
           "$RUNNER_TEMP/snapshots/bin/python" scripts/ios-snapshots.py store apps/ios/build/review apps/ios/build/review/store
 
+      - name: Say whether every launch drew the same pixels
+        if: ${{ inputs.probe && needs.shoot.result == 'success' }}
+        run: |
+          "$RUNNER_TEMP/snapshots/bin/python" scripts/ios-snapshots.py probe apps/ios/build/review --summary "$GITHUB_STEP_SUMMARY"
+
       - name: Compare with the checked-in baselines
         id: compare
-        if: ${{ !inputs.store && needs.shoot.result == 'success' }}
+        if: ${{ !inputs.store && !inputs.probe && needs.shoot.result == 'success' }}
         run: |
           "$RUNNER_TEMP/snapshots/bin/python" scripts/test_ios_snapshots.py
           # Exits 1 when the shots differ, 2 when one is blank (its page not drawn) or none was
@@ -421,7 +431,7 @@ jobs:
       - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
-          name: ios-screenshots${{ inputs.store && '-store' || '' }}
+          name: ios-screenshots${{ inputs.store && '-store' || '' }}${{ inputs.probe && '-probe' || '' }}
           path: apps/ios/build/review/
           if-no-files-found: warn
 
@@ -461,7 +471,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           # The store-size set beside the review set, not over it.
-          BRANCH: ci/ios-screenshots/${{ github.head_ref || github.ref_name }}${{ inputs.store && '-store' || '' }}
+          BRANCH: ci/ios-screenshots/${{ github.head_ref || github.ref_name }}${{ inputs.store && '-store' || '' }}${{ inputs.probe && '-probe' || '' }}
         run: |
           [ -d apps/ios/build/review ] || exit 0
           cd apps/ios/build/review

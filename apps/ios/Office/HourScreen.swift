@@ -400,6 +400,7 @@ struct HourScreen: View {
                     .read(Reading.ending, at: rows.count, into: reading)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { epilogueHeight = $0 }
                 }
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named(Reading.space)).minY } action: { reading.contentTop = $0 }
                 .background(alignment: .top) {
                     if view.firstClass {
                         FirstClassFrame(top: 3 + headerHeight, bottom: epilogueHeight + m.px(20))
@@ -693,6 +694,10 @@ final class Reading {
     /// Each row's height as last laid out, by index; and where those on screen now stand, by the
     /// row's id, so a row leaving never clears the place of one that has taken its index.
     @ObservationIgnored private var heights: [Int: CGFloat] = [:]
+    /// Where the list's top stands on screen: minus how far it has scrolled.
+    @ObservationIgnored var contentTop: CGFloat = 0 {
+        didSet { if contentTop != oldValue { update() } }
+    }
     @ObservationIgnored private var frames: [String: (row: Int, frame: CGRect)] = [:]
     /// Where the cross that ends the hour stands in the ending, from its top, and its size; and
     /// whether it stands wholly on the screen now, for its leaf.
@@ -732,6 +737,12 @@ final class Reading {
     private func update() {
         let now = read()
         ScreenshotGeometry.note("hour.reading", "ratio \(now), rows \(rows), frames \(frames.count), heights \(heights.count), viewport \(viewport)")
+        // Where the rows on screen stand, to the bit, and the list's own top (minus the scroll
+        // offset): two launches whose shots differ by a hair say which moved (#948).
+        if ScreenshotGeometry.on {
+            let shown = shownRows().map { "\($0.id) \(exact($0.frame.minY))+\(exact($0.frame.height))" }
+            ScreenshotGeometry.note("hour.rows", "content top \(exact(contentTop)); " + shown.joined(separator: ", "))
+        }
         if abs(now - ratio) > 0.0005 || (now != ratio && (now == 0 || now == 1)) { ratio = now }
         let mark = frames[Reading.ending].map { $0.frame.minY + endMark.top }
         let shown = mark.map { Reading.whollyShown(from: $0, size: endMark.size, foot: viewport.height) } ?? false
@@ -756,6 +767,9 @@ final class Reading {
         return passed + left <= 0 ? 1 : min(1, max(0, passed / (passed + left)))
     }
 }
+
+/// Every digit a CGFloat holds, for the screenshots' geometry notes.
+private func exact(_ v: CGFloat) -> String { String(format: "%.6f", Double(v)) }
 
 private extension View {
     /// Reports the place on screen of this row, `id`, the `row`th, to `reading`, and its leaving.
