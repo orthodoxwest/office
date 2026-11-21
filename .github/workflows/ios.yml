@@ -239,15 +239,10 @@ jobs:
         id: sim
         run: apps/ios/screenshots.sh devices >> "$GITHUB_OUTPUT"
 
-      # Booting behind the download, the one thing left on this runner to slow.
-      - name: Start the phone booting
-        env:
-          PHONE: ${{ steps.sim.outputs.phone }}
-        run: apps/ios/screenshots.sh boot "$PHONE"
-
-      # A download once hung ten minutes behind a booting simulator: fail fast rather than wait.
+      # Before the boot: twice the download hung behind a booting simulator, and on a quiet
+      # runner it takes seconds. The limit is a guard against a hang all the same.
       - uses: actions/download-artifact@v8.0.2
-        timeout-minutes: 5
+        timeout-minutes: 3
         with:
           name: ios-products
           path: apps/ios/build
@@ -255,6 +250,11 @@ jobs:
       - name: Unpack the build
         working-directory: apps/ios
         run: mkdir -p build/dd/Build && tar -C build/dd/Build -xf build/products.tar
+
+      - name: Start the phone booting
+        env:
+          PHONE: ${{ steps.sim.outputs.phone }}
+        run: apps/ios/screenshots.sh boot "$PHONE"
 
       # xcodebuild lists no simulator at all, only placeholders, and fails while the image is
       # still making its simulator runtime ready (seen on macos-26 with a booting phone), so the
@@ -323,14 +323,10 @@ jobs:
             apps/ios/screenshots.sh devices >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Start the simulator booting
-        env:
-          SIM: ${{ steps.sim.outputs[matrix.device] }}
-        run: apps/ios/screenshots.sh boot "$SIM"
-
-      # A download once hung ten minutes behind a booting simulator: fail fast rather than wait.
+      # Before the boot: twice the download hung behind a booting simulator, and on a quiet
+      # runner it takes seconds. The limit is a guard against a hang all the same.
       - uses: actions/download-artifact@v8.0.2
-        timeout-minutes: 5
+        timeout-minutes: 3
         with:
           name: ios-products
           path: apps/ios/build
@@ -338,6 +334,11 @@ jobs:
       - name: Unpack the build
         working-directory: apps/ios
         run: mkdir -p build/dd/Build && tar -C build/dd/Build -xf build/products.tar
+
+      - name: Start the simulator booting
+        env:
+          SIM: ${{ steps.sim.outputs[matrix.device] }}
+        run: apps/ios/screenshots.sh boot "$SIM"
 
       # Pillow, for the shots' blank test while they are taken (screenshots.sh).
       - name: Set up the snapshot tools
