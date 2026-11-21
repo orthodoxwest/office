@@ -5625,7 +5625,10 @@ test("About's Horologium, live specimen leaf, and Ordo ribbon respond to interac
   // The specimen sets lines as the hour prints them, the ✠ after "O God,"; its switch offers the
   // hour's three forms, and a deacon greets as a priest does.
   const specimen = page.locator(".about-specimen");
-  await expect(specimen.locator(".about-specimen-opening")).toContainText("O God, ✠ make speed to save me.");
+  // The cross as printed, and said as the hour says it.
+  await expect(specimen.locator(".about-specimen-opening")).toContainText("O God, ✠");
+  await expect(specimen.locator(".about-specimen-opening")).toContainText("make speed to save me.");
+  await expect(specimen.locator(".about-specimen-cross .sr-only")).toHaveText("sign of the cross,");
   await expect(specimen.locator(".about-specimen-opt")).toHaveText(["Private", "Deacon", "Priest"]);
   await expect(specimen.locator(".about-specimen-v-text")).toHaveText("O Lord, hear my prayer.");
   await specimen.locator('.about-specimen-opt[data-form="deacon"]').click();

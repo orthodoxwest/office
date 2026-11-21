@@ -338,7 +338,7 @@ struct HourScreen: View {
         let scoreColumn = min(m.px(measure), width - 2 * (inset + m.px(gutter)))
         ScrollViewReader { scroll in
             ScrollView {
-                HourListStack {
+                LazyVStack(spacing: 0) {
                     Rectangle().fill(bandColor(view.color, p)).frame(height: 3).accessibilityHidden(true)
                     SiteHeader()
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
@@ -1047,20 +1047,6 @@ private struct HourTitle: View {
         } completion: {
             // Once unfolded, as Android waits on the transition rather than a clock.
             if picking { reveal("disclosed") }
-        }
-    }
-}
-
-/// Uses an eager `VStack` when VoiceOver is running so the Headings rotor can jump to headings
-/// further down a long hour without waiting for lazy cells to materialize.
-private struct HourListStack<Content: View>: View {
-    @ViewBuilder let content: () -> Content
-
-    var body: some View {
-        if UIAccessibility.isVoiceOverRunning {
-            VStack(spacing: 0, content: content)
-        } else {
-            LazyVStack(spacing: 0, content: content)
         }
     }
 }
