@@ -1838,6 +1838,36 @@ for (const dir of ["dusk", "dawn"]) {
   });
 }
 
+// The page keeps answering through the whole play. WebKit stalled for
+// seconds (no script, timer or frame) while the new page's still stood at
+// an opacity of exactly 0 waiting for its glow (#923); the glow starts from a
+// thousandth instead.
+for (const dir of ["dusk", "dawn"]) {
+  test(`the page keeps answering through the crown's ${dir}`, async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
+    await openCrown(page, { stored: dir === "dusk" ? null : "dark", hurry: false });
+    const [x, y] = await crownPoint(page);
+    await page.evaluate(() => {
+      window.__gap = 0;
+      let last = performance.now();
+      const ch = new MessageChannel();
+      ch.port1.onmessage = () => {
+        const now = performance.now();
+        window.__gap = Math.max(window.__gap, now - last);
+        last = now;
+        setTimeout(() => ch.port2.postMessage(0), 20);
+      };
+      ch.port2.postMessage(0);
+    });
+    await page.mouse.click(x, y);
+    await crownPlayed(page);
+    await crownAtRest(page);
+    // (A frame or two of the stills is slow in WebKit; seconds are not.)
+    expect(await page.evaluate(() => window.__gap)).toBeLessThan(2000);
+  });
+}
+
 test("a second tap while the crown plays is kept and plays the way back", async ({ page }) => {
   // A whole dusk and a whole dawn, unhurried.
   test.setTimeout(60_000);
