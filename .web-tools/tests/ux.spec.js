@@ -5246,16 +5246,34 @@ const scopes = (events) => events.map(body => body.split(" ")[0]);
 // a phone screen) and start a navigation that races the test's next goto.
 const engage = (page) => page.keyboard.press("Shift");
 
+// Collects the page's usage beacons into `bodies` and answers each with `status()`, keeping them
+// off the real usage store. It replaces the page's fetch for /api/usage rather than routing the
+// request: while Playwright intercepts a WebKit page's network (page.route, or setOffline), a
+// request it lets through just as the page navigates can fail that navigation with "WebKit
+// encountered an internal error" (#924), and a route intercepts every request, not only its own.
+async function captureUsage(page, bodies, status = () => 204) {
+  await page.exposeFunction("officeTestUsage", (body) => {
+    bodies.push(body);
+    return status();
+  });
+  await page.addInitScript(() => {
+    const send = window.fetch;
+    window.fetch = function (input, init) {
+      const url = new URL(typeof input === "string" ? input : input.url, location.href);
+      if (url.pathname !== "/api/usage") return send.apply(this, arguments);
+      return window.officeTestUsage(String((init && init.body) || ""))
+        .then((code) => new Response(null, { status: code }));
+    };
+  });
+}
+
 // A person, not the default HeadlessChrome agent the server drops as a bot.
 const HUMAN_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
   "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
 
 test("engaged visits to a current page send an event, passive and background ones do not", async ({ page }) => {
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
 
   // Rendering alone is not use: a scraper that renders and leaves must not count.
   await page.goto(`/lauds/${easternDay()}`);
@@ -5312,10 +5330,7 @@ test("the usage report keeps its explorer shut until it is used", async ({ page 
 
 test("the dated archive is freely readable but never counted", async ({ page }) => {
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
   // Deep past, far future, and a distant ordo year: all render, none report.
   for (const path of ["/lauds/2019-03-04", "/?date=2045-06-01", "/calendar/2050", "/vespers/2031-12-25"]) {
     await page.goto(path);
@@ -5335,10 +5350,7 @@ test("the dated archive is freely readable but never counted", async ({ page }) 
 
 test("the current ordo page is tracked in its own column, not just the site total", async ({ page }) => {
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
   const year = new Date().getFullYear();
   await page.goto(`/calendar/${year}/01`);
   await engage(page);
@@ -5348,10 +5360,7 @@ test("the current ordo page is tracked in its own column, not just the site tota
 
 test("generating a reminder feed link is tracked separately from viewing the page", async ({ page }) => {
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
   // A stub so the copy actually "succeeds" without a real clipboard permission.
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "clipboard", {
@@ -5371,10 +5380,7 @@ test("generating a reminder feed link is tracked separately from viewing the pag
 // The default project emulates a phone, which is what most readers use.
 test("the beacon reports the appearance the page was read in", async ({ page }) => {
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
   const read = async (label) => {
     events.length = 0;
     await page.goto(`/vespers/${easternDay()}`);
@@ -5401,10 +5407,7 @@ test("the beacon reports the appearance the page was read in", async ({ page }) 
 
 test("the installed web app reports itself apart from a browser tab", async ({ page }) => {
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
   // Safari's home-screen app says so on navigator; others match display-mode: standalone.
   await page.addInitScript(() => Object.defineProperty(navigator, "standalone", { configurable: true, value: true }));
   await page.goto(`/?date=${easternDay()}`);
@@ -5416,10 +5419,7 @@ test("the installed web app reports itself apart from a browser tab", async ({ p
 // The device keeps only the day it first opened the Office; the beacon says first or returning.
 test("a browser is new on the day it first opens the Office and returning after", async ({ page }) => {
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
   const visit = async () => {
     events.length = 0;
     await page.goto(`/?date=${easternDay()}`);
@@ -5445,10 +5445,7 @@ test("a browser is new on the day it first opens the Office and returning after"
 test("a browser opens its week and month on the first day it is counted in them", async ({ page }) => {
   const events = [];
   let online = true;
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: online ? 204 : 503 });
-  });
+  await captureUsage(page, events, () => (online ? 204 : 503));
   const visit = async () => {
     events.length = 0;
     await page.goto(`/?date=${easternDay()}`);
@@ -5492,10 +5489,7 @@ test("a browser opens its week and month on the first day it is counted in them"
 test("the beacon says how a reader keeps the hours", async ({ page }) => {
   const events = [];
   let online = true;
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: online ? 204 : 503 });
-  });
+  await captureUsage(page, events, () => (online ? 204 : 503));
   // Half past six in the evening in New York (half past seven in summer): Vespers' time.
   const today = easternDay();
   await page.clock.setFixedTime(new Date(`${today}T18:30:00-05:00`));
@@ -5511,17 +5505,14 @@ test("the beacon says how a reader keeps the hours", async ({ page }) => {
   }, today);
   await expect.poll(() => events.length).toBe(2);
   expect(events[1]).toMatch(/ timely:vespers prayed:vespers(?: |$)/);
-  // The network lost on an hour already counted: nothing went unreported.
-  await page.context().setOffline(true);
+  // The network lost on an hour already counted: nothing went unreported. The browser says
+  // it is offline without Playwright's emulated outage, which intercepts the page's network
+  // and can fail the next navigation in WebKit (#924).
+  await page.evaluate(() => Object.defineProperty(navigator, "onLine", { configurable: true, get: () => false }));
   await page.evaluate(() => window.dispatchEvent(new Event("pageshow")));
   await page.waitForTimeout(200);
   expect(await page.evaluate(() => localStorage.getItem("office-offline"))).toBe(null);
-  await page.context().setOffline(false);
-  // Leave only once a request from the page reaches the server again. This guards against the
-  // emulated outage lingering; whether that caused WebKit's "internal error" on CI is not
-  // established (#924).
-  await expect.poll(() => page.evaluate(() =>
-    fetch(`/sw.js?online-check=${Date.now()}`, { method: "HEAD", cache: "no-store" }).then((r) => r.ok, () => false))).toBe(true);
+  expect(events.length).toBe(2);
   // Lauds now is out of its time; its beacon fails, and the next that arrives says so, once.
   online = false;
   await page.goto(`/lauds/${today}`);
@@ -5545,7 +5536,7 @@ test("the beacon says how a reader keeps the hours", async ({ page }) => {
 // place; after that, and for a reader from before first days were kept, About is in the menu.
 test("home introduces the Office to a reader in their first week", async ({ page }) => {
   // Kept off the real usage store, which the deduplication test counts from in parallel.
-  await page.route("**/api/usage", route => route.fulfill({ status: 204 }));
+  await captureUsage(page, []);
   const introduction = page.locator(".home-introduction");
   const home = `/?date=${easternDay()}`;
   await page.goto(home);
@@ -5714,10 +5705,7 @@ test.describe("on a screen with a mouse", () => {
 
   test("the beacon separates a desk from a narrowed window", async ({ page }) => {
     const events = [];
-    await page.route("**/api/usage", async route => {
-      events.push(route.request().postData());
-      await route.fulfill({ status: 204 });
-    });
+    await captureUsage(page, events);
     const read = async (label) => {
       events.length = 0;
       await page.goto(`/vespers/${easternDay()}`);
@@ -6059,10 +6047,7 @@ test('prayer form persists and explicit review links override it without changin
 
 test('prayer-form metrics record the rendered form and subsequent switches only on office pages', async ({ page }) => {
   const bodies = [];
-  await page.route('**/api/usage', async route => {
-    bodies.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, bodies);
   const today = await serverTodaySlug(page);
   bodies.length = 0;
   await page.goto(`/lauds/${today}`);
@@ -6084,10 +6069,7 @@ test('prayer-form metrics record the rendered form and subsequent switches only 
 
 test('an hour with a score reports whether its chant notation is shown, and no other page does', async ({ page }) => {
   const bodies = [];
-  await page.route('**/api/usage', async route => {
-    bodies.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, bodies);
   const today = await serverTodaySlug(page);
   // Compline closes with a scored Marian antiphon on every day but the Triduum's.
   await page.goto(`/compline/${today}`);
@@ -6255,7 +6237,7 @@ test('prayer forms fall back safely with unavailable storage or scripting', asyn
   } finally { await plain.close(); }
 });
 
-test('private greetings are not repeated after preces when switching offline or printing', async ({ page, context }) => {
+test('private greetings are not repeated after preces when switching offline or printing', async ({ context }) => {
   for (const [path, privateCount] of [
     ['/compline/2026-03-10', 2],
     ['/prime/2026-03-10', 2],
@@ -6263,7 +6245,10 @@ test('private greetings are not repeated after preces when switching offline or 
     ['/vespers/2026-11-01', 3],
     ['/compline/2026-11-01', 1],
   ]) {
+    // Each day in a page of its own, opened once the emulated outage is lifted: a page that
+    // navigates while Playwright intercepts its network can fail in WebKit (#924).
     await context.setOffline(false);
+    const page = await context.newPage();
     await page.goto(`${path}?form=private`);
     const prayers = page.locator('.elements');
     const countPrivateResponses = async () => {
@@ -6287,6 +6272,7 @@ test('private greetings are not repeated after preces when switching offline or 
     expect(await countPrivateResponses()).toBe(privateCount);
     await expect(omittedGreeting).not.toBeVisible();
     await page.emulateMedia({ media: 'screen' });
+    await page.close();
   }
 });
 
