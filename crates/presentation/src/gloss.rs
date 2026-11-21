@@ -141,6 +141,9 @@ impl ReadingKeyStyle {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ReadingKeyItem {
     pub mark: &'static str,
+    /// What a screen reader says for `mark`: its name where the mark is glyphs (℣. ℟., ✠), on
+    /// every front.
+    pub spoken: &'static str,
     pub style: ReadingKeyStyle,
     pub text: &'static str,
 }
@@ -154,28 +157,38 @@ pub const READING_KEY_FOOT_AFTER: &str = ".";
 pub const READING_KEY_ITEMS: &[ReadingKeyItem] = &[
     ReadingKeyItem {
         mark: "Red words",
+        spoken: "Red words",
         style: ReadingKeyStyle::Rubric,
         text: "Directions, not read aloud. Underlined words open a note when tapped.",
     },
-    ReadingKeyItem { mark: "℣.  ℟.", style: ReadingKeyStyle::Rubric, text: "Versicle and response. Praying alone, say both." },
+    ReadingKeyItem {
+        mark: "℣.  ℟.",
+        spoken: "Versicle and response",
+        style: ReadingKeyStyle::Rubric,
+        text: "Versicle and response. Praying alone, say both.",
+    },
     ReadingKeyItem {
         mark: "*  †",
+        spoken: "Asterisk and dagger",
         style: ReadingKeyStyle::Rubric,
         text: "Pause briefly at * in each psalm verse, and take a breath at †.",
     },
-    ReadingKeyItem { mark: "✠", style: ReadingKeyStyle::Rubric, text: "Make the sign of the cross." },
+    ReadingKeyItem { mark: "✠", spoken: "Cross", style: ReadingKeyStyle::Rubric, text: "Make the sign of the cross." },
     ReadingKeyItem {
         mark: "Ant.",
+        spoken: "Antiphon",
         style: ReadingKeyStyle::Titulus,
         text: "Antiphon: a short verse framing a psalm or canticle. Tap it, a psalm’s number in parentheses or a heading like Chapter for a note.",
     },
     ReadingKeyItem {
         mark: "Grey type",
+        spoken: "Grey type",
         style: ReadingKeyStyle::Unsaid,
         text: "Said silently, or opening words already spoken in the antiphon.",
     },
     ReadingKeyItem {
         mark: "62 (63)",
+        spoken: "62 (63)",
         style: ReadingKeyStyle::Psalm,
         text: "Traditional Septuagint psalm number first; Hebrew number in parentheses.",
     },
@@ -238,6 +251,15 @@ fn word_char(c: char) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A screen reader names every mark in words; no front reads a glyph aloud.
+    #[test]
+    fn every_reading_key_mark_is_named_in_words() {
+        for item in READING_KEY_ITEMS {
+            assert!(!item.spoken.is_empty(), "{}", item.mark);
+            assert!(!item.spoken.contains(['℣', '℟', '✠', '*', '†']), "{} is said {}", item.mark, item.spoken);
+        }
+    }
 
     fn terms(text: &str) -> Vec<&str> {
         gloss_runs(text)

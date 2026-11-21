@@ -110,8 +110,7 @@
       <div class="reading-key-panel">
         <p class="reading-key-title">{{ reading_key.title }}</p>
         <ul class="reading-key-list" role="list">
-          {%- set rk_spoken = {"℣.  ℟.": "Versicle and response", "*  †": "Asterisk and dagger", "✠": "Cross", "Ant.": "Antiphon"} %}
-          {% for item in reading_key.items %}<li><span class="rk-mark rk-{{ item.style }}">{% if item.style == "psalm" %}{% set pp = item.mark|split(" ", 1)|list %}{{ pp[0] }}{% if pp|length == 2 %} <span>{{ pp[1] }}</span>{% endif %}{% elif item.mark in rk_spoken %}<span aria-hidden="true">{{ item.mark }}</span><span class="sr-only">{{ rk_spoken[item.mark] }}</span>{% else %}{{ item.mark }}{% endif %}</span><span class="sr-only">: </span><span class="rk-desc">{{ item.text }}</span></li>{% endfor %}
+          {% for item in reading_key.items %}<li><span class="rk-mark rk-{{ item.style }}">{% if item.style == "psalm" %}{% set pp = item.mark|split(" ", 1)|list %}{{ pp[0] }}{% if pp|length == 2 %} <span>{{ pp[1] }}</span>{% endif %}{% elif item.spoken != item.mark %}<span aria-hidden="true">{{ item.mark }}</span><span class="sr-only">{{ item.spoken }}</span>{% else %}{{ item.mark }}{% endif %}</span><span class="sr-only">: </span><span class="rk-desc">{{ item.text }}</span></li>{% endfor %}
         </ul>
         <p class="reading-key-foot">{{ reading_key.foot_before }}<a href="/about">{{ reading_key.foot_link }}</a>{{ reading_key.foot_after }}</p>
       </div>

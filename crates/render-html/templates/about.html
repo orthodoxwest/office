@@ -132,11 +132,10 @@
       {%- if loop.previtem is undefined or loop.previtem.kind != "key" %}
       <ul class="about-keys" role="list">
       {%- endif %}
-        {%- set about_key_spoken = {"℣. ℟.": "Versicle and response", "℣.  ℟.": "Versicle and response", "✠": "Cross"} %}
         <li class="about-key-row" data-key="{{ b.id }}">
           <button type="button" class="about-key-btn" data-key="{{ b.id }}" aria-pressed="false">
             <span class="about-key about-key-{{ b.ink }}">
-              {%- if b.ink == "secret" %}<span class="about-key-voiced">{{ b.mark }}</span> <span class="about-key-unsaid">{{ b.tail }}</span>{% elif b.mark in about_key_spoken %}<span aria-hidden="true">{{ b.mark }}</span><span class="sr-only">{{ about_key_spoken[b.mark] }}</span>{% else %}{{ b.mark }}{% endif -%}
+              {%- if b.ink == "secret" %}<span class="about-key-voiced">{{ b.mark }}</span> <span class="about-key-unsaid">{{ b.tail }}</span>{% elif b.spoken != b.mark %}<span aria-hidden="true">{{ b.mark }}</span><span class="sr-only">{{ b.spoken }}</span>{% else %}{{ b.mark }}{% endif -%}
             </span><span class="sr-only">: </span>
             <span class="about-key-desc">{{ b.text }}</span>
           </button>

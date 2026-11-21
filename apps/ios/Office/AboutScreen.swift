@@ -1009,19 +1009,10 @@ private struct AboutRuledKeyList: View {
                     .background { if active { PoolAlongRow(alpha: 0.85) } }
                 }
                 .buttonStyle(Quiet())
-                .accessibilityLabel("\(spokenMark(k)): \(k.text)")
+                .accessibilityLabel("\(k.spoken): \(k.text)")
                 .accessibilityAddTraits(active ? .isSelected : [])
             }
             RuledDivider(color: p.lining.opacity(0.36), weight: 0.9, seed: 189)
-        }
-    }
-
-    private func spokenMark(_ k: AboutBlockView) -> String {
-        switch k.ink {
-        case "symbol": return "Versicle and response"
-        case "cross": return "Cross"
-        case "secret": return [k.mark, k.tail].filter { !$0.isEmpty }.joined(separator: " ")
-        default: return k.mark
         }
     }
 

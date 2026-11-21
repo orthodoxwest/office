@@ -6688,12 +6688,19 @@ function plainClickOpensHere(e, link) {
       btn.addEventListener("mouseenter", function () {
         if (!pinnedColor) showColor(slug, true);
       });
+      // A keyboard reader sees each colour's meaning as the pointer's reader does.
+      btn.addEventListener("focus", function () {
+        if (!pinnedColor) showColor(slug, true);
+      });
     });
 
     var legend = ribbon.querySelector(".about-ordo-legend");
     if (legend) {
       legend.addEventListener("mouseleave", function () {
         if (!pinnedColor) showColor(null, true);
+      });
+      legend.addEventListener("focusout", function (e) {
+        if (!pinnedColor && !legend.contains(e.relatedTarget)) showColor(null, true);
       });
     }
   }

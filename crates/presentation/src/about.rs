@@ -26,8 +26,10 @@ pub enum AboutBlock {
     Specimen,
     /// A row of the ruled typographic key under the specimen: `id` links the row to the
     /// matching line in the specimen (`rubric`, `vr`, `cross`, `secret`, `form`); `tail`, when
-    /// non-empty, is set in the unsaid ink after `mark` (e.g. `Our` + `Father…`).
-    Key { id: &'static str, mark: &'static str, tail: &'static str, ink: KeyInk, text: &'static str },
+    /// non-empty, is set in the unsaid ink after `mark` (e.g. `Our` + `Father…`); `spoken` is
+    /// what a screen reader says for the mark and its tail, naming glyphs (℣. ℟., ✠) on every
+    /// front.
+    Key { id: &'static str, mark: &'static str, tail: &'static str, spoken: &'static str, ink: KeyInk, text: &'static str },
     /// One chronological beat in "An ancient prayer", set beside a fine marginal thread.
     Era { period: &'static str, text: &'static str },
     /// The current year's liturgical color ribbon (`presentation::course`) and interactive color key
@@ -198,6 +200,7 @@ pub const ABOUT: &[AboutBlock] = &[
         id: "rubric",
         mark: "Rubrics",
         tail: "",
+        spoken: "Rubrics",
         ink: KeyInk::Rubric,
         text: "Directions for posture, gestures, and order—not read aloud.",
     },
@@ -205,14 +208,16 @@ pub const ABOUT: &[AboutBlock] = &[
         id: "vr",
         mark: "℣. ℟.",
         tail: "",
+        spoken: "Versicle and response",
         ink: KeyInk::Symbol,
         text: "A versicle and its response. When praying alone, say both.",
     },
-    AboutBlock::Key { id: "cross", mark: "✠", tail: "", ink: KeyInk::Cross, text: "Make the sign of the cross." },
+    AboutBlock::Key { id: "cross", mark: "✠", tail: "", spoken: "Cross", ink: KeyInk::Cross, text: "Make the sign of the cross." },
     AboutBlock::Key {
         id: "secret",
         mark: "Our",
         tail: "Father…",
+        spoken: "Our Father…",
         ink: KeyInk::Secret,
         text: "Grey text is prayed silently; lines in full ink at the start or close of a silent prayer are spoken aloud.",
     },
@@ -220,6 +225,7 @@ pub const ABOUT: &[AboutBlock] = &[
         id: "form",
         mark: "Prayer form",
         tail: "",
+        spoken: "Prayer form",
         ink: KeyInk::Form,
         text: "At the top of each hour, switches between praying alone or in a group led by a deacon or priest.",
     },
@@ -322,6 +328,20 @@ pub fn about_newcomer(days_since_first: Option<i64>) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A screen reader names every key's mark in words, as the reading key's are.
+    #[test]
+    fn every_key_mark_is_named_in_words() {
+        let mut keys = 0;
+        for block in ABOUT {
+            if let AboutBlock::Key { mark, spoken, .. } = block {
+                keys += 1;
+                assert!(!spoken.is_empty(), "{mark}");
+                assert!(!spoken.contains(['℣', '℟', '✠', '*', '†']), "{mark} is said {spoken}");
+            }
+        }
+        assert!(keys > 0);
+    }
 
     #[test]
     fn links_split_from_their_paragraph() {

@@ -1072,16 +1072,6 @@ private struct ReadingKeyPanel: View {
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
-    private func spokenMark(_ mark: String) -> String {
-        switch mark {
-        case "℣.  ℟.": return "Versicle and response"
-        case "*  †": return "Asterisk and dagger"
-        case "✠": return "Cross"
-        case "Ant.": return "Antiphon"
-        default: return mark
-        }
-    }
-
     var body: some View {
         let desc = TextStyle(size: 14.1, line: 20.4)
         VStack(alignment: .leading, spacing: 0) {
@@ -1105,7 +1095,7 @@ private struct ReadingKeyPanel: View {
                 .padding(.vertical, m.px(8.3))
                 .padding(.horizontal, m.px(3.2))
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("\(spokenMark(item.mark)): \(item.text)")
+                .accessibilityLabel("\(item.spoken): \(item.text)")
             }
             Hairline(color: p.border)
             Button(action: onAbout) {

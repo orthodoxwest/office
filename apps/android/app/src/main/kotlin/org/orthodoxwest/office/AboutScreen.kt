@@ -515,8 +515,9 @@ private fun Horologium(
     val largeFont = density.fontScale > 1.35f
     val readout: @Composable (Modifier) -> Unit = { mod ->
         Column(
+            // Not a live region, as on the web and iOS: each stop already names its hour, and a
+            // readout spoken at every pass would talk over the page.
             mod.clearAndSetSemantics {
-                liveRegion = LiveRegionMode.Polite
                 contentDescription = "${if (isNow) "Now, " else ""}${active.time}. ${active.name}, ${active.gloss}"
             },
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -958,16 +959,10 @@ private fun RuledKeyList(keys: List<AboutBlockView>, litKey: String?, onToggle: 
         keys.forEachIndexed { i, k ->
             if (i > 0) RuledDivider(p.lining.copy(alpha = 0.19f), 0.8f, seed = 180 + i)
             val active = litKey == k.id
-            val spokenMark = when (k.ink) {
-                "symbol" -> "Versicle and response"
-                "cross" -> "Cross"
-                "secret" -> listOf(k.mark, k.tail).filter { it.isNotEmpty() }.joinToString(" ")
-                else -> k.mark
-            }
             Row(
                 Modifier.fillMaxWidth()
                     .then(if (active) Modifier.poolAlongRow(pool.copy(alpha = pool.alpha * 0.85f)) else Modifier)
-                    .tap(selected = active, label = "$spokenMark: ${k.text}") { onToggle(k.id) }
+                    .tap(selected = active, label = "${k.spoken}: ${k.text}") { onToggle(k.id) }
                     .padding(vertical = 8.3.dp, horizontal = 3.dp),
                 verticalAlignment = Alignment.Top,
             ) {

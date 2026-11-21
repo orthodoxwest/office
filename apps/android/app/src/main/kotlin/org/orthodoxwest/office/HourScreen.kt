@@ -564,13 +564,6 @@ private fun HourTitle(
 @Composable
 private fun ReadingKeyPanel(key: ReadingKeyView, onAbout: () -> Unit) {
     val p = LocalPalette.current
-    fun spokenMark(mark: String): String = when (mark) {
-        "℣.  ℟." -> "Versicle and response"
-        "*  †" -> "Asterisk and dagger"
-        "✠" -> "Cross"
-        "Ant." -> "Antiphon"
-        else -> mark
-    }
     Column(Modifier.padding(top = 10.dp, bottom = 8.dp).widthIn(max = 384.dp).fillMaxWidth()) {
         Text(
             key.title.uppercase(),
@@ -582,7 +575,7 @@ private fun ReadingKeyPanel(key: ReadingKeyView, onAbout: () -> Unit) {
             if (i > 0) Hairline(p.surfaceEdge)
             Row(
                 Modifier.fillMaxWidth().padding(vertical = 8.3.dp, horizontal = 3.2.dp)
-                    .clearAndSetSemantics { contentDescription = "${spokenMark(item.mark)}: ${item.text}" },
+                    .clearAndSetSemantics { contentDescription = "${item.spoken}: ${item.text}" },
                 verticalAlignment = Alignment.Top,
             ) {
                 val markMod = Modifier.width(82.dp).padding(end = 12.dp)

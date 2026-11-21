@@ -4643,6 +4643,9 @@ test("an ordo row's tap leaves a mark's note alone, and its date's cell leads to
   await expect(row.locator(".day-mobile-date")).toHaveAccessibleDescription(/\S/);
 
   await page.setViewportSize({ width: 1280, height: 900 });
+  // The row ignores a click for 300ms after a note closes (that tap's own click); a later
+  // click is a new one, however soon a busy machine runs it.
+  await expect.poll(() => note.evaluate((n) => Date.now() - Number(n.dataset.closedAt || 0))).toBeGreaterThanOrEqual(300);
   const wk = row.locator("td.day-wk");
   await wk.click();
   await expect(details).toHaveAttribute("open", "");

@@ -439,7 +439,11 @@ input {
   display: none !important;
 }
 
+/* Words said for what the eye reads otherwise (✠, Ant., a year in Roman
+   numerals) stay out of copied text. */
 .sr-only {
+  -webkit-user-select: none;
+  user-select: none;
   position: absolute;
   width: 1px;
   height: 1px;
@@ -449,15 +453,6 @@ input {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-/* Words said for a mark the eye reads (✠, Ant.) stay out of copied text,
-   as the sigils' do (.sigil is unselectable). */
-.cross .sr-only,
-.antiphon em .sr-only,
-.home-versicle-sigil .sr-only {
-  -webkit-user-select: none;
-  user-select: none;
 }
 
 /* Reader text size (footer control, localStorage key office-text-size).
