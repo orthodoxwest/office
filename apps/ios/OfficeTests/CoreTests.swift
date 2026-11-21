@@ -137,12 +137,16 @@ final class SpokenTests: XCTestCase {
 
     func testChantScoresSpeakCleanWordsAndStanzaNumbers() throws {
         let core = try Office.core.get()
-        let scored = [(3, 15), (4, 5), (12, 25)].flatMap { month, day in
-            hourNames().flatMap { hour in
-                (try! core.compose(hour: hour, year: 2026, month: Int32(month), day: Int32(day), form: "priest", martyrology: false, chant: true))
-                    .sections.flatMap(\.blocks)
+        // (Plain loops: the nested flatMaps took the type checker past its limit.)
+        var scored: [BlockView] = []
+        for (month, day) in [(3, 15), (4, 5), (12, 25)] {
+            for hour in hourNames() {
+                let view = try core.compose(hour: hour, year: 2026, month: Int32(month), day: Int32(day), form: "priest", martyrology: false, chant: true)
+                for section in view.sections {
+                    scored += section.blocks.filter { $0.kind == .score }
+                }
             }
-        }.filter { $0.kind == .score }
+        }
         XCTAssertFalse(scored.isEmpty)
         for b in scored {
             let said = spoken(b)
