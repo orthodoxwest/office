@@ -122,7 +122,14 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
     var open by remember(block) { mutableStateOf<Int?>(null) }
     val m = if (block.kind == BlockKind.GAP) modifier else modifier.clearAndSetSemantics {
         contentDescription = spoken(block)
-        if (block.kind == BlockKind.HEADING || block.kind == BlockKind.COMMEMORATION_HEADING) heading()
+        if (
+            block.kind == BlockKind.HEADING ||
+            block.kind == BlockKind.COMMEMORATION_HEADING ||
+            block.kind == BlockKind.ITEM_LABEL ||
+            block.kind == BlockKind.CANTICLE_SECTION
+        ) {
+            heading()
+        }
         if (glossed.isNotEmpty()) {
             customActions = glossed.map { (i, gloss) -> CustomAccessibilityAction(explain(gloss)) { open = i; true } }
         }
@@ -523,6 +530,7 @@ fun spoken(block: BlockView): String {
             else -> run.text
         }
     }
+        .replace("✠", CROSS_MARK)
         .replace("†", ", ")
         .replace("·", ".")
         .replace("℣.", "Versicle.").replace("℟.", "Response.")
@@ -539,8 +547,11 @@ fun spoken(block: BlockView): String {
         .replaceFirstChar { it.uppercase() }
     val marker = when (block.kind) {
         BlockKind.ANTIPHON, BlockKind.ANNOUNCED_ANTIPHON -> "Antiphon."
-        BlockKind.VERSICLE, BlockKind.RESPONSE -> block.marker.replace("℣.", "Versicle.").replace("℟.", "Response.")
+        BlockKind.VERSICLE, BlockKind.RESPONSE -> block.marker
+            .replace("℣.", "Versicle.").replace("℟.", "Response.")
+            .replace("℣", "Versicle").replace("℟", "Response")
         BlockKind.VERSE -> ""
+        BlockKind.SCORE -> block.marker.trim('.', ' ').let { if (it.isEmpty()) "" else "Stanza $it." }
         else -> block.marker
     }
     return listOf(marker, words).filter { it.isNotEmpty() }.joinToString(" ")

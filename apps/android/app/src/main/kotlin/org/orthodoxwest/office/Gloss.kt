@@ -46,12 +46,10 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.CustomAccessibilityAction
-import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.onClick
-import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.AnnotatedString
@@ -350,6 +348,7 @@ fun NoteMark(name: String, label: String, modifier: Modifier = Modifier, mark: @
     Box(
         modifier
             .onGloballyPositioned { coordinates[0] = it }
+            .reach()
             .tap(label = label) { open = !open }
             .semantics { stateDescription = if (open) "Expanded" else "Collapsed" },
     ) {
@@ -468,8 +467,9 @@ fun Note(words: NoteWords?, rects: () -> List<Rect>, onDismiss: () -> Unit) {
                         .border(1.dp, p.goldLine, shape)
                         // The surface's edge catching the light just inside the top (`inset 0 1px 0`).
                         .drawBehind { drawRect(p.surfaceEdge, Offset(1.dp.toPx(), 1.dp.toPx()), size.copy(width = size.width - 2.dp.toPx(), height = 1.dp.toPx())) }
+                        .tap(action = "dismiss note", onClick = onDismiss)
                         .padding(start = 14.4.dp, end = 14.4.dp, top = 11.2.dp, bottom = 12.8.dp)
-                        .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+                        .semantics(mergeDescendants = true) {},
                 ) {
                     if (said.title.isNotEmpty()) Text(said.title, style = NoteTitle.copy(color = p.rubric), modifier = Modifier.padding(bottom = 3.2.dp))
                     Text(said.note, style = NoteText.copy(color = p.text))

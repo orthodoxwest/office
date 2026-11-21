@@ -1,6 +1,6 @@
 {% extends "layout.html" %}{% block title %}Daily Office — {{ date_str }}{% endblock %}{% block content %}
 <div class="home">
-  {% if from_feast %}<a class="from-feast" href="{{ from_feast.href|url }}">&lsaquo; {{ from_feast.label|typeset }}</a>{% endif %}
+  {% if from_feast %}<a class="from-feast" href="{{ from_feast.href|url }}"><span aria-hidden="true">&lsaquo; </span>{{ from_feast.label|typeset }}</a>{% endif %}
   <span class="sr-only">Liturgical color: {{ color }}</span>
   {# The source order is the frontispiece order at every width: day identity,
        prayer invitation, then the secondary date control. Keeping the visual
@@ -49,7 +49,7 @@
            for it: never in Passiontide or on a violet day, when the head is
            stripped (presentation::home_shows_versicle). #}
         {% if versicle %}
-        <p class="home-versicle"><span class="home-versicle-line"><span class="home-versicle-sigil">℣.</span> {{ versicle|typeset }}</span> <span class="home-versicle-line"><span class="home-versicle-sigil">℟.</span> {{ response|typeset }}</span></p>
+        <p class="home-versicle"><span class="home-versicle-line"><span class="home-versicle-sigil"><span aria-hidden="true">℣.</span><span class="sr-only">Versicle.</span></span> {{ versicle|typeset }}</span> <span class="home-versicle-line"><span class="home-versicle-sigil"><span aria-hidden="true">℟.</span><span class="sr-only">Response.</span></span> {{ response|typeset }}</span></p>
         {% endif %}
         {% if commemorations %}
         <div class="commemorations">

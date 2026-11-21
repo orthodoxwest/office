@@ -255,7 +255,8 @@ fn shown(out: &[Block], on: bool) -> String {
 }
 
 /// The web's words as a reader sees them with Chant `on` or off: with it on, each score by its
-/// stanza number and label, the words it replaces left out.
+/// stanza number and spoken words, the words it replaces left out. Screen-reader-only expansions
+/// (`class="sr-only"`) outside scores are skipped so visible text stays word-for-word with blocks.
 fn web_words(html: &str, on: bool) -> String {
     let mut out = String::new();
     let mut rest = html;
@@ -266,14 +267,15 @@ fn web_words(html: &str, on: bool) -> String {
         let name: String = tag[1..].chars().take_while(char::is_ascii_alphanumeric).collect();
         let score = on && tag.contains("class=\"chant-score");
         let hidden = if on { "data-chant-variant=\"off\"" } else { "data-chant-variant=\"on\"" };
-        if score || tag.contains(hidden) {
+        let sr_only = tag.contains("class=\"sr-only\"");
+        if score || tag.contains(hidden) || sr_only {
             let end = element_end(rest, &name);
             if score {
                 let element = &rest[..end];
                 if let Some(n) = element.split("class=\"chant-stanza-number\" aria-hidden=\"true\">").nth(1) {
                     out.push_str(n.split('<').next().unwrap());
                 }
-                out.push_str(&squeeze(&html_text(tag.split("aria-label=\"").nth(1).unwrap().split('"').next().unwrap())));
+                out.push_str(&squeeze(&html_text(element.split("class=\"sr-only\">").nth(1).unwrap().split('<').next().unwrap())));
             }
             rest = &rest[end..];
         } else {
@@ -351,7 +353,7 @@ fn scored_blocks_carry_the_web_s_words_either_way() {
         let out = blocks(&e);
         assert_eq!(shown(&out, false), shown(&blocks(&unscored), false), "{:?}", e.score);
         let html = render_html::html::render_section_elements(std::slice::from_ref(&e));
-        assert_eq!(shown(&out, false), squeeze(&html_text(&render_html::html::render_section_elements(&[unscored]))));
+        assert_eq!(shown(&out, false), web_words(&render_html::html::render_section_elements(&[unscored]), false));
         assert_eq!(shown(&out, true), web_words(&html, true), "{:?}", e.score);
         assert_eq!(e.text.contains("kneeling"), shown(&out, true).contains("kneeling"), "a rubric shows with Chant on too");
     }
@@ -367,7 +369,7 @@ fn a_score_s_label_leaves_out_the_pointing() {
     let score = blocks(&e).into_iter().find(|b| b.kind == BlockKind::Score).unwrap();
     assert_eq!(score.plain_text(), label);
     let html = render_html::html::render_section_elements(&[e]);
-    assert!(html.contains(&format!("aria-label=\"{label}\"")), "{html}");
+    assert!(html.contains(&format!("<span class=\"sr-only\">{label}</span>")), "{html}");
 }
 
 /// A feast page's texts read the same on every front: each feast kept or commemorated in a year,
@@ -399,7 +401,7 @@ fn a_feasts_texts_carry_the_same_text_as_the_web() {
                 };
                 hymns += usize::from(t.hymn.is_some());
                 let native: String = native.iter().map(|b| squeeze(&b.plain_text())).collect();
-                assert_eq!(native, squeeze(&html_text(&html)), "{id} {} {}", day.date, t.label);
+                assert_eq!(native, web_words(&html, false), "{id} {} {}", day.date, t.label);
                 checked += 1;
             }
         }

@@ -107,31 +107,41 @@ struct RootView: View {
             .overlay(alignment: .topTrailing) {
                 if model.overlay == .menu && geo.size.width < wideFrom {
                     ZStack(alignment: .topTrailing) {
-                        // A tap anywhere else closes the menu.
-                        Color.black.opacity(0.001).ignoresSafeArea().onTapGesture { model.closeOverlay() }
-                            .accessibilityHidden(true)
+                        // A tap anywhere else closes the menu; exposed to VoiceOver as a Close
+                        // button inside the modal so users are never trapped without Z-scrub.
+                        Color.black.opacity(0.001).ignoresSafeArea()
+                            .onTapGesture { model.closeOverlay() }
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("Close menu")
+                            .accessibilityAddTraits(.isButton)
+                            .accessibilitySortPriority(0)
                         MenuPanel()
                             .padding(.top, m.px(52))
                             .padding(.horizontal, m.px(gutter))
-                            // Modal to VoiceOver, as Android's popup is to TalkBack; the scrub closes it.
-                            .accessibilityElement(children: .contain)
-                            .accessibilityAddTraits(.isModal)
-                            .accessibilityAction(.escape) { model.closeOverlay() }
+                            .accessibilitySortPriority(1)
                     }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityAddTraits(.isModal)
+                    .accessibilityAction(.escape) { model.closeOverlay() }
                     .transition(panel)
                 }
                 if model.overlay == .settings && geo.size.width >= wideFrom {
                     ZStack(alignment: .topTrailing) {
-                        Color.black.opacity(0.001).ignoresSafeArea().onTapGesture { model.closeOverlay() }
-                            .accessibilityHidden(true)
+                        Color.black.opacity(0.001).ignoresSafeArea()
+                            .onTapGesture { model.closeOverlay() }
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("Close settings")
+                            .accessibilityAddTraits(.isButton)
+                            .accessibilitySortPriority(0)
                         // Under the header's end: the nav shell is held to 68rem and centred.
                         MenuPanel(prefsOnly: true)
                             .padding(.top, m.px(52))
                             .padding(.trailing, max(0, (geo.size.width - m.px(1088)) / 2) + m.px(gutter))
-                            .accessibilityElement(children: .contain)
-                            .accessibilityAddTraits(.isModal)
-                            .accessibilityAction(.escape) { model.closeOverlay() }
+                            .accessibilitySortPriority(1)
                     }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityAddTraits(.isModal)
+                    .accessibilityAction(.escape) { model.closeOverlay() }
                     .transition(panel)
                 }
             }
@@ -195,17 +205,22 @@ private struct EntryPage: View {
     @EnvironmentObject private var model: AppModel
 
     var body: some View {
-        switch model.page(of: entry) {
-        case let .home(d)?: HomePage(date: d)
-        case let .hour(d, h)?: HourPage(date: d, hour: h)
-        case let .ordo(y, m, d)?: OrdoPage(year: y, month: m, day: d)
-        case let .year(y)?: YearPage(year: y)
-        case .reminders?: RemindersPage()
-        case .about?: AboutPage()
-        case let .find(q)?: FindPage(query: q)
-        case let .feast(id)?: FeastPage(id: id, entry: entry)
-        // Gone from the way back, while the stack lets it go.
-        case nil: Color.clear
+        Group {
+            switch model.page(of: entry) {
+            case let .home(d)?: HomePage(date: d)
+            case let .hour(d, h)?: HourPage(date: d, hour: h)
+            case let .ordo(y, m, d)?: OrdoPage(year: y, month: m, day: d)
+            case let .year(y)?: YearPage(year: y)
+            case .reminders?: RemindersPage()
+            case .about?: AboutPage()
+            case let .find(q)?: FindPage(query: q)
+            case let .feast(id)?: FeastPage(id: id, entry: entry)
+            // Gone from the way back, while the stack lets it go.
+            case nil: Color.clear
+            }
+        }
+        .accessibilityAction(.escape) {
+            if !model.path.isEmpty { model.path.removeLast() }
         }
     }
 }

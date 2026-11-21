@@ -255,14 +255,20 @@ struct RemindersScreen: View {
     /// to turn them off unfolds beneath it as a worded link, not a boxed button.
     @ViewBuilder private var phoneSwitch: some View {
         TabletButton(label: settings.on ? "Reminders are on" : "Turn on reminders") {
-            if !settings.on { turn(on: true) }
+            if !settings.on {
+                turn(on: true)
+                UIAccessibility.post(notification: .announcement, argument: "Reminders are on")
+            }
         }
         .contentTransition(.opacity)
         .accessibilityRemoveTraits(settings.on ? .isButton : [])
         .padding(.top, m.px(12))
         if settings.on {
             VStack(spacing: 0) {
-                Button { turn(on: false) } label: {
+                Button {
+                    turn(on: false)
+                    UIAccessibility.post(notification: .announcement, argument: "Reminders are off")
+                } label: {
                     Text("Turn off reminders").type(Scale.body.sized(16, line: 22)).foregroundStyle(p.accent)
                         .goldUnderline(true, p.goldLine)
                         .frame(minHeight: 44)
@@ -476,6 +482,7 @@ private struct TimeSheet: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .clipped()
                     .ignoresSafeArea()
+                    .accessibilityHidden(true)
             } else {
                 p.surface.ignoresSafeArea()
             }

@@ -195,12 +195,17 @@ fun OrdoScreen(
         item(key = "find") { SearchEntry(onFind, ordoColumn().padding(top = 8.dp)) }
         item(key = "tools") {
             Row(ordoColumn().padding(top = 8.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "§ Fasting · ",
-                    style = Type.small.copy(fontSize = 12.sp, lineHeight = 17.4.sp, color = p.muted),
-                )
-                FishIcon(p.muted, Modifier.padding(end = 3.dp))
-                Text("Abstinence", style = Type.small.copy(fontSize = 12.sp, lineHeight = 17.4.sp, color = p.muted))
+                Row(
+                    Modifier.clearAndSetSemantics { contentDescription = "Section mark: fasting. Fish: abstinence." },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        "§ Fasting · ",
+                        style = Type.small.copy(fontSize = 12.sp, lineHeight = 17.4.sp, color = p.muted),
+                    )
+                    FishIcon(p.muted, Modifier.padding(end = 3.dp))
+                    Text("Abstinence", style = Type.small.copy(fontSize = 12.sp, lineHeight = 17.4.sp, color = p.muted))
+                }
                 Spacer(Modifier.weight(1f))
                 Text(
                     if (allDetails) "Hide office details" else "Show office details",
@@ -300,8 +305,15 @@ private fun OrdoHeader(
                 style = Type.body.copy(fontSize = if (wide) 34.4.sp else 28.sp, lineHeight = if (wide) 39.6.sp else 34.sp, color = p.text, fontFeatureSettings = "lnum"),
             )
             // The frontispiece reads as the printed ordo's title page.
-            val subtitle = if (month == null && !roman.isNullOrEmpty()) "Anno Domini $roman" else "Feasts & daily observances"
-            Text(subtitle, Modifier.padding(top = 4.8.dp), style = Type.small.copy(color = p.muted, fontSize = if (wide) 13.6.sp else Type.small.fontSize))
+            val isFrontispiece = month == null && !roman.isNullOrEmpty()
+            val subtitle = if (isFrontispiece) "Anno Domini $roman" else "Feasts & daily observances"
+            Text(
+                subtitle,
+                Modifier.padding(top = 4.8.dp).then(
+                    if (isFrontispiece) Modifier.clearAndSetSemantics { contentDescription = "Anno Domini $year" } else Modifier,
+                ),
+                style = Type.small.copy(color = p.muted, fontSize = if (wide) 13.6.sp else Type.small.fontSize),
+            )
         }
     }
     val yearNav: @Composable (Modifier) -> Unit = { m ->
@@ -674,7 +686,7 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
         "liturgical color: ${d.color}",
         "fasting".takeIf { d.fast },
         "abstinence".takeIf { d.abstinence },
-        d.rank.takeIf { it.isNotEmpty() }?.let { "rank $it" },
+        (d.rankFull.ifEmpty { d.rank }).takeIf { it.isNotEmpty() },
     ).joinToString(". ")
     // A tap on the row, off its date, its marks and the open digest, opens or closes the details,
     // as the disclosure does: the row is read in place, and only the date leads to the day (the
@@ -1007,7 +1019,7 @@ private fun OrdoMarks(d: OrdoDayView, fast: (@Composable () -> Unit)?, abstinenc
     if (d.fast && fast != null) NoteMark(MARK_WORDS.fasting, "Fasting") { fast() }
     if (d.abstinence && abstinence) NoteMark(MARK_WORDS.abstinence, "Abstinence") { FishIcon(p.muted) }
     if (d.rank.isNotEmpty() && rank != null) {
-        if (d.rankFull.isNotEmpty()) NoteMark(d.rankFull, "Rank ${d.rank}") { rank() } else rank()
+        if (d.rankFull.isNotEmpty()) NoteMark(d.rankFull, d.rankFull) { rank() } else rank()
     }
 }
 
@@ -1114,9 +1126,9 @@ private fun OrdoDayView.hasVespers() = magnificatAntiphon.isNotEmpty() || vesper
 
 @Composable
 private fun SmallDisclosure(label: String, open: Boolean, onToggle: () -> Unit) {
-    // As tall as its type: no row keeps a 44dp line for it. Compose still answers a touch over the
-    // platform's whole minimum target round it, as the web draws its thumb box.
-    Row(Modifier.tap(onClick = onToggle).disclosed(open), verticalAlignment = Alignment.CenterVertically) {
+    // As tall as its type: no row keeps a 44dp line for it. `.reach()` expands the touch box
+    // to 48dp without adding row height, as the web draws its thumb box.
+    Row(Modifier.reach().tap(onClick = onToggle).disclosed(open), verticalAlignment = Alignment.CenterVertically) {
         Text(label, style = Type.small.copy(fontSize = 12.sp, lineHeight = 18.sp, color = LocalPalette.current.muted))
         Caret(open, LocalPalette.current.muted)
     }
@@ -1149,7 +1161,7 @@ private fun ColumnScope.Digest(d: OrdoDayView, onDay: () -> Unit, onFeast: (Stri
     // web's `.day-office-open`), sized to a full 44dp thumb target.
     Text(
         "${MARK_WORDS.openDay} ›",
-        Modifier.heightIn(min = 44.dp).tap(onClick = onDay).wrapContentHeight(Alignment.CenterVertically),
+        Modifier.heightIn(min = 44.dp).tap(label = MARK_WORDS.openDay, onClick = onDay).wrapContentHeight(Alignment.CenterVertically),
         style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.accent),
     )
     Column(

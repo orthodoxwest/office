@@ -51,11 +51,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -97,9 +101,12 @@ import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -673,13 +680,14 @@ fun MenuPanel(
                         val w = 1.dp.toPx()
                         drawRect(p.surfaceEdge, Offset(w, 2.dp.toPx()), size.copy(width = size.width - 2 * w, height = w))
                     }
+                    .verticalScroll(rememberScrollState())
                     .padding(10.4.dp),
             ) {
                 if (onHour != null && !prefsOnly) {
                     listOf(listOf("lauds", "prime"), listOf("terce", "sext", "none"), listOf("vespers", "compline")).forEachIndexed { i, row ->
                         // A hairline between the bands, so the grouping reads without labels.
                         if (i > 0) Hairline(p.surfaceEdge)
-                        MenuRow { row.forEach { h -> MenuCell(hourLabel(h).uppercase(), h == currentHour, nav, page = true) { onHour(h) } } }
+                        MenuRow { row.forEach { h -> MenuCell(hourLabel(h).uppercase(), h == currentHour, nav, page = true, spoken = hourLabel(h)) { onHour(h) } } }
                         Spacer(Modifier.height(2.4.dp))
                     }
                     Hairline(p.border, Modifier.padding(vertical = 4.dp))
@@ -687,17 +695,17 @@ fun MenuPanel(
                 if (!prefsOnly) {
                     // Ordo, Reminders and About share one three-up row, matching Terce · Sext · None above.
                     MenuRow {
-                        MenuCell("ORDO", onOrdoCurrent, nav, page = true, onClick = onOrdo)
+                        MenuCell("ORDO", onOrdoCurrent, nav, page = true, spoken = "Ordo", onClick = onOrdo)
                         // Habit setup and introduction: quieter than the Ordo, as on the web (`.nav-secondary`).
-                        MenuCell("REMINDERS", onRemindersCurrent, Type.label(11.52f, 0.04f), page = true, onClick = onReminders)
-                        MenuCell(about.uppercase(), onAboutCurrent, Type.label(11.52f, 0.04f), page = true, onClick = onAbout)
+                        MenuCell("REMINDERS", onRemindersCurrent, Type.label(11.52f, 0.04f), page = true, spoken = "Reminders", onClick = onReminders)
+                        MenuCell(about.uppercase(), onAboutCurrent, Type.label(11.52f, 0.04f), page = true, spoken = about, onClick = onAbout)
                     }
                     Hairline(p.border, Modifier.padding(top = 6.4.dp))
                     Spacer(Modifier.height(6.4.dp))
                 }
                 MenuRow {
                     Text("THEME", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
-                    ThemeChoice.entries.forEach { t -> MenuCell(t.label.uppercase(), t == theme, Type.label(12f, 0.06f)) { onTheme(t) } }
+                    ThemeChoice.entries.forEach { t -> MenuCell(t.label.uppercase(), t == theme, Type.label(12f, 0.06f), spoken = t.label) { onTheme(t) } }
                 }
                 // The names are the church's, so a line says what they are, as on the web.
                 PrefHint(
@@ -737,7 +745,7 @@ fun MenuPanel(
                     }
                     Spacer(Modifier.weight(1f))
                     listOf("OFF" to false, "ON" to true).forEach { (label, on) ->
-                        MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f)) { martyrology.onChange(on) }
+                        MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f), spoken = "Martyrology ${label.lowercase()}") { martyrology.onChange(on) }
                     }
                 }
                 PrefHint(AnnotatedString(PREF_HINTS.martyrology))
@@ -917,11 +925,11 @@ fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onP
             (if (centred) Modifier.align(Alignment.CenterHorizontally).widthIn(max = 44.dp * 7) else Modifier).fillMaxWidth().padding(top = 8.dp).heightIn(min = 44.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("← ${DAY_NAV.previous}", Modifier.tap(label = DAY_NAV.previous) { onPick(shown.minusDays(1)) }.padding(horizontal = if (centred) 4.dp else 16.dp), style = link)
+            Text("← ${DAY_NAV.previous}", Modifier.heightIn(min = 44.dp).tap(label = DAY_NAV.previous) { onPick(shown.minusDays(1)) }.padding(horizontal = if (centred) 4.dp else 16.dp).wrapContentHeight(Alignment.CenterVertically), style = link)
             Spacer(Modifier.weight(1f))
-            if (shown != today) Text("TODAY", Modifier.tap { onPick(today) }, style = Type.control.copy(color = p.muted))
+            if (shown != today) Text("TODAY", Modifier.heightIn(min = 44.dp).tap(label = "Today") { onPick(today) }.wrapContentHeight(Alignment.CenterVertically), style = Type.control.copy(color = p.muted))
             Spacer(Modifier.weight(1f))
-            Text("${DAY_NAV.next} →", Modifier.tap(label = DAY_NAV.next) { onPick(shown.plusDays(1)) }.padding(horizontal = if (centred) 4.dp else 16.dp), style = link)
+            Text("${DAY_NAV.next} →", Modifier.heightIn(min = 44.dp).tap(label = DAY_NAV.next) { onPick(shown.plusDays(1)) }.padding(horizontal = if (centred) 4.dp else 16.dp).wrapContentHeight(Alignment.CenterVertically), style = link)
         }
         Column(Modifier.align(Alignment.CenterHorizontally).widthIn(max = 44.dp * 7).fillMaxWidth()) {
             // A hairline parts the day's turn above from the month's below.
@@ -934,13 +942,15 @@ fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onP
                 val stepStyle = link.copy(fontSize = 22.sp)
                 // Each step a day's cell wide, over the first and last columns.
                 Box(
-                    Modifier.size(44.dp).then(if (back != null) Modifier.tap(label = if (months) "Previous year" else "Previous month") { month = back } else Modifier),
+                    Modifier.size(44.dp).then(if (back != null) Modifier.tap(label = if (months) "Previous year" else "Previous month") { month = back } else Modifier.clearAndSetSemantics {}),
                     contentAlignment = Alignment.Center,
                 ) { Text("‹", style = if (back != null) stepStyle else stepStyle.copy(color = p.border)) }
                 val title = if (months) "${month.year}" else "${month.month.getDisplayName(JavaTextStyle.FULL, Locale.US)} ${month.year}"
                 Row(
                     Modifier.weight(1f).heightIn(min = 44.dp)
-                        .tap(label = if (months) "$title, back to days" else "$title, choose another month") { months = !months },
+                        .tap(label = if (months) "$title, back to days" else "$title, choose another month") { months = !months }
+                        .disclosed(months)
+                        .semantics { liveRegion = LiveRegionMode.Polite },
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -949,7 +959,7 @@ fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onP
                     Caret(months, p.goldLine, lighter = false)
                 }
                 Box(
-                    Modifier.size(44.dp).then(if (forward != null) Modifier.tap(label = if (months) "Next year" else "Next month") { month = forward } else Modifier),
+                    Modifier.size(44.dp).then(if (forward != null) Modifier.tap(label = if (months) "Next year" else "Next month") { month = forward } else Modifier.clearAndSetSemantics {}),
                     contentAlignment = Alignment.Center,
                 ) { Text("›", style = if (forward != null) stepStyle else stepStyle.copy(color = p.border)) }
             }
@@ -1075,12 +1085,14 @@ private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: M
                 row.forEach { m ->
                     val name = Month.of(m).getDisplayName(JavaTextStyle.FULL, Locale.US)
                     val chosen = shown.year == year && shown.monthValue == m
+                    val isCurrentMonth = today.year == year && today.monthValue == m
+                    val spokenMonth = if (isCurrentMonth) "$name $year, this month" else "$name $year"
                     Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                         Text(
                             Month.of(m).getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
                             Modifier
-                                .then(if (today.year == year && today.monthValue == m) Modifier.todayPool(p) else Modifier)
-                                .then(if (live) Modifier.tap(label = "$name $year", selected = chosen, lit = Lit(homeInk(p).nowPool)) { onMonth(m) } else Modifier.clearAndSetSemantics {})
+                                .then(if (isCurrentMonth) Modifier.todayPool(p) else Modifier)
+                                .then(if (live) Modifier.tap(label = spokenMonth, selected = chosen, lit = Lit(homeInk(p).nowPool)) { onMonth(m) } else Modifier.clearAndSetSemantics {})
                                 .heightIn(min = 44.dp)
                                 .goldUnderline(chosen, p.goldLine)
                                 .padding(horizontal = 14.4.dp, vertical = 13.dp),
@@ -1104,8 +1116,12 @@ fun FormChooser(form: String, onForm: (String) -> Unit) {
     val p = LocalPalette.current
     val haptics = LocalHapticFeedback.current
     Column(Modifier.widthIn(max = 368.dp).fillMaxWidth().padding(top = 12.dp, bottom = 8.dp)) {
-        Text("HOW ARE YOU PRAYING?", Modifier.padding(bottom = 10.4.dp), style = Type.label(11.2f, 0.1f).copy(color = p.muted))
-        Column(Modifier.fillMaxWidth().drawBehind {
+        Text(
+            "HOW ARE YOU PRAYING?",
+            Modifier.padding(bottom = 10.4.dp).semantics { heading(); contentDescription = "How are you praying?" },
+            style = Type.label(11.2f, 0.1f).copy(color = p.muted),
+        )
+        Column(Modifier.fillMaxWidth().selectableGroup().drawBehind {
             val w = 1.dp.toPx()
             drawLine(p.border, Offset(0f, w / 2f), Offset(size.width, w / 2f), w)
             drawLine(p.border, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)

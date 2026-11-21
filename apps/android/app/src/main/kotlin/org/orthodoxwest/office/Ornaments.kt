@@ -41,6 +41,7 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -222,7 +223,7 @@ private fun Sprig() {
 fun Headpiece(modifier: Modifier = Modifier) {
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
         Sprig()
-        Text("✠", style = TextStyle(fontFamily = CrossFont, fontSize = 11.sp, color = LocalPalette.current.lining))
+        Text("✠", Modifier.clearAndSetSemantics {}, style = TextStyle(fontFamily = CrossFont, fontSize = 11.sp, color = LocalPalette.current.lining))
         Sprig()
     }
 }
@@ -241,7 +242,7 @@ fun HourSign(hour: String) {
         "vespers", "compline" -> Canvas(Modifier.size(16.64.dp)) { fitted(24f, 24f) { drawPath(Moon, p.moonInk) } }
         // A step larger than the shared headpiece's cross (the web's 1rem against 0.8rem), nearer
         // the sun's and moon's weight in the rule's break.
-        else -> Text("✠", style = TextStyle(fontFamily = CrossFont, fontSize = 13.75.sp, color = p.lining))
+        else -> Text("✠", Modifier.clearAndSetSemantics {}, style = TextStyle(fontFamily = CrossFont, fontSize = 13.75.sp, color = p.lining))
     }
 }
 

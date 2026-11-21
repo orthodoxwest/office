@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 private let periods: [(period: Period, label: String, hours: [String])] = [
     (.morning, "Morning", ["lauds", "prime"]),
@@ -686,6 +687,7 @@ private struct Frontispiece: View {
                             .padding(.vertical, m.px(12))
                     }
                     .buttonStyle(Quiet())
+                    .accessibilityLabel("Go to today")
                     .crownInk("w-today")
                 }
             }
@@ -727,7 +729,7 @@ private struct Frontispiece: View {
             .padding(.horizontal, side)
             .frame(maxWidth: .infinity)
             .opacity(picking ? 0 : 1)
-            .animation(.easeIn(duration: 0.12), value: picking)
+            .animation(reduceMotion ? nil : .easeIn(duration: 0.12), value: picking)
             .allowsHitTesting(!picking)
             .accessibilityHidden(picking)
             // The stage's second face: the day's turn and the calendar, laid out only while shown,
@@ -746,8 +748,9 @@ private struct Frontispiece: View {
             .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
             .clipped()
             .opacity(picking ? 1 : 0)
-            .animation(.easeOut(duration: 0.2).delay(0.06), value: picking)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.2).delay(0.06), value: picking)
             .accessibilityHidden(!picking)
+            .accessibilityAction(.escape) { if picking { togglePicker() } }
             .padding(.horizontal, side)
             .frame(maxWidth: .infinity)
             // The season and "Change date" under the stage, sharing one line, centred (the web's
@@ -814,8 +817,9 @@ private struct Frontispiece: View {
     /// Opens "Change date"'s picker, or folds it away and then lets it go, on the disclosures' curves;
     /// under Reduce Motion the stage turns at once, as the web's and Android's then do.
     private func togglePicker() {
+        let opening = !picking
         if reduceMotion {
-            unfolded = !picking
+            unfolded = opening
             picking.toggle()
             if picking { reveal.alongside(homeCard) }
         } else if picking {
@@ -832,16 +836,23 @@ private struct Frontispiece: View {
                 reveal.alongside(homeCard)
             }
         }
+        if UIAccessibility.isVoiceOverRunning {
+            UIAccessibility.post(notification: .announcement, argument: opening ? "Date picker opened above" : "Date picker closed")
+        }
     }
 
     /// A line of the versicle: its ℣ or ℟ upright in the rubrics' red, the words in italic, the
     /// text's ink a little withdrawn.
     private func versicleLine(_ sigil: String, _ words: String, _ style: TextStyle) -> some View {
-        (Text(sigil).font(Font(garamond(style.size * m.type))).foregroundColor(rubric) + Text(" " + words))
+        let spokenSigil = sigil
+            .replacingOccurrences(of: "℣.", with: "Versicle.")
+            .replacingOccurrences(of: "℟.", with: "Response.")
+        return (Text(sigil).font(Font(garamond(style.size * m.type))).foregroundColor(rubric) + Text(" " + words))
             .type(style)
             .foregroundStyle(p.text.opacity(0.84))
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
+            .accessibilityLabel("\(spokenSigil) \(words)")
     }
 
     /// The inscription band: flat green earth between oxblood edges and leaf fillets, ruled by
@@ -1036,6 +1047,7 @@ private struct Tablet: ButtonStyle {
                         Image(uiImage: tablet).renderingMode(.template).resizable().foregroundStyle(deeper).opacity(held ? 1 : 0)
                     }
                     .padding(1)
+                    .accessibilityHidden(true)
                 }
             }
             .overlay {
