@@ -520,7 +520,7 @@ private fun HourTitle(
                     } else {
                         val sg = seasonGloss(part)
                         if (sg != null) {
-                            GlossMark(sg, part) { Text(text, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center)) }
+                            GlossMark(sg, part, reaches = false) { Text(text, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center)) }
                         } else {
                             Text(text, Modifier.semantics { contentDescription = part }, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
                         }

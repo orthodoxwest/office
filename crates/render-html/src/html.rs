@@ -75,10 +75,12 @@ pub fn render_section_heading(label: &str) -> String {
 pub fn render_section_heading_in(label: &str, bare: bool) -> String {
     let bare = if bare { " section-bare" } else { "" };
     if let Some(name) = label.strip_prefix("Commemoration of ").filter(|n| !n.is_empty()) {
+        // The Cross keeps its own note; any other is a commemorated feast or season.
+        let kicker = heading_gloss(label).unwrap_or(&ORDO_COMMEMORATION_GLOSS);
         return format!(
             "<h2 class=\"section-heading commemoration-heading{bare}\"><span class=\"commemoration-kicker gloss-quiet\" data-gloss-title=\"{}\" data-gloss=\"{}\">Commemoration of</span> <span class=\"commemoration-name\">{}</span></h2>",
-            esc_text(ORDO_COMMEMORATION_GLOSS.title),
-            esc_text(ORDO_COMMEMORATION_GLOSS.note),
+            esc_text(kicker.title),
+            esc_text(kicker.note),
             esc_text(name)
         );
     }

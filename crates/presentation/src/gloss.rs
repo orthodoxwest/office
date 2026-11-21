@@ -82,7 +82,7 @@ pub const GOSPEL_CANTICLE_GLOSS: Gloss = Gloss {
 pub const MARIAN_ANTIPHON_GLOSS: Gloss = Gloss {
     term: "Final Antiphon of the Blessed Virgin Mary",
     title: "Final Marian Antiphon",
-    note: "One of four seasonal hymns to the Mother of God—Alma Redemptoris Mater, Ave Regina Caelorum, Regina Caeli, or Salve Regina—closing the office.",
+    note: "One of the four seasonal antiphons of the Mother of God—Alma Redemptoris Mater, Ave Regina Caelorum, Regina Caeli, or Salve Regina—closing the office.",
 };
 
 pub const VERSICLE_GLOSS: Gloss =
@@ -93,7 +93,7 @@ pub const VERSICLE_GLOSS: Gloss =
 pub const COMMEMORATION_OF_CROSS_GLOSS: Gloss = Gloss {
     term: "Commemoration of the Cross",
     title: "Commemoration of the Cross",
-    note: "A short prayer honoring the Holy Cross, said from Low Sunday to the Ascension in place of the Suffrage of All Saints.",
+    note: "A short prayer honoring the Holy Cross, said from the Monday after Low Sunday to the Vigil of the Ascension, on days below a Double, in place of the Suffrage of All Saints.",
 };
 
 pub const POSTURE_GLOSS: Gloss = Gloss {
@@ -182,14 +182,14 @@ pub const SECOND_VESPERS_GLOSS: Gloss = Gloss {
 pub const MONASTIC_OBSERVANCE_GLOSS: Gloss = Gloss {
     term: "Monastics & Oblates",
     title: "Monastics & Oblates only",
-    note: "Bracketed observances are kept by Benedictine monastics and oblates; the parish office follows the day’s main entry above.",
+    note: "An observance kept only by Benedictine monastics and oblates. The parish says the ordinary office of the day.",
 };
 
 /// Feast page quiet glosses.
 pub const PROPER_GLOSS: Gloss = Gloss {
     term: "Proper of the feast",
     title: "Proper of the feast",
-    note: "Texts appointed specifically for this feast—its collect, antiphons, versicles, and hymns—as distinct from texts drawn from the Common.",
+    note: "The texts said on this feast—its collect, antiphons, versicles, and hymns. Those it borrows from the texts shared by its class of saints are marked “Common”.",
 };
 
 pub const COMMON_GLOSS: Gloss = Gloss {
@@ -231,7 +231,7 @@ pub const RANK_SD_GLOSS: Gloss = Gloss {
 pub const RANK_F2_GLOSS: Gloss = Gloss {
     term: "Privileged Feria",
     title: "Privileged Feria",
-    note: "A major weekday of the liturgical season (such as Ash Wednesday or weekdays of Holy Week) that outranks ordinary feasts.",
+    note: "A weekday of the season with an office of its own, such as an Ember day or Rogation Monday, ranking with a Semi-double.",
 };
 
 pub const RANK_S_GLOSS: Gloss =
@@ -332,12 +332,9 @@ pub fn feast_text_gloss(label: &str) -> Option<&'static Gloss> {
         Some(&ORDO_BENEDICTUS_GLOSS)
     } else if label.ends_with("· Magnificat") {
         Some(&ORDO_MAGNIFICAT_GLOSS)
-    } else if label.ends_with("· Antiphon") {
+    } else if label.starts_with("At ") {
+        // "At … · Antiphon", or a canticle antiphon said at more than one hour ("At Lauds and II Vespers").
         Some(&ANTIPHON_GLOSS)
-    } else if label.contains("II Vespers") {
-        Some(&SECOND_VESPERS_GLOSS)
-    } else if label.contains("I Vespers") {
-        Some(&FIRST_VESPERS_GLOSS)
     } else {
         None
     }
@@ -581,6 +578,9 @@ mod tests {
         assert_eq!(feast_text_gloss("At II Vespers · Magnificat").map(|g| g.title), Some("Magnificat antiphon"));
         assert_eq!(feast_text_gloss("At I Vespers · Antiphon").map(|g| g.title), Some("Antiphon"));
         assert_eq!(feast_text_gloss("Versicle at Lauds").map(|g| g.title), Some("Versicle"));
+        // A canticle antiphon said at several hours is an antiphon, not a note on Vespers.
+        assert_eq!(feast_text_gloss("At Lauds and II Vespers").map(|g| g.title), Some("Antiphon"));
+        assert_eq!(feast_text_gloss("At I Vespers, Lauds and II Vespers").map(|g| g.title), Some("Antiphon"));
     }
 
     #[test]

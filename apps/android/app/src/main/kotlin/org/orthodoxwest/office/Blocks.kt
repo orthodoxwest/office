@@ -132,6 +132,9 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         if (glossed.isEmpty()) Text(runs(block), modifier, style = style)
         else GlossedText(runs(block), block, open, { open = it }, modifier, style)
     }
+    // A verse's or the Gloria Patri's words: a posture cue among them ("Bow.") answers a tap, as on the web.
+    @Composable
+    fun verseText(modifier: Modifier, style: TextStyle) = rubricText(modifier, style)
     val p = LocalPalette.current
     val text = Type.body.copy(color = p.text)
     val verse = Type.verse.copy(color = p.text)
@@ -183,8 +186,8 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
             else GlossedText(antText, block, open, { open = it }, m.fillMaxWidth(), antStyle)
         }
         BlockKind.VERSE -> when {
-            block.dropCap -> Opening(block, verse, m, textStart = VerseGutter)
-            block.marker.isEmpty() -> Text(runs(block), m.fillMaxWidth().padding(start = VerseGutter), style = verse)
+            block.dropCap -> Opening(block, verse, m, textStart = VerseGutter, gloss = if (glossed.isEmpty()) null else (open to { open = it }))
+            block.marker.isEmpty() -> verseText(m.fillMaxWidth().padding(start = VerseGutter), verse)
             else -> Row(m.fillMaxWidth()) {
                 Text(
                     block.marker,
@@ -192,14 +195,13 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
                     softWrap = false,
                     style = Type.verseNumber.copy(color = p.muted),
                 )
-                Text(runs(block), Modifier.alignByBaseline(), style = verse)
+                verseText(Modifier.alignByBaseline(), verse)
             }
         }
         // The Gloria Patri keeps the verses' edge; each line's wrap steps in (the web's `.source-line`, 1.1rem).
-        BlockKind.GLORIA_PATRI -> Text(
-            runs(block),
+        BlockKind.GLORIA_PATRI -> verseText(
             m.fillMaxWidth().padding(start = VerseGutter),
-            style = verse.copy(textIndent = TextIndent(restLine = 17.6.sp)),
+            verse.copy(textIndent = TextIndent(restLine = 17.6.sp)),
         )
         BlockKind.VERSICLE, BlockKind.RESPONSE, BlockKind.ALL -> when {
             block.dropCap -> Opening(block, text, m, textStart = 0.dp, raised = true)
@@ -262,10 +264,24 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
  * A line that turns over below the capital keeps its style's hanging indent (a hymn's, a sung line's).
  */
 @Composable
-internal fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, textStart: Dp, raised: Boolean = false) {
+internal fun Opening(
+    block: BlockView,
+    style: TextStyle,
+    modifier: Modifier,
+    textStart: Dp,
+    raised: Boolean = false,
+    // The open note and its setter, where the opening's words carry a gloss (a psalm's "Sit." at its
+    // first mediant): its lines then answer a tap on the cue, as the other verses' do.
+    gloss: Pair<Int?, (Int?) -> Unit>? = null,
+) {
+    @Composable
+    fun Words(text: AnnotatedString, modifier: Modifier, style: TextStyle) {
+        if (gloss == null) Text(text, modifier, style = style)
+        else GlossedText(text, block, gloss.first, gloss.second, modifier, style)
+    }
     val (letter, rest) = splitInitial(block, runs(block))
     if (letter == null) {
-        Text(rest, modifier.fillMaxWidth().padding(start = textStart), style = style)
+        Words(rest, modifier.fillMaxWidth().padding(start = textStart), style)
         return
     }
     val ochre = LocalOrnament.current.cap
@@ -341,14 +357,14 @@ internal fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, tex
             }
         }
         when (setting) {
-            OpeningSetting.Raised -> Text(raisedText, Modifier.fillMaxWidth(), style = plain)
+            OpeningSetting.Raised -> Words(raisedText, Modifier.fillMaxWidth(), plain)
             is OpeningSetting.Elevated -> {
                 // One line pitch above the text, into which the capital rises; its ink top meets the
                 // cap height of that empty line, its foot the text's baseline.
                 val capTop = setting.layout.firstBaseline + cap.drop - cap.glyph.firstBaseline
                 Column(Modifier.drawBehind { translate(cap.left, capTop) { initial(cap.glyph) } }) {
                     Spacer(Modifier.height(with(density) { style.lineHeight.toDp() }))
-                    Text(body, Modifier.padding(start = textStart), style = elevatedStyle)
+                    Words(body, Modifier.padding(start = textStart), elevatedStyle)
                 }
             }
             is OpeningSetting.Dropped -> {
@@ -381,9 +397,9 @@ internal fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, tex
                 Column {
                     // Painted behind the lines beside it, taking no room of its own: the lines set the height.
                     Box(Modifier.drawBehind { translate(cap.left, capTop) { initial(cap.glyph) } }) {
-                        Text(first, Modifier.padding(start = with(density) { besideStart.toDp() }), style = plain)
+                        Words(first, Modifier.padding(start = with(density) { besideStart.toDp() }), plain)
                     }
-                    if (after.isNotEmpty()) Text(after, Modifier.padding(start = textStart), style = style)
+                    if (after.isNotEmpty()) Words(after, Modifier.padding(start = textStart), style)
                 }
             }
         }

@@ -521,3 +521,11 @@ fn the_web_sets_the_same_steps() {
         assert_eq!(lines, step.lines(), "{property} {value}");
     }
 }
+
+/// The Cross's commemoration heading keeps the kicker but carries the Cross's own note, as the web's.
+#[test]
+fn the_cross_commemoration_kicker_carries_the_cross_note() {
+    let kicker = |label: &str| section_heading(label).runs[0].gloss.map(|g| g.title);
+    assert_eq!(kicker("Commemoration of the Cross"), Some(presentation::gloss::COMMEMORATION_OF_CROSS_GLOSS.title));
+    assert_eq!(kicker("Commemoration of St Mark"), Some(presentation::gloss::ORDO_COMMEMORATION_GLOSS.title));
+}

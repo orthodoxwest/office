@@ -114,6 +114,7 @@ import org.orthodoxwest.office.core.coursePlace
 import org.orthodoxwest.office.core.courseSpan
 import org.orthodoxwest.office.core.emberDaysGloss
 import org.orthodoxwest.office.core.ordoDetailGlosses
+import org.orthodoxwest.office.core.vespersNoteGloss
 
 /** One month of the ordo, as the web's month page: year and month navigation, then the days. */
 @Composable
@@ -294,7 +295,7 @@ private fun OrdoHeader(
     val title: @Composable () -> Unit = {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Headpiece()
-            GlossMark(ORDO_GLOSSES.ordo, "$year Ordo", Modifier.padding(top = 2.dp), isHeading = true) {
+            GlossMark(ORDO_GLOSSES.ordo, "$year Ordo", Modifier.padding(top = 2.dp), isHeading = true, reaches = false) {
                 Text(
                     "$year Ordo",
                     style = Type.body.copy(fontSize = if (wide) 34.4.sp else 28.sp, lineHeight = if (wide) 39.6.sp else 34.sp, color = p.text, fontFeatureSettings = "lnum"),
@@ -502,7 +503,7 @@ private fun TabulaHeading() {
             lozenge(c, 2.5.dp.toPx(), o.flat, null)
         }.padding(vertical = 6.4.dp),
     ) {
-        GlossMark(ORDO_GLOSSES.tabula, "Tabula Temporaria", isHeading = true) {
+        GlossMark(ORDO_GLOSSES.tabula, "Tabula Temporaria", isHeading = true, reaches = false) {
             Text(
                 "Tabula Temporaria",
                 style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp),
@@ -848,7 +849,7 @@ private fun DrawScope.dayRail(inks: RailInks, reach: Float, top: Float, bottom: 
 private fun Monastic(d: OrdoDayView) {
     val style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = LocalPalette.current.muted, fontStyle = FontStyle.Italic)
     d.monastic.forEach { m ->
-        GlossMark(ORDO_GLOSSES.monastic, m.heading, Modifier.padding(top = 2.4.dp)) {
+        GlossMark(ORDO_GLOSSES.monastic, "[${m.heading}] ${m.rank}", Modifier.padding(top = 2.4.dp), reaches = false) {
             Text("[${m.heading}] ${m.rank}", style = style)
         }
         if (m.office.isNotEmpty()) Text(m.office, style = style)
@@ -1148,8 +1149,6 @@ private val DETAIL_GLOSSES by lazy {
         "preces" to g.preces,
         "suffrage" to g.suffrage,
         "cross" to g.cross,
-        "vespers1" to g.firstVespers,
-        "vespers2" to g.secondVespers,
     )
 }
 
@@ -1197,18 +1196,14 @@ private fun DigestHour(
     Column(Modifier.padding(bottom = 4.dp)) {
         Text(name.uppercase(), Modifier.padding(bottom = 2.4.dp), style = Type.label(12f, 0.06f).copy(color = p.accent, lineHeight = 18.sp))
         notes.forEach { note ->
-            val key = when {
-                note.startsWith("II Vespers") -> "vespers2"
-                note.startsWith("I Vespers") -> "vespers1"
-                else -> null
-            }
-            if (key != null) {
+            val vg = vespersNoteGloss(note)
+            if (vg != null) {
                 val annotated = buildAnnotatedString {
-                    pushStringAnnotation(GLOSS, key)
+                    pushStringAnnotation(GLOSS, "vespers")
                     append(note)
                     pop()
                 }
-                AnnotatedGlossText(annotated, DETAIL_GLOSSES, line)
+                AnnotatedGlossText(annotated, mapOf("vespers" to vg), line)
             } else {
                 Text(note, style = line)
             }

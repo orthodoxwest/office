@@ -415,7 +415,12 @@ pub fn section_heading(label: &str) -> Block {
         return Block::new(
             BlockKind::CommemorationHeading,
             vec![
-                Run::with_quiet_gloss("Commemoration of", RunStyle::Kicker, Some(&ORDO_COMMEMORATION_GLOSS)),
+                // The Cross keeps its own note; any other is a commemorated feast or season.
+                Run::with_quiet_gloss(
+                    "Commemoration of",
+                    RunStyle::Kicker,
+                    Some(heading_gloss(label).unwrap_or(&ORDO_COMMEMORATION_GLOSS)),
+                ),
                 Run::new("\n", RunStyle::Break),
                 Run::new(typeset(name), RunStyle::Plain),
             ],

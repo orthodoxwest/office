@@ -1120,8 +1120,6 @@ pub struct OrdoDetailGlosses {
     pub preces: GlossView,
     pub suffrage: GlossView,
     pub cross: GlossView,
-    pub first_vespers: GlossView,
-    pub second_vespers: GlossView,
     pub ordo: GlossView,
     pub tabula: GlossView,
     pub monastic: GlossView,
@@ -1138,12 +1136,16 @@ pub fn ordo_detail_glosses() -> OrdoDetailGlosses {
         preces: to_view(&presentation::gloss::PRECES_GLOSS),
         suffrage: to_view(&presentation::gloss::SUFFRAGE_GLOSS),
         cross: to_view(&presentation::gloss::COMMEMORATION_OF_CROSS_GLOSS),
-        first_vespers: to_view(&presentation::gloss::FIRST_VESPERS_GLOSS),
-        second_vespers: to_view(&presentation::gloss::SECOND_VESPERS_GLOSS),
         ordo: quiet(&presentation::gloss::ORDO_GLOSS),
         tabula: quiet(&presentation::gloss::TABULA_TEMPORARIA_GLOSS),
         monastic: quiet(&presentation::gloss::MONASTIC_OBSERVANCE_GLOSS),
     }
+}
+
+/// The note for an Ordo Vespers note ("I Vespers of …", "II Vespers of preceding"), if it has one.
+#[uniffi::export]
+pub fn vespers_note_gloss(note: String) -> Option<GlossView> {
+    presentation::gloss::vespers_note_gloss(&note).map(|g| GlossView::of(g, false))
 }
 
 /// Quiet glosses shown on Home's day block (Octave, day versicle sigils).

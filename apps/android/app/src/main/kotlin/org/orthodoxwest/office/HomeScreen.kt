@@ -640,7 +640,7 @@ private fun Frontispiece(
                         reserve = reserve,
                     )
                     if (view.octaveNote.isNotEmpty()) {
-                        GlossMark(HOME_GLOSSES.octave, view.octaveNote, Modifier.crownUnit("w-octave").then(reserve.at("octave"))) {
+                        GlossMark(HOME_GLOSSES.octave, view.octaveNote, Modifier.crownUnit("w-octave").then(reserve.at("octave")), reaches = false) {
                             Text(view.octaveNote, style = Type.small.copy(color = muted), onTextLayout = reserve.layout("octave"))
                         }
                     }
@@ -650,7 +650,7 @@ private fun Frontispiece(
                             view.penitential.forEachIndexed { i, it ->
                                 val pg = penitentialGloss(it)
                                 if (pg != null) {
-                                    GlossMark(pg, it, reserve.at("fast$i")) {
+                                    GlossMark(pg, it, reserve.at("fast$i"), reaches = false) {
                                         Text(it, style = fast.copy(color = rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp), onTextLayout = reserve.layout("fast$i"))
                                     }
                                 } else {
@@ -792,7 +792,7 @@ private fun Frontispiece(
                             val leadModifier = if (introduction == null) Modifier else Modifier.heightIn(min = 44.dp).tap(action = "open About the Office", onClick = onIntroduction)
                             Row(Modifier.align(Alignment.CenterVertically).then(leadModifier), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                                 if (sg != null) {
-                                    GlossMark(sg, lead) { Text(lead, style = seasonStyle.copy(textAlign = TextAlign.Center)) }
+                                    GlossMark(sg, lead, reaches = false) { Text(lead, style = seasonStyle.copy(textAlign = TextAlign.Center)) }
                                 } else {
                                     Text(lead, style = seasonStyle.copy(textAlign = TextAlign.Center))
                                 }
@@ -908,7 +908,7 @@ private fun FeastName(name: String, alias: String, size: Float, modifier: Modifi
 @Composable
 private fun VersicleLine(sigil: String, words: String, size: Float, rubric: Color, reserve: Reserve, key: String) {
     val p = LocalPalette.current
-    GlossMark(HOME_GLOSSES.versicle, "$sigil $words", reserve.at(key)) {
+    GlossMark(HOME_GLOSSES.versicle, "$sigil $words", reserve.at(key), reaches = false) {
         Text(
             buildAnnotatedString {
                 withStyle(SpanStyle(fontStyle = FontStyle.Normal, color = rubric)) { append(sigil) }

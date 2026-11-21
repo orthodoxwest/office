@@ -414,6 +414,15 @@ fn commemoration_heading_preserves_name_and_escapes_markup() {
     assert_eq!(render_section_heading("Lauds"), r#"<h2 class="section-heading">Lauds</h2>"#);
 }
 
+#[test]
+fn the_cross_commemoration_kicker_carries_the_cross_note() {
+    let cross = presentation::gloss::COMMEMORATION_OF_CROSS_GLOSS;
+    has(&render_section_heading("Commemoration of the Cross"), &format!(r#"data-gloss-title="{}""#, cross.title));
+    let other = render_section_heading("Commemoration of St Mark");
+    has(&other, &format!(r#"data-gloss-title="{}""#, presentation::gloss::ORDO_COMMEMORATION_GLOSS.title));
+    lacks(&other, cross.title);
+}
+
 fn psalm_67(incipit: &str) -> OfficeElement {
     let mut e = elem(ElementType::Psalm, "Psalm 67\n\n1. Be merciful unto us * and bless us.");
     e.label = "Psalm 66\u{a0}(67)".into();

@@ -390,7 +390,7 @@ private fun FeastHead(view: FeastPageView, frontal: Color, size: Int, modifier: 
                     if (i > 0) PaintPoint(5.5.dp, frontal)
                     val rg = if (i == 0) view.rankGloss else null
                     if (rg != null) {
-                        GlossMark(rg, part) { Text(part, style = rank) }
+                        GlossMark(rg, part, reaches = false) { Text(part, style = rank) }
                     } else {
                         Text(part, style = rank)
                     }
@@ -415,7 +415,7 @@ private fun SectionHeading(text: String, seed: Int, gap: Dp = 4.8.dp, gloss: Glo
     val style = titulusType(17.28f).copy(textAlign = TextAlign.Start)
     if (gloss != null) {
         Box(lineModifier) {
-            GlossMark(gloss, text, isHeading = true) { Text(text, style = style) }
+            GlossMark(gloss, text, isHeading = true, reaches = false) { Text(text, style = style) }
         }
     } else {
         Text(text, lineModifier.semantics { heading() }, style = style)
@@ -462,7 +462,7 @@ private fun Standing(view: FeastPageView, narrow: Boolean, onFeast: (String) -> 
         verticalArrangement = Arrangement.spacedBy(if (monastic) 8.dp else 5.6.dp),
     ) {
         if (monastic) {
-            GlossMark(FEAST_GLOSSES.monastic, w.monasticHeading, Modifier.fillMaxWidth(), isHeading = true) {
+            GlossMark(FEAST_GLOSSES.monastic, w.monasticHeading, Modifier.fillMaxWidth(), isHeading = true, reaches = false) {
                 Text(w.monasticHeading, Modifier.fillMaxWidth(), style = titulusType(15.2f))
             }
             view.keptByAll?.let { all ->
@@ -558,18 +558,19 @@ private fun FeastTexts(view: FeastPageView, onDay: (LocalDate) -> Unit, modifier
                 }
             } else {
                 val lg = t.labelGloss
-                Row(
+                // A long label takes its line and "Common" goes under it, rather than being squeezed beside it.
+                FlowRow(
                     Modifier.padding(top = 16.dp, bottom = 2.4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    itemVerticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (lg != null) {
-                        GlossMark(lg, t.label, isHeading = true) { Text(t.label, style = labelStyle) }
+                        GlossMark(lg, t.label, isHeading = true, reaches = false) { Text(t.label, style = labelStyle) }
                     } else {
                         Text(t.label, Modifier.semantics { heading() }, style = labelStyle)
                     }
                     if (t.common) {
-                        GlossMark(FEAST_GLOSSES.common, w.commonMark) { Text(w.commonMark, style = commonStyle) }
+                        GlossMark(FEAST_GLOSSES.common, w.commonMark, reaches = false) { Text(w.commonMark, style = commonStyle) }
                     }
                 }
                 // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.

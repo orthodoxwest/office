@@ -647,7 +647,7 @@ private struct DayRow: View {
     @ViewBuilder private var monastic: some View {
         let style = TextStyle(size: 13.6, line: 20.4, italic: true)
         ForEach(d.monastic, id: \.heading) { o in
-            GlossMark(gloss: detailGlosses.monastic, label: o.heading, reaches: false) {
+            GlossMark(gloss: detailGlosses.monastic, label: "[\(o.heading)] \(o.rank)", reaches: false) {
                 Text("[\(o.heading)] \(o.rank)").type(style).foregroundStyle(p.muted)
             }
             .padding(.top, m.px(2.4))
@@ -1063,11 +1063,9 @@ private struct Digest: View {
         return VStack(alignment: .leading, spacing: 0) {
             Text(name.uppercased()).type(TextStyle.label(12, 0.06).sized(12, line: 18)).foregroundStyle(p.accent).padding(.bottom, m.px(2.4))
             ForEach(notes, id: \.self) { note in
-                let vg: GlossView? = note.hasPrefix("II Vespers")
-                    ? detailGlosses.secondVespers
-                    : (note.hasPrefix("I Vespers") ? detailGlosses.firstVespers : nil)
-                if let vg {
-                    GlossMark(gloss: vg, label: vg.title, reaches: false) {
+                if let vg = vespersNoteGloss(note: note) {
+                    // VoiceOver speaks the note itself ("I Vespers of All Saints"), not only the gloss's title.
+                    GlossMark(gloss: vg, label: note, reaches: false) {
                         Text(note).type(line).foregroundStyle(p.muted)
                     }
                 } else {
