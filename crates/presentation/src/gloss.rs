@@ -76,7 +76,7 @@ pub const SHORT_RESPONSORY_GLOSS: Gloss = Gloss {
 pub const GOSPEL_CANTICLE_GLOSS: Gloss = Gloss {
     term: "The Gospel Canticle",
     title: "Gospel Canticle",
-    note: "A biblical song from the Gospel of Luke—the Benedictus at Lauds, Magnificat at Vespers, or Nunc Dimittis at Compline.",
+    note: "A song from the Gospel of St Luke: the Benedictus at Lauds, and the Magnificat at Vespers.",
 };
 
 pub const MARIAN_ANTIPHON_GLOSS: Gloss = Gloss {
@@ -93,7 +93,7 @@ pub const VERSICLE_GLOSS: Gloss =
 pub const COMMEMORATION_OF_CROSS_GLOSS: Gloss = Gloss {
     term: "Commemoration of the Cross",
     title: "Commemoration of the Cross",
-    note: "A short prayer honoring the Holy Cross, said in Paschaltide in place of the Suffrage of All Saints.",
+    note: "A short prayer honoring the Holy Cross, said from Low Sunday to the Ascension in place of the Suffrage of All Saints.",
 };
 
 pub const POSTURE_GLOSS: Gloss = Gloss {
@@ -128,7 +128,7 @@ pub const ORDO_GLOSS: Gloss = Gloss {
 pub const TABULA_TEMPORARIA_GLOSS: Gloss = Gloss {
     term: "Tabula Temporaria",
     title: "Tabula Temporaria",
-    note: "Latin for “Table of Moveable Dates”: the year’s computus figures, moveable feasts, and Ember days.",
+    note: "Latin for “table of the times”: the year’s computus figures, moveable feasts, and Ember days.",
 };
 
 pub const GOLDEN_NUMBER_GLOSS: Gloss = Gloss {
@@ -201,31 +201,31 @@ pub const COMMON_GLOSS: Gloss = Gloss {
 pub const RANK_1CL_GLOSS: Gloss = Gloss {
     term: "Double of the 1st Class",
     title: "Double of the 1st Class",
-    note: "The highest rank of feast (such as Christmas, Easter, and Pentecost), taking precedence over almost every other observance with full antiphons.",
+    note: "The highest rank of feast (such as Christmas, Easter, and Pentecost), giving way to almost no other observance.",
 };
 
 pub const RANK_2CL_GLOSS: Gloss = Gloss {
     term: "Double of the 2nd Class",
     title: "Double of the 2nd Class",
-    note: "A principal feast (such as Apostles and major feasts of the Lord and the Blessed Virgin) with full antiphons before and after each psalm.",
+    note: "A principal feast, such as those of the Apostles and the greater feasts of the Lord and the Blessed Virgin, ranking below only the 1st Class.",
 };
 
 pub const RANK_GD_GLOSS: Gloss = Gloss {
     term: "Greater Double",
     title: "Greater Double",
-    note: "A solemn feast ranking above ordinary Doubles, with full antiphons and First Vespers.",
+    note: "A solemn Double, ranking above ordinary Doubles and below Doubles of the 2nd Class.",
 };
 
 pub const RANK_D_GLOSS: Gloss = Gloss {
     term: "Double",
     title: "Double",
-    note: "A standard feast where each antiphon is said in full both before and after its psalm.",
+    note: "A feast whose antiphons at Lauds and Vespers are said in full both before and after each psalm.",
 };
 
 pub const RANK_SD_GLOSS: Gloss = Gloss {
     term: "Semi-double",
     title: "Semi-double",
-    note: "A lesser feast where antiphons are only begun before each psalm and said in full afterward.",
+    note: "A lesser feast whose antiphons are only begun before each psalm and said in full after it.",
 };
 
 pub const RANK_F2_GLOSS: Gloss = Gloss {
@@ -254,12 +254,6 @@ pub const PASSIONTIDE_GLOSS: Gloss = Gloss {
     term: "Passiontide",
     title: "Passiontide",
     note: "The final two weeks of Lent, from Passion Sunday through Holy Week, focused on Christ’s suffering and Cross.",
-};
-
-pub const PASCHALTIDE_GLOSS: Gloss = Gloss {
-    term: "Paschaltide",
-    title: "Paschaltide",
-    note: "The fifty days of Easter joy from Pascha (Easter) through the Octave of Pentecost.",
 };
 
 pub const FASTING_GLOSS: Gloss = Gloss {
@@ -294,12 +288,11 @@ pub fn vespers_note_gloss(note: &str) -> Option<&'static Gloss> {
     }
 }
 
-/// Returns a quiet gloss for less-familiar liturgical season labels.
+/// Returns a quiet gloss for a less-familiar season label, as `season_label` names it.
 pub fn season_gloss(label: &str) -> Option<&'static Gloss> {
     match label.trim() {
         "Septuagesima" => Some(&SEPTUAGESIMA_GLOSS),
         "Passiontide" => Some(&PASSIONTIDE_GLOSS),
-        "Paschaltide" => Some(&PASCHALTIDE_GLOSS),
         _ => None,
     }
 }
@@ -569,24 +562,18 @@ mod tests {
 
         assert_eq!(season_gloss("Septuagesima").map(|g| g.title), Some("Septuagesima"));
         assert_eq!(season_gloss("Passiontide").map(|g| g.title), Some("Passiontide"));
-        assert_eq!(season_gloss("Paschaltide").map(|g| g.title), Some("Paschaltide"));
         assert!(season_gloss("Advent").is_none());
+        // The glosses key on the labels the headers actually show.
+        for season in ["septuagesima", "passiontide"] {
+            assert!(season_gloss(&crate::season_label(season)).is_some(), "{season}");
+        }
 
         assert_eq!(penitential_gloss("Fasting").map(|g| g.title), Some("Day of Fasting"));
         assert_eq!(penitential_gloss("Abstinence").map(|g| g.title), Some("Day of Abstinence"));
         assert!(penitential_gloss("Other").is_none());
 
-        for rank in [
-            "Double of the 1st Class",
-            "Double of the 2nd Class",
-            "Greater Double",
-            "Double",
-            "Semi-double",
-            "Privileged Feria",
-            "Simple",
-            "Commemoration",
-        ] {
-            assert!(rank_gloss(rank).is_some(), "missing rank gloss for {rank}");
+        for rank in calendar::Rank::ALL {
+            assert!(rank_gloss(rank.display_name()).is_some(), "missing rank gloss for {rank:?}");
         }
 
         assert_eq!(feast_text_gloss("Collect").map(|g| g.title), Some("Collect"));

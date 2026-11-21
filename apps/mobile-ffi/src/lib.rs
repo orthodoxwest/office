@@ -1146,27 +1146,26 @@ pub fn ordo_detail_glosses() -> OrdoDetailGlosses {
     }
 }
 
-/// Quiet glosses shown on Home's day block (Octave, Fasting/Abstinence, day versicle sigils).
+/// Quiet glosses shown on Home's day block (Octave, day versicle sigils).
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct HomeGlosses {
     pub octave: GlossView,
     pub versicle: GlossView,
-    pub fasting: GlossView,
-    pub abstinence: GlossView,
 }
 
 #[uniffi::export]
 pub fn home_glosses() -> HomeGlosses {
     let quiet = |g: &presentation::gloss::Gloss| GlossView::of(g, true);
-    HomeGlosses {
-        octave: quiet(&presentation::gloss::OCTAVE_GLOSS),
-        versicle: quiet(&presentation::gloss::VERSICLE_GLOSS),
-        fasting: quiet(&presentation::gloss::FASTING_GLOSS),
-        abstinence: quiet(&presentation::gloss::ABSTINENCE_GLOSS),
-    }
+    HomeGlosses { octave: quiet(&presentation::gloss::OCTAVE_GLOSS), versicle: quiet(&presentation::gloss::VERSICLE_GLOSS) }
 }
 
-/// Quiet gloss for a less-familiar liturgical season label (Septuagesima, Passiontide, Paschaltide).
+/// Quiet gloss for one of Home's penitential badges ("Fasting", "Abstinence").
+#[uniffi::export]
+pub fn penitential_gloss(label: String) -> Option<GlossView> {
+    presentation::gloss::penitential_gloss(&label).map(|g| GlossView::of(g, true))
+}
+
+/// Quiet gloss for a less-familiar liturgical season label (Septuagesima, Passiontide).
 #[uniffi::export]
 pub fn season_gloss(label: String) -> Option<GlossView> {
     presentation::gloss::season_gloss(&label).map(|g| GlossView::of(g, true))

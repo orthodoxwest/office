@@ -105,6 +105,7 @@ import org.orthodoxwest.office.core.homeGlosses
 import org.orthodoxwest.office.core.hourLightAt
 import org.orthodoxwest.office.core.hourLightTotalMs
 import org.orthodoxwest.office.core.hourNote
+import org.orthodoxwest.office.core.penitentialGloss
 import org.orthodoxwest.office.core.seasonGloss
 
 private val HOME_GLOSSES by lazy { homeGlosses() }
@@ -647,11 +648,7 @@ private fun Frontispiece(
                         Row(Modifier.padding(top = if (desk && tier.heavy) 0.dp else 12.dp).crownUnit("w-fast"), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
                             val fast = if (desk) Type.small.copy(fontSize = tier.fast.sp) else Type.small
                             view.penitential.forEachIndexed { i, it ->
-                                val pg = when (it) {
-                                    "Fasting" -> HOME_GLOSSES.fasting
-                                    "Abstinence" -> HOME_GLOSSES.abstinence
-                                    else -> null
-                                }
+                                val pg = penitentialGloss(it)
                                 if (pg != null) {
                                     GlossMark(pg, it, reserve.at("fast$i")) {
                                         Text(it, style = fast.copy(color = rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp), onTextLayout = reserve.layout("fast$i"))

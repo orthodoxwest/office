@@ -633,7 +633,7 @@ private struct Frontispiece: View {
                 if !view.penitential.isEmpty {
                     HStack(spacing: m.px(9.6)) {
                         ForEach(view.penitential, id: \.self) { t in
-                            let pg: GlossView? = t == "Fasting" ? homeGlossesShared.fasting : (t == "Abstinence" ? homeGlossesShared.abstinence : nil)
+                            let pg = penitentialGloss(label: t)
                             if let pg {
                                 GlossMark(gloss: pg, label: t, reaches: false) {
                                     Text(t).type(tier.fast).foregroundStyle(rubric).reserved("fast " + t)
