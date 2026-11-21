@@ -776,13 +776,14 @@ final class Reading {
 }
 
 /**
- * A row of the hour's list, its height taken up to a whole number of the screen's pixels and its
- * content at its top. The text's own lines (36.8 or 146.4 points) are a fraction of a pixel off
- * the grid, so each row stood on a fraction of its own, and where `scrollTo` left the list hung
- * on which rows above it had been laid out and which only guessed: from launch to launch a row
- * near a pixel's half rounded either way and drew a hair lower (#948). Whole-pixel rows share one
- * fraction, which the scroll's whole-pixel offset keeps under half a pixel, so every row rounds
- * the same way every time. A row grows by under a pixel; nothing in it moves.
+ * A row of the hour's list on the screen's pixel grid. The text's own lines (36.8 or 146.4
+ * points) are a fraction of a pixel off the grid, and where `scrollTo` leaves the list hangs on
+ * which rows above it were laid out and which only guessed, so from launch to launch the rows
+ * stood on different fractions of a pixel and a stanza drew a hair lower in one than another
+ * (#948). So each row's height is taken up to a whole number of pixels, with its content at its
+ * top, and the rows, which then share one fraction, are drawn moved by it onto the grid. The
+ * move is under half a pixel and only drawn: the row's place in the list, and what the reading
+ * measures of it, are as laid out.
  */
 private struct WholePixels: Layout {
     let scale: CGFloat
@@ -803,7 +804,12 @@ private struct WholePixelRow: ViewModifier {
     @Environment(\.displayScale) private var scale
 
     func body(content: Content) -> some View {
-        WholePixels(scale: max(1, scale)) { content }
+        let scale = max(1, scale)
+        WholePixels(scale: scale) { content }
+            .visualEffect { row, proxy in
+                let top = proxy.frame(in: .global).minY
+                return row.offset(y: (top * scale).rounded() / scale - top)
+            }
     }
 }
 
