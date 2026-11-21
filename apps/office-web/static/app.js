@@ -3420,7 +3420,7 @@ function plainClickOpensHere(e, link) {
   // are render_blocks::hour_light's, which the apps play too; a test holds
   // this line to them. Reduced motion, a hidden page or a browser without
   // pseudo-element animations takes the change at once, as before.
-  var HOUR_LIGHT = { total: 1400, glossOut: 500, inkFrom: 300, inkFor: 600, wordsOut: 500, seat: 620, wordsBack: 800, glossIn: 800, ease: "cubic-bezier(0.45, 0, 0.55, 1)", out: "cubic-bezier(0.42, 0, 1, 1)", back: "cubic-bezier(0, 0, 0.58, 1)" };
+  var HOUR_LIGHT = { total: 1400, inkFrom: 300, inkFor: 600, wordsOut: 500, seat: 620, wordsBack: 800, ease: "cubic-bezier(0.45, 0, 0.55, 1)", out: "cubic-bezier(0.42, 0, 1, 1)", back: "cubic-bezier(0, 0, 0.58, 1)" };
   // A boundary found later than this after it passed was not seen passing
   // (a timer held back by a sleeping phone): the page is corrected, not moved.
   var HOUR_LIGHT_FRESH_MS = 5000;
@@ -3544,14 +3544,8 @@ function plainClickOpensHere(e, link) {
       if (!note) {
         return;
       }
-      if (b.gloss && a.gloss) {
-        if (b.glossInk !== a.glossInk) {
-          run(note, [{ color: b.glossInk }, { color: a.glossInk }], Object.assign({}, ink));
-        }
-      } else if (b.gloss) {
-        run(note, [{ opacity: 1 }, { opacity: 0 }], { duration: L.glossOut, easing: L.ease });
-      } else if (a.gloss) {
-        run(note, [{ opacity: 0 }, { opacity: 1 }], { delay: L.glossIn, duration: T - L.glossIn, easing: L.ease });
+      if (b.gloss && a.gloss && b.glossInk !== a.glossInk) {
+        run(note, [{ color: b.glossInk }, { color: a.glossInk }], Object.assign({}, ink));
       }
     });
     if (prayNow && wasLabel !== label) {

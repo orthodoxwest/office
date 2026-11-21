@@ -1895,8 +1895,6 @@ pub struct LightFrame {
     pub leaving_pool: f32,
     pub coming_pool: f32,
     pub ink: f32,
-    pub leaving_gloss: f32,
-    pub coming_gloss: f32,
     pub words: f32,
     pub seated: bool,
     pub done: bool,
@@ -1907,16 +1905,7 @@ pub struct LightFrame {
 #[uniffi::export]
 pub fn hour_light_at(ms: f32) -> LightFrame {
     let f = render_blocks::light_at(ms);
-    LightFrame {
-        leaving_pool: f.leaving_pool,
-        coming_pool: f.coming_pool,
-        ink: f.ink,
-        leaving_gloss: f.leaving_gloss,
-        coming_gloss: f.coming_gloss,
-        words: f.words,
-        seated: f.seated,
-        done: f.done,
-    }
+    LightFrame { leaving_pool: f.leaving_pool, coming_pool: f.coming_pool, ink: f.ink, words: f.words, seated: f.seated, done: f.done }
 }
 
 /// The whole pass, in milliseconds.
