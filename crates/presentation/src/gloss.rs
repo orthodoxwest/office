@@ -578,7 +578,7 @@ mod tests {
         assert_eq!(penitential_gloss("Abstinence").map(|g| g.title), Some("Day of Abstinence"));
         assert!(penitential_gloss("Other").is_none());
         // Keyed on the badges the calendar actually writes.
-        for label in (calendar::Penitential { fast: true, abstinence: true }).labels() {
+        for label in (calendar::model::Penitential { fast: true, abstinence: true }).labels() {
             assert!(penitential_gloss(label).is_some(), "{label}");
         }
 
