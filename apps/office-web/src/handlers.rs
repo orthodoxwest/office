@@ -1029,17 +1029,14 @@ mod tests {
         // St Placidus: the martyrs' versicle, each half with its sigil.
         let placidus = versicle("2026-10-05").expect("a plain day's versicle");
         assert!(
-            placidus.contains(
-                r#"<span class="home-versicle-sigil"><span aria-hidden="true">℣.</span><span class="sr-only">Versicle.</span></span> Let the Saints be joyful with glory."#
-            ),
+            placidus.contains(r#">℣.</span><span class="sr-only">Versicle.</span></span> Let the Saints be joyful with glory."#),
             "{placidus}"
         );
         assert!(
-            placidus.contains(
-                r#"<span class="home-versicle-sigil"><span aria-hidden="true">℟.</span><span class="sr-only">Response.</span></span> Let them rejoice in their beds."#
-            ),
+            placidus.contains(r#">℟.</span><span class="sr-only">Response.</span></span> Let them rejoice in their beds."#),
             "{placidus}"
         );
+        assert!(placidus.contains(r#"class="home-versicle-line gloss-quiet""#), "{placidus}");
         // Laetare, in rose, keeps it.
         assert!(versicle("2026-03-22").is_some_and(|v| v.contains("God shall give his angels charge over thee.")));
         // A Lenten feria (violet), Passion Sunday, Maundy Thursday, and a day with a commemoration.
@@ -1114,9 +1111,12 @@ mod tests {
     /// and St Sylvester; 2 January is past it.
     #[test]
     fn home_names_the_nativity_octave_on_the_first_of_january() {
-        let note = r#"<p class="octave-note">Octave of Christmas</p>"#;
         for date in ["2026-12-26", "2026-12-31", "2027-01-01"] {
-            assert!(get(&format!("/?date={date}")).2.contains(note), "{date}");
+            let body = get(&format!("/?date={date}")).2;
+            assert!(
+                body.contains(r#"<p class="octave-note"><span class="gloss-quiet""#) && body.contains(">Octave of Christmas</span></p>"),
+                "{date}"
+            );
         }
         assert!(!get("/?date=2027-01-02").2.contains("octave-note"));
     }
@@ -1319,7 +1319,8 @@ mod tests {
         let row = |slug: &str| body.split(&format!(r#"id="d-{slug}""#)).nth(1).and_then(|r| r.split("</tr>").next()).unwrap().to_string();
         let benedict = row("2026-07-11");
         assert!(benedict.contains("Saturday Office of the B.V.M."), "{benedict}");
-        assert!(benedict.contains(r#"<div class="day-monastic"><p>[Solemnity of St Benedict (Monastics &amp; Oblates Only)] <abbr tabindex="0" title="Greater Double">gd</abbr> <span class="day-monastic-office">Proper Office, Monastic Diurnal pp. 560–564</span></p></div>"#), "{benedict}");
+        assert!(benedict.contains(r#"<div class="day-monastic"><p><span class="gloss-quiet""#), "{benedict}");
+        assert!(benedict.contains(r#">[Solemnity of St Benedict (Monastics &amp; Oblates Only)]</span> <abbr tabindex="0" title="Greater Double">gd</abbr> <span class="day-monastic-office">Proper Office, Monastic Diurnal pp. 560–564</span></p></div>"#), "{benedict}");
         assert!(row("2026-07-16").contains("[Our Lady of Einsiedeln (Monastics &amp; Oblates Only)]"));
         assert_eq!(body.matches(r#"class="day-monastic""#).count(), 2);
     }

@@ -183,6 +183,9 @@ fun GlossMark(
     modifier: Modifier = Modifier,
     underline: Boolean = !gloss.quiet,
     isHeading: Boolean = false,
+    // False where the mark sits close under a link or another control: the target then keeps to the
+    // mark's own bounds, as the iOS app's `reaches: false`, so it never takes a tap meant for its neighbour.
+    reaches: Boolean = true,
     open: MutableState<Boolean> = remember { mutableStateOf(false) },
     mark: @Composable () -> Unit,
 ) {
@@ -208,7 +211,7 @@ fun GlossMark(
         Box(
             Modifier
                 .matchParentSize()
-                .reach()
+                .then(if (reaches) Modifier.reach() else Modifier)
                 .tap(label = label, action = "explain", source = press) { isOpen = !isOpen }
                 .semantics {
                     stateDescription = if (isOpen) "Expanded" else "Collapsed"

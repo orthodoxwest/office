@@ -324,9 +324,11 @@ private struct OrdoHeader: View {
     private var title: some View {
         VStack(spacing: 0) {
             Headpiece()
-            Text("\(String(year)) Ordo").type(TextStyle(size: wide ? 34.4 : 28, line: wide ? 39.6 : 34, lining: true)).foregroundStyle(p.text)
-                .padding(.top, m.px(2))
-                .accessibilityAddTraits(.isHeader)
+            GlossMark(gloss: detailGlosses.ordo, label: "\(String(year)) Ordo", reaches: false) {
+                Text("\(String(year)) Ordo").type(TextStyle(size: wide ? 34.4 : 28, line: wide ? 39.6 : 34, lining: true)).foregroundStyle(p.text)
+            }
+            .padding(.top, m.px(2))
+            .accessibilityAddTraits(.isHeader)
             // The frontispiece reads as the printed ordo's title page.
             let isFrontispiece = month == nil && !(roman ?? "").isEmpty
             let subtitle = isFrontispiece ? "Anno Domini \(roman ?? "")" : "Feasts & daily observances"
@@ -657,7 +659,10 @@ private struct DayRow: View {
     @ViewBuilder private var monastic: some View {
         let style = TextStyle(size: 13.6, line: 20.4, italic: true)
         ForEach(d.monastic, id: \.heading) { o in
-            Text("[\(o.heading)] \(o.rank)").type(style).foregroundStyle(p.muted).padding(.top, m.px(2.4))
+            GlossMark(gloss: detailGlosses.monastic, label: "[\(o.heading)] \(o.rank)", reaches: false) {
+                Text("[\(o.heading)] \(o.rank)").type(style).foregroundStyle(p.muted)
+            }
+            .padding(.top, m.px(2.4))
             if !o.office.isEmpty { Text(o.office).type(style).foregroundStyle(p.muted) }
         }
     }
@@ -1072,7 +1077,16 @@ private struct Digest: View {
             Text(name.uppercased()).type(TextStyle.label(12, 0.06).sized(12, line: 18)).foregroundStyle(p.accent).padding(.bottom, m.px(2.4))
                 .accessibilityLabel(name)
                 .accessibilityAddTraits(.isHeader)
-            ForEach(notes, id: \.self) { Text($0).type(line).foregroundStyle(p.muted) }
+            ForEach(notes, id: \.self) { note in
+                if let vg = vespersNoteGloss(note: note) {
+                    // VoiceOver speaks the note itself ("I Vespers of All Saints"), not only the gloss's title.
+                    GlossMark(gloss: vg, label: note, reaches: false) {
+                        Text(note).type(line).foregroundStyle(p.muted)
+                    }
+                } else {
+                    Text(note).type(line).foregroundStyle(p.muted)
+                }
+            }
             if let antiphon, let kind = antiphonKind {
                 let g = kind == "ben" ? detailGlosses.benedictus : detailGlosses.magnificat
                 HStack(alignment: .firstTextBaseline, spacing: m.px(4)) {
@@ -1097,7 +1111,9 @@ private struct Digest: View {
                         }
                     }
                     if cross {
-                        Text("Commemoration of the Cross").type(rubricLine).foregroundStyle(p.rubric)
+                        GlossMark(gloss: detailGlosses.cross, label: detailGlosses.cross.title, underlineColor: p.rubric, reaches: false) {
+                            Text(detailGlosses.cross.term).type(rubricLine).foregroundStyle(p.rubric)
+                        }
                     }
                 }
             }
@@ -1192,12 +1208,14 @@ private struct TabulaHeading: View {
     @Environment(\.metrics) private var m
 
     var body: some View {
-        Text("Tabula Temporaria").type(TextStyle(size: 21.6, line: 28, tracking: 1.3, smallCaps: true)).foregroundStyle(p.titulus)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, m.px(6.4))
-            // Ringed in the page's ground, as the web's box-shadow parts the rules around it.
-            .overlay(alignment: .bottom) { OrnamentRule(lozengeSize: 2.5, ring: p.bg) }
-            .accessibilityAddTraits(.isHeader)
+        GlossMark(gloss: detailGlosses.tabula, label: "Tabula Temporaria", reaches: false) {
+            Text("Tabula Temporaria").type(TextStyle(size: 21.6, line: 28, tracking: 1.3, smallCaps: true)).foregroundStyle(p.titulus)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, m.px(6.4))
+        // Ringed in the page's ground, as the web's box-shadow parts the rules around it.
+        .overlay(alignment: .bottom) { OrnamentRule(lozengeSize: 2.5, ring: p.bg) }
+        .accessibilityAddTraits(.isHeader)
     }
 }
 

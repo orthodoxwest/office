@@ -114,6 +114,7 @@ import org.orthodoxwest.office.core.coursePlace
 import org.orthodoxwest.office.core.courseSpan
 import org.orthodoxwest.office.core.emberDaysGloss
 import org.orthodoxwest.office.core.ordoDetailGlosses
+import org.orthodoxwest.office.core.vespersNoteGloss
 
 /** One month of the ordo, as the web's month page: year and month navigation, then the days. */
 @Composable
@@ -299,11 +300,12 @@ private fun OrdoHeader(
     val title: @Composable () -> Unit = {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Headpiece()
-            Text(
-                "$year Ordo",
-                Modifier.padding(top = 2.dp).semantics { heading() },
-                style = Type.body.copy(fontSize = if (wide) 34.4.sp else 28.sp, lineHeight = if (wide) 39.6.sp else 34.sp, color = p.text, fontFeatureSettings = "lnum"),
-            )
+            GlossMark(ORDO_GLOSSES.ordo, "$year Ordo", Modifier.padding(top = 2.dp), isHeading = true, reaches = false) {
+                Text(
+                    "$year Ordo",
+                    style = Type.body.copy(fontSize = if (wide) 34.4.sp else 28.sp, lineHeight = if (wide) 39.6.sp else 34.sp, color = p.text, fontFeatureSettings = "lnum"),
+                )
+            }
             // The frontispiece reads as the printed ordo's title page.
             val isFrontispiece = month == null && !roman.isNullOrEmpty()
             val subtitle = if (isFrontispiece) "Anno Domini $roman" else "Feasts & daily observances"
@@ -502,9 +504,8 @@ fun OrdoYearScreen(
 private fun TabulaHeading() {
     val p = LocalPalette.current
     val o = LocalOrnament.current
-    Text(
-        "Tabula Temporaria",
-        Modifier.fillMaxWidth().semantics { heading() }.drawBehind {
+    Box(
+        Modifier.fillMaxWidth().drawBehind {
             val w = 1.dp.toPx()
             drawLine(o.line, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)
             drawLine(o.line, Offset(0f, size.height - w * 2.5f), Offset(size.width, size.height - w * 2.5f), w)
@@ -513,8 +514,14 @@ private fun TabulaHeading() {
             lozenge(c, 4.5.dp.toPx(), p.bg, null)
             lozenge(c, 2.5.dp.toPx(), o.flat, null)
         }.padding(vertical = 6.4.dp),
-        style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp),
-    )
+    ) {
+        GlossMark(ORDO_GLOSSES.tabula, "Tabula Temporaria", isHeading = true, reaches = false) {
+            Text(
+                "Tabula Temporaria",
+                style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp),
+            )
+        }
+    }
 }
 
 /**
@@ -854,7 +861,9 @@ private fun DrawScope.dayRail(inks: RailInks, reach: Float, top: Float, bottom: 
 private fun Monastic(d: OrdoDayView) {
     val style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = LocalPalette.current.muted, fontStyle = FontStyle.Italic)
     d.monastic.forEach { m ->
-        Text("[${m.heading}] ${m.rank}", Modifier.padding(top = 2.4.dp), style = style)
+        GlossMark(ORDO_GLOSSES.monastic, "[${m.heading}] ${m.rank}", Modifier.padding(top = 2.4.dp), reaches = false) {
+            Text("[${m.heading}] ${m.rank}", style = style)
+        }
         if (m.office.isNotEmpty()) Text(m.office, style = style)
     }
 }
@@ -1141,15 +1150,17 @@ private fun SmallDisclosure(label: String, open: Boolean, onToggle: () -> Unit) 
 private val TodayNote: TextStyle
     @Composable get() = Type.label(13.12f, 0.1f).copy(color = LocalPalette.current.let { if (it.dark) it.gold else Color(0xFF76561A) }, fontFeatureSettings = ALL_SMALL_CAPS)
 
-/** Notes for abbreviations inside Ordo Office details (`presentation::gloss`). */
+/** Notes for abbreviations and headings on the Ordo (`presentation::gloss`). */
+private val ORDO_GLOSSES by lazy { ordoDetailGlosses() }
 private val DETAIL_GLOSSES by lazy {
-    val g = ordoDetailGlosses()
+    val g = ORDO_GLOSSES
     mapOf(
         "ben" to g.benedictus,
         "mag" to g.magnificat,
         "com" to g.commemoration,
         "preces" to g.preces,
         "suffrage" to g.suffrage,
+        "cross" to g.cross,
     )
 }
 
@@ -1196,7 +1207,19 @@ private fun DigestHour(
     val line = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)
     Column(Modifier.padding(bottom = 4.dp)) {
         Text(name.uppercase(), Modifier.padding(bottom = 2.4.dp), style = Type.label(12f, 0.06f).copy(color = p.accent, lineHeight = 18.sp))
-        notes.forEach { Text(it, style = line) }
+        notes.forEach { note ->
+            val vg = vespersNoteGloss(note)
+            if (vg != null) {
+                val annotated = buildAnnotatedString {
+                    pushStringAnnotation(GLOSS, "vespers")
+                    append(note)
+                    pop()
+                }
+                AnnotatedGlossText(annotated, mapOf("vespers" to vg), line)
+            } else {
+                Text(note, style = line)
+            }
+        }
         if (antiphon != null || preces || suffrage || cross) {
             val text = buildAnnotatedString {
                 if (antiphon != null && antiphonKey != null) {
@@ -1218,7 +1241,12 @@ private fun DigestHour(
                         append(DETAIL_GLOSSES.getValue("suffrage").term)
                         pop()
                     }
-                    if (cross) append((if (length > 0) "  " else "") + "Commemoration of the Cross")
+                    if (cross) {
+                        if (length > 0) append("  ")
+                        pushStringAnnotation(GLOSS, "cross")
+                        append(DETAIL_GLOSSES.getValue("cross").term)
+                        pop()
+                    }
                 }
             }
             AnnotatedGlossText(text, DETAIL_GLOSSES, line)

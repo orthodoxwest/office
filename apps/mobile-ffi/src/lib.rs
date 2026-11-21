@@ -1113,7 +1113,7 @@ pub fn ember_days_gloss() -> GlossView {
     GlossView::of(g, false)
 }
 
-/// The notes opened by tapping abbreviations inside Ordo "Office details".
+/// The notes opened by tapping abbreviations and headings on the Ordo and Tabula Temporaria.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct OrdoDetailGlosses {
     pub benedictus: GlossView,
@@ -1121,18 +1121,58 @@ pub struct OrdoDetailGlosses {
     pub commemoration: GlossView,
     pub preces: GlossView,
     pub suffrage: GlossView,
+    pub cross: GlossView,
+    pub ordo: GlossView,
+    pub tabula: GlossView,
+    pub monastic: GlossView,
 }
 
 #[uniffi::export]
 pub fn ordo_detail_glosses() -> OrdoDetailGlosses {
     let to_view = |g: &presentation::gloss::Gloss| GlossView::of(g, false);
+    let quiet = |g: &presentation::gloss::Gloss| GlossView::of(g, true);
     OrdoDetailGlosses {
         benedictus: to_view(&presentation::gloss::ORDO_BENEDICTUS_GLOSS),
         magnificat: to_view(&presentation::gloss::ORDO_MAGNIFICAT_GLOSS),
         commemoration: to_view(&presentation::gloss::ORDO_COMMEMORATION_GLOSS),
         preces: to_view(&presentation::gloss::PRECES_GLOSS),
         suffrage: to_view(&presentation::gloss::SUFFRAGE_GLOSS),
+        cross: to_view(&presentation::gloss::COMMEMORATION_OF_CROSS_GLOSS),
+        ordo: quiet(&presentation::gloss::ORDO_GLOSS),
+        tabula: quiet(&presentation::gloss::TABULA_TEMPORARIA_GLOSS),
+        monastic: quiet(&presentation::gloss::MONASTIC_OBSERVANCE_GLOSS),
     }
+}
+
+/// The note for an Ordo Vespers note ("I Vespers of …", "II Vespers of preceding"), if it has one.
+#[uniffi::export]
+pub fn vespers_note_gloss(note: String) -> Option<GlossView> {
+    presentation::gloss::vespers_note_gloss(&note).map(|g| GlossView::of(g, false))
+}
+
+/// Quiet glosses shown on Home's day block (Octave, day versicle sigils).
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct HomeGlosses {
+    pub octave: GlossView,
+    pub versicle: GlossView,
+}
+
+#[uniffi::export]
+pub fn home_glosses() -> HomeGlosses {
+    let quiet = |g: &presentation::gloss::Gloss| GlossView::of(g, true);
+    HomeGlosses { octave: quiet(&presentation::gloss::OCTAVE_GLOSS), versicle: quiet(&presentation::gloss::VERSICLE_GLOSS) }
+}
+
+/// Quiet gloss for one of Home's penitential badges ("Fasting", "Abstinence").
+#[uniffi::export]
+pub fn penitential_gloss(label: String) -> Option<GlossView> {
+    presentation::gloss::penitential_gloss(&label).map(|g| GlossView::of(g, true))
+}
+
+/// Quiet gloss for a less-familiar liturgical season label (Septuagesima, Passiontide).
+#[uniffi::export]
+pub fn season_gloss(label: String) -> Option<GlossView> {
+    presentation::gloss::season_gloss(&label).map(|g| GlossView::of(g, true))
 }
 
 #[uniffi::export]

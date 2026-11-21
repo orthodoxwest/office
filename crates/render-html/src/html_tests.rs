@@ -136,11 +136,15 @@ fn posture_cues_follow_their_mediants_and_precede_the_doxology_lines() {
         PostureCue::new(Posture::StandUpright, PostureAnchor::BeforeVerse(1)),
     ];
     let html = render_section_elements(&[psalm, gloria]);
-    has(&html, r#"<span class="mediant" aria-hidden="true">*</span> <span class="posture">Sit.</span> and hath put on"#);
-    has(&html, r#"<span class="verse-body"><span class="posture">Bow.</span> He hath made"#);
-    has(&html, r#"Without a mediant <span class="posture">Stand.</span></span>"#);
-    has(&html, r#"<span class="source-line"><span class="posture">Bow.</span> Glory be"#);
-    has(&html, r#"<span class="source-line"><span class="posture">Stand upright.</span> As it was"#);
+    has(&html, r#"<span class="mediant" aria-hidden="true">*</span> <span class="posture gloss-quiet""#);
+    has(&html, r#">Sit.</span> and hath put on"#);
+    has(&html, r#"<span class="verse-body"><span class="posture gloss-quiet""#);
+    has(&html, r#">Bow.</span> He hath made"#);
+    has(&html, r#"Without a mediant <span class="posture gloss-quiet""#);
+    has(&html, r#">Stand.</span></span>"#);
+    has(&html, r#"<span class="source-line"><span class="posture gloss-quiet""#);
+    has(&html, r#">Bow.</span> Glory be"#);
+    has(&html, r#">Stand upright.</span> As it was"#);
     // Without cues nothing is added.
     lacks(&render_psalm_verses("Psalm 93\n\nTHE Lord is King * and hath put on glorious apparel.\n", &[], 0), "posture");
 }
@@ -419,9 +423,19 @@ fn hymn_rubric_is_instruction_not_latin_title() {
 #[test]
 fn commemoration_heading_preserves_name_and_escapes_markup() {
     let got = render_section_heading("Commemoration of St A & St B <test>");
-    has(&got, r#"class="commemoration-kicker">Commemoration of</span> "#);
+    has(&got, r#"class="commemoration-kicker gloss-quiet""#);
+    has(&got, r#">Commemoration of</span> "#);
     has(&got, "St A &amp; St B &lt;test&gt;");
     assert_eq!(render_section_heading("Lauds"), r#"<h2 class="section-heading">Lauds</h2>"#);
+}
+
+#[test]
+fn the_cross_commemoration_kicker_carries_the_cross_note() {
+    let cross = presentation::gloss::COMMEMORATION_OF_CROSS_GLOSS;
+    has(&render_section_heading("Commemoration of the Cross"), &format!(r#"data-gloss-title="{}""#, cross.title));
+    let other = render_section_heading("Commemoration of St Mark");
+    has(&other, &format!(r#"data-gloss-title="{}""#, presentation::gloss::ORDO_COMMEMORATION_GLOSS.title));
+    lacks(&other, cross.title);
 }
 
 fn psalm_67(incipit: &str) -> OfficeElement {

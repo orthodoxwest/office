@@ -12,7 +12,9 @@ pub(crate) use corpus::typography::soften_drop_cap_opening;
 pub use corpus::typography::typeset;
 
 use crate::escape::html_escape_string;
-use presentation::gloss::{ANTIPHON_GLOSS, CHAPTER_GLOSS, Gloss, GlossRun, PSALM_NUMBER_GLOSS, gloss_runs, heading_gloss};
+use presentation::gloss::{
+    ANTIPHON_GLOSS, CHAPTER_GLOSS, Gloss, GlossRun, ORDO_COMMEMORATION_GLOSS, POSTURE_GLOSS, PSALM_NUMBER_GLOSS, gloss_runs, heading_gloss,
+};
 
 fn quiet_gloss_attrs(gloss: &Gloss) -> String {
     format!(" class=\"gloss-quiet\" data-gloss-title=\"{}\" data-gloss=\"{}\"", esc_text(gloss.title), esc_text(gloss.note))
@@ -110,8 +112,12 @@ pub fn render_section_heading(label: &str) -> String {
 pub fn render_section_heading_in(label: &str, bare: bool) -> String {
     let bare = if bare { " section-bare" } else { "" };
     if let Some(name) = label.strip_prefix("Commemoration of ").filter(|n| !n.is_empty()) {
+        // The Cross keeps its own note; any other is a commemorated feast or season.
+        let kicker = heading_gloss(label).unwrap_or(&ORDO_COMMEMORATION_GLOSS);
         return format!(
-            "<h2 class=\"section-heading commemoration-heading{bare}\"><span class=\"commemoration-kicker\">Commemoration of</span> <span class=\"commemoration-name\">{}</span></h2>",
+            "<h2 class=\"section-heading commemoration-heading{bare}\"><span class=\"commemoration-kicker gloss-quiet\" data-gloss-title=\"{}\" data-gloss=\"{}\">Commemoration of</span> <span class=\"commemoration-name\">{}</span></h2>",
+            esc_text(kicker.title),
+            esc_text(kicker.note),
             esc_text(name)
         );
     }
@@ -261,9 +267,17 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
     sb
 }
 
-/// Posture cues at one anchor, each a red rubric run.
+/// Posture cues at one anchor, each a red rubric run with a quiet gloss.
 fn posture_html(cues: &[PostureCue], at: PostureAnchor) -> String {
-    posture_cues_at(cues, at).map(|cue| format!("<span class=\"posture\">{cue}</span> ")).collect()
+    posture_cues_at(cues, at)
+        .map(|cue| {
+            format!(
+                "<span class=\"posture gloss-quiet\" data-gloss-title=\"{}\" data-gloss=\"{}\">{cue}</span> ",
+                esc_text(POSTURE_GLOSS.title),
+                esc_text(POSTURE_GLOSS.note)
+            )
+        })
+        .collect()
 }
 
 /// Display text with its first `words` words muted as not said; returns the

@@ -102,9 +102,14 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.LightFrame
+import org.orthodoxwest.office.core.homeGlosses
 import org.orthodoxwest.office.core.hourLightAt
 import org.orthodoxwest.office.core.hourLightTotalMs
 import org.orthodoxwest.office.core.hourNote
+import org.orthodoxwest.office.core.penitentialGloss
+import org.orthodoxwest.office.core.seasonGloss
+
+private val HOME_GLOSSES by lazy { homeGlosses() }
 
 private val PERIODS = listOf(
     Triple(Period.MORNING, "Morning", listOf("lauds", "prime")),
@@ -636,11 +641,24 @@ private fun Frontispiece(
                         linked = view.feastId.isNotEmpty(),
                         reserve = reserve,
                     )
-                    if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, Modifier.crownUnit("w-octave").then(reserve.at("octave")), style = Type.small.copy(color = muted), onTextLayout = reserve.layout("octave"))
+                    if (view.octaveNote.isNotEmpty()) {
+                        GlossMark(HOME_GLOSSES.octave, view.octaveNote, Modifier.crownUnit("w-octave").then(reserve.at("octave")), reaches = false) {
+                            Text(view.octaveNote, style = Type.small.copy(color = muted), onTextLayout = reserve.layout("octave"))
+                        }
+                    }
                     if (view.penitential.isNotEmpty()) {
                         Row(Modifier.padding(top = if (desk && tier.heavy) 0.dp else 12.dp).crownUnit("w-fast").semantics(mergeDescendants = true) {}, horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
                             val fast = if (desk) Type.small.copy(fontSize = tier.fast.sp) else Type.small
-                            view.penitential.forEachIndexed { i, it -> Text(it, reserve.at("fast$i"), style = fast.copy(color = rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp), onTextLayout = reserve.layout("fast$i")) }
+                            view.penitential.forEachIndexed { i, it ->
+                                val pg = penitentialGloss(it)
+                                if (pg != null) {
+                                    GlossMark(pg, it, reserve.at("fast$i"), reaches = false) {
+                                        Text(it, style = fast.copy(color = rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp), onTextLayout = reserve.layout("fast$i"))
+                                    }
+                                } else {
+                                    Text(it, reserve.at("fast$i"), style = fast.copy(color = rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp), onTextLayout = reserve.layout("fast$i"))
+                                }
+                            }
                         }
                     }
                     if (view.commemorations.isNotEmpty()) {
@@ -773,9 +791,14 @@ private fun Frontispiece(
                         // the same gilt point after it, and opens About.
                         val lead = introduction ?: view.season
                         if (lead.isNotEmpty()) {
+                            val sg = if (introduction == null) seasonGloss(lead) else null
                             val leadModifier = if (introduction == null) Modifier else Modifier.heightIn(min = 44.dp).tap(action = "open About the Office", onClick = onIntroduction)
                             Row(Modifier.align(Alignment.CenterVertically).then(leadModifier), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                                Text(lead, style = seasonStyle.copy(textAlign = TextAlign.Center))
+                                if (sg != null) {
+                                    GlossMark(sg, lead, reaches = false) { Text(lead, style = seasonStyle.copy(textAlign = TextAlign.Center)) }
+                                } else {
+                                    Text(lead, style = seasonStyle.copy(textAlign = TextAlign.Center))
+                                }
                                 Canvas(Modifier.padding(start = 14.4.dp, end = 8.8.dp).size(5.dp)) { lozenge(center, 2.5.dp.toPx(), o.flat.copy(alpha = 0.7f), null) }
                             }
                         }
@@ -889,23 +912,24 @@ private fun FeastName(name: String, alias: String, size: Float, modifier: Modifi
 private fun VersicleLine(sigil: String, words: String, size: Float, rubric: Color, reserve: Reserve, key: String) {
     val p = LocalPalette.current
     val spokenSigil = sigil.replace("℣.", "Versicle.").replace("℟.", "Response.")
-    Text(
-        buildAnnotatedString {
-            withStyle(SpanStyle(fontStyle = FontStyle.Normal, color = rubric)) { append(sigil) }
-            append(" ")
-            append(words)
-        },
-        style = Type.body.copy(
-            fontSize = size.sp,
-            lineHeight = (size * 1.32f).sp,
-            fontStyle = FontStyle.Italic,
-            color = p.text.copy(alpha = p.text.alpha * 0.84f),
-            textAlign = TextAlign.Center,
-            lineBreak = LineBreak.Heading,
-        ),
-        modifier = reserve.at(key).clearAndSetSemantics { contentDescription = "$spokenSigil $words" },
-        onTextLayout = reserve.layout(key),
-    )
+    GlossMark(HOME_GLOSSES.versicle, "$spokenSigil $words", reserve.at(key), reaches = false) {
+        Text(
+            buildAnnotatedString {
+                withStyle(SpanStyle(fontStyle = FontStyle.Normal, color = rubric)) { append(sigil) }
+                append(" ")
+                append(words)
+            },
+            style = Type.body.copy(
+                fontSize = size.sp,
+                lineHeight = (size * 1.32f).sp,
+                fontStyle = FontStyle.Italic,
+                color = p.text.copy(alpha = p.text.alpha * 0.84f),
+                textAlign = TextAlign.Center,
+                lineBreak = LineBreak.Heading,
+            ),
+            onTextLayout = reserve.layout(key),
+        )
+    }
 }
 
 /**

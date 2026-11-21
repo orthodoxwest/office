@@ -280,7 +280,7 @@ mod tests {
         // The head: the date as the titulus over the name, the rank and colour parted by a point.
         assert!(body.contains(r#"<header class="feast-head is-feast day-color-white""#));
         assert!(body.contains(r#"<p class="feast-titulus">February 27</p>"#));
-        assert!(body.contains("<span>Greater Double</span>") && body.contains("<span>White</span>"));
+        assert!(body.contains(">Greater Double</span>") && body.contains("<span>White</span>"));
         // Opened from nowhere in particular, it leads back to the search.
         assert!(body.contains(r#"<a class="find-back" href="/calendar/find"><span aria-hidden="true">&lsaquo; </span>Find a feast</a>"#));
         assert!(body.contains(">The next eight years</h2>"));
@@ -288,12 +288,12 @@ mod tests {
         assert!(body.contains("From the Common of a Confessor and Bishop."));
         // Septuagesima's I Vespers take his evening, where he is commemorated.
         for label in ["At I Vespers · Magnificat", "At Lauds · Benedictus", "At II Vespers · Antiphon", "Collect"] {
-            assert!(body.contains(&format!("<h3>{label} <span")), "{label}");
+            assert!(body.contains(&format!(">{label}</span> <span")), "{label}");
         }
         assert!(body.contains("blessed Raphael, thy Confessor and Bishop") && body.contains("world without end"));
         assert!(body.contains(r#"class="feast-next""#), "a feast kept every few years has a next keeping");
-        let collect = body.find("<h3>Collect").unwrap();
-        assert!(collect < body.find("<h3>At I Vespers").unwrap(), "the collect, the day's, comes before the texts of single hours");
+        let collect = body.find(">Collect</span>").unwrap();
+        assert!(collect < body.find(">At I Vespers").unwrap(), "the collect, the day's, comes before the texts of single hours");
         assert!(collect < body.find(">The next eight years</h2>").unwrap(), "the texts come before the years");
         // A year kept as usual leaves "Kept" unsaid; a year he is only commemorated says so.
         assert!(!body.contains("<b>Kept</b>") && body.contains("<b>Commemorated</b>"));

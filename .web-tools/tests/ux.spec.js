@@ -4740,6 +4740,26 @@ test("newcomer reading key, quiet structural glosses, 3-up menu, reminders gloss
   await page.locator('.tabula-tables dt a.feast-link', { hasText: "Ash Wednesday" }).click();
   await expect(page).toHaveURL(/\/feast\/ash-wednesday\?from=ordo-2026$/);
   await expect(page.locator(".find-back")).toHaveText(/2026 Ordo/);
+
+  // Quiet glosses on Feast, Tabula, and Home pages stay ununderlined at rest, stay keyboard-accessible, and open #gloss-note on tap.
+  await openDatedPage(page, "/feast/st-raphael-of-brooklyn");
+  for (const title of ["Greater Double", "Proper of the feast", "Collect", "From the Common"]) {
+    const el = page.locator(`.gloss-quiet[data-gloss-title="${title}"]`).first();
+    await expect(el).toHaveCSS("text-decoration-line", "none");
+    await expect(el).toHaveAttribute("role", "button");
+    await el.click();
+    await expect(page.locator("#gloss-note")).not.toHaveClass(/closed/);
+    await expect(page.locator("#gloss-note .gloss-title")).toHaveText(title);
+    await page.keyboard.press("Escape");
+  }
+
+  await openDatedPage(page, "/?date=2026-12-26");
+  const octave = page.locator('.octave-note .gloss-quiet[data-gloss-title="Octave"]');
+  await expect(octave).toHaveCSS("text-decoration-line", "none");
+  await expect(octave).toHaveAttribute("role", "button");
+  await octave.click();
+  await expect(page.locator("#gloss-note")).not.toHaveClass(/closed/);
+  await page.keyboard.press("Escape");
 });
 
 // One theme: overflow and touch targets are geometry, which themes share

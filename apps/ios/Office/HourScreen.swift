@@ -943,6 +943,10 @@ private struct HourTitle: View {
                             .accessibilityLabel(part)
                             .accessibilityHint("Changes the date")
                             .accessibilityValue(picking ? "Expanded" : "Collapsed")
+                        } else if let sg = seasonGloss(label: part) {
+                            GlossMark(gloss: sg, label: part, reaches: false) {
+                                Text(text).type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                            }
                         } else {
                             Text(text).type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
                                 .accessibilityLabel(part)

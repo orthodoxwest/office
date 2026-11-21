@@ -2932,9 +2932,19 @@ html[data-newcomer] .home-season {
     height: var(--touch-target);
     transform: translateY(-50%);
   }
-  /* Compact adjacent lines in Ordo Office details (Ben. above Com.) must not
-     have the lower line's touch box cover the line above it. */
-  .day-office-digest .gloss-term[role="button"]::before {
+  /* Compact adjacent lines in Ordo Office details and monastic lines, and
+     the marks set close under a feast link (Home's octave note, fasting
+     badges and season, the hour header's season), must not have their touch
+     box cover the line or link above them. */
+  .day-office-digest .gloss-term[role="button"]::before,
+  .day-office-digest .gloss-quiet::before,
+  .day-monastic .gloss-quiet::before,
+  .octave-note .gloss-quiet::before,
+  .penitential-badge.gloss-quiet::before,
+  .home-season .gloss-quiet::before,
+  .hour-meta .gloss-quiet::before,
+  .home-versicle .gloss-quiet::before,
+  .feast-text h3 .gloss-quiet::before {
     inset: -0.15rem -0.25rem;
     height: auto;
     transform: none;
