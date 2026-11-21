@@ -1028,8 +1028,14 @@ mod tests {
         };
         // St Placidus: the martyrs' versicle, each half with its sigil.
         let placidus = versicle("2026-10-05").expect("a plain day's versicle");
-        assert!(placidus.contains(r#">℣.</span><span class="sr-only">Versicle.</span></span> Let the Saints be joyful with glory."#), "{placidus}");
-        assert!(placidus.contains(r#">℟.</span><span class="sr-only">Response.</span></span> Let them rejoice in their beds."#), "{placidus}");
+        assert!(
+            placidus.contains(r#">℣.</span><span class="sr-only">Versicle.</span></span> Let the Saints be joyful with glory."#),
+            "{placidus}"
+        );
+        assert!(
+            placidus.contains(r#">℟.</span><span class="sr-only">Response.</span></span> Let them rejoice in their beds."#),
+            "{placidus}"
+        );
         assert!(placidus.contains(r#"class="home-versicle-line gloss-quiet""#), "{placidus}");
         // Laetare, in rose, keeps it.
         assert!(versicle("2026-03-22").is_some_and(|v| v.contains("God shall give his angels charge over thee.")));
