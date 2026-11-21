@@ -1137,15 +1137,19 @@ private fun SmallDisclosure(label: String, open: Boolean, onToggle: () -> Unit) 
 private val TodayNote: TextStyle
     @Composable get() = Type.label(13.12f, 0.1f).copy(color = LocalPalette.current.let { if (it.dark) it.gold else Color(0xFF76561A) }, fontFeatureSettings = ALL_SMALL_CAPS)
 
-/** Notes for abbreviations inside Ordo Office details (`presentation::gloss`). */
+/** Notes for abbreviations and headings on the Ordo (`presentation::gloss`). */
+private val ORDO_GLOSSES by lazy { ordoDetailGlosses() }
 private val DETAIL_GLOSSES by lazy {
-    val g = ordoDetailGlosses()
+    val g = ORDO_GLOSSES
     mapOf(
         "ben" to g.benedictus,
         "mag" to g.magnificat,
         "com" to g.commemoration,
         "preces" to g.preces,
         "suffrage" to g.suffrage,
+        "cross" to g.cross,
+        "vespers1" to g.firstVespers,
+        "vespers2" to g.secondVespers,
     )
 }
 
