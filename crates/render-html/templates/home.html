@@ -49,7 +49,7 @@
            for it: never in Passiontide or on a violet day, when the head is
            stripped (presentation::home_shows_versicle). #}
         {% if versicle %}
-        <p class="home-versicle"><span class="home-versicle-line"><span class="home-versicle-sigil gloss-quiet" data-gloss-title="{{ versicle_gloss.title }}" data-gloss="{{ versicle_gloss.note }}">℣.</span> {{ versicle|typeset }}</span> <span class="home-versicle-line"><span class="home-versicle-sigil gloss-quiet" data-gloss-title="{{ versicle_gloss.title }}" data-gloss="{{ versicle_gloss.note }}">℟.</span> {{ response|typeset }}</span></p>
+        <p class="home-versicle"><span class="home-versicle-line gloss-quiet" data-gloss-title="{{ versicle_gloss.title }}" data-gloss="{{ versicle_gloss.note }}"><span class="home-versicle-sigil">℣.</span> {{ versicle|typeset }}</span> <span class="home-versicle-line gloss-quiet" data-gloss-title="{{ versicle_gloss.title }}" data-gloss="{{ versicle_gloss.note }}"><span class="home-versicle-sigil">℟.</span> {{ response|typeset }}</span></p>
         {% endif %}
         {% if commemorations %}
         <div class="commemorations">

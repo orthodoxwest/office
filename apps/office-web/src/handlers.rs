@@ -1030,7 +1030,7 @@ mod tests {
         let placidus = versicle("2026-10-05").expect("a plain day's versicle");
         assert!(placidus.contains(">℣.</span> Let the Saints be joyful with glory."), "{placidus}");
         assert!(placidus.contains(">℟.</span> Let them rejoice in their beds."), "{placidus}");
-        assert!(placidus.contains(r#"class="home-versicle-sigil gloss-quiet""#), "{placidus}");
+        assert!(placidus.contains(r#"class="home-versicle-line gloss-quiet""#), "{placidus}");
         // Laetare, in rose, keeps it.
         assert!(versicle("2026-03-22").is_some_and(|v| v.contains("God shall give his angels charge over thee.")));
         // A Lenten feria (violet), Passion Sunday, Maundy Thursday, and a day with a commemoration.

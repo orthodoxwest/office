@@ -187,10 +187,10 @@ document.documentElement.classList.add("js");
 
   function control(term) {
     // Repeating quiet glosses in running text (each antiphon's "Ant.", each
-    // psalm's Hebrew number, posture cues, and Home's ℣./℟. sigils) answer a
+    // psalm's Hebrew number, posture cues, and Home's ℣./℟. lines) answer a
     // tap without adding dozens of tab stops. Standalone quiet glosses on
     // headings and page labels stay keyboard controls.
-    if (term.classList.contains("gloss-quiet") && (term.matches(".psalm-heb, .posture, .home-versicle-sigil") || term.closest(".antiphon"))) {
+    if (term.classList.contains("gloss-quiet") && (term.matches(".psalm-heb, .posture, .home-versicle-line") || term.closest(".antiphon"))) {
       term.addEventListener("click", function () { toggle(term); });
       return;
     }

@@ -77,7 +77,7 @@
   <div class="calendar-header" id="calendar-top">
     <div class="calendar-title">
       {{ headpiece() }}
-      <h1>{{ year }} <span class="gloss-quiet" data-gloss-title="{{ ordo_gloss.title }}" data-gloss="{{ ordo_gloss.note }}">Ordo</span></h1>
+      <h1><span class="gloss-quiet" data-gloss-title="{{ ordo_gloss.title }}" data-gloss="{{ ordo_gloss.note }}">{{ year }} Ordo</span></h1>
       {# The frontispiece reads as the printed ordo's title page. #}
       <p class="calendar-subtitle">{% if view == "year" and year_roman %}Anno Domini {{ year_roman }}{% else %}Feasts &amp; daily observances{% endif %}</p>
     </div>

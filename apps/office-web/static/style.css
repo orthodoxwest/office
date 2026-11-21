@@ -2935,7 +2935,8 @@ html[data-newcomer] .home-season {
   .octave-note .gloss-quiet::before,
   .penitential-badge.gloss-quiet::before,
   .home-season .gloss-quiet::before,
-  .hour-meta .gloss-quiet::before {
+  .hour-meta .gloss-quiet::before,
+  .home-versicle .gloss-quiet::before {
     inset: -0.15rem -0.25rem;
     height: auto;
     transform: none;
