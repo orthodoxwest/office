@@ -245,7 +245,9 @@ jobs:
           PHONE: ${{ steps.sim.outputs.phone }}
         run: apps/ios/screenshots.sh boot "$PHONE"
 
+      # A download once hung ten minutes behind a booting simulator: fail fast rather than wait.
       - uses: actions/download-artifact@v8.0.2
+        timeout-minutes: 5
         with:
           name: ios-products
           path: apps/ios/build
@@ -326,7 +328,9 @@ jobs:
           SIM: ${{ steps.sim.outputs[matrix.device] }}
         run: apps/ios/screenshots.sh boot "$SIM"
 
+      # A download once hung ten minutes behind a booting simulator: fail fast rather than wait.
       - uses: actions/download-artifact@v8.0.2
+        timeout-minutes: 5
         with:
           name: ios-products
           path: apps/ios/build
