@@ -24,7 +24,9 @@ use liturgy::{
     ChantScore, ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, RubricSpan, ScoreSpan, VoiceSpan, posture_cues_at,
     split_words,
 };
-use presentation::gloss::{ANTIPHON_GLOSS, Gloss, GlossRun, PSALM_NUMBER_GLOSS, gloss_runs, heading_gloss};
+use presentation::gloss::{
+    ANTIPHON_GLOSS, Gloss, GlossRun, ORDO_COMMEMORATION_GLOSS, POSTURE_GLOSS, PSALM_NUMBER_GLOSS, gloss_runs, heading_gloss,
+};
 
 /// What a block is, which decides its paragraph style.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -412,7 +414,11 @@ pub fn section_heading(label: &str) -> Block {
     if let Some(name) = label.strip_prefix("Commemoration of ").filter(|n| !n.is_empty()) {
         return Block::new(
             BlockKind::CommemorationHeading,
-            vec![Run::new("Commemoration of", RunStyle::Kicker), Run::new("\n", RunStyle::Break), Run::new(typeset(name), RunStyle::Plain)],
+            vec![
+                Run::with_quiet_gloss("Commemoration of", RunStyle::Kicker, Some(&ORDO_COMMEMORATION_GLOSS)),
+                Run::new("\n", RunStyle::Break),
+                Run::new(typeset(name), RunStyle::Plain),
+            ],
         );
     }
     let runs = match heading_gloss(label) {
@@ -607,10 +613,10 @@ fn rubric_text_runs(s: &str) -> Vec<Run> {
         .collect()
 }
 
-/// Posture cues at one anchor, each a run followed by a space.
+/// Posture cues at one anchor, each a run carrying a quiet gloss, followed by a space.
 fn push_postures(runs: &mut Vec<Run>, cues: &[PostureCue], at: PostureAnchor) {
     for cue in posture_cues_at(cues, at) {
-        runs.push(Run::new(cue, RunStyle::Posture));
+        runs.push(Run::with_quiet_gloss(cue, RunStyle::Posture, Some(&POSTURE_GLOSS)));
         runs.push(Run::new(" ", RunStyle::Plain));
     }
 }

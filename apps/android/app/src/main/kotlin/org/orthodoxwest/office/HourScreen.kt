@@ -96,6 +96,7 @@ import org.orthodoxwest.office.core.ReadingKeyView
 import org.orthodoxwest.office.core.blockWords
 import org.orthodoxwest.office.core.readingKey
 import org.orthodoxwest.office.core.reopensAtPlace
+import org.orthodoxwest.office.core.seasonGloss
 
 /** How many hours hold each window awake. */
 private val hoursAwake = WeakHashMap<View, Int>()
@@ -517,7 +518,12 @@ private fun HourTitle(
                             style = Type.meta.copy(color = if (picking) p.accent else p.muted, textAlign = TextAlign.Center),
                         )
                     } else {
-                        Text(text, Modifier.semantics { contentDescription = part }, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
+                        val sg = seasonGloss(part)
+                        if (sg != null) {
+                            GlossMark(sg, part) { Text(text, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center)) }
+                        } else {
+                            Text(text, Modifier.semantics { contentDescription = part }, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
+                        }
                     }
                 }
             }

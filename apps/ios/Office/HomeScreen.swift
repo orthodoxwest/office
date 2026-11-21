@@ -1,5 +1,7 @@
 import SwiftUI
 
+private let homeGlossesShared = homeGlosses()
+
 private let periods: [(period: Period, label: String, hours: [String])] = [
     (.morning, "Morning", ["lauds", "prime"]),
     (.day, "Day", ["terce", "sext", "none"]),
@@ -623,13 +625,22 @@ private struct Frontispiece: View {
                 .frame(maxWidth: tier.feastMeasure.map { m.px($0) })
                 .padding(.top, m.px(2))
                 if !view.octaveNote.isEmpty {
-                    Text(view.octaveNote).type(Scale.small).foregroundStyle(muted).multilineTextAlignment(.center).reserved("octave")
-                        .crownInk("w-octave")
+                    GlossMark(gloss: homeGlossesShared.octave, label: view.octaveNote, reaches: false) {
+                        Text(view.octaveNote).type(Scale.small).foregroundStyle(muted).multilineTextAlignment(.center).reserved("octave")
+                    }
+                    .crownInk("w-octave")
                 }
                 if !view.penitential.isEmpty {
                     HStack(spacing: m.px(9.6)) {
                         ForEach(view.penitential, id: \.self) { t in
-                            Text(t).type(tier.fast).foregroundStyle(rubric).reserved("fast " + t)
+                            let pg: GlossView? = t == "Fasting" ? homeGlossesShared.fasting : (t == "Abstinence" ? homeGlossesShared.abstinence : nil)
+                            if let pg {
+                                GlossMark(gloss: pg, label: t, reaches: false) {
+                                    Text(t).type(tier.fast).foregroundStyle(rubric).reserved("fast " + t)
+                                }
+                            } else {
+                                Text(t).type(tier.fast).foregroundStyle(rubric).reserved("fast " + t)
+                            }
                         }
                     }
                     .crownInk("w-fast")
@@ -762,9 +773,17 @@ private struct Frontispiece: View {
                 if view.season.isEmpty && !newcomer {
                     change.padding(.top, m.px(tier.metaGap + 1))
                 } else {
+                    let sg = newcomer ? nil : seasonGloss(label: view.season)
                     let lead = HStack(spacing: 0) {
-                        Text(newcomer ? aboutPage.introduction : view.season).type(foot).foregroundStyle(p.muted)
-                            .multilineTextAlignment(.center)
+                        if let sg {
+                            GlossMark(gloss: sg, label: view.season, reaches: false) {
+                                Text(view.season).type(foot).foregroundStyle(p.muted)
+                                    .multilineTextAlignment(.center)
+                            }
+                        } else {
+                            Text(newcomer ? aboutPage.introduction : view.season).type(foot).foregroundStyle(p.muted)
+                                .multilineTextAlignment(.center)
+                        }
                         Canvas { ctx, s in ctx.fill(lozenge(CGPoint(x: s.width / 2, y: s.height / 2), 2.5), with: .color(o.flat.opacity(0.7))) }
                             .frame(width: 5, height: 5)
                             .padding(.leading, m.px(14.4))
@@ -837,11 +856,13 @@ private struct Frontispiece: View {
     /// A line of the versicle: its ℣ or ℟ upright in the rubrics' red, the words in italic, the
     /// text's ink a little withdrawn.
     private func versicleLine(_ sigil: String, _ words: String, _ style: TextStyle) -> some View {
-        (Text(sigil).font(Font(garamond(style.size * m.type))).foregroundColor(rubric) + Text(" " + words))
-            .type(style)
-            .foregroundStyle(p.text.opacity(0.84))
-            .multilineTextAlignment(.center)
-            .fixedSize(horizontal: false, vertical: true)
+        GlossMark(gloss: homeGlossesShared.versicle, label: "\(sigil) \(words)", reaches: false) {
+            (Text(sigil).font(Font(garamond(style.size * m.type))).foregroundColor(rubric) + Text(" " + words))
+                .type(style)
+                .foregroundStyle(p.text.opacity(0.84))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
     /// The inscription band: flat green earth between oxblood edges and leaf fillets, ruled by

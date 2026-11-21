@@ -2925,9 +2925,11 @@ html[data-newcomer] .home-season {
     height: var(--touch-target);
     transform: translateY(-50%);
   }
-  /* Compact adjacent lines in Ordo Office details (Ben. above Com.) must not
+  /* Compact adjacent lines in Ordo Office details and monastic lines must not
      have the lower line's touch box cover the line above it. */
-  .day-office-digest .gloss-term[role="button"]::before {
+  .day-office-digest .gloss-term[role="button"]::before,
+  .day-office-digest .gloss-quiet::before,
+  .day-monastic .gloss-quiet::before {
     inset: -0.15rem -0.25rem;
     height: auto;
     transform: none;

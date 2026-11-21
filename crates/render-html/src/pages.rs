@@ -115,14 +115,27 @@ impl Pages {
         // The office being prayed from each clock hour, as a script literal for home's pre-paint mark
         // of the hour ([start, slug, name, day offset], home.html).
         env.add_global("hour_schedule", Value::from_safe_string(hour_schedule_literal()));
-        // The in-hour "How to read" key and Tabula/Ordo gloss notes (`presentation::gloss`).
+        // The in-hour "How to read" key and screen gloss notes (`presentation::gloss`).
         env.add_global("reading_key", reading_key_value());
+        env.add_global("ordo_gloss", gloss_value(&presentation::gloss::ORDO_GLOSS));
+        env.add_global("tabula_temporaria_gloss", gloss_value(&presentation::gloss::TABULA_TEMPORARIA_GLOSS));
         env.add_global("ember_days_gloss", gloss_value(&presentation::gloss::EMBER_DAYS_GLOSS));
         env.add_global("ordo_gloss_ben", gloss_value(&presentation::gloss::ORDO_BENEDICTUS_GLOSS));
         env.add_global("ordo_gloss_mag", gloss_value(&presentation::gloss::ORDO_MAGNIFICAT_GLOSS));
         env.add_global("ordo_gloss_com", gloss_value(&presentation::gloss::ORDO_COMMEMORATION_GLOSS));
         env.add_global("ordo_gloss_preces", gloss_value(&presentation::gloss::PRECES_GLOSS));
         env.add_global("ordo_gloss_suffrage", gloss_value(&presentation::gloss::SUFFRAGE_GLOSS));
+        env.add_global("ordo_gloss_cross", gloss_value(&presentation::gloss::COMMEMORATION_OF_CROSS_GLOSS));
+        env.add_global("monastic_gloss", gloss_value(&presentation::gloss::MONASTIC_OBSERVANCE_GLOSS));
+        env.add_global("proper_gloss", gloss_value(&presentation::gloss::PROPER_GLOSS));
+        env.add_global("common_gloss", gloss_value(&presentation::gloss::COMMON_GLOSS));
+        env.add_global("octave_gloss", gloss_value(&presentation::gloss::OCTAVE_GLOSS));
+        env.add_global("versicle_gloss", gloss_value(&presentation::gloss::VERSICLE_GLOSS));
+        env.add_filter("vespers_note_gloss", |s: String| presentation::gloss::vespers_note_gloss(&s).map(gloss_value));
+        env.add_filter("season_gloss", |s: String| presentation::gloss::season_gloss(&s).map(gloss_value));
+        env.add_filter("penitential_gloss", |s: String| presentation::gloss::penitential_gloss(&s).map(gloss_value));
+        env.add_filter("rank_gloss", |s: String| presentation::gloss::rank_gloss(&s).map(gloss_value));
+        env.add_filter("feast_text_gloss", |s: String| presentation::gloss::feast_text_gloss(&s).map(gloss_value));
         Ok(Pages { env })
     }
 

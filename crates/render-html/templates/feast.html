@@ -5,13 +5,13 @@
     <span class="feast-crown" aria-hidden="true"></span>
     <h1>{{ name|typeset }}</h1>
     <p class="feast-titulus">{{ titulus }}</p>
-    <p class="feast-rank">{% set parts = subtitle|split(" · ")|list %}{% for part in parts %}{% if not loop.first %}<span class="feast-point" aria-hidden="true"></span><span class="sr-only"> · </span>{% endif %}<span>{{ part|typeset }}</span>{% endfor %}</p>
+    <p class="feast-rank">{% set parts = subtitle|split(" · ")|list %}{% for part in parts %}{% if not loop.first %}<span class="feast-point" aria-hidden="true"></span><span class="sr-only"> · </span>{% endif %}{% set rg = part|rank_gloss %}{% if rg %}<span class="gloss-quiet" data-gloss-title="{{ rg.title }}" data-gloss="{{ rg.note }}">{{ part|typeset }}</span>{% else %}<span>{{ part|typeset }}</span>{% endif %}{% endfor %}</p>
   </header>
   <div class="feast-body{% if not texts %} no-texts{% endif %}">
     {% if monastic_note or next %}
     <div class="feast-standing{% if monastic_note %} is-monastic{% endif %}{% if next %} day-color-{{ next.color }}{% endif %}">
       {% if monastic_note %}
-      <p class="feast-standing-label">{{ feast_words.monastic_heading }}</p>
+      <p class="feast-standing-label"><span class="gloss-quiet" data-gloss-title="{{ monastic_gloss.title }}" data-gloss="{{ monastic_gloss.note }}">{{ feast_words.monastic_heading }}</span></p>
       {% if kept_by_all %}<p class="feast-everyone">{{ feast_words.everyone_keeps }} <a href="{{ kept_by_all.href|url }}">{{ kept_by_all.label|typeset }}</a> {{ kept_by_all_note }}</p>{% endif %}
       <p class="feast-standing-note">{{ monastic_note|typeset }}</p>
       {% endif %}
@@ -26,7 +26,7 @@
     {% endif %}
     {% if texts %}
     <section class="feast-section feast-texts" aria-labelledby="feast-texts-heading">
-      <h2 id="feast-texts-heading">{{ feast_words.texts_heading }}</h2>
+      <h2 id="feast-texts-heading"><span class="gloss-quiet" data-gloss-title="{{ proper_gloss.title }}" data-gloss="{{ proper_gloss.note }}">{{ feast_words.texts_heading }}</span></h2>
       <p class="feast-source">{{ texts_source|typeset }}</p>
       {% for t in texts %}
       {% if t.hymn %}
@@ -36,7 +36,8 @@
       </details>
       {% else %}
       <div class="feast-text{% if loop.first and t.prayer %} collect{% endif %}">
-        <h3>{{ t.label }}{% if t.common %} <span class="feast-text-common">{{ feast_words.common_mark }}</span>{% endif %}</h3>
+        {% set tg = t.label|feast_text_gloss %}
+        <h3>{% if tg %}<span class="gloss-quiet" data-gloss-title="{{ tg.title }}" data-gloss="{{ tg.note }}">{{ t.label }}</span>{% else %}{{ t.label }}{% endif %}{% if t.common %} <span class="feast-text-common gloss-quiet" data-gloss-title="{{ common_gloss.title }}" data-gloss="{{ common_gloss.note }}">{{ feast_words.common_mark }}</span>{% endif %}</h3>
         {% if t.prayer %}{{ t.text|feast_prayer }}{% else %}{{ t.text|feast_text }}{% endif %}
       </div>
       {% endif %}
