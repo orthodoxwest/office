@@ -338,12 +338,17 @@ struct HourScreen: View {
         let scoreColumn = min(m.px(measure), width - 2 * (inset + m.px(gutter)))
         ScrollViewReader { scroll in
             ScrollView {
+                // Every row a whole number of pixels tall (wholePixels): the list's rows then all
+                // stand on the same fraction of a pixel, however many above were laid out or only
+                // guessed, and draw on the same pixels from launch to launch (#948).
                 LazyVStack(spacing: 0) {
                     Rectangle().fill(bandColor(view.color, p)).frame(height: 3).accessibilityHidden(true)
                     SiteHeader()
+                        .wholePixels()
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
                     HourTitle(view: view, date: date, pageWidth: width)
                         .padding(.horizontal, inset)
+                        .wholePixels()
                     ForEach(Array(rows.enumerated()), id: \.element.id) { n, row in
                         Group {
                             switch row {
@@ -384,6 +389,7 @@ struct HourScreen: View {
                                 .environment(\.metrics, prayer)
                             }
                         }
+                        .wholePixels()
                         .read(row.id, at: n, into: reading)
                     }
                     Epilogue(
@@ -397,6 +403,7 @@ struct HourScreen: View {
                         // Under the veil a bare hour's vault goes dark (the Triduum; All Souls keeps its stars).
                         lit: !(view.bare && view.ornament == "passiontide")
                     )
+                    .wholePixels()
                     .read(Reading.ending, at: rows.count, into: reading)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { epilogueHeight = $0 }
                 }
@@ -766,6 +773,42 @@ final class Reading {
         let left = ending.map { $0.minY - bottom } ?? ((0..<end).reduce(0) { $0 + height($1) } - bottom - passed)
         return passed + left <= 0 ? 1 : min(1, max(0, passed / (passed + left)))
     }
+}
+
+/**
+ * A row of the hour's list, its height taken up to a whole number of the screen's pixels and its
+ * content at its top. The text's own lines (36.8 or 146.4 points) are a fraction of a pixel off
+ * the grid, so each row stood on a fraction of its own, and where `scrollTo` left the list hung
+ * on which rows above it had been laid out and which only guessed: from launch to launch a row
+ * near a pixel's half rounded either way and drew a hair lower (#948). Whole-pixel rows share one
+ * fraction, which the scroll's whole-pixel offset keeps under half a pixel, so every row rounds
+ * the same way every time. A row grows by under a pixel; nothing in it moves.
+ */
+private struct WholePixels: Layout {
+    let scale: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard let row = subviews.first else { return .zero }
+        let size = row.sizeThatFits(proposal)
+        return CGSize(width: size.width, height: (size.height * scale).rounded(.up) / scale)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard let row = subviews.first else { return }
+        row.place(at: bounds.origin, anchor: .topLeading, proposal: ProposedViewSize(width: bounds.width, height: nil))
+    }
+}
+
+private struct WholePixelRow: ViewModifier {
+    @Environment(\.displayScale) private var scale
+
+    func body(content: Content) -> some View {
+        WholePixels(scale: max(1, scale)) { content }
+    }
+}
+
+private extension View {
+    func wholePixels() -> some View { modifier(WholePixelRow()) }
 }
 
 /// Every digit a CGFloat holds, for the screenshots' geometry notes.
