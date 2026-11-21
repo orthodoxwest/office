@@ -21,9 +21,6 @@ const GROUPS: [&str; 4] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE, GROUP_HOU
 pub(super) use office::HOUR_NAMES;
 pub(super) const PRAYER_FORMS: [&str; 3] = liturgy::PrayerForm::NAMES;
 
-/// Groups this engine can produce so far.
-const PORTED_GROUPS: [&str; 4] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE, GROUP_HOURS];
-
 const USAGE: &str = "usage: office dump -start YEAR [-years N] [-hours LIST] [-forms LIST] [-groups LIST] [-digest]
        office dump -dates YYYY-MM-DD,... [-hours LIST] [-forms LIST] [-groups LIST] [-digest]
 
@@ -107,9 +104,6 @@ impl Selection {
 }
 
 pub fn cmd_dump(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(), String> {
-    if args.first().is_some_and(|command| command == "diff") {
-        return crate::dump_tools::cmd_diff(&args[1..], out);
-    }
     let flags = Flags::parse_with_bools(args, &["start", "years", "dates", "hours", "forms", "groups"], &["digest"])
         .map_err(|e| format!("{e}\n{USAGE}"))?;
     if !flags.rest.is_empty() {
@@ -136,9 +130,6 @@ pub fn cmd_dump(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(
         sel.years = years;
     }
     let sel = sel.normalize()?;
-    if let Some(g) = sel.groups.iter().find(|g| !PORTED_GROUPS.contains(&g.as_str())) {
-        return Err(format!("the Rust engine does not produce the {g} record group yet (use -groups {})", PORTED_GROUPS.join(",")));
-    }
     let engine = if sel.has(GROUP_CORPUS) || sel.has(GROUP_HOURS) {
         Some(office::Engine::load(data).map_err(|e| format!("creating office engine: {e}"))?)
     } else {
@@ -316,7 +307,7 @@ fn decisions(list: &[Decision]) -> Value {
 }
 
 /// One composed hour, for reading and diffing. The parity digest hashes the
-/// same fields straight from `OfficeHour` (see `dump_tools::hash_hour`).
+/// same fields straight from `OfficeHour` (see `parity::hash_hour`).
 fn hour_record(hour_name: &str, h: &OfficeHour) -> Value {
     let sections: Vec<Value> = h
         .sections

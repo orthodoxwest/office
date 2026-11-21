@@ -96,7 +96,7 @@ jobs:
           python3 scripts/test_verify_psalms.py
           python3 scripts/test_sweep_targets.py
           python3 scripts/test_play_promote.py
-          make diurnal-test
+          python3 scripts/test_diurnal_pages.py
 
       - name: Validate and lint the corpus with Rust
         run: make validate lint-texts
@@ -122,25 +122,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.100.0
       - uses: Swatinem/rust-cache@v2.9.3
       - run: make build
-
-      # The assurance-report golden renders this same command, so a floor
-      # failure is reported here rather than as a golden crash.
-      - name: Check text provenance baseline
-        id: assurance
-        run: |
-          set +e
-          ./office review assurance -markdown > assurance-summary.md
-          STATUS=$?
-          set -e
-          cat assurance-summary.md >> "$GITHUB_STEP_SUMMARY"
-          exit "$STATUS"
-
-      - name: Upload assurance summary
-        if: always() && steps.assurance.outcome != 'skipped'
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: assurance-summary
-          path: assurance-summary.md
 
       - name: Run golden tests
         id: golden
@@ -178,8 +159,8 @@ jobs:
               : '';
             const body =
               '## Golden file mismatch detected\n\n' +
-              'Generated review output doesn\'t match the checked-in golden files. ' +
-              'This usually means a data or logic edit changed a rendered hour, the audit report, or the assurance snapshot.' +
+              'Generated output doesn\'t match the checked-in golden files. ' +
+              'This usually means a data or logic edit changed a rendered hour, the ordo, the audit report, or the parity snapshot.' +
               diffSection + '\n\n' +
               '**If this change is intentional** — add the `update-golden` label to this PR. ' +
               'GitHub Actions will merge `master`, regenerate the golden files and push the result automatically.\n\n' +
