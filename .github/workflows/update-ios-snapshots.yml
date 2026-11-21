@@ -148,8 +148,21 @@ jobs:
         id: sim
         run: apps/ios/screenshots.sh devices >> "$GITHUB_OUTPUT"
 
+      # ios.yml's core, by its key, when master built one from the same inputs (this job can only
+      # read caches, so it saves none).
+      - name: Restore the Rust core
+        id: core
+        uses: actions/cache@v6.1.0
+        with:
+          path: |
+            apps/ios/build/OfficeCore.xcframework
+            apps/ios/build/generated
+            apps/ios/build/include
+          key: ios-core-sim-1.100.0-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'crates/**', 'apps/mobile-ffi/**', 'data/**', 'apps/office-web/static/**', 'apps/office-web/templates/**', 'apps/ios/build-core.sh') }}
+
       # Only the simulator's target, as ios.yml.
       - name: Set up Rust
+        if: steps.core.outputs.cache-hit != 'true'
         uses: dtolnay/rust-toolchain@1.100.0
         with:
           targets: aarch64-apple-ios-sim
@@ -157,6 +170,7 @@ jobs:
       # ios.yml's cache, by name: this job can only read caches, and under its own job's key it
       # never found one, so its core build ran cold, 11 to 13 minutes instead of 2½.
       - name: Cache Cargo
+        if: steps.core.outputs.cache-hit != 'true'
         uses: Swatinem/rust-cache@v2.9.3
         with:
           shared-key: ios-simulator
@@ -165,6 +179,7 @@ jobs:
         run: brew install xcodegen
 
       - name: Build the Rust core and its Swift bindings
+        if: steps.core.outputs.cache-hit != 'true'
         env:
           # Only the simulator's library: the device's is TestFlight's.
           IOS_TARGETS: aarch64-apple-ios-sim
@@ -179,7 +194,7 @@ jobs:
       # the toolchain, the Cargo cache and the core's build five to ten times slower. xcodebuild
       # lists no simulator at all, only placeholders, and fails while the image is still making
       # its simulator runtime ready (seen on macos-26 with a booting phone), so the build waits
-      # for the boot to finish. The iPad boots after the phone's shots (screenshots.sh shoot).
+      # for the boot to finish. The iPad boots behind the phone's shots (screenshots.sh shoot).
       - name: Boot the phone
         env:
           PHONE: ${{ steps.sim.outputs.phone }}

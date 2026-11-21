@@ -139,6 +139,17 @@ class CompareTest(unittest.TestCase):
         self.assertTrue(any("about-nave.png has a baseline but was not taken" in line for line in lines), lines)
         self.assertEqual(sorted(p.name for p in self.updates.glob("*.png")), ["home-nave.png", "ordo-nave.png"])
 
+    def test_changes_name_the_changed_new_and_gone_shots(self):
+        self.shot("home-nave", "Vespers")
+        self.shot("about-nave")
+        self.seed()
+        self.shot("home-nave", "Compline")
+        self.shot("ordo-nave")
+        changes = pathlib.Path(self.tmp.name) / "changes.json"
+        SNAP.compare(self.raw, self.base, self.updates, self.diffs, changes=changes)
+        self.assertEqual(json.loads(changes.read_text()),
+                         {"changed": ["home-nave"], "new": ["ordo-nave"], "gone": ["about-nave"]})
+
     def test_resized_shot_fails(self):
         self.shot("home-nave")
         self.seed()
@@ -214,6 +225,42 @@ class CompareTest(unittest.TestCase):
             del SNAP.EXCLUDED["reminders-nave"]
         self.assertEqual([p.name for p in self.updates.glob("*.png")], ["home-nave.png"])
 
+
+
+class EnvironmentTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.raw = pathlib.Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def part(self, role, **changes):
+        part = {"xcode": ENV["xcode"], "runtime": ENV["runtime"], "device": ENV[role], **changes}
+        (self.raw / f"environment-{role}.json").write_text(json.dumps(part))
+
+    def test_the_devices_parts_join_into_one(self):
+        self.part("phone")
+        self.part("ipad")
+        self.assertEqual(SNAP.main(["environment", str(self.raw)]), 0)
+        self.assertEqual(json.loads((self.raw / "environment.json").read_text()), ENV)
+        self.assertEqual(sorted(p.name for p in self.raw.iterdir()), ["environment.json"])
+        self.assertEqual(SNAP.read_environment(self.raw), ENV)
+
+    def test_parts_from_different_runtimes_are_refused(self):
+        self.part("phone")
+        self.part("ipad", runtime="com.apple.CoreSimulator.SimRuntime.iOS-27-0")
+        with self.assertRaises(SystemExit):
+            SNAP.join_environment(self.raw)
+        self.assertFalse((self.raw / "environment.json").exists())
+
+    def test_a_missing_or_malformed_part_is_refused(self):
+        self.part("phone")
+        with self.assertRaises(SystemExit):
+            SNAP.join_environment(self.raw)
+        self.part("ipad", device="iPad\n::error::")
+        with self.assertRaises(SystemExit):
+            SNAP.join_environment(self.raw)
 
 
 @unittest.skipIf(Image is None, "Pillow is not installed")
