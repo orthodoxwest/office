@@ -186,14 +186,17 @@ final class CrownPlayer: NSObject, ObservableObject {
         let choice = memory.next(stored: model.theme, deviceDark: deviceDark)
         let toDark = choice.dark(deviceDark ? .dark : .light)
         // The menu's own change, crossfade and all: for a reader who asked for stillness or
-        // contrast, a black day (no sky is played over Good Friday or All Souls), a page with
-        // the menu open over it, or anything the play cannot stand on.
+        // contrast, a screen-reader user, a black day (no sky is played over Good Friday or All
+        // Souls), a page with the menu open over it, or anything the play cannot stand on.
         let still = plain || UIAccessibility.isReduceMotionEnabled || UIAccessibility.isDarkerSystemColorsEnabled
-            || head.black || model.overlay != .none
+            || UIAccessibility.isVoiceOverRunning || head.black || model.overlay != .none
         guard !still, let window, let root = window.rootViewController?.view,
               let run = CrownRun(model: model, choice: choice, dusk: toDark, head: head, frames: frames, window: window, root: root, deviceDark: deviceDark)
         else {
             withAnimation(restyling) { model.turnTheme(choice) }
+            if UIAccessibility.isVoiceOverRunning {
+                UIAccessibility.post(notification: .announcement, argument: toDark ? "Switched to Apse, dark theme" : "Switched to Nave, light theme")
+            }
             return
         }
         self.run = run

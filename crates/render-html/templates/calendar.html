@@ -79,7 +79,7 @@
       {{ headpiece() }}
       <h1><span class="gloss-quiet" data-gloss-title="{{ ordo_gloss.title }}" data-gloss="{{ ordo_gloss.note }}">{{ year }} Ordo</span></h1>
       {# The frontispiece reads as the printed ordo's title page. #}
-      <p class="calendar-subtitle">{% if view == "year" and year_roman %}Anno Domini {{ year_roman }}{% else %}Feasts &amp; daily observances{% endif %}</p>
+      <p class="calendar-subtitle">{% if view == "year" and year_roman %}<span lang="la">Anno Domini</span> <span aria-hidden="true">{{ year_roman }}</span><span class="sr-only">{{ year }}</span>{% else %}Feasts &amp; daily observances{% endif %}</p>
     </div>
     <nav class="year-nav" aria-label="Calendar year">
       {% if has_prev_year %}<a href="{{ prev_year_link|url }}"{% if not prev_year_follow %} rel="nofollow"{% endif %} aria-label="Previous year, {{ prev_year }}">&lsaquo; {{ prev_year }}</a>{% else %}<span></span>{% endif %}
@@ -104,7 +104,7 @@
     <a class="calendar-whole-year" href="{{ all_link|url }}">The whole year on one page</a>
   </div>
   <section class="tabula" aria-labelledby="tabula-heading">
-    <h2 id="tabula-heading"><span class="gloss-quiet" data-gloss-title="{{ tabula_temporaria_gloss.title }}" data-gloss="{{ tabula_temporaria_gloss.note }}">Tabula Temporaria</span></h2>
+    <h2 id="tabula-heading" lang="la"><span class="gloss-quiet" data-gloss-title="{{ tabula_temporaria_gloss.title }}" data-gloss="{{ tabula_temporaria_gloss.note }}">Tabula Temporaria</span></h2>
     <dl class="tabula-figures">
       {% for r in tabula.figures %}<div><dt>{% if r.gloss_note %}<span class="gloss-term" data-gloss-title="{{ r.gloss_title }}" data-gloss="{{ r.gloss_note }}">{{ r.label }}</span>{% else %}{{ r.label }}{% endif %}</dt><dd>{{ r.value }}</dd></div>{% endfor %}
     </dl>
@@ -134,7 +134,7 @@
   {% for m in months %}
   <section class="month" id="{{ m.slug }}">
     {# The heading is sticky, so its jump link stays reachable all year. #}
-    <h2>{{ m.name }}<a class="month-top" href="#calendar-top" title="Back to the top of the year"><span aria-hidden="true">&uarr;</span><span class="sr-only">Back to the top of the year</span></a></h2>
+    <h2 aria-label="{{ m.name }}">{{ m.name }}<a class="month-top" href="#calendar-top" title="Back to the top of the year"><span aria-hidden="true">&uarr;</span><span class="sr-only">Back to the top of the year</span></a></h2>
     <table class="month-table">
       <caption class="sr-only">{{ m.name }} {{ year }} ordo with feast, penitential observances, liturgical color, and rank.</caption>
       <thead>
@@ -158,7 +158,6 @@
           <td class="day-num" data-label="Day">{% if d.rail_inset %}<span class="day-inset day-color-{{ d.rail_inset }}" aria-hidden="true"></span>{% endif %}{{ thread }}<a href="{{ home_link(d.date_slug)|url }}" aria-describedby="n-{{ d.date_slug }}">{{ d.day_num }}</a></td>
           <td class="day-wk" data-label="Weekday">{{ d.weekday }}</td>
           <td class="day-feast" data-label="Feast">{% if d.rail_inset %}<span class="day-inset day-color-{{ d.rail_inset }}" aria-hidden="true"></span>{% endif %}{{ thread }}
-            <span class="sr-only">Liturgical color: {{ d.color }}. </span>
             <div class="day-mobile-head">
               <a class="day-mobile-date" href="{{ home_link(d.date_slug)|url }}" aria-describedby="n-{{ d.date_slug }}">
                 <span class="day-mobile-num">{{ d.day_num }}</span>
@@ -175,16 +174,16 @@
             </div>
             {# The date leads to the day; a feast name with a feast page links inline to it;
                tapping Office details or the rest of the row opens its office details (app.js). #}
-            <span class="day-feast-name" id="n-{{ d.date_slug }}">{% if d.feast_href %}<a class="feast-link" href="{{ d.feast_href|url }}" title="About this feast">{{ d.feast_name|typeset }}</a>{% else %}{{ d.feast_name|typeset }}{% endif %}</span>
+            <span class="day-feast-name" id="n-{{ d.date_slug }}">{% if d.feast_href %}<a class="feast-link" href="{{ d.feast_href|url }}" title="About this feast">{{ d.feast_name|typeset }}</a>{% else %}{{ d.feast_name|typeset }}{% endif %}</span><span class="sr-only">. Liturgical color: {{ d.color }}.</span>
             {# Kept by monastics and oblates only: the ordo's bracketed line, never the day's office. #}
-            {% if d.monastic %}<div class="day-monastic">{% for o in d.monastic %}<p><span class="gloss-quiet" data-gloss-title="{{ monastic_gloss.title }}" data-gloss="{{ monastic_gloss.note }}">[{{ o.heading|typeset }}]</span> <abbr tabindex="0" title="{{ o.rank_full }}">{{ o.rank }}</abbr>{% if o.office %}<span class="day-monastic-office">{{ o.office|typeset }}</span>{% endif %}</p>{% endfor %}</div>{% endif %}
+            {% if d.monastic %}<div class="day-monastic">{% for o in d.monastic %}<p><span class="gloss-quiet" data-gloss-title="{{ monastic_gloss.title }}" data-gloss="{{ monastic_gloss.note }}">[{{ o.heading|typeset }}]</span> <abbr tabindex="0" title="{{ o.rank_full }}">{{ o.rank }}</abbr>{% if o.office %} <span class="day-monastic-office">{{ o.office|typeset }}</span>{% endif %}</p>{% endfor %}</div>{% endif %}
             {# One disclosure holds the day's commemorations and its office. #}
             <div class="day-disclosures">
             {% if d.commemorations or d.benedictus_antiphon or d.magnificat_antiphon or d.lauds_preces or d.lauds_suffrage or d.lauds_cross or d.hours_preces or d.vespers_preces or d.vespers_suffrage or d.vespers_cross or d.vespers_note or d.lauds_comms or d.vespers_comms %}
             <details class="day-office-details">
               <summary>Office details</summary>
               {# The row's tap opens these in place; this leads on to the day. #}
-              <a class="day-office-open" href="{{ home_link(d.date_slug)|url }}">{{ open_this_day }} ›</a>
+              <a class="day-office-open" href="{{ home_link(d.date_slug)|url }}">{{ open_this_day }}<span aria-hidden="true"> ›</span></a>
               <dl class="day-office-digest">
               {% if d.commemorations %}
               <div class="day-office-hour">
@@ -253,9 +252,9 @@
   <span id="ordo-place" hidden></span>
   {# The hours' continuation: the same diamond, labels and targets. #}
   <nav class="hour-continuation ordo-continuation" aria-label="Other months">
-    {% if prev_month %}<a class="hour-continuation-link previous-hour" href="{{ prev_month.href|url }}"{% if not prev_month.follow %} rel="nofollow"{% endif %}><span class="continuation-label">Previous month</span><span>&larr; {{ prev_month.name }}</span></a>{% else %}<span></span>{% endif %}
+    {% if prev_month %}<a class="hour-continuation-link previous-hour" href="{{ prev_month.href|url }}"{% if not prev_month.follow %} rel="nofollow"{% endif %}><span class="continuation-label">Previous month</span><span class="sr-only">: </span><span><span aria-hidden="true">&larr; </span>{{ prev_month.name }}</span></a>{% else %}<span></span>{% endif %}
     <a class="day-hours-link" href="{{ year_link|url }}">{{ year }} Ordo</a>
-    {% if next_month %}<a class="hour-continuation-link next-hour" href="{{ next_month.href|url }}"{% if not next_month.follow %} rel="nofollow"{% endif %}><span class="continuation-label">Next month</span><span>{{ next_month.name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
+    {% if next_month %}<a class="hour-continuation-link next-hour" href="{{ next_month.href|url }}"{% if not next_month.follow %} rel="nofollow"{% endif %}><span class="continuation-label">Next month</span><span class="sr-only">: </span><span>{{ next_month.name }}<span aria-hidden="true"> &rarr;</span></span></a>{% else %}<span></span>{% endif %}
   </nav>
   {% endif %}
   {% endif %}

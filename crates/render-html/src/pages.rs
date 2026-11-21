@@ -251,6 +251,7 @@ fn reading_key_value() -> Value {
         .map(|item| {
             minijinja::context! {
                 mark => item.mark,
+                spoken => item.spoken,
                 style => item.style.name(),
                 text => item.text,
             }

@@ -134,6 +134,26 @@ final class SpokenTests: XCTestCase {
         let cue = try XCTUnwrap(verse.runs.first { $0.style == .posture }).text.trimmingCharacters(in: .whitespaces)
         XCTAssertTrue(spoken(verse).contains("(\(cue))"), spoken(verse))
     }
+
+    func testChantScoresSpeakCleanWordsAndStanzaNumbers() throws {
+        let core = try Office.core.get()
+        let scored = [(3, 15), (4, 5), (12, 25)].flatMap { month, day in
+            hourNames().flatMap { hour in
+                (try! core.compose(hour: hour, year: 2026, month: Int32(month), day: Int32(day), form: "priest", martyrology: false, chant: true))
+                    .sections.flatMap(\.blocks)
+            }
+        }.filter { $0.kind == .score }
+        XCTAssertFalse(scored.isEmpty)
+        for b in scored {
+            let said = spoken(b)
+            for mark in ["*", "†", "℣", "℟", "✠", "\u{E000}"] { XCTAssertFalse(said.contains(mark), "\(mark) in: \(said)") }
+            XCTAssertFalse(said.trimmingCharacters(in: .whitespaces).isEmpty)
+        }
+        XCTAssertTrue(scored.contains { b in
+            let num = b.marker.trimmingCharacters(in: CharacterSet(charactersIn: ". "))
+            return !num.isEmpty && spoken(b).hasPrefix("Stanza \(num).")
+        })
+    }
 }
 
 /// The typesetter keeps the web's line boxes and seats the initial as the web does.

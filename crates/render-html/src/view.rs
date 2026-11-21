@@ -436,6 +436,8 @@ pub struct AboutBlockView {
     pub period: String,
     pub mark: String,
     pub tail: String,
+    /// What a screen reader says for a key's mark (`presentation::about::AboutBlock::Key`).
+    pub spoken: String,
     pub ink: &'static str,
 }
 
@@ -622,13 +624,14 @@ impl AboutData {
                         sec.blocks.push(block("specimen"));
                     }
                 }
-                AboutBlock::Key { id, mark, tail, ink, text } => {
+                AboutBlock::Key { id, mark, tail, spoken, ink, text } => {
                     if let Some(sec) = sections.last_mut() {
                         sec.blocks.push(AboutBlockView {
                             id: id.into(),
                             text: text.into(),
                             mark: mark.into(),
                             tail: tail.into(),
+                            spoken: spoken.into(),
                             ink: ink.name(),
                             ..block("key")
                         });

@@ -403,10 +403,11 @@ struct BlockRow: View {
                 if openGloss != i { shownGloss = i }
                 openGloss = openGloss == i ? nil : i
             }
+            let isHeader = block.kind == .heading || block.kind == .commemorationHeading || block.kind == .itemLabel || block.kind == .canticleSection
             let prose = Prose(
                 spec: spec,
                 spoken: spoken(block),
-                header: block.kind == .heading || block.kind == .commemorationHeading,
+                header: isHeader,
                 openGloss: openGloss,
                 onGloss: tapGloss
             )
@@ -429,6 +430,14 @@ struct BlockRow: View {
                 .frame(maxWidth: .infinity)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(spoken(block))
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityActions {
+                    ForEach(Array(glosses.enumerated()), id: \.offset) { i, g in
+                        Button("Explain “\(g.title)”") {
+                            tapGloss?(i, .zero)
+                        }
+                    }
+                }
             } else if block.kind == .stanza || block.kind == .hymnRubric {
                 // The hymn's column, centred: the rag balanced by an equal indent on the left,
                 // as the web's fit-content `.hymn-verses`.
@@ -597,6 +606,7 @@ func spoken(_ block: BlockView) -> String {
         }
     }.joined()
     words = words
+        .replacingOccurrences(of: "✠", with: crossMark)
         .replacingOccurrences(of: "†", with: ", ")
         .replacingOccurrences(of: "·", with: ".")
         .replacingOccurrences(of: "℣.", with: "Versicle.").replacingOccurrences(of: "℟.", with: "Response.")
@@ -614,8 +624,11 @@ func spoken(_ block: BlockView) -> String {
     let marker: String
     switch block.kind {
     case .antiphon, .announcedAntiphon: marker = "Antiphon."
-    case .versicle, .response: marker = block.marker.replacingOccurrences(of: "℣.", with: "Versicle.").replacingOccurrences(of: "℟.", with: "Response.")
+    case .versicle, .response: marker = block.marker.replacingOccurrences(of: "℣.", with: "Versicle.").replacingOccurrences(of: "℟.", with: "Response.").replacingOccurrences(of: "℣", with: "Versicle").replacingOccurrences(of: "℟", with: "Response")
     case .verse: marker = ""
+    case .score:
+        let num = block.marker.trimmingCharacters(in: CharacterSet(charactersIn: ". "))
+        marker = num.isEmpty ? "" : "Stanza \(num)."
     default: marker = block.marker
     }
     return [marker, words].filter { !$0.isEmpty }.joined(separator: " ")

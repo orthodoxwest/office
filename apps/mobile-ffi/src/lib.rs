@@ -1070,6 +1070,8 @@ pub fn ordo_year(year: i32) -> OrdoYearView {
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ReadingKeyItemView {
     pub mark: String,
+    /// What a screen reader says for the mark.
+    pub spoken: String,
     /// "rubric", "titulus", "unsaid", or "psalm".
     pub style: String,
     pub text: String,
@@ -1096,7 +1098,7 @@ pub fn reading_key() -> ReadingKeyView {
         title: READING_KEY_TITLE.into(),
         items: READING_KEY_ITEMS
             .iter()
-            .map(|i| ReadingKeyItemView { mark: i.mark.into(), style: i.style.name().into(), text: i.text.into() })
+            .map(|i| ReadingKeyItemView { mark: i.mark.into(), spoken: i.spoken.into(), style: i.style.name().into(), text: i.text.into() })
             .collect(),
         foot_before: READING_KEY_FOOT_BEFORE.into(),
         foot_link: READING_KEY_FOOT_LINK.into(),
@@ -1209,6 +1211,8 @@ pub struct AboutBlockView {
     pub period: String,
     pub mark: String,
     pub tail: String,
+    /// What a screen reader says for a key's mark and tail.
+    pub spoken: String,
     pub ink: String,
 }
 
@@ -1316,6 +1320,7 @@ pub fn about() -> AboutView {
         period: String::new(),
         mark: String::new(),
         tail: String::new(),
+        spoken: String::new(),
         ink: String::new(),
     };
     let paragraph = |text: &str| AboutBlockView {
@@ -1340,11 +1345,12 @@ pub fn about() -> AboutView {
             AboutBlock::Hours => block("hours"),
             AboutBlock::Note(text) => AboutBlockView { text: text.into(), ..block("note") },
             AboutBlock::Specimen => block("specimen"),
-            AboutBlock::Key { id, mark, tail, ink, text } => AboutBlockView {
+            AboutBlock::Key { id, mark, tail, spoken, ink, text } => AboutBlockView {
                 id: id.into(),
                 text: text.into(),
                 mark: mark.into(),
                 tail: tail.into(),
+                spoken: spoken.into(),
                 ink: ink.name().into(),
                 ..block("key")
             },

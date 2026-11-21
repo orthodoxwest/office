@@ -106,6 +106,7 @@ struct FindScreen: View {
     private func result(_ r: FeastResultView) -> some View {
         let ink = rankTone(r.rankTone, p)
         return VStack(alignment: .leading, spacing: 0) {
+            let heading = [r.name, r.rankFull].filter { !$0.isEmpty }.joined(separator: ", ")
             Button { model.open(.feast(r.id)) } label: {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(alignment: .top, spacing: 0) {
@@ -123,8 +124,8 @@ struct FindScreen: View {
             }
             .buttonStyle(Quiet())
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(r.name), \(r.rankFull). \(r.meta)")
-            .accessibilityAddTraits(.isHeader)
+            .accessibilityLabel("\(heading). \(r.meta)")
+            .accessibilityAddTraits([.isButton, .isHeader])
             .accessibilityHint("Opens the feast's page")
             // Over the feast's button, so a tap on the rank names it in a note (as the ordo's marks
             // do) rather than opening the feast.
@@ -134,7 +135,7 @@ struct FindScreen: View {
                         if r.rankFull.isEmpty {
                             rankLetters(r, ink).accessibilityHidden(true)
                         } else {
-                            NoteMark(name: r.rankFull, label: "Rank \(r.rank)") { rankLetters(r, ink) }
+                            NoteMark(name: r.rankFull, label: r.rankFull) { rankLetters(r, ink) }
                         }
                     }
                 }
@@ -273,14 +274,16 @@ struct FeastScreen: View {
     /// goes (the web's `back_link`); else the search.
     private var back: some View {
         let to = entry.flatMap(model.feastBack)
+        let label = to ?? feastWordsShared.findTitle
         return Button {
             if let entry, to != nil { model.back(from: entry) } else { model.findAgain() }
         } label: {
-            Text("‹ \(to ?? feastWordsShared.findTitle)").type(TextStyle(size: 15.2, line: 20, tracking: 1.37, smallCaps: true)).foregroundStyle(p.muted)
+            Text("‹ \(label)").type(TextStyle(size: 15.2, line: 20, tracking: 1.37, smallCaps: true)).foregroundStyle(p.muted)
                 .padding(.vertical, m.px(12))
                 .frame(minHeight: 44)
         }
         .buttonStyle(Quiet())
+        .accessibilityLabel("Back to \(label)")
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
@@ -552,7 +555,7 @@ private struct StandingBox: View {
                     Button { model.open(.feast(all.id)) } label: {
                         (Text(w.everyoneKeeps + " ") + Text(all.name).foregroundColor(p.accent) + Text(" " + view.keptByAllNote))
                             .type(Scale.body.sized(16.8, line: 24)).foregroundStyle(p.text).multilineTextAlignment(.leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     }
                     .buttonStyle(Quiet())
                     .accessibilityHint("Opens the feast's page")
@@ -566,6 +569,7 @@ private struct StandingBox: View {
                     .buttonStyle(Quiet())
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel("\(next.label): \(next.dateLabel). \(go)")
+                    .accessibilityAddTraits(.isButton)
                     .accessibilityHint("Opens the day")
             }
         }
@@ -575,6 +579,7 @@ private struct StandingBox: View {
         .background {
             if let tablet = UIImage(named: "tablet.png") {
                 Image(uiImage: tablet).renderingMode(.template).resizable().foregroundStyle(wash).padding(1)
+                    .accessibilityHidden(true)
             }
         }
         .overlay {
@@ -760,6 +765,7 @@ private struct FeastYears: View {
                 .buttonStyle(Pooled(pool: HomeInk.of(p).nowPool))
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(spoken)
+                .accessibilityAddTraits(.isButton)
                 .accessibilityHint("Opens the day")
         } else {
             row(y)
@@ -841,6 +847,7 @@ private struct YearRow: View {
                     .buttonStyle(Quiet())
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(spoken)
+                    .accessibilityAddTraits(.isButton)
                     .accessibilityHint("Opens the day")
             } else {
                 row(open: false)

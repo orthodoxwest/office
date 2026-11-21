@@ -32,17 +32,54 @@ const SIGIL_ALL_CLASS: &str = "sigil sigil-all";
 const SOURCE_LINE_OPEN: &str = "<span class=\"source-line\">";
 
 /// The pointing asterisk between half-verses. A no-break space binds it to
-/// the half it ends, so a wrap can never open a line with the mark.
-const MEDIANT: &str = "\u{a0}<span class=\"mediant\">*</span> ";
+/// the half it ends, so a wrap can never open a line with the mark. Hidden
+/// from screen readers so it is not read aloud as "asterisk" in every verse.
+const MEDIANT: &str = "\u{a0}<span class=\"mediant\" aria-hidden=\"true\">*</span> ";
 
 /// The escape for every run of display text in an hour.
 pub fn esc_text(s: &str) -> String {
     html_escape_string(&typeset(s))
 }
 
-/// Escaped text with the ✠ cross styled.
+/// Escaped text with the ✠ cross styled and named for screen readers,
+/// and the psalm flex † silenced from speech (matching the native apps' `spoken`).
 fn esc_cross(s: &str) -> String {
-    esc_text(s).replace('✠', "<span class=\"cross\">✠</span>")
+    let escaped = esc_text(s);
+    let mut out = String::with_capacity(escaped.len());
+    let mut rest = escaped.as_str();
+    while let Some(i) = rest.find('✠') {
+        let before = &rest[..i];
+        out.push_str(before);
+        let after = &rest[i + '✠'.len_utf8()..];
+        let preceded_by_pause = before.trim_end().ends_with([',', ';', ':']);
+        let followed_by_punct = after.trim_start().starts_with([',', '.', ';', ':', '!', '?']);
+        let spoken = match (preceded_by_pause, followed_by_punct) {
+            (true, true) => "sign of the cross",
+            (true, false) => "sign of the cross,",
+            (false, true) => ", sign of the cross",
+            (false, false) => ", sign of the cross,",
+        };
+        out.push_str("<span class=\"cross\"><span aria-hidden=\"true\">✠</span><span class=\"sr-only\">");
+        out.push_str(spoken);
+        out.push_str("</span></span>");
+        rest = after;
+    }
+    out.push_str(rest);
+    out.replace('†', "<span class=\"flex\" aria-hidden=\"true\">†</span>")
+}
+
+/// A versicle/response/speaker sigil, naming ℣. and ℟. for screen readers and
+/// separating the sigil from the text that follows so words never concatenate.
+fn sigil_html(mark_class: &str, sigil: &str) -> String {
+    match sigil {
+        "℣." => {
+            format!("<span class=\"{mark_class}\"><span aria-hidden=\"true\">℣.</span><span class=\"sr-only\">Versicle.</span></span> ")
+        }
+        "℟." => {
+            format!("<span class=\"{mark_class}\"><span aria-hidden=\"true\">℟.</span><span class=\"sr-only\">Response.</span></span> ")
+        }
+        _ => format!("<span class=\"{mark_class}\">{sigil}</span> "),
+    }
 }
 
 /// A section's elements, a psalm or canticle absorbing the doxology after it.
@@ -103,7 +140,10 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
         ElementType::Antiphon => {
             if elem.label.is_empty() {
                 let class = if elem.announce { "antiphon antiphon-announce" } else { "antiphon" };
-                sb.push_str(&format!("<p class=\"{class}\"><em{}>Ant.</em> ", quiet_gloss_attrs(&ANTIPHON_GLOSS)));
+                sb.push_str(&format!(
+                    "<p class=\"{class}\"><em{}><span aria-hidden=\"true\">Ant.</span><span class=\"sr-only\">Antiphon.</span></em> ",
+                    quiet_gloss_attrs(&ANTIPHON_GLOSS)
+                ));
                 sb.push_str(&chant_line_html(&elem.display_text()));
                 sb.push_str("</p>");
             } else {
@@ -141,8 +181,9 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
                     None => sb.push_str(&esc_text(&elem.label)),
                 }
                 if !elem.incipit.is_empty() {
-                    // The dot stays with the label; the Latin title wraps whole.
-                    sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}· </span>");
+                    // The dot stays with the label; the space outside aria-hidden keeps the
+                    // spoken label and Latin title separated for screen readers.
+                    sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}·</span> ");
                     sb.push_str("<span class=\"psalm-incipit\" lang=\"la\">");
                     sb.push_str(&esc_text(&elem.incipit));
                     sb.push_str("</span>");
@@ -291,7 +332,7 @@ pub fn render_psalm_verses(text: &str, postures: &[PostureCue], unrepeated: usiz
                     sb.push_str("<p class=\"verse\">");
                 } else {
                     sb.push_str(&format!(
-                        "<p class=\"verse numbered\"><span class=\"verse-num\">{}</span><span class=\"verse-body\">",
+                        "<p class=\"verse numbered\"><span class=\"verse-num\" aria-hidden=\"true\">{}</span> <span class=\"verse-body\">",
                         esc_text(number)
                     ));
                 }
@@ -389,8 +430,9 @@ fn render_corporate_lord_prayer(elem: &OfficeElement) -> String {
     let response = parts.response;
     let flow = |s: &str| s.split('\n').map(str::trim).filter(|l| !l.is_empty()).collect::<Vec<_>>().join(" ");
     format!(
-        "<div class=\"liturgical-block corporate-lord-prayer\"><p class=\"plain-line corporate-lord-prayer-officiant\">{}</p><p class=\"response-line corporate-lord-prayer-response\"><span class=\"{SIGIL_CLASS}\">℟.</span><span class=\"sigil-text\">{}</span></p></div>",
+        "<div class=\"liturgical-block corporate-lord-prayer\"><p class=\"plain-line corporate-lord-prayer-officiant\">{}</p><p class=\"response-line corporate-lord-prayer-response\">{}<span class=\"sigil-text\">{}</span></p></div>",
         chant_line_html(&flow(&officiant)),
+        sigil_html(SIGIL_CLASS, "℟."),
         chant_line_html(&flow(&response))
     )
 }
@@ -479,7 +521,7 @@ fn render_voiced_block(text: &str, spoken_at: &[bool], mode: Mode) -> String {
         };
         flush(&mut sb, &mut prose, &mut prose_blocks, &mut pending_gap);
         emit_gap(&mut sb, &mut pending_gap);
-        sb.push_str(&format!("<p class=\"{line_class}\"><span class=\"{mark_class}\">{sigil}</span><span class=\"sigil-text\">"));
+        sb.push_str(&format!("<p class=\"{line_class}\">{}<span class=\"sigil-text\">", sigil_html(mark_class, sigil)));
         emit_voiced(&mut sb, &line.text, line.offset, spoken_at);
         sb.push_str("</span></p>");
     }
@@ -633,7 +675,8 @@ fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
         flush(&mut sb, &mut prose, &mut prose_blocks, &mut pending_gap);
         emit_gap(&mut sb, &mut pending_gap);
         sb.push_str(&format!(
-            "<p class=\"{line_class}\"><span class=\"{mark_class}\">{sigil}</span><span class=\"sigil-text\">{}</span></p>",
+            "<p class=\"{line_class}\">{}<span class=\"sigil-text\">{}</span></p>",
+            sigil_html(mark_class, sigil),
             chant_line_html(&line.text)
         ));
     }
@@ -697,7 +740,10 @@ fn hymn_stanzas_html(text: &str, score: Option<&ChantScore>, initial: bool) -> S
             sb.push_str("<span class=\"hymn-line\">");
             sb.push_str(&esc_cross(line));
             if join_amen && j == stanza.len() - 1 {
-                sb.push_str(&format!("<span class=\"hymn-amen\">{}</span>", esc_cross(&hymn.stanzas[i + 1][0])));
+                sb.push_str(&format!(
+                    "<span class=\"sr-only\"> </span><span class=\"hymn-amen\">{}</span>",
+                    esc_cross(&hymn.stanzas[i + 1][0])
+                ));
             }
             sb.push_str("</span>");
         }

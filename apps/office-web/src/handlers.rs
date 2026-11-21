@@ -1028,8 +1028,8 @@ mod tests {
         };
         // St Placidus: the martyrs' versicle, each half with its sigil.
         let placidus = versicle("2026-10-05").expect("a plain day's versicle");
-        assert!(placidus.contains(">℣.</span> Let the Saints be joyful with glory."), "{placidus}");
-        assert!(placidus.contains(">℟.</span> Let them rejoice in their beds."), "{placidus}");
+        assert!(placidus.contains(r#">℣.</span><span class="sr-only">Versicle.</span></span> Let the Saints be joyful with glory."#), "{placidus}");
+        assert!(placidus.contains(r#">℟.</span><span class="sr-only">Response.</span></span> Let them rejoice in their beds."#), "{placidus}");
         assert!(placidus.contains(r#"class="home-versicle-line gloss-quiet""#), "{placidus}");
         // Laetare, in rose, keeps it.
         assert!(versicle("2026-03-22").is_some_and(|v| v.contains("God shall give his angels charge over thee.")));
@@ -1280,8 +1280,8 @@ mod tests {
         let unruled = |page: String| page.replace(r#" rel="nofollow""#, "");
         let body = unruled(body);
         for want in [
-            r#"href="/calendar/2026/08"><span class="continuation-label">Previous month</span><span>&larr; August</span>"#,
-            r#"href="/calendar/2026/10"><span class="continuation-label">Next month</span><span>October &rarr;</span>"#,
+            r#"href="/calendar/2026/08"><span class="continuation-label">Previous month</span><span class="sr-only">: </span><span><span aria-hidden="true">&larr; </span>August</span>"#,
+            r#"href="/calendar/2026/10"><span class="continuation-label">Next month</span><span class="sr-only">: </span><span>October<span aria-hidden="true"> &rarr;</span></span>"#,
             r#"<a class="day-hours-link" href="/calendar/2026">2026 Ordo</a>"#,
         ] {
             assert!(body.contains(want), "month continuation missing {want:?}");
@@ -1289,10 +1289,10 @@ mod tests {
         // Neighbours across the year name their year.
         assert!(
             unruled(ordo("/calendar/2026/12"))
-                .contains(r#"href="/calendar/2027/01"><span class="continuation-label">Next month</span><span>January 2027 &rarr;</span>"#)
+                .contains(r#"href="/calendar/2027/01"><span class="continuation-label">Next month</span><span class="sr-only">: </span><span>January 2027<span aria-hidden="true"> &rarr;</span></span>"#)
         );
         assert!(unruled(ordo("/calendar/2026/01")).contains(
-            r#"href="/calendar/2025/12"><span class="continuation-label">Previous month</span><span>&larr; December 2025</span>"#
+            r#"href="/calendar/2025/12"><span class="continuation-label">Previous month</span><span class="sr-only">: </span><span><span aria-hidden="true">&larr; </span>December 2025</span>"#
         ));
         // The ordo runs over the years every front offers, and stops at their ends.
         let years = presentation::offered_years(Server::local_year());
@@ -1314,7 +1314,7 @@ mod tests {
         let benedict = row("2026-07-11");
         assert!(benedict.contains("Saturday Office of the B.V.M."), "{benedict}");
         assert!(benedict.contains(r#"<div class="day-monastic"><p><span class="gloss-quiet""#), "{benedict}");
-        assert!(benedict.contains(r#">[Solemnity of St Benedict (Monastics &amp; Oblates Only)]</span> <abbr tabindex="0" title="Greater Double">gd</abbr><span class="day-monastic-office">Proper Office, Monastic Diurnal pp. 560–564</span></p></div>"#), "{benedict}");
+        assert!(benedict.contains(r#">[Solemnity of St Benedict (Monastics &amp; Oblates Only)]</span> <abbr tabindex="0" title="Greater Double">gd</abbr> <span class="day-monastic-office">Proper Office, Monastic Diurnal pp. 560–564</span></p></div>"#), "{benedict}");
         assert!(row("2026-07-16").contains("[Our Lady of Einsiedeln (Monastics &amp; Oblates Only)]"));
         assert_eq!(body.matches(r#"class="day-monastic""#).count(), 2);
     }
