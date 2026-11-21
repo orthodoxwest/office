@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// One month of the ordo, brought to `day` when one is asked for (the web's #d-date).
 struct OrdoPage: View {
@@ -130,7 +131,11 @@ struct OrdoScreen: View {
                         }
                     } header: {
                         MonthHeading(name: monthName(number)) {
-                            withAnimation { scroll.scrollTo("top", anchor: .top) }
+                            if reduceMotion {
+                                scroll.scrollTo("top", anchor: .top)
+                            } else {
+                                withAnimation { scroll.scrollTo("top", anchor: .top) }
+                            }
                         }
                         .ordoColumn(m, wide: wide)
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { heading = $0 }
@@ -226,15 +231,19 @@ struct OrdoScreen: View {
     /// month fades back in, as the web's and Android's ordo (70ms out, 140ms in), rather than
     /// thirty days unfolding together. Under Reduce Motion the days simply change.
     private func turnAll() {
+        let next = !allDetails
+        let notice = next ? "Office details shown" : "Office details hidden"
         guard !reduceMotion else {
-            allDetails.toggle()
+            allDetails = next
+            UIAccessibility.post(notification: .announcement, argument: notice)
             return
         }
         withAnimation(.timingCurve(0.4, 0, 1, 1, duration: 0.07)) { dimmed = true } completion: {
             var still = Transaction()
             still.disablesAnimations = true
-            withTransaction(still) { allDetails.toggle() }
+            withTransaction(still) { allDetails = next }
             withAnimation(.timingCurve(0, 0, 0.2, 1, duration: 0.14)) { dimmed = false }
+            UIAccessibility.post(notification: .announcement, argument: notice)
         }
     }
 
@@ -319,8 +328,10 @@ private struct OrdoHeader: View {
                 .padding(.top, m.px(2))
                 .accessibilityAddTraits(.isHeader)
             // The frontispiece reads as the printed ordo's title page.
-            let subtitle = month == nil && !(roman ?? "").isEmpty ? "Anno Domini \(roman ?? "")" : "Feasts & daily observances"
+            let isFrontispiece = month == nil && !(roman ?? "").isEmpty
+            let subtitle = isFrontispiece ? "Anno Domini \(roman ?? "")" : "Feasts & daily observances"
             Text(subtitle).type(wide ? Scale.small.sized(13.6) : Scale.small).foregroundStyle(p.muted).padding(.top, m.px(4.8))
+                .accessibilityLabel(isFrontispiece ? "Anno Domini \(year)" : subtitle)
         }
     }
 
@@ -549,13 +560,14 @@ private struct DayRow: View {
 
     /// One stop for VoiceOver: the date, its colour and observances, and the feast.
     private var spoken: String {
-        [
+        let rank = d.rankFull.isEmpty ? d.rank : d.rankFull
+        return [
             spokenDay(d.date, today: model.today),
             d.feast,
             "liturgical color: \(d.color)",
             d.fast ? "fasting" : nil,
             d.abstinence ? "abstinence" : nil,
-            d.rank.isEmpty ? nil : "rank \(d.rank)",
+            rank.isEmpty ? nil : rank,
         ].compactMap { $0 }.joined(separator: ". ")
     }
 
@@ -636,7 +648,7 @@ private struct DayRow: View {
         if d.rankFull.isEmpty {
             letters().accessibilityHidden(true)
         } else {
-            NoteMark(name: d.rankFull, label: "Rank \(d.rank)", mark: letters)
+            NoteMark(name: d.rankFull, label: d.rankFull, mark: letters)
         }
     }
 
@@ -1029,6 +1041,7 @@ private struct Digest: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(Quiet())
+            .accessibilityLabel(markWords.openDay)
             digest
         }
     }
@@ -1057,6 +1070,8 @@ private struct Digest: View {
         let rubricLine = TextStyle(size: 13.6, line: 20.4)
         return VStack(alignment: .leading, spacing: 0) {
             Text(name.uppercased()).type(TextStyle.label(12, 0.06).sized(12, line: 18)).foregroundStyle(p.accent).padding(.bottom, m.px(2.4))
+                .accessibilityLabel(name)
+                .accessibilityAddTraits(.isHeader)
             ForEach(notes, id: \.self) { Text($0).type(line).foregroundStyle(p.muted) }
             if let antiphon, let kind = antiphonKind {
                 let g = kind == "ben" ? detailGlosses.benedictus : detailGlosses.magnificat
@@ -1318,6 +1333,7 @@ private struct TabulaTable: View {
                     .disabled(r.date == nil)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel("\(r.label), \(r.value)")
+                    .accessibilityAddTraits(r.date == nil ? [] : .isButton)
                     .accessibilityHint(r.date == nil ? "" : "Opens the day in the ordo")
                 }
                 Hairline(color: p.border)

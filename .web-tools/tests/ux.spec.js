@@ -1120,7 +1120,7 @@ test("a place in a chant score is found by the words it sets, at another width",
   await page.waitForLoadState("load");
   const score = page.locator(".hymn .chant-score").nth(2);
   await score.evaluate((s) => s.scrollIntoView());
-  const label = await score.getAttribute("aria-label");
+  const label = await score.locator(".sr-only").textContent();
   await losePage(page, () => page.goto("/about"));
   const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("office-place")));
   expect(kept.words).toBe(label.replace(/\s+/g, " ").trim().slice(0, 60));
@@ -1131,7 +1131,7 @@ test("a place in a chant score is found by the words it sets, at another width",
   const top = await page.evaluate(() => {
     const edge = document.querySelector(".hour-scroll-progress").getBoundingClientRect().bottom;
     return [...document.querySelectorAll(".office-hour .elements .chant-score")]
-      .find((s) => s.getClientRects().length && s.getBoundingClientRect().bottom > edge)?.getAttribute("aria-label");
+      .find((s) => s.getClientRects().length && s.getBoundingClientRect().bottom > edge)?.querySelector(".sr-only")?.textContent;
   });
   expect(top).toBe(label);
 });
@@ -1189,7 +1189,7 @@ test("a place hidden by another prayer form or the Martyrology opens where the w
   await page.evaluate(() => localStorage.setItem("office-prayer-form", "deacon"));
   const amen = (form) => `(all) => {
     const way = document.querySelector('.leader-slot[data-leader-slot="confession"] > [data-leaders~="${form}"]');
-    return all.filter((l) => way.contains(l) && /^℟\\.\\s*Amen\\.$/.test(l.textContent.replace(/\\s+/g, " ").trim()))[1];
+    return all.filter((l) => way.contains(l) && /^℟\\.(?:Response\\.)?\\s*Amen\\.$/.test(l.textContent.replace(/\\s+/g, " ").trim()))[1];
   }`;
   const confession = await reopened(amen("deacon"), () => localStorage.setItem("office-prayer-form", "private"));
   const privateAmen = await page.evaluate(([LINES, pick]) => {
@@ -2734,7 +2734,10 @@ test("menus put away on a tap iOS Safari sends no click for", async ({ page }) =
   await expect(menu).not.toHaveAttribute("open", "");
   await page.getByText("Menu", { exact: true }).tap();
   await expect(menu).toHaveAttribute("open", "");
-  await page.locator("footer > p").first().tap();
+  // The page under the open menu is inert, so the tap lands on the body
+  // beneath the footer's words: tapped where they are, not at the element.
+  const footerLine = await page.locator("footer > p").first().boundingBox();
+  await page.touchscreen.tap(footerLine.x + footerLine.width / 2, footerLine.y + footerLine.height / 2);
   await expect(menu).not.toHaveAttribute("open", "");
   // The word itself still closes it as well as opening it.
   await page.getByText("Menu", { exact: true }).tap();
@@ -6252,7 +6255,8 @@ test('private greetings are not repeated after preces when switching offline or 
     await page.goto(`${path}?form=private`);
     const prayers = page.locator('.elements');
     const countPrivateResponses = async () => {
-      const text = (await prayers.innerText()).replace(/[℣℟]\./g, '').replace(/\s+/g, ' ');
+      // The sigils and the words a screen reader says for them (Versicle., Response.) left out.
+      const text = (await prayers.innerText()).replace(/[℣℟]\.|\b(?:Versicle|Response)\./g, '').replace(/\s+/g, ' ');
       return (text.match(/O Lord, hear my prayer\. And let my cry come unto thee\./g) || []).length;
     };
     expect(await countPrivateResponses()).toBe(privateCount);
@@ -7406,3 +7410,55 @@ for (const [platform, userAgent] of [
     await context.close();
   });
 }
+
+test("mobile screen readers hear clean liturgical marks, inert menu backdrop, and chooser focus", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  await page.goto("/vespers/2026-03-15");
+  await page.waitForLoadState("load");
+  // Heading precedes the fixed scroll progress bar in DOM order.
+  const headingBeforeProgress = await page.evaluate(() => {
+    const h1 = document.querySelector("h1");
+    const bar = document.querySelector(".hour-scroll-progress");
+    return Boolean(h1 && bar && (h1.compareDocumentPosition(bar) & Node.DOCUMENT_POSITION_FOLLOWING));
+  });
+  expect(headingBeforeProgress).toBe(true);
+  await expect(page.locator(".mediant").first()).toHaveAttribute("aria-hidden", "true");
+  await expect(page.locator(".verse-num").first()).toHaveAttribute("aria-hidden", "true");
+  await expect(page.locator(".cross .sr-only").first()).toContainText("sign of the cross");
+  // A copied line is the line as printed, without the words said for its marks.
+  const copied = await page.locator(".cross").first().evaluate((cross) => {
+    const range = document.createRange();
+    range.selectNodeContents(cross.closest("p"));
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return selection.toString();
+  });
+  expect(copied).toContain("✠");
+  expect(copied).not.toContain("sign of the cross");
+  const score = page.locator(".chant-score").first();
+  await expect(score).not.toHaveAttribute("role", "img");
+  await expect(score.locator(".sr-only")).not.toHaveText("");
+  await expect(score.locator("svg")).toHaveAttribute("aria-hidden", "true");
+
+  // Opening the mobile menu makes main content inert and closing restores it.
+  await page.locator(".site-menu > summary").click();
+  expect(await page.locator("#main-content").evaluate((el) => el.inert)).toBe(true);
+  await page.keyboard.press("Escape");
+  expect(await page.locator("#main-content").evaluate((el) => el.inert)).toBe(false);
+
+  // Home's Change date chooser focuses its month title on open and returns focus on Escape.
+  await page.goto("/");
+  await page.locator(".home-date-nav > summary").click();
+  await expect(page.locator("#home-chooser .date-picker-title")).toBeFocused();
+  await expect(page.locator("#home-chooser .date-picker th .sr-only").first()).toHaveText("Sunday");
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".home-date-nav > summary")).toBeFocused();
+
+  // Ordo rank marks announce their full rank names and month headings omit the back-to-top link text.
+  await page.goto("/calendar/2026/03");
+  await expect(page.locator(".month-table abbr.day-mobile-rank[role='button']").first()).toHaveAttribute("aria-label", /Double|Class|Feria|Simple/i);
+  await expect(page.locator(".month > h2").first()).toHaveAttribute("aria-label", "March");
+});
+

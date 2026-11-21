@@ -211,10 +211,15 @@ document.documentElement.classList.add("js");
   terms.forEach(control);
   marks.forEach(function (mark) {
     // The title becomes the note: kept, the browser's own tooltip would
-    // answer too.
+    // answer too. Once control() gives the mark role="button", keep the
+    // full name as its accessible label so rank abbreviations ("1cl", "gd")
+    // are spoken in full.
     mark.dataset.gloss = mark.getAttribute("title");
     mark.removeAttribute("title");
     control(mark);
+    if (!mark.querySelector(".sr-only") && mark.dataset.gloss) {
+      mark.setAttribute("aria-label", mark.dataset.gloss);
+    }
     mark.addEventListener("pointerenter", function (e) {
       if (e.pointerType === "mouse" && open !== mark) show(mark, "hover");
     });
@@ -1085,7 +1090,6 @@ function plainClickOpensHere(e, link) {
 
   var offlineIndicator = document.createElement("div");
   offlineIndicator.className = "offline-indicator";
-  offlineIndicator.textContent = "Offline";
   offlineIndicator.setAttribute("role", "status");
   offlineIndicator.setAttribute("aria-live", "polite");
   offlineIndicator.hidden = true;
@@ -1104,7 +1108,13 @@ function plainClickOpensHere(e, link) {
   var ONLINE_CHECK_TIMEOUT_MS = 4000;
 
   var setOfflineIndicator = function (offline) {
+    var wasOffline = !offlineIndicator.hidden;
     offlineIndicator.hidden = !offline;
+    if (offline && !wasOffline) {
+      offlineIndicator.textContent = "Offline";
+    } else if (!offline && wasOffline) {
+      offlineIndicator.textContent = "";
+    }
     if (offline && !recoveryTimer) {
       recoveryTimer = setInterval(checkOnline, 4000);
     } else if (!offline && recoveryTimer) {
@@ -1456,18 +1466,30 @@ function plainClickOpensHere(e, link) {
   var overlayElement = function (overlay) {
     return overlay === "menu" ? siteMenu : overlay === "settings" ? siteSettings : null;
   };
+  var syncOverlayInert = function () {
+    var modal = overlayOpen() === "menu";
+    var main = document.getElementById("main-content");
+    var footer = document.querySelector("footer");
+    if (main) main.inert = modal;
+    if (footer) footer.inert = modal;
+  };
   var closeOverlay = function (focusSummary) {
     var open = overlayElement(overlayOpen());
     if (!open) {
       return false;
     }
     open.removeAttribute("open");
+    syncOverlayInert();
     var summary = focusSummary && open.querySelector("summary");
     if (summary) {
       summary.focus();
     }
     return true;
   };
+
+  if (siteMenu) {
+    siteMenu.addEventListener("toggle", syncOverlayInert);
+  }
 
   if (narrowScreen) {
     var crossBreakpoint = function () {
@@ -1481,6 +1503,7 @@ function plainClickOpensHere(e, link) {
           siteMenu.setAttribute("open", "");
         }
       }
+      syncOverlayInert();
     };
     crossBreakpoint();
     if (narrowScreen.addEventListener) {
@@ -2302,9 +2325,10 @@ function plainClickOpensHere(e, link) {
     WEEKDAY_NAMES.forEach(function (name) {
       var th = el("th");
       th.scope = "col";
-      var abbr = el("abbr", "", name.charAt(0));
-      abbr.title = name;
-      th.appendChild(abbr);
+      var vis = el("span", "", name.charAt(0));
+      vis.setAttribute("aria-hidden", "true");
+      th.appendChild(vis);
+      th.appendChild(el("span", "sr-only", name));
       headRow.appendChild(th);
     });
     var thead = el("thead");
@@ -2397,16 +2421,15 @@ function plainClickOpensHere(e, link) {
             link.href = datedHrefForPage(slug);
             link.setAttribute("data-date", slug);
             link.tabIndex = slug === focusSlug ? 0 : -1;
-            link.setAttribute(
-              "aria-label",
-              WEEKDAY_NAMES[weekday] + ", " + MONTH_NAMES[month] + " " + day + ", " + year,
-            );
+            var dayLabel = WEEKDAY_NAMES[weekday] + ", " + MONTH_NAMES[month] + " " + day + ", " + year;
+            if (slug === state.chosen) {
+              td.setAttribute("aria-selected", "true");
+              dayLabel += ", selected";
+            }
+            link.setAttribute("aria-label", dayLabel);
             link.appendChild(el("span", "", String(day)));
             if (slug === state.today) {
               link.setAttribute("aria-current", "date");
-            }
-            if (slug === state.chosen) {
-              td.setAttribute("aria-selected", "true");
             }
             td.appendChild(link);
           }
@@ -2621,8 +2644,15 @@ function plainClickOpensHere(e, link) {
     };
     // On the disclosures' fold where script turns it (app.js, turnFold).
     button.addEventListener("click", function () {
+      var opening = !details.open;
       if (!(details.turnFold && details.turnFold())) {
         details.open = !details.open;
+      }
+      if (opening) {
+        var title = details.querySelector(".date-picker-title");
+        if (title) {
+          requestAnimationFrame(function () { title.focus({ preventScroll: true }); });
+        }
       }
     });
     details.addEventListener("toggle", sync);
@@ -2665,6 +2695,8 @@ function plainClickOpensHere(e, link) {
     // has-date-picker: the native field stays behind for no-script visitors only.
     chooser.className = "home-chooser has-date-picker";
     chooser.id = "home-chooser";
+    chooser.setAttribute("role", "region");
+    chooser.setAttribute("aria-label", "Change date");
     chooser.appendChild(nav);
     chooser.appendChild(picker);
     stage.appendChild(chooser);
@@ -2739,7 +2771,14 @@ function plainClickOpensHere(e, link) {
       window.requestAnimationFrame(step);
     }
 
-    function turn(open) {
+    function focusChooser() {
+      var target = chooser.querySelector(".date-picker-title") || chooser.querySelector("a, button");
+      if (target) {
+        target.focus({ preventScroll: true });
+      }
+    }
+
+    function turn(open, restoreFocus) {
       if (turning) {
         turning();
       }
@@ -2768,8 +2807,10 @@ function plainClickOpensHere(e, link) {
       if (!animated) {
         if (!open) {
           release();
+          if (restoreFocus) summary.focus({ preventScroll: true });
         } else {
           follow(gap, false);
+          focusChooser();
         }
         return;
       }
@@ -2805,6 +2846,9 @@ function plainClickOpensHere(e, link) {
         // The stage at its own height now: the foot where it finally rests.
         if (finished && open && details.open) {
           follow(gap, false);
+          focusChooser();
+        } else if (finished && !open && restoreFocus) {
+          summary.focus({ preventScroll: true });
         }
       }
       function ended(event) {
@@ -2829,7 +2873,13 @@ function plainClickOpensHere(e, link) {
     // same frame and nothing of the other state is ever painted.
     summary.addEventListener("click", function (event) {
       event.preventDefault();
-      turn(!details.open);
+      turn(!details.open, false);
+    });
+    chooser.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && details.open) {
+        event.preventDefault();
+        turn(false, true);
+      }
     });
 
     // Turned while settling (a resize) the stage and head start again from
@@ -5999,7 +6049,7 @@ function plainClickOpensHere(e, link) {
         if (isPrayed && !mark) {
           mark = document.createElement("span");
           mark.className = "home-hour-prayed";
-          mark.innerHTML = '<span aria-hidden="true">✠</span><span class="sr-only">Prayed</span>';
+          mark.innerHTML = '<span aria-hidden="true">✠</span> <span class="sr-only">Prayed</span>';
           (link.querySelector(".home-hour-link-name") || link).appendChild(mark);
         } else if (!isPrayed && mark) {
           mark.remove();
@@ -6613,17 +6663,18 @@ function plainClickOpensHere(e, link) {
     var meaning = ribbon.querySelector(".about-ordo-meaning");
     var pinnedColor = null;
 
-    function showColor(slug) {
+    function showColor(slug, announce) {
       if (slug) ribbon.setAttribute("data-selected-color", slug);
       else ribbon.removeAttribute("data-selected-color");
       var active = null;
       swatches.forEach(function (btn) {
-        var on = slug && btn.getAttribute("data-color") === slug;
+        var color = btn.getAttribute("data-color");
+        var on = slug && color === slug;
         btn.classList.toggle("is-selected", Boolean(on));
-        btn.setAttribute("aria-pressed", on ? "true" : "false");
+        btn.setAttribute("aria-pressed", pinnedColor && color === pinnedColor ? "true" : "false");
         if (on) active = btn;
       });
-      if (meaning) {
+      if (meaning && announce !== false) {
         meaning.textContent = active ? active.getAttribute("data-name") + " — " + active.getAttribute("data-meaning") : "";
       }
     }
@@ -6632,23 +6683,17 @@ function plainClickOpensHere(e, link) {
       var slug = btn.getAttribute("data-color");
       btn.addEventListener("click", function () {
         pinnedColor = pinnedColor === slug ? null : slug;
-        showColor(pinnedColor);
+        showColor(pinnedColor, true);
       });
       btn.addEventListener("mouseenter", function () {
-        if (!pinnedColor) showColor(slug);
-      });
-      btn.addEventListener("focus", function () {
-        if (!pinnedColor) showColor(slug);
+        if (!pinnedColor) showColor(slug, true);
       });
     });
 
     var legend = ribbon.querySelector(".about-ordo-legend");
     if (legend) {
       legend.addEventListener("mouseleave", function () {
-        if (!pinnedColor) showColor(null);
-      });
-      legend.addEventListener("focusout", function (e) {
-        if (!pinnedColor && !legend.contains(e.relatedTarget)) showColor(null);
+        if (!pinnedColor) showColor(null, true);
       });
     }
   }

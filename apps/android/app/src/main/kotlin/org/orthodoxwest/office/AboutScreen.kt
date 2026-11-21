@@ -57,9 +57,11 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.LinkAnnotation
@@ -203,7 +205,12 @@ fun AboutScreen(
                     space = Space.NONE,
                 )
             }
-            Opening(dropCapBlock, body, Modifier.padding(top = 4.dp), textStart = 0.dp)
+            Opening(
+                dropCapBlock,
+                body,
+                Modifier.padding(top = 4.dp).clearAndSetSemantics { contentDescription = intro },
+                textStart = 0.dp,
+            )
         }
     }
 
@@ -507,7 +514,13 @@ private fun Horologium(
     val density = LocalDensity.current
     val largeFont = density.fontScale > 1.35f
     val readout: @Composable (Modifier) -> Unit = { mod ->
-        Column(mod, horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            mod.clearAndSetSemantics {
+                liveRegion = LiveRegionMode.Polite
+                contentDescription = "${if (isNow) "Now, " else ""}${active.time}. ${active.name}, ${active.gloss}"
+            },
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Text(
                 (if (isNow) "Now · " else "") + active.time,
                 style = Type.body.copy(
@@ -652,9 +665,9 @@ private fun Horologium(
                 color = p.muted,
                 fontFeatureSettings = ALL_SMALL_CAPS,
             )
-            Text("Dawn", Modifier.align(Alignment.BottomStart).padding(start = boxW * (42f / 320f)), style = cardinalStyle)
-            Text("Noon", Modifier.align(Alignment.TopCenter).padding(top = 2.dp), style = cardinalStyle)
-            Text("Night", Modifier.align(Alignment.BottomEnd).padding(end = boxW * (42f / 320f)), style = cardinalStyle)
+            Text("Dawn", Modifier.align(Alignment.BottomStart).padding(start = boxW * (42f / 320f)).clearAndSetSemantics {}, style = cardinalStyle)
+            Text("Noon", Modifier.align(Alignment.TopCenter).padding(top = 2.dp).clearAndSetSemantics {}, style = cardinalStyle)
+            Text("Night", Modifier.align(Alignment.BottomEnd).padding(end = boxW * (42f / 320f)).clearAndSetSemantics {}, style = cardinalStyle)
 
             // Centered readout inside the dome belly at standard font scale
             if (!largeFont) {
@@ -846,7 +859,12 @@ private fun SpecimenLeaf(
 
         RuledDivider(p.lining.copy(alpha = 0.19f), 0.75f, seed = 171)
         Spacer(Modifier.height(8.dp))
-        Row(Modifier.fillMaxWidth().litPool(litKey == "vr" || litKey == "cross", pool).padding(bottom = 4.dp)) {
+        Row(
+            Modifier.fillMaxWidth().litPool(litKey == "vr" || litKey == "cross", pool).padding(bottom = 4.dp)
+                .clearAndSetSemantics {
+                    contentDescription = "Versicle. " + specimen.openingVersicle.replace("✠", "sign of the cross,")
+                },
+        ) {
             Text("℣.", Modifier.width(27.dp), style = lineStyle.copy(color = p.rubric))
             Text(
                 buildAnnotatedString {
@@ -860,7 +878,10 @@ private fun SpecimenLeaf(
                 style = lineStyle,
             )
         }
-        Row(Modifier.fillMaxWidth().litPool(litKey == "vr", pool).padding(bottom = 8.dp)) {
+        Row(
+            Modifier.fillMaxWidth().litPool(litKey == "vr", pool).padding(bottom = 8.dp)
+                .clearAndSetSemantics { contentDescription = "Response. ${specimen.openingResponse}" },
+        ) {
             Text("℟.", Modifier.width(27.dp), style = lineStyle.copy(color = p.rubric))
             Text(specimen.openingResponse, style = lineStyle)
         }
@@ -868,14 +889,22 @@ private fun SpecimenLeaf(
         // The close's greeting, as the chosen form gives it: a deacon greets as a priest does.
         RuledDivider(p.lining.copy(alpha = 0.19f), 0.75f, seed = 170)
         val clergy = form != "private"
-        Column(Modifier.fillMaxWidth().litPool(litKey == "form", pool).padding(top = 7.dp)) {
+        val formV = if (clergy) specimen.priestVersicle else specimen.aloneVersicle
+        val formR = if (clergy) specimen.priestResponse else specimen.aloneResponse
+        Column(
+            Modifier.fillMaxWidth().litPool(litKey == "form", pool).padding(top = 7.dp)
+                .clearAndSetSemantics {
+                    liveRegion = LiveRegionMode.Polite
+                    contentDescription = "Versicle. $formV Response. $formR"
+                },
+        ) {
             Row(Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
                 Text("℣.", Modifier.width(27.dp), style = lineStyle.copy(color = p.rubric))
-                Text(if (clergy) specimen.priestVersicle else specimen.aloneVersicle, style = lineStyle)
+                Text(formV, style = lineStyle)
             }
             Row(Modifier.fillMaxWidth()) {
                 Text("℟.", Modifier.width(27.dp), style = lineStyle.copy(color = p.rubric))
-                Text(if (clergy) specimen.priestResponse else specimen.aloneResponse, style = lineStyle)
+                Text(formR, style = lineStyle)
             }
         }
     }
@@ -929,10 +958,16 @@ private fun RuledKeyList(keys: List<AboutBlockView>, litKey: String?, onToggle: 
         keys.forEachIndexed { i, k ->
             if (i > 0) RuledDivider(p.lining.copy(alpha = 0.19f), 0.8f, seed = 180 + i)
             val active = litKey == k.id
+            val spokenMark = when (k.ink) {
+                "symbol" -> "Versicle and response"
+                "cross" -> "Cross"
+                "secret" -> listOf(k.mark, k.tail).filter { it.isNotEmpty() }.joinToString(" ")
+                else -> k.mark
+            }
             Row(
                 Modifier.fillMaxWidth()
                     .then(if (active) Modifier.poolAlongRow(pool.copy(alpha = pool.alpha * 0.85f)) else Modifier)
-                    .tap(selected = active, label = "${k.mark} ${k.tail}: ${k.text}") { onToggle(k.id) }
+                    .tap(selected = active, label = "$spokenMark: ${k.text}") { onToggle(k.id) }
                     .padding(vertical = 8.3.dp, horizontal = 3.dp),
                 verticalAlignment = Alignment.Top,
             ) {
@@ -992,7 +1027,7 @@ private fun LineageList(eras: List<AboutBlockView>, body: TextStyle) {
                 Column(Modifier.weight(1f)) {
                     Text(
                         era.period,
-                        Modifier.padding(bottom = 4.dp),
+                        Modifier.padding(bottom = 4.dp).semantics { heading() },
                         style = Type.body.copy(
                             fontSize = 13.12.sp,
                             lineHeight = 18.sp,
@@ -1068,7 +1103,7 @@ private fun OrdoRibbon(
                 }
             }
             // Each name stands at its own month's start, as the web's (view.rs AboutRibbonLabel).
-            BoxWithConstraints(Modifier.fillMaxWidth().padding(top = 2.dp)) {
+            BoxWithConstraints(Modifier.fillMaxWidth().padding(top = 2.dp).clearAndSetSemantics {}) {
                 listOf("Jan", "Mar", "May", "Jul", "Sep", "Nov").forEachIndexed { i, m ->
                     Text(
                         m,
@@ -1119,7 +1154,7 @@ private fun OrdoRibbon(
         if (active != null) {
             Text(
                 "${active.name} — ${active.meaning}",
-                Modifier.padding(top = 6.dp),
+                Modifier.padding(top = 6.dp).semantics { liveRegion = LiveRegionMode.Polite },
                 style = Type.body.copy(fontSize = 14.4.sp, lineHeight = 20.sp, color = p.muted, fontStyle = FontStyle.Italic),
             )
         }

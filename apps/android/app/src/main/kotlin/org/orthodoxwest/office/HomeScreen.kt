@@ -1,5 +1,6 @@
 package org.orthodoxwest.office
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -452,6 +453,7 @@ private fun Frontispiece(
     // How far "Change date" has turned the stage from the hours to the calendar, 0 to 1, on the
     // disclosures' curves; while it opens, the page follows the card's foot where it lengthens.
     val turn = remember { Animatable(if (picking) 1f else 0f) }
+    BackHandler(enabled = picking) { picking = false }
     LaunchedEffect(picking) {
         coroutineScope {
             launch { turn.animateTo(if (picking) 1f else 0f, tween(if (picking) UNFOLD_MS else FOLD_MS, easing = FastOutSlowInEasing)) }
@@ -575,7 +577,7 @@ private fun Frontispiece(
             // The day.
             {
                 Column(Modifier.fillMaxWidth().padding(horizontal = tier.dayClear), horizontalAlignment = Alignment.CenterHorizontally) {
-                    val dateModifier = Modifier.crownUnit("w-date").semantics(mergeDescendants = true) { heading() }.tap(action = "open the ordo", onClick = onOrdoDay)
+                    val dateModifier = Modifier.crownUnit("w-date").semantics(mergeDescendants = true) { heading() }.tap(label = view.dateLabel, action = "open the ordo", onClick = onOrdoDay)
                     val at = view.dateLabel.indexOf(", ")
                     if (at < 0) {
                         Text(
@@ -596,7 +598,7 @@ private fun Frontispiece(
                             val weekday = tier.weekday()
                             Text(
                                 view.dateLabel.substring(0, at),
-                                reserve.at("weekday").semantics { contentDescription = view.dateLabel.substring(0, at + 1) },
+                                reserve.at("weekday"),
                                 style = Type.body.copy(
                                     fontSize = weekday.sp,
                                     lineHeight = (weekday * tier.weekdayLine(heavy)).sp,
@@ -636,14 +638,14 @@ private fun Frontispiece(
                     )
                     if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, Modifier.crownUnit("w-octave").then(reserve.at("octave")), style = Type.small.copy(color = muted), onTextLayout = reserve.layout("octave"))
                     if (view.penitential.isNotEmpty()) {
-                        Row(Modifier.padding(top = if (desk && tier.heavy) 0.dp else 12.dp).crownUnit("w-fast"), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
+                        Row(Modifier.padding(top = if (desk && tier.heavy) 0.dp else 12.dp).crownUnit("w-fast").semantics(mergeDescendants = true) {}, horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
                             val fast = if (desk) Type.small.copy(fontSize = tier.fast.sp) else Type.small
                             view.penitential.forEachIndexed { i, it -> Text(it, reserve.at("fast$i"), style = fast.copy(color = rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp), onTextLayout = reserve.layout("fast$i")) }
                         }
                     }
                     if (view.commemorations.isNotEmpty()) {
                         Column(Modifier.padding(top = 8.dp).crownUnit("w-also"), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("ALSO", reserve.at("also"), style = Type.label(10.56f, 0.1f).copy(color = muted), onTextLayout = reserve.layout("also"))
+                            Text("ALSO", reserve.at("also").semantics { contentDescription = "Also" }, style = Type.label(10.56f, 0.1f).copy(color = muted), onTextLayout = reserve.layout("also"))
                             // A second commemoration is joined to the first with "and", as the web's
                             // `.commemorations li + li::before`, so the list reads as a sentence.
                             view.commemorations.forEachIndexed { i, name ->
@@ -681,7 +683,7 @@ private fun Frontispiece(
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                         Text(
                             "GO TO TODAY",
-                            Modifier.crownUnit("w-today").heightIn(min = 44.dp).tap { onDate(today) }.padding(vertical = 12.dp).then(reserve.at("today")).goldUnderline(true, p.goldLine),
+                            Modifier.crownUnit("w-today").heightIn(min = 44.dp).tap(label = "Go to today") { onDate(today) }.padding(vertical = 12.dp).then(reserve.at("today")).goldUnderline(true, p.goldLine),
                             style = Type.menu.copy(color = p.accent),
                             onTextLayout = reserve.layout("today"),
                         )
@@ -701,6 +703,7 @@ private fun Frontispiece(
                         Modifier
                             .throughPadding(side)
                             .crownUnit("frieze")
+                            .semantics(mergeDescendants = true) { heading() }
                             .background(p.inscriptionGround)
                             .drawBehind {
                                 val u = density
@@ -885,6 +888,7 @@ private fun FeastName(name: String, alias: String, size: Float, modifier: Modifi
 @Composable
 private fun VersicleLine(sigil: String, words: String, size: Float, rubric: Color, reserve: Reserve, key: String) {
     val p = LocalPalette.current
+    val spokenSigil = sigil.replace("℣.", "Versicle.").replace("℟.", "Response.")
     Text(
         buildAnnotatedString {
             withStyle(SpanStyle(fontStyle = FontStyle.Normal, color = rubric)) { append(sigil) }
@@ -899,7 +903,7 @@ private fun VersicleLine(sigil: String, words: String, size: Float, rubric: Colo
             textAlign = TextAlign.Center,
             lineBreak = LineBreak.Heading,
         ),
-        modifier = reserve.at(key),
+        modifier = reserve.at(key).clearAndSetSemantics { contentDescription = "$spokenSigil $words" },
         onTextLayout = reserve.layout(key),
     )
 }
@@ -1025,7 +1029,8 @@ private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<Str
                     .crownUnit("r-period$i"),
             ) {
                 Column(
-                    Modifier.width(labelWidth).fillMaxHeight().padding(vertical = 6.dp).padding(start = 1.4.dp),
+                    Modifier.width(labelWidth).fillMaxHeight().padding(vertical = 6.dp).padding(start = 1.4.dp)
+                        .semantics(mergeDescendants = true) { heading() },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
@@ -1118,7 +1123,7 @@ private fun HourList(
     Layout(
         contents = listOf(
             {
-                Column(Modifier.padding(end = 22.4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(Modifier.padding(end = 22.4.dp).semantics(mergeDescendants = true) { heading() }, horizontalAlignment = Alignment.CenterHorizontally) {
                     PeriodIcon(period, o.flat, modifier = Modifier.scale(1.25f), alpha = 0.9f)
                     Text(label, Modifier.padding(top = 4.dp), softWrap = false, style = labelStyle)
                 }

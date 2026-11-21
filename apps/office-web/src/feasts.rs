@@ -282,7 +282,7 @@ mod tests {
         assert!(body.contains(r#"<p class="feast-titulus">February 27</p>"#));
         assert!(body.contains("<span>Greater Double</span>") && body.contains("<span>White</span>"));
         // Opened from nowhere in particular, it leads back to the search.
-        assert!(body.contains(r#"<a class="find-back" href="/calendar/find">&lsaquo; Find a feast</a>"#));
+        assert!(body.contains(r#"<a class="find-back" href="/calendar/find"><span aria-hidden="true">&lsaquo; </span>Find a feast</a>"#));
         assert!(body.contains(">The next eight years</h2>"));
         assert_eq!(body.matches(r#"class="find-year "#).count(), FEAST_PAGE_YEARS as usize);
         assert!(body.contains("From the Common of a Confessor and Bishop."));
@@ -325,7 +325,7 @@ mod tests {
     #[test]
     fn days_lead_to_their_feasts_and_back() {
         let home = page("/?date=2026-02-27&from=st-raphael-of-brooklyn");
-        assert!(home.contains(r#"<a class="from-feast" href="/feast/st-raphael-of-brooklyn">&lsaquo; St Raphael of Brooklyn</a>"#));
+        assert!(home.contains(r#"<a class="from-feast" href="/feast/st-raphael-of-brooklyn"><span aria-hidden="true">&lsaquo; </span>St Raphael of Brooklyn</a>"#));
         assert!(!page("/?date=2026-02-27&from=..%2Fnope").contains("from-feast"));
         // A day's feast leads to its page, which leads back to that day; the ordo's, to the ordo.
         assert!(
@@ -340,14 +340,21 @@ mod tests {
         assert!(ordo.contains(r#"action="/calendar/find""#));
         assert!(ordo.contains(r#"<a class="feast-link" href="/feast/st-raphael-of-brooklyn?from=ordo-2026-02-27">"#));
         let from_day = page("/feast/st-raphael-of-brooklyn?from=2027-02-27");
-        assert!(from_day.contains(r#"<a class="find-back" href="/?date=2027-02-27">&lsaquo; February 27</a>"#));
+        assert!(
+            from_day.contains(r#"<a class="find-back" href="/?date=2027-02-27"><span aria-hidden="true">&lsaquo; </span>February 27</a>"#)
+        );
         let from_ordo = page("/feast/st-raphael-of-brooklyn?from=ordo-2026-02-27");
-        assert!(from_ordo.contains(r#"<a class="find-back" href="/calendar/2026/02#d-2026-02-27">&lsaquo; Ordo, February 2026</a>"#));
+        assert!(from_ordo.contains(
+            r#"<a class="find-back" href="/calendar/2026/02#d-2026-02-27"><span aria-hidden="true">&lsaquo; </span>Ordo, February 2026</a>"#
+        ));
         let from_year = page("/feast/ash-wednesday?from=ordo-2026");
-        assert!(from_year.contains(r#"<a class="find-back" href="/calendar/2026">&lsaquo; 2026 Ordo</a>"#));
+        assert!(from_year.contains(r#"<a class="find-back" href="/calendar/2026"><span aria-hidden="true">&lsaquo; </span>2026 Ordo</a>"#));
         let from_hour = page("/feast/st-raphael-of-brooklyn?from=lauds-2027-02-27");
-        assert!(from_hour.contains(r#"<a class="find-back" href="/lauds/2027-02-27">&lsaquo; Lauds</a>"#));
-        assert!(page("/feast/st-raphael-of-brooklyn?from=nonsense").contains(r#"href="/calendar/find">&lsaquo; Find a feast"#));
+        assert!(from_hour.contains(r#"<a class="find-back" href="/lauds/2027-02-27"><span aria-hidden="true">&lsaquo; </span>Lauds</a>"#));
+        assert!(
+            page("/feast/st-raphael-of-brooklyn?from=nonsense")
+                .contains(r#"href="/calendar/find"><span aria-hidden="true">&lsaquo; </span>Find a feast"#)
+        );
     }
 
     #[test]

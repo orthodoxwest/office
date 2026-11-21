@@ -338,7 +338,7 @@ struct HourScreen: View {
         let scoreColumn = min(m.px(measure), width - 2 * (inset + m.px(gutter)))
         ScrollViewReader { scroll in
             ScrollView {
-                LazyVStack(spacing: 0) {
+                HourListStack {
                     Rectangle().fill(bandColor(view.color, p)).frame(height: 3).accessibilityHidden(true)
                     SiteHeader()
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
@@ -1051,12 +1051,36 @@ private struct HourTitle: View {
     }
 }
 
+/// Uses an eager `VStack` when VoiceOver is running so the Headings rotor can jump to headings
+/// further down a long hour without waiting for lazy cells to materialize.
+private struct HourListStack<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        if UIAccessibility.isVoiceOverRunning {
+            VStack(spacing: 0, content: content)
+        } else {
+            LazyVStack(spacing: 0, content: content)
+        }
+    }
+}
+
 /// In-hour "How to read" legend panel (matches web's `.reading-key-panel`).
 private struct ReadingKeyPanel: View {
     let key: ReadingKeyView
     let onAbout: () -> Void
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
+
+    private func spokenMark(_ mark: String) -> String {
+        switch mark {
+        case "℣.  ℟.": return "Versicle and response"
+        case "*  †": return "Asterisk and dagger"
+        case "✠": return "Cross"
+        case "Ant.": return "Antiphon"
+        default: return mark
+        }
+    }
 
     var body: some View {
         let desc = TextStyle(size: 14.1, line: 20.4)
@@ -1065,6 +1089,8 @@ private struct ReadingKeyPanel: View {
                 .type(.label(11.2, 0.1))
                 .foregroundStyle(p.muted)
                 .padding(.bottom, m.px(8.8))
+                .accessibilityLabel(key.title)
+                .accessibilityAddTraits(.isHeader)
             Hairline(color: p.border)
             ForEach(Array(key.items.enumerated()), id: \.offset) { i, item in
                 if i > 0 { Hairline(color: p.surfaceEdge) }
@@ -1078,6 +1104,8 @@ private struct ReadingKeyPanel: View {
                 }
                 .padding(.vertical, m.px(8.3))
                 .padding(.horizontal, m.px(3.2))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(spokenMark(item.mark)): \(item.text)")
             }
             Hairline(color: p.border)
             Button(action: onAbout) {
@@ -1086,11 +1114,11 @@ private struct ReadingKeyPanel: View {
                     + Text(key.footAfter).foregroundColor(p.muted))
                     .type(TextStyle(size: 12.8, line: 19.2))
                     .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
             }
             .buttonStyle(Quiet())
             .padding(.top, m.px(10.4))
-            .accessibilityLabel(key.footLink)
+            .accessibilityLabel("\(key.footBefore)\(key.footLink)\(key.footAfter)")
             .accessibilityHint("Opens About the Office")
         }
         .frame(maxWidth: m.px(384))
