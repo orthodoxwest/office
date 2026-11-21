@@ -87,7 +87,14 @@ window.officeHoldPlace = function (change, blocks) {
         selector.querySelector("summary").focus({ preventScroll: true });
       }, ".elements .leader-slot, .elements .psalm, .elements .canticle, .elements > .section-heading");
       syncLinks();
-      document.getElementById("leader-status").textContent = "Prayers updated. " + event.target.nextElementSibling.textContent + ".";
+      var phrase = event.target.nextElementSibling.textContent;
+      var status = document.getElementById("leader-status");
+      if (status) {
+        status.textContent = "";
+        setTimeout(function () {
+          status.textContent = "Prayers updated. " + phrase + ".";
+        }, 120);
+      }
       window.dispatchEvent(new Event("officeleaderchange"));
     });
   }

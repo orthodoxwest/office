@@ -1065,6 +1065,8 @@ private struct ReadingKeyPanel: View {
                 .type(.label(11.2, 0.1))
                 .foregroundStyle(p.muted)
                 .padding(.bottom, m.px(8.8))
+                .accessibilityLabel(key.title)
+                .accessibilityAddTraits(.isHeader)
             Hairline(color: p.border)
             ForEach(Array(key.items.enumerated()), id: \.offset) { i, item in
                 if i > 0 { Hairline(color: p.surfaceEdge) }
@@ -1078,6 +1080,8 @@ private struct ReadingKeyPanel: View {
                 }
                 .padding(.vertical, m.px(8.3))
                 .padding(.horizontal, m.px(3.2))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(item.spoken): \(item.text)")
             }
             Hairline(color: p.border)
             Button(action: onAbout) {
@@ -1086,11 +1090,11 @@ private struct ReadingKeyPanel: View {
                     + Text(key.footAfter).foregroundColor(p.muted))
                     .type(TextStyle(size: 12.8, line: 19.2))
                     .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
             }
             .buttonStyle(Quiet())
             .padding(.top, m.px(10.4))
-            .accessibilityLabel(key.footLink)
+            .accessibilityLabel("\(key.footBefore)\(key.footLink)\(key.footAfter)")
             .accessibilityHint("Opens About the Office")
         }
         .frame(maxWidth: m.px(384))

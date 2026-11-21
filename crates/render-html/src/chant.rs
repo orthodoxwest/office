@@ -45,11 +45,12 @@ pub const WIDTH_STEPS: u32 = 16;
 /// to a page wider than the prayer's measure.
 const COLUMN_EMS: std::ops::RangeInclusive<f32> = 4.0..=80.0;
 
-/// A score in place of the words it sets. The group is announced by `words`, the text it sets,
-/// typeset as the page's text is, rather than by its SVG.
+/// A score in place of the words it sets. The lyrics sit in an `.sr-only`
+/// span beside the `aria-hidden` SVG so screen readers read and navigate the
+/// words as text rather than an atomic image.
 pub fn score_html(score: &ChantScore, gabc: &Arc<str>, words: &str) -> String {
     format!(
-        "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"{}\">{}</div>",
+        "<div class=\"chant-score\" data-chant-variant=\"on\"><span class=\"sr-only\">{}</span>{}</div>",
         html_escape_string(&typeset(words.trim())),
         engraved(&Arc::from(score.with_mode_figure(gabc)), true, phrased(score))
     )
@@ -66,14 +67,14 @@ pub fn whole_hymn_html(score: &ChantScore, text: &str) -> String {
     let mut out = String::from("<div class=\"chant-hymn\" data-chant-variant=\"on\">");
     if parts.len() != stanzas.len() {
         rubrics.first().into_iter().flatten().for_each(|r| write_hymn_rubric(&mut out, r));
-        out.push_str(&score_html(score, &score.gabc, &stanzas.join(" ")));
+        out.push_str(&score_html(score, &score.gabc, &stanza_join(&stanzas)));
         out.push_str("</div>");
         return out;
     }
     for (i, ((part, words), before)) in parts.iter().zip(&stanzas).zip(&rubrics).enumerate() {
         before.iter().for_each(|r| write_hymn_rubric(&mut out, r));
         out.push_str(&format!(
-            "<div class=\"chant-score chant-stanza\" role=\"img\" aria-label=\"{}\">{}{}</div>",
+            "<div class=\"chant-score chant-stanza\"><span class=\"sr-only\">{}</span>{}{}</div>",
             html_escape_string(&typeset(words.trim())),
             if i > 0 { format!("<span class=\"chant-stanza-number\" aria-hidden=\"true\">{}.</span>", i + 1) } else { String::new() },
             engraved(&Arc::from(if i == 0 { score.with_mode_figure(part) } else { part.clone() }), i == 0, true)
@@ -81,6 +82,10 @@ pub fn whole_hymn_html(score: &ChantScore, text: &str) -> String {
     }
     out.push_str("</div>");
     out
+}
+
+fn stanza_join(stanzas: &[String]) -> String {
+    stanzas.join(" ")
 }
 
 /// A hymn's score is set phrase by phrase, a line of verse to a staff; an antiphon's as prose.
@@ -310,7 +315,7 @@ mod tests {
     fn a_score_carries_its_gabc_and_a_fallback_announced_by_its_words() {
         let html = html_of(HYMN, ScoreSpan::FirstStanza, "To thee, before the close of day,");
         assert!(html.starts_with(
-            "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"To thee, before the close of day,\">"
+            "<div class=\"chant-score\" data-chant-variant=\"on\"><span class=\"sr-only\">To thee, before the close of day,</span>"
         ));
         let opening = score(HYMN, ScoreSpan::FirstStanza).with_mode_figure(HYMN);
         assert!(html.contains(&format!(" data-gabc=\"{}\"", html_escape_string(&opening))), "{html}");
@@ -325,7 +330,7 @@ mod tests {
     #[test]
     fn a_score_is_named_by_its_words_typeset() {
         let html = html_of("name: t;\n%%\n(c4) Heav(g)en's(h) King.(g) (::)", ScoreSpan::FirstStanza, "Heaven's King. ");
-        assert!(html.contains("aria-label=\"Heaven\u{2019}s King.\""), "{html}");
+        assert!(html.contains("<span class=\"sr-only\">Heaven\u{2019}s King.</span>"), "{html}");
     }
 
     #[test]

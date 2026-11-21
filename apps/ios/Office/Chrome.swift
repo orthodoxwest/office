@@ -476,6 +476,7 @@ struct MenuPanel: View {
                 Image(uiImage: plaster).resizable().scaledToFill()
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .clipped()
+                    .accessibilityHidden(true)
             } else {
                 p.surface
             }
@@ -757,7 +758,9 @@ struct DayPicker: View {
                     .buttonStyle(Quiet()).accessibilityLabel(dayNav.previous)
                 Spacer(minLength: 0)
                 if shown != today {
-                    Button { pick(today) } label: { Text("TODAY").type(Scale.control).foregroundStyle(p.muted).frame(minHeight: 44) }.buttonStyle(Quiet())
+                    Button { pick(today) } label: { Text("TODAY").type(Scale.control).foregroundStyle(p.muted).frame(minHeight: 44) }
+                        .buttonStyle(Quiet())
+                        .accessibilityLabel("Today")
                 }
                 Spacer(minLength: 0)
                 Button { pick(shown.adding(days: 1)) } label: { Text("\(dayNav.next) →").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(centred ? 4 : 16)).frame(minHeight: 44) }
@@ -773,7 +776,7 @@ struct DayPicker: View {
                 HStack(spacing: 0) {
                     // A month's step in the days, a year's in the months; none past the picker's span.
                     step("‹", back, months ? "Previous year" : "Previous month", width: cell)
-                    Button { withAnimation(.easeInOut(duration: 0.18)) { months.toggle() } } label: {
+                    Button { withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.18)) { months.toggle() } } label: {
                         // Set like the disclosure labels around it, with their gold caret.
                         HStack(spacing: 0) {
                             Text(title.uppercased()).type(.label(11.52, 0.1)).foregroundStyle(p.text)
@@ -783,6 +786,7 @@ struct DayPicker: View {
                     }
                     .buttonStyle(Quiet())
                     .accessibilityLabel(months ? "\(title), back to days" : "\(title), choose another month")
+                    .accessibilityValue(months ? "Expanded" : "Collapsed")
                     step("›", forward, months ? "Next year" : "Next month", width: cell)
                 }
                 .padding(.top, m.px(12))
@@ -833,9 +837,13 @@ struct DayPicker: View {
     private func turnTo(_ to: (Int, Int)?) {
         guard let to else { return }
         turn = to.0 * 12 + to.1 > year * 12 + month ? 1 : -1
-        withAnimation(.easeInOut(duration: 0.26)) {
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.26)) {
             year = to.0
             month = to.1
+        }
+        if UIAccessibility.isVoiceOverRunning {
+            let announced = months ? "\(to.0)" : "\(monthName(to.1)) \(to.0)"
+            UIAccessibility.post(notification: .announcement, argument: announced)
         }
     }
 

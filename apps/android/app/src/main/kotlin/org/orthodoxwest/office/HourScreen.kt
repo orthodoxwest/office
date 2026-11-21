@@ -63,6 +63,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
@@ -566,13 +567,17 @@ private fun ReadingKeyPanel(key: ReadingKeyView, onAbout: () -> Unit) {
     Column(Modifier.padding(top = 10.dp, bottom = 8.dp).widthIn(max = 384.dp).fillMaxWidth()) {
         Text(
             key.title.uppercase(),
-            Modifier.padding(bottom = 8.8.dp),
+            Modifier.padding(bottom = 8.8.dp).semantics { heading(); contentDescription = key.title },
             style = Type.label(11.2f, 0.1f).copy(color = p.muted),
         )
         Hairline(p.border)
         key.items.forEachIndexed { i, item ->
             if (i > 0) Hairline(p.surfaceEdge)
-            Row(Modifier.fillMaxWidth().padding(vertical = 8.3.dp, horizontal = 3.2.dp), verticalAlignment = Alignment.Top) {
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 8.3.dp, horizontal = 3.2.dp)
+                    .clearAndSetSemantics { contentDescription = "${item.spoken}: ${item.text}" },
+                verticalAlignment = Alignment.Top,
+            ) {
                 val markMod = Modifier.width(82.dp).padding(end = 12.dp)
                 when (item.style) {
                     "rubric" -> Text(item.mark, markMod, style = Type.small.copy(fontSize = 14.1.sp, lineHeight = 20.4.sp, color = p.rubric, fontStyle = FontStyle.Italic), softWrap = false)
@@ -605,7 +610,7 @@ private fun ReadingKeyPanel(key: ReadingKeyView, onAbout: () -> Unit) {
                 withStyle(SpanStyle(color = p.accent, textDecoration = TextDecoration.Underline)) { append(key.footLink) }
                 append(key.footAfter)
             },
-            Modifier.padding(top = 10.4.dp).tap(label = key.footLink, action = "open about the office", onClick = onAbout),
+            Modifier.padding(top = 10.4.dp).heightIn(min = 44.dp).tap(label = "${key.footBefore}${key.footLink}${key.footAfter}", action = "open About the Office", onClick = onAbout),
             style = Type.small.copy(fontSize = 12.8.sp, lineHeight = 19.2.sp, color = p.muted),
         )
     }

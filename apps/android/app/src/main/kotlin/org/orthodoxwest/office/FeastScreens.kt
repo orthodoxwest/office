@@ -147,7 +147,7 @@ fun FindScreen(
                         // The rank's letters name the rank in a note when tapped, as the ordo's marks do.
                         val letters = @Composable { Text(r.rank, style = Type.small.copy(fontSize = 15.2.sp, lineHeight = 20.sp, color = rankTone(r.rankTone, p))) }
                         val at = Modifier.padding(start = 12.dp, top = 4.dp)
-                        if (r.rankFull.isNotEmpty()) NoteMark(r.rankFull, "Rank ${r.rank}", at) { letters() } else Box(at) { letters() }
+                        if (r.rankFull.isNotEmpty()) NoteMark(r.rankFull, r.rankFull, at) { letters() } else Box(at) { letters() }
                     }
                 }
                 Text(
@@ -156,7 +156,7 @@ fun FindScreen(
                         append(" · ")
                         withStyle(SpanStyle(color = p.accent)) { append(FEAST_WORDS.everyYear) }
                     },
-                    Modifier.padding(top = 3.dp, bottom = 6.dp).tap(action = "open the feast's page") { onFeast(r.id) },
+                    Modifier.padding(top = 3.dp, bottom = 6.dp).tap(label = "${r.meta}, ${FEAST_WORDS.everyYear} for ${r.name}", action = "open the feast's page") { onFeast(r.id) },
                     style = Type.small.copy(fontSize = 14.7.sp, lineHeight = 21.sp, color = p.muted),
                 )
                 r.years.forEachIndexed { i, y -> YearRow(y, first = i == 0, onDay = onDay) }
@@ -222,9 +222,10 @@ fun FeastScreen(
         item(key = "chrome") { chrome() }
         item(key = "back") {
             Box(column) {
+                val target = back ?: w.findTitle
                 Text(
-                    "‹ ${back ?: w.findTitle}",
-                    Modifier.heightIn(min = 44.dp).tap(onClick = if (back != null) onBack else onFind).padding(vertical = 12.dp),
+                    "‹ $target",
+                    Modifier.heightIn(min = 44.dp).tap(label = "Back to $target", onClick = if (back != null) onBack else onFind).padding(vertical = 12.dp),
                     style = Type.small.copy(fontSize = 15.2.sp, lineHeight = 20.sp, color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 1.37.sp),
                 )
             }
@@ -378,7 +379,7 @@ private fun FeastHead(view: FeastPageView, frontal: Color, size: Int, modifier: 
             )
             val rank = Type.small.copy(fontSize = 15.68.sp, lineHeight = 23.5.sp, color = p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center)
             FlowRow(
-                Modifier.padding(top = 8.8.dp).clearAndSetSemantics { contentDescription = view.subtitle; traversalIndex = 2f },
+                Modifier.padding(top = 8.8.dp).clearAndSetSemantics { contentDescription = view.subtitle.replace(" · ", ", "); traversalIndex = 2f },
                 horizontalArrangement = Arrangement.spacedBy(9.6.dp, Alignment.CenterHorizontally),
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) {

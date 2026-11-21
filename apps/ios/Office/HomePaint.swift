@@ -425,6 +425,7 @@ struct TabletButton: View {
                 .background {
                     if let tablet = UIImage(named: "tablet.png") {
                         Image(uiImage: tablet).renderingMode(.template).resizable().foregroundStyle(home.tabletWash).padding(1)
+                            .accessibilityHidden(true)
                     }
                 }
                 .overlay {

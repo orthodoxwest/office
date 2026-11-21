@@ -489,6 +489,7 @@ private struct AboutHorologium: View {
         if let active = hours.first(where: { $0.hour == activeSlug }) ?? hours.last {
             let isNow = active.hour == current && !current.isEmpty
             let largeType = m.type > 1.35
+            let readoutSpoken = "\(isNow ? "Now, " : "")\(active.time). \(active.name), \(active.gloss)"
             let readout = VStack(spacing: m.px(1)) {
                 Text((isNow ? "Now · " : "") + active.time)
                     .type(TextStyle(size: 11.2, line: 14.5, tracking: 1.5, smallCaps: true))
@@ -499,6 +500,8 @@ private struct AboutHorologium: View {
                     .type(Scale.body.sized(18, line: 22))
                     .multilineTextAlignment(.center)
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(readoutSpoken)
             VStack(spacing: 0) {
                 ZStack {
                     HorologiumCanvas(
@@ -875,6 +878,8 @@ private struct AboutSpecimenLeaf: View {
             }
             .padding(.bottom, m.px(4))
             .background { if litKey == "vr" || litKey == "cross" { SpecimenLitPool() } }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Versicle. " + specimen.openingVersicle.replacingOccurrences(of: "✠", with: "sign of the cross,"))
 
             HStack(alignment: .firstTextBaseline, spacing: 0) {
                 Text("℟.").type(lineStyle).foregroundStyle(p.rubric).frame(width: m.px(27), alignment: .leading)
@@ -883,25 +888,31 @@ private struct AboutSpecimenLeaf: View {
             }
             .padding(.bottom, m.px(8))
             .background { if litKey == "vr" { SpecimenLitPool() } }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Response. \(specimen.openingResponse)")
 
             // The close's greeting, as the chosen form gives it: a deacon greets as a priest does.
             RuledDivider(color: p.lining.opacity(0.19), weight: 0.75, seed: 170)
 
             let clergy = form != "private"
+            let formV = clergy ? specimen.priestVersicle : specimen.aloneVersicle
+            let formR = clergy ? specimen.priestResponse : specimen.aloneResponse
             VStack(alignment: .leading, spacing: m.px(4)) {
                 HStack(alignment: .firstTextBaseline, spacing: 0) {
                     Text("℣.").type(lineStyle).foregroundStyle(p.rubric).frame(width: m.px(27), alignment: .leading)
-                    Text(clergy ? specimen.priestVersicle : specimen.aloneVersicle).type(lineStyle).foregroundStyle(p.text)
+                    Text(formV).type(lineStyle).foregroundStyle(p.text)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 HStack(alignment: .firstTextBaseline, spacing: 0) {
                     Text("℟.").type(lineStyle).foregroundStyle(p.rubric).frame(width: m.px(27), alignment: .leading)
-                    Text(clergy ? specimen.priestResponse : specimen.aloneResponse).type(lineStyle).foregroundStyle(p.text)
+                    Text(formR).type(lineStyle).foregroundStyle(p.text)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             .padding(.top, m.px(7))
             .background { if litKey == "form" { SpecimenLitPool() } }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Versicle. \(formV) Response. \(formR)")
         }
         .padding(.horizontal, m.px(18))
         .padding(.vertical, m.px(15))
@@ -909,12 +920,19 @@ private struct AboutSpecimenLeaf: View {
         .background {
             if let tablet = UIImage(named: "tablet.png") {
                 Image(uiImage: tablet).renderingMode(.template).resizable().foregroundStyle(wash).padding(1)
+                    .accessibilityHidden(true)
             }
         }
         .overlay {
             Canvas { ctx, size in invitationRules(ctx, size, lining: p.lining, frontal: o.flat, seed: 161, share: 0.58) }
                 .allowsHitTesting(false)
                 .accessibilityHidden(true)
+        }
+        .onChange(of: form) { _, next in
+            let clergy = next != "private"
+            let v = clergy ? specimen.priestVersicle : specimen.aloneVersicle
+            let r = clergy ? specimen.priestResponse : specimen.aloneResponse
+            UIAccessibility.post(notification: .announcement, argument: "Versicle. \(v) Response. \(r)")
         }
     }
 
@@ -991,6 +1009,7 @@ private struct AboutRuledKeyList: View {
                     .background { if active { PoolAlongRow(alpha: 0.85) } }
                 }
                 .buttonStyle(Quiet())
+                .accessibilityLabel("\(k.spoken): \(k.text)")
                 .accessibilityAddTraits(active ? .isSelected : [])
             }
             RuledDivider(color: p.lining.opacity(0.36), weight: 0.9, seed: 189)
@@ -1028,10 +1047,12 @@ private struct AboutLineageList: View {
                 HStack(alignment: .top, spacing: m.px(14)) {
                     Rectangle().fill(o.flat).frame(width: 6, height: 6).rotationEffect(.degrees(45))
                         .padding(.top, m.px(7))
+                        .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: m.px(4)) {
                         Text(era.period)
                             .type(TextStyle(size: 13.12, line: 18, tracking: 1.45, smallCaps: true))
                             .foregroundStyle(p.titulus)
+                            .accessibilityAddTraits(.isHeader)
                         Text(era.text)
                             .type(Scale.body.sized(20, line: 31))
                             .foregroundStyle(p.text)

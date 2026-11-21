@@ -37,6 +37,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberTimePickerState
@@ -581,7 +582,7 @@ fun PlainHeadpiece() {
     val rule = ink.copy(alpha = 0.55f)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Canvas(Modifier.width(22.dp).height(1.dp)) { drawRect(rule) }
-        Text("✠", Modifier.padding(horizontal = 8.dp), style = TextStyle(fontFamily = CrossFont, fontSize = 11.sp, color = ink))
+        Text("✠", Modifier.padding(horizontal = 8.dp).clearAndSetSemantics {}, style = TextStyle(fontFamily = CrossFont, fontSize = 11.sp, color = ink))
         Canvas(Modifier.width(22.dp).height(1.dp)) { drawRect(rule) }
     }
 }
@@ -672,8 +673,21 @@ private fun TimeDialog(hour: HourReminder, is24: Boolean, onDismiss: () -> Unit,
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val state = rememberTimePickerState(hour.time.hour, hour.time.minute, is24)
+    var keyboard by remember { mutableStateOf(false) }
     val period = PERIODS.firstOrNull { hour.hour in it.hours }?.let { periodOf(it.label) } ?: Period.DAY
     val link = Type.body.copy(fontSize = 17.6.sp, lineHeight = 24.sp)
+    val pickerColors = TimePickerDefaults.colors(
+        clockDialColor = p.bg,
+        selectorColor = p.accent,
+        timeSelectorSelectedContainerColor = p.pressedWash,
+        timeSelectorSelectedContentColor = p.text,
+        timeSelectorUnselectedContainerColor = p.bg,
+        timeSelectorUnselectedContentColor = p.muted,
+        periodSelectorSelectedContainerColor = p.pressedWash,
+        periodSelectorSelectedContentColor = p.text,
+        periodSelectorUnselectedContentColor = p.muted,
+        periodSelectorBorderColor = p.border,
+    )
     AlertDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.border(1.dp, p.border, RectangleShape).drawWithContent {
@@ -683,9 +697,17 @@ private fun TimeDialog(hour: HourReminder, is24: Boolean, onDismiss: () -> Unit,
         shape = RectangleShape,
         containerColor = p.surface,
         title = {
-            Row(Modifier.semantics(mergeDescendants = true) { heading() }, verticalAlignment = Alignment.CenterVertically) {
-                PeriodIcon(period, o.flat)
-                Text(hour.name, Modifier.padding(start = 6.dp), style = Type.label(13.12f, 0.12f).copy(color = p.titulus, fontFeatureSettings = ALL_SMALL_CAPS))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.semantics(mergeDescendants = true) { heading() }, verticalAlignment = Alignment.CenterVertically) {
+                    PeriodIcon(period, o.flat)
+                    Text(hour.name, Modifier.padding(start = 6.dp), style = Type.label(13.12f, 0.12f).copy(color = p.titulus, fontFeatureSettings = ALL_SMALL_CAPS))
+                }
+                Text(
+                    if (keyboard) "Clock dial" else "Keyboard",
+                    Modifier.heightIn(min = 44.dp).tap(label = if (keyboard) "Switch to clock dial" else "Switch to keyboard time input") { keyboard = !keyboard }
+                        .padding(horizontal = 4.dp, vertical = 10.dp),
+                    style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.sp, color = p.accent),
+                )
             }
         },
         confirmButton = {
@@ -699,21 +721,7 @@ private fun TimeDialog(hour: HourReminder, is24: Boolean, onDismiss: () -> Unit,
             Text("Cancel", Modifier.heightIn(min = 44.dp).tap(onClick = onDismiss).padding(horizontal = 8.dp, vertical = 10.dp), style = link.copy(color = p.muted))
         },
         text = {
-            TimePicker(
-                state,
-                colors = TimePickerDefaults.colors(
-                    clockDialColor = p.bg,
-                    selectorColor = p.accent,
-                    timeSelectorSelectedContainerColor = p.pressedWash,
-                    timeSelectorSelectedContentColor = p.text,
-                    timeSelectorUnselectedContainerColor = p.bg,
-                    timeSelectorUnselectedContentColor = p.muted,
-                    periodSelectorSelectedContainerColor = p.pressedWash,
-                    periodSelectorSelectedContentColor = p.text,
-                    periodSelectorUnselectedContentColor = p.muted,
-                    periodSelectorBorderColor = p.border,
-                ),
-            )
+            if (keyboard) TimeInput(state, colors = pickerColors) else TimePicker(state, colors = pickerColors)
         },
     )
 }

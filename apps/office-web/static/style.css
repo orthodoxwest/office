@@ -439,7 +439,11 @@ input {
   display: none !important;
 }
 
+/* Words said for what the eye reads otherwise (✠, Ant., a year in Roman
+   numerals) stay out of copied text. */
 .sr-only {
+  -webkit-user-select: none;
+  user-select: none;
   position: absolute;
   width: 1px;
   height: 1px;
@@ -824,16 +828,19 @@ summary:focus-visible {
   color: var(--accent);
 }
 
-/* The app's one caret, in the ink of the words it opens, a little lighter. */
+/* The app's one caret, in the ink of the words it opens, a little lighter.
+   Every caret is declared twice: the `/ ""` form keeps a screen reader from
+   reading the triangle, and Safari before 17.4, which rejects that form,
+   keeps the plain one instead of losing the caret. */
 .site-settings > summary::after {
-  content: "▾";
+  content: "▾"; content: "▾" / "";
   margin-left: 0.4rem;
   color: color-mix(in srgb, currentColor 70%, transparent);
   font-size: 0.85em;
 }
 
 .site-settings[open] > summary::after {
-  content: "▴";
+  content: "▴"; content: "▴" / "";
 }
 
 .site-settings > summary:focus-visible {
@@ -1114,14 +1121,14 @@ summary:focus-visible {
   /* Same disclosure mark as "Change date" on home and the hours: the app has
      one caret, not a caret here and a math sign there. */
   .site-menu > summary::after {
-    content: "▾";
+    content: "▾"; content: "▾" / "";
     margin-left: 0.4rem;
     color: color-mix(in srgb, currentColor 70%, transparent);
     font-size: 0.85em;
   }
 
   .site-menu[open] > summary::after {
-    content: "▴";
+    content: "▴"; content: "▴" / "";
   }
 
   .site-menu-panel {
@@ -1949,14 +1956,14 @@ button.hour-meta-date[aria-expanded="true"] {
 }
 
 .hour-date-nav > summary::after {
-  content: "▾";
+  content: "▾"; content: "▾" / "";
   margin-inline-start: 0.35em;
   color: color-mix(in srgb, currentColor 70%, transparent);
   font-size: 0.85em;
 }
 
 .hour-date-nav[open] > summary::after {
-  content: "▴";
+  content: "▴"; content: "▴" / "";
 }
 
 /* Disclosure labels that are flex boxes (for their touch height) trim the
@@ -2208,14 +2215,14 @@ html[data-newcomer] .home-season {
 }
 
 .date-picker-title::after {
-  content: "▾";
+  content: "▾"; content: "▾" / "";
   margin-inline-start: 0.35em;
   color: var(--gold-line);
   font-size: 0.85em;
 }
 
 .date-picker[data-view="months"] .date-picker-title::after {
-  content: "▴";
+  content: "▴"; content: "▴" / "";
 }
 
 /* Both views share one cell of the grid, so the months view keeps the
@@ -3660,7 +3667,7 @@ html[data-newcomer] .home-season {
 }
 
 .session-prayers summary::after {
-  content: "▾";
+  content: "▾"; content: "▾" / "";
   margin-inline-start: 0.35em;
   color: color-mix(in srgb, currentColor 70%, transparent);
   font-size: 0.75em;
@@ -3668,7 +3675,7 @@ html[data-newcomer] .home-season {
 }
 
 .session-prayers[open] > summary::after {
-  content: "▴";
+  content: "▴"; content: "▴" / "";
 }
 
 /* ── Offline state ── */
@@ -4436,12 +4443,12 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
 }
 .day-disclosures summary::-webkit-details-marker { display: none; }
 .day-disclosures summary::after {
-  content: "▾";
+  content: "▾"; content: "▾" / "";
   margin-left: 0.3em;
   color: color-mix(in srgb, currentColor 70%, transparent);
   font-size: 0.85em;
 }
-.day-disclosures details[open] > summary::after { content: "▴"; }
+.day-disclosures details[open] > summary::after { content: "▴"; content: "▴" / ""; }
 /* From a tablet up the feast and its disclosures share one line, so a month
    reads as a list of days rather than a stack of cards and the page is near
    half as long; an opened disclosure drops below the name at full width. On
@@ -5264,14 +5271,14 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
 .feast-hymn > summary::-webkit-details-marker { display: none; }
 .feast-hymn > summary h3 { margin: 0; }
 .feast-hymn > summary h3::after {
-  content: "▾" / "";
+  content: "▾"; content: "▾" / "";
   margin-inline-start: 0.35em;
   color: color-mix(in srgb, currentColor 70%, transparent);
   font-size: 0.75em;
   font-variant: normal;
   letter-spacing: 0;
 }
-.feast-hymn[open] > summary h3::after { content: "▴" / ""; }
+.feast-hymn[open] > summary h3::after { content: "▴"; content: "▴" / ""; }
 .feast-hymn-title { flex-basis: 100%; color: var(--muted); font-size: 1.02rem; font-style: italic; }
 .feast-hymn .hymn-verses { margin-top: var(--space-bind); font-size: 1.08rem; }
 .feast-hymn .hymn-verses > * { margin-block: 0; }
@@ -8665,8 +8672,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 
 .about-horologium-stop {
   position: absolute;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.75rem;
+  height: 2.75rem;
   margin: 0;
   padding: 0;
   border: 0;
@@ -13576,8 +13583,8 @@ body.page-home::before {
 }
 .usage-trend-details summary { display: flex; align-items: center; gap: .7rem; min-height: 2.75rem; cursor: pointer; color: var(--text); font-size: .9rem; list-style: none; }
 .usage-trend-details summary::-webkit-details-marker { display: none; }
-.usage-trend-details summary::after { content: "▾"; color: var(--gold-line); }
-.usage-trend-details[open] > summary::after { content: "▴"; }
+.usage-trend-details summary::after { content: "▾"; content: "▾" / ""; color: var(--gold-line); }
+.usage-trend-details[open] > summary::after { content: "▴"; content: "▴" / ""; }
 @media (max-width: 850px) {
   .usage-overview { grid-template-columns: 1fr; gap: 0; }
 }
@@ -13787,9 +13794,9 @@ body.page-home::before {
 .leader-selector > summary::-webkit-details-marker,
 .reading-key > summary::-webkit-details-marker { display: none; }
 .leader-selector > summary::after,
-.reading-key > summary::after { content: "▾"; margin-inline-start: .1em; color: color-mix(in srgb, currentColor 70%, transparent); font-size: .85em; letter-spacing: 0; }
+.reading-key > summary::after { content: "▾"; content: "▾" / ""; margin-inline-start: .1em; color: color-mix(in srgb, currentColor 70%, transparent); font-size: .85em; letter-spacing: 0; }
 .leader-selector[open] > summary::after,
-.reading-key[open] > summary::after { content: "▴"; }
+.reading-key[open] > summary::after { content: "▴"; content: "▴" / ""; }
 /* On an hour the header disclosures take home's foot letter, true small
    capitals (not capitals shrunk to 0.72rem), and each keeps one line: on a
    first-class day the frame narrows the measure by 24px, and "Prayer form:

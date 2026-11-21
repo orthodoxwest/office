@@ -54,9 +54,6 @@
 {% endblock %}{% block content %}{% from "macros.html" import headpiece %}
 <div class="office-hour">
   <div class="color-band color-band-{{ hour.color }}" id="hour-band"><span class="sr-only">Liturgical color: {{ hour.color }}</span></div>
-  <div class="hour-scroll-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progress through the prayer text">
-    <div class="hour-scroll-progress-bar"></div>
-  </div>
   {# The day's colour reaches the title's lozenge; the headpiece is set
        into the title's upper rule, as home and the ordo open their pages. #}
   <div class="hour-header day-color-{{ hour.color }}">
@@ -70,7 +67,7 @@
          way into the date picker below (app.js), so the header carries no
          "Change date" label; without it the disclosure keeps its summary. #}
     {%- set season = hour.season|season_label %}
-    <p class="hour-meta"><span class="hour-meta-line"><span class="hour-meta-part hour-meta-date">{{ date_str }}</span>{% if season %}<span class="hour-meta-sep">&nbsp;&middot; </span><span class="hour-meta-part">{{ season }}</span>{% endif %}</span>{% if hour.feast %}<span class="sr-only">. </span><span class="hour-meta-part hour-meta-feast">{% if hour.feast_href %}<a class="feast-link hour-feast-link" href="{{ hour.feast_href|url }}" title="About this feast">{{ hour.feast|typeset }}</a>{% else %}{{ hour.feast|typeset }}{% endif %}</span>{% endif %}</p>
+    <p class="hour-meta"><span class="hour-meta-line"><span class="hour-meta-part hour-meta-date">{{ date_str }}</span>{% if season %}<span class="hour-meta-sep" aria-hidden="true">&nbsp;&middot; </span><span class="sr-only">, </span><span class="hour-meta-part">{{ season }}</span>{% endif %}</span>{% if hour.feast %}<span class="sr-only">. </span><span class="hour-meta-part hour-meta-feast">{% if hour.feast_href %}<a class="feast-link hour-feast-link" href="{{ hour.feast_href|url }}" title="About this feast">{{ hour.feast|typeset }}</a>{% else %}{{ hour.feast|typeset }}{% endif %}</span>{% endif %}</p>
     {# Always visible when not local today — recovery from an overnight tab
          must not require opening "Change date". Secondary Today stays in the form. #}
     {# No role=status on server markup — see home.html. Client inject uses a live region. #}
@@ -112,8 +109,8 @@
       <summary>{{ reading_key.label }}</summary>
       <div class="reading-key-panel">
         <p class="reading-key-title">{{ reading_key.title }}</p>
-        <ul class="reading-key-list">
-          {% for item in reading_key.items %}<li><span class="rk-mark rk-{{ item.style }}">{% if item.style == "psalm" %}{% set pp = item.mark|split(" ", 1)|list %}{{ pp[0] }}{% if pp|length == 2 %} <span>{{ pp[1] }}</span>{% endif %}{% else %}{{ item.mark }}{% endif %}</span><span class="rk-desc">{{ item.text }}</span></li>{% endfor %}
+        <ul class="reading-key-list" role="list">
+          {% for item in reading_key.items %}<li><span class="rk-mark rk-{{ item.style }}">{% if item.style == "psalm" %}{% set pp = item.mark|split(" ", 1)|list %}{{ pp[0] }}{% if pp|length == 2 %} <span>{{ pp[1] }}</span>{% endif %}{% elif item.spoken != item.mark %}<span aria-hidden="true">{{ item.mark }}</span><span class="sr-only">{{ item.spoken }}</span>{% else %}{{ item.mark }}{% endif %}</span><span class="sr-only">: </span><span class="rk-desc">{{ item.text }}</span></li>{% endfor %}
         </ul>
         <p class="reading-key-foot">{{ reading_key.foot_before }}<a href="/about">{{ reading_key.foot_link }}</a>{{ reading_key.foot_after }}</p>
       </div>
@@ -185,10 +182,13 @@
     </script>
     {%- endif %}
     <nav class="hour-continuation" aria-label="Other hours for this day">
-      {% if previous_hour_link %}<a class="hour-continuation-link previous-hour" href="{{ previous_hour_link|url }}"><span class="continuation-label">Previous hour</span><span>&larr; {{ previous_hour_name }}</span></a>{% else %}<span></span>{% endif %}
+      {% if previous_hour_link %}<a class="hour-continuation-link previous-hour" href="{{ previous_hour_link|url }}"><span class="continuation-label">Previous hour</span><span class="sr-only">: </span><span><span aria-hidden="true">&larr; </span>{{ previous_hour_name }}</span></a>{% else %}<span></span>{% endif %}
       <a class="day-hours-link" href="{{ day_link|url }}">All hours</a>
-      {% if next_hour_link %}<a class="hour-continuation-link next-hour" href="{{ next_hour_link|url }}"><span class="continuation-label">{{ "Tomorrow" if hour_name == "compline" else "Next hour" }}</span><span>{{ next_hour_name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
+      {% if next_hour_link %}<a class="hour-continuation-link next-hour" href="{{ next_hour_link|url }}"><span class="continuation-label">{{ "Tomorrow" if hour_name == "compline" else "Next hour" }}</span><span class="sr-only">: </span><span>{{ next_hour_name }}<span aria-hidden="true"> &rarr;</span></span></a>{% else %}<span></span>{% endif %}
     </nav>
+  </div>
+  <div class="hour-scroll-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progress through the prayer text">
+    <div class="hour-scroll-progress-bar"></div>
   </div>
 </div>
 {% endblock %}
@@ -233,10 +233,11 @@
       if (line.tagName !== "SUMMARY" && line.closest("details:not([open])")) return false;
       return line.getClientRects().length > 0;
     }
-    // A chant score by the words it sets (its aria-label), not its SVG, which chant.js lays out
+    // A chant score by the words it sets (its sr-only text), not its SVG, which chant.js lays out
     // again at the column's width.
     function words(line) {
-      var said = line.classList.contains("chant-score") ? line.getAttribute("aria-label") : null;
+      var scoreText = line.classList.contains("chant-score") && line.querySelector(".sr-only");
+      var said = scoreText ? scoreText.textContent : (line.classList.contains("chant-score") ? line.getAttribute("aria-label") : null);
       return (said || line.textContent || "").replace(/\s+/g, " ").trim().slice(0, 60);
     }
     // The reading's top edge: under the colour band and the hairline.
