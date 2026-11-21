@@ -134,6 +134,13 @@ boot() {
   nohup xcrun simctl boot "$1" > "${RUNNER_TEMP:-/tmp}/boot-$1.log" 2>&1 &
 }
 
+# Waits until SIM has booted, booting it if nothing has. bootstatus -b fails ("Unable to boot
+# device in current state: Booted") when a `boot` started just before it is still under way, so
+# then it only waits.
+booted() {
+  xcrun simctl bootstatus "$1" -b > /dev/null 2>&1 || xcrun simctl bootstatus "$1" > /dev/null
+}
+
 shoot_one() {
   local role=$1 sim=$2 app=$3 out=$4
   case "$role" in
@@ -237,12 +244,12 @@ shoot_one() {
     fi
     echo "$(date +%T) $name (cleared and launched in $((launched - began))s, drawn after ${drawn}s, at rest $((settled + 1))s later)"
   }
-  # The simulator booted (if it is not already: bootstatus -b boots it), set up and given the
+  # The simulator booted (if it is not already, `booted` boots it), set up and given the
   # app. Each step says when it is done, so a slow one shows in the log.
   local start=$SECONDS
   step() { echo "$(date +%T) $role: $1 ($((SECONDS - start))s in)"; }
   step "waiting for $sim to boot"
-  xcrun simctl bootstatus "$sim" -b > /dev/null
+  booted "$sim"
   step "booted"
   xcrun simctl ui "$sim" appearance light
   # Dynamic Type at its default, whatever the image set.
@@ -343,7 +350,8 @@ shoot() {
 case "${1:-}" in
   devices) shift; devices "$@" ;;
   boot) shift; boot "$@" ;;
+  booted) shift; booted "$@" ;;
   shoot-one) shift; shoot_one "$@" ;;
   shoot) shift; shoot "$@" ;;
-  *) echo "usage: $0 devices [store] | boot SIM | shoot-one ROLE SIM APP OUT | shoot PHONE IPAD APP OUT" >&2; exit 2 ;;
+  *) echo "usage: $0 devices [store] | boot SIM | booted SIM | shoot-one ROLE SIM APP OUT | shoot PHONE IPAD APP OUT" >&2; exit 2 ;;
 esac

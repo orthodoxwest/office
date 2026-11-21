@@ -264,7 +264,7 @@ jobs:
           PHONE: ${{ steps.sim.outputs.phone }}
         run: |
           start=$SECONDS
-          xcrun simctl bootstatus "$PHONE" -b > /dev/null
+          apps/ios/screenshots.sh booted "$PHONE"
           echo "booted after $((SECONDS - start))s of waiting"
 
       - name: Test
