@@ -23,7 +23,7 @@ Needs PLAY_SERVICE_ACCOUNT_JSON (the Play upload's service account). In auto mod
 build comes from the Publish to Play workflow's runs (GITHUB_TOKEN, GITHUB_REPOSITORY): each push
 run that succeeded uploaded the build whose version code is its commit's count (as
 apps/android/app/build.gradle.kts numbers them), so the run's finishing time is when the build
-reached Closed testing. A version code Play has no bundle for is skipped.
+reached Closed testing.
 """
 
 from __future__ import annotations
@@ -74,10 +74,6 @@ class Play:
         if r.status_code >= 400:
             sys.exit(f"::error::Play API {method} {path}: {r.status_code} {r.text}")
         return r.json() if r.content else {}
-
-    def bundles(self) -> set[int]:
-        """The version codes of every bundle uploaded to the app."""
-        return {int(b["versionCode"]) for b in self._call("GET", f"/edits/{self.edit}/bundles").get("bundles", [])}
 
     def track(self, name: str) -> list[dict]:
         return self._call("GET", f"/edits/{self.edit}/tracks/{name}").get("releases", [])
@@ -210,9 +206,10 @@ def main() -> None:
             # The newest build a day old, even one a later merge has replaced on Closed testing: merges
             # land more often than daily, so waiting for the build there now to age never promotes.
             # Every such build went to Internal testing unreviewed, and Google reviews the release.
-            candidates = [(c, sha) for c, sha in uploads(args.min_age) if c > live_code]
-            uploaded = play.bundles() if candidates else set()
-            ready = [(c, sha) for c, sha in candidates if c in uploaded]
+            # Not checked against Play's bundle list, which left out replaced builds and so blocked
+            # every one; a version code Play lacks fails the commit with Play's error.
+            ready = [(c, sha) for c, sha in uploads(args.min_age) if c > live_code]
+            log(f"Uploaded at least {args.min_age:g} hours ago, newer than production: {[c for c, _ in ready]}")
             if ready:
                 code, sha = ready[0]
                 release = release_of(code, testing, args.rollout, sha)

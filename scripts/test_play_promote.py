@@ -23,19 +23,15 @@ TESTING = [{"status": "completed", "versionCodes": ["120"], "releaseNotes": NOTE
 NOW = PROMOTE.dt.datetime(2026, 11, 12, 15, 0, tzinfo=PROMOTE.dt.timezone.utc)
 
 
-def run(argv, production, testing=TESTING, uploads=(), bundles=None, notes=()):
+def run(argv, production, testing=TESTING, uploads=(), notes=()):
     """main()'s production release for these tracks and uploads, or None when it sends nothing.
 
-    `uploads` are version codes (their commit is "c<code>"); Play has a bundle for each unless
-    `bundles` says otherwise; `notes` is whatsnew.txt's text at every commit."""
+    `uploads` are version codes (their commit is "c<code>"); `notes` is whatsnew.txt's text at every commit."""
     sent = []
 
     class Play:
         def __init__(self, _key):
             pass
-
-        def bundles(self):
-            return set(uploads if bundles is None else bundles)
 
         def track(self, name):
             return testing if name == "alpha" else production
@@ -84,11 +80,6 @@ class AutoTest(unittest.TestCase):
         release = run(["auto"], [], testing=[], uploads=[120])
         self.assertEqual(release["versionCodes"], ["120"])
         self.assertNotIn("releaseNotes", release)
-
-    def test_a_build_play_never_got_is_skipped(self):
-        release = run(["auto"], [{"status": "completed", "versionCodes": ["100"]}], uploads=[120, 110], bundles=[110, 100])
-        self.assertEqual(release["versionCodes"], ["110"])
-        self.assertIsNone(run(["auto"], [], uploads=[120], bundles=[]))
 
     def test_a_staged_rollout_is_finished_once_it_has_run_its_time(self):
         release = run(["auto"], [{"status": "completed", "versionCodes": ["100"]}, staged(110, 48)], uploads=[120])
