@@ -134,7 +134,7 @@ class AccessibilityTest {
         show(Page.About)
         compose.onNodeWithText("About the Office").assert(isHeading())
         compose.onNodeWithText("The seven hours").assert(isHeading())
-        compose.onNode(hasContentDescription("The Daily Office", substring = true)).assertExists()
+        compose.onNode(hasContentDescription("The Divine Office is the Church", substring = true)).assertExists()
         compose.onNodeWithText("Lauds").assert(role(Role.Button))
         compose.onNodeWithText("Compline").assert(role(Role.Button))
     }

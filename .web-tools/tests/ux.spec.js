@@ -1189,7 +1189,7 @@ test("a place hidden by another prayer form or the Martyrology opens where the w
   await page.evaluate(() => localStorage.setItem("office-prayer-form", "deacon"));
   const amen = (form) => `(all) => {
     const way = document.querySelector('.leader-slot[data-leader-slot="confession"] > [data-leaders~="${form}"]');
-    return all.filter((l) => way.contains(l) && /^℟\\.\\s*Amen\\.$/.test(l.textContent.replace(/\\s+/g, " ").trim()))[1];
+    return all.filter((l) => way.contains(l) && /^℟\\.(?:Response\\.)?\\s*Amen\\.$/.test(l.textContent.replace(/\\s+/g, " ").trim()))[1];
   }`;
   const confession = await reopened(amen("deacon"), () => localStorage.setItem("office-prayer-form", "private"));
   const privateAmen = await page.evaluate(([LINES, pick]) => {
@@ -2734,7 +2734,10 @@ test("menus put away on a tap iOS Safari sends no click for", async ({ page }) =
   await expect(menu).not.toHaveAttribute("open", "");
   await page.getByText("Menu", { exact: true }).tap();
   await expect(menu).toHaveAttribute("open", "");
-  await page.locator("footer > p").first().tap();
+  // The page under the open menu is inert, so the tap lands on the body
+  // beneath the footer's words: tapped where they are, not at the element.
+  const footerLine = await page.locator("footer > p").first().boundingBox();
+  await page.touchscreen.tap(footerLine.x + footerLine.width / 2, footerLine.y + footerLine.height / 2);
   await expect(menu).not.toHaveAttribute("open", "");
   // The word itself still closes it as well as opening it.
   await page.getByText("Menu", { exact: true }).tap();
@@ -6252,7 +6255,8 @@ test('private greetings are not repeated after preces when switching offline or 
     await page.goto(`${path}?form=private`);
     const prayers = page.locator('.elements');
     const countPrivateResponses = async () => {
-      const text = (await prayers.innerText()).replace(/[℣℟]\./g, '').replace(/\s+/g, ' ');
+      // The sigils and the words a screen reader says for them (Versicle., Response.) left out.
+      const text = (await prayers.innerText()).replace(/[℣℟]\.|\b(?:Versicle|Response)\./g, '').replace(/\s+/g, ' ');
       return (text.match(/O Lord, hear my prayer\. And let my cry come unto thee\./g) || []).length;
     };
     expect(await countPrivateResponses()).toBe(privateCount);
@@ -7422,6 +7426,17 @@ test("mobile screen readers hear clean liturgical marks, inert menu backdrop, an
   await expect(page.locator(".mediant").first()).toHaveAttribute("aria-hidden", "true");
   await expect(page.locator(".verse-num").first()).toHaveAttribute("aria-hidden", "true");
   await expect(page.locator(".cross .sr-only").first()).toContainText("sign of the cross");
+  // A copied line is the line as printed, without the words said for its marks.
+  const copied = await page.locator(".cross").first().evaluate((cross) => {
+    const range = document.createRange();
+    range.selectNodeContents(cross.closest("p"));
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return selection.toString();
+  });
+  expect(copied).toContain("✠");
+  expect(copied).not.toContain("sign of the cross");
   const score = page.locator(".chant-score").first();
   await expect(score).not.toHaveAttribute("role", "img");
   await expect(score.locator(".sr-only")).not.toHaveText("");
@@ -7443,7 +7458,7 @@ test("mobile screen readers hear clean liturgical marks, inert menu backdrop, an
 
   // Ordo rank marks announce their full rank names and month headings omit the back-to-top link text.
   await page.goto("/calendar/2026/03");
-  await expect(page.locator(".month-table abbr[role='button']").first()).toHaveAttribute("aria-label", /Double|Class|Feria|Simple/i);
+  await expect(page.locator(".month-table abbr.day-mobile-rank[role='button']").first()).toHaveAttribute("aria-label", /Double|Class|Feria|Simple/i);
   await expect(page.locator(".month > h2").first()).toHaveAttribute("aria-label", "March");
 });
 

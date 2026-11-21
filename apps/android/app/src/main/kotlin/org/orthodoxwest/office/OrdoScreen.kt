@@ -1126,9 +1126,9 @@ private fun OrdoDayView.hasVespers() = magnificatAntiphon.isNotEmpty() || vesper
 
 @Composable
 private fun SmallDisclosure(label: String, open: Boolean, onToggle: () -> Unit) {
-    // As tall as its type: no row keeps a 44dp line for it. `.reach()` expands the touch box
-    // to 48dp without adding row height, as the web draws its thumb box.
-    Row(Modifier.reach().tap(onClick = onToggle).disclosed(open), verticalAlignment = Alignment.CenterVertically) {
+    // As tall as its type: no row keeps a 44dp line for it. Compose still answers a touch over the
+    // platform's whole minimum target round it, as the web draws its thumb box.
+    Row(Modifier.tap(onClick = onToggle).disclosed(open), verticalAlignment = Alignment.CenterVertically) {
         Text(label, style = Type.small.copy(fontSize = 12.sp, lineHeight = 18.sp, color = LocalPalette.current.muted))
         Caret(open, LocalPalette.current.muted)
     }

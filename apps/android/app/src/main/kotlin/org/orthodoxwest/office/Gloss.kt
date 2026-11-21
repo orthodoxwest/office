@@ -348,7 +348,6 @@ fun NoteMark(name: String, label: String, modifier: Modifier = Modifier, mark: @
     Box(
         modifier
             .onGloballyPositioned { coordinates[0] = it }
-            .reach()
             .tap(label = label) { open = !open }
             .semantics { stateDescription = if (open) "Expanded" else "Collapsed" },
     ) {
