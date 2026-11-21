@@ -15005,8 +15005,13 @@ body.page-home::before {
     crown-glow-in calc(var(--crown-glow-dur) * 1ms * var(--crown-kp)) var(--crown-glow-ease) calc(var(--crown-spread-at) * 1ms * var(--crown-kp)) both;
 }
 
+/* KEEP: never quite 0. While the new page's still stands at exactly 0
+   (held there by the delay above) WebKit stalls the page: on Linux it ran no
+   script, timer or frame for 5 s of a play, 9 s with four plays at once, and
+   a still held at 0 for the whole play stalled 17 s (#923). A thousandth is
+   under one level of 8-bit alpha, so nothing of the new page shows. */
 @keyframes crown-glow-in {
-  from { opacity: 0; }
+  from { opacity: 0.001; }
   to { opacity: 1; }
 }
 
