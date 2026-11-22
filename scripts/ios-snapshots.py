@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """The iOS app's checked-in screenshot baselines (apps/ios/snapshots/).
 
-    ios-snapshots.py compare RAW BASELINES --updates DIR --diffs DIR [--summary FILE]
+    ios-snapshots.py compare RAW BASELINES --updates DIR --diffs DIR [--summary FILE] [--changes FILE]
+    ios-snapshots.py environment RAW
+    ios-snapshots.py probe RAW [--summary FILE]
     ios-snapshots.py fetch BRANCH [--remote origin]
     ios-snapshots.py store RAW OUT
     ios-snapshots.py blank SHOT [--ipad]
@@ -24,8 +26,18 @@ while it is taken (apps/ios/screenshots.sh), exiting 0 when it is blank.
 It exits 0 when every shot matches, when there are no baselines yet (with a notice) or when the
 shots were not compared (another environment, with a warning); 1 when a shot changed, is new or is
 gone; 2 when a shot is blank or none was taken. --output gets the state (matched, no-baselines,
-not-compared, differ, blank or none), and --summary a section for each of them. Shots from another Xcode or runtime than the baselines'
+not-compared, differ, blank or none), --summary a section for each of them, and --changes a JSON
+object listing the changed, new and gone shots by name (ios.yml's comment shows them). Shots from another Xcode or runtime than the baselines'
 (environment.json) are not compared: they differ in ways no page changed.
+
+`environment` joins what each device's shots were taken with (environment-phone.json and
+environment-ipad.json, which apps/ios/screenshots.sh shoot-one writes on its own runner) into the
+one environment.json the baselines keep, refusing a pair from different Xcodes or runtimes.
+
+`probe` takes a probe run's shots (apps/ios/screenshots.sh with PROBE=N: each of a few pages
+shot N times, as NAME-1.png to NAME-N.png) and says, for each page, which launches drew it on
+other pixels than the first, at any difference at all, with the geometry notes that differ. It
+exits 1 when any did.
 
 `fetch` copies the comparable set a CI run published to ci/ios-screenshots/BRANCH (its
 snapshots/ folder) into apps/ios/snapshots/, for when the label cannot be used: on the pull
@@ -136,13 +148,36 @@ def read_environment(folder):
     return env
 
 
+def join_environment(raw):
+    """environment-phone.json and environment-ipad.json in raw, joined into raw/environment.json."""
+    parts = {}
+    for role in ("phone", "ipad"):
+        path = raw / f"environment-{role}.json"
+        if not path.is_file():
+            raise SystemExit(f"{path}: missing (apps/ios/screenshots.sh shoot-one {role} writes it)")
+        part = json.loads(path.read_text())
+        if (not isinstance(part, dict) or set(part) != {"xcode", "runtime", "device"}
+                or not all(isinstance(v, str) and ENVIRONMENT_VALUE.fullmatch(v) for v in part.values())):
+            raise SystemExit(f"{path}: expected exactly xcode, runtime and device, each matching {ENVIRONMENT_VALUE.pattern}")
+        parts[role] = part
+    phone, ipad = parts["phone"], parts["ipad"]
+    for key in ("xcode", "runtime"):
+        if phone[key] != ipad[key]:
+            raise SystemExit(f"The iPhone and the iPad were shot with different {key}s: {phone[key]}, {ipad[key]}")
+    env = {"xcode": phone["xcode"], "runtime": phone["runtime"], "phone": phone["device"], "ipad": ipad["device"]}
+    (raw / ENVIRONMENT).write_text(json.dumps(env, indent=2) + "\n")
+    for role in parts:
+        (raw / f"environment-{role}.json").unlink()
+    return env
+
+
 def write_summary(summary, heading, text):
     if summary:
         with open(summary, "a") as out:
             out.write(f"## iOS screenshots: {heading}\n\n{text}\n\n")
 
 
-def compare(raw, baselines, updates, diffs, summary=None):
+def compare(raw, baselines, updates, diffs, summary=None, changes=None):
     """
     Compares the shots in raw with the baselines. Returns the exit status, the state
     (matched, differ, no-baselines, not-compared; blank or none, which exit 2) and the report's lines.
@@ -238,6 +273,9 @@ def compare(raw, baselines, updates, diffs, summary=None):
             same.append(name)
             shutil.copyfile(kept[name], updates / f"{name}.png")
     gone = sorted(set(kept) - set(shots) - set(EXCLUDED))
+    if changes:
+        pathlib.Path(changes).write_text(json.dumps(
+            {"changed": [name for name, _ in changed], "new": new, "gone": gone}, indent=2) + "\n")
 
     lines.append(f"{len(same)} of {len(shots)} iOS screenshots match their baselines.")
     for name, why in changed:
@@ -338,6 +376,46 @@ def store(raw, out):
             shot.save(out / folder / f"{n}-{name}.png", optimize=True)
 
 
+def probe(raw, summary=None):
+    """Whether each page's repeated shots in raw are alike to the pixel; see the module's docstring."""
+    from PIL import Image, ImageChops
+
+    def full(path):
+        with Image.open(path) as image:
+            return image.convert("RGB")
+
+    groups = {}
+    for path in sorted(raw.glob("*.png")):
+        m = re.fullmatch(r"(.+)-(\d+)", path.stem)
+        if m:
+            groups.setdefault(m.group(1), []).append((int(m.group(2)), path))
+    if not groups:
+        raise SystemExit(f"{raw}: no probe shots (NAME-N.png)")
+    lines, unstable = [], False
+    for name, shots in sorted(groups.items()):
+        shots.sort()
+        first = full(shots[0][1])
+        notes = lambda p: (p.parent / f"{p.stem}{GEOMETRY}").read_text() if (p.parent / f"{p.stem}{GEOMETRY}").is_file() else ""
+        odd = []
+        for n, path in shots[1:]:
+            box = ImageChops.difference(first, full(path)).getbbox()
+            if box:
+                odd.append(f"{n} (differs within {box})")
+        unstable |= bool(odd)
+        lines.append(f"{name}: {len(shots)} shots, " + (f"unlike the first: {', '.join(odd)}" if odd else "all alike"))
+        distinct = {}
+        for n, path in shots:
+            distinct.setdefault(notes(path), []).append(n)
+        if len(distinct) > 1:
+            for text, ns in distinct.items():
+                lines.append(f"  geometry of shots {ns}:\n" + "".join(f"    {line}\n" for line in text.splitlines()))
+    print("\n".join(lines))
+    if summary:
+        with open(summary, "a") as out:
+            out.write("## iOS probe\n\n```\n" + "\n".join(lines) + "\n```\n\n")
+    return 1 if unstable else 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -348,6 +426,12 @@ def main(argv=None):
     c.add_argument("--diffs", type=pathlib.Path, required=True)
     c.add_argument("--summary")
     c.add_argument("--output", help="a file to append state=<state> to, such as $GITHUB_OUTPUT")
+    c.add_argument("--changes", help="a JSON file to write the changed, new and gone shots' names to")
+    e = sub.add_parser("environment")
+    e.add_argument("raw", type=pathlib.Path)
+    pr = sub.add_parser("probe")
+    pr.add_argument("raw", type=pathlib.Path)
+    pr.add_argument("--summary")
     f = sub.add_parser("fetch")
     f.add_argument("branch")
     f.add_argument("--remote", default="origin")
@@ -369,7 +453,12 @@ def main(argv=None):
     if args.command == "fetch":
         fetch(args.branch, args.remote)
         return 0
-    status, state, lines = compare(args.raw, args.baselines, args.updates, args.diffs, args.summary)
+    if args.command == "probe":
+        return probe(args.raw, args.summary)
+    if args.command == "environment":
+        print(json.dumps(join_environment(args.raw)))
+        return 0
+    status, state, lines = compare(args.raw, args.baselines, args.updates, args.diffs, args.summary, args.changes)
     print("\n".join(lines))
     if args.output:
         with open(args.output, "a") as out:

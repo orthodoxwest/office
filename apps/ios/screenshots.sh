@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 # The simulator screenshots, for .github/workflows/ios.yml and update-ios-snapshots.yml.
 #
-#   screenshots.sh devices [store]   choose Xcode and the two simulators and start booting them;
-#                                    prints phone=, ipad= and pinned= lines for $GITHUB_OUTPUT
+#   screenshots.sh devices [store]   choose Xcode and the two simulators; prints phone=, ipad=
+#                                    and pinned= lines for $GITHUB_OUTPUT
+#   screenshots.sh boot SIM          start SIM booting in the background
+#   screenshots.sh shoot-one ROLE SIM APP OUT
+#                                    ROLE is phone or ipad: wait for SIM to boot, install APP and
+#                                    shoot that device's pages into OUT, with what they were taken
+#                                    with (environment-ROLE.json; scripts/ios-snapshots.py
+#                                    environment joins the two into environment.json)
 #   screenshots.sh shoot PHONE IPAD APP OUT
-#                                    install APP on both and shoot every page into OUT, with
-#                                    the environment they were taken in (environment.json)
+#                                    both on one runner, one after the other, and the joined
+#                                    environment.json
+#
+# ios.yml shoots the phone and the iPad on runners of their own (shoot-one), each booting only
+# its own simulator; update-ios-snapshots.yml's fallback takes both on one (shoot).
 #
 # The checked-in baselines (apps/ios/snapshots/) record the Xcode, runtime and devices they were
 # taken with (environment.json). `devices` takes the same ones when the runner has them, and says
@@ -111,18 +120,34 @@ PY
   fi
   local phone_id=${phone%%$'\t'*} ipad_id=${ipad%%$'\t'*}
   xcrun simctl list devices | grep -E "$phone_id|$ipad_id" >&2
-  # A simulator's first boot takes minutes, so both start now, behind the builds, and the
-  # screenshots wait for them (simctl bootstatus).
-  for sim in "$phone_id" "$ipad_id"; do
-    nohup xcrun simctl boot "$sim" > "${RUNNER_TEMP:-/tmp}/boot-$sim.log" 2>&1 &
-  done
+  # Nothing is booted here. A simulator's first boot keeps the runner's cores and disk busy for
+  # minutes: booted behind the Rust build, the two made it five to ten times slower (unpacking a
+  # cached toolchain took five minutes, the core's build seven to fourteen, against a minute and
+  # a half on TestFlight's runner of the same image, which boots none). So nothing is built on a
+  # runner while a simulator boots there (`boot`).
   echo "phone=$phone_id"
   echo "ipad=$ipad_id"
   echo "pinned=$pinned"
 }
 
-shoot() {
-  local phone=$1 ipad=$2 app=$3 out=$4
+boot() {
+  nohup xcrun simctl boot "$1" > "${RUNNER_TEMP:-/tmp}/boot-$1.log" 2>&1 &
+}
+
+# Waits until SIM has booted, booting it if nothing has. bootstatus -b fails ("Unable to boot
+# device in current state: Booted") when a `boot` started just before it is still under way, so
+# then it only waits.
+booted() {
+  xcrun simctl bootstatus "$1" -b > /dev/null 2>&1 || xcrun simctl bootstatus "$1" > /dev/null
+}
+
+shoot_one() {
+  local role=$1 sim=$2 app=$3 out=$4
+  case "$role" in
+    phone | ipad) ;;
+    *) echo "shoot-one: ROLE is phone or ipad, not $role" >&2; exit 2 ;;
+  esac
+  local phone=$sim ipad=$sim
   local id=org.orthodoxwest.office
   mkdir -p "$out"
   # The app's clock and zone, and the reader's language, are fixed with today; nothing else in
@@ -219,19 +244,21 @@ shoot() {
     fi
     echo "$(date +%T) $name (cleared and launched in $((launched - began))s, drawn after ${drawn}s, at rest $((settled + 1))s later)"
   }
-  for sim in "$phone" "$ipad"; do
-    echo "$(date +%T) waiting for $sim to boot"
-    xcrun simctl bootstatus "$sim" -b > /dev/null
-    echo "$(date +%T) booted"
-    xcrun simctl ui "$sim" appearance light
-    # Dynamic Type at its default, whatever the image set.
-    xcrun simctl ui "$sim" content_size large
-    xcrun simctl status_bar "$sim" override --time 9:41 --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4
-    xcrun simctl uninstall "$sim" "$id" > /dev/null 2>&1 || true
-    xcrun simctl install "$sim" "$app"
-  done
-  # The phone's shots, then the iPad's. (Taken at once, each simulator's launches waited on the
-  # other's, and the pair took longer than the two one after the other.)
+  # The simulator booted (if it is not already, `booted` boots it), set up and given the
+  # app. Each step says when it is done, so a slow one shows in the log.
+  local start=$SECONDS
+  step() { echo "$(date +%T) $role: $1 ($((SECONDS - start))s in)"; }
+  step "waiting for $sim to boot"
+  booted "$sim"
+  step "booted"
+  xcrun simctl ui "$sim" appearance light
+  # Dynamic Type at its default, whatever the image set.
+  xcrun simctl ui "$sim" content_size large
+  xcrun simctl status_bar "$sim" override --time 9:41 --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4
+  step "appearance and status bar set"
+  xcrun simctl uninstall "$sim" "$id" > /dev/null 2>&1 || true
+  xcrun simctl install "$sim" "$app"
+  step "app installed"
   phone_shots() {
     for theme in nave apse; do
       one "$phone" "home-$theme" -page home -theme "$theme"
@@ -270,12 +297,29 @@ shoot() {
     one "$ipad" "ipad-chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave
     one "$ipad" "ipad-settings-nave" -page home -theme nave -settings YES
   }
-  phone_shots
-  ipad_shots
-  # What they were taken with, which the baselines keep and the next run's `devices` follows.
-  python3 - "$phone" "$ipad" "$out/environment.json" <<'PY'
+  # PROBE=N: the anchored pages whose shots have differed by a hair between runs (#948), each N
+  # times on the phone and nothing on the iPad, for ios-snapshots.py probe to say whether every
+  # launch lands on the same pixels.
+  probe_shots() {
+    local i
+    for i in $(seq 1 "$PROBE"); do
+      one "$phone" "hymn-nave-$i" -page hour -hour vespers -anchor hymn -theme nave
+      one "$phone" "psalm-apse-$i" -page hour -hour vespers -anchor psalm -theme apse
+      one "$phone" "hymn-apse-$i" -page hour -hour vespers -anchor hymn -theme apse
+      one "$phone" "psalm-nave-$i" -page hour -hour vespers -anchor psalm -theme nave
+    done
+  }
+  if [ -z "${PROBE:-}" ]; then
+    "${role}_shots"
+  elif [ "$role" = phone ]; then
+    probe_shots
+  fi
+  step "shots taken"
+  # What they were taken with, which the baselines keep (joined with the other device's by
+  # scripts/ios-snapshots.py environment) and the next run's `devices` follows.
+  python3 - "$sim" "$out/environment-$role.json" <<'PY'
 import json, plistlib, subprocess, sys
-phone, ipad, path = sys.argv[1:]
+sim, path = sys.argv[1:]
 developer = subprocess.run(["xcode-select", "-p"], capture_output=True, text=True, check=True).stdout.strip()
 with open(developer.rsplit("/Contents/", 1)[0] + "/Contents/version.plist", "rb") as f:
     version = plistlib.load(f)
@@ -283,12 +327,9 @@ devices = json.loads(subprocess.run(["xcrun", "simctl", "list", "devices", "-j"]
 where = {d["udid"]: (runtime, d["name"]) for runtime, ds in devices.items() for d in ds}
 env = {
     "xcode": f'{version["CFBundleShortVersionString"]} {version["ProductBuildVersion"]}',
-    "runtime": where[phone][0],
-    "phone": where[phone][1],
-    "ipad": where[ipad][1],
+    "runtime": where[sim][0],
+    "device": where[sim][1],
 }
-if where[ipad][0] != env["runtime"]:
-    sys.exit(f"The iPhone and the iPad run different runtimes: {env['runtime']}, {where[ipad][0]}")
 with open(path, "w") as f:
     json.dump(env, f, indent=2)
     f.write("\n")
@@ -296,8 +337,21 @@ print(json.dumps(env))
 PY
 }
 
+# Both devices on one runner: the iPad boots behind the phone's shots, as the two have long done
+# on update-ios-snapshots.yml's fallback, where nothing else is left to slow.
+shoot() {
+  local phone=$1 ipad=$2 app=$3 out=$4
+  boot "$ipad"
+  (shoot_one phone "$phone" "$app" "$out")
+  (shoot_one ipad "$ipad" "$app" "$out")
+  python3 "$here/../../scripts/ios-snapshots.py" environment "$out"
+}
+
 case "${1:-}" in
   devices) shift; devices "$@" ;;
+  boot) shift; boot "$@" ;;
+  booted) shift; booted "$@" ;;
+  shoot-one) shift; shoot_one "$@" ;;
   shoot) shift; shoot "$@" ;;
-  *) echo "usage: $0 devices [store] | shoot PHONE IPAD APP OUT" >&2; exit 2 ;;
+  *) echo "usage: $0 devices [store] | boot SIM | booted SIM | shoot-one ROLE SIM APP OUT | shoot PHONE IPAD APP OUT" >&2; exit 2 ;;
 esac
