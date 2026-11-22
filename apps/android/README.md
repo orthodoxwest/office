@@ -226,15 +226,16 @@ The **Publish to Play** workflow (`.github/workflows/play.yml`) builds the bundl
 and uploads it to Google Play.
 
 - **Every merge to `master` that changes the app** goes to Internal testing and Closed testing
-  at once, with `apps/android/whatsnew.txt` as the release notes. Internal testing skips Google's
+  at once, with the release notes since the last production release. Internal testing skips Google's
   review and reaches the maintainers within minutes, so a bad build shows there first; Closed
   testing reaches testers once the review passes (usually hours), and a newer merge replaces a
   release still in review.
-- **The release notes** ("What's new") are only ever the text of `apps/android/whatsnew.txt`
-  (lines starting with `#` dropped), never anything from the merge. The same text goes with
-  every build until it is edited, and an empty file uploads builds with no notes. Edit it in the
-  pull request whose merge should carry it; a change to that file alone uploads nothing. A text
-  over Play's 500 characters stops the run before it builds.
+- **The release notes** ("What's new") are the note files under `release-notes/` that pull
+  requests add for notable changes (`release-notes/README.md`), never anything taken from the
+  merge. A testing upload carries every note added since the newest `android/` tag (what
+  production last had out), so testers see what the public has yet to get; with none, the
+  standing line "Corrections to the texts and improvements to the app." A note alone uploads
+  nothing; the next app change carries it. A manual run's notes replace them.
 - **The public** gets a build when the **Promote to production** workflow moves it there (below),
   or when you promote it in Play Console (*Closed testing → Promote release → Production*); either
   way it is the exact build testers have been running. A manual run of Publish to Play can also upload to any
@@ -259,8 +260,9 @@ done by hand in Play Console.
 
 The **Promote to production** workflow (`.github/workflows/play-promote.yml`,
 `scripts/play-promote.py`) moves a build from Closed testing to production through the Play API,
-by its version code, without rebuilding. It carries the release notes the build had on Closed
-testing.
+by its version code, without rebuilding. Its release notes are the notes added between
+production's build and this one, so each note goes out once on Android, and each run tags what
+production has out (`android/0.1.<code>`) as the record.
 
 - **Every day** at 15:00 UTC: a staged rollout the workflow started two days before is
   finished (all users). Otherwise the newest build uploaded to Closed testing at least 24 hours
@@ -268,7 +270,7 @@ testing.
   the public 1 to 2 days after testers get it, and everyone two days later. Google's review of
   each new release (usually hours) comes out of the 20% stage. A build's upload time is when its
   Publish to Play run finished. A build a later merge has replaced on Closed testing still
-  qualifies, with the notes it was uploaded with (`whatsnew.txt` at its commit): merges land more
+  qualifies: merges land more
   than once a day, so the build on Closed testing now is seldom a day old.
 - **The staged release's name** in Play Console ("0.1.120 staged 2026-11-12T15:00Z") records when
   it started; that is how the next runs know its age.

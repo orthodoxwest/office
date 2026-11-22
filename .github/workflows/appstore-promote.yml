@@ -24,7 +24,7 @@ on:
         type: string
         default: ""
       notes:
-        description: "What's New; empty uses apps/android/whatsnew.txt as of the build"
+        description: "What's New; empty uses the notes in release-notes/ since the App Store's live build"
         type: string
         default: ""
       dry_run:
@@ -47,12 +47,13 @@ jobs:
     timeout-minutes: 20
     environment: ${{ github.event_name == 'schedule' && 'appstore-auto' || 'appstore' }}
     permissions:
-      contents: read
+      # Tags the App Store's live version (ios/<version>), as the release notes' record.
+      contents: write
 
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          # Build numbers are commit counts; the build's commit holds its release notes.
+          # Build numbers are commit counts; the release notes compare commits and tags.
           fetch-depth: 0
           persist-credentials: false
 
@@ -61,6 +62,7 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY: ${{ secrets.ASC_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
           EVENT: ${{ github.event_name }}
           BUILD: ${{ inputs.build }}
           NOTES: ${{ inputs.notes }}

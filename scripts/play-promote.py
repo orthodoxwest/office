@@ -13,9 +13,10 @@ Run by .github/workflows/play-promote.yml; see apps/android/README.md ("Promotin
              out until it is finished, resumed or replaced in Play Console.
   manual     Release --version-code (default: Closed testing's newest) to --rollout of users now.
 
-Nothing is rebuilt: production gets a bundle Play already has, by its version code, with the
-release notes it carried on Closed testing (apps/android/whatsnew.txt as of its commit, the same
-text, once a later build has replaced it there). A staged release is named with the time it
+Nothing is rebuilt: production gets a bundle Play already has, by its version code. Its release
+notes are the note files under release-notes/ added between production's build and this one
+(scripts/release_notes.py), so a note goes out once on Android; each run tags what production
+has out (android/0.1.<code>). A staged release is named with the time it
 started ("0.1.120 staged 2026-11-12T15:00Z"), which is how a later run knows its age; Google's
 review comes out of that time. --dry-run reads Play and says what it would do.
 
@@ -37,11 +38,12 @@ import subprocess
 import sys
 import urllib.request
 
+import release_notes
+
 PACKAGE = "org.orthodoxwest.office"
 API = f"https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{PACKAGE}"
 TESTING = "alpha"  # Closed testing
 PRODUCTION = "production"
-NOTES_FILE = "apps/android/whatsnew.txt"
 STAGED = re.compile(r"staged (\d{4}-\d\d-\d\dT\d\d:\d\dZ)")
 
 
@@ -133,29 +135,32 @@ def uploads(min_age: float) -> list[tuple[int, str]]:
     return sorted(found, reverse=True)
 
 
-def notes_at(commit: str) -> list[dict]:
-    """The release notes Publish to Play gave the build of `commit`: apps/android/whatsnew.txt there, without # lines."""
-    r = subprocess.run(["git", "show", f"{commit}:{NOTES_FILE}"], capture_output=True, text=True, check=False)
-    lines = [line for line in r.stdout.splitlines() if not line.startswith("#")] if r.returncode == 0 else []
-    text = "\n".join(lines).strip()
-    return [{"language": "en-US", "text": text}] if text else []
+def notes_between(live: int, commit: str | None) -> list[dict]:
+    """Play's release notes for the build of `commit`: the notes added since production's build `live`."""
+    if commit is None:
+        return []
+    base = release_notes.commit_of(live) if live else None
+    if live and base is None:
+        base = release_notes.latest_tag("android", commit)
+    return [{"language": "en-US", "text": release_notes.release_text("android", base, commit)}]
 
 
-def release_of(code: int, testing: list[dict], fraction: float, commit: str | None = None) -> dict:
-    """A production release of `code`, carrying the notes it had on Closed testing."""
+def release_of(code: int, fraction: float, notes: list[dict]) -> dict:
+    """A production release of `code`."""
     rel: dict = {"versionCodes": [str(code)], "status": "completed"}
-    for r in testing:
-        if code in codes(r) and r.get("releaseNotes"):
-            rel["releaseNotes"] = r["releaseNotes"]
-            break
-    else:
-        notes = notes_at(commit) if commit else []
-        if notes:
-            rel["releaseNotes"] = notes
+    if notes:
+        rel["releaseNotes"] = notes
     if fraction < 1:
         rel["status"], rel["userFraction"] = "inProgress", fraction
         rel["name"] = f"0.1.{code} staged {now():%Y-%m-%dT%H:%MZ}"
     return rel
+
+
+def tag(code: int, dry_run: bool) -> None:
+    """Record production's build `code` as the tag android/0.1.<code>."""
+    commit = release_notes.commit_of(code) if code else None
+    if commit and not dry_run:
+        release_notes.record("android", f"0.1.{code}", commit)
 
 
 def main() -> None:
@@ -176,6 +181,7 @@ def main() -> None:
     live_code = live[0] if live else 0
     log(f"Closed testing: {[(r.get('status'), codes(r)) for r in testing]}")
     log(f"Production: {[(r.get('status'), codes(r), r.get('userFraction')) for r in production]}")
+    tag(live_code, args.dry_run)
 
     release = None
     if args.mode == "manual":
@@ -184,7 +190,7 @@ def main() -> None:
             sys.exit("::error::Closed testing has no release to promote")
         if code < live_code:
             sys.exit(f"::error::Production already has {live_code}, newer than {code}")
-        release = release_of(code, testing, args.rollout)
+        release = release_of(code, args.rollout, notes_between(live_code, release_notes.commit_of(code)))
         message = f"Releasing {code} to {args.rollout:.0%} of production"
     else:
         halted = [r for r in production if r.get("status") == "halted"]
@@ -212,7 +218,7 @@ def main() -> None:
             log(f"Uploaded at least {args.min_age:g} hours ago, newer than production: {[c for c, _ in ready]}")
             if ready:
                 code, sha = ready[0]
-                release = release_of(code, testing, args.rollout, sha)
+                release = release_of(code, args.rollout, notes_between(live_code, sha))
                 message = f"Releasing {code} to {args.rollout:.0%} of production (uploaded at least {args.min_age:g} hours ago)"
             else:
                 summary(f"Nothing to promote: production has {live_code or 'nothing'}, and no newer build was uploaded {args.min_age:g} hours ago or more.")
@@ -228,6 +234,10 @@ def main() -> None:
     play.set_production(release)
     new = live_code not in codes(release)
     summary(f"{message}." + (" Google reviews it before it reaches anyone." if new else ""))
+    if new:
+        tag(int(release["versionCodes"][0]), False)
+    if release.get("releaseNotes"):
+        summary("What's new:\n\n" + release["releaseNotes"][0]["text"])
 
 
 if __name__ == "__main__":

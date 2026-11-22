@@ -30,9 +30,10 @@ over from the previous version. Each step looks before it acts, so a re-run afte
 picks up where it stopped. A review submission being prepared that holds anything else is left
 alone. Reads are retried, with a timeout, when App Store Connect is slow or busy. --dry-run reads App Store Connect and says what it would do.
 
-"What's New" is --notes if given, otherwise apps/android/whatsnew.txt as of the build's commit
-(the notes Google Play shows; lines starting with # dropped), otherwise DEFAULT_NOTES. The build
-number counts commits, as testflight.yml numbers it, so the commit is found from it.
+"What's New" is --notes if given, otherwise the note files under release-notes/ added between the
+App Store's live build and this one (scripts/release_notes.py), so a note goes out once on iOS.
+The build number counts commits, as testflight.yml numbers it, so the commits are found from it.
+Each run tags the live version's build (ios/<version>).
 
 Needs ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY (the .p8's contents). The token is an ES256 JWT,
 signed with the openssl command, so the script needs nothing beyond the standard library.
@@ -55,12 +56,13 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+import release_notes
+
 BUNDLE_ID = "org.orthodoxwest.office"
 API = "https://api.appstoreconnect.apple.com"
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PROJECT = ROOT / "apps/ios/project.yml"
-NOTES_FILE = "apps/android/whatsnew.txt"
-DEFAULT_NOTES = "Corrections to the texts and improvements to the app."
+DEFAULT_NOTES = release_notes.DEFAULT_NOTES
 
 # App Store version states (appVersionState, and the older appStoreState it replaces; Apple's
 # AppVersionState and AppStoreVersionState). A version in one of these has been sent to Apple:
@@ -274,32 +276,17 @@ def decide(versions: list[dict], submissions: list[dict], builds: list[dict], at
             "update": live is not None}, ""
 
 
-def notes_at(commit: str) -> str:
-    """apps/android/whatsnew.txt at the commit, without its # lines."""
-    r = subprocess.run(["git", "-C", str(ROOT), "show", f"{commit}:{NOTES_FILE}"],
-                       capture_output=True, text=True)
-    if r.returncode != 0:
-        return ""
-    return "\n".join(line for line in r.stdout.splitlines() if not line.startswith("#")).strip()
+def notes_between(live_build: int | None, commit: str | None) -> str:
+    """What's New for the build of `commit`: the notes added since the App Store's live build."""
+    if commit is None:
+        return DEFAULT_NOTES
+    base = release_notes.commit_of(live_build) if live_build else None
+    if base is None:
+        base = release_notes.latest_tag("ios", commit)
+    return release_notes.release_text("ios", base, commit)
 
 
-def commit_of(number: int) -> str | None:
-    """master's commit whose commit count is the build number (testflight.yml's numbering)."""
-    chain = subprocess.run(["git", "-C", str(ROOT), "rev-list", "--first-parent", "HEAD"],
-                           capture_output=True, text=True).stdout.split()
-
-    def count(i: int) -> int:
-        return int(subprocess.run(["git", "-C", str(ROOT), "rev-list", "--count", chain[i]],
-                                  capture_output=True, text=True).stdout)
-
-    lo, hi = 0, len(chain) - 1  # counts fall strictly from chain[0] (HEAD) back
-    while lo <= hi:
-        mid = (lo + hi) // 2
-        c = count(mid)
-        if c == number:
-            return chain[mid]
-        lo, hi = (mid + 1, hi) if c > number else (lo, mid - 1)
-    return None
+commit_of = release_notes.commit_of
 
 
 # --- App Store Connect --------------------------------------------------------------------
@@ -427,6 +414,22 @@ def read_builds(api: Api, app: str) -> list[dict]:
         "limit": "200", "include": "preReleaseVersion,buildBetaDetail"})))
 
 
+def live_build(api: Api, versions: list[dict]) -> tuple[str, int] | None:
+    """The App Store's live version and its build number, or None before the first release."""
+    released = [v for v in versions if state(v) in RELEASED]
+    if not released:
+        return None
+    top = max(released, key=lambda v: parse_version(v["attributes"]["versionString"]))
+    try:
+        build = api.call("GET", f"/v1/appStoreVersions/{top['id']}/build").get("data") or {}
+    except ApiError as e:
+        log(f"::warning::Could not read version {top['attributes']['versionString']}'s build ({e}); "
+            "the release notes count from the newest ios/ tag")
+        return None
+    number = (build.get("attributes") or {}).get("version")
+    return (top["attributes"]["versionString"], int(number)) if number else None
+
+
 def credentials() -> tuple[str, str, str]:
     try:
         return os.environ["ASC_KEY_ID"], os.environ["ASC_ISSUER_ID"], os.environ["ASC_KEY"]
@@ -546,7 +549,7 @@ def main() -> None:
     ap.add_argument("mode", choices=["version", "auto", "manual"])
     ap.add_argument("--min-age", type=float, default=24.0, help="hours since a build's upload (auto)")
     ap.add_argument("--build", type=int, default=0, help="the build number to submit (manual)")
-    ap.add_argument("--notes", default="", help="What's New; empty uses apps/android/whatsnew.txt")
+    ap.add_argument("--notes", default="", help="What's New; empty uses the notes in release-notes/ since the live build")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -571,6 +574,11 @@ def run(args: argparse.Namespace) -> None:
         print(chosen)
         return
 
+    live = live_build(api, versions)
+    if live:
+        commit = commit_of(live[1])
+        if commit and not args.dry_run:
+            release_notes.record("ios", live[0], commit)
     submissions = read_submissions(api, app)
     builds = read_builds(api, app)
     log(f"Builds: {[(b['version'], b['number'], b['processing'], b['external']) for b in builds[:10]]}")
@@ -581,7 +589,7 @@ def run(args: argparse.Namespace) -> None:
         return
     build = plan["build"]
     commit = commit_of(build["number"])
-    notes = args.notes.strip() or (notes_at(commit) if commit else "") or DEFAULT_NOTES
+    notes = args.notes.strip() or notes_between(live[1] if live else None, commit)
     what = (f"Submitting build {build['number']} as version {build['version']} for App Review, released "
             f"automatically once approved" + (", phased over seven days" if plan["update"] else ""))
     if plan["resubmit"]:

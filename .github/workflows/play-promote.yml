@@ -45,14 +45,15 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event_name == 'schedule' && 'play-auto' || 'play' }}
     permissions:
-      contents: read
+      # Tags what production has out (android/0.1.<code>), as the release notes' record.
+      contents: write
       # The Publish to Play runs say when each build reached Closed testing.
       actions: read
 
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          # Version codes are commit counts.
+          # Version codes are commit counts; the release notes compare commits and tags.
           fetch-depth: 0
           persist-credentials: false
 
