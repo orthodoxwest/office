@@ -445,7 +445,12 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
                 block.marker_gloss = Some(&ANTIPHON_GLOSS);
                 out.push(block);
             } else {
-                out.push(Block::new(BlockKind::LatinTitle, text_runs_styled(&elem.label, RunStyle::Latin)));
+                let gloss = presentation::gloss::marian_antiphon_gloss(&elem.label);
+                let runs = match gloss {
+                    Some(g) => vec![Run::with_quiet_gloss(typeset(&elem.label), RunStyle::Latin, Some(g))],
+                    None => text_runs_styled(&elem.label, RunStyle::Latin),
+                };
+                out.push(Block::new(BlockKind::LatinTitle, runs));
                 marian_antiphon(out, &elem.text, elem.score.as_ref());
             }
         }
@@ -468,7 +473,11 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
                 };
                 if !elem.incipit.is_empty() {
                     runs.push(Run::new("\u{a0}· ", RunStyle::Plain));
-                    runs.push(Run::new(typeset(&elem.incipit), RunStyle::Latin));
+                    runs.push(Run::with_quiet_gloss(
+                        typeset(&elem.incipit),
+                        RunStyle::Latin,
+                        Some(&presentation::gloss::PSALM_INCIPIT_GLOSS),
+                    ));
                 }
                 out.push(Block::new(BlockKind::ItemLabel, runs));
             }
@@ -480,7 +489,10 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
         ElementType::Hymn => {
             out.push(section_heading("Hymn"));
             if !elem.label.is_empty() {
-                out.push(Block::new(BlockKind::LatinTitle, text_runs_styled(&elem.label, RunStyle::Latin)));
+                out.push(Block::new(
+                    BlockKind::LatinTitle,
+                    vec![Run::with_quiet_gloss(typeset(&elem.label), RunStyle::Latin, Some(&presentation::gloss::HYMN_TITLE_GLOSS))],
+                ));
             }
             scored_hymn(out, elem);
         }

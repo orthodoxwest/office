@@ -627,6 +627,8 @@ impl Server {
             Ok(entry) => presentation::course::year_course(entry.days.iter().map(|d| &**d)),
             Err(e) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, &format!("error building calendar: {e}")),
         };
+        let rare = render_html::view::rare_colors_in(&course);
+        let span = f64::from(presentation::course::COURSE_SPAN);
         // Search needs only this year's ordo and the next.
         let indexed = |y: i32| (now.year()..=now.year() + 1).contains(&y);
         let step = |y: i32, m: u32| MonthStep {
@@ -663,6 +665,21 @@ impl Server {
                 .zip(1..)
                 .map(|(name, m)| {
                     let today = (year, m) == (now.year(), now.month());
+                    let runs = &course[m as usize - 1];
+                    let rare_pins = if view == OrdoView::Year {
+                        runs.iter()
+                            .filter(|r| rare.contains(&r.color))
+                            .map(|r| {
+                                let mid = f64::from(r.start) + f64::from(r.days) * 0.5;
+                                render_html::view::AboutRibbonPin {
+                                    color: r.color.as_str().to_string(),
+                                    left_pct: format!("{:.3}%", mid / span * 100.0),
+                                }
+                            })
+                            .collect()
+                    } else {
+                        Vec::new()
+                    };
                     MonthLink {
                         name: if today { format!("{name}, this month") } else { name.to_string() },
                         abbr: name[..3].to_string(),
@@ -672,13 +689,15 @@ impl Server {
                         current: current == Some(m),
                         today,
                         today_x: if today { presentation::course::course_place_percent(now.day()) } else { String::new() },
-                        course: course[m as usize - 1]
+                        course: runs
                             .iter()
                             .map(|r| CourseRunView { start: r.start, days: r.days, color: r.color.as_str().to_string() })
                             .collect(),
+                        rare_pins,
                     }
                 })
                 .collect(),
+            ordo_colors: if view == OrdoView::Year { render_html::view::build_ordo_colors(year, Some(&course)) } else { Vec::new() },
             months,
             prev_month: current.and_then(|m| match m {
                 1 if crate::cache::offered_year(year - 1) => Some(step(year - 1, 12)),
@@ -856,6 +875,7 @@ mod tests {
             ("peach", crown::SKY_PEACH),
             ("teal", crown::SKY_TEAL),
             ("cross-ember", crown::CROSS_EMBER),
+            ("cross-ember-veiled", crown::CROSS_EMBER_VEILED),
         ] {
             rules.push(format!("--crown-{name}: {};", rgb(c)));
         }
@@ -1401,7 +1421,9 @@ mod tests {
         let (status, headers, body) = get("/?date=2026-09-22");
         assert_eq!(status, StatusCode::OK);
         assert_eq!(headers[header::CACHE_CONTROL], "no-cache");
-        let feast = body.find(r#"<p class="feast">Feria</p>"#).expect("names the feria");
+        let feast = body.find(r#"<p class="feast">"#).expect("names the feria");
+        let feast_end = body[feast..].find("</p>").expect("closes feast");
+        assert!(body[feast..feast + feast_end].contains(">Feria</span>"), "names the feria with a quiet gloss");
         let also = body.find(r#"class="commemorations-label""#).expect("commemorations");
         assert!(feast < also);
         assert!(!body.contains(r#"class="home-season""#), "the season is not repeated");

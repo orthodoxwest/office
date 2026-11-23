@@ -89,6 +89,9 @@ pub struct AboutSpecimen {
     pub alone_response: &'static str,
     pub priest_versicle: &'static str,
     pub priest_response: &'static str,
+    /// Brief rubric explaining how Deacon and Priest differ in choir (shown when toggled).
+    pub deacon_note: &'static str,
+    pub priest_note: &'static str,
     pub secret_voiced: &'static str,
     pub secret_silent: &'static str,
 }
@@ -161,6 +164,8 @@ pub const ABOUT_SPECIMEN: AboutSpecimen = AboutSpecimen {
     alone_response: "And let my cry come unto thee.",
     priest_versicle: "The Lord be with you.",
     priest_response: "And with thy spirit.",
+    deacon_note: "In choir, a deacon greets and blesses; at Prime and Compline, only a priest gives the absolution.",
+    priest_note: "In choir, a priest greets, blesses, and gives the absolution at Prime and Compline.",
     secret_voiced: "Our Father,",
     secret_silent: "who art in heaven, Hallowed be thy Name…",
 };

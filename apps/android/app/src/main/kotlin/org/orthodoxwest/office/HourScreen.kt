@@ -95,6 +95,7 @@ import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.PrayedReading
 import org.orthodoxwest.office.core.ReadingKeyView
 import org.orthodoxwest.office.core.blockWords
+import org.orthodoxwest.office.core.dayNameGloss
 import org.orthodoxwest.office.core.readingKey
 import org.orthodoxwest.office.core.reopensAtPlace
 import org.orthodoxwest.office.core.seasonGloss
@@ -529,10 +530,17 @@ private fun HourTitle(
                 }
             }
             if (view.feast.isNotEmpty()) {
-                val feastMod = Modifier.padding(top = 1.9.dp).then(
-                    if (view.feastId.isNotEmpty()) Modifier.tap(label = view.feast, action = "about this feast") { onFeast(view.feastId) } else Modifier,
-                )
-                Text(view.feast, feastMod, style = Type.dayName.copy(color = p.text))
+                val dg = if (view.feastId.isEmpty()) dayNameGloss(view.feast) else null
+                if (dg != null) {
+                    GlossMark(dg, view.feast, Modifier.padding(top = 1.9.dp), reaches = false) {
+                        Text(view.feast, style = Type.dayName.copy(color = p.text))
+                    }
+                } else {
+                    val feastMod = Modifier.padding(top = 1.9.dp).then(
+                        if (view.feastId.isNotEmpty()) Modifier.tap(label = view.feast, action = "about this feast") { onFeast(view.feastId) } else Modifier,
+                    )
+                    Text(view.feast, feastMod, style = Type.dayName.copy(color = p.text))
+                }
             }
         }
         if (date != today) {

@@ -148,7 +148,11 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
                 sb.push_str("</p>");
             } else {
                 sb.push_str("<div class=\"marian-antiphon\"><h3 class=\"item-label\" lang=\"la\">");
-                sb.push_str(&esc_text(&elem.label));
+                if let Some(g) = presentation::gloss::marian_antiphon_gloss(&elem.label) {
+                    sb.push_str(&format!("<span{}>{}</span>", quiet_gloss_attrs(g), esc_text(&elem.label)));
+                } else {
+                    sb.push_str(&esc_text(&elem.label));
+                }
                 sb.push_str("</h3>");
                 sb.push_str(&render_marian_antiphon_scored(&elem.text, elem.score.as_ref()));
                 sb.push_str("</div>");
@@ -184,7 +188,11 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
                     // The dot stays with the label; the space outside aria-hidden keeps the
                     // spoken label and Latin title separated for screen readers.
                     sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}·</span> ");
-                    sb.push_str("<span class=\"psalm-incipit\" lang=\"la\">");
+                    sb.push_str(&format!(
+                        "<span class=\"psalm-incipit gloss-quiet\" lang=\"la\" data-gloss-title=\"{}\" data-gloss=\"{}\">",
+                        esc_text(presentation::gloss::PSALM_INCIPIT_GLOSS.title),
+                        esc_text(presentation::gloss::PSALM_INCIPIT_GLOSS.note),
+                    ));
                     sb.push_str(&esc_text(&elem.incipit));
                     sb.push_str("</span>");
                 }
@@ -199,9 +207,11 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
         ElementType::Hymn => {
             sb.push_str("<div class=\"hymn\"><h2 class=\"section-heading\">Hymn</h2>");
             if !elem.label.is_empty() {
-                sb.push_str("<p class=\"hymn-title\" lang=\"la\">");
-                sb.push_str(&esc_text(&elem.label));
-                sb.push_str("</p>");
+                sb.push_str(&format!(
+                    "<p class=\"hymn-title\" lang=\"la\"><span{}>{}</span></p>",
+                    quiet_gloss_attrs(&presentation::gloss::HYMN_TITLE_GLOSS),
+                    esc_text(&elem.label),
+                ));
             }
             match &elem.score {
                 Some(score) if score.sets == ScoreSpan::WholeHymn => {

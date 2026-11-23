@@ -235,6 +235,9 @@ pub struct MonthLink {
     pub today_x: String,
     /// The month's runs of day colours, the year's course (`presentation::course`).
     pub course: Vec<CourseRunView>,
+    /// Rare-color pins (Rose, Black) in this month so selecting a rare color on the frontispiece
+    /// legend visibly locates its single-day flecks.
+    pub rare_pins: Vec<AboutRibbonPin>,
 }
 
 /// One run of a month's band: `days` days of `color` from `start` (0-based), on a span of 31.
@@ -302,6 +305,8 @@ pub struct CalendarData {
     pub year_link: String,
     pub all_link: String,
     pub month_links: Vec<MonthLink>,
+    /// The six liturgical colors with this year's dates/counts, shown interactively on the frontispiece.
+    pub ordo_colors: Vec<AboutOrdoColorView>,
     /// The month shown, or every month of the whole-year view.
     pub months: Vec<std::sync::Arc<MonthData>>,
     pub prev_month: Option<MonthStep>,
@@ -513,6 +518,8 @@ pub struct AboutSpecimenView {
     pub alone_response: String,
     pub priest_versicle: String,
     pub priest_response: String,
+    pub deacon_note: String,
+    pub priest_note: String,
     pub secret_voiced: String,
     pub secret_silent: String,
 }
@@ -523,15 +530,27 @@ pub struct AboutOrdoColorView {
     pub slug: String,
     pub name: String,
     pub meaning: String,
+    /// Dates in this year for rare colors ("Mar 15, Dec 13"), or day count ("92 days in 2026").
+    pub note: String,
 }
 
 /// One month's slice of the full-year liturgical color ribbon shown in "The Ordo".
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct AboutCourseMonth {
+    pub month: u32,
+    pub name: &'static str,
+    pub href: String,
     pub offset_x: u32,
     pub runs: Vec<CourseRunView>,
     pub short_start: u32,
     pub short_days: u32,
+}
+
+/// A subtle diamond pin locating a rare liturgical color (Rose, Black) along a color band.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct AboutRibbonPin {
+    pub color: String,
+    pub left_pct: String,
 }
 
 /// Full-year liturgical color ribbon for the About page's "The Ordo" section.
@@ -544,6 +563,8 @@ pub struct AboutOrdoRibbon {
     pub width: u32,
     pub today_pct: String,
     pub months: Vec<AboutCourseMonth>,
+    /// Rare-color pins (Rose, Black) positioned along the full ribbon.
+    pub rare_pins: Vec<AboutRibbonPin>,
     /// Every other month's name, set at its own month's start (a percentage of the width).
     pub labels: Vec<AboutRibbonLabel>,
 }
@@ -558,13 +579,50 @@ pub struct AboutRibbonLabel {
 /// The gap between two months' bands on About's ribbon, in days' widths.
 pub const ABOUT_RIBBON_GAP: u32 = 3;
 
+/// Builds the six liturgical color legend entries, enriched with this year's dates/counts when `course` is given.
+pub fn build_ordo_colors(year: i32, course: Option<&[Vec<presentation::course::CourseRun>]>) -> Vec<AboutOrdoColorView> {
+    use calendar::Color;
+    presentation::about::ABOUT_ORDO_COLORS
+        .iter()
+        .map(|c| {
+            let note = course
+                .and_then(|months| {
+                    let color = match c.slug {
+                        "white" => Some(Color::White),
+                        "red" => Some(Color::Red),
+                        "violet" => Some(Color::Violet),
+                        "green" => Some(Color::Green),
+                        "rose" => Some(Color::Rose),
+                        "black" => Some(Color::Black),
+                        _ => None,
+                    }?;
+                    Some(presentation::course::color_days_note(months, color, year))
+                })
+                .unwrap_or_default();
+            AboutOrdoColorView { slug: c.slug.into(), name: c.name.into(), meaning: c.meaning.into(), note }
+        })
+        .collect()
+}
+
+/// Computes which liturgical colors in `course` are rare (total days <= `RARE_COLOR_MAX_DAYS`).
+pub fn rare_colors_in(course: &[Vec<presentation::course::CourseRun>]) -> Vec<calendar::Color> {
+    use calendar::Color;
+    let all = [Color::White, Color::Red, Color::Violet, Color::Green, Color::Rose, Color::Black];
+    all.into_iter()
+        .filter(|&color| {
+            let total: u32 = course.iter().flat_map(|m| m.iter()).filter(|r| r.color == color).map(|r| r.days).sum();
+            total > 0 && total <= presentation::course::RARE_COLOR_MAX_DAYS
+        })
+        .collect()
+}
+
 impl AboutData {
     /// The page as presentation words it, for the page chrome given, with the hour it is now
     /// marked and invited to as home does at `now`'s `clock_hour` (0–23).
     pub fn new(chrome: Chrome, now: calendar::Date, clock_hour: i8) -> AboutData {
         use crate::escape::html_escape_string as esc;
         use presentation::about::{
-            ABOUT, ABOUT_HOURS, ABOUT_KICKER, ABOUT_ORDO_COLORS, ABOUT_SPECIMEN, ABOUT_TITLE, AboutBlock, AboutRun, about_current_hour,
+            ABOUT, ABOUT_HOURS, ABOUT_KICKER, ABOUT_SPECIMEN, ABOUT_TITLE, AboutBlock, AboutRun, about_current_hour,
             about_horologium_angle, about_horologium_is_night, about_runs,
         };
         let current = about_current_hour(clock_hour);
@@ -741,14 +799,13 @@ impl AboutData {
             alone_response: ABOUT_SPECIMEN.alone_response.into(),
             priest_versicle: ABOUT_SPECIMEN.priest_versicle.into(),
             priest_response: ABOUT_SPECIMEN.priest_response.into(),
+            deacon_note: ABOUT_SPECIMEN.deacon_note.into(),
+            priest_note: ABOUT_SPECIMEN.priest_note.into(),
             secret_voiced: ABOUT_SPECIMEN.secret_voiced.into(),
             secret_silent: ABOUT_SPECIMEN.secret_silent.into(),
         };
 
-        let ordo_colors = ABOUT_ORDO_COLORS
-            .iter()
-            .map(|c| AboutOrdoColorView { slug: c.slug.into(), name: c.name.into(), meaning: c.meaning.into() })
-            .collect();
+        let ordo_colors = build_ordo_colors(now.year(), None);
 
         AboutData {
             chrome,
@@ -777,13 +834,29 @@ impl AboutData {
         let span = presentation::course::COURSE_SPAN;
         let gap = ABOUT_RIBBON_GAP;
         let total = 12 * span + 11 * gap;
+        let year = now.year();
+        let rare = rare_colors_in(course);
+        let mut rare_pins = Vec::new();
         let months = course
             .iter()
             .enumerate()
             .map(|(mi, runs)| {
                 let offset_x = (mi as u32) * (span + gap);
                 let end = runs.last().map_or(0, |r| r.start + r.days);
+                let month = (mi as u32) + 1;
+                for r in runs {
+                    if rare.contains(&r.color) {
+                        let mid = f64::from(offset_x + r.start) + f64::from(r.days) * 0.5;
+                        rare_pins.push(AboutRibbonPin {
+                            color: r.color.as_str().into(),
+                            left_pct: format!("{:.3}%", mid / f64::from(total) * 100.0),
+                        });
+                    }
+                }
                 AboutCourseMonth {
+                    month,
+                    name: presentation::MONTHS.get(mi).copied().unwrap_or(""),
+                    href: format!("/calendar/{year:04}/{month:02}"),
                     offset_x,
                     runs: runs.iter().map(|r| CourseRunView { start: r.start, days: r.days, color: r.color.as_str().into() }).collect(),
                     short_start: end,
@@ -800,13 +873,15 @@ impl AboutData {
                 left_pct: format!("{:.3}%", f64::from(2 * i as u32 * (span + gap)) / f64::from(total) * 100.0),
             })
             .collect();
+        self.ordo_colors = build_ordo_colors(year, Some(course));
         self.ordo_ribbon = AboutOrdoRibbon {
-            year: now.year(),
+            year,
             span,
             gap,
             width: total,
             today_pct: format!("{:.3}%", today_x / f64::from(total) * 100.0),
             months,
+            rare_pins,
             labels,
         };
         self

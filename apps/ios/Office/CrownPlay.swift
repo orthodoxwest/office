@@ -482,7 +482,7 @@ final class CrownRun {
         lit = Double(leafCatch(head.season))
         oldCross = crownMark(dark: !dusk, season: head.season, first: head.first, black: head.black, size: crown.width)
         newCross = crownMark(dark: dusk, season: head.season, first: head.first, black: head.black, size: crown.width)
-        let ember = fig.crossEmber.color()
+        let ember = (head.season == "passiontide" ? fig.crossEmberVeiled : fig.crossEmber).color()
         emberCross = Crown(size: crown.width, ink: ember, shading: .color(ember))
         catchInk = mix(leaf.hi, .white, 0.62)
         pigment = UIImage(named: "pigment.png")

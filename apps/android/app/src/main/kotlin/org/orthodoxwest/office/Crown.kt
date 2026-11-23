@@ -190,6 +190,7 @@ internal class CrownHead {
     var band = 0f
     var arch: Arch = PhoneArch
     var black = false
+    var veiled = false
     var picking = false
     var tapBox = Rect.Zero
     /** The cross in the dark look (true) or the light, drawn to the scope's size. */
@@ -639,7 +640,7 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
         val cross = units["cross"]!!
         p.crossNew = look(cross.size) { h.cross(this, toDark) }
         p.crossCatch = look(cross.size) { consecrationCross(h.catchInk) }
-        p.crossEmber = look(cross.size) { consecrationCross(rgb(plan.crossEmber)) }
+        p.crossEmber = look(cross.size) { consecrationCross(rgb(if (h.veiled) plan.crossEmberVeiled else plan.crossEmber)) }
         firmament.drawn = emptyList()
         t = 0f
         play = p

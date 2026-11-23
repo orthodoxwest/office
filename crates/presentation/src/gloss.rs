@@ -250,16 +250,94 @@ pub const OCTAVE_GLOSS: Gloss = Gloss {
     note: "An eight-day celebration extending a major feast—from the feast day through the eighth day (the octave day).",
 };
 
+pub const FERIA_GLOSS: Gloss = Gloss {
+    term: "Feria",
+    title: "Feria",
+    note: "An ordinary weekday of the liturgical season with no saint’s feast, keeping the weekday psalter and seasonal prayers.",
+};
+
+pub const VIGIL_GLOSS: Gloss = Gloss {
+    term: "Vigil",
+    title: "Vigil",
+    note: "A day of watchfulness and preparation before a major feast, whose celebration begins at First Vespers this evening.",
+};
+
+pub const PSALM_INCIPIT_GLOSS: Gloss = Gloss {
+    term: "Latin incipit",
+    title: "Latin incipit",
+    note: "The traditional Latin opening words by which this psalm or canticle is known in the Western Office.",
+};
+
+pub const HYMN_TITLE_GLOSS: Gloss = Gloss {
+    term: "Latin hymn title",
+    title: "Latin hymn title",
+    note: "The traditional Latin opening line (incipit) of this office hymn.",
+};
+
+pub const MARIAN_ALMA_GLOSS: Gloss = Gloss {
+    term: "Alma Redemptoris Mater",
+    title: "Alma Redemptoris Mater",
+    note: "“Loving Mother of the Redeemer”—the seasonal Marian antiphon sung from First Vespers of Advent Sunday through February 2.",
+};
+
+pub const MARIAN_AVE_GLOSS: Gloss = Gloss {
+    term: "Ave Regina Caelorum",
+    title: "Ave Regina Caelorum",
+    note: "“Hail, Queen of Heaven”—the seasonal Marian antiphon sung from Compline of February 2 through Wednesday of Holy Week.",
+};
+
+pub const MARIAN_REGINA_GLOSS: Gloss = Gloss {
+    term: "Regina Caeli",
+    title: "Regina Caeli",
+    note: "“Queen of Heaven”—the seasonal Marian antiphon sung throughout Paschaltide, from Easter through the Saturday after Pentecost.",
+};
+
+pub const MARIAN_SALVE_GLOSS: Gloss = Gloss {
+    term: "Salve Regina",
+    title: "Salve Regina",
+    note: "“Hail, Holy Queen”—the seasonal Marian antiphon sung from First Vespers of Trinity Sunday until Advent.",
+};
+
+pub const ADVENT_GLOSS: Gloss = Gloss {
+    term: "Advent",
+    title: "Advent",
+    note: "The four-week season of quiet preparation and expectation before the Nativity of our Lord.",
+};
+
+pub const CHRISTMASTIDE_GLOSS: Gloss = Gloss {
+    term: "Christmastide",
+    title: "Christmastide",
+    note: "The joyful season celebrating the Nativity of our Lord, from Christmas Eve through the Vigil of the Epiphany.",
+};
+
+pub const EPIPHANYTIDE_GLOSS: Gloss = Gloss {
+    term: "Epiphanytide",
+    title: "Epiphanytide",
+    note: "The season following the Epiphany (January 6), manifesting Christ to the nations, until Septuagesima.",
+};
+
 pub const SEPTUAGESIMA_GLOSS: Gloss = Gloss {
     term: "Septuagesima",
     title: "Septuagesima",
     note: "The pre-Lenten season of three Sundays preparing for Lent, beginning about seventy days before Easter.",
 };
 
+pub const LENT_GLOSS: Gloss = Gloss {
+    term: "Lent",
+    title: "Lent",
+    note: "The forty-day season of fasting, repentance, and prayer preparing for Easter, from Ash Wednesday to Easter Eve.",
+};
+
 pub const PASSIONTIDE_GLOSS: Gloss = Gloss {
     term: "Passiontide",
     title: "Passiontide",
     note: "The final two weeks of Lent, from Passion Sunday through Holy Week, focused on Christ’s suffering and Cross.",
+};
+
+pub const EASTERTIDE_GLOSS: Gloss = Gloss {
+    term: "Eastertide",
+    title: "Eastertide",
+    note: "The fifty days of Paschal joy from Easter Day through the Octave of Pentecost.",
 };
 
 pub const FASTING_GLOSS: Gloss = Gloss {
@@ -294,11 +372,39 @@ pub fn vespers_note_gloss(note: &str) -> Option<&'static Gloss> {
     }
 }
 
-/// Returns a quiet gloss for a less-familiar season label, as `season_label` names it.
+/// Returns a quiet gloss for a liturgical season label, as `season_label` names it.
 pub fn season_gloss(label: &str) -> Option<&'static Gloss> {
     match label.trim() {
+        "Advent" => Some(&ADVENT_GLOSS),
+        "Christmastide" => Some(&CHRISTMASTIDE_GLOSS),
+        "Epiphanytide" => Some(&EPIPHANYTIDE_GLOSS),
         "Septuagesima" => Some(&SEPTUAGESIMA_GLOSS),
+        "Lent" => Some(&LENT_GLOSS),
         "Passiontide" => Some(&PASSIONTIDE_GLOSS),
+        "Eastertide" => Some(&EASTERTIDE_GLOSS),
+        _ => None,
+    }
+}
+
+/// Returns a quiet gloss for a plain day name without a feast page ("Feria", "Advent feria", "Vigil of …").
+pub fn day_name_gloss(name: &str) -> Option<&'static Gloss> {
+    let name = name.trim();
+    if name == "Feria" || name.ends_with(" feria") {
+        Some(&FERIA_GLOSS)
+    } else if name.starts_with("Vigil of ") {
+        Some(&VIGIL_GLOSS)
+    } else {
+        None
+    }
+}
+
+/// Returns a quiet gloss for one of the four seasonal Marian antiphon Latin titles.
+pub fn marian_antiphon_gloss(title: &str) -> Option<&'static Gloss> {
+    match title.trim() {
+        "Alma Redemptoris Mater" => Some(&MARIAN_ALMA_GLOSS),
+        "Ave Regina Caelorum" | "Ave Regina Coelorum" => Some(&MARIAN_AVE_GLOSS),
+        "Regina Caeli" | "Regina Coeli" => Some(&MARIAN_REGINA_GLOSS),
+        "Salve Regina" => Some(&MARIAN_SALVE_GLOSS),
         _ => None,
     }
 }
@@ -590,11 +696,23 @@ mod tests {
 
         assert_eq!(season_gloss("Septuagesima").map(|g| g.title), Some("Septuagesima"));
         assert_eq!(season_gloss("Passiontide").map(|g| g.title), Some("Passiontide"));
-        assert!(season_gloss("Advent").is_none());
-        // The glosses key on the labels the headers actually show.
-        for season in ["septuagesima", "passiontide"] {
+        assert_eq!(season_gloss("Advent").map(|g| g.title), Some("Advent"));
+        assert!(season_gloss("Unknown").is_none());
+        // The glosses key on every named season label the headers actually show.
+        for season in ["advent", "christmas", "epiphany", "septuagesima", "lent", "passiontide", "easter"] {
             assert!(season_gloss(&crate::season_label(season)).is_some(), "{season}");
         }
+
+        assert_eq!(day_name_gloss("Feria").map(|g| g.title), Some("Feria"));
+        assert_eq!(day_name_gloss("Advent feria").map(|g| g.title), Some("Feria"));
+        assert_eq!(day_name_gloss("Vigil of Pentecost").map(|g| g.title), Some("Vigil"));
+        assert!(day_name_gloss("St Mark, Evangelist").is_none());
+
+        assert_eq!(marian_antiphon_gloss("Alma Redemptoris Mater").map(|g| g.title), Some("Alma Redemptoris Mater"));
+        assert_eq!(marian_antiphon_gloss("Ave Regina Caelorum").map(|g| g.title), Some("Ave Regina Caelorum"));
+        assert_eq!(marian_antiphon_gloss("Regina Caeli").map(|g| g.title), Some("Regina Caeli"));
+        assert_eq!(marian_antiphon_gloss("Salve Regina").map(|g| g.title), Some("Salve Regina"));
+        assert!(marian_antiphon_gloss("Te Deum").is_none());
 
         assert_eq!(penitential_gloss("Fasting").map(|g| g.title), Some("Day of Fasting"));
         assert_eq!(penitential_gloss("Abstinence").map(|g| g.title), Some("Day of Abstinence"));

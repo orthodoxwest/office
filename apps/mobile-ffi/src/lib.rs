@@ -468,6 +468,7 @@ pub struct CrownPlan {
     pub sky_peach: CrownRgb,
     pub sky_teal: CrownRgb,
     pub cross_ember: CrownRgb,
+    pub cross_ember_veiled: CrownRgb,
     /// The cross's answer to the hand, in real ms from the tap (not slowed by `pace`): it gives
     /// to `cross_press` of its size and back, catches the light (brightest `cross_catch_peak` of
     /// the way through `cross_catch_len`), and at dusk takes its ember gold at once.
@@ -540,6 +541,7 @@ pub fn crown_plan(to_dark: bool) -> CrownPlan {
         sky_peach: rgb(c::SKY_PEACH),
         sky_teal: rgb(c::SKY_TEAL),
         cross_ember: rgb(c::CROSS_EMBER),
+        cross_ember_veiled: rgb(c::CROSS_EMBER_VEILED),
         cross_press: c::CROSS_PRESS,
         cross_press_len: c::CROSS_PRESS_LEN,
         cross_catch_len: c::CROSS_CATCH_LEN,
@@ -1169,10 +1171,58 @@ pub fn penitential_gloss(label: String) -> Option<GlossView> {
     presentation::gloss::penitential_gloss(&label).map(|g| GlossView::of(g, true))
 }
 
-/// Quiet gloss for a less-familiar liturgical season label (Septuagesima, Passiontide).
+/// Quiet gloss for a liturgical season label.
 #[uniffi::export]
 pub fn season_gloss(label: String) -> Option<GlossView> {
     presentation::gloss::season_gloss(&label).map(|g| GlossView::of(g, true))
+}
+
+/// Quiet gloss for a plain day name without a feast page ("Feria", "Advent feria", "Vigil of …").
+#[uniffi::export]
+pub fn day_name_gloss(name: String) -> Option<GlossView> {
+    presentation::gloss::day_name_gloss(&name).map(|g| GlossView::of(g, true))
+}
+
+/// Rare-day threshold for the liturgical color ribbon (Rose, Black).
+#[uniffi::export]
+pub fn rare_color_max_days() -> u32 {
+    presentation::course::RARE_COLOR_MAX_DAYS
+}
+
+/// Short parenthetical note for a liturgical color across `course` in `year`: dates for rare colors
+/// ("Mar 15, Dec 13"), or day count for frequent ones ("92 days in 2026").
+#[uniffi::export]
+pub fn color_days_note(course: Vec<CourseMonthView>, color: String, year: i32) -> String {
+    let parsed = match color.as_str() {
+        "white" => calendar::Color::White,
+        "red" => calendar::Color::Red,
+        "violet" => calendar::Color::Violet,
+        "green" => calendar::Color::Green,
+        "rose" => calendar::Color::Rose,
+        "black" => calendar::Color::Black,
+        _ => return String::new(),
+    };
+    let months: Vec<Vec<presentation::course::CourseRun>> = course
+        .into_iter()
+        .map(|m| {
+            m.runs
+                .into_iter()
+                .filter_map(|r| {
+                    let c = match r.color.as_str() {
+                        "white" => calendar::Color::White,
+                        "red" => calendar::Color::Red,
+                        "violet" => calendar::Color::Violet,
+                        "green" => calendar::Color::Green,
+                        "rose" => calendar::Color::Rose,
+                        "black" => calendar::Color::Black,
+                        _ => return None,
+                    };
+                    Some(presentation::course::CourseRun { start: r.start.max(0) as u32, days: r.days.max(0) as u32, color: c })
+                })
+                .collect()
+        })
+        .collect();
+    presentation::course::color_days_note(&months, parsed, year)
 }
 
 #[uniffi::export]
@@ -1250,6 +1300,8 @@ pub struct AboutSpecimenView {
     pub alone_response: String,
     pub priest_versicle: String,
     pub priest_response: String,
+    pub deacon_note: String,
+    pub priest_note: String,
     pub secret_voiced: String,
     pub secret_silent: String,
 }
@@ -1308,8 +1360,8 @@ pub fn about_now(today: CivilDate, clock_hour: i32) -> Result<AboutNow, OfficeEr
 #[uniffi::export]
 pub fn about() -> AboutView {
     use presentation::about::{
-        ABOUT, ABOUT_HOURS, ABOUT_INTRODUCTION, ABOUT_KICKER, ABOUT_MENU, ABOUT_ON_THE_WEB, ABOUT_ORDO_COLORS, ABOUT_SPECIMEN, ABOUT_TITLE,
-        AboutBlock, AboutRun, about_horologium_angle, about_horologium_is_night, about_runs,
+        ABOUT, ABOUT_HOURS, ABOUT_INTRODUCTION, ABOUT_KICKER, ABOUT_MENU, ABOUT_ON_THE_WEB, ABOUT_SPECIMEN, ABOUT_TITLE, AboutBlock,
+        AboutRun, about_horologium_angle, about_horologium_is_night, about_runs,
     };
     let block = |kind: &str| AboutBlockView {
         kind: kind.into(),
@@ -1388,13 +1440,11 @@ pub fn about() -> AboutView {
         alone_response: ABOUT_SPECIMEN.alone_response.into(),
         priest_versicle: ABOUT_SPECIMEN.priest_versicle.into(),
         priest_response: ABOUT_SPECIMEN.priest_response.into(),
+        deacon_note: ABOUT_SPECIMEN.deacon_note.into(),
+        priest_note: ABOUT_SPECIMEN.priest_note.into(),
         secret_voiced: ABOUT_SPECIMEN.secret_voiced.into(),
         secret_silent: ABOUT_SPECIMEN.secret_silent.into(),
     };
-    let ordo_colors = ABOUT_ORDO_COLORS
-        .iter()
-        .map(|c| AboutOrdoColorView { slug: c.slug.into(), name: c.name.into(), meaning: c.meaning.into() })
-        .collect();
     AboutView {
         kicker: ABOUT_KICKER.into(),
         title: ABOUT_TITLE.into(),
@@ -1403,9 +1453,18 @@ pub fn about() -> AboutView {
         blocks,
         periods,
         specimen,
-        ordo_colors,
+        ordo_colors: ordo_colors(),
         ribbon_label: presentation::about::ABOUT_RIBBON_LABEL.into(),
     }
+}
+
+/// The six liturgical colors in legend order, shared between About's ribbon and the Ordo frontispiece.
+#[uniffi::export]
+pub fn ordo_colors() -> Vec<AboutOrdoColorView> {
+    presentation::about::ABOUT_ORDO_COLORS
+        .iter()
+        .map(|c| AboutOrdoColorView { slug: c.slug.into(), name: c.name.into(), meaning: c.meaning.into() })
+        .collect()
 }
 
 /// Whether home offers the introduction: the app's first day is within the newcomer week.

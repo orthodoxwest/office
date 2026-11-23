@@ -102,6 +102,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.LightFrame
+import org.orthodoxwest.office.core.dayNameGloss
 import org.orthodoxwest.office.core.homeGlosses
 import org.orthodoxwest.office.core.hourLightAt
 import org.orthodoxwest.office.core.hourLightTotalMs
@@ -516,6 +517,7 @@ private fun Frontispiece(
     if (head != null) {
         head.arch = tier.arch
         head.black = black
+        head.veiled = season == "passiontide"
         head.picking = picking
         head.catchInk = mix(Leaf(ornament(Apse, season)).hi, Color.White, 0.62f)
         head.cross = { dark ->
@@ -632,15 +634,29 @@ private fun Frontispiece(
                     }
                     // The day's feast leads to its page, underlined as the web's `.feast-link`, though in
                     // its own ink: a text decoration takes no colour.
-                    FeastName(
-                        view.feastName,
-                        view.feastAlias,
-                        tier.feast,
-                        Modifier.padding(top = 2.dp).widthIn(max = tier.feastMeasure).crownUnit("w-feast")
-                            .then(if (view.feastId.isEmpty()) Modifier else Modifier.tap(action = "open the feast's page") { onFeast(view.feastId) }),
-                        linked = view.feastId.isNotEmpty(),
-                        reserve = reserve,
-                    )
+                    val dayGloss = if (view.feastId.isEmpty()) dayNameGloss(view.feastName) else null
+                    val feastBoxMod = Modifier.padding(top = 2.dp).widthIn(max = tier.feastMeasure).crownUnit("w-feast")
+                    if (dayGloss != null) {
+                        GlossMark(dayGloss, view.feastName, feastBoxMod, reaches = false) {
+                            FeastName(
+                                view.feastName,
+                                view.feastAlias,
+                                tier.feast,
+                                Modifier,
+                                linked = false,
+                                reserve = reserve,
+                            )
+                        }
+                    } else {
+                        FeastName(
+                            view.feastName,
+                            view.feastAlias,
+                            tier.feast,
+                            feastBoxMod.then(if (view.feastId.isEmpty()) Modifier else Modifier.tap(action = "open the feast's page") { onFeast(view.feastId) }),
+                            linked = view.feastId.isNotEmpty(),
+                            reserve = reserve,
+                        )
+                    }
                     if (view.octaveNote.isNotEmpty()) {
                         GlossMark(HOME_GLOSSES.octave, view.octaveNote, Modifier.crownUnit("w-octave").then(reserve.at("octave")), reaches = false) {
                             Text(view.octaveNote, style = Type.small.copy(color = muted), onTextLayout = reserve.layout("octave"))

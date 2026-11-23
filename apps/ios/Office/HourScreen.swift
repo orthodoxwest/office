@@ -1001,6 +1001,12 @@ private struct HourTitle: View {
                         .buttonStyle(Quiet())
                         .padding(.top, m.px(1.9))
                         .accessibilityHint("About this feast")
+                    } else if let dg = dayNameGloss(name: view.feast) {
+                        GlossMark(gloss: dg, label: view.feast, reaches: false) {
+                            Text(view.feast).type(Scale.dayName).foregroundStyle(p.text)
+                                .multilineTextAlignment(.center)
+                        }
+                        .padding(.top, m.px(1.9))
                     } else {
                         Text(view.feast).type(Scale.dayName).foregroundStyle(p.text)
                             .multilineTextAlignment(.center)
