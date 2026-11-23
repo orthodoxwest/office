@@ -8025,6 +8025,24 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   white-space: nowrap;
 }
 
+/* The invitation to the hour now, once that hour is prayed (app.js): the
+   directory's small gilt cross at its words' shoulder, taking no room, so
+   the tablet keeps its height and still opens the hour. */
+.page-home .pray-now-label {
+  position: relative;
+}
+
+.page-home .pray-now-prayed {
+  position: absolute;
+  top: 0.12em;
+  left: 100%;
+  margin-left: 0.28em;
+  color: var(--gold);
+  font-size: 0.6em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 /* The foot: the season and "Change date", parted by a gilt point, under
    the table's own closing rule. */
 .page-home .home-day-meta {

@@ -142,6 +142,8 @@ struct PlannedReminder: Equatable {
     let office: Date
     let title: String
     let feast: String
+    /// Through the Triduum, when the bells are silent: posted without the bell.
+    var silent = false
 }
 
 /**
@@ -182,7 +184,7 @@ enum ReminderScheduler {
                   let fire = calendar.date(byAdding: .minute, value: -settings.lead, to: officeDate),
                   fire > now else { continue }
             let at = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: fire)
-            out.append(PlannedReminder(id: "reminder.\(r.date.iso).\(r.hour)", hour: r.hour, date: r.date, at: at, fireDate: fire, office: officeDate, title: r.title, feast: r.feast))
+            out.append(PlannedReminder(id: "reminder.\(r.date.iso).\(r.hour)", hour: r.hour, date: r.date, at: at, fireDate: fire, office: officeDate, title: r.title, feast: r.feast, silent: r.silent))
             if out.count == capacity { break }
         }
         return out
@@ -196,12 +198,14 @@ enum ReminderScheduler {
         "\(name) · \(office.formatted(date: .omitted, time: .shortened))"
     }
 
-    /// The notification a reminder posts: "Vespers · 6:00 PM", then the day it keeps, with the bell.
+    /// The notification a reminder posts: "Vespers · 6:00 PM", then the day it keeps, with the bell;
+    /// without it from Vespers of Maundy Thursday through None of Holy Saturday, while the church's
+    /// bells are silent (`presentation::reminders::reminder_silent`).
     static func content(_ r: PlannedReminder) -> UNMutableNotificationContent {
         let c = UNMutableNotificationContent()
         c.title = title(r.title, office: r.office)
         c.body = r.feast
-        c.sound = UNNotificationSound(named: UNNotificationSoundName("bell.caf"))
+        c.sound = r.silent ? nil : UNNotificationSound(named: UNNotificationSoundName("bell.caf"))
         c.categoryIdentifier = category
         c.threadIdentifier = "hours"
         c.userInfo = ["hour": r.hour, "date": r.date.iso, "office": r.office.timeIntervalSince1970]

@@ -39,6 +39,9 @@ pub struct HomeHourLink {
     /// What the hour is ("Evening prayer"), shown under its name while it is the current hour on
     /// a phone, and under every hour's name in the wide home's niche.
     pub note: String,
+    /// Vespers on an evening that already keeps the morrow: "First Vespers of …", which the
+    /// invitation sets under "Pray Vespers" in place of the note; empty otherwise.
+    pub eve: String,
 }
 
 /// The day-landing page.

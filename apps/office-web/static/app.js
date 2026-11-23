@@ -3697,7 +3697,10 @@ function plainClickOpensHere(e, link) {
     var wasWords = prayNow ? prayNowWords(prayNow) : null;
     var wasLabel = wasWords ? wasWords.textContent.trim() : "";
     var glossNote = glossHour && card.querySelector('.home-hour-link[data-hour="' + glossHour + '"] .home-hour-link-note');
-    var gloss = glossNote ? glossNote.textContent : "";
+    // On an evening that keeps the morrow, "First Vespers of …" in place of "Evening prayer":
+    // presentation::Invitation::on_eve, which the server marks on today's Vespers as data-eve.
+    var eve = lit ? lit.getAttribute("data-eve") : null;
+    var gloss = eve || (glossNote ? glossNote.textContent : "");
     var wasGlossEl = prayNow ? prayNowGloss(prayNow) : null;
     var wasGloss = wasGlossEl && !wasGlossEl.hidden ? wasGlossEl.textContent : "";
     card.querySelectorAll(".home-hour-link").forEach(function (link) {
@@ -3712,6 +3715,8 @@ function plainClickOpensHere(e, link) {
       setPrayNowLabel(prayNow, label);
       setPrayNowGloss(prayNow, gloss);
     }
+    // The invitation's mark of an hour prayed follows the hour it now opens.
+    window.dispatchEvent(new Event("officeinvitation"));
   }
 
   // About's table marks the hour it is now as home's directory does (none
@@ -6061,9 +6066,33 @@ function plainClickOpensHere(e, link) {
           mark.remove();
         }
       });
+      // The invitation to the hour now, once that hour is prayed, takes the same cross at its
+      // words' shoulder, as the apps' PrayNow: its link still opens the hour. Its
+      // hour and day are its link's, so Compline after midnight asks yesterday's marks.
+      var prayNow = document.querySelector(".home-prayer-card .pray-now");
+      var label = prayNow && prayNow.querySelector(".pray-now-label");
+      if (label) {
+        var path = /^\/([a-z]+)\/(\d{4}-\d{2}-\d{2})$/.exec(prayNow.getAttribute("href") || "");
+        var words = Array.prototype.map.call(label.childNodes, function (n) {
+          return n.nodeType === 3 || !n.classList.contains("pray-now-prayed") ? n.textContent : "";
+        }).join("").trim();
+        var all = load();
+        var done = !!path && words.indexOf("Pray ") === 0 && Array.isArray(all[path[2]]) && all[path[2]].indexOf(path[1]) >= 0;
+        var cross = label.querySelector(".pray-now-prayed");
+        prayNow.classList.toggle("is-prayed", done);
+        if (done && !cross) {
+          cross = document.createElement("span");
+          cross.className = "pray-now-prayed";
+          cross.innerHTML = '<span aria-hidden="true">✠</span> <span class="sr-only">Prayed</span>';
+          label.appendChild(cross);
+        } else if (!done && cross) {
+          cross.remove();
+        }
+      }
     };
     paint();
     window.addEventListener("pageshow", paint);
+    window.addEventListener("officeinvitation", paint);
     window.addEventListener("storage", function (e) {
       if (e.key === PRAYED_KEY || e.key === null) paint();
     });

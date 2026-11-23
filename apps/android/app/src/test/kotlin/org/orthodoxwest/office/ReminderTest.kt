@@ -150,6 +150,26 @@ class ReminderTest {
     }
 
     @Test
+    fun theTriduumsRemindersComeWithoutTheBell() {
+        turn(on = true)
+        // Maundy Thursday 2026 (Julian Pascha, 12 April): its Lauds rings, its Vespers is silent.
+        ReminderScheduler.sync(app, ZonedDateTime.of(2026, 4, 9, 5, 0, 0, 0, zone))
+        val byTime = alarms.scheduledAlarms.sortedBy { it.triggerAtMs }
+        val notifications = shadowOf(app.getSystemService(NotificationManager::class.java))
+        fun channelOf(at: String): String {
+            val alarm = byTime.single { Instant.ofEpochMilli(it.triggerAtMs).atZone(zone).toLocalDateTime().toString() == at }
+            Notifications.post(app, alarm.intent)
+            return notifications.allNotifications.last().channelId
+        }
+        assertEquals(Notifications.CHANNEL, channelOf("2026-04-09T06:35"))
+        assertEquals(Notifications.SILENT_CHANNEL, channelOf("2026-04-09T17:50"))
+        assertEquals(Notifications.SILENT_CHANNEL, channelOf("2026-04-11T06:35"))
+        assertEquals(Notifications.CHANNEL, channelOf("2026-04-11T17:50"))
+        val silent = app.getSystemService(NotificationManager::class.java).getNotificationChannel(Notifications.SILENT_CHANNEL)
+        assertNull(silent.sound)
+    }
+
+    @Test
     fun inTenMinutesPutsTheReminderAwayAndRingsAgain() {
         turn(on = true)
         ReminderScheduler.sync(app, ZonedDateTime.of(2026, 3, 15, 5, 0, 0, 0, zone))

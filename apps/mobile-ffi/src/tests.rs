@@ -171,6 +171,19 @@ fn home_invites_to_the_current_office_only_today() {
     assert_eq!(core.home(civil(2026, 3, 30), today, 9).unwrap().ornament, "passiontide");
 }
 
+/// On an evening that keeps the morrow, the invitation to Vespers says so (#951).
+#[test]
+fn home_says_first_vespers_on_the_eve_of_a_feast() {
+    let core = OfficeCore::new().unwrap();
+    let eve = civil(2026, 12, 24);
+    assert_eq!(core.home(eve, eve, 18).unwrap().pray_now_gloss, "First Vespers of the Nativity of Our Lord");
+    assert_eq!(core.home(eve, eve, 21).unwrap().pray_now_gloss, "Prayer before sleep");
+    let saturday = civil(2026, 11, 28);
+    assert_eq!(core.home(saturday, saturday, 18).unwrap().pray_now_gloss, "First Vespers of I Sunday of Advent");
+    let plain = civil(2026, 12, 23);
+    assert_eq!(core.home(plain, plain, 18).unwrap().pray_now_gloss, "Evening prayer");
+}
+
 #[test]
 fn about_lights_and_invites_to_the_hour_home_does() {
     let core = OfficeCore::new().unwrap();
@@ -389,6 +402,34 @@ fn the_ordo_leads_a_vigil_into_its_feast_as_the_web_does() {
     assert_eq!(lead(2026, 11, 1), (String::new(), "violet".to_string()));
     // St Andrew's vigil, anticipated over Advent Sunday, leads nowhere.
     assert_eq!(lead(2026, 11, 28), (String::new(), String::new()));
+}
+
+/// The bells are silent through the Triduum: Maundy Thursday's Vespers through Holy Saturday's
+/// None come without the bell, and Holy Saturday's Vespers rings again (#950).
+#[test]
+fn reminders_keep_the_triduum_without_the_bell() {
+    let core = OfficeCore::new().unwrap();
+    let choose = |hour: &str, h: i32, m: i32| ReminderChoice { hour: hour.into(), hour_of_day: h, minute: m };
+    let hours = vec![choose("lauds", 6, 45), choose("none", 15, 0), choose("vespers", 18, 0)];
+    let got = core.reminders(civil(2026, 4, 9), 4, hours, vec![true; 7], None).unwrap();
+    let silent: Vec<_> = got.iter().map(|r| (r.date.day, r.hour.as_str(), r.silent)).collect();
+    assert_eq!(
+        silent,
+        [
+            (9, "lauds", false),
+            (9, "none", false),
+            (9, "vespers", true),
+            (10, "lauds", true),
+            (10, "none", true),
+            (10, "vespers", true),
+            (11, "lauds", true),
+            (11, "none", true),
+            (11, "vespers", false),
+            (12, "lauds", false),
+            (12, "none", false),
+            (12, "vespers", false),
+        ]
+    );
 }
 
 #[test]
