@@ -5474,11 +5474,13 @@ test("the installed web app reports itself apart from a browser tab", async ({ p
 
 // The device keeps only the day it first opened the Office; the beacon says first or returning.
 test("a browser is new on the day it first opens the Office and returning after", async ({ page }) => {
+  // A fixed day: run across a real midnight, the first day would turn returning between visits.
+  await page.clock.setFixedTime(new Date("2026-03-18T12:00:00-04:00"));
   const events = [];
   await captureUsage(page, events);
   const visit = async () => {
     events.length = 0;
-    await page.goto(`/?date=${easternDay()}`);
+    await page.goto("/?date=2026-03-18");
     await engage(page);
     await expect.poll(() => events.length).toBe(1);
     // Leave for a page that never reports before the test changes storage: a beacon still
@@ -5501,15 +5503,18 @@ test("a browser is new on the day it first opens the Office and returning after"
 test("a browser opens its week and month on the first day it is counted in them", async ({ page }) => {
   const events = [];
   let online = true;
+  // A fixed Wednesday, so the week began earlier in the same month, and no real midnight (or a
+  // Monday's) turns the week between visits.
+  const today = "2026-03-18";
+  await page.clock.setFixedTime(new Date(`${today}T12:00:00-04:00`));
   await captureUsage(page, events, () => (online ? 204 : 503));
   const visit = async () => {
     events.length = 0;
-    await page.goto(`/?date=${easternDay()}`);
+    await page.goto(`/?date=${today}`);
     await engage(page);
     await expect.poll(() => events.length).toBe(1);
     return events[0].match(/week:\w+ month:\w+/)[0];
   };
-  const today = easternDay();
   const kept = () => page.evaluate(() => [localStorage.getItem("office-counted"), localStorage.getItem("office-counted-before")]);
   // A beacon the server did not count opens nothing.
   online = false;
@@ -5529,12 +5534,10 @@ test("a browser opens its week and month on the first day it is counted in them"
     await page.goto("/privacy");
     await page.evaluate((d) => { localStorage.setItem("office-counted", d); localStorage.removeItem("office-counted-before"); }, day);
   };
-  if (weekStart !== today && weekStart.slice(0, 7) === today.slice(0, 7)) {
-    await earlier(weekStart);
-    expect(await visit()).toBe("week:again month:again");
-    await expect.poll(kept).toEqual([today, weekStart]);
-    expect(await visit()).toBe("week:again month:again");
-  }
+  await earlier(weekStart);
+  expect(await visit()).toBe("week:again month:again");
+  await expect.poll(kept).toEqual([today, weekStart]);
+  expect(await visit()).toBe("week:again month:again");
   // Last counted a year ago: a new week and a new month.
   await earlier(`${Number(today.slice(0, 4)) - 1}${today.slice(4)}`.replace(/-02-29$/, "-02-28"));
   expect(await visit()).toBe("week:first month:first");
