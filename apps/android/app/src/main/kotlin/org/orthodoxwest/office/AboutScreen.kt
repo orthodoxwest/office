@@ -3,6 +3,7 @@ package org.orthodoxwest.office
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.text.format.DateFormat
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -96,10 +97,15 @@ import org.orthodoxwest.office.core.RunStyle
 import org.orthodoxwest.office.core.RunView
 import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.aboutNow
+import org.orthodoxwest.office.core.aboutSunTime
 import org.orthodoxwest.office.core.colorDaysNote
 import org.orthodoxwest.office.core.courseSpan
 import org.orthodoxwest.office.core.rareColorMaxDays
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.max
@@ -142,6 +148,11 @@ fun AboutScreen(
     val body = Type.body.copy(lineHeight = 31.sp, color = p.text)
     val now = remember(today, clockHour) { runCatching { aboutNow(today.toCivil(), clockHour) }.getOrNull() }
     val currentHour = now?.current.orEmpty()
+    // While the reminders follow the sun here, the hours' times are today's sun's.
+    val periods = remember(view, today) {
+        val clock = DateTimeFormatter.ofPattern(if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm a", Locale.getDefault())
+        sunPeriods(view.periods, ReminderStore(context).load().sunTimes(today, ZoneId.systemDefault()), clock)
+    }
 
     // Extract head epigraph, intro, hours heading/note, and remaining prose sections from shared blocks.
     val verse = remember(view) { view.blocks.firstOrNull { it.kind == "verse" } }
@@ -160,14 +171,14 @@ fun AboutScreen(
                 AboutSectionHeading(parsed.hoursHeading, seed = 110)
             }
             Horologium(
-                periods = view.periods,
+                periods = periods,
                 current = currentHour,
                 pinned = pinnedHour,
                 onSelect = { slug -> pinnedHour = if (pinnedHour == slug) null else slug },
                 onPin = { slug -> pinnedHour = slug },
             )
             HoursDirectory(
-                periods = view.periods,
+                periods = periods,
                 current = currentHour,
                 preview = pinnedHour?.takeIf { it != currentHour },
                 onHour = { onOpen(Page.Hour(today, it)) },
@@ -797,6 +808,22 @@ private fun Horologium(
  * frame above and below, medium dividers between periods, faint hairlines between hours inside a
  * period, and zero vertical rules or shaded cells.
  */
+/**
+ * The table's hours with today's times by the sun ("at sunrise · 6:48 am") in place of their own,
+ * when [sun] has them; Compline, and every hour while the sun does not time them, keep theirs.
+ */
+internal fun sunPeriods(periods: List<AboutPeriodView>, sun: Map<String, LocalTime>?, clock: DateTimeFormatter): List<AboutPeriodView> {
+    if (sun == null) return periods
+    return periods.map { period ->
+        period.copy(
+            hours = period.hours.map { h ->
+                val time = sun[h.hour]?.let { aboutSunTime(h.hour, it.format(clock)) }.orEmpty()
+                if (time.isEmpty()) h else h.copy(time = time)
+            },
+        )
+    }
+}
+
 @Composable
 private fun HoursDirectory(
     periods: List<AboutPeriodView>,

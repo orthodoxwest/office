@@ -45,6 +45,24 @@ struct AboutPage: View {
     }
 }
 
+/// The table's hours with today's times by the sun ("at sunrise · 6:48 am") in place of their
+/// own, when `sun` has them; Compline, and every hour while the sun does not time them, keep theirs.
+func aboutSunPeriods(_ periods: [AboutPeriodView], sun: [String: (hour: Int, minute: Int)]?) -> [AboutPeriodView] {
+    guard let sun else { return periods }
+    var civil = Calendar(identifier: .gregorian)
+    civil.timeZone = .current
+    return periods.map { period in
+        AboutPeriodView(label: period.label, hours: period.hours.map { h -> AboutHourView in
+            guard let t = sun[h.hour],
+                  let date = civil.date(from: DateComponents(year: 2026, month: 1, day: 1, hour: t.hour, minute: t.minute))
+            else { return h }
+            let time = aboutSunTime(hour: h.hour, clock: date.formatted(date: .omitted, time: .shortened))
+            if time.isEmpty { return h }
+            return AboutHourView(hour: h.hour, name: h.name, gloss: h.gloss, time: time, angle: h.angle, night: h.night)
+        })
+    }
+}
+
 /**
  * About the Office, set as the web's `/about`: the feast page's painted frontispiece head, an
  * illuminated drop-cap introduction, the interactive Horologium over an open hand-ruled hours
@@ -73,6 +91,8 @@ struct AboutScreen: View {
         let verse = view.blocks.first { $0.kind == "verse" }
         let intro = view.blocks.first { $0.kind == "intro" }?.text ?? ""
         let parsed = partitionAboutBlocks(view.blocks)
+        // While the reminders follow the sun here, the hours' times are today's sun's.
+        let periods = aboutSunPeriods(view.periods, sun: (try? Office.core.get()).flatMap { ReminderStore.load().sunTimes(on: Date(), core: $0) })
 
         GeometryReader { geo in
             let wide = geo.size.width >= aboutRailFrom
@@ -96,7 +116,7 @@ struct AboutScreen: View {
                                     }
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     VStack(alignment: .leading, spacing: 0) {
-                                        hoursColumn(parsed: parsed, current: currentHour)
+                                        hoursColumn(parsed: parsed, periods: periods, current: currentHour)
                                         doorBlock(now: now, fillWidth: true)
                                     }
                                     .frame(width: min(376, geo.size.width * 0.36), alignment: .leading)
@@ -116,7 +136,7 @@ struct AboutScreen: View {
                                     wide: false
                                 )
                                 introBlock(intro)
-                                hoursColumn(parsed: parsed, current: currentHour)
+                                hoursColumn(parsed: parsed, periods: periods, current: currentHour)
                                     .padding(.top, m.px(22))
                                 proseSections(parsed.sections)
                                 doorBlock(now: now, fillWidth: false)
@@ -164,20 +184,20 @@ struct AboutScreen: View {
         }
     }
 
-    @ViewBuilder private func hoursColumn(parsed: AboutPartition, current: String) -> some View {
+    @ViewBuilder private func hoursColumn(parsed: AboutPartition, periods: [AboutPeriodView], current: String) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             if !parsed.hoursHeading.isEmpty {
                 AboutSectionHeading(text: parsed.hoursHeading, seed: 110)
             }
             AboutHorologium(
-                periods: view.periods,
+                periods: periods,
                 current: current,
                 pinned: pinnedHour,
                 onSelect: { slug in pinnedHour = pinnedHour == slug ? nil : slug },
                 onPin: { slug in pinnedHour = slug }
             )
             AboutHoursDirectory(
-                periods: view.periods,
+                periods: periods,
                 current: current,
                 preview: pinnedHour != current ? pinnedHour : nil
             )

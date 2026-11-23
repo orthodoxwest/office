@@ -130,6 +130,27 @@ pub const ABOUT_HOURS: [(&str, &[(&str, &str)]); 3] = [
     ("Evening", &[("vespers", "toward sunset"), ("compline", "late in the evening")]),
 ];
 
+/// When the hours follow the sun where the reader is ([`crate::sun`]), what the table and the
+/// Horologium say of each hour's time in place of [`ABOUT_HOURS`]' own, before today's clock
+/// time there. Compline keeps the reader's own time, so it keeps its gloss.
+pub const ABOUT_SUN_HOURS: [(&str, &str); 6] = [
+    ("lauds", "at sunrise"),
+    ("prime", "at the first hour"),
+    ("terce", "at the third hour"),
+    ("sext", "at solar noon"),
+    ("none", "at the ninth hour"),
+    ("vespers", "toward sunset"),
+];
+
+/// An hour's time on the About page while the hours follow the sun: "at sunrise · 6:48 am", the
+/// clock time `clock` in the reader's own style, set in the table's lower case. None for an hour
+/// the sun does not time (Compline), which keeps [`ABOUT_HOURS`]' words.
+pub fn about_sun_time(slug: &str, clock: &str) -> Option<String> {
+    let (_, lead) = ABOUT_SUN_HOURS.iter().find(|(s, _)| *s == slug)?;
+    let clock = clock.trim();
+    (!clock.is_empty()).then(|| format!("{lead} · {}", clock.to_lowercase()))
+}
+
 /// Each hour's station angle along the Horologium's semicircular arc, in degrees from the western
 /// horizon (180° = dawn at left, 90° = solar noon at zenith, 0° = night at right).
 pub fn about_horologium_angle(slug: &str) -> f64 {
@@ -410,6 +431,19 @@ mod tests {
         assert!(about_horologium_is_night("vespers"));
         assert!(about_horologium_is_night("compline"));
         assert!(!about_horologium_is_night("none"));
+    }
+
+    #[test]
+    fn the_sun_times_every_hour_but_compline() {
+        assert_eq!(about_sun_time("lauds", "6:48 AM").as_deref(), Some("at sunrise · 6:48 am"));
+        assert_eq!(about_sun_time("sext", "12:14").as_deref(), Some("at solar noon · 12:14"));
+        assert_eq!(about_sun_time("vespers", "5:19 PM").as_deref(), Some("toward sunset · 5:19 pm"));
+        assert_eq!(about_sun_time("compline", "9:00 PM"), None);
+        assert_eq!(about_sun_time("lauds", " "), None);
+        // The six the sun times are the table's own, in its order.
+        let table: Vec<_> = ABOUT_HOURS.iter().flat_map(|(_, hours)| hours.iter().map(|(slug, _)| *slug)).collect();
+        let sun: Vec<_> = ABOUT_SUN_HOURS.iter().map(|(slug, _)| *slug).collect();
+        assert_eq!(sun, table[..6]);
     }
 
     #[test]

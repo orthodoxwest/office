@@ -78,6 +78,21 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(aboutLink("/privacy", defaults: defaults), .web(URL(string: "https://example.org/privacy")!))
     }
 
+    /// While the hours follow the sun, About gives today's sun's times, and Compline keeps its words.
+    func testAboutGivesTheSunsTimesButCompline() {
+        let periods = about().periods
+        XCTAssertEqual(aboutSunPeriods(periods, sun: nil), periods)
+        let sun: [String: (hour: Int, minute: Int)] = ["lauds": (6, 48), "sext": (12, 14), "vespers": (17, 19), "compline": (21, 0)]
+        let hours = aboutSunPeriods(periods, sun: sun).flatMap(\.hours)
+        let time = { (slug: String) in hours.first { $0.hour == slug }?.time ?? "" }
+        XCTAssertTrue(time("lauds").hasPrefix("at sunrise · "), time("lauds"))
+        XCTAssertTrue(time("sext").hasPrefix("at solar noon · "), time("sext"))
+        XCTAssertTrue(time("vespers").hasPrefix("toward sunset · "), time("vespers"))
+        XCTAssertEqual(time("compline"), periods.last?.hours.last?.time)
+        XCTAssertEqual(time("prime"), periods.first?.hours.last?.time)
+        XCTAssertEqual(aboutSunTime(hour: "lauds", clock: "6:48 AM"), "at sunrise · 6:48 am")
+    }
+
     /// About lights the hour home lights, none from midnight to 2 am, and ends with home's invitation.
     func testAboutLightsAndInvitesToTheHourHomeDoes() throws {
         let today = CivilDate(year: 2026, month: 11, day: 13)

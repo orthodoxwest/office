@@ -934,6 +934,14 @@ pub fn hour_note(slug: String) -> String {
     hour_gloss(&slug).to_string()
 }
 
+/// An hour's time on the About page while the hours follow the sun, from today's time for it in
+/// the phone's clock style: "at sunrise · 6:48 am" (`presentation::about::about_sun_time`).
+/// Empty for Compline, which keeps the page's own words.
+#[uniffi::export]
+pub fn about_sun_time(hour: String, clock: String) -> String {
+    presentation::about::about_sun_time(&hour, &clock).unwrap_or_default()
+}
+
 /// Why the sun setting is greyed out, under its switch.
 #[uniffi::export]
 pub fn sun_unavailable_note() -> String {

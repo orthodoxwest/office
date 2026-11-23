@@ -11,6 +11,9 @@ import org.orthodoxwest.office.core.aboutNow
 import org.orthodoxwest.office.core.dayNameGloss
 import org.orthodoxwest.office.core.hourNames
 import org.orthodoxwest.office.core.ordoColors
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 /** About the Office as the core gives it: the page AboutScreen sets, and the first week home offers it in. */
 class AboutTest {
@@ -41,6 +44,23 @@ class AboutTest {
         val links = view.blocks.flatMap { it.runs }.map { it.link }.filter { it.isNotEmpty() }
         assertTrue(links.isNotEmpty())
         for (link in links) assertTrue(link, link in listOf("/calendar", "/reminders", "/privacy") || link.startsWith("https://"))
+    }
+
+    /** While the hours follow the sun, the table gives today's sun's times, and Compline keeps its words. */
+    @Test
+    fun theSunTimesTheHoursButCompline() {
+        val clock = DateTimeFormatter.ofPattern("h:mm a", Locale.US)
+        assertEquals(view.periods, sunPeriods(view.periods, null, clock))
+        val sun = mapOf(
+            "lauds" to LocalTime.of(6, 48), "prime" to LocalTime.of(7, 43), "terce" to LocalTime.of(9, 31),
+            "sext" to LocalTime.of(12, 14), "none" to LocalTime.of(14, 15), "vespers" to LocalTime.of(17, 19),
+            "compline" to LocalTime.of(21, 0),
+        )
+        val times = sunPeriods(view.periods, sun, clock).flatMap { it.hours }.associate { it.hour to it.time }
+        assertEquals("at sunrise · 6:48 am", times["lauds"])
+        assertEquals("at solar noon · 12:14 pm", times["sext"])
+        assertEquals("toward sunset · 5:19 pm", times["vespers"])
+        assertEquals(view.periods.last().hours.last().time, times["compline"])
     }
 
     /** The table lights the hour home lights, none from midnight to 2 am, and the page ends with home's invitation. */
