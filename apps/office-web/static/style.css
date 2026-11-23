@@ -7788,6 +7788,11 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 @media (max-width: 700px) {
   .page-home .pray-now-gloss:not([hidden]) {
     display: block;
+    /* One line, whatever the hour's gloss: a long "First Vespers of …" is cut
+       short rather than growing the tablet (presentation::first_vespers_gloss). */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     margin-top: 0.08rem;
     color: var(--now-gloss);
     font-size: 0.86rem;

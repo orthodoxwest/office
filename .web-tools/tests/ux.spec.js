@@ -640,7 +640,13 @@ test("the invitation names First Vespers on the eve of a feast", async ({ page }
   await expect(page.locator(".pray-now-gloss")).toHaveText("Prayer before sleep");
   await page.clock.setFixedTime(new Date("2026-12-23T18:00:00-05:00"));
   await openDatedPage(page, "/?date=2026-12-23");
-  await expect(page.locator(".pray-now-gloss")).toHaveText("Evening prayer");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Evening prayer");  const tablet = () => page.evaluate(() => Math.round(document.querySelector(".pray-now").getBoundingClientRect().height));
+  const plain = await tablet();
+  // The longest name keeps the gloss to one line, so the tablet keeps its height.
+  await page.clock.setFixedTime(new Date("2026-11-17T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-11-17");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("First Vespers of the Dedication of the Basilica of the Holy Apostles Peter & Paul");
+  expect(await tablet()).toBe(plain);
 });
 
 // The invitation to the hour now, once that hour is prayed, takes the

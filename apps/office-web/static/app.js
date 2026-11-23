@@ -3559,6 +3559,8 @@ function plainClickOpensHere(e, link) {
           setPrayNowLabel(prayNow, label);
           setPrayNowGloss(prayNow, gloss);
         }
+        // The mark of an hour prayed changes with the words, at the seat, as the apps' does.
+        window.dispatchEvent(new Event("officeinvitation"));
       },
     };
     var run = function (el, frames, timing, pseudo) {
@@ -3710,13 +3712,16 @@ function plainClickOpensHere(e, link) {
       prayNow.setAttribute("href", href);
     }
     if (passing === true && (was !== lit || (prayNow && (wasLabel !== label || wasGloss !== gloss))) && lightMayPass()) {
+      // The pass marks the invitation again at its seat.
       passLight(card, was, lit, prayNow, wasLabel, label, wasGloss, gloss);
-    } else if (prayNow) {
-      setPrayNowLabel(prayNow, label);
-      setPrayNowGloss(prayNow, gloss);
+    } else {
+      if (prayNow) {
+        setPrayNowLabel(prayNow, label);
+        setPrayNowGloss(prayNow, gloss);
+      }
+      // The invitation's mark of an hour prayed follows the hour it now opens.
+      window.dispatchEvent(new Event("officeinvitation"));
     }
-    // The invitation's mark of an hour prayed follows the hour it now opens.
-    window.dispatchEvent(new Event("officeinvitation"));
   }
 
   // About's table marks the hour it is now as home's directory does (none

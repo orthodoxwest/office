@@ -158,8 +158,9 @@ class ReminderTest {
         val notifications = shadowOf(app.getSystemService(NotificationManager::class.java))
         fun channelOf(at: String): String {
             val alarm = byTime.single { Instant.ofEpochMilli(it.triggerAtMs).atZone(zone).toLocalDateTime().toString() == at }
+            app.getSystemService(NotificationManager::class.java).cancelAll()
             Notifications.post(app, alarm.intent)
-            return notifications.allNotifications.last().channelId
+            return notifications.allNotifications.single().channelId
         }
         assertEquals(Notifications.CHANNEL, channelOf("2026-04-09T06:35"))
         assertEquals(Notifications.SILENT_CHANNEL, channelOf("2026-04-09T17:50"))

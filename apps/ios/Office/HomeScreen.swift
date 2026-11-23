@@ -1045,9 +1045,12 @@ struct PrayNow: View {
                         }
                     }
                 if !gloss.isEmpty {
+                    // One line: a long "First Vespers of …" is cut short rather than growing the tablet.
                     Text(gloss)
                         .type(TextStyle(size: glossSize, line: glossSize * 1.2, italic: true))
                         .foregroundStyle(glossInk)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                 }
             }
             .opacity(words)

@@ -80,6 +80,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
@@ -88,6 +89,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
@@ -1007,7 +1009,9 @@ fun PrayNow(label: String, size: Float, top: Dp, bottom: Dp, frontal: Color, was
             .fillMaxWidth()
             .heightIn(min = 44.dp)
             .crownUnit("r-pray")
-            .tap(label = if (prayed) "$label, prayed" else null, source = source, onClick = onClick)
+            .tap(source = source, onClick = onClick)
+            // Said after the words and the gloss, as the web's "Prayed" and iOS's value.
+            .then(if (prayed) Modifier.semantics { stateDescription = "Prayed" } else Modifier)
             .drawBehind {
                 tabletWash(tablet, lerp(wash, deeper, held))
                 invitationRules(p.lining, frontal)
@@ -1026,7 +1030,8 @@ fun PrayNow(label: String, size: Float, top: Dp, bottom: Dp, frontal: Color, was
                 if (prayed) PaintedCross(Modifier.align(Alignment.TopEnd).offset(x = (size * 0.6f).dp, y = (size * 0.18f).dp).size((size * 0.42f).dp), ink = p.gold)
             }
             if (gloss.isNotEmpty()) {
-                Text(gloss, Modifier.padding(top = 1.3.dp), style = Type.small.copy(fontSize = glossSize.sp, lineHeight = (glossSize * 1.2f).sp, color = glossInk, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center))
+                // One line: a long "First Vespers of …" is cut short rather than growing the tablet.
+                Text(gloss, Modifier.padding(top = 1.3.dp), style = Type.small.copy(fontSize = glossSize.sp, lineHeight = (glossSize * 1.2f).sp, color = glossInk, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }
