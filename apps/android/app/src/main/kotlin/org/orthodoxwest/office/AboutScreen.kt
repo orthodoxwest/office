@@ -3,6 +3,7 @@ package org.orthodoxwest.office
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.text.format.DateFormat
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -96,10 +97,16 @@ import org.orthodoxwest.office.core.RunStyle
 import org.orthodoxwest.office.core.RunView
 import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.aboutNow
+import org.orthodoxwest.office.core.aboutSunTime
+import org.orthodoxwest.office.core.aboutTimeSpoken
 import org.orthodoxwest.office.core.colorDaysNote
 import org.orthodoxwest.office.core.courseSpan
 import org.orthodoxwest.office.core.rareColorMaxDays
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.max
@@ -121,6 +128,7 @@ fun AboutScreen(
     view: AboutView,
     today: LocalDate,
     clockHour: Int,
+    reminders: ReminderSettings,
     chrome: @Composable () -> Unit,
     insets: PaddingValues,
     onOpen: (Page) -> Unit,
@@ -142,6 +150,11 @@ fun AboutScreen(
     val body = Type.body.copy(lineHeight = 31.sp, color = p.text)
     val now = remember(today, clockHour) { runCatching { aboutNow(today.toCivil(), clockHour) }.getOrNull() }
     val currentHour = now?.current.orEmpty()
+    // While the reminders follow the sun here, the hours' times are today's sun's.
+    val periods = remember(view, today, reminders) {
+        val clock = DateTimeFormatter.ofPattern(if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm a", Locale.getDefault())
+        sunPeriods(view.periods, reminders.sunTimes(today, ZoneId.systemDefault()), clock)
+    }
 
     // Extract head epigraph, intro, hours heading/note, and remaining prose sections from shared blocks.
     val verse = remember(view) { view.blocks.firstOrNull { it.kind == "verse" } }
@@ -160,14 +173,14 @@ fun AboutScreen(
                 AboutSectionHeading(parsed.hoursHeading, seed = 110)
             }
             Horologium(
-                periods = view.periods,
+                periods = periods,
                 current = currentHour,
                 pinned = pinnedHour,
                 onSelect = { slug -> pinnedHour = if (pinnedHour == slug) null else slug },
                 onPin = { slug -> pinnedHour = slug },
             )
             HoursDirectory(
-                periods = view.periods,
+                periods = periods,
                 current = currentHour,
                 preview = pinnedHour?.takeIf { it != currentHour },
                 onHour = { onOpen(Page.Hour(today, it)) },
@@ -556,7 +569,7 @@ private fun Horologium(
             // Not a live region, as on the web and iOS: each stop already names its hour, and a
             // readout spoken at every pass would talk over the page.
             mod.clearAndSetSemantics {
-                contentDescription = "${if (isNow) "Now, " else ""}${active.time}. ${active.name}, ${active.gloss}"
+                contentDescription = "${if (isNow) "Now, " else ""}${aboutTimeSpoken(active.time)}. ${active.name}, ${active.gloss}"
             },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -781,7 +794,7 @@ private fun Horologium(
                 Box(
                     Modifier.offset { IntOffset(xPx, yPx) }
                         .size(44.dp)
-                        .tap(label = "${h.name}: ${h.gloss}, ${h.time}", selected = h.hour == active.hour) { onSelect(h.hour) },
+                        .tap(label = "${h.name}: ${h.gloss}, ${aboutTimeSpoken(h.time)}", selected = h.hour == active.hour) { onSelect(h.hour) },
                 )
             }
         }
@@ -789,6 +802,22 @@ private fun Horologium(
         if (largeFont) {
             readout(Modifier.fillMaxWidth().padding(top = 8.dp))
         }
+    }
+}
+
+/**
+ * The table's hours with today's times by the sun ("sunrise · 6:48 am") in place of their own,
+ * when [sun] has them; Compline, and every hour while the sun does not time them, keep theirs.
+ */
+internal fun sunPeriods(periods: List<AboutPeriodView>, sun: Map<String, LocalTime>?, clock: DateTimeFormatter): List<AboutPeriodView> {
+    if (sun == null) return periods
+    return periods.map { period ->
+        period.copy(
+            hours = period.hours.map { h ->
+                val time = sun[h.hour]?.let { aboutSunTime(h.hour, it.format(clock)) }.orEmpty()
+                if (time.isEmpty()) h else h.copy(time = time)
+            },
+        )
     }
 }
 
@@ -866,7 +895,7 @@ private fun HoursDirectory(
                             Spacer(Modifier.width(10.4.dp))
                             Column(Modifier.weight(1f).alignByBaseline()) {
                                 Text(h.gloss, style = glossStyle)
-                                Text(h.time, style = timeStyle)
+                                Text(h.time, Modifier.semantics { contentDescription = aboutTimeSpoken(h.time) }, style = timeStyle)
                             }
                         }
                     }
