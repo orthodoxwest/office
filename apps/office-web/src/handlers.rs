@@ -315,6 +315,27 @@ impl Server {
         }
     }
 
+    /// The date picker's marks for a year (#953): `{"year":2026,"days":"wwwW…"}`, a letter a day
+    /// from the first of January (`presentation::course::day_marks_code`). The calendar alone, so
+    /// cheap; only the offered years, as the picker offers.
+    pub fn day_marks(&self, method: &Method, year: &str) -> Response<Body> {
+        if method != Method::GET && method != Method::HEAD {
+            return crate::http::http_error("405 method not allowed", StatusCode::METHOD_NOT_ALLOWED);
+        }
+        let Some(year) = (year.len() == 4 && year.bytes().all(|b| b.is_ascii_digit())).then(|| year.parse::<i32>().ok()).flatten() else {
+            return crate::http::not_found();
+        };
+        let Ok(entry) = self.cache.get(year) else { return crate::http::not_found() };
+        let marks = presentation::course::day_marks(entry.days.iter().map(|d| &**d), &entry.moveable);
+        let body = format!(r#"{{"year":{year},"days":"{}"}}"#, presentation::course::day_marks_code(&marks));
+        let mut resp = response(StatusCode::OK, if method == Method::HEAD { String::new() } else { body });
+        set(&mut resp, header::CONTENT_TYPE, "application/json");
+        set(&mut resp, header::X_CONTENT_TYPE_OPTIONS, "nosniff");
+        // A deploy may move a feast; a day's old marks do no harm meanwhile.
+        set(&mut resp, header::CACHE_CONTROL, "public, max-age=86400");
+        resp
+    }
+
     pub fn not_found_page(&self, req: &Req) -> Response<Body> {
         let data =
             NotFoundData { chrome: Chrome { page: "notice".into(), nav_date: self.nav_date_now(req), noindex: true, ..Chrome::default() } };

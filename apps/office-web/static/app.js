@@ -2307,6 +2307,39 @@ function plainClickOpensHere(e, link) {
     return node;
   }
 
+  // The picker's marks (#953): a year's letters from /api/day-marks, a letter
+  // a day from the first of January in the colour's ordo abbreviation, a
+  // capital on a first-class feast (presentation::course::day_marks_code).
+  // Each year is asked for once a page; until it comes, and if it never does
+  // (offline, a year the server does not offer), the days are plain.
+  var MARK_COLORS = { w: "white", r: "red", g: "green", v: "violet", b: "black", p: "rose" };
+  var dayMarks = {};
+  var FIRST_CLASS_WORDS = "first-class feast";
+
+  function yearMarks(year, arrived) {
+    if (Object.prototype.hasOwnProperty.call(dayMarks, year)) {
+      return typeof dayMarks[year] === "string" ? dayMarks[year] : null;
+    }
+    dayMarks[year] = null;
+    if (typeof fetch !== "function") {
+      return null;
+    }
+    fetch("/api/day-marks/" + year, { credentials: "same-origin" }).then(function (resp) {
+      return resp.ok ? resp.json() : null;
+    }).then(function (data) {
+      if (data && data.year === year && typeof data.days === "string") {
+        dayMarks[year] = data.days;
+        arrived(year);
+      }
+    }).catch(function () {});
+    return null;
+  }
+
+  // The day's index in its year, 0 for the first of January.
+  function dayOfYear(date) {
+    return Math.round((date - civilDate(date.getUTCFullYear(), 0, 1)) / 86400000);
+  }
+
   function buildDatePicker(details) {
     var picker = el("div", "date-picker");
     picker.setAttribute("role", "group");
@@ -2433,6 +2466,7 @@ function plainClickOpensHere(e, link) {
               dayLabel += ", selected";
             }
             link.setAttribute("aria-label", dayLabel);
+            link.setAttribute("data-label", dayLabel);
             link.appendChild(el("span", "", String(day)));
             if (slug === state.today) {
               link.setAttribute("aria-current", "date");
@@ -2443,6 +2477,35 @@ function plainClickOpensHere(e, link) {
         }
         weeks.appendChild(tr);
       }
+      markDays();
+    }
+
+    // Lays the year's marks on the days shown, in place, so marks that
+    // arrive while a day has focus do not take it away.
+    function markDays() {
+      var year = state.focus.getUTCFullYear();
+      var code = yearMarks(year, function (arrivedYear) {
+        if (state.focus.getUTCFullYear() === arrivedYear) {
+          markDays();
+        }
+      });
+      if (!code) {
+        return;
+      }
+      weeks.querySelectorAll(".date-picker-day").forEach(function (link) {
+        var date = parseSlug(link.getAttribute("data-date"));
+        var letter = date && date.getUTCFullYear() === year ? code.charAt(dayOfYear(date)) : "";
+        var color = MARK_COLORS[letter.toLowerCase()];
+        if (!color || link.hasAttribute("data-color")) {
+          return;
+        }
+        link.setAttribute("data-color", color);
+        link.classList.add("day-color-" + color);
+        if (letter !== letter.toLowerCase()) {
+          link.setAttribute("data-first-class", "");
+          link.setAttribute("aria-label", link.getAttribute("data-label") + ", " + FIRST_CLASS_WORDS);
+        }
+      });
     }
 
     function renderMonths() {

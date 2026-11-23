@@ -41,6 +41,8 @@ for (const theme of ["light", "dark"]) {
     await openForSnapshot(page, `/lauds/${testDate}`, theme);
     await page.locator("button.hour-meta-date").click();
     await expect(page.locator(".date-picker")).toBeVisible();
+    // The day marks come with the year's letters; shoot them laid.
+    await expect(page.locator(".date-picker-day[data-color]")).toHaveCount(31);
     // The picker lends its parts to the controls' grid, so the row and its open panel are shot.
     await expect(page.locator(".hour-context-controls")).toHaveScreenshot(`date-picker-${theme}.png`);
   });

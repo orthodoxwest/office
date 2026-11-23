@@ -4159,6 +4159,34 @@ test("home's date picker opens the chosen day's home", async ({ page }) => {
   await expect(page).toHaveURL(/\/\?date=2026-02-14$/);
 });
 
+// The picker marks each day with a hairline of its colour and gilds the
+// first-class feasts (#953), so the month's shape shows with no words added.
+test("the date picker marks each day's colour and gilds first-class feasts", async ({ page }) => {
+  await openDatedPage(page, `/lauds/${testDate}`);
+  await page.locator("button.hour-meta-date").click();
+  const picker = page.getByRole("group", { name: "Choose a date" });
+  const day = slug => picker.locator(`.date-picker-day[data-date="${slug}"]`);
+  // Laetare in rose, Lent's ferias in violet, the Annunciation gilt on white.
+  await expect(day("2026-03-22")).toHaveAttribute("data-color", "rose");
+  await expect(day("2026-03-16")).toHaveAttribute("data-color", "violet");
+  await expect(day("2026-03-25")).toHaveAttribute("data-color", "white");
+  await expect(day("2026-03-25")).toHaveAttribute("data-first-class", "");
+  await expect(day("2026-03-25")).toHaveAttribute("aria-label", "Wednesday, March 25, 2026, first-class feast");
+  await expect(day("2026-03-16")).not.toHaveAttribute("data-first-class", /.*/);
+  // The hairline is drawn in the day's colour, under the figure.
+  const hairline = await day("2026-03-16").evaluate(link => {
+    const after = getComputedStyle(link, "::after");
+    return { height: after.height, background: after.backgroundColor };
+  });
+  expect(hairline.height).toBe("2px");
+  expect(hairline.background).not.toBe("rgba(0, 0, 0, 0)");
+  // Next month: Good Friday black and plain, Pascha gilt.
+  await picker.getByRole("button", { name: "Next month" }).click();
+  await expect(day("2026-04-10")).toHaveAttribute("data-color", "black");
+  await expect(day("2026-04-10")).not.toHaveAttribute("data-first-class", /.*/);
+  await expect(day("2026-04-12")).toHaveAttribute("data-first-class", "");
+});
+
 test("without JavaScript the native date field still jumps", async ({ browser, baseURL }) => {
   const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
   const page = await context.newPage();

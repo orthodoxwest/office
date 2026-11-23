@@ -53,6 +53,7 @@ pub struct Server {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Route {
     UsageEvent,
+    DayMarks,
     UsageDashboard,
     Static,
     ServiceWorker,
@@ -128,7 +129,7 @@ impl Server {
         {
             match route {
                 // Clients that already hold these URLs keep using them where they are.
-                Route::UsageEvent | Route::Static => {}
+                Route::UsageEvent | Route::Static | Route::DayMarks => {}
                 Route::Ics => return self.ics(&query, &format!("https://{canonical}")),
                 Route::ServiceWorker => return moved::farewell_worker(),
                 Route::UsageDashboard
@@ -160,6 +161,7 @@ impl Server {
         }
         let mut resp = match route {
             Route::UsageEvent => usage::handle_event(self.usage.as_ref(), method, headers, host, self.canonical.as_deref(), body),
+            Route::DayMarks => self.day_marks(method, path.trim_start_matches("/api/day-marks/")),
             Route::UsageDashboard => usage::handle_dashboard(self.usage.as_ref(), &self.pages, method, &query),
             Route::Static => pwa::serve_static(&path, query.get("v")),
             Route::ServiceWorker => pwa::service_worker(self.version()),
@@ -209,6 +211,7 @@ impl Server {
         };
         Router::new()
             .route("/api/usage", endpoint(Route::UsageEvent))
+            .route("/api/day-marks/{year}", endpoint(Route::DayMarks))
             .route("/admin/usage", endpoint(Route::UsageDashboard))
             .route("/static", endpoint(Route::Static))
             .route("/static/", endpoint(Route::Static))
@@ -316,6 +319,22 @@ mod routing_tests {
             .body(body.into())
             .unwrap();
         test_server().router().oneshot(request).await.unwrap()
+    }
+
+    /// The date picker's marks: a letter a day for an offered year, nothing for another.
+    #[tokio::test]
+    async fn day_marks_serve_a_letter_a_day_for_offered_years() {
+        let year = Server::local_year();
+        let resp = request(Method::GET, &format!("/api/day-marks/{year}"), Body::empty()).await;
+        assert_eq!(resp.status(), StatusCode::OK);
+        assert_eq!(resp.headers().get(header::CONTENT_TYPE).unwrap(), "application/json");
+        let body = String::from_utf8(axum::body::to_bytes(resp.into_body(), usize::MAX).await.unwrap().to_vec()).unwrap();
+        let days = body.strip_prefix(&format!(r#"{{"year":{year},"days":""#)).and_then(|b| b.strip_suffix(r#""}"#)).expect(&body);
+        assert!(days.len() == 365 || days.len() == 366, "{body}");
+        assert!(days.chars().all(|c| "wrgvbpWRGVBP".contains(c)), "{body}");
+        for path in ["/api/day-marks/1066", "/api/day-marks/20x6", "/api/day-marks/02026"] {
+            assert_eq!(request(Method::GET, path, Body::empty()).await.status(), StatusCode::NOT_FOUND, "{path}");
+        }
     }
 
     #[tokio::test]

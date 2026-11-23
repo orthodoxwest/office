@@ -66,6 +66,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -88,6 +89,7 @@ import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.shadow.Shadow
@@ -135,8 +137,11 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.orthodoxwest.office.core.DayMarkView
 import org.orthodoxwest.office.core.preferenceHints
 
 /** The reading measure's side gutter (`--page-gutter` on a phone). */
@@ -1024,6 +1029,26 @@ private fun YearMonth.coerceIn(years: IntRange): YearMonth = when {
     else -> this
 }
 
+/** How a screen reader names a first-class feast in the picker (`presentation::course::FIRST_CLASS_SPOKEN`). */
+private val FIRST_CLASS_SPOKEN by lazy { org.orthodoxwest.office.core.firstClassSpoken() }
+
+/**
+ * A day's marks in the picker (#953, `.date-picker-day[data-color]`): a whisper-thin hairline of
+ * its colour under the figure, below the chosen day's gold rule, and on a first-class feast a gilt
+ * lozenge riding it, as home gilds the day.
+ */
+private fun Modifier.dayMark(mark: DayMarkView, p: Palette): Modifier = drawBehind {
+    val line = 2.dp.toPx()
+    val y = size.height - 4.dp.toPx() - line / 2f
+    val half = 15.2.dp.toPx() / 2f
+    drawLine(dayColor(mark.color, p).copy(alpha = 0.6f), Offset(center.x - half, y), Offset(center.x + half, y), line)
+    if (mark.firstClass) {
+        val side = 4.5.dp.toPx()
+        val at = Offset(center.x, size.height - 5.dp.toPx())
+        rotate(45f, at) { drawRect(p.gold, Offset(at.x - side / 2f, at.y - side / 2f), Size(side, side)) }
+    }
+}
+
 /** A month's days in six weeks always, blank where the month is not; `live` false while the months cover them. */
 @Composable
 private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boolean, onPick: (LocalDate) -> Unit) {
@@ -1040,17 +1065,23 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
             )
         }
     }
+    // The month's marks (#953), from the calendar off the main thread; until they come the days are plain.
+    val marks by produceState(emptyList<DayMarkView>(), month) {
+        value = withContext(Dispatchers.Default) { runCatching { Office.core.dayMarks(month.year, month.monthValue) }.getOrDefault(emptyList()) }
+    }
     val lead = month.atDay(1).dayOfWeek.value % 7
     val cells = (0 until 42).map { i -> (i - lead + 1).takeIf { it in 1..month.lengthOfMonth() }?.let(month::atDay) }
     cells.chunked(7).forEach { week ->
         Row(Modifier.fillMaxWidth()) {
             week.forEach { day ->
+                val mark = day?.let { marks.getOrNull(it.dayOfMonth - 1) }
                 Box(
                     Modifier
                         .weight(1f)
                         .heightIn(min = 44.dp)
                         .then(if (day == today) Modifier.todayPool(p) else Modifier)
-                        .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown, lit = Lit(homeInk(p).nowPool)) {
+                        .then(if (mark != null) Modifier.dayMark(mark, p) else Modifier)
+                        .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today) + if (mark?.firstClass == true) ", $FIRST_CLASS_SPOKEN" else "", selected = day == shown, lit = Lit(homeInk(p).nowPool)) {
                             haptics.chose()
                             onPick(day)
                         } else Modifier),

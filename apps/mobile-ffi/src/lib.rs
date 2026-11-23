@@ -76,6 +76,8 @@ pub struct OfficeCore {
     keepings: Mutex<HashMap<i32, Arc<YearIndex>>>,
     /// Each year's course under the ordo's month strip, built from the calendar alone.
     courses: Mutex<HashMap<i32, Vec<CourseMonthView>>>,
+    /// Each year's date-picker marks, built from the calendar alone.
+    marks: Mutex<HashMap<i32, Arc<Vec<DayMarkView>>>>,
 }
 
 #[uniffi::export]
@@ -95,6 +97,7 @@ impl OfficeCore {
             feasts,
             keepings: Mutex::new(HashMap::new()),
             courses: Mutex::new(HashMap::new()),
+            marks: Mutex::new(HashMap::new()),
         }))
     }
 
@@ -289,6 +292,51 @@ impl OfficeCore {
         courses.insert(year, course.clone());
         Ok(course)
     }
+}
+
+#[uniffi::export]
+impl OfficeCore {
+    /// The date picker's marks for a month's days, the first first (#953): each day's colour, for
+    /// the hairline under its figure, and whether home keeps it as a first-class feast, for the
+    /// gilt lozenge on it (`presentation::course::day_marks`, as the web's /api/day-marks). The
+    /// calendar alone, no hour composed; kept per year.
+    pub fn day_marks(&self, year: i32, month: i32) -> Result<Vec<DayMarkView>, OfficeError> {
+        if !(1..=12).contains(&month) {
+            return Err(failed(format!("invalid month {month}")));
+        }
+        let cached = self.marks.lock().map_err(|e| failed(e.to_string()))?.get(&year).cloned();
+        let marks = match cached {
+            Some(m) => m,
+            None => {
+                let cal = build_calendar(year, &self.calendar).map_err(failed)?;
+                let marks = presentation::course::day_marks(&cal.days, &MoveableDates::compute(year));
+                let views: Vec<DayMarkView> = cal
+                    .days
+                    .iter()
+                    .zip(marks)
+                    .map(|(d, m)| DayMarkView {
+                        month: d.date.month() as i32,
+                        color: m.color.as_str().to_string(),
+                        first_class: m.first_class,
+                    })
+                    .collect();
+                let views = Arc::new(views);
+                let mut all = self.marks.lock().map_err(|e| failed(e.to_string()))?;
+                if all.len() >= MAX_COURSE_YEARS {
+                    all.clear();
+                }
+                all.insert(year, Arc::clone(&views));
+                views
+            }
+        };
+        Ok(marks.iter().filter(|m| m.month == month).cloned().collect())
+    }
+}
+
+/// How a screen reader names a first-class feast in the date picker, after the day's date (#953).
+#[uniffi::export]
+pub fn first_class_spoken() -> String {
+    presentation::course::FIRST_CLASS_SPOKEN.to_string()
 }
 
 /// The years of course kept at once: a reader turning far through the years starts afresh.
@@ -1548,6 +1596,15 @@ pub struct OrdoMonthView {
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct CourseMonthView {
     pub runs: Vec<CourseRunView>,
+}
+
+/// One day in the date picker: its `color` ("white", "red", "green", "violet", "rose", "black"),
+/// drawn as a hairline under its figure, and whether it is a first-class feast, a gilt lozenge.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct DayMarkView {
+    pub month: i32,
+    pub color: String,
+    pub first_class: bool,
 }
 
 /// `days` days of `color` ("white", "red", "green", "violet", "rose", "black"), from `start` days
