@@ -886,3 +886,25 @@ fn subtle_details_exports_match_presentation() {
     assert!(green_note.contains("days in 2026"), "expected day count in 2026, got: {green_note}");
     assert_eq!(crate::rare_color_max_days(), presentation::course::RARE_COLOR_MAX_DAYS);
 }
+
+/// The picker's marks spell, month by month, the web's letters for the year (#953).
+#[test]
+fn day_marks_match_the_webs_year() {
+    let core = OfficeCore::new().unwrap();
+    let fs = repo_data();
+    let cal = calendar::build_calendar(2026, &calendar::CalendarData::load(&fs).unwrap()).unwrap();
+    let want = presentation::course::day_marks_code(&presentation::course::day_marks(&cal.days, &MoveableDates::compute(2026)));
+    let got: String = (1..=12)
+        .flat_map(|m| core.day_marks(2026, m).unwrap())
+        .map(|d| {
+            let letter = calendar::Color::parse(&d.color).unwrap().abbrev();
+            if d.first_class { letter.to_ascii_uppercase() } else { letter.to_string() }
+        })
+        .collect();
+    assert_eq!(got, want);
+    let december = core.day_marks(2026, 12).unwrap();
+    assert_eq!(december.len(), 31);
+    assert!(december[24].first_class && december[24].color == "white");
+    assert!(core.day_marks(2026, 13).is_err());
+    assert_eq!(first_class_spoken(), "first-class feast");
+}
