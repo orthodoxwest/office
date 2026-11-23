@@ -2286,6 +2286,40 @@ html[data-newcomer] .home-season {
   background: radial-gradient(closest-side, var(--now-pool), color-mix(in srgb, var(--now-pool) 55%, transparent) 52%, transparent);
 }
 
+/* The day's colour, a whisper-thin hairline under its figure (#953), and on a
+   first-class feast a gilt lozenge riding it, as home gilds the day: opening
+   the picker shows the month's liturgical shape (Lent's violet, Laetare's rose,
+   Easter's white week) with no words added. Below the chosen day's gold rule,
+   which is cut to the figures; the marks come with the year's letters from
+   /api/day-marks, and a picker without them is the plain kalendar. */
+.date-picker-day {
+  position: relative;
+}
+.date-picker-day[data-color]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 0.95rem;
+  height: 2px;
+  background: var(--day-color);
+  opacity: 0.6;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.date-picker-day[data-first-class]::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 4.5px;
+  height: 4.5px;
+  background: var(--gold);
+  transform: translate(-50%, 50%) rotate(45deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* The chosen day reads as the chosen prayer form does: oak ink on a gold
    rule. Cut to the figures, so a single digit gets a short rule. */
 .date-picker-days [aria-selected="true"] .date-picker-day,
@@ -2346,6 +2380,11 @@ html[data-newcomer] .home-season {
 }
 
 @media (forced-colors: active) {
+  .date-picker-day::before,
+  .date-picker-day::after {
+    display: none;
+  }
+
   .date-picker-days [aria-selected="true"] .date-picker-day > span,
   .date-picker-months [aria-selected="true"] .date-picker-month {
     text-decoration: underline;
@@ -3946,19 +3985,25 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .ordo-color-key .day-color-red,
+  :root:not([data-theme="light"]) .date-picker-day.day-color-red,
   :root:not([data-theme="light"]) .month-course-pin.day-color-red { --day-color: #c9503f; }
   :root:not([data-theme="light"]) .ordo-color-key .day-color-green,
+  :root:not([data-theme="light"]) .date-picker-day.day-color-green,
   :root:not([data-theme="light"]) .month-course-pin.day-color-green { --day-color: #4f8a52; }
   :root:not([data-theme="light"]) .ordo-color-key .day-color-violet,
+  :root:not([data-theme="light"]) .date-picker-day.day-color-violet,
   :root:not([data-theme="light"]) .month-course-pin.day-color-violet { --day-color: #8d62ad; }
   :root:not([data-theme="light"]) .ordo-color-key .day-color-black,
   :root:not([data-theme="light"]) .month-course-pin.day-color-black { --day-color: #6a7380; }
 }
 :root[data-theme="dark"] .ordo-color-key .day-color-red,
+:root[data-theme="dark"] .date-picker-day.day-color-red,
 :root[data-theme="dark"] .month-course-pin.day-color-red { --day-color: #c9503f; }
 :root[data-theme="dark"] .ordo-color-key .day-color-green,
+:root[data-theme="dark"] .date-picker-day.day-color-green,
 :root[data-theme="dark"] .month-course-pin.day-color-green { --day-color: #4f8a52; }
 :root[data-theme="dark"] .ordo-color-key .day-color-violet,
+:root[data-theme="dark"] .date-picker-day.day-color-violet,
 :root[data-theme="dark"] .month-course-pin.day-color-violet { --day-color: #8d62ad; }
 :root[data-theme="dark"] .ordo-color-key .day-color-black,
 :root[data-theme="dark"] .month-course-pin.day-color-black { --day-color: #6a7380; }
@@ -7788,6 +7833,11 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 @media (max-width: 700px) {
   .page-home .pray-now-gloss:not([hidden]) {
     display: block;
+    /* One line, whatever the hour's gloss: a long "First Vespers of …" is cut
+       short rather than growing the tablet (presentation::first_vespers_gloss). */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     margin-top: 0.08rem;
     color: var(--now-gloss);
     font-size: 0.86rem;
@@ -8021,6 +8071,24 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   margin-left: 0.3em;
   color: var(--gold);
   font-size: 0.7em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* The invitation to the hour now, once that hour is prayed (app.js): the
+   directory's small gilt cross at its words' shoulder, taking no room, so
+   the tablet keeps its height and still opens the hour. */
+.page-home .pray-now-label {
+  position: relative;
+}
+
+.page-home .pray-now-prayed {
+  position: absolute;
+  top: 0.12em;
+  left: 100%;
+  margin-left: 0.28em;
+  color: var(--gold);
+  font-size: 0.6em;
   line-height: 1;
   white-space: nowrap;
 }

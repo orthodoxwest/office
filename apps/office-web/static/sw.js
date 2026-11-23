@@ -570,8 +570,9 @@ self.addEventListener("fetch", function (event) {
     return;
   }
 
-  // Metrics and the unlinked report must never enter Cache Storage.
-  if (url.pathname === "/api/usage" || url.pathname === "/admin/usage") {
+  // Metrics, the date picker's marks and the unlinked report must never
+  // enter Cache Storage; offline, the picker's days are plain.
+  if (url.pathname.indexOf("/api/") === 0 || url.pathname === "/admin/usage") {
     return;
   }
 

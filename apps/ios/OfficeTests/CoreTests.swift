@@ -554,6 +554,20 @@ final class ReminderTests: XCTestCase {
         XCTAssertGreaterThan(after.fireDate, first.fireDate)
     }
 
+    /// The bells are silent from Vespers of Maundy Thursday through None of Holy Saturday (#950).
+    func testTheTriduumsRemindersComeWithoutTheBell() throws {
+        let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 4, day: 9, hour: 0, minute: 0)))
+        let plan = try ReminderScheduler.plan(settings(["lauds": (7, 0), "vespers": (18, 0)]), now: now, core: Office.core.get(), calendar: calendar)
+        let silent = plan.prefix(6).map { "\($0.date.iso) \($0.hour) \($0.silent)" }
+        XCTAssertEqual(silent, [
+            "2026-04-09 lauds false", "2026-04-09 vespers true",
+            "2026-04-10 lauds true", "2026-04-10 vespers true",
+            "2026-04-11 lauds true", "2026-04-11 vespers false",
+        ])
+        XCTAssertNil(ReminderScheduler.content(plan[1]).sound)
+        XCTAssertNotNil(ReminderScheduler.content(plan[0]).sound)
+    }
+
     func testTheScheduleStopsAtIOSsLimit() throws {
         let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 15, hour: 0, minute: 0)))
         let all = Dictionary(uniqueKeysWithValues: hourNames().enumerated().map { ($0.element, (6 + 2 * $0.offset, 0)) })

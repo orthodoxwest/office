@@ -42,7 +42,10 @@ pub struct Req<'a> {
     pub site: &'a str,
 }
 
-fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
+/// Home's hours. Vespers on an evening that already keeps the morrow carries the invitation's
+/// gloss for it ("First Vespers of …"), which the page's script sets under "Pray Vespers" by the
+/// reader's clock; its own note in the table stays "Evening prayer".
+fn build_home_hours(date_slug: &str, current: &str, first_vespers: Option<&str>) -> Vec<HomeHourLink> {
     HOUR_NAMES
         .iter()
         .map(|slug| HomeHourLink {
@@ -51,6 +54,10 @@ fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
             url: hour_link(slug, date_slug),
             is_current: *slug == current,
             note: hour_gloss(slug).to_string(),
+            eve: match (*slug, first_vespers) {
+                ("vespers", Some(feast)) => presentation::first_vespers_gloss(feast),
+                _ => String::new(),
+            },
         })
         .collect()
 }
@@ -315,6 +322,27 @@ impl Server {
         }
     }
 
+    /// The date picker's marks for a year (#953): `{"year":2026,"days":"wwwW…"}`, a letter a day
+    /// from the first of January (`presentation::course::day_marks_code`). The calendar alone, no
+    /// office resolved or hour composed, in its own small cache; only the offered years, as the
+    /// picker offers.
+    pub fn day_marks(&self, method: &Method, year: &str) -> Response<Body> {
+        if method != Method::GET && method != Method::HEAD {
+            return crate::http::http_error("405 method not allowed", StatusCode::METHOD_NOT_ALLOWED);
+        }
+        let Some(year) = (year.len() == 4 && year.bytes().all(|b| b.is_ascii_digit())).then(|| year.parse::<i32>().ok()).flatten() else {
+            return crate::http::not_found();
+        };
+        let Ok(code) = self.cache.day_marks(year) else { return crate::http::not_found() };
+        let body = format!(r#"{{"year":{year},"days":"{code}"}}"#);
+        let mut resp = response(StatusCode::OK, if method == Method::HEAD { String::new() } else { body });
+        set(&mut resp, header::CONTENT_TYPE, "application/json");
+        set(&mut resp, header::X_CONTENT_TYPE_OPTIONS, "nosniff");
+        // A deploy may move a feast; a day's old marks do no harm meanwhile.
+        set(&mut resp, header::CACHE_CONTROL, "public, max-age=86400");
+        resp
+    }
+
     pub fn not_found_page(&self, req: &Req) -> Response<Body> {
         let data =
             NotFoundData { chrome: Chrome { page: "notice".into(), nav_date: self.nav_date_now(req), noindex: true, ..Chrome::default() } };
@@ -364,14 +392,15 @@ impl Server {
         let heading = day_heading(day);
         let (now, now_hour) = now_in(&loc);
         let now_slug = date_slug(now);
-        let invite = invitation(date, now, now_hour);
+        let first_vespers = day.vespers.first_vespers_of();
+        let invite = invitation(date, now, now_hour).on_eve(first_vespers);
         let versicle = if home_shows_versicle(day) {
             self.engine.compose_hour("lauds", day, &entry.moveable, PrayerForm::Private).ok().and_then(|h| hour_versicle(&h))
         } else {
             None
         };
         let Versicle { versicle, response } = versicle.unwrap_or(Versicle { versicle: String::new(), response: String::new() });
-        let hours = build_home_hours(&slug, invite.current);
+        let hours = build_home_hours(&slug, invite.current, first_vespers);
         let (feast_name, feast_alias) = split_alias(&heading.feast);
         let feasts = self.cache.feasts();
         let from = req.query.get("from");
@@ -415,7 +444,7 @@ impl Server {
             response,
             calendar_link: calendar_link(&slug),
             pray_now_label: invite.label,
-            pray_now_gloss: invite.gloss.into(),
+            pray_now_gloss: invite.gloss,
             pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
             hours,
         };
@@ -1124,6 +1153,16 @@ mod tests {
         let month = get("/calendar/2026/11").2;
         assert_eq!(month.matches(r##"expect.href = "#ordo-place""##).count(), 1, "the ordo's hold runs once");
         assert!(month.find(r##"expect.href = "#ordo-place""##).unwrap() < month.find("<body").unwrap());
+    }
+
+    /// On an evening that keeps the morrow, Vespers carries "First Vespers of …" for the
+    /// invitation to set under "Pray Vespers" by the reader's clock (#951); other evenings none.
+    #[test]
+    fn home_marks_first_vespers_on_the_eve_of_a_feast() {
+        let eve = get("/?date=2026-12-24").2;
+        assert!(eve.contains(r#"data-hour="vespers" data-eve="First Vespers of the Nativity of Our Lord""#), "{eve}");
+        assert!(get("/?date=2026-11-28").2.contains(r#"data-eve="First Vespers of I Sunday of Advent""#));
+        assert!(!get("/?date=2026-12-23").2.contains("data-eve=\""));
     }
 
     /// 1 January is the Nativity's eighth day (#833; the 2026 ordo's "(Octave Day of the

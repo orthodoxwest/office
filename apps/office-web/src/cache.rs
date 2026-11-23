@@ -75,6 +75,10 @@ pub struct YearCache {
     /// Each year's feasts and how they are kept, for search and the feast pages: the calendar
     /// alone, with no hour composed.
     keepings: Mutex<HashMap<i32, Slot<YearIndex>>>,
+    /// Each year's date-picker marks (`presentation::course::day_marks_code`): the calendar
+    /// alone, kept apart from the years above so a reader turning the picker's years does not
+    /// push the hours' and the ordo's years out.
+    marks: Mutex<HashMap<i32, Slot<String>>>,
     /// How many years have been built, for the tests.
     #[cfg(test)]
     builds: AtomicUsize,
@@ -92,6 +96,7 @@ impl YearCache {
             entries: Mutex::new(Entries::default()),
             feasts,
             keepings: Mutex::new(HashMap::new()),
+            marks: Mutex::new(HashMap::new()),
             #[cfg(test)]
             builds: AtomicUsize::new(0),
         }
@@ -114,6 +119,24 @@ impl YearCache {
         };
         // Built outside the lock (see `Slot`): another year's reader does not wait on this one.
         slot.get_or_init(|| Ok(Arc::new(YearIndex::new(year, build_calendar(year, &self.data)?.days)))).clone()
+    }
+
+    /// The year's date-picker marks, a letter a day (`presentation::course::day_marks_code`).
+    pub fn day_marks(&self, year: i32) -> Result<Arc<String>, String> {
+        offered(year)?;
+        let slot = {
+            let mut marks = self.marks.lock().map_err(|e| e.to_string())?;
+            if marks.len() >= MAX_KEEPING_YEARS && !marks.contains_key(&year) {
+                marks.clear();
+            }
+            Arc::clone(marks.entry(year).or_default())
+        };
+        slot.get_or_init(|| {
+            let cal = build_calendar(year, &self.data)?;
+            let marks = presentation::course::day_marks(&cal.days, &MoveableDates::compute(year));
+            Ok(Arc::new(presentation::course::day_marks_code(&marks)))
+        })
+        .clone()
     }
 
     /// The year's days, building them if the year is not cached. A year in
@@ -228,6 +251,18 @@ mod tests {
         assert!(cache.get(first - 1).is_err() && cache.get(last + 1).is_err() && cache.keeping(last + 1).is_err());
         assert!(cache.get(first).is_ok() && cache.get(last).is_ok());
         assert_eq!(cache.builds.load(Ordering::Relaxed), 2);
+    }
+
+    /// The picker's marks come from the calendar alone and leave the years' window untouched, so
+    /// a reader turning the picker's years builds no office year and evicts none.
+    #[test]
+    fn day_marks_build_no_office_year() {
+        let cache = cache();
+        let year = crate::Server::local_year();
+        let marks = cache.day_marks(year).unwrap();
+        assert!(marks.len() >= 365 && Arc::ptr_eq(&marks, &cache.day_marks(year).unwrap()));
+        assert!(cache.day_marks(year + presentation::YEARS_AHEAD + 1).is_err());
+        assert_eq!(cache.builds.load(Ordering::Relaxed), 0);
     }
 
     #[test]

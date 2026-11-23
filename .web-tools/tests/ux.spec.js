@@ -626,6 +626,61 @@ test("the phone's table of hours keeps one shape whichever hour is now", async (
   await expect(page.locator(".pray-now-gloss")).toBeHidden();
 });
 
+// On an evening that already keeps the morrow, the invitation to Vespers says
+// so (presentation::Invitation::on_eve, #951), by the reader's clock: the
+// afternoon's None and the evening's Compline keep their own glosses, and the
+// table's Vespers keeps "Evening prayer".
+test("the invitation names First Vespers on the eve of a feast", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-12-24T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-24");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("First Vespers of the Nativity of Our Lord");
+  await expect(page.locator('.home-hour-link[data-hour="vespers"] .home-hour-link-note')).toHaveText("Evening prayer");
+  await page.clock.setFixedTime(new Date("2026-12-24T21:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-24");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Prayer before sleep");
+  await page.clock.setFixedTime(new Date("2026-12-23T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-23");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Evening prayer");  const tablet = () => page.evaluate(() => Math.round(document.querySelector(".pray-now").getBoundingClientRect().height));
+  const plain = await tablet();
+  // The longest name keeps the gloss to one line, so the tablet keeps its height.
+  await page.clock.setFixedTime(new Date("2026-11-17T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-11-17");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("First Vespers of the Dedication of the Basilica of the Holy Apostles Peter & Paul");
+  expect(await tablet()).toBe(plain);
+});
+
+// The invitation to the hour now, once that hour is prayed, takes the
+// directory's small gilt cross at its words' shoulder (#954): its link still
+// opens the hour, and the tablet keeps its height. Compline after midnight
+// asks the marks of the day it belongs to.
+test("the invitation to an hour already prayed takes the gilt cross and keeps its height", async ({ page }) => {
+  const tablet = () => page.evaluate(() => Math.round(document.querySelector(".pray-now").getBoundingClientRect().height));
+  await page.clock.setFixedTime(new Date("2026-03-15T18:00:00-04:00"));
+  await openDatedPage(page, `/?date=${testDate}`);
+  const prayNow = page.locator(".pray-now");
+  await expect(prayNow).not.toHaveClass(/is-prayed/);
+  const plain = await tablet();
+  await page.evaluate(() => {
+    localStorage.setItem("office-prayed", JSON.stringify({ "2026-03-15": ["vespers"], "2026-03-14": ["compline"] }));
+  });
+  await page.reload();
+  await expect(prayNow).toHaveClass(/is-prayed/);
+  await expect(prayNow.locator(".pray-now-prayed .sr-only")).toHaveText("Prayed");
+  await expect(prayNow).toHaveAttribute("href", "/vespers/2026-03-15");
+  await expect(prayNow.locator(".pray-now-label")).toContainText("Pray Vespers");
+  expect(await tablet()).toBe(plain);
+  // At one in the morning, yesterday's Compline is invited, and it was prayed.
+  await page.clock.setFixedTime(new Date("2026-03-15T01:00:00-04:00"));
+  await page.reload();
+  await expect(prayNow).toHaveAttribute("href", "/compline/2026-03-14");
+  await expect(prayNow).toHaveClass(/is-prayed/);
+  // Mid-morning's Terce was not.
+  await page.clock.setFixedTime(new Date("2026-03-15T10:00:00-04:00"));
+  await page.reload();
+  await expect(prayNow).not.toHaveClass(/is-prayed/);
+  await expect(prayNow.locator(".pray-now-prayed")).toHaveCount(0);
+});
+
 // The light moves with the hours (app.js HOUR_LIGHT, render_blocks::hour_light).
 // Its animations are held almost still as they are made, so a test sets the
 // pass's clock itself rather than racing it.
@@ -4157,6 +4212,43 @@ test("home's date picker opens the chosen day's home", async ({ page }) => {
   await picker.getByRole("button", { name: "Previous month" }).click();
   await picker.getByRole("link", { name: "Saturday, February 14, 2026" }).click();
   await expect(page).toHaveURL(/\/\?date=2026-02-14$/);
+});
+
+// The picker marks each day with a hairline of its colour and gilds the
+// first-class feasts (#953), so the month's shape shows with no words added.
+test("the date picker marks each day's colour and gilds first-class feasts", async ({ page }) => {
+  // The marks are asked for only when the picker opens.
+  const asked = [];
+  page.on("request", req => {
+    if (req.url().includes("/api/day-marks/")) {
+      asked.push(req.url());
+    }
+  });
+  await openDatedPage(page, `/lauds/${testDate}`);
+  expect(asked).toEqual([]);
+  await page.locator("button.hour-meta-date").click();
+  const picker = page.getByRole("group", { name: "Choose a date" });
+  const day = slug => picker.locator(`.date-picker-day[data-date="${slug}"]`);
+  // Laetare in rose, Lent's ferias in violet, the Annunciation gilt on white.
+  await expect(day("2026-03-22")).toHaveAttribute("data-color", "rose");
+  await expect(day("2026-03-16")).toHaveAttribute("data-color", "violet");
+  await expect(day("2026-03-25")).toHaveAttribute("data-color", "white");
+  await expect(day("2026-03-25")).toHaveAttribute("data-first-class", "");
+  await expect(day("2026-03-25")).toHaveAttribute("aria-label", "Wednesday, March 25, 2026, first-class feast");
+  await expect(day("2026-03-16")).not.toHaveAttribute("data-first-class", /.*/);
+  // The hairline is drawn in the day's colour, under the figure.
+  const hairline = await day("2026-03-16").evaluate(link => {
+    const after = getComputedStyle(link, "::after");
+    return { height: after.height, background: after.backgroundColor };
+  });
+  expect(hairline.height).toBe("2px");
+  // Lent's violet, the ordo rails' own (.day-color-violet).
+  expect(hairline.background).toBe("rgb(106, 58, 138)");
+  // Next month: Good Friday black and plain, Pascha gilt.
+  await picker.getByRole("button", { name: "Next month" }).click();
+  await expect(day("2026-04-10")).toHaveAttribute("data-color", "black");
+  await expect(day("2026-04-10")).not.toHaveAttribute("data-first-class", /.*/);
+  await expect(day("2026-04-12")).toHaveAttribute("data-first-class", "");
 });
 
 test("without JavaScript the native date field still jumps", async ({ browser, baseURL }) => {

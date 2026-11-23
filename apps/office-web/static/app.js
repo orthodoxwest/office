@@ -2307,6 +2307,52 @@ function plainClickOpensHere(e, link) {
     return node;
   }
 
+  // The picker's marks (#953): a year's letters from /api/day-marks, a letter
+  // a day from the first of January in the colour's ordo abbreviation, a
+  // capital on a first-class feast (presentation::course::day_marks_code).
+  // A year is asked for when an open picker first shows it, never on a page
+  // whose picker stays shut; until it comes the days are plain. A request
+  // that fails (offline, a year the server does not offer) may be asked
+  // again half a minute on.
+  var MARK_COLORS = { w: "white", r: "red", g: "green", v: "violet", b: "black", p: "rose" };
+  var MARK_RETRY_MS = 30000;
+  var dayMarks = {};
+  var FIRST_CLASS_WORDS = "first-class feast";
+
+  function yearMarks(year, arrived) {
+    var held = dayMarks[year];
+    if (typeof held === "string") {
+      return held;
+    }
+    // A number: in flight (0) or failed, and not to be asked again until then.
+    if (typeof held === "number" && (held === 0 || Date.now() < held)) {
+      return null;
+    }
+    if (typeof fetch !== "function") {
+      return null;
+    }
+    dayMarks[year] = 0;
+    var failed = function () {
+      dayMarks[year] = Date.now() + MARK_RETRY_MS;
+    };
+    fetch("/api/day-marks/" + year, { credentials: "same-origin" }).then(function (resp) {
+      return resp.ok ? resp.json() : null;
+    }).then(function (data) {
+      if (data && data.year === year && typeof data.days === "string") {
+        dayMarks[year] = data.days;
+        arrived(year);
+      } else {
+        failed();
+      }
+    }).catch(failed);
+    return null;
+  }
+
+  // The day's index in its year, 0 for the first of January.
+  function dayOfYear(date) {
+    return Math.round((date - civilDate(date.getUTCFullYear(), 0, 1)) / 86400000);
+  }
+
   function buildDatePicker(details) {
     var picker = el("div", "date-picker");
     picker.setAttribute("role", "group");
@@ -2433,6 +2479,7 @@ function plainClickOpensHere(e, link) {
               dayLabel += ", selected";
             }
             link.setAttribute("aria-label", dayLabel);
+            link.setAttribute("data-label", dayLabel);
             link.appendChild(el("span", "", String(day)));
             if (slug === state.today) {
               link.setAttribute("aria-current", "date");
@@ -2443,6 +2490,38 @@ function plainClickOpensHere(e, link) {
         }
         weeks.appendChild(tr);
       }
+      markDays();
+    }
+
+    // Lays the year's marks on the days shown, in place, so marks that
+    // arrive while a day has focus do not take it away.
+    function markDays() {
+      if (!details.open) {
+        return;
+      }
+      var year = state.focus.getUTCFullYear();
+      var code = yearMarks(year, function (arrivedYear) {
+        if (state.focus.getUTCFullYear() === arrivedYear) {
+          markDays();
+        }
+      });
+      if (!code) {
+        return;
+      }
+      weeks.querySelectorAll(".date-picker-day").forEach(function (link) {
+        var date = parseSlug(link.getAttribute("data-date"));
+        var letter = date && date.getUTCFullYear() === year ? code.charAt(dayOfYear(date)) : "";
+        var color = MARK_COLORS[letter.toLowerCase()];
+        if (!color || link.hasAttribute("data-color")) {
+          return;
+        }
+        link.setAttribute("data-color", color);
+        link.classList.add("day-color-" + color);
+        if (letter !== letter.toLowerCase()) {
+          link.setAttribute("data-first-class", "");
+          link.setAttribute("aria-label", link.getAttribute("data-label") + ", " + FIRST_CLASS_WORDS);
+        }
+      });
     }
 
     function renderMonths() {
@@ -2612,6 +2691,8 @@ function plainClickOpensHere(e, link) {
         reset();
         if (drawing() !== drawn) {
           render();
+        } else {
+          markDays();
         }
       }
     });
@@ -3559,6 +3640,8 @@ function plainClickOpensHere(e, link) {
           setPrayNowLabel(prayNow, label);
           setPrayNowGloss(prayNow, gloss);
         }
+        // The mark of an hour prayed changes with the words, at the seat, as the apps' does.
+        window.dispatchEvent(new Event("officeinvitation"));
       },
     };
     var run = function (el, frames, timing, pseudo) {
@@ -3697,7 +3780,10 @@ function plainClickOpensHere(e, link) {
     var wasWords = prayNow ? prayNowWords(prayNow) : null;
     var wasLabel = wasWords ? wasWords.textContent.trim() : "";
     var glossNote = glossHour && card.querySelector('.home-hour-link[data-hour="' + glossHour + '"] .home-hour-link-note');
-    var gloss = glossNote ? glossNote.textContent : "";
+    // On an evening that keeps the morrow, "First Vespers of …" in place of "Evening prayer":
+    // presentation::Invitation::on_eve, which the server marks on today's Vespers as data-eve.
+    var eve = lit ? lit.getAttribute("data-eve") : null;
+    var gloss = eve || (glossNote ? glossNote.textContent : "");
     var wasGlossEl = prayNow ? prayNowGloss(prayNow) : null;
     var wasGloss = wasGlossEl && !wasGlossEl.hidden ? wasGlossEl.textContent : "";
     card.querySelectorAll(".home-hour-link").forEach(function (link) {
@@ -3707,10 +3793,15 @@ function plainClickOpensHere(e, link) {
       prayNow.setAttribute("href", href);
     }
     if (passing === true && (was !== lit || (prayNow && (wasLabel !== label || wasGloss !== gloss))) && lightMayPass()) {
+      // The pass marks the invitation again at its seat.
       passLight(card, was, lit, prayNow, wasLabel, label, wasGloss, gloss);
-    } else if (prayNow) {
-      setPrayNowLabel(prayNow, label);
-      setPrayNowGloss(prayNow, gloss);
+    } else {
+      if (prayNow) {
+        setPrayNowLabel(prayNow, label);
+        setPrayNowGloss(prayNow, gloss);
+      }
+      // The invitation's mark of an hour prayed follows the hour it now opens.
+      window.dispatchEvent(new Event("officeinvitation"));
     }
   }
 
@@ -6061,9 +6152,33 @@ function plainClickOpensHere(e, link) {
           mark.remove();
         }
       });
+      // The invitation to the hour now, once that hour is prayed, takes the same cross at its
+      // words' shoulder, as the apps' PrayNow: its link still opens the hour. Its
+      // hour and day are its link's, so Compline after midnight asks yesterday's marks.
+      var prayNow = document.querySelector(".home-prayer-card .pray-now");
+      var label = prayNow && prayNow.querySelector(".pray-now-label");
+      if (label) {
+        var path = /^\/([a-z]+)\/(\d{4}-\d{2}-\d{2})$/.exec(prayNow.getAttribute("href") || "");
+        var words = Array.prototype.map.call(label.childNodes, function (n) {
+          return n.nodeType === 3 || !n.classList.contains("pray-now-prayed") ? n.textContent : "";
+        }).join("").trim();
+        var all = load();
+        var done = !!path && words.indexOf("Pray ") === 0 && Array.isArray(all[path[2]]) && all[path[2]].indexOf(path[1]) >= 0;
+        var cross = label.querySelector(".pray-now-prayed");
+        prayNow.classList.toggle("is-prayed", done);
+        if (done && !cross) {
+          cross = document.createElement("span");
+          cross.className = "pray-now-prayed";
+          cross.innerHTML = '<span aria-hidden="true">✠</span> <span class="sr-only">Prayed</span>';
+          label.appendChild(cross);
+        } else if (!done && cross) {
+          cross.remove();
+        }
+      }
     };
     paint();
     window.addEventListener("pageshow", paint);
+    window.addEventListener("officeinvitation", paint);
     window.addEventListener("storage", function (e) {
       if (e.key === PRAYED_KEY || e.key === null) paint();
     });
