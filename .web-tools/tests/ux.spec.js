@@ -7560,8 +7560,8 @@ test("subtle details: Horologium stars and keys, Specimen clergy note and revers
   await expect(ribbon.locator(".about-ordo-month-hit").first()).toHaveAttribute("href", /^\/calendar\/\d{4}\/01$/);
   await ribbon.locator('.about-ordo-swatch[data-color="rose"]').click();
   await expect(ribbon.locator(".about-ordo-meaning")).toContainText("Mar 22");
-  const rosePinOpacity = await ribbon.locator('.about-ordo-pin[data-color="rose"]').first().evaluate((el) => parseFloat(getComputedStyle(el).opacity));
-  expect(rosePinOpacity).toBe(1);
+  // The pin fades in, so wait for the transition to settle rather than read it mid-fade.
+  await expect(ribbon.locator('.about-ordo-pin[data-color="rose"]').first()).toHaveCSS("opacity", "1");
 
   // 4. Ordo year frontispiece interactive color key and rare-color course pins.
   await page.goto("/calendar/2026");
@@ -7572,8 +7572,7 @@ test("subtle details: Horologium stars and keys, Specimen clergy note and revers
   await ordoKey.locator('.about-ordo-swatch[data-color="rose"]').click();
   await expect(cal).toHaveAttribute("data-selected-color", "rose");
   await expect(ordoKey.locator(".about-ordo-meaning")).toContainText("Mar 22");
-  const monthPinOpacity = await cal.locator('.month-course-pin[data-color="rose"]').first().evaluate((el) => parseFloat(getComputedStyle(el).opacity));
-  expect(monthPinOpacity).toBe(1);
+  await expect(cal.locator('.month-course-pin[data-color="rose"]').first()).toHaveCSS("opacity", "1");
 
   // 5. Quiet glosses on Feria, named seasons, psalm incipits (non-tabbable), and Marian antiphons.
   await page.goto("/?date=2026-09-22");

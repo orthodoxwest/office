@@ -1193,31 +1193,15 @@ pub fn rare_color_max_days() -> u32 {
 /// ("Mar 15, Dec 13"), or day count for frequent ones ("92 days in 2026").
 #[uniffi::export]
 pub fn color_days_note(course: Vec<CourseMonthView>, color: String, year: i32) -> String {
-    let parsed = match color.as_str() {
-        "white" => calendar::Color::White,
-        "red" => calendar::Color::Red,
-        "violet" => calendar::Color::Violet,
-        "green" => calendar::Color::Green,
-        "rose" => calendar::Color::Rose,
-        "black" => calendar::Color::Black,
-        _ => return String::new(),
-    };
+    let Ok(parsed) = calendar::Color::parse(&color) else { return String::new() };
     let months: Vec<Vec<presentation::course::CourseRun>> = course
         .into_iter()
         .map(|m| {
             m.runs
                 .into_iter()
                 .filter_map(|r| {
-                    let c = match r.color.as_str() {
-                        "white" => calendar::Color::White,
-                        "red" => calendar::Color::Red,
-                        "violet" => calendar::Color::Violet,
-                        "green" => calendar::Color::Green,
-                        "rose" => calendar::Color::Rose,
-                        "black" => calendar::Color::Black,
-                        _ => return None,
-                    };
-                    Some(presentation::course::CourseRun { start: r.start.max(0) as u32, days: r.days.max(0) as u32, color: c })
+                    let color = calendar::Color::parse(&r.color).ok()?;
+                    Some(presentation::course::CourseRun { start: r.start.max(0) as u32, days: r.days.max(0) as u32, color })
                 })
                 .collect()
         })

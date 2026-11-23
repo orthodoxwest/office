@@ -587,15 +587,7 @@ pub fn build_ordo_colors(year: i32, course: Option<&[Vec<presentation::course::C
         .map(|c| {
             let note = course
                 .and_then(|months| {
-                    let color = match c.slug {
-                        "white" => Some(Color::White),
-                        "red" => Some(Color::Red),
-                        "violet" => Some(Color::Violet),
-                        "green" => Some(Color::Green),
-                        "rose" => Some(Color::Rose),
-                        "black" => Some(Color::Black),
-                        _ => None,
-                    }?;
+                    let color = Color::parse(c.slug).ok()?;
                     Some(presentation::course::color_days_note(months, color, year))
                 })
                 .unwrap_or_default();

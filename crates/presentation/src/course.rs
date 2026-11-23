@@ -75,13 +75,7 @@ pub fn color_days_note(months: &[Vec<CourseRun>], color: Color, year: i32) -> St
     if total == 0 {
         return String::new();
     }
-    if total <= RARE_COLOR_MAX_DAYS {
-        dates.join(", ")
-    } else if total == 1 {
-        format!("1 day in {year}")
-    } else {
-        format!("{total} days in {year}")
-    }
+    if total <= RARE_COLOR_MAX_DAYS { dates.join(", ") } else { format!("{total} days in {year}") }
 }
 
 #[cfg(test)]

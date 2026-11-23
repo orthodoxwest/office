@@ -256,11 +256,7 @@ pub const FERIA_GLOSS: Gloss = Gloss {
     note: "An ordinary weekday of the liturgical season with no saint’s feast, keeping the weekday psalter and seasonal prayers.",
 };
 
-pub const VIGIL_GLOSS: Gloss = Gloss {
-    term: "Vigil",
-    title: "Vigil",
-    note: "A day of watchfulness and preparation before a major feast, whose celebration begins at First Vespers this evening.",
-};
+pub const VIGIL_GLOSS: Gloss = Gloss { term: "Vigil", title: "Vigil", note: "A day of watchfulness and preparation before a major feast." };
 
 pub const PSALM_INCIPIT_GLOSS: Gloss = Gloss {
     term: "Latin incipit",
@@ -289,7 +285,7 @@ pub const MARIAN_AVE_GLOSS: Gloss = Gloss {
 pub const MARIAN_REGINA_GLOSS: Gloss = Gloss {
     term: "Regina Caeli",
     title: "Regina Caeli",
-    note: "“Queen of Heaven”—the seasonal Marian antiphon sung throughout Paschaltide, from Easter through the Saturday after Pentecost.",
+    note: "“Queen of Heaven”—the seasonal Marian antiphon sung throughout Paschaltide, from Compline of Holy Saturday through the Saturday after Pentecost.",
 };
 
 pub const MARIAN_SALVE_GLOSS: Gloss = Gloss {
@@ -301,13 +297,13 @@ pub const MARIAN_SALVE_GLOSS: Gloss = Gloss {
 pub const ADVENT_GLOSS: Gloss = Gloss {
     term: "Advent",
     title: "Advent",
-    note: "The four-week season of quiet preparation and expectation before the Nativity of our Lord.",
+    note: "The season of the four Sundays before Christmas, a time of quiet preparation and expectation for the Nativity of our Lord.",
 };
 
 pub const CHRISTMASTIDE_GLOSS: Gloss = Gloss {
     term: "Christmastide",
     title: "Christmastide",
-    note: "The joyful season celebrating the Nativity of our Lord, from Christmas Eve through the Vigil of the Epiphany.",
+    note: "The joyful season celebrating the Nativity of our Lord, from Christmas Day through the Vigil of the Epiphany.",
 };
 
 pub const EPIPHANYTIDE_GLOSS: Gloss = Gloss {
@@ -334,11 +330,8 @@ pub const PASSIONTIDE_GLOSS: Gloss = Gloss {
     note: "The final two weeks of Lent, from Passion Sunday through Holy Week, focused on Christ’s suffering and Cross.",
 };
 
-pub const EASTERTIDE_GLOSS: Gloss = Gloss {
-    term: "Eastertide",
-    title: "Eastertide",
-    note: "The fifty days of Paschal joy from Easter Day through the Octave of Pentecost.",
-};
+pub const EASTERTIDE_GLOSS: Gloss =
+    Gloss { term: "Eastertide", title: "Eastertide", note: "The fifty days of Paschal joy from Easter Day to Pentecost." };
 
 pub const FASTING_GLOSS: Gloss = Gloss {
     term: "Fasting",
