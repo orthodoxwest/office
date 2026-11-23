@@ -5,15 +5,17 @@ use calendar::{Category, Date, MoveableDates, Season, Weekday};
 use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection, PrayerForm};
 
 use crate::day::Day;
-use crate::engine::{append_hour_element, compact_refs, resolve_element};
-use crate::hourdef::{HourElement, HourSection};
+use crate::engine::{append_hour_element, compact_refs};
+use crate::hourdef::HourSection;
 use crate::major::record_condition_decision;
 use crate::proper::{advent_ferial_psalm_antiphon_ref, lookup_feast_proper_text, resolve_proper_text};
 use crate::texts::OfficeTexts;
 
-/// Composes Prime. `martyrology` substitutes the next day's reviewed
-/// Martyrology entry for the static rubric; readers turn it on in Settings,
-/// and it is off by default.
+/// Composes Prime. `martyrology` reads the next day's reviewed Martyrology
+/// entry after the closing versicles; readers turn it on in Settings, and it
+/// is off by default. Off, or on a day with no reviewed entry, Prime ends with
+/// May the souls of the faithful: the Diurnal's rubric (p. 10) belongs to the
+/// Capitular Office, which ends Prime only when it is said (#960).
 pub fn compose_prime(
     day: &Day,
     sections: &[HourSection],
@@ -32,8 +34,10 @@ pub fn compose_prime(
         }
         let mut elems = Vec::new();
         for elem in &section.elements {
-            if martyrology && section.name == "Martyrology" && elem.reference == MARTYROLOGY_RUBRIC {
-                elems.extend(resolve_prime_martyrology(day, t));
+            if section.name == "Martyrology" && elem.reference == MARTYROLOGY_RUBRIC {
+                if martyrology {
+                    elems.extend(resolve_prime_martyrology(day, t));
+                }
                 continue;
             }
             if elem.kind == "proper-antiphon" && elem.reference == "psalm-antiphon-1" && !crate::psalmody::is_office_of_the_dead(day) {
@@ -49,8 +53,7 @@ pub fn compose_prime(
 
 const MARTYROLOGY_RUBRIC: &str = "ordinary/prime/martyrology-rubric";
 
-/// Whether a composed Prime reads a day's Martyrology entry, rather than
-/// the rubric that stands in for it.
+/// Whether a composed Prime reads a day's Martyrology entry.
 pub fn reads_martyrology(hour: &OfficeHour) -> bool {
     hour.sections.iter().flat_map(|s| &s.elements).any(|e| e.source_ref.starts_with("ordinary/martyrology/"))
 }
@@ -58,8 +61,8 @@ pub fn reads_martyrology(hour: &OfficeHour) -> bool {
 const MONTH_NAMES: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-/// The next day's reviewed Martyrology entry. The static rubric remains the
-/// fallback while the per-date corpus is being populated.
+/// The next day's reviewed Martyrology entry, or nothing on a day the corpus
+/// holds back.
 fn resolve_prime_martyrology(day: &Day, t: &OfficeTexts) -> Vec<OfficeElement> {
     let next = day.date.add_days(1);
     let reference = martyrology_entry_key(next);
@@ -67,7 +70,7 @@ fn resolve_prime_martyrology(day: &Day, t: &OfficeTexts) -> Vec<OfficeElement> {
     const RESPONSE: &str = "ordinary/martyrology/response";
     let (text, conclusion, response) = (t.get(&reference), t.get(CONCLUSION), t.get(RESPONSE));
     if text.is_empty() || conclusion.is_empty() || response.is_empty() {
-        return vec![resolve_element(&HourElement::new("rubric", MARTYROLOGY_RUBRIC), t)];
+        return Vec::new();
     }
     let sourced = |kind: ElementType, text: String, key: &str| OfficeElement {
         source_ref: key.to_string(),
@@ -260,7 +263,7 @@ mod tests {
     use calendar::Rank;
 
     #[test]
-    fn martyrology_uses_next_civil_date_and_keeps_missing_day_rubric() {
+    fn martyrology_uses_next_civil_date_and_prime_ends_without_it() {
         let sections = crate::hourdef::parse_hour_definition("prime", include_str!("../../../data/office/prime.txt")).unwrap();
         for (current, key, title) in [
             (date(2026, 9, 7), "09-08", "September 8"),
@@ -298,15 +301,16 @@ mod tests {
             assert_eq!(elements[2].text, "Many other holy ones.");
             assert_eq!(elements[3].kind, ElementType::Response);
             assert_eq!(elements[3].text, "R. Thanks be to God.");
+            // Off, Prime ends with May the souls of the faithful, with no
+            // rubric pointing to a Martyrology it does not give (#960).
             let plain = compose_prime(&d, &sections, &t, None, false);
-            assert!(!plain.sections.iter().flat_map(|s| &s.elements).any(|e| e.kind == ElementType::Reading));
+            let refs: Vec<_> = plain.sections.iter().flat_map(|s| &s.elements).map(|e| e.source_ref.as_str()).collect();
+            assert!(!refs.iter().any(|r| r.contains("martyrology")), "{refs:?}");
         }
+        // A day the corpus holds back reads nothing, and points to nothing.
         let t = texts(&[(MARTYROLOGY_RUBRIC, "Read the Martyrology.")]);
         let d = day(date(2026, 12, 31), Season::Christmas);
-        let fallback = resolve_prime_martyrology(&d, &t);
-        assert_eq!(fallback.len(), 1);
-        assert_eq!(fallback[0].kind, ElementType::Rubric);
-        assert_eq!(fallback[0].text, "Read the Martyrology.");
+        assert!(resolve_prime_martyrology(&d, &t).is_empty());
         for id in ["holy-thursday", "good-friday", "holy-saturday"] {
             let mut f = feast(id, None);
             f.rank = Rank::Double1stClass;

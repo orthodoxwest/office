@@ -1,11 +1,13 @@
 # Prime Martyrology
 
-Prime normally ends with a rubric pointing to the Martyrology. A reader who
+Prime normally ends with *May the souls of the faithful*, as the Diurnal's
+Prime does when the Capitular Office is not said (p. 10; #960). A reader who
 turns **Martyrology** on in Settings (off by default; web, Android and iOS)
-instead hears the reviewed announcement for the **following civil date**, if
+then hears the reviewed announcement for the **following civil date**, if
 one exists, along with the common conclusion and response. Otherwise, and in
-all CLI output, the rubric stays. The Triduum still suppresses the whole
-section. Readings follow civil dates regardless of feast transfers; nothing
+all CLI output, nothing follows: the Diurnal's rubric "Then the Martyrology is
+read in Choir" is not printed, since the app gives no Martyrology to read. The
+Triduum still suppresses the whole section. Readings follow civil dates regardless of feast transfers; nothing
 else in the calendar or other hours changes.
 
 The corpus covers the whole civil year except the held days below, read at
@@ -14,7 +16,7 @@ early-layer notices with no later claim are kept without an exact chronology
 (proposed answer to #476, awaiting confirmation). May 29 (Eleutherius at Arce),
 July 5 (Philomena at San Severino) and July 29 (Seraphina at Mamia) stay held:
 the place is no ancient see or cannot be identified. December 8, 15 and 25 await
-clergy review of their announcements. Held days keep the rubric.
+clergy review of their announcements. Held days read nothing.
 
 Leap years follow the source's bissextile rule (January–June, p. 15), as the
 calendar does for the feasts: February 24 reads `02-24-bissextile`, and
@@ -28,7 +30,7 @@ keeps are listed. Both rules are proposed answers awaiting clergy confirmation
 
 On the web the setting lives in the browser (`office-martyrology` in
 localStorage, like the theme), so the page never varies by reader: Prime carries
-the Martyrology section twice, as the rubric and as the reading
+the Martyrology section twice, empty and as the reading
 (`data-martyrology-variant`), and the root's `data-martyrology` shows one before
 first paint. The offline copy therefore serves either setting. The native apps
 compose Prime again when the setting changes. Programmatic use goes through

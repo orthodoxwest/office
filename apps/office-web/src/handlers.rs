@@ -1094,16 +1094,15 @@ mod tests {
         }
     }
 
-    // Prime carries both the rubric and tomorrow's reading for the reader's
-    // setting to choose between; nothing in the URL changes the page.
+    // Prime carries tomorrow's reading for the reader's setting to show or
+    // not; off, it ends with May the souls, with no rubric in its place (#960).
+    // Nothing in the URL changes the page.
     #[test]
     fn prime_carries_the_martyrology_for_the_setting() {
         let (status, _, body) = get("/prime/2026-09-07");
         assert_eq!(status, StatusCode::OK);
-        let off = body
-            .find("<div data-martyrology-variant=\"off\"><p class=\"rubric\">Then the <span class=\"gloss-term\"")
-            .expect("rubric variant");
-        assert!(body[off..off + 400].contains(">Martyrology</span> is read"));
+        let off = body.find("<div data-martyrology-variant=\"off\"></div>").expect("empty variant");
+        assert!(!body.contains("Martyrology</span> is read"));
         let on = body
             .find("<div data-martyrology-variant=\"on\"><h2 class=\"section-heading\">Martyrology for tomorrow, September 8</h2>")
             .expect("reading");
