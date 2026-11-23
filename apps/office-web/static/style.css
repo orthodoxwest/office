@@ -13715,6 +13715,8 @@ body.page-home::before {
 .usage-table th:first-child { text-align: left; position: sticky; left: 0; background: var(--surface); font-weight: 400; }
 .usage-table thead th:first-child { z-index: 3; }
 .usage-table tbody th { z-index: 1; }
+.usage-builds caption { caption-side: top; text-align: left; padding: .2rem 0 .4rem; font-weight: 700; }
+.usage-builds + .usage-splits-note, .usage-builds + .usage-builds { margin-top: 1.4rem; }
 .usage-total { font-weight: 700; }
 .usage-zero { color: var(--muted); }
 .usage-weekday { margin-left: .35rem; color: var(--muted); font-size: .8rem; }
