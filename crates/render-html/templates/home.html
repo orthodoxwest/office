@@ -82,7 +82,7 @@
            picker unfolds under its own control instead. #}
       <div class="home-stage">
       <div class="home-hours-face">
-      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}"><span class="pray-now-label">{{ pray_now_label }}</span> <span class="pray-now-gloss"{% if not pray_now_gloss %} hidden{% endif %}>{{ pray_now_gloss }}</span></a></p>
+      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}"><span class="pray-now-label">{{ pray_now_label }}</span> <span class="pray-now-gloss"{% if not pray_now_gloss %} hidden{% endif %}>{{ pray_now_gloss|typeset }}</span></a></p>
       <nav class="home-hour-links" aria-label="Hours for the day">
         <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
           <h3 class="home-hour-group-label" id="home-hours-morning">
@@ -127,7 +127,7 @@
           </h3>
           <div class="home-hour-group-links">
             {% for h in hours %}{% if h.slug in ["vespers", "compline"] %}
-            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
+            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.eve %} data-eve="{{ h.eve|typeset }}"{% endif %}{% if h.is_current %} aria-current="time"{% endif %}>
               <span class="home-hour-link-name">{{ h.name }}</span>
               {% if h.note %}<span class="home-hour-link-note">{{ h.note }}</span>{% endif %}
               {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
@@ -211,12 +211,15 @@
         }
         if (href) prayNow.setAttribute("href", href);
         (prayNow.querySelector(".pray-now-label") || prayNow).textContent = label;
-        // The hour's gloss, which a phone sets under the words: the one its hour carries below.
+        // The hour's gloss, which a phone sets under the words: the one its hour carries below,
+        // or on an evening that keeps the morrow, "First Vespers of …" (its data-eve).
         var gloss = prayNow.querySelector(".pray-now-gloss");
+        var row = hour && entry[3] === 0 && card.querySelector('.home-hour-link[data-hour="' + hour + '"]');
         var note = hour && card.querySelector('.home-hour-link[data-hour="' + hour + '"] .home-hour-link-note');
+        var said = (row && row.getAttribute("data-eve")) || (note ? note.textContent : "");
         if (gloss) {
-          gloss.textContent = note ? note.textContent : "";
-          gloss.hidden = !note;
+          gloss.textContent = said;
+          gloss.hidden = !said;
         }
       })();
     </script>

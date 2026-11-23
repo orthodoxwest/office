@@ -152,7 +152,7 @@ impl OfficeCore {
         let year = self.year(shown.year())?;
         let day = year.days.get(shown.ordinal() as usize - 1).ok_or_else(|| failed(format!("no office day for {shown}")))?;
         let heading = day_heading(day);
-        let invite = invitation(shown, now, clock_hour_i8(clock_hour));
+        let invite = invitation(shown, now, clock_hour_i8(clock_hour)).on_eve(day.vespers.first_vespers_of());
         let versicle = if home_shows_versicle(day) {
             self.engine.compose_hour("lauds", day, &year.moveable, PrayerForm::Private).ok().and_then(|h| hour_versicle(&h))
         } else {
@@ -178,7 +178,7 @@ impl OfficeCore {
             is_today: shown == now,
             pray_now_label: invite.label,
             pray_now_hour: invite.hour.to_string(),
-            pray_now_gloss: invite.gloss.to_string(),
+            pray_now_gloss: typeset(&invite.gloss),
             pray_now_date: CivilDate::from(invite.date),
             current_hour: invite.current.to_string(),
         })
@@ -245,6 +245,7 @@ impl OfficeCore {
                     feast: typeset(&day_name(day)),
                     summary: typeset(&reminder_summary(&c.hour, day)),
                     description: typeset(&reminder_description(day)),
+                    silent: presentation::reminders::reminder_silent(&c.hour, date, &year.moveable),
                 });
             }
         }
@@ -1060,6 +1061,10 @@ pub struct ReminderView {
     pub summary: String,
     /// Rank, season, colour and commemorations, as the feed describes the event.
     pub description: String,
+    /// Delivered without the bell: the bells are silent through the Triduum, from Vespers of
+    /// Maundy Thursday through None of Holy Saturday (`presentation::reminders::reminder_silent`).
+    #[uniffi(default = false)]
+    pub silent: bool,
 }
 
 /// The reminder page's hours as the web offers them: the suggested time and
@@ -1576,7 +1581,8 @@ pub struct HomeView {
     pub pray_now_date: CivilDate,
     /// What the hour the invitation opens is, for a newcomer: "Evening prayer", which a phone
     /// sets in the invitation under its words (the wide niche glosses every hour in its table);
-    /// empty for "Open Lauds".
+    /// empty for "Open Lauds". On an evening whose Vespers already keeps the morrow, "First Vespers
+    /// of …" (`presentation::first_vespers_gloss`).
     pub pray_now_gloss: String,
     /// The hour the directory marks as now, or empty.
     pub current_hour: String,

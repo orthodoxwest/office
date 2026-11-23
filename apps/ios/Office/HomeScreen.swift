@@ -723,7 +723,10 @@ private struct Frontispiece: View {
                 VStack(spacing: 0) {
                     // A phone says what the hour is under the invitation's words, so the hours' table
                     // keeps one shape whichever hour is now; the niche glosses every hour in its table.
-                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil, gloss: tier.desk ? "" : lit.note, glossSize: tier.gloss, glossInk: home.nowGloss) {
+                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil, gloss: tier.desk ? "" : lit.note, glossSize: tier.gloss, glossInk: home.nowGloss,
+                             // The hour now, once prayed, on its own day (Compline after midnight is
+                             // yesterday's), as the web's `.pray-now.is-prayed`.
+                             prayed: view.isToday && lit.label == view.prayNowLabel && model.hoursPrayed(on: view.prayNowDate).contains(view.prayNowHour)) {
                         model.open(.hour(view.prayNowDate, view.prayNowHour))
                     }
                     .crownInk("r-pray")
@@ -1022,6 +1025,8 @@ struct PrayNow: View {
     var gloss: String = ""
     var glossSize: CGFloat = 13.76
     var glossInk: Color = .secondary
+    /// The hour now, already prayed: a small gilt cross at the words' shoulder, as the directory's.
+    var prayed: Bool = false
     let action: () -> Void
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
@@ -1031,10 +1036,21 @@ struct PrayNow: View {
             VStack(spacing: m.px(1.3)) {
                 Text(label).type(style.tracked(style.size * 0.012))
                     .foregroundStyle(lifted ?? (p.dark ? p.lining : p.titulus))
+                    // Taking no room, so the tablet keeps its height and still opens the hour.
+                    .overlay(alignment: .topTrailing) {
+                        if prayed {
+                            PaintedMark(.cross, size: m.px(style.size * 0.42), color: p.gold)
+                                .offset(x: m.px(style.size * 0.6), y: m.px(style.size * 0.18))
+                                .accessibilityHidden(true)
+                        }
+                    }
                 if !gloss.isEmpty {
+                    // One line: a long "First Vespers of …" is cut short rather than growing the tablet.
                     Text(gloss)
                         .type(TextStyle(size: glossSize, line: glossSize * 1.2, italic: true))
                         .foregroundStyle(glossInk)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                 }
             }
             .opacity(words)
@@ -1043,6 +1059,7 @@ struct PrayNow: View {
             .padding(.vertical, m.px(pad))
             .padding(.horizontal, m.px(13.8))
         }
+        .accessibilityValue(prayed ? "prayed" : "")
         .buttonStyle(Tablet(
             frontal: frontal, wash: wash, lining: p.lining, accent: p.accent,
             // The wash half as deep again (`--tablet-wash-pressed`): ochre by day, moonlit blue by night.

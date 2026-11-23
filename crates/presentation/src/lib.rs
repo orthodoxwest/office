@@ -280,8 +280,81 @@ pub struct Invitation {
     /// not to this day's office.
     pub current: &'static str,
     /// What the hour it opens is, for a newcomer ("Evening prayer"), which a
-    /// phone sets in the invitation under its words; empty for "Open Lauds".
-    pub gloss: &'static str,
+    /// phone sets in the invitation under its words; empty for "Open Lauds". On an
+    /// evening whose Vespers already keeps the morrow, [`Invitation::on_eve`] makes it
+    /// "First Vespers of …".
+    pub gloss: String,
+}
+
+impl Invitation {
+    /// The invitation on an evening whose Vespers is the First Vespers of `first_vespers_of`
+    /// (the feast or Sunday that owns the evening, as `office::VespersOwner::IOfFollowing`
+    /// names it): while it invites to this day's Vespers, its gloss says so
+    /// ([`first_vespers_gloss`]) instead of "Evening prayer". Any other invitation is unchanged.
+    pub fn on_eve(mut self, first_vespers_of: Option<&str>) -> Invitation {
+        if let Some(feast) = first_vespers_of.filter(|f| !f.trim().is_empty())
+            && self.current == "vespers"
+        {
+            self.gloss = first_vespers_gloss(feast);
+        }
+        self
+    }
+}
+
+/// Home's quiet word under "Pray Vespers" when the evening already belongs to the morrow:
+/// "First Vespers of the Nativity of Our Lord", "First Vespers of I Sunday of Advent". It is a
+/// gloss of one line under the invitation (cut short with an ellipsis on a narrow phone, as every
+/// front sets it), so the name is its short form, read in the run of the
+/// sentence: only up to its first comma ("St Cyril of Alexandria", not his titles), without a
+/// "(Resumed)" or "(Gaudete)" after it, "The Feast of" going by its familiar name ("Corpus
+/// Christi") or else dropped ("Our Lord Jesus Christ the King"), an anticipated Sunday's "Office
+/// of" dropped, "B.V.M." spelled out, and "the" before a mystery or a day that takes one ("the
+/// Epiphany of Our Lord", "the Octave Day of All Saints", "the Sunday of the Resurrection"). Each
+/// front sets it as the hour's gloss, so it is typeset where that is.
+pub fn first_vespers_gloss(feast: &str) -> String {
+    // Mysteries, octaves and days whose name reads with "the" before it.
+    const TAKES_THE: &[&str] = &[
+        "Annunciation",
+        "Ascension",
+        "Assumption",
+        "Circumcision",
+        "Conception",
+        "Dedication",
+        "Epiphany",
+        "Exaltation",
+        "Expectation",
+        "Finding",
+        "Holy",
+        "Most",
+        "Motherhood",
+        "Nativity",
+        "Octave",
+        "Presentation",
+        "Purification",
+        "Saturday",
+        "Seven",
+        "Solemnity",
+        "Sunday",
+        "Transfiguration",
+        "Vigil",
+        "Visitation",
+    ];
+    let (name, alias) = split_alias(feast);
+    let alias = alias.trim_start_matches('(').trim_end_matches(')').trim();
+    let name = name.trim();
+    let name = match name.strip_prefix("The Feast of ").or_else(|| name.strip_prefix("Feast of ")) {
+        Some(_) if !alias.is_empty() => alias,
+        Some(rest) => rest,
+        None => name,
+    };
+    let name = name.strip_prefix("Office of the ").or_else(|| name.strip_prefix("Office of ")).unwrap_or(name);
+    let name = name.split(',').next().unwrap_or(name).trim().replace("B.V.M.", "Blessed Virgin Mary");
+    let name = match name.strip_prefix("The ").or_else(|| name.strip_prefix("the ")) {
+        Some(rest) => format!("the {rest}"),
+        None if TAKES_THE.contains(&name.split(' ').next().unwrap_or("")) => format!("the {name}"),
+        None => name,
+    };
+    format!("First Vespers of {name}")
 }
 
 /// What an hour is, for a newcomer reading home's invitation: "Evening prayer".
@@ -407,7 +480,7 @@ impl EndLeaf {
 /// The invitation on home for `shown`, given the reader's own day and clock hour.
 pub fn invitation(shown: Date, now: Date, now_hour: i8) -> Invitation {
     if shown != now {
-        return Invitation { hour: "lauds", label: "Open Lauds".to_string(), date: shown, current: "", gloss: "" };
+        return Invitation { hour: "lauds", label: "Open Lauds".to_string(), date: shown, current: "", gloss: String::new() };
     }
     let (hour, name, offset) = current_hour_entry(now_hour);
     Invitation {
@@ -415,7 +488,7 @@ pub fn invitation(shown: Date, now: Date, now_hour: i8) -> Invitation {
         label: format!("Pray {name}"),
         date: now.add_days(offset),
         current: if offset == 0 { hour } else { "" },
-        gloss: hour_gloss(hour),
+        gloss: hour_gloss(hour).to_string(),
     }
 }
 
@@ -868,11 +941,45 @@ mod tests {
         assert_eq!(evening.gloss, "Evening prayer");
         // Compline after midnight marks no hour today, but the invitation still says what it is.
         let late = invitation(today, today, 1);
-        assert_eq!((late.hour, late.date, late.current, late.gloss), ("compline", Date::new(2026, 3, 14), "", "Prayer before sleep"));
+        assert_eq!(
+            (late.hour, late.date, late.current, late.gloss.as_str()),
+            ("compline", Date::new(2026, 3, 14), "", "Prayer before sleep")
+        );
         let other = invitation(today.add_days(1), today, 18);
         assert_eq!(
-            (other.hour, other.label.as_str(), other.date, other.current, other.gloss),
+            (other.hour, other.label.as_str(), other.date, other.current, other.gloss.as_str()),
             ("lauds", "Open Lauds", today.add_days(1), "", "")
         );
+    }
+
+    #[test]
+    fn an_evening_that_keeps_the_morrow_says_so_under_pray_vespers() {
+        let eve = Date::new(2026, 12, 24);
+        let vespers = invitation(eve, eve, 18).on_eve(Some("The Nativity of Our Lord"));
+        assert_eq!((vespers.label.as_str(), vespers.gloss.as_str()), ("Pray Vespers", "First Vespers of the Nativity of Our Lord"));
+        // Only Vespers says it: Compline that evening, None that afternoon and another day's
+        // "Open Lauds" keep their own words, and an evening of the day's own Vespers is unchanged.
+        assert_eq!(invitation(eve, eve, 21).on_eve(Some("The Nativity of Our Lord")).gloss, "Prayer before sleep");
+        assert_eq!(invitation(eve, eve, 14).on_eve(Some("The Nativity of Our Lord")).gloss, "Afternoon prayer");
+        assert_eq!(invitation(eve.add_days(1), eve, 18).on_eve(Some("The Nativity of Our Lord")).gloss, "");
+        assert_eq!(invitation(eve, eve, 18).on_eve(None).gloss, "Evening prayer");
+        let gloss = |name| first_vespers_gloss(name);
+        assert_eq!(gloss("I Sunday of Advent"), "First Vespers of I Sunday of Advent");
+        assert_eq!(gloss("III Sunday of Advent (Gaudete)"), "First Vespers of III Sunday of Advent");
+        assert_eq!(gloss("VI Sunday after Epiphany (Resumed)"), "First Vespers of VI Sunday after Epiphany");
+        assert_eq!(gloss("The Feast of the Most Holy Body of Christ (Corpus Christi)"), "First Vespers of Corpus Christi");
+        assert_eq!(gloss("The Feast of Our Lord Jesus Christ the King"), "First Vespers of Our Lord Jesus Christ the King");
+        assert_eq!(gloss("Office of the XXII Sunday after Pentecost"), "First Vespers of XXII Sunday after Pentecost");
+        // A saint's titles stay in the hour; the gloss names the saint.
+        assert_eq!(gloss("St Cyril of Alexandria, Confessor, Bishop & Doctor"), "First Vespers of St Cyril of Alexandria");
+        assert_eq!(gloss("Ss Fabian (Bishop) & Sebastian, Martyrs"), "First Vespers of Ss Fabian (Bishop) & Sebastian");
+        assert_eq!(gloss("Solemnity of St Joseph, Spouse of the Blessed Virgin Mary"), "First Vespers of the Solemnity of St Joseph");
+        // A mystery or a day takes "the"; a feast named for itself does not.
+        assert_eq!(gloss("Epiphany of Our Lord"), "First Vespers of the Epiphany of Our Lord");
+        assert_eq!(gloss("Sunday of the Resurrection"), "First Vespers of the Sunday of the Resurrection");
+        assert_eq!(gloss("Saturday Office of the B.V.M."), "First Vespers of the Saturday Office of the Blessed Virgin Mary");
+        assert_eq!(gloss("All Saints"), "First Vespers of All Saints");
+        assert_eq!(gloss("Palm Sunday"), "First Vespers of Palm Sunday");
+        assert_eq!(gloss("Our Lady of Walsingham"), "First Vespers of Our Lady of Walsingham");
     }
 }
