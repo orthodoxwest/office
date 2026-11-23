@@ -1,0 +1,185 @@
+Command line invocation:
+    /Applications/Xcode_27.1.app/Contents/Developer/usr/bin/xcodebuild test-without-building -xctestrun build/dd/Build/Products/Office_iphonesimulator27.1-arm64.xctestrun -destination id=24E299B4-C77B-4426-AC2B-71243825F07C
+
+2026-11-23 13:43:21.793 xcodebuild[2086:11240] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-23 13:43:42.039777+0000 Office[3291:15884] [framework] CoreUI: CUIThemeStore: No theme registered with id=0
+2026-11-23 13:43:42.040536+0000 Office[3291:15884] [framework] CoreUI: CUIThemeStore: No theme registered with id=0
+2026-11-23 13:43:42.237191+0000 Office[3291:15884] [XPCErrors] non-launching port is incompatible with service identifier "com.apple.PointerUI.pointeruid.default-service"
+2026-11-23 13:43:42.558065+0000 Office[3291:15884] [API] cannot add handler to 0 from 0 - dropping
+IOSurfaceClientSetSurfaceNotify failed e00002c7
+2026-11-23 13:43:42.617462+0000 Office[3291:15884] fopen failed for data file: errno = 2 (No such file or directory)
+2026-11-23 13:43:43.206658+0000 Office[3291:15884] fopen failed for data file: errno = 2 (No such file or directory)
+2026-11-23 13:43:43.231206+0000 Office[3291:15884] [error] building pipeline path_exterior-jfa10la4feba4 took 0.613895 seconds
+2026-11-23 13:43:43.462911+0000 Office[3291:15884] [] CVPixelBufferCreate returned err -6680. width 800, height 1063, pixel format RGBA, options [ExtendedPixelsRight = 0, ExtendedPixelsBottom = 0, BytesPerRowAlignment = 64]
+2026-11-23 13:43:43.463401+0000 Office[3291:15884] [] CVPixelBufferCreate returned err -6680. width 800, height 1063, pixel format RGBA, options [ExtendedPixelsRight = 0, ExtendedPixelsBottom = 0, BytesPerRowAlignment = 64]
+2026-11-23 13:43:43.997611+0000 Office[3291:15884] [API] cannot add handler to 0 from 0 - dropping
+Test Suite 'All tests' started at 2026-11-23 13:43:45.922.
+Test Suite 'OfficeTests.xctest' started at 2026-11-23 13:43:45.923.
+Test Suite 'ChromeLayoutTests' started at 2026-11-23 13:43:45.923.
+Test Case '-[OfficeTests.ChromeLayoutTests testTheMenuKeepsItsOwnHeight]' started.
+Test Case '-[OfficeTests.ChromeLayoutTests testTheMenuKeepsItsOwnHeight]' passed (0.086 seconds).
+Test Case '-[OfficeTests.ChromeLayoutTests testThePickersWeeksKeepADaysHeightAtAnySize]' started.
+Test Case '-[OfficeTests.ChromeLayoutTests testThePickersWeeksKeepADaysHeightAtAnySize]' passed (0.194 seconds).
+Test Suite 'ChromeLayoutTests' passed at 2026-11-23 13:43:46.207.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.280 (0.284) seconds
+Test Suite 'CoreTests' started at 2026-11-23 13:43:46.207.
+Test Case '-[OfficeTests.CoreTests testAboutGivesTheSunsTimesButCompline]' started.
+Test Case '-[OfficeTests.CoreTests testAboutGivesTheSunsTimesButCompline]' passed (0.005 seconds).
+Test Case '-[OfficeTests.CoreTests testAboutLightsAndInvitesToTheHourHomeDoes]' started.
+Test Case '-[OfficeTests.CoreTests testAboutLightsAndInvitesToTheHourHomeDoes]' passed (0.002 seconds).
+Test Case '-[OfficeTests.CoreTests testAFeastIsFoundAndItsPageLeadsToItsDays]' started.
+Test Case '-[OfficeTests.CoreTests testAFeastIsFoundAndItsPageLeadsToItsDays]' passed (0.066 seconds).
+Test Case '-[OfficeTests.CoreTests testARubricsSecretlyCarriesItsNote]' started.
+Test Case '-[OfficeTests.CoreTests testARubricsSecretlyCarriesItsNote]' passed (0.016 seconds).
+Test Case '-[OfficeTests.CoreTests testComposesAnHourFromTheEmbeddedCorpus]' started.
+Test Case '-[OfficeTests.CoreTests testComposesAnHourFromTheEmbeddedCorpus]' passed (0.003 seconds).
+Test Case '-[OfficeTests.CoreTests testEachShortcutOpensTheDayItIsChosen]' started.
+Test Case '-[OfficeTests.CoreTests testEachShortcutOpensTheDayItIsChosen]' passed (0.001 seconds).
+Test Case '-[OfficeTests.CoreTests testTheAboutPageHasTheSevenHoursAndLinksOnlyWhereTheAppCanGo]' started.
+Test Case '-[OfficeTests.CoreTests testTheAboutPageHasTheSevenHoursAndLinksOnlyWhereTheAppCanGo]' passed (0.009 seconds).
+Test Case '-[OfficeTests.CoreTests testTheGapsFollowTheSharedRhythm]' started.
+Test Case '-[OfficeTests.CoreTests testTheGapsFollowTheSharedRhythm]' passed (0.004 seconds).
+Test Suite 'CoreTests' passed at 2026-11-23 13:43:46.316.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.106 (0.109) seconds
+Test Suite 'CrownTests' started at 2026-11-23 13:43:46.316.
+Test Case '-[OfficeTests.CrownTests testAPlainTapSettlesOnTheTurnedThemeAndSavesIt]' started.
+Test Case '-[OfficeTests.CrownTests testAPlainTapSettlesOnTheTurnedThemeAndSavesIt]' passed (0.004 seconds).
+Test Case '-[OfficeTests.CrownTests testThePlayKeepsItsOrder]' started.
+Test Case '-[OfficeTests.CrownTests testThePlayKeepsItsOrder]' passed (0.020 seconds).
+Test Case '-[OfficeTests.CrownTests testTheTapTurnsTheLookAndTheTapBackRestoresTheChoice]' started.
+Test Case '-[OfficeTests.CrownTests testTheTapTurnsTheLookAndTheTapBackRestoresTheChoice]' passed (0.001 seconds).
+Test Suite 'CrownTests' passed at 2026-11-23 13:43:46.342.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.025 (0.026) seconds
+Test Suite 'PlaceTests' started at 2026-11-23 13:43:46.342.
+Test Case '-[OfficeTests.PlaceTests testAFeastPageNamesItsWayBack]' started.
+Test Case '-[OfficeTests.PlaceTests testAFeastPageNamesItsWayBack]' passed (0.001 seconds).
+Test Case '-[OfficeTests.PlaceTests testAnInterruptedHourOpensAtItsPlaceOnlyWithinTheLimit]' started.
+Test Case '-[OfficeTests.PlaceTests testAnInterruptedHourOpensAtItsPlaceOnlyWithinTheLimit]' passed (0.001 seconds).
+Test Case '-[OfficeTests.PlaceTests testAPageOfTheSameKindReplacesTheOneShown]' started.
+Test Case '-[OfficeTests.PlaceTests testAPageOfTheSameKindReplacesTheOneShown]' passed (0.001 seconds).
+Test Case '-[OfficeTests.PlaceTests testCivilDatesStepAcrossMonths]' started.
+Test Case '-[OfficeTests.PlaceTests testCivilDatesStepAcrossMonths]' passed (0.001 seconds).
+Test Case '-[OfficeTests.PlaceTests testPagesRoundTripThroughSavedState]' started.
+Test Case '-[OfficeTests.PlaceTests testPagesRoundTripThroughSavedState]' passed (0.001 seconds).
+Test Case '-[OfficeTests.PlaceTests testTheEndCrossGildsOnceMarkedAndWhollyShown]' started.
+Test Case '-[OfficeTests.PlaceTests testTheEndCrossGildsOnceMarkedAndWhollyShown]' passed (0.001 seconds).
+Test Case '-[OfficeTests.PlaceTests testTheKeptPlaceCarriesTheReading]' started.
+Test Case '-[OfficeTests.PlaceTests testTheKeptPlaceCarriesTheReading]' passed (0.002 seconds).
+Test Case '-[OfficeTests.PlaceTests testTheOrdoOpensAgainAtTheDayChosen]' started.
+Test Case '-[OfficeTests.PlaceTests testTheOrdoOpensAgainAtTheDayChosen]' passed (0.001 seconds).
+Test Case '-[OfficeTests.PlaceTests testTheSearchTakesItsWordsInPlace]' started.
+Test Case '-[OfficeTests.PlaceTests testTheSearchTakesItsWordsInPlace]' passed (0.001 seconds).
+Test Suite 'PlaceTests' passed at 2026-11-23 13:43:46.356.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.010 (0.014) seconds
+Test Suite 'ProseTests' started at 2026-11-23 13:43:46.357.
+Test Case '-[OfficeTests.ProseTests testALongOpeningRunsBesideADeepInitial]' started.
+Test Case '-[OfficeTests.ProseTests testALongOpeningRunsBesideADeepInitial]' passed (0.005 seconds).
+Test Case '-[OfficeTests.ProseTests testAShortOpeningRaisesItsInitial]' started.
+Test Case '-[OfficeTests.ProseTests testAShortOpeningRaisesItsInitial]' passed (0.001 seconds).
+Test Case '-[OfficeTests.ProseTests testAShortPsalmOpeningElevatesItsInitial]' started.
+Test Case '-[OfficeTests.ProseTests testAShortPsalmOpeningElevatesItsInitial]' passed (0.001 seconds).
+Test Case '-[OfficeTests.ProseTests testEachHymnHasOneCentredColumn]' started.
+Test Case '-[OfficeTests.ProseTests testEachHymnHasOneCentredColumn]' passed (0.007 seconds).
+Test Case '-[OfficeTests.ProseTests testEveryLineBesideADeepInitialStartsAtItsEdge]' started.
+Test Case '-[OfficeTests.ProseTests testEveryLineBesideADeepInitialStartsAtItsEdge]' passed (0.002 seconds).
+Test Case '-[OfficeTests.ProseTests testEveryLineBoxIsTheStylesLineHeight]' started.
+Test Case '-[OfficeTests.ProseTests testEveryLineBoxIsTheStylesLineHeight]' passed (0.001 seconds).
+Test Case '-[OfficeTests.ProseTests testTheSmallCapsTakeTheRestOfTheFirstWord]' started.
+Test Case '-[OfficeTests.ProseTests testTheSmallCapsTakeTheRestOfTheFirstWord]' passed (0.008 seconds).
+Test Suite 'ProseTests' passed at 2026-11-23 13:43:46.385.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.026 (0.028) seconds
+Test Suite 'ReminderTests' started at 2026-11-23 13:43:46.385.
+Test Case '-[OfficeTests.ReminderTests testAboutGivesTheSunsTimesAtThePlaceKept]' started.
+Test Case '-[OfficeTests.ReminderTests testAboutGivesTheSunsTimesAtThePlaceKept]' passed (0.002 seconds).
+Test Case '-[OfficeTests.ReminderTests testEachDayTakesItsOwnOffsetAcrossAClockChange]' started.
+Test Case '-[OfficeTests.ReminderTests testEachDayTakesItsOwnOffsetAcrossAClockChange]' passed (0.001 seconds).
+Test Case '-[OfficeTests.ReminderTests testEachReminderRingsItsLeadBeforeTheOffice]' started.
+Test Case '-[OfficeTests.ReminderTests testEachReminderRingsItsLeadBeforeTheOffice]' passed (0.005 seconds).
+Test Case '-[OfficeTests.ReminderTests testOnlyTheChosenDaysAndNothingWhenOff]' started.
+Test Case '-[OfficeTests.ReminderTests testOnlyTheChosenDaysAndNothingWhenOff]' passed (0.001 seconds).
+Test Case '-[OfficeTests.ReminderTests testPastTheLimitTheChosenTimesStand]' started.
+Test Case '-[OfficeTests.ReminderTests testPastTheLimitTheChosenTimesStand]' passed (0.002 seconds).
+Test Case '-[OfficeTests.ReminderTests testTheNextLineIsReadAgainAsItsReminderComesOrTheDayTurns]' started.
+Test Case '-[OfficeTests.ReminderTests testTheNextLineIsReadAgainAsItsReminderComesOrTheDayTurns]' passed (0.002 seconds).
+Test Case '-[OfficeTests.ReminderTests testTheScheduleStopsAtIOSsLimit]' started.
+Test Case '-[OfficeTests.ReminderTests testTheScheduleStopsAtIOSsLimit]' passed (0.003 seconds).
+Test Case '-[OfficeTests.ReminderTests testTheSettingAndPlaceAreKept]' started.
+Test Case '-[OfficeTests.ReminderTests testTheSettingAndPlaceAreKept]' passed (0.007 seconds).
+Test Case '-[OfficeTests.ReminderTests testTheSunTimesTheHoursAtThePlaceKept]' started.
+Test Case '-[OfficeTests.ReminderTests testTheSunTimesTheHoursAtThePlaceKept]' passed (0.002 seconds).
+Test Case '-[OfficeTests.ReminderTests testTheTriduumsRemindersComeWithoutTheBell]' started.
+Test Case '-[OfficeTests.ReminderTests testTheTriduumsRemindersComeWithoutTheBell]' passed (0.002 seconds).
+Test Case '-[OfficeTests.ReminderTests testTodaysSunTimesForThePage]' started.
+Test Case '-[OfficeTests.ReminderTests testTodaysSunTimesForThePage]' passed (0.001 seconds).
+Test Suite 'ReminderTests' passed at 2026-11-23 13:43:46.423.
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.028 (0.038) seconds
+Test Suite 'SVGTests' started at 2026-11-23 13:43:46.424.
+Test Case '-[OfficeTests.SVGTests testArcsAndRelativeCommands]' started.
+Test Case '-[OfficeTests.SVGTests testArcsAndRelativeCommands]' passed (0.001 seconds).
+Test Case '-[OfficeTests.SVGTests testThePaintedMarksStandInTheirBoxes]' started.
+Test Case '-[OfficeTests.SVGTests testThePaintedMarksStandInTheirBoxes]' passed (0.001 seconds).
+Test Suite 'SVGTests' passed at 2026-11-23 13:43:46.426.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'SpokenTests' started at 2026-11-23 13:43:46.431.
+Test Case '-[OfficeTests.SpokenTests testAPostureCueIsAnAside]' started.
+Test Case '-[OfficeTests.SpokenTests testAPostureCueIsAnAside]' passed (0.047 seconds).
+Test Case '-[OfficeTests.SpokenTests testChantScoresSpeakCleanWordsAndStanzaNumbers]' started.
+Test Case '-[OfficeTests.SpokenTests testChantScoresSpeakCleanWordsAndStanzaNumbers]' passed (0.051 seconds).
+Test Case '-[OfficeTests.SpokenTests testSigilsAreNamedAndTheCrossIsSaid]' started.
+Test Case '-[OfficeTests.SpokenTests testSigilsAreNamedAndTheCrossIsSaid]' passed (0.196 seconds).
+Test Case '-[OfficeTests.SpokenTests testTheMarksForTheEyeAreSilent]' started.
+Test Case '-[OfficeTests.SpokenTests testTheMarksForTheEyeAreSilent]' passed (0.254 seconds).
+Test Suite 'SpokenTests' passed at 2026-11-23 13:43:46.981.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.548 (0.550) seconds
+Test Suite 'UsageTests' started at 2026-11-23 13:43:46.982.
+Test Case '-[OfficeTests.UsageTests testAFailedBeaconIsTriedAgainOnTheNextVisit]' started.
+Test Case '-[OfficeTests.UsageTests testAFailedBeaconIsTriedAgainOnTheNextVisit]' passed (0.007 seconds).
+Test Case '-[OfficeTests.UsageTests testAFreshInstallationWaitsBeforeReporting]' started.
+Test Case '-[OfficeTests.UsageTests testAFreshInstallationWaitsBeforeReporting]' passed (0.005 seconds).
+Test Case '-[OfficeTests.UsageTests testANewcomerIsOfferedTheIntroductionForAWeek]' started.
+Test Case '-[OfficeTests.UsageTests testANewcomerIsOfferedTheIntroductionForAWeek]' passed (0.008 seconds).
+Test Case '-[OfficeTests.UsageTests testAnHourThatCouldNotReportIsSaidNextTime]' started.
+Test Case '-[OfficeTests.UsageTests testAnHourThatCouldNotReportIsSaidNextTime]' passed (0.008 seconds).
+Test Case '-[OfficeTests.UsageTests testAnHourWithAScoreSaysWhetherItsNotationWasShown]' started.
+Test Case '-[OfficeTests.UsageTests testAnHourWithAScoreSaysWhetherItsNotationWasShown]' passed (0.007 seconds).
+Test Case '-[OfficeTests.UsageTests testAnInstallationIsNewOnItsFirstDayOnly]' started.
+Test Case '-[OfficeTests.UsageTests testAnInstallationIsNewOnItsFirstDayOnly]' passed (0.008 seconds).
+Test Case '-[OfficeTests.UsageTests testAnInstallationSaysHowItKeepsTheHours]' started.
+Test Case '-[OfficeTests.UsageTests testAnInstallationSaysHowItKeepsTheHours]' passed (0.009 seconds).
+Test Case '-[OfficeTests.UsageTests testAnInstallationThatReportedBeforeIsReturning]' started.
+Test Case '-[OfficeTests.UsageTests testAnInstallationThatReportedBeforeIsReturning]' passed (0.006 seconds).
+Test Case '-[OfficeTests.UsageTests testAWeekAndAMonthOpenOnTheirFirstCountedDay]' started.
+Test Case '-[OfficeTests.UsageTests testAWeekAndAMonthOpenOnTheirFirstCountedDay]' passed (0.015 seconds).
+Test Case '-[OfficeTests.UsageTests testAWeekOpensOnlyWhenABeaconIsCounted]' started.
+Test Case '-[OfficeTests.UsageTests testAWeekOpensOnlyWhenABeaconIsCounted]' passed (0.008 seconds).
+Test Case '-[OfficeTests.UsageTests testBeaconsFollowTheSiteToTheAddressItNames]' started.
+Test Case '-[OfficeTests.UsageTests testBeaconsFollowTheSiteToTheAddressItNames]' passed (0.005 seconds).
+Test Case '-[OfficeTests.UsageTests testDebugBuildsNeverReport]' started.
+Test Case '-[OfficeTests.UsageTests testDebugBuildsNeverReport]' passed (0.001 seconds).
+Test Case '-[OfficeTests.UsageTests testEachPageCountsOnceADay]' started.
+Test Case '-[OfficeTests.UsageTests testEachPageCountsOnceADay]' passed (0.007 seconds).
+Test Case '-[OfficeTests.UsageTests testOpeningTheAppDoesNotSpendItsFirstDay]' started.
+Test Case '-[OfficeTests.UsageTests testOpeningTheAppDoesNotSpendItsFirstDay]' passed (0.006 seconds).
+Test Case '-[OfficeTests.UsageTests testTheArchiveIsNotCounted]' started.
+Test Case '-[OfficeTests.UsageTests testTheArchiveIsNotCounted]' passed (0.005 seconds).
+Test Case '-[OfficeTests.UsageTests testTheIdentifierLastsOneReportingDay]' started.
+Test Case '-[OfficeTests.UsageTests testTheIdentifierLastsOneReportingDay]' passed (0.007 seconds).
+Test Suite 'UsageTests' passed at 2026-11-23 13:43:47.111.
+	 Executed 16 tests, with 0 failures (0 unexpected) in 0.112 (0.129) seconds
+Test Suite 'OfficeTests.xctest' passed at 2026-11-23 13:43:47.111.
+	 Executed 62 tests, with 0 failures (0 unexpected) in 1.135 (1.188) seconds
+Test Suite 'All tests' passed at 2026-11-23 13:43:47.111.
+	 Executed 62 tests, with 0 failures (0 unexpected) in 1.135 (1.189) seconds
+2026-11-23 13:43:47.148 xcodebuild[2086:11240] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-23 13:43:47.154 xcodebuild[2086:11240] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-23 13:43:47.157 xcodebuild[2086:11240] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-23 13:43:47.588 xcodebuild[2086:11240] [MT] IDETestOperationsObserverDebug: 27.252 elapsed -- Testing started completed.
+2026-11-23 13:43:47.588 xcodebuild[2086:11240] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-11-23 13:43:47.588 xcodebuild[2086:11240] [MT] IDETestOperationsObserverDebug: 27.252 sec, +27.252 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/Library/Developer/Xcode/DerivedData/Office-beeqtsnveuvhxedkxykxkpdipmjo/Logs/Test/Test-Office-2026.11.23_13-43-19-+0000.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started
