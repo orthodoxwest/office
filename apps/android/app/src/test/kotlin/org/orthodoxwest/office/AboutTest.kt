@@ -8,6 +8,7 @@ import org.orthodoxwest.office.core.CivilDate
 import org.orthodoxwest.office.core.about
 import org.orthodoxwest.office.core.aboutNewcomer
 import org.orthodoxwest.office.core.aboutNow
+import org.orthodoxwest.office.core.aboutTimeSpoken
 import org.orthodoxwest.office.core.dayNameGloss
 import org.orthodoxwest.office.core.hourNames
 import org.orthodoxwest.office.core.ordoColors
@@ -57,9 +58,13 @@ class AboutTest {
             "compline" to LocalTime.of(21, 0),
         )
         val times = sunPeriods(view.periods, sun, clock).flatMap { it.hours }.associate { it.hour to it.time }
-        assertEquals("at sunrise · 6:48 am", times["lauds"])
-        assertEquals("at solar noon · 12:14 pm", times["sext"])
-        assertEquals("toward sunset · 5:19 pm", times["vespers"])
+        assertEquals("sunrise · 6:48 am", times["lauds"])
+        assertEquals("first hour · 7:43 am", times["prime"])
+        assertEquals("third hour · 9:31 am", times["terce"])
+        assertEquals("solar noon · 12:14 pm", times["sext"])
+        assertEquals("ninth hour · 2:15 pm", times["none"])
+        assertEquals("sunset · 5:19 pm", times["vespers"])
+        assertEquals("sunrise, 6:48 am", aboutTimeSpoken(times.getValue("lauds")))
         assertEquals(view.periods.last().hours.last().time, times["compline"])
     }
 

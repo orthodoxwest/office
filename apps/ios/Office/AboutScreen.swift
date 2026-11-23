@@ -45,7 +45,7 @@ struct AboutPage: View {
     }
 }
 
-/// The table's hours with today's times by the sun ("at sunrise · 6:48 am") in place of their
+/// The table's hours with today's times by the sun ("sunrise · 6:48 am") in place of their
 /// own, when `sun` has them; Compline, and every hour while the sun does not time them, keep theirs.
 func aboutSunPeriods(_ periods: [AboutPeriodView], sun: [String: (hour: Int, minute: Int)]?) -> [AboutPeriodView] {
     guard let sun else { return periods }
@@ -81,6 +81,10 @@ struct AboutScreen: View {
     @State private var specimenForm = "private"
     @State private var litKey: String?
     @State private var selectedColor: String?
+    /// The table's hours with today's times by the sun, while the reminders follow it; nil keeps
+    /// the page's own. Read again when the day turns or a new place is read.
+    @State private var sunPeriods: [AboutPeriodView]?
+    @ObservedObject private var location = PhoneLocation.shared
 
     /// The hour it is now, as home has it (`presentation::about`): nil only if the core refuses the date.
     private var now: AboutNow? { try? aboutNow(today: model.today, clockHour: Int32(model.clockHour)) }
@@ -91,8 +95,7 @@ struct AboutScreen: View {
         let verse = view.blocks.first { $0.kind == "verse" }
         let intro = view.blocks.first { $0.kind == "intro" }?.text ?? ""
         let parsed = partitionAboutBlocks(view.blocks)
-        // While the reminders follow the sun here, the hours' times are today's sun's.
-        let periods = aboutSunPeriods(view.periods, sun: (try? Office.core.get()).flatMap { ReminderStore.load().sunTimes(on: Date(), core: $0) })
+        let periods = sunPeriods ?? view.periods
 
         GeometryReader { geo in
             let wide = geo.size.width >= aboutRailFrom
@@ -149,6 +152,7 @@ struct AboutScreen: View {
                 }
             }
         }
+        .task(id: "\(model.today.year)-\(model.today.month)-\(model.today.day) \(location.revision)") { readSun() }
         // A paragraph's links open the app's own pages, or the browser.
         .environment(\.openURL, OpenURLAction { url in
             switch aboutLink(url.absoluteString) {
@@ -166,6 +170,16 @@ struct AboutScreen: View {
                 return .discarded
             }
         })
+    }
+
+    /// Today's times by the sun at the place kept, for `model.today` (its local noon).
+    private func readSun() {
+        let t = model.today
+        var civil = Calendar.current
+        civil.timeZone = .current
+        let day = civil.date(from: DateComponents(year: Int(t.year), month: Int(t.month), day: Int(t.day), hour: 12)) ?? Date()
+        let sun = (try? Office.core.get()).flatMap { ReminderStore.load().sunTimes(on: day, core: $0, calendar: civil) }
+        sunPeriods = sun == nil ? nil : aboutSunPeriods(view.periods, sun: sun)
     }
 
     @ViewBuilder private func introBlock(_ text: String) -> some View {
@@ -525,7 +539,7 @@ private struct AboutHorologium: View {
         if let active = hours.first(where: { $0.hour == activeSlug }) ?? hours.last {
             let isNow = active.hour == current && !current.isEmpty
             let largeType = m.type > 1.35
-            let readoutSpoken = "\(isNow ? "Now, " : "")\(active.time). \(active.name), \(active.gloss)"
+            let readoutSpoken = "\(isNow ? "Now, " : "")\(aboutTimeSpoken(time: active.time)). \(active.name), \(active.gloss)"
             let displayAngle = dragAngle ?? active.angle
             let stars = starAlpha(for: active.hour)
             let readout = VStack(spacing: m.px(1)) {
@@ -606,7 +620,7 @@ private struct AboutHorologium: View {
                             }
                             .buttonStyle(.plain)
                             .position(x: px, y: py)
-                            .accessibilityLabel("\(hr.name): \(hr.gloss), \(hr.time)")
+                            .accessibilityLabel("\(hr.name): \(hr.gloss), \(aboutTimeSpoken(time: hr.time))")
                             .accessibilityAddTraits(hr.hour == active.hour ? .isSelected : [])
                         }
                     }
@@ -906,7 +920,7 @@ private struct AboutHoursDirectory: View {
         }
         .buttonStyle(Lit { PoolOfLight(at: UnitPoint(x: 0.3, y: 0.5), size: CGSize(width: 0.88, height: 1.16)) })
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel([h.name, h.gloss, h.time, isNow ? "now" : nil].compactMap { $0 }.joined(separator: ", "))
+        .accessibilityLabel([h.name, h.gloss, aboutTimeSpoken(time: h.time), isNow ? "now" : nil].compactMap { $0 }.joined(separator: ", "))
         .accessibilityAddTraits(.isButton)
     }
 }

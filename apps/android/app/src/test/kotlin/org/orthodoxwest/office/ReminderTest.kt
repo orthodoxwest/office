@@ -14,6 +14,8 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.TimeZone
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -23,6 +25,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.orthodoxwest.office.core.about
 import org.orthodoxwest.office.core.reminderNext
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
@@ -202,6 +205,22 @@ class ReminderTest {
     private fun followSun(latitude: Double, longitude: Double) {
         val store = ReminderStore(app)
         store.save(store.load().copy(on = true, followSun = true, place = StoredPlace(latitude, longitude, Instant.parse("2026-06-20T16:00:00Z"))))
+    }
+
+    /** About gives the same day's sun as the reminders, from the settings the page is handed. */
+    @Test
+    fun aboutGivesTheSunsTimesAtThePlaceKept() {
+        val clock = DateTimeFormatter.ofPattern("h:mm a", Locale.US)
+        val midsummer = LocalDate.of(2026, 6, 21)
+        assertEquals(about().periods, sunPeriods(about().periods, ReminderStore(app).load().sunTimes(midsummer, zone), clock))
+        followSun(39.9526, -75.1652)
+        val periods = sunPeriods(about().periods, ReminderStore(app).load().sunTimes(midsummer, zone), clock)
+        val times = periods.flatMap { it.hours }.associate { it.hour to it.time }
+        assertEquals("sunrise · 5:32 am", times["lauds"])
+        assertEquals("sunset · 8:33 pm", times["vespers"])
+        assertTrue(times["prime"]!!.startsWith("first hour · 6:"))
+        assertTrue(times["sext"]!!.startsWith("solar noon · 1:0"))
+        assertEquals(about().periods.last().hours.last().time, times["compline"])
     }
 
     @Test

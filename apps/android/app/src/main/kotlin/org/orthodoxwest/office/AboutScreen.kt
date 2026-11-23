@@ -98,6 +98,7 @@ import org.orthodoxwest.office.core.RunView
 import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.aboutNow
 import org.orthodoxwest.office.core.aboutSunTime
+import org.orthodoxwest.office.core.aboutTimeSpoken
 import org.orthodoxwest.office.core.colorDaysNote
 import org.orthodoxwest.office.core.courseSpan
 import org.orthodoxwest.office.core.rareColorMaxDays
@@ -127,6 +128,7 @@ fun AboutScreen(
     view: AboutView,
     today: LocalDate,
     clockHour: Int,
+    reminders: ReminderSettings,
     chrome: @Composable () -> Unit,
     insets: PaddingValues,
     onOpen: (Page) -> Unit,
@@ -149,9 +151,9 @@ fun AboutScreen(
     val now = remember(today, clockHour) { runCatching { aboutNow(today.toCivil(), clockHour) }.getOrNull() }
     val currentHour = now?.current.orEmpty()
     // While the reminders follow the sun here, the hours' times are today's sun's.
-    val periods = remember(view, today) {
+    val periods = remember(view, today, reminders) {
         val clock = DateTimeFormatter.ofPattern(if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm a", Locale.getDefault())
-        sunPeriods(view.periods, ReminderStore(context).load().sunTimes(today, ZoneId.systemDefault()), clock)
+        sunPeriods(view.periods, reminders.sunTimes(today, ZoneId.systemDefault()), clock)
     }
 
     // Extract head epigraph, intro, hours heading/note, and remaining prose sections from shared blocks.
@@ -567,7 +569,7 @@ private fun Horologium(
             // Not a live region, as on the web and iOS: each stop already names its hour, and a
             // readout spoken at every pass would talk over the page.
             mod.clearAndSetSemantics {
-                contentDescription = "${if (isNow) "Now, " else ""}${active.time}. ${active.name}, ${active.gloss}"
+                contentDescription = "${if (isNow) "Now, " else ""}${aboutTimeSpoken(active.time)}. ${active.name}, ${active.gloss}"
             },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -792,7 +794,7 @@ private fun Horologium(
                 Box(
                     Modifier.offset { IntOffset(xPx, yPx) }
                         .size(44.dp)
-                        .tap(label = "${h.name}: ${h.gloss}, ${h.time}", selected = h.hour == active.hour) { onSelect(h.hour) },
+                        .tap(label = "${h.name}: ${h.gloss}, ${aboutTimeSpoken(h.time)}", selected = h.hour == active.hour) { onSelect(h.hour) },
                 )
             }
         }
@@ -804,12 +806,7 @@ private fun Horologium(
 }
 
 /**
- * The seven hours in home's three periods, ruled as home's painted page: firm hand-ruled terracotta
- * frame above and below, medium dividers between periods, faint hairlines between hours inside a
- * period, and zero vertical rules or shaded cells.
- */
-/**
- * The table's hours with today's times by the sun ("at sunrise · 6:48 am") in place of their own,
+ * The table's hours with today's times by the sun ("sunrise · 6:48 am") in place of their own,
  * when [sun] has them; Compline, and every hour while the sun does not time them, keep theirs.
  */
 internal fun sunPeriods(periods: List<AboutPeriodView>, sun: Map<String, LocalTime>?, clock: DateTimeFormatter): List<AboutPeriodView> {
@@ -824,6 +821,11 @@ internal fun sunPeriods(periods: List<AboutPeriodView>, sun: Map<String, LocalTi
     }
 }
 
+/**
+ * The seven hours in home's three periods, ruled as home's painted page: firm hand-ruled terracotta
+ * frame above and below, medium dividers between periods, faint hairlines between hours inside a
+ * period, and zero vertical rules or shaded cells.
+ */
 @Composable
 private fun HoursDirectory(
     periods: List<AboutPeriodView>,
@@ -893,7 +895,7 @@ private fun HoursDirectory(
                             Spacer(Modifier.width(10.4.dp))
                             Column(Modifier.weight(1f).alignByBaseline()) {
                                 Text(h.gloss, style = glossStyle)
-                                Text(h.time, style = timeStyle)
+                                Text(h.time, Modifier.semantics { contentDescription = aboutTimeSpoken(h.time) }, style = timeStyle)
                             }
                         }
                     }

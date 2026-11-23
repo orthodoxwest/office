@@ -132,23 +132,32 @@ pub const ABOUT_HOURS: [(&str, &[(&str, &str)]); 3] = [
 
 /// When the hours follow the sun where the reader is ([`crate::sun`]), what the table and the
 /// Horologium say of each hour's time in place of [`ABOUT_HOURS`]' own, before today's clock
-/// time there. Compline keeps the reader's own time, so it keeps its gloss.
+/// time there: when the sun sets it ([`crate::sun::office_minute`]: Vespers at sunset, Prime,
+/// Terce and None at the first, third and ninth of the day's twelve hours). Short, so the
+/// Horologium's readout keeps one line with its "Now". Compline keeps the reader's own time, so
+/// it keeps its gloss.
 pub const ABOUT_SUN_HOURS: [(&str, &str); 6] = [
-    ("lauds", "at sunrise"),
-    ("prime", "at the first hour"),
-    ("terce", "at the third hour"),
-    ("sext", "at solar noon"),
-    ("none", "at the ninth hour"),
-    ("vespers", "toward sunset"),
+    ("lauds", "sunrise"),
+    ("prime", "first hour"),
+    ("terce", "third hour"),
+    ("sext", "solar noon"),
+    ("none", "ninth hour"),
+    ("vespers", "sunset"),
 ];
 
-/// An hour's time on the About page while the hours follow the sun: "at sunrise · 6:48 am", the
+/// An hour's time on the About page while the hours follow the sun: "sunrise · 6:48 am", the
 /// clock time `clock` in the reader's own style, set in the table's lower case. None for an hour
 /// the sun does not time (Compline), which keeps [`ABOUT_HOURS`]' words.
 pub fn about_sun_time(slug: &str, clock: &str) -> Option<String> {
     let (_, lead) = ABOUT_SUN_HOURS.iter().find(|(s, _)| *s == slug)?;
     let clock = clock.trim();
     (!clock.is_empty()).then(|| format!("{lead} · {}", clock.to_lowercase()))
+}
+
+/// What a screen reader says for an hour's time on the About page: the time as set, its middle
+/// dot a pause ("sunrise, 6:48 am").
+pub fn about_time_spoken(time: &str) -> String {
+    time.replace(" · ", ", ")
 }
 
 /// Each hour's station angle along the Horologium's semicircular arc, in degrees from the western
@@ -435,9 +444,17 @@ mod tests {
 
     #[test]
     fn the_sun_times_every_hour_but_compline() {
-        assert_eq!(about_sun_time("lauds", "6:48 AM").as_deref(), Some("at sunrise · 6:48 am"));
-        assert_eq!(about_sun_time("sext", "12:14").as_deref(), Some("at solar noon · 12:14"));
-        assert_eq!(about_sun_time("vespers", "5:19 PM").as_deref(), Some("toward sunset · 5:19 pm"));
+        assert_eq!(about_sun_time("lauds", "6:48 AM").as_deref(), Some("sunrise · 6:48 am"));
+        assert_eq!(about_sun_time("prime", "7:43 AM").as_deref(), Some("first hour · 7:43 am"));
+        assert_eq!(about_sun_time("sext", "12:14").as_deref(), Some("solar noon · 12:14"));
+        assert_eq!(about_sun_time("vespers", "5:19 PM").as_deref(), Some("sunset · 5:19 pm"));
+        assert_eq!(about_time_spoken("sunrise · 6:48 am"), "sunrise, 6:48 am");
+        assert_eq!(about_time_spoken("about 7 am"), "about 7 am");
+        // No longer in the readout than the longest of the table's own, with its "Now · ".
+        let longest = ABOUT_HOURS.iter().flat_map(|(_, h)| h.iter().map(|(_, t)| t.chars().count())).max().unwrap();
+        for (slug, _) in ABOUT_SUN_HOURS {
+            assert!(about_sun_time(slug, "12:59 PM").unwrap().chars().count() <= longest + 3, "{slug}");
+        }
         assert_eq!(about_sun_time("compline", "9:00 PM"), None);
         assert_eq!(about_sun_time("lauds", " "), None);
         // The six the sun times are the table's own, in its order.
