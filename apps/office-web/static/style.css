@@ -3994,7 +3994,6 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
   :root:not([data-theme="light"]) .date-picker-day.day-color-violet,
   :root:not([data-theme="light"]) .month-course-pin.day-color-violet { --day-color: #8d62ad; }
   :root:not([data-theme="light"]) .ordo-color-key .day-color-black,
-  :root:not([data-theme="light"]) .date-picker-day.day-color-black,
   :root:not([data-theme="light"]) .month-course-pin.day-color-black { --day-color: #6a7380; }
 }
 :root[data-theme="dark"] .ordo-color-key .day-color-red,
@@ -4007,7 +4006,6 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
 :root[data-theme="dark"] .date-picker-day.day-color-violet,
 :root[data-theme="dark"] .month-course-pin.day-color-violet { --day-color: #8d62ad; }
 :root[data-theme="dark"] .ordo-color-key .day-color-black,
-:root[data-theme="dark"] .date-picker-day.day-color-black,
 :root[data-theme="dark"] .month-course-pin.day-color-black { --day-color: #6a7380; }
 /* Forced colours keep no pigment: the band and its key stand down, as the rails do. */
 @media (forced-colors: active) {

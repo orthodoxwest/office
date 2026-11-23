@@ -2310,28 +2310,41 @@ function plainClickOpensHere(e, link) {
   // The picker's marks (#953): a year's letters from /api/day-marks, a letter
   // a day from the first of January in the colour's ordo abbreviation, a
   // capital on a first-class feast (presentation::course::day_marks_code).
-  // Each year is asked for once a page; until it comes, and if it never does
-  // (offline, a year the server does not offer), the days are plain.
+  // A year is asked for when an open picker first shows it, never on a page
+  // whose picker stays shut; until it comes the days are plain. A request
+  // that fails (offline, a year the server does not offer) may be asked
+  // again half a minute on.
   var MARK_COLORS = { w: "white", r: "red", g: "green", v: "violet", b: "black", p: "rose" };
+  var MARK_RETRY_MS = 30000;
   var dayMarks = {};
   var FIRST_CLASS_WORDS = "first-class feast";
 
   function yearMarks(year, arrived) {
-    if (Object.prototype.hasOwnProperty.call(dayMarks, year)) {
-      return typeof dayMarks[year] === "string" ? dayMarks[year] : null;
+    var held = dayMarks[year];
+    if (typeof held === "string") {
+      return held;
     }
-    dayMarks[year] = null;
+    // A number: in flight (0) or failed, and not to be asked again until then.
+    if (typeof held === "number" && (held === 0 || Date.now() < held)) {
+      return null;
+    }
     if (typeof fetch !== "function") {
       return null;
     }
+    dayMarks[year] = 0;
+    var failed = function () {
+      dayMarks[year] = Date.now() + MARK_RETRY_MS;
+    };
     fetch("/api/day-marks/" + year, { credentials: "same-origin" }).then(function (resp) {
       return resp.ok ? resp.json() : null;
     }).then(function (data) {
       if (data && data.year === year && typeof data.days === "string") {
         dayMarks[year] = data.days;
         arrived(year);
+      } else {
+        failed();
       }
-    }).catch(function () {});
+    }).catch(failed);
     return null;
   }
 
@@ -2483,6 +2496,9 @@ function plainClickOpensHere(e, link) {
     // Lays the year's marks on the days shown, in place, so marks that
     // arrive while a day has focus do not take it away.
     function markDays() {
+      if (!details.open) {
+        return;
+      }
       var year = state.focus.getUTCFullYear();
       var code = yearMarks(year, function (arrivedYear) {
         if (state.focus.getUTCFullYear() === arrivedYear) {
@@ -2675,6 +2691,8 @@ function plainClickOpensHere(e, link) {
         reset();
         if (drawing() !== drawn) {
           render();
+        } else {
+          markDays();
         }
       }
     });

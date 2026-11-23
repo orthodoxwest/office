@@ -4162,7 +4162,15 @@ test("home's date picker opens the chosen day's home", async ({ page }) => {
 // The picker marks each day with a hairline of its colour and gilds the
 // first-class feasts (#953), so the month's shape shows with no words added.
 test("the date picker marks each day's colour and gilds first-class feasts", async ({ page }) => {
+  // The marks are asked for only when the picker opens.
+  const asked = [];
+  page.on("request", req => {
+    if (req.url().includes("/api/day-marks/")) {
+      asked.push(req.url());
+    }
+  });
   await openDatedPage(page, `/lauds/${testDate}`);
+  expect(asked).toEqual([]);
   await page.locator("button.hour-meta-date").click();
   const picker = page.getByRole("group", { name: "Choose a date" });
   const day = slug => picker.locator(`.date-picker-day[data-date="${slug}"]`);
@@ -4179,7 +4187,8 @@ test("the date picker marks each day's colour and gilds first-class feasts", asy
     return { height: after.height, background: after.backgroundColor };
   });
   expect(hairline.height).toBe("2px");
-  expect(hairline.background).not.toBe("rgba(0, 0, 0, 0)");
+  // Lent's violet, the ordo rails' own (.day-color-violet).
+  expect(hairline.background).toBe("rgb(106, 58, 138)");
   // Next month: Good Friday black and plain, Pascha gilt.
   await picker.getByRole("button", { name: "Next month" }).click();
   await expect(day("2026-04-10")).toHaveAttribute("data-color", "black");
