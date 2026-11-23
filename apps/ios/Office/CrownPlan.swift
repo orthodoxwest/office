@@ -81,6 +81,7 @@ struct CrownFigures {
     let skyPeach: Pigment
     let skyTeal: Pigment
     let crossEmber: Pigment
+    let crossEmberVeiled: Pigment
     /// The cross's answer to the hand, in real ms from the tap (not slowed by `pace`): it gives to
     /// `crossPress` of its size and back in `crossPressLen`, catches the light (brightest
     /// `crossCatchPeak` of the way through `crossCatchLen`), and at dusk takes its ember gold in
@@ -171,6 +172,7 @@ extension CrownFigures {
             skyPeach: Pigment(p.skyPeach),
             skyTeal: Pigment(p.skyTeal),
             crossEmber: Pigment(p.crossEmber),
+            crossEmberVeiled: Pigment(p.crossEmberVeiled),
             crossPress: Double(p.crossPress),
             crossPressLen: Double(p.crossPressLen),
             crossCatchLen: Double(p.crossCatchLen),

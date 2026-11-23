@@ -59,7 +59,11 @@ final class CoreTests: XCTestCase {
         XCTAssertTrue(zip(hours, hours.dropFirst()).allSatisfy { $0.angle > $1.angle })
         XCTAssertFalse(page.specimen.aloneVersicle.isEmpty)
         XCTAssertFalse(page.specimen.priestVersicle.isEmpty)
+        XCTAssertFalse(page.specimen.deaconNote.isEmpty)
+        XCTAssertFalse(page.specimen.priestNote.isEmpty)
         XCTAssertEqual(page.ordoColors.count, 6)
+        XCTAssertEqual(ordoColors().count, 6)
+        XCTAssertEqual(dayNameGloss(name: "Feria")?.term, "Feria")
         let links = page.blocks.flatMap(\.runs).map(\.link).filter { !$0.isEmpty }
         XCTAssertFalse(links.isEmpty)
         for link in links {

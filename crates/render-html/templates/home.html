@@ -38,7 +38,7 @@
         {# A familiar name the ordo gives in parentheses ("(Corpus Christi)")
            is set apart from the name, so it is kept whole and, when the two
            cannot share a line, takes the next line of its own. #}
-        {% if feast_name %}<p class="feast{% if feast_alias %} has-alias{% endif %}">{% if feast_href %}<a class="feast-link" href="{{ feast_href|url }}" title="About this feast">{% endif %}{% if feast_alias %}<span class="feast-name">{{ feast_name|typeset }}</span> <span class="feast-alias">{{ feast_alias|typeset }}</span>{% else %}{{ feast_name|typeset }}{% endif %}{% if feast_href %}</a>{% endif %}</p>{% endif %}
+        {% if feast_name %}{% set dg = "" if feast_href else (feast_name|day_name_gloss) %}<p class="feast{% if feast_alias %} has-alias{% endif %}">{% if feast_href %}<a class="feast-link" href="{{ feast_href|url }}" title="About this feast">{% elif dg %}<span class="gloss-quiet" data-gloss-title="{{ dg.title }}" data-gloss="{{ dg.note }}">{% endif %}{% if feast_alias %}<span class="feast-name">{{ feast_name|typeset }}</span> <span class="feast-alias">{{ feast_alias|typeset }}</span>{% else %}{{ feast_name|typeset }}{% endif %}{% if feast_href %}</a>{% elif dg %}</span>{% endif %}</p>{% endif %}
         {% if octave_note %}<p class="octave-note"><span class="gloss-quiet" data-gloss-title="{{ octave_gloss.title }}" data-gloss="{{ octave_gloss.note }}">{{ octave_note }}</span></p>{% endif %}
         {% if penitential %}
         <p class="penitential">

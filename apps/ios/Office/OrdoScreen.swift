@@ -280,6 +280,8 @@ private struct OrdoHeader: View {
     let course: [CourseMonthView]?
     /// How much of the year's course the frontispiece's stroke has uncovered, 0 to 1.
     var laid: Double = 1
+    var selectedColor: String? = nil
+    var rareColors: Set<String> = []
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
@@ -406,7 +408,9 @@ private struct OrdoHeader: View {
                                 band: course.flatMap { mo - 1 < $0.count ? $0[mo - 1] : nil },
                                 today: todays ? Int(t.day) : nil,
                                 index: mo - 1,
-                                stroke: laid
+                                stroke: laid,
+                                selectedColor: selectedColor,
+                                rareColors: rareColors
                             )
                         }
                     }
@@ -431,6 +435,8 @@ private struct CourseBand: View, Animatable {
     let today: Int?
     let index: Int
     var stroke: Double
+    var selectedColor: String? = nil
+    var rareColors: Set<String> = []
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
     @Environment(\.displayScale) private var scale
@@ -443,6 +449,8 @@ private struct CourseBand: View, Animatable {
     var body: some View {
         let laid = CGFloat(min(1, max(0, stroke * 12 - Double(index))))
         let (band, today, p, scale, r) = (band, today, p, scale, m.px(2.5))
+        let sel = selectedColor
+        let rare = rareColors
         Canvas { ctx, size in
             let snap = { (v: CGFloat) in (v * scale).rounded() / scale }
             let top = snap(1), height = snap(3), hair = 1 / scale
@@ -454,15 +462,26 @@ private struct CourseBand: View, Animatable {
                 for run in band.runs {
                     let x0 = snap(size.width * CGFloat(run.start) / span)
                     let x1 = snap(size.width * CGFloat(run.start + run.days) / span)
-                    if x1 > x0 { ctx.fill(Path(CGRect(x: x0, y: top, width: x1 - x0, height: height)), with: .color(titleColor(run.color, p))) }
+                    let alpha = (sel == nil || sel == run.color) ? 1.0 : 0.16
+                    if x1 > x0 { ctx.fill(Path(CGRect(x: x0, y: top, width: x1 - x0, height: height)), with: .color(titleColor(run.color, p).opacity(alpha))) }
                 }
             }
         }
         .overlay {
-            if let today {
-                // The web's 0.22rem square turned on its point, centred 7.5pt under the cell.
+            if today != nil || (sel != nil && rare.contains(sel!)) {
                 Canvas { ctx, size in
-                    ctx.fill(lozenge(CGPoint(x: size.width * CGFloat(coursePlace(day: Int32(today))), y: 7.5), r), with: .color(p.gold))
+                    if let band, let sel, rare.contains(sel) {
+                        let span = CGFloat(courseSpan())
+                        let pinCol = ordoRibbonColor(sel, p)
+                        for run in band.runs where run.color == sel {
+                            let midX = size.width * (CGFloat(run.start) + CGFloat(run.days) / 2.0) / span
+                            ctx.fill(lozenge(CGPoint(x: midX, y: 7.5), m.px(2.4)), with: .color(pinCol))
+                        }
+                    }
+                    if let today {
+                        // The web's 0.22rem square turned on its point, centred 7.5pt under the cell.
+                        ctx.fill(lozenge(CGPoint(x: size.width * CGFloat(coursePlace(day: Int32(today))), y: 7.5), r), with: .color(p.gold))
+                    }
                 }
             }
         }
@@ -1149,6 +1168,8 @@ private struct Digest: View {
  * A year's frontispiece, as the web's /calendar/{year}: the title page, the month strip, and the
  * Tabula Temporaria. Each date leads to its day in the ordo.
  */
+private let ordoColorLegend: [AboutOrdoColorView] = ordoColors()
+
 struct OrdoYearScreen: View {
     let view: OrdoYearView
     /// The year's course, once the engine has it.
@@ -1161,12 +1182,29 @@ struct OrdoYearScreen: View {
     /// The stroke that lays the course in, the first time a frontispiece shows it this launch
     /// (`AppModel.courseLaid`); under Reduce Motion, or after, the band is simply there.
     @State private var laid: Double?
+    @State private var selectedColor: String?
 
     var body: some View {
+        let rare = rareCourseColors(course)
         ScrollView {
             VStack(spacing: 0) {
                 SiteHeader()
-                OrdoHeader(year: Int(view.year), month: nil, roman: view.roman, course: course, laid: laid ?? (model.courseLaid ? 1 : 0)).ordoColumn(m, wide: wide).padding(.top, m.px(17.6))
+                OrdoHeader(
+                    year: Int(view.year),
+                    month: nil,
+                    roman: view.roman,
+                    course: course,
+                    laid: laid ?? (model.courseLaid ? 1 : 0),
+                    selectedColor: selectedColor,
+                    rareColors: rare
+                ).ordoColumn(m, wide: wide).padding(.top, m.px(17.6))
+                OrdoColorKey(
+                    colors: ordoColorLegend,
+                    course: course,
+                    year: view.year,
+                    selected: selectedColor,
+                    onSelect: { slug in selectedColor = selectedColor == slug ? nil : slug }
+                ).ordoColumn(m, wide: wide).padding(.top, m.px(12))
                 SearchEntry { model.open(.find("")) }.ordoColumn(m, wide: wide).padding(.top, m.px(8))
                 VStack(spacing: 0) {
                     TabulaHeading()
@@ -1189,6 +1227,9 @@ struct OrdoYearScreen: View {
                 Footer()
             }
         }
+        .onChange(of: view.year) { _, _ in
+            selectedColor = nil
+        }
         .onChange(of: course != nil, initial: true) { _, has in
             guard has, !model.courseLaid else { return }
             model.courseLaid = true
@@ -1199,6 +1240,49 @@ struct OrdoYearScreen: View {
             let (x1, y1, x2, y2) = Tempo.courseLayCurve
             withAnimation(.timingCurve(x1, y1, x2, y2, duration: Double(Tempo.courseLay) / 1000)) { laid = 1 }
         }
+    }
+}
+
+/// Six-diamond liturgical colour key for the Ordo year frontispiece, mirroring About's legend.
+private struct OrdoColorKey: View {
+    let colors: [AboutOrdoColorView]
+    let course: [CourseMonthView]?
+    let year: Int32
+    let selected: String?
+    let onSelect: (String) -> Void
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            MetaLine(space: m.px(14)) {
+                ForEach(Array(colors.enumerated()), id: \.offset) { _, c in
+                    let isSelected = selected == c.slug
+                    Button { onSelect(c.slug) } label: {
+                        HStack(spacing: 5.5) {
+                            Rectangle().fill(ordoRibbonColor(c.slug, p)).frame(width: 5.5, height: 5.5).rotationEffect(.degrees(45))
+                            Text(c.name).type(Scale.body.sized(13.76, line: 18)).foregroundStyle(isSelected ? p.text : p.muted)
+                        }
+                        .padding(.vertical, 3)
+                        .overlay(alignment: .bottom) {
+                            if isSelected { Rectangle().fill(p.gold).frame(height: 1.5) }
+                        }
+                    }
+                    .buttonStyle(Quiet())
+                    .accessibilityLabel("\(c.name): \(c.meaning)")
+                    .accessibilityAddTraits(isSelected ? .isSelected : [])
+                }
+            }
+            if let active = colors.first(where: { $0.slug == selected }) {
+                let note = (course.map { !$0.isEmpty ? colorDaysNote(course: $0, color: active.slug, year: year) : "" }) ?? ""
+                let line = "\(active.name) — \(active.meaning)" + (note.isEmpty ? "" : " (\(note))")
+                Text(line)
+                    .type(Scale.bodyItalic.sized(14.4, line: 20))
+                    .foregroundStyle(p.muted)
+                    .padding(.top, m.px(6))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

@@ -48,6 +48,36 @@ pub fn course_place_percent(day: u32) -> String {
     format!("{:.3}%", course_place(day) * 100.0)
 }
 
+/// Rare-day threshold for the liturgical color ribbon: colors with at most this many days in the
+/// year (Rose: Gaudete & Laetare; Black: Good Friday & All Souls) get subtle diamond pins when
+/// selected and name their dates in the legend note.
+pub const RARE_COLOR_MAX_DAYS: u32 = 6;
+
+/// Short parenthetical note for a liturgical color across `months` in `year`: dates for rare colors
+/// ("Mar 15, Dec 13"), or day count for frequent ones ("92 days in 2026"). Empty if no days match.
+pub fn color_days_note(months: &[Vec<CourseRun>], color: Color, year: i32) -> String {
+    let mut total: u32 = 0;
+    let mut dates: Vec<String> = Vec::new();
+    for (mi, runs) in months.iter().enumerate() {
+        let abbr = crate::MONTHS.get(mi).map(|m| &m[..3]).unwrap_or("");
+        for r in runs {
+            if r.color != color {
+                continue;
+            }
+            total += r.days;
+            if total <= RARE_COLOR_MAX_DAYS {
+                for offset in 0..r.days {
+                    dates.push(format!("{abbr} {}", r.start + offset + 1));
+                }
+            }
+        }
+    }
+    if total == 0 {
+        return String::new();
+    }
+    if total <= RARE_COLOR_MAX_DAYS { dates.join(", ") } else { format!("{total} days in {year}") }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -58,5 +88,16 @@ mod tests {
         assert_eq!(course_place_percent(13), "40.323%");
         assert_eq!(course_place_percent(31), "98.387%");
         assert_eq!(course_place(0), course_place(1));
+    }
+
+    #[test]
+    fn rare_colors_name_their_dates_and_frequent_colors_count_days() {
+        let mut months: Vec<Vec<CourseRun>> = vec![Vec::new(); 12];
+        months[2].push(CourseRun { start: 14, days: 1, color: Color::Rose });
+        months[11].push(CourseRun { start: 12, days: 1, color: Color::Rose });
+        months[0].push(CourseRun { start: 0, days: 20, color: Color::White });
+        assert_eq!(color_days_note(&months, Color::Rose, 2026), "Mar 15, Dec 13");
+        assert_eq!(color_days_note(&months, Color::White, 2026), "20 days in 2026");
+        assert_eq!(color_days_note(&months, Color::Black, 2026), "");
     }
 }

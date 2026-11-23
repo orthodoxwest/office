@@ -787,6 +787,7 @@ fn crown_plan_carries_presentations_figures() {
         assert_eq!((plan.dawn_field_out, plan.dawn_star_linger, plan.star_over), (c::DAWN_FIELD_OUT, c::DAWN_STAR_LINGER, c::STAR_OVER));
         assert_eq!((plan.beat_hold, plan.beat_len), (c::BEAT_HOLD, c::BEAT_LEN));
         assert_eq!([plan.cross_ember.r, plan.cross_ember.g, plan.cross_ember.b], c::CROSS_EMBER);
+        assert_eq!([plan.cross_ember_veiled.r, plan.cross_ember_veiled.g, plan.cross_ember_veiled.b], c::CROSS_EMBER_VEILED);
         assert_eq!([plan.veil_ink.r, plan.veil_ink.g, plan.veil_ink.b], play.veil_ink);
         assert_eq!((plan.veil_peak, plan.ink_at), (play.veil_peak, play.ink_at));
         let g = plan.glow_ease;
@@ -861,4 +862,27 @@ fn the_apps_read_whether_an_hour_ends_bare() {
     assert!(souls.bare && souls.end_bare);
     let plain = hour("vespers", 10, 31);
     assert!(!plain.bare && !plain.end_bare);
+}
+
+#[test]
+fn subtle_details_exports_match_presentation() {
+    let core = OfficeCore::new().unwrap();
+    assert_eq!(crate::day_name_gloss("Feria".into()).unwrap().term, "Feria");
+    assert_eq!(crate::day_name_gloss("Advent feria".into()).unwrap().term, "Feria");
+    assert_eq!(crate::day_name_gloss("Vigil of the Nativity".into()).unwrap().term, "Vigil");
+    assert!(crate::day_name_gloss("The Nativity of Our Lord".into()).is_none());
+
+    let about = crate::about();
+    assert!(!about.specimen.deacon_note.is_empty());
+    assert!(!about.specimen.priest_note.is_empty());
+    assert_ne!(about.specimen.deacon_note, about.specimen.priest_note);
+    assert_eq!(about.ordo_colors.len(), 6);
+    assert_eq!(crate::ordo_colors().len(), 6);
+
+    let course = core.ordo_course(2026).unwrap();
+    let rose_note = crate::color_days_note(course.clone(), "rose".into(), 2026);
+    assert!(rose_note.contains("Mar") && rose_note.contains("Dec"), "expected Rose dates, got: {rose_note}");
+    let green_note = crate::color_days_note(course, "green".into(), 2026);
+    assert!(green_note.contains("days in 2026"), "expected day count in 2026, got: {green_note}");
+    assert_eq!(crate::rare_color_max_days(), presentation::course::RARE_COLOR_MAX_DAYS);
 }

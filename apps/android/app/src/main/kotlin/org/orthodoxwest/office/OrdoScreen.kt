@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -59,6 +60,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -72,11 +74,13 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -103,6 +107,7 @@ import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
+import org.orthodoxwest.office.core.AboutOrdoColorView
 import org.orthodoxwest.office.core.CommemorationView
 import org.orthodoxwest.office.core.CourseMonthView
 import org.orthodoxwest.office.core.GlossView
@@ -110,10 +115,13 @@ import org.orthodoxwest.office.core.OrdoDayView
 import org.orthodoxwest.office.core.OrdoMonthView
 import org.orthodoxwest.office.core.OrdoYearView
 import org.orthodoxwest.office.core.TabulaRowView
+import org.orthodoxwest.office.core.colorDaysNote
 import org.orthodoxwest.office.core.coursePlace
 import org.orthodoxwest.office.core.courseSpan
 import org.orthodoxwest.office.core.emberDaysGloss
+import org.orthodoxwest.office.core.ordoColors
 import org.orthodoxwest.office.core.ordoDetailGlosses
+import org.orthodoxwest.office.core.rareColorMaxDays
 import org.orthodoxwest.office.core.vespersNoteGloss
 
 /** One month of the ordo, as the web's month page: year and month navigation, then the days. */
@@ -292,6 +300,8 @@ private fun OrdoHeader(
     onToday: () -> Unit,
     onYear: (Int) -> Unit,
     modifier: Modifier,
+    selectedColor: String? = null,
+    rareColors: Set<String> = emptySet(),
 ) {
     val p = LocalPalette.current
     val wide = LocalWide.current
@@ -362,7 +372,12 @@ private fun OrdoHeader(
                                 style = Type.label(12.48f, 0.06f).copy(color = if (current) p.accent else p.muted),
                             )
                         }
-                        CourseBand(course?.getOrNull(m.value - 1), if (todays) today.dayOfMonth else null) { (laid() * 12f - (m.value - 1)).coerceIn(0f, 1f) }
+                        CourseBand(
+                            course?.getOrNull(m.value - 1),
+                            if (todays) today.dayOfMonth else null,
+                            selectedColor = selectedColor,
+                            rareColors = rareColors,
+                        ) { (laid() * 12f - (m.value - 1)).coerceIn(0f, 1f) }
                     }
                 }
             }
@@ -404,7 +419,13 @@ private fun OrdoHeader(
  * uncovered (0 to 1), read as it draws.
  */
 @Composable
-private fun CourseBand(band: CourseMonthView?, today: Int?, laid: () -> Float) {
+private fun CourseBand(
+    band: CourseMonthView?,
+    today: Int?,
+    selectedColor: String? = null,
+    rareColors: Set<String> = emptySet(),
+    laid: () -> Float,
+) {
     val p = LocalPalette.current
     Canvas(Modifier.fillMaxWidth().height(11.dp)) {
         val top = 1.dp.toPx().roundToInt().toFloat()
@@ -418,7 +439,17 @@ private fun CourseBand(band: CourseMonthView?, today: Int?, laid: () -> Float) {
                 for (r in band.runs) {
                     val x0 = (size.width * r.start / span).roundToInt().toFloat()
                     val x1 = (size.width * (r.start + r.days) / span).roundToInt().toFloat()
-                    if (x1 > x0) drawRect(railColor(r.color, p), Offset(x0, top), Size(x1 - x0, height))
+                    val alpha = if (selectedColor == null || selectedColor == r.color) 1f else 0.16f
+                    if (x1 > x0) drawRect(railColor(r.color, p).copy(alpha = alpha), Offset(x0, top), Size(x1 - x0, height))
+                }
+            }
+            if (selectedColor != null && selectedColor in rareColors) {
+                val pinCol = ribbonColor(selectedColor, p)
+                for (r in band.runs) {
+                    if (r.color == selectedColor) {
+                        val midX = size.width * (r.start + r.days / 2f) / span
+                        lozenge(Offset(midX, 7.5.dp.toPx()), 2.4.dp.toPx(), pinCol, null)
+                    }
                 }
             }
         }
@@ -439,8 +470,8 @@ private const val FIRST_DAY_ITEM = 6
 
 /**
  * A year's frontispiece, as the web's /calendar/{year}: the title page, the month strip with the
- * year's course under it (`course`, from the engine once it has it), and the Tabula Temporaria.
- * Each date leads to its day in the ordo.
+ * year's course under it (`course`, from the engine once it has it), an interactive colour key,
+ * and the Tabula Temporaria. Each date leads to its day in the ordo.
  */
 @Composable
 fun OrdoYearScreen(
@@ -458,6 +489,17 @@ fun OrdoYearScreen(
 ) {
     val p = LocalPalette.current
     val emberGloss = remember { emberDaysGloss() }
+    val colors = remember { ordoColors() }
+    var selectedColor by rememberSaveable(view.year) { mutableStateOf<String?>(null) }
+    val rareColors = remember(course) {
+        if (course == null) emptySet()
+        else {
+            val maxDays = rareColorMaxDays().toInt()
+            val totals = mutableMapOf<String, Int>()
+            course.forEach { m -> m.runs.forEach { r -> totals[r.color] = (totals[r.color] ?: 0) + r.days } }
+            totals.filterValues { it in 1..maxDays }.keys
+        }
+    }
     val listState = rememberSaveable(view.year, saver = LazyListState.Saver) { LazyListState() }
     // The year's course is laid in by one stroke across the twelve months, the first time a
     // frontispiece shows it this launch (the web's once a session); with animations off the
@@ -476,7 +518,32 @@ fun OrdoYearScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item(key = "chrome") { chrome() }
-        item(key = "header") { OrdoHeader(view.year, null, view.roman, course, today, { stroke.value }, onMonth, onToday, onYear, ordoColumn().padding(top = 17.6.dp)) }
+        item(key = "header") {
+            OrdoHeader(
+                view.year,
+                null,
+                view.roman,
+                course,
+                today,
+                { stroke.value },
+                onMonth,
+                onToday,
+                onYear,
+                ordoColumn().padding(top = 17.6.dp),
+                selectedColor = selectedColor,
+                rareColors = rareColors,
+            )
+        }
+        item(key = "color-key") {
+            OrdoColorKey(
+                colors = colors,
+                course = course,
+                year = view.year,
+                selected = selectedColor,
+                onSelect = { slug -> selectedColor = if (selectedColor == slug) null else slug },
+                modifier = ordoColumn().padding(top = 12.dp),
+            )
+        }
         item(key = "find") { SearchEntry(onFind, ordoColumn().padding(top = 8.dp)) }
         item(key = "tabula") {
             Column(ordoColumn().padding(top = 40.dp)) {
@@ -496,6 +563,61 @@ fun OrdoYearScreen(
             }
         }
         item(key = "footer") { Footer() }
+    }
+}
+
+/** Six-diamond liturgical colour key for the Ordo year frontispiece, mirroring About's legend. */
+@Composable
+private fun OrdoColorKey(
+    colors: List<AboutOrdoColorView>,
+    course: List<CourseMonthView>?,
+    year: Int,
+    selected: String?,
+    onSelect: (String) -> Unit,
+    modifier: Modifier,
+) {
+    val p = LocalPalette.current
+    Column(modifier) {
+        FlowRow(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            colors.forEach { c ->
+                val isSelected = selected == c.slug
+                Row(
+                    Modifier
+                        .tap(selected = isSelected, label = "${c.name}: ${c.meaning}") { onSelect(c.slug) }
+                        .drawBehind {
+                            if (isSelected) {
+                                val y = size.height - 0.75.dp.toPx()
+                                drawLine(p.gold, Offset(0f, y), Offset(size.width, y), 1.5.dp.toPx())
+                            }
+                        }
+                        .padding(vertical = 3.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.5.dp),
+                ) {
+                    Box(Modifier.size(5.5.dp).rotate(45f).background(ribbonColor(c.slug, p)))
+                    Text(
+                        c.name,
+                        style = Type.body.copy(fontSize = 13.76.sp, lineHeight = 18.sp, color = if (isSelected) p.text else p.muted),
+                    )
+                }
+            }
+        }
+        val active = colors.firstOrNull { it.slug == selected }
+        if (active != null) {
+            val note = remember(course, active.slug, year) {
+                if (!course.isNullOrEmpty()) colorDaysNote(course, active.slug, year) else ""
+            }
+            val line = "${active.name} — ${active.meaning}" + if (note.isNotEmpty()) " ($note)" else ""
+            Text(
+                line,
+                Modifier.padding(top = 6.dp).semantics { liveRegion = LiveRegionMode.Polite },
+                style = Type.body.copy(fontSize = 14.4.sp, lineHeight = 20.sp, color = p.muted, fontStyle = FontStyle.Italic),
+            )
+        }
     }
 }
 

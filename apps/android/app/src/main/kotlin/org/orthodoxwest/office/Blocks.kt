@@ -156,10 +156,9 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
             else GlossedText(runs(block), block, open, { open = it }, Modifier.fillMaxWidth(), style)
         }
         BlockKind.ITEM_LABEL -> ItemLabel(block, glossed.isNotEmpty(), open, { open = it }, m.fillMaxWidth(), Type.itemLabel.copy(color = p.titulus))
-        BlockKind.LATIN_TITLE, BlockKind.CANTICLE_SECTION -> Text(
-            runs(block),
+        BlockKind.LATIN_TITLE, BlockKind.CANTICLE_SECTION -> rubricText(
             m.fillMaxWidth(),
-            style = text.copy(color = p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center),
+            text.copy(color = p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center),
         )
         BlockKind.CHAPTER_REF, BlockKind.SCRIPTURE_REF -> Text(runs(block), m.fillMaxWidth(), style = Type.reference.copy(color = p.rubric))
         BlockKind.RUBRIC -> rubricText(m.fillMaxWidth(), Type.rubric.copy(color = p.rubric))

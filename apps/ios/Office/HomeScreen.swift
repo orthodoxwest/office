@@ -611,7 +611,13 @@ private struct Frontispiece: View {
                 // The day's feast leads to its page, underlined as the web's `.feast-link`.
                 Group {
                     if view.feastId.isEmpty {
-                        FeastName(name: view.feastName, alias: view.feastAlias, style: tier.feast)
+                        if let dg = dayNameGloss(name: view.feastName) {
+                            GlossMark(gloss: dg, label: view.feastName, reaches: false) {
+                                FeastName(name: view.feastName, alias: view.feastAlias, style: tier.feast)
+                            }
+                        } else {
+                            FeastName(name: view.feastName, alias: view.feastAlias, style: tier.feast)
+                        }
                     } else {
                         Button { model.open(.feast(view.feastId)) } label: {
                             FeastName(name: view.feastName, alias: view.feastAlias, style: tier.feast, linked: true)

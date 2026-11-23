@@ -8,7 +8,9 @@ import org.orthodoxwest.office.core.CivilDate
 import org.orthodoxwest.office.core.about
 import org.orthodoxwest.office.core.aboutNewcomer
 import org.orthodoxwest.office.core.aboutNow
+import org.orthodoxwest.office.core.dayNameGloss
 import org.orthodoxwest.office.core.hourNames
+import org.orthodoxwest.office.core.ordoColors
 
 /** About the Office as the core gives it: the page AboutScreen sets, and the first week home offers it in. */
 class AboutTest {
@@ -26,7 +28,11 @@ class AboutTest {
         assertEquals(1, view.blocks.count { it.kind == "specimen" })
         assertEquals(1, view.blocks.count { it.kind == "ordo_ribbon" })
         assertEquals(6, view.ordoColors.size)
+        assertEquals(6, ordoColors().size)
         assertTrue(view.specimen.rubric.isNotBlank())
+        assertTrue(view.specimen.deaconNote.isNotBlank())
+        assertTrue(view.specimen.priestNote.isNotBlank())
+        assertEquals("Feria", dayNameGloss("Feria")?.term)
     }
 
     /** AboutScreen opens the ordo and the reminders itself, and leaves the rest to the browser. */

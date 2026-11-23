@@ -133,6 +133,7 @@ impl Pages {
         env.add_global("versicle_gloss", gloss_value(&presentation::gloss::VERSICLE_GLOSS));
         env.add_filter("vespers_note_gloss", |s: String| presentation::gloss::vespers_note_gloss(&s).map(gloss_value));
         env.add_filter("season_gloss", |s: String| presentation::gloss::season_gloss(&s).map(gloss_value));
+        env.add_filter("day_name_gloss", |s: String| presentation::gloss::day_name_gloss(&s).map(gloss_value));
         env.add_filter("penitential_gloss", |s: String| presentation::gloss::penitential_gloss(&s).map(gloss_value));
         env.add_filter("rank_gloss", |s: String| presentation::gloss::rank_gloss(&s).map(gloss_value));
         env.add_filter("feast_text_gloss", |s: String| presentation::gloss::feast_text_gloss(&s).map(gloss_value));

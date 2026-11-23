@@ -454,7 +454,7 @@ fn psalm_label_carries_latin_incipit() {
             "<h3 class=\"item-label\">Psalm <span class=\"psalm-num\">66\u{a0}",
             "<span class=\"psalm-heb gloss-quiet\" data-gloss-title=\"Psalm numbering\" data-gloss=\"The first number follows the traditional Septuagint and Vulgate psalter; the number in parentheses follows the Hebrew and King James numbering.\">(67)</span></span>",
             "<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}·</span> ",
-            r#"<span class="psalm-incipit" lang="la">Deus misereatur nostri</span></h3>"#
+            "<span class=\"psalm-incipit gloss-quiet\" lang=\"la\" data-gloss-title=\"Latin incipit\" data-gloss=\"The traditional Latin opening words by which this psalm or canticle is known in the Western Office.\">Deus misereatur nostri</span></h3>"
         ),
     );
     // Canticles are labeled by their incipit too.
@@ -463,7 +463,10 @@ fn psalm_label_carries_latin_incipit() {
     e.incipit = "Magnificat anima mea Dominum".into();
     let html = render_section_elements(&[e]);
     has(&html, r#"<div class="canticle">"#);
-    has(&html, r#"<span class="psalm-incipit" lang="la">Magnificat anima mea Dominum</span>"#);
+    has(
+        &html,
+        "<span class=\"psalm-incipit gloss-quiet\" lang=\"la\" data-gloss-title=\"Latin incipit\" data-gloss=\"The traditional Latin opening words by which this psalm or canticle is known in the Western Office.\">Magnificat anima mea Dominum</span>",
+    );
     // Without a recorded incipit there is no empty span or orphaned separator.
     let html = render_section_elements(&[psalm_67("")]);
     has(

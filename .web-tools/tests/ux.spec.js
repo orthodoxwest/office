@@ -5474,11 +5474,13 @@ test("the installed web app reports itself apart from a browser tab", async ({ p
 
 // The device keeps only the day it first opened the Office; the beacon says first or returning.
 test("a browser is new on the day it first opens the Office and returning after", async ({ page }) => {
+  // A fixed day: run across a real midnight, the first day would turn returning between visits.
+  await page.clock.setFixedTime(new Date("2026-03-18T12:00:00-04:00"));
   const events = [];
   await captureUsage(page, events);
   const visit = async () => {
     events.length = 0;
-    await page.goto(`/?date=${easternDay()}`);
+    await page.goto("/?date=2026-03-18");
     await engage(page);
     await expect.poll(() => events.length).toBe(1);
     // Leave for a page that never reports before the test changes storage: a beacon still
@@ -5501,15 +5503,18 @@ test("a browser is new on the day it first opens the Office and returning after"
 test("a browser opens its week and month on the first day it is counted in them", async ({ page }) => {
   const events = [];
   let online = true;
+  // A fixed Wednesday, so the week began earlier in the same month, and no real midnight (or a
+  // Monday's) turns the week between visits.
+  const today = "2026-03-18";
+  await page.clock.setFixedTime(new Date(`${today}T12:00:00-04:00`));
   await captureUsage(page, events, () => (online ? 204 : 503));
   const visit = async () => {
     events.length = 0;
-    await page.goto(`/?date=${easternDay()}`);
+    await page.goto(`/?date=${today}`);
     await engage(page);
     await expect.poll(() => events.length).toBe(1);
     return events[0].match(/week:\w+ month:\w+/)[0];
   };
-  const today = easternDay();
   const kept = () => page.evaluate(() => [localStorage.getItem("office-counted"), localStorage.getItem("office-counted-before")]);
   // A beacon the server did not count opens nothing.
   online = false;
@@ -5529,12 +5534,10 @@ test("a browser opens its week and month on the first day it is counted in them"
     await page.goto("/privacy");
     await page.evaluate((d) => { localStorage.setItem("office-counted", d); localStorage.removeItem("office-counted-before"); }, day);
   };
-  if (weekStart !== today && weekStart.slice(0, 7) === today.slice(0, 7)) {
-    await earlier(weekStart);
-    expect(await visit()).toBe("week:again month:again");
-    await expect.poll(kept).toEqual([today, weekStart]);
-    expect(await visit()).toBe("week:again month:again");
-  }
+  await earlier(weekStart);
+  expect(await visit()).toBe("week:again month:again");
+  await expect.poll(kept).toEqual([today, weekStart]);
+  expect(await visit()).toBe("week:again month:again");
   // Last counted a year ago: a new week and a new month.
   await earlier(`${Number(today.slice(0, 4)) - 1}${today.slice(4)}`.replace(/-02-29$/, "-02-28"));
   expect(await visit()).toBe("week:first month:first");
@@ -7517,4 +7520,94 @@ test("mobile screen readers hear clean liturgical marks, inert menu backdrop, an
   await expect(page.locator(".month-table abbr.day-mobile-rank[role='button']").first()).toHaveAttribute("aria-label", /Double|Class|Feria|Simple/i);
   await expect(page.locator(".month > h2").first()).toHaveAttribute("aria-label", "March");
 });
+
+test("subtle details: Horologium stars and keys, Specimen clergy note and reverse highlight, Ordo color key and pins, quiet glosses, and Passiontide veiling", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T15:00:00-04:00"));
+  await openDatedPage(page, "/about");
+
+  // 1. Horologium: parish multi-ray star paths (no circle dots), arrow-key nav, and clean SR separators.
+  expect(await page.locator(".about-horologium-stars path").count()).toBe(8);
+  expect(await page.locator(".about-horologium-stars circle").count()).toBe(0);
+  const firstStop = page.locator(".about-horologium-stop").first();
+  await firstStop.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "prime");
+  await expect(page.locator(".about-horologium-title em .sr-only")).toHaveText(", ");
+  await page.keyboard.press("End");
+  await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "compline");
+
+  // 2. Specimen leaf: Deacon vs Priest note and bidirectional line -> key illumination.
+  const specimen = page.locator(".about-specimen");
+  const formNote = specimen.locator(".about-specimen-form-note");
+  await expect(formNote).toBeHidden();
+  await specimen.locator('.about-specimen-opt[data-form="deacon"]').click();
+  await expect(formNote).toBeVisible();
+  const deaconNoteText = await formNote.textContent();
+  await specimen.locator('.about-specimen-opt[data-form="priest"]').click();
+  await expect(formNote).toBeVisible();
+  const priestNoteText = await formNote.textContent();
+  expect(deaconNoteText).not.toBe(priestNoteText);
+  await specimen.locator('.about-specimen-opt[data-form="private"]').click();
+  await expect(formNote).toBeHidden();
+
+  await specimen.locator(".about-specimen-rubric").click();
+  await expect(page.locator('.about-key-row[data-key="rubric"]')).toHaveClass(/is-active/);
+  await specimen.locator(".about-specimen-cross").click();
+  await expect(page.locator('.about-key-row[data-key="cross"]')).toHaveClass(/is-active/);
+  await specimen.locator(".about-specimen-cross").click();
+  await expect(page.locator('.about-key-row[data-key="cross"]')).not.toHaveClass(/is-active/);
+
+  // 3. About Ordo ribbon: 12 clickable month hits, rare Rose/Black pins, and year day-count/date note.
+  const ribbon = page.locator(".about-ordo-ribbon");
+  expect(await ribbon.locator(".about-ordo-month-hit").count()).toBe(12);
+  await expect(ribbon.locator(".about-ordo-month-hit").first()).toHaveAttribute("href", /^\/calendar\/\d{4}\/01$/);
+  await ribbon.locator('.about-ordo-swatch[data-color="rose"]').click();
+  await expect(ribbon.locator(".about-ordo-meaning")).toContainText("Mar 22");
+  // The pin fades in, so wait for the transition to settle rather than read it mid-fade.
+  await expect(ribbon.locator('.about-ordo-pin[data-color="rose"]').first()).toHaveCSS("opacity", "1");
+
+  // 4. Ordo year frontispiece interactive color key and rare-color course pins.
+  await page.goto("/calendar/2026");
+  await page.waitForLoadState("load");
+  const cal = page.locator(".calendar");
+  const ordoKey = cal.locator(".ordo-color-key");
+  await expect(ordoKey).toBeVisible();
+  await ordoKey.locator('.about-ordo-swatch[data-color="rose"]').click();
+  await expect(cal).toHaveAttribute("data-selected-color", "rose");
+  await expect(ordoKey.locator(".about-ordo-meaning")).toContainText("Mar 22");
+  await expect(cal.locator('.month-course-pin[data-color="rose"]').first()).toHaveCSS("opacity", "1");
+
+  // 5. Quiet glosses on Feria, named seasons, psalm incipits (non-tabbable), and Marian antiphons.
+  await page.goto("/?date=2026-09-22");
+  await page.waitForLoadState("load");
+  await page.locator(".feast .gloss-quiet").click();
+  await expect(page.locator("#gloss-note")).toContainText("Feria");
+
+  await page.goto("/compline/2026-03-15");
+  await page.waitForLoadState("load");
+  await page.locator(".hour-meta .gloss-quiet").first().click();
+  await expect(page.locator("#gloss-note")).toContainText("Lent");
+  const incipit = page.locator(".psalm-incipit.gloss-quiet").first();
+  await expect(incipit).not.toHaveAttribute("tabindex", "0");
+  await incipit.click();
+  await expect(page.locator("#gloss-note")).toContainText("Latin opening");
+  await page.locator(".marian-antiphon h3 .gloss-quiet").click();
+  await expect(page.locator("#gloss-note")).toContainText("Ave Regina");
+
+  // 6. Scrolling dismisses an open gloss popover on the Ordo month page.
+  await page.goto("/calendar/2026/03");
+  await page.waitForLoadState("load");
+  await page.locator(".calendar-title h1 .gloss-quiet").click();
+  await expect(page.locator("#gloss-note")).not.toHaveClass(/closed/);
+  await page.evaluate(() => window.scrollBy(0, 260));
+  await expect(page.locator("#gloss-note")).toHaveClass(/faded/);
+
+  // 7. Passiontide veiling: matte end-mark (no gild.png foil) and veiled cross-ember token.
+  await page.goto("/lauds/2026-03-30");
+  await page.waitForLoadState("load");
+  await expect(page.locator("body")).toHaveClass(/season-passiontide/);
+  const endBg = await page.locator(".hour-end-mark").evaluate((el) => getComputedStyle(el, "::after").backgroundImage);
+  expect(endBg).not.toContain("gild.png");
+});
+
 
