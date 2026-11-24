@@ -19,6 +19,9 @@ Ref = ordinary/shared/our-father
 Type = officiant-confession
 Ref = ordinary/shared/confiteor
 
+Type = rubric
+Ref = ordinary/compline/post-absolution-rubric
+
 Type = versicle
 Ref = ordinary/compline/post-absolution
 
