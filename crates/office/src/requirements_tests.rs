@@ -1231,15 +1231,16 @@ fn lesser_doubles_without_proper_psalms_say_the_weekday_psalms_at_vespers() {
     }
 }
 
-/// The Hours' psalm antiphon follows Lauds (Rubrics XXIV.2, 4, 5; Diurnal p. 44): a Lesser
-/// Double from the Common, whose Lauds take the weekday psalter's antiphons, says the weekday's
-/// at Prime, Terce, Sext and None too, not the Common's (St Edmund, Friday 20 November 2026; St
-/// Catherine, Wednesday 25 November; St Athanasius in Paschaltide, 2 May). A Lesser Double with
-/// proper Lauds antiphons carries them to the Hours, first, second, third and fifth (St Clement,
-/// Diurnal p. 667), and the Christmas octave days say "At the Little Hours all as on the Feast"
-/// (pp. 220-221) though their Lauds are the Feria's.
+/// The Hours' psalm antiphon on lesser Doubles and the Christmas octave days. A lesser Double
+/// says Lauds with the occurrent Feria's antiphons unless it has proper ones, but "At the Little
+/// Hours the Antiphons are of the Proper or Common" (Diurnal p. 6*, Common of Saints 2; XXIV.4
+/// sends only Vespers, Matins and Lauds to the Psalter): St Edmund and St Catherine take the
+/// Common's (pp. 23*, 49*; 2026 ordo "Hours Of Com. (49*f)"), and St Clement his proper Lauds
+/// antiphons, "At Lauds and the Hours" (p. 667). The Christmas octave days keep the Feria's
+/// Lauds but say "At the Little Hours all as on the Feast" (pp. 220-221; 2026 ordo, 2 January,
+/// "Hours Of Feast (195f)").
 #[test]
-fn the_hours_take_the_antiphons_lauds_takes() {
+fn the_hours_take_the_proper_or_common_antiphons_on_lesser_doubles() {
     let antiphon = |date: &str, hour: &str| -> String {
         let date = Date::parse(date).unwrap();
         let (days, moveable) = year(date.year());
@@ -1252,24 +1253,20 @@ fn the_hours_take_the_antiphons_lauds_takes() {
             .unwrap_or_else(|| panic!("{date} {hour}: no psalm antiphon"));
         e.text.clone()
     };
-    let friday = ["My goods", "I called", "O thou that dwellest", "Blessed are all they"];
-    for date in ["2026-11-20", "2026-11-27"] {
-        for (hour, want) in ["prime", "terce", "sext", "none"].into_iter().zip(friday) {
-            assert!(antiphon(date, hour).starts_with(want), "{date} {hour}: {}", antiphon(date, hour));
-        }
-    }
-    assert!(antiphon("2026-11-25", "terce").starts_with("I called"));
-    assert!(antiphon("2026-11-25", "none").starts_with("Blessed are all they"));
-    for hour in ["prime", "terce", "sext", "none"] {
-        assert!(antiphon("2026-05-02", hour).starts_with("Alleluia"), "{hour}");
-    }
+    let edmund = ["Whosoever shall confess me", "He that followeth me", "If any man serve me", "Father"];
     let clement = ["While holy Clement", "Not for my own merits", "Upon the mountain", "All the nations"];
     let stephen = ["They stoned Stephen", "The stones of the torrent", "My soul", "Behold, I see"];
-    for (date, want) in [("2026-11-23", clement), ("2026-01-02", stephen)] {
+    let john = ["Right worthy of honour", "This is that disciple", "This is my disciple", "Behold, my servant"];
+    let innocents = ["Herod was exceeding wroth", "From two years old", "Their Angels", "Beneath the altar"];
+    for (date, want) in
+        [("2026-11-20", edmund), ("2026-11-23", clement), ("2026-01-02", stephen), ("2026-01-03", john), ("2027-01-04", innocents)]
+    {
         for (hour, want) in ["prime", "terce", "sext", "none"].into_iter().zip(want) {
-            assert!(antiphon(date, hour).starts_with(want), "{date} {hour}: {}", antiphon(date, hour));
+            let got = antiphon(date, hour);
+            assert!(got.starts_with(want), "{date} {hour}: {got}");
         }
     }
+    assert!(antiphon("2026-11-25", "prime").starts_with("This is a wise Virgin"));
 }
 
 /// Commemorations whose feast definition chooses their texts: the Common is

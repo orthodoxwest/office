@@ -187,12 +187,6 @@ fn resolve_prime_psalm_antiphon(day: &Day, t: &OfficeTexts, moveable: Option<&Mo
     });
     // The Saturday Office of Our Lady takes the Common of Feasts B.V.M.'s
     // Prime antiphon, "While the King" (Diurnal p. 67*; p. 69*) (#652).
-    // A Lesser Double or Simple whose Lauds keeps the weekday psalter says Prime with the
-    // weekday's antiphon too (Rubrics XXIV.2, 5; Diurnal p. 44).
-    if !ferial && crate::lauds_psalmody::uses_weekday_little_hour_antiphons(day, t) {
-        let (text, key) = crate::lauds_psalmody::weekday_little_hour_antiphon(day, "prime", SLOT, t);
-        return prime_element(SLOT, &key, text);
-    }
     if !ferial {
         let (mut text, mut key) = resolve_proper_text(day, "lauds", SLOT, t);
         // The ordinary Sunday psalter has its own threefold Alleluia (p. 83).
