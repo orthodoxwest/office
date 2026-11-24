@@ -3379,9 +3379,14 @@ body.season-passiontide .hour-end-mark::after {
 }
 
 /* A posture cue at the mediant ("Sit.") ends the first line with it. Opening
-   the second line beside the initial, it read as the half-verse's first word. */
+   the second line beside the initial, it read as the half-verse's first word.
+   A cue only some prayer forms take (the Little Hours, cued when a priest or
+   deacon leads) carries data-leaders and moves the break only while shown. */
 @supports selector(:has(+ *)) {
-  .psalm-verses .verse.initial-divided > .mediant:has(+ .posture)::after {
+  .psalm-verses .verse.initial-divided > .mediant:has(+ .posture:not([data-leaders]))::after,
+  :root:is(:not([data-leader]), [data-leader="private"]) .psalm-verses .verse.initial-divided > .mediant:has(+ .posture[data-leaders~="private"])::after,
+  :root[data-leader="deacon"] .psalm-verses .verse.initial-divided > .mediant:has(+ .posture[data-leaders~="deacon"])::after,
+  :root[data-leader="priest"] .psalm-verses .verse.initial-divided > .mediant:has(+ .posture[data-leaders~="priest"])::after {
     content: none;
   }
 

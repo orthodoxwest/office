@@ -75,6 +75,23 @@ fn composes_what_the_web_composes() {
 }
 
 #[test]
+fn the_little_hours_show_posture_cues_when_a_priest_or_deacon_leads() {
+    let core = OfficeCore::new().unwrap();
+    let cues = |hour: &str, form: &str| {
+        let view = core.compose(hour.into(), 2026, 10, 4, form.into(), false, false).unwrap();
+        format!("{:?}", view.sections).matches("style: Posture").count()
+    };
+    for hour in ["prime", "terce", "sext", "none"] {
+        assert_eq!(cues(hour, "private"), 0, "{hour}");
+        assert!(cues(hour, "priest") > 0 && cues(hour, "deacon") == cues(hour, "priest"), "{hour}");
+    }
+    for hour in ["lauds", "vespers"] {
+        assert!(cues(hour, "private") > 0 && cues(hour, "priest") == cues(hour, "private"), "{hour}");
+    }
+    assert_eq!(cues("compline", "priest"), 0);
+}
+
+#[test]
 fn the_martyrology_setting_reads_tomorrows_entry_at_prime() {
     let core = OfficeCore::new().unwrap();
     let text = |v: &HourView| format!("{:?}", v.sections);
