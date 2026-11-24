@@ -1267,7 +1267,8 @@ body:is(.page-home, .page-hour) footer > p {
 /* ── The apps ──
    The colophon's last line names the native apps (layout.html, presentation::stores), set as
    the report line is. A phone sees only its own platform's (data-platform, set before the first
-   paint); an iPhone sees none until the App Store listing is set (.has-ios). Home keeps its
+   paint); an iPhone sees none until the App Store listing is set (.has-ios), and a Fire tablet,
+   which has no Google Play, none until the app is on Amazon's. Home keeps its
    colophon to the one line: the wide home fits its niche and colophon to the screen. */
 
 footer .app-stores {
@@ -1288,6 +1289,7 @@ body:is(.page-home, .page-hour) footer > p.app-stores {
 :root[data-platform="ios"] .app-store:not([data-store="ios"]),
 :root[data-platform] .app-store-and,
 :root[data-platform="ios"] :is(.app-stores, .app-offer):not(.has-ios),
+:root[data-platform="fire"] :is(.app-stores, .app-offer),
 .page-home .app-stores {
   display: none;
 }
@@ -1357,12 +1359,15 @@ body:is(.page-home, .page-hour) footer > p.app-stores {
   transform: rotate(180deg);
 }
 
-:root[data-platform="ios"] .reminder-calendar:not(.has-ios) {
+:root[data-platform="ios"] .reminder-calendar:not(.has-ios),
+:root[data-platform="fire"] .reminder-calendar {
   border-top: 0;
 }
 
 :root[data-platform="ios"] .reminder-calendar:not(.has-ios) > summary,
-:root[data-platform="ios"] .reminder-calendar:not(.has-ios) .reminder-calendar-lead {
+:root[data-platform="ios"] .reminder-calendar:not(.has-ios) .reminder-calendar-lead,
+:root[data-platform="fire"] .reminder-calendar > summary,
+:root[data-platform="fire"] .reminder-calendar .reminder-calendar-lead {
   display: none;
 }
 

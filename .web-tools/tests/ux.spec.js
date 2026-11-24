@@ -7530,18 +7530,20 @@ test("a pressed row takes the pool of light and bare words dim", async ({ page }
 // The native apps (presentation::stores): a phone sees only its own store, and Reminders leads
 // with the app and shuts the calendar's fold before it is painted. Were there no App Store
 // listing (APP_STORE_ID unset), an iPhone would see neither the offer nor the fold's title, and
-// its page would read as the calendar alone.
+// its page would read as the calendar alone. A Fire tablet's Silk calls itself Android but has
+// no Google Play: it is offered no store, and its page is the calendar alone.
 for (const [platform, userAgent] of [
   ["android", "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"],
   ["ios", "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1"],
+  ["fire", "Mozilla/5.0 (Linux; Android 11; KFRASWI) AppleWebKit/537.36 (KHTML, like Gecko) Silk/130.4.1 like Chrome/130.0.6723.102 Safari/537.36"],
 ]) {
-  test(`Reminders and the colophon offer the ${platform} reader their own app`, async ({ browser }) => {
+  test(`Reminders and the colophon offer the ${platform} reader only their own store`, async ({ browser }) => {
     const context = await browser.newContext({ userAgent, viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, serviceWorkers: "block" });
     const page = await context.newPage();
     await page.goto("/reminders");
     await expect(page.locator("html")).toHaveAttribute("data-platform", platform);
     const ios = await page.locator(".reminder-calendar.has-ios").count() > 0;
-    const offered = platform === "android" || ios;
+    const offered = platform === "android" || (platform === "ios" && ios);
     const fold = page.locator("details.reminder-calendar");
     expect(await fold.evaluate((d) => d.open)).toBe(!offered);
     await expect(page.locator(".reminders-app")).toBeVisible({ visible: offered });
