@@ -24,6 +24,9 @@ use crate::psalmody::{is_office_of_the_dead, says_psalm_doxology};
 const GOSPEL_CANTICLES: [&str; 2] = ["canticles/benedictus", "canticles/magnificat"];
 const IN_TEXT_DOXOLOGY: &str = "Let us bless the Father";
 const LITTLE_HOURS: [&str; 4] = ["prime", "terce", "sext", "none"];
+/// Said standing: a profession of faith takes no Sit./Stand., only the bow at
+/// its Gloria (needs ruling, #973).
+const SAID_STANDING: [&str; 1] = ["proper/trinity-sunday/athanasian-creed"];
 
 /// Whether an hour's psalmody is cued: Lauds and Vespers always, the Little
 /// Hours only when a priest or deacon leads (a proxy for praying in choir).
@@ -56,7 +59,7 @@ pub fn mark_postures(hour: &mut OfficeHour, day: &Day, hour_name: &str, form: Pr
             let followed_by_gloria =
                 end < elems.len() && elems[end].kind == ElementType::PsalmDoxology && elems[end].text.trim_start().starts_with("Glory be");
             if followed_by_gloria {
-                if !is_gospel_canticle(&elems[start]) {
+                if !is_gospel_canticle(&elems[start]) && !SAID_STANDING.contains(&elems[start].source_ref.as_str()) {
                     mark_unit(&mut elems[start..end], None);
                 }
                 let lines = elems[end].text.trim().lines().count();

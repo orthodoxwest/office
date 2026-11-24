@@ -596,6 +596,11 @@ fn little_hours_take_posture_cues_when_a_priest_or_deacon_leads() {
             let got = cues(hour, sunday, form);
             assert!(!got.is_empty() && got.iter().all(|(_, c)| !c.is_empty()), "{hour} {form:?}: {got:?}");
         }
+        // The Athanasian Creed is said standing: only its Gloria is cued (#973).
+        let trinity = cues("prime", Date::new(2026, 6, 7), form);
+        let creed = trinity.iter().position(|(s, _)| s == "proper/trinity-sunday/athanasian-creed").expect("creed");
+        assert!(trinity[creed].1.is_empty(), "{form:?}: {:?}", trinity[creed]);
+        assert_eq!(trinity[creed + 1].1, ["bow ^0", "stand-upright ^1"], "{form:?}");
         // Nothing is cued without the Gloria in the Triduum.
         for hour in ["prime", "terce", "sext", "none"] {
             assert!(cues(hour, moveable.good_friday, form).iter().all(|(_, c)| c.is_empty()), "{hour} {form:?} Good Friday");
