@@ -497,6 +497,18 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
                     text = format!("[Weekday Lauds antiphon not found: {src}]");
                 }
             }
+            // A Lesser Double or Simple whose Lauds keeps the weekday psalter keeps its
+            // antiphons at the Little Hours too, not the Common's (Rubrics XXIV.2, 5).
+            if matches!(hour_name, "terce" | "sext" | "none")
+                && r.starts_with("psalm-antiphon")
+                && lauds_psalmody::uses_weekday_little_hour_antiphons(day, t)
+                && !src.starts_with("proper/")
+            {
+                (text, src) = lauds_psalmody::weekday_little_hour_antiphon(day, hour_name, r, t);
+                if text.is_empty() {
+                    text = format!("[Weekday Little Hour antiphon not found: {src}]");
+                }
+            }
             element(ElementType::Antiphon, text, r, &src)
         }
         "proper-opening-acclamation" => {

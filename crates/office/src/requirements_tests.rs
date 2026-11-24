@@ -1231,6 +1231,47 @@ fn lesser_doubles_without_proper_psalms_say_the_weekday_psalms_at_vespers() {
     }
 }
 
+/// The Hours' psalm antiphon follows Lauds (Rubrics XXIV.2, 4, 5; Diurnal p. 44): a Lesser
+/// Double from the Common, whose Lauds take the weekday psalter's antiphons, says the weekday's
+/// at Prime, Terce, Sext and None too, not the Common's (St Edmund, Friday 20 November 2026; St
+/// Catherine, Wednesday 25 November; St Athanasius in Paschaltide, 2 May). A Lesser Double with
+/// proper Lauds antiphons carries them to the Hours, first, second, third and fifth (St Clement,
+/// Diurnal p. 667), and the Christmas octave days say "At the Little Hours all as on the Feast"
+/// (pp. 220-221) though their Lauds are the Feria's.
+#[test]
+fn the_hours_take_the_antiphons_lauds_takes() {
+    let antiphon = |date: &str, hour: &str| -> String {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let e = composed
+            .sections
+            .iter()
+            .flat_map(|s| &s.elements)
+            .find(|e| e.kind == ElementType::Antiphon && e.slot_ref.starts_with("psalm-antiphon"))
+            .unwrap_or_else(|| panic!("{date} {hour}: no psalm antiphon"));
+        e.text.clone()
+    };
+    let friday = ["My goods", "I called", "O thou that dwellest", "Blessed are all they"];
+    for date in ["2026-11-20", "2026-11-27"] {
+        for (hour, want) in ["prime", "terce", "sext", "none"].into_iter().zip(friday) {
+            assert!(antiphon(date, hour).starts_with(want), "{date} {hour}: {}", antiphon(date, hour));
+        }
+    }
+    assert!(antiphon("2026-11-25", "terce").starts_with("I called"));
+    assert!(antiphon("2026-11-25", "none").starts_with("Blessed are all they"));
+    for hour in ["prime", "terce", "sext", "none"] {
+        assert!(antiphon("2026-05-02", hour).starts_with("Alleluia"), "{hour}");
+    }
+    let clement = ["While holy Clement", "Not for my own merits", "Upon the mountain", "All the nations"];
+    let stephen = ["They stoned Stephen", "The stones of the torrent", "My soul", "Behold, I see"];
+    for (date, want) in [("2026-11-23", clement), ("2026-01-02", stephen)] {
+        for (hour, want) in ["prime", "terce", "sext", "none"].into_iter().zip(want) {
+            assert!(antiphon(date, hour).starts_with(want), "{date} {hour}: {}", antiphon(date, hour));
+        }
+    }
+}
+
 /// Commemorations whose feast definition chooses their texts: the Common is
 /// the right one for who they are (#617), "N." is a name (#607), and the
 /// Saturninus antiphon keeps the one-Martyr Common until clergy rule (#610).

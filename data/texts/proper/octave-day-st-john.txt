@@ -141,3 +141,17 @@
 [versicle-vespers]
 # SOURCE: Monastic Diurnal p. 220 (January 3, At I Vespers: "Chapter, Short R., Hymn and V. as at Vespers of the Feast, p. 200")
 @use proper/st-john-evangelist/versicle-vespers
+
+# Diurnal p. 220: Lauds has the occurrent Feria's antiphons and psalms, but "At the Little
+# Hours all as on the Feast": the Feast's Lauds antiphons, omitting the fourth.
+[psalm-antiphon-1-prime]
+@use proper/st-john-evangelist/psalm-antiphon-1
+
+[psalm-antiphon-2-terce]
+@use proper/st-john-evangelist/psalm-antiphon-2
+
+[psalm-antiphon-3-sext]
+@use proper/st-john-evangelist/psalm-antiphon-3
+
+[psalm-antiphon-5-none]
+@use proper/st-john-evangelist/psalm-antiphon-5

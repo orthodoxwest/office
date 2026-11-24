@@ -71,6 +71,42 @@ pub fn weekday_lauds_antiphon(day: &Day, reference: &str, t: &OfficeTexts) -> (S
     (t.get(&key).to_string(), key)
 }
 
+/// Whether Prime and the Little Hours take the weekday psalter's antiphon with their psalms:
+/// on the feasts whose Lauds keeps the weekday psalter, a Lesser Double without proper antiphons
+/// or a Simple. Their Lauds antiphons are the weekday's (Rubrics XXIV.4), the Common's Lauds
+/// antiphons pass to the Hours only on feasts of XII Lessons (XXIV.5), and otherwise "the
+/// Antiphons are always said from the Psalter" (XXIV.2): "the Ants. appointed for Ferias ... and
+/// also on lesser Feasts, even in Advent, when the Psalms of the Feria are to be said" (Diurnal
+/// p. 44). A Sunday anticipated on Saturday keeps its own.
+pub fn uses_weekday_little_hour_antiphons(day: &Day, t: &OfficeTexts) -> bool {
+    uses_weekday_lauds_psalmody(day, t) && !day.celebration.as_deref().is_some_and(|c| c.is_category(Category::Sunday))
+}
+
+/// The weekday psalter's antiphon at Prime, Terce, Sext or None on such a feast: Paschaltide's
+/// Alleluia, otherwise the antiphon "Throughout the Year" for the weekday (Diurnal p. 44), as at
+/// its Lauds (`weekday_lauds_antiphon`).
+pub fn weekday_little_hour_antiphon(day: &Day, hour_name: &str, reference: &str, t: &OfficeTexts) -> (String, String) {
+    if day.season == Season::Easter {
+        let found = lookup_seasonal_text(day, hour_name, reference, t);
+        if !found.0.is_empty() {
+            return found;
+        }
+    }
+    let weekday = day.civil_weekday_name();
+    let candidates = crate::proper::ref_candidates(reference);
+    let keys = candidates
+        .iter()
+        .map(|c| format!("ordinary/{hour_name}/{c}-{weekday}"))
+        .chain(candidates.iter().map(|c| format!("ordinary/{hour_name}/{c}")));
+    for key in keys {
+        let text = t.get(&key);
+        if !text.is_empty() {
+            return (text.to_string(), key);
+        }
+    }
+    (String::new(), format!("ordinary/{hour_name}/{reference}"))
+}
+
 /// A proper's declared Lauds psalmody (or its Laudate).
 pub fn lookup_lauds_psalmody(day: &Day, reference: &str, t: &OfficeTexts) -> (String, String) {
     let Some(c) = day.celebration.as_deref() else { return (String::new(), String::new()) };

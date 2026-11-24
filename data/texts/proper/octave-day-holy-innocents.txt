@@ -230,3 +230,17 @@ These are they * which were not defiled with women; for they are virgins: and th
 [versicle-vespers]
 # SOURCE: Monastic Diurnal p. 221 (January 4, At I Vespers: "V. Herod was exceeding wroth"), the Feast's Lauds versicle
 @use proper/holy-innocents/versicle-lauds
+
+# Diurnal p. 221: Lauds has the occurrent Feria's antiphons and psalms, but "At the Little
+# Hours all as on the Feast": the Feast's Lauds antiphons, omitting the fourth.
+[psalm-antiphon-1-prime]
+@use proper/holy-innocents/psalm-antiphon-1
+
+[psalm-antiphon-2-terce]
+@use proper/holy-innocents/psalm-antiphon-2
+
+[psalm-antiphon-3-sext]
+@use proper/holy-innocents/psalm-antiphon-3
+
+[psalm-antiphon-5-none]
+@use proper/holy-innocents/psalm-antiphon-5
