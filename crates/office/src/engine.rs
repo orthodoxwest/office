@@ -473,6 +473,16 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
                 resolve_element(elem, t)
             }
         }
+        "marian-rubric" => {
+            let civil = day.civil_date();
+            if seasonal::marian_antiphon_said_kneeling(civil, hour_name, &MoveableDates::compute(civil.year())) {
+                resolve_element(elem, t)
+            } else {
+                let mut e = OfficeElement::new(ElementType::Rubric, corpus::OMIT_MARKER);
+                e.slot_ref = r.to_string();
+                e
+            }
+        }
         "gloria-patri" => {
             if !says_psalm_doxology(day, hour_name) {
                 let mut e = OfficeElement::new(ElementType::Doxology, corpus::OMIT_MARKER);
