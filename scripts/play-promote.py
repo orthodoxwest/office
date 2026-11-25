@@ -13,6 +13,13 @@ Run by .github/workflows/play-promote.yml; see apps/android/README.md ("Promotin
              out until it is finished, resumed or replaced in Play Console.
   manual     Release --version-code (default: Closed testing's newest) to --rollout of users now.
 
+Play's API can release only a bundle that some track still holds: a build a later merge has
+replaced on Internal and Closed testing is gone from it ("APK version codes could not be found"),
+though Play Console still lists it. So each auto run also keeps Closed testing's newest build on
+the closed track `hold`, which has no testers, until production has it or something newer: that
+build is still there, a day old, for a later run to promote. The run creates the track if it is
+missing; if Play refuses, it warns and promotes only builds Closed testing still holds.
+
 Nothing is rebuilt: production gets a bundle Play already has, by its version code. Its release
 notes are the note files under release-notes/ added since production's newest completed build
 (scripts/release_notes.py): a staged, halted or replaced release may never reach everyone, so
@@ -44,6 +51,8 @@ import release_notes
 PACKAGE = "org.orthodoxwest.office"
 API = f"https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{PACKAGE}"
 TESTING = "alpha"  # Closed testing
+INTERNAL = "internal"
+HOLD = "hold"  # a closed track with no testers that keeps a build Play can still release
 PRODUCTION = "production"
 STAGED = re.compile(r"staged (\d{4}-\d\d-\d\dT\d\d:\d\dZ)")
 
@@ -80,6 +89,37 @@ class Play:
 
     def track(self, name: str) -> list[dict]:
         return self._call("GET", f"/edits/{self.edit}/tracks/{name}").get("releases", [])
+
+    def held(self) -> list[dict]:
+        """The hold track's releases; none while the track does not exist."""
+        r = self.http.request("GET", API + f"/edits/{self.edit}/tracks/{HOLD}")
+        return r.json().get("releases", []) if r.status_code < 400 else []
+
+    def hold(self, code: int) -> str | None:
+        """Put `code` on the hold track, in an edit of its own, creating the track if need be.
+        Returns Play's refusal, or None once it is held."""
+        def call(method: str, path: str, body: dict | None = None):
+            r = self.http.request(method, API + path, json=body)
+            return r if r.status_code < 400 else f"{method} {path}: {r.status_code} {r.text}"
+
+        edit = call("POST", "/edits")
+        if isinstance(edit, str):
+            return edit
+        edit = edit.json()["id"]
+        if isinstance(call("GET", f"/edits/{edit}/tracks/{HOLD}"), str):
+            made = call("POST", f"/edits/{edit}/tracks",
+                        {"track": HOLD, "type": "CLOSED_TESTING", "formFactor": "DEFAULT"})
+            if isinstance(made, str):
+                self.http.request("DELETE", API + f"/edits/{edit}")
+                return made
+        release = {"versionCodes": [str(code)], "status": "completed", "name": f"0.1.{code} held"}
+        for step in (("PUT", f"/edits/{edit}/tracks/{HOLD}", {"track": HOLD, "releases": [release]}),
+                     ("POST", f"/edits/{edit}:commit", None)):
+            done = call(*step)
+            if isinstance(done, str):
+                self.http.request("DELETE", API + f"/edits/{edit}")
+                return done
+        return None
 
     def set_production(self, release: dict) -> None:
         self._call("PUT", f"/edits/{self.edit}/tracks/{PRODUCTION}", {"track": PRODUCTION, "releases": [release]})
@@ -189,6 +229,28 @@ def main() -> None:
     shipped = (newest(production, ("completed",)) or (0, None))[0]
     log(f"Closed testing: {[(r.get('status'), codes(r)) for r in testing]}")
     log(f"Production: {[(r.get('status'), codes(r), r.get('userFraction')) for r in production]}")
+    held_codes: set[int] = set()
+    hold_track: list[dict] = []
+    if args.mode == "auto":
+        hold_track = play.held()
+        log(f"Held: {[codes(r) for r in hold_track]}")
+        for r in testing + play.track(INTERNAL) + hold_track:
+            held_codes.update(codes(r))
+
+    def keep_back(live_now: int) -> None:
+        """Hold Closed testing's newest build once the held one has gone out (auto mode)."""
+        if args.mode != "auto" or args.dry_run:
+            return
+        held = (newest(hold_track, ("completed", "inProgress", "halted", "draft")) or (0, None))[0]
+        candidate = (newest(testing, ("completed", "inProgress")) or (0, None))[0]
+        if held > live_now or candidate <= max(held, live_now):
+            return  # the held build has yet to reach production, or nothing newer to hold
+        refused = play.hold(candidate)
+        if refused:
+            log(f"::warning::Could not keep {candidate} on the {HOLD} track, so it may be replaced before "
+                f"it is a day old: {refused}")
+        else:
+            log(f"Holding {candidate} on the {HOLD} track until it is promoted")
 
     def emit_tag(code: int) -> None:
         if code and not args.dry_run and not release_notes.has_tag("android", f"0.1.{code}", code):
@@ -222,13 +284,14 @@ def main() -> None:
                 release = {k: v for k, v in staged[0].items() if k != "userFraction"} | {"status": "completed"}
                 message = f"Finishing the staged rollout of {codes(staged[0])}: all users now get it"
         else:
-            # The newest build a day old, even one a later merge has replaced on Closed testing: merges
-            # land more often than daily, so waiting for the build there now to age never promotes.
+            # The newest build a day old that a track still holds: merges land more often than daily,
+            # so the build on Closed testing now is seldom a day old, and the API cannot release one
+            # a later merge has replaced there, so the hold track keeps one back (see the docstring).
             # Every such build went to Internal testing unreviewed, and Google reviews the release.
-            # Not checked against Play's bundle list, which left out replaced builds and so blocked
-            # every one; a version code Play lacks fails the commit with Play's error.
-            ready = [(c, sha) for c, sha in uploads(args.min_age) if c > live_code]
-            log(f"Uploaded at least {args.min_age:g} hours ago, newer than production: {[c for c, _ in ready]}")
+            aged = [(c, sha) for c, sha in uploads(args.min_age) if c > live_code]
+            ready = [(c, sha) for c, sha in aged if c in held_codes]
+            log(f"Uploaded at least {args.min_age:g} hours ago, newer than production: {[c for c, _ in aged]}; "
+                f"still on a track: {[c for c, _ in ready]}")
             if ready:
                 code, sha = ready[0]
                 release = release_of(code, args.rollout, notes_between(shipped, sha))
@@ -239,6 +302,7 @@ def main() -> None:
     if release is None:
         play.abandon()
         emit_tag(shipped)
+        keep_back(live_code)
         return
     if args.dry_run:
         summary(f"Dry run: {message}")
@@ -252,6 +316,7 @@ def main() -> None:
     summary(f"{message}." + (" Google reviews it before it reaches anyone." if new else ""))
     if release.get("releaseNotes"):
         summary("What's new:\n\n" + release["releaseNotes"][0]["text"])
+    keep_back(max(live_code, *codes(release)))
 
 
 if __name__ == "__main__":

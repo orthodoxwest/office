@@ -271,9 +271,15 @@ alone holds a token able to push.
   before, if it is newer than production's, goes to 20% of users. So a merge reaches a fifth of
   the public 1 to 2 days after testers get it, and everyone two days later. Google's review of
   each new release (usually hours) comes out of the 20% stage. A build's upload time is when its
-  Publish to Play run finished. A build a later merge has replaced on Closed testing still
-  qualifies: merges land more
-  than once a day, so the build on Closed testing now is seldom a day old.
+  Publish to Play run finished.
+- **The `hold` track** keeps a build back for that day. Merges land more than once a day, so the
+  build on Closed testing now is seldom a day old, and Play's API cannot release a build a later
+  merge has replaced on Internal and Closed testing (Play Console still lists it, but the API
+  answers "APK version codes could not be found"). So each daily run also puts Closed testing's
+  newest build on `hold`, a closed testing track with no testers, and leaves it there until
+  production has it or something newer; a later run promotes it once it is a day old. The run
+  creates the track if it is missing. If Play refuses (the run warns), create a closed testing
+  track named `hold` in Play Console (*Testing → Closed testing → Create track*), with no testers.
 - **The staged release's name** in Play Console ("0.1.120 staged 2026-11-12T15:00Z") records when
   it started; that is how the next runs know its age.
 - **Halting** a rollout in Play Console (*Production → Halt rollout*), or starting one there,

@@ -28,22 +28,36 @@ NOW = PROMOTE.dt.datetime(2026, 11, 12, 15, 0, tzinfo=PROMOTE.dt.timezone.utc)
 
 
 OUTPUTS = []
+HELD = []
 
 
-def run(argv, production, testing=TESTING, uploads=(), tagged=()):
+def run(argv, production, testing=TESTING, uploads=(), tagged=(), held=(), internal=None, hold_refused=None):
     """main()'s production release for these tracks and uploads, or None when it sends nothing.
 
     `uploads` are version codes; every version code's commit is "c<code>", except 999's, which is
-    not on master. The step outputs written go to OUTPUTS."""
+    not on master. `held` is the version codes on the hold track, and Internal testing has what
+    Closed testing has unless `internal` says otherwise. The step outputs written go to OUTPUTS,
+    the builds put on the hold track to HELD."""
     sent = []
     OUTPUTS.clear()
+    HELD.clear()
 
     class Play:
         def __init__(self, _key):
             pass
 
         def track(self, name):
+            if name == "internal":
+                return testing if internal is None else internal
             return testing if name == "alpha" else production
+
+        def held(self):
+            return [{"status": "completed", "versionCodes": [str(c)]} for c in held]
+
+        def hold(self, code):
+            if hold_refused is None:
+                HELD.append(code)
+            return hold_refused
 
         def set_production(self, release):
             sent.append(release)
@@ -85,17 +99,49 @@ class AutoTest(unittest.TestCase):
                               uploads=[120], tagged={"0.1.120"}))
         self.assertEqual(OUTPUTS, [])
 
-    def test_a_day_old_build_replaced_on_testing_is_still_promoted(self):
+    def test_a_day_old_build_kept_on_the_hold_track_is_promoted(self):
         # Merges land more than once a day, so the build on Closed testing now (130) is never a day
-        # old; 120, uploaded a day ago and since replaced there, goes out with its own notes.
+        # old; 120, uploaded a day ago, replaced there and kept on the hold track, goes out with its
+        # own notes, and 130 is held in its place.
         later = [{"status": "completed", "versionCodes": ["130"]}]
         release = run(["auto"], [{"status": "completed", "versionCodes": ["100"]}], testing=later,
-                      uploads=[120, 110])
+                      uploads=[120, 110], held=[120])
         self.assertEqual(release["versionCodes"], ["120"])
         self.assertEqual(release["releaseNotes"], notes("c100", "c120"))
+        self.assertEqual(HELD, [130])
+
+    def test_a_build_no_track_holds_is_never_sent(self):
+        # Play's API cannot release a bundle every track has let go of (2058, Nov 25): the newest
+        # day-old build a track still holds goes instead, or none, and Closed testing's is held.
+        later = [{"status": "completed", "versionCodes": ["130"]}]
+        production = [{"status": "completed", "versionCodes": ["100"]}]
+        self.assertIsNone(run(["auto"], production, testing=later, uploads=[120, 110]))
+        self.assertEqual(HELD, [130])
+        release = run(["auto"], production, testing=later, uploads=[120, 110], held=[110])
+        self.assertEqual(release["versionCodes"], ["110"])
+        release = run(["auto"], production, testing=later, uploads=[120, 110], internal=[
+            {"status": "completed", "versionCodes": ["120"]}])
+        self.assertEqual(release["versionCodes"], ["120"])
+
+    def test_the_held_build_stays_until_it_goes_out(self):
+        # 125 is held but not yet a day old: a newer merge does not take its place, or it never ages.
+        later = [{"status": "completed", "versionCodes": ["130"]}]
+        self.assertIsNone(run(["auto"], [{"status": "completed", "versionCodes": ["100"]}], testing=later,
+                              uploads=[], held=[125]))
+        self.assertEqual(HELD, [])
+
+    def test_a_refused_hold_warns_and_does_not_fail(self):
+        later = [{"status": "completed", "versionCodes": ["130"]}]
+        self.assertIsNone(run(["auto"], [{"status": "completed", "versionCodes": ["100"]}], testing=later,
+                              uploads=[], hold_refused="403"))
+        self.assertEqual(HELD, [])
+
+    def test_a_staged_rollout_waiting_still_holds_the_newest(self):
+        self.assertIsNone(run(["auto"], [staged(110, 23)], uploads=[120]))
+        self.assertEqual(HELD, [120])
 
     def test_the_first_release_carries_every_note(self):
-        release = run(["auto"], [], testing=[], uploads=[120])
+        release = run(["auto"], [], testing=[], uploads=[120], held=[120])
         self.assertEqual(release["versionCodes"], ["120"])
         self.assertEqual(release["releaseNotes"], notes(None, "c120"))
 
@@ -176,6 +222,12 @@ class ManualTest(unittest.TestCase):
     def test_dry_run_sends_and_tags_nothing(self):
         self.assertIsNone(run(["manual", "--dry-run"], [{"status": "completed", "versionCodes": ["100"]}]))
         self.assertEqual(OUTPUTS, [])
+        self.assertIsNone(run(["auto", "--dry-run"], [{"status": "completed", "versionCodes": ["100"]}], uploads=[]))
+        self.assertEqual(HELD, [])
+
+    def test_manual_runs_hold_nothing(self):
+        run(["manual"], [{"status": "completed", "versionCodes": ["100"]}])
+        self.assertEqual(HELD, [])
 
     def test_replacing_a_staged_or_halted_release_carries_its_notes_again(self):
         # 110 reached a fifth of users (or none, if Google rejected it); 120's notes count from 100.
