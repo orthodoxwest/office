@@ -14,9 +14,10 @@ Run by .github/workflows/play-promote.yml; see apps/android/README.md ("Promotin
   manual     Release --version-code (default: Closed testing's newest) to --rollout of users now.
 
 Nothing is rebuilt: production gets a bundle Play already has, by its version code. Its release
-notes are the note files under release-notes/ added between production's build and this one
-(scripts/release_notes.py), so a note goes out once on Android; each run tags what production
-has out (android/0.1.<code>). A staged release is named with the time it
+notes are the note files under release-notes/ added since production's newest completed build
+(scripts/release_notes.py): a staged, halted or replaced release may never reach everyone, so
+its notes go again with the next. Each run writes that build's version code as the step output
+`live`, and the workflow's next step tags it (android/0.1.<code>). A staged release is named with the time it
 started ("0.1.120 staged 2026-11-12T15:00Z"), which is how a later run knows its age; Google's
 review comes out of that time. --dry-run reads Play and says what it would do.
 
@@ -135,12 +136,13 @@ def uploads(min_age: float) -> list[tuple[int, str]]:
     return sorted(found, reverse=True)
 
 
-def notes_between(live: int, commit: str | None) -> list[dict]:
-    """Play's release notes for the build of `commit`: the notes added since production's build `live`."""
+def notes_between(shipped: int, commit: str | None) -> list[dict]:
+    """Play's release notes for the build of `commit`: the notes added since `shipped`, production's
+    newest completed build (0: none). A build not on master gets the standing line."""
     if commit is None:
-        return []
-    base = release_notes.commit_of(live) if live else None
-    if live and base is None:
+        return [{"language": "en-US", "text": release_notes.DEFAULT_NOTES}]
+    base = release_notes.commit_of(shipped) if shipped else None
+    if shipped and base is None:
         base = release_notes.latest_tag("android", commit)
     return [{"language": "en-US", "text": release_notes.release_text("android", base, commit)}]
 
@@ -156,11 +158,11 @@ def release_of(code: int, fraction: float, notes: list[dict]) -> dict:
     return rel
 
 
-def tag(code: int, dry_run: bool) -> None:
-    """Record production's build `code` as the tag android/0.1.<code>."""
-    commit = release_notes.commit_of(code) if code else None
-    if commit and not dry_run:
-        release_notes.record("android", f"0.1.{code}", commit)
+def output(name: str, value: str) -> None:
+    path = os.environ.get("GITHUB_OUTPUT")
+    if path:
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(f"{name}={value}\n")
 
 
 def main() -> None:
@@ -179,9 +181,12 @@ def main() -> None:
     testing, production = play.track(TESTING), play.track(PRODUCTION)
     live = newest(production, ("completed", "inProgress", "halted"))
     live_code = live[0] if live else 0
+    # The notes count from what everyone has: a staged, halted or rejected release may not reach them.
+    shipped = (newest(production, ("completed",)) or (0, None))[0]
     log(f"Closed testing: {[(r.get('status'), codes(r)) for r in testing]}")
     log(f"Production: {[(r.get('status'), codes(r), r.get('userFraction')) for r in production]}")
-    tag(live_code, args.dry_run)
+    if shipped and not args.dry_run:
+        output("live", str(shipped))
 
     release = None
     if args.mode == "manual":
@@ -190,7 +195,7 @@ def main() -> None:
             sys.exit("::error::Closed testing has no release to promote")
         if code < live_code:
             sys.exit(f"::error::Production already has {live_code}, newer than {code}")
-        release = release_of(code, args.rollout, notes_between(live_code, release_notes.commit_of(code)))
+        release = release_of(code, args.rollout, notes_between(shipped, release_notes.commit_of(code)))
         message = f"Releasing {code} to {args.rollout:.0%} of production"
     else:
         halted = [r for r in production if r.get("status") == "halted"]
@@ -218,7 +223,7 @@ def main() -> None:
             log(f"Uploaded at least {args.min_age:g} hours ago, newer than production: {[c for c, _ in ready]}")
             if ready:
                 code, sha = ready[0]
-                release = release_of(code, args.rollout, notes_between(live_code, sha))
+                release = release_of(code, args.rollout, notes_between(shipped, sha))
                 message = f"Releasing {code} to {args.rollout:.0%} of production (uploaded at least {args.min_age:g} hours ago)"
             else:
                 summary(f"Nothing to promote: production has {live_code or 'nothing'}, and no newer build was uploaded {args.min_age:g} hours ago or more.")
@@ -234,8 +239,6 @@ def main() -> None:
     play.set_production(release)
     new = live_code not in codes(release)
     summary(f"{message}." + (" Google reviews it before it reaches anyone." if new else ""))
-    if new:
-        tag(int(release["versionCodes"][0]), False)
     if release.get("releaseNotes"):
         summary("What's new:\n\n" + release["releaseNotes"][0]["text"])
 

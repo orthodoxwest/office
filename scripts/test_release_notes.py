@@ -20,6 +20,9 @@ class ParseTest(unittest.TestCase):
         self.assertEqual(RN.parse("The ordo\nscrolls to today.\n\nAnd more.\n"),
                          (frozenset({"android", "ios"}), "The ordo scrolls to today.\n\nAnd more."))
 
+    def test_a_byte_order_mark_does_not_hide_the_platforms_line(self):
+        self.assertEqual(RN.parse("\ufeffPlatforms: ios\n\nA fix."), (frozenset({"ios"}), "A fix."))
+
     def test_platforms_line(self):
         self.assertEqual(RN.parse("Platforms: Android\n\nA fix.")[0], frozenset({"android"}))
         self.assertEqual(RN.parse("platforms: ios, android\nA fix.")[0], frozenset({"android", "ios"}))
@@ -97,6 +100,27 @@ class RepoTest(unittest.TestCase):
         head = self.commit(remove=["release-notes/gone.txt"])
         self.assertEqual(RN.notes_for("ios", base, head), [])
 
+    def test_a_renamed_note_is_not_new(self):
+        base = self.commit({"release-notes/old.txt": "Old note."})
+        self.git("mv", "release-notes/old.txt", "release-notes/renamed.txt")
+        head = self.commit({"release-notes/new.txt": "New note."})
+        self.assertEqual(RN.notes_for("ios", base, head), ["New note."])
+
+    def test_a_note_merged_from_a_branch_sorts_by_the_merge(self):
+        start = self.commit()
+        self.git("checkout", "-q", "-b", "side")
+        self.commit({"release-notes/early.txt": "Written early."})
+        self.git("checkout", "-q", "master")
+        self.commit({"release-notes/later.txt": "Written later."})
+        self.time += 60
+        self.git("merge", "-q", "--no-ff", "--no-edit", "side")
+        self.assertEqual(RN.notes_for("ios", start, "HEAD"), ["Written early.", "Written later."])
+
+    def test_a_base_git_cannot_read_stops_the_run(self):
+        head = self.commit({"release-notes/one.txt": "One."})
+        with self.assertRaises(SystemExit):
+            RN.notes_for("ios", "0" * 40, head)
+
     def test_commit_of_counts_commits(self):
         shas = [self.commit() for _ in range(5)]
         self.assertEqual(RN.commit_of(3), shas[2])
@@ -116,9 +140,14 @@ class RepoTest(unittest.TestCase):
     def test_check(self):
         self.commit({"release-notes/README.md": "About.", "release-notes/ok.txt": "Fine.",
                      "release-notes/long.txt": "x" * 501, "release-notes/web.txt": "Platforms: web\n\nNo.",
-                     "release-notes/wrong.md": "Not a note."})
+                     "release-notes/wrong.md": "Not a note.", "release-notes/sub/deep.txt": "Nested."})
+        (self.root / "release-notes/latin1.txt").write_bytes("Caf\xe9.".encode("latin-1"))
+        self.git("add", "release-notes/latin1.txt")
+        self.commit()
         problems = RN.check()
-        self.assertEqual(len(problems), 3, problems)
+        self.assertEqual(len(problems), 5, problems)
+        self.assertTrue(any("deep.txt" in p for p in problems))
+        self.assertTrue(any("latin1.txt" in p and "UTF-8" in p for p in problems))
         self.assertTrue(any("long.txt" in p for p in problems))
         self.assertTrue(any("web.txt" in p for p in problems))
         self.assertTrue(any("wrong.md" in p for p in problems))

@@ -22,6 +22,7 @@ test: ## Run Rust and Python tests
 	python3 scripts/test_play_promote.py
 	python3 scripts/test_appstore.py
 	python3 scripts/test_release_notes.py
+	python3 scripts/release_notes.py check
 	python3 scripts/test_ordo_compare.py
 	python3 scripts/test_project_status.py
 	python3 scripts/test_update_golden_workflow.py

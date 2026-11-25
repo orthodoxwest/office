@@ -33,7 +33,8 @@ alone. Reads are retried, with a timeout, when App Store Connect is slow or busy
 "What's New" is --notes if given, otherwise the note files under release-notes/ added between the
 App Store's live build and this one (scripts/release_notes.py), so a note goes out once on iOS.
 The build number counts commits, as testflight.yml numbers it, so the commits are found from it.
-Each run tags the live version's build (ios/<version>).
+Each run writes the live version and its build number as the step outputs `version` and `build`,
+and the workflow's next step tags that build ios/<version>.
 
 Needs ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY (the .p8's contents). The token is an ES256 JWT,
 signed with the openssl command, so the script needs nothing beyond the standard library.
@@ -430,6 +431,13 @@ def live_build(api: Api, versions: list[dict]) -> tuple[str, int] | None:
     return (top["attributes"]["versionString"], int(number)) if number else None
 
 
+def output(**values: str) -> None:
+    path = os.environ.get("GITHUB_OUTPUT")
+    if path:
+        with open(path, "a", encoding="utf-8") as f:
+            f.writelines(f"{k}={v}\n" for k, v in values.items())
+
+
 def credentials() -> tuple[str, str, str]:
     try:
         return os.environ["ASC_KEY_ID"], os.environ["ASC_ISSUER_ID"], os.environ["ASC_KEY"]
@@ -575,10 +583,9 @@ def run(args: argparse.Namespace) -> None:
         return
 
     live = live_build(api, versions)
-    if live:
-        commit = commit_of(live[1])
-        if commit and not args.dry_run:
-            release_notes.record("ios", live[0], commit)
+    if live and not args.dry_run:
+        # The workflow's next step, which alone holds a token that can push, tags it ios/<version>.
+        output(version=live[0], build=str(live[1]))
     submissions = read_submissions(api, app)
     builds = read_builds(api, app)
     log(f"Builds: {[(b['version'], b['number'], b['processing'], b['external']) for b in builds[:10]]}")

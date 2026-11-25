@@ -260,9 +260,11 @@ done by hand in Play Console.
 
 The **Promote to production** workflow (`.github/workflows/play-promote.yml`,
 `scripts/play-promote.py`) moves a build from Closed testing to production through the Play API,
-by its version code, without rebuilding. Its release notes are the notes added between
-production's build and this one, so each note goes out once on Android, and each run tags what
-production has out (`android/0.1.<code>`) as the record.
+by its version code, without rebuilding. Its release notes are the notes added since
+production's newest *completed* build, so each note goes out once on Android; a staged, halted or
+replaced release may never reach everyone, so its notes go again with the release after it. Each
+run then tags that completed build (`android/0.1.<code>`) as the record, in a job of its own that
+alone holds a token able to push.
 
 - **Every day** at 15:00 UTC: a staged rollout the workflow started two days before is
   finished (all users). Otherwise the newest build uploaded to Closed testing at least 24 hours

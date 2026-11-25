@@ -27,15 +27,16 @@ def notes(base, head):
 NOW = PROMOTE.dt.datetime(2026, 11, 12, 15, 0, tzinfo=PROMOTE.dt.timezone.utc)
 
 
-TAGS = []
+OUTPUTS = []
 
 
 def run(argv, production, testing=TESTING, uploads=()):
     """main()'s production release for these tracks and uploads, or None when it sends nothing.
 
-    `uploads` are version codes; every version code's commit is "c<code>". Tags made go to TAGS."""
+    `uploads` are version codes; every version code's commit is "c<code>", except 999's, which is
+    not on master. The step outputs written go to OUTPUTS."""
     sent = []
-    TAGS.clear()
+    OUTPUTS.clear()
 
     class Play:
         def __init__(self, _key):
@@ -52,9 +53,9 @@ def run(argv, production, testing=TESTING, uploads=()):
 
     with mock.patch.object(PROMOTE, "Play", Play), \
             mock.patch.object(PROMOTE, "uploads", lambda _hours: [(c, f"c{c}") for c in uploads]), \
-            mock.patch.object(PROMOTE.release_notes, "commit_of", lambda n: f"c{n}"), \
+            mock.patch.object(PROMOTE.release_notes, "commit_of", lambda n: None if n == 999 else f"c{n}"), \
             mock.patch.object(PROMOTE.release_notes, "release_text", lambda _p, base, head: notes(base, head)[0]["text"]), \
-            mock.patch.object(PROMOTE.release_notes, "record", lambda *a, **k: TAGS.append(a[:3])), \
+            mock.patch.object(PROMOTE, "output", lambda k, v: OUTPUTS.append((k, v))), \
             mock.patch.object(PROMOTE, "now", lambda: NOW), \
             mock.patch.dict(os.environ, {"PLAY_SERVICE_ACCOUNT_JSON": "{}"}), \
             mock.patch.object(sys, "argv", ["play-promote.py", *argv]), \
@@ -75,8 +76,8 @@ class AutoTest(unittest.TestCase):
                       uploads=[120, 110])
         self.assertEqual(release, {"versionCodes": ["120"], "status": "inProgress", "userFraction": 0.2,
                                    "releaseNotes": notes("c100", "c120"), "name": "0.1.120 staged 2026-11-12T15:00Z"})
-        # Production's build is tagged as it stands, and the new release once it is sent.
-        self.assertEqual(TAGS, [("android", "0.1.100", "c100"), ("android", "0.1.120", "c120")])
+        # Production's completed build is handed to the tag step, not the release just sent for review.
+        self.assertEqual(OUTPUTS, [("live", "100")])
 
     def test_a_day_old_build_replaced_on_testing_is_still_promoted(self):
         # Merges land more than once a day, so the build on Closed testing now (130) is never a day
@@ -99,7 +100,8 @@ class AutoTest(unittest.TestCase):
         self.assertEqual(release["versionCodes"], ["110"])
         self.assertEqual(release["releaseNotes"], notes("c100", "c110"))
         self.assertNotIn("userFraction", release)
-        self.assertEqual(TAGS, [("android", "0.1.110", "c110")])
+        # 110 is not out to everyone until this release is committed, so 100 is still what is tagged.
+        self.assertEqual(OUTPUTS, [("live", "100")])
 
     def test_a_young_staged_rollout_waits_and_holds_back_newer_builds(self):
         self.assertIsNone(run(["auto"], [staged(110, 23)], uploads=[120]))
@@ -158,7 +160,19 @@ class ManualTest(unittest.TestCase):
 
     def test_dry_run_sends_and_tags_nothing(self):
         self.assertIsNone(run(["manual", "--dry-run"], [{"status": "completed", "versionCodes": ["100"]}]))
-        self.assertEqual(TAGS, [])
+        self.assertEqual(OUTPUTS, [])
+
+    def test_replacing_a_staged_or_halted_release_carries_its_notes_again(self):
+        # 110 reached a fifth of users (or none, if Google rejected it); 120's notes count from 100.
+        for status in ("inProgress", "halted"):
+            production = [{"status": "completed", "versionCodes": ["100"]},
+                          {"status": status, "versionCodes": ["110"], "userFraction": 0.2}]
+            release = run(["manual", "--rollout", "1"], production)
+            self.assertEqual(release["releaseNotes"], notes("c100", "c120"), status)
+
+    def test_a_build_not_on_master_gets_the_standing_line(self):
+        release = run(["manual", "--version-code", "999"], [{"status": "completed", "versionCodes": ["100"]}])
+        self.assertEqual(release["releaseNotes"][0]["text"], PROMOTE.release_notes.DEFAULT_NOTES)
 
     def test_rollout_out_of_range(self):
         with self.assertRaises(SystemExit):

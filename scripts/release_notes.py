@@ -10,10 +10,13 @@ A platform's release carries every note file present at the commit being release
 present at the commit the platform already has out, so a note goes out once on each platform and
 is left out of that platform's later releases. What a platform has out comes from its store when
 the script can read it (Play's production track, the App Store's live version), otherwise from
-the platform's newest tag; each promotion tags what its store has out (android/0.1.<code>,
-ios/<version>) as a record. A release with no new notes says DEFAULT_NOTES.
+the platform's newest tag; each promotion run tags what its store has fully out
+(android/0.1.<code>, ios/<version>) as a record. A release with no new notes says DEFAULT_NOTES.
 
   check                     Every note file at HEAD parses, names known platforms and fits Play.
+  record --platform P --version V --build N
+                            Tag build N's commit as P/V (the promotion workflows' last step, which
+                            alone holds the token that can push tags).
   show --platform P         The notes P's next release would carry, as the store gets them:
        [--base REF]         since REF (default: P's newest tag reachable from --head; none, all),
        [--head REF]         up to REF (default HEAD),
@@ -53,7 +56,7 @@ class NoteError(ValueError):
 
 def parse(text: str) -> tuple[frozenset[str], str]:
     """A note file's platforms and its text (paragraphs kept, lines within one joined)."""
-    lines = text.strip().splitlines()
+    lines = text.lstrip("\ufeff").strip().splitlines()
     platforms = frozenset(PLATFORMS)
     if lines and lines[0].lower().startswith("platforms:"):
         named = [p.strip().lower() for p in lines[0].split(":", 1)[1].split(",") if p.strip()]
@@ -84,30 +87,55 @@ def compose(notes: list[str], limit: int) -> str:
         text = "\n\n".join(notes[:keep] + ([MORE] if keep < len(notes) else []))
         if len(text) <= limit:
             return text
-    return notes[0][:limit]  # check keeps every note within Play's limit, so this is not reached
+    return notes[0][:limit]  # the newest note alone, cut only by a --limit below Play's
 
 
 # --- The notes between two commits ----------------------------------------------------------
 
 
 def files_at(commit: str) -> set[str]:
+    """The note files at `commit`. A commit git cannot read stops the run: taking it as having no
+    notes would send every shipped note again."""
     r = git("ls-tree", "-r", "--name-only", commit, "--", NOTES_DIR + "/", check=False)
-    return {p for p in r.stdout.split() if p.endswith(SUFFIX)} if r.returncode == 0 else set()
+    if r.returncode != 0:
+        sys.exit(f"::error::Cannot read {NOTES_DIR}/ at {commit}: {r.stderr.strip()}")
+    return {p for p in r.stdout.split() if p.endswith(SUFFIX)}
+
+
+def new_files(base: str | None, head: str) -> set[str]:
+    """Note files at head that base lacks, a renamed note counting as the note it was, so renaming a
+    shipped note does not send it again."""
+    if base is None:
+        return files_at(head)
+    files_at(base)  # stops on a base git cannot read
+    r = git("diff", "--name-status", "--find-renames", base, head,
+            "--", NOTES_DIR + "/", check=False)
+    if r.returncode != 0:
+        sys.exit(f"::error::Cannot compare {NOTES_DIR}/ between {base} and {head}: {r.stderr.strip()}")
+    added = {line.split("\t")[-1] for line in r.stdout.splitlines() if line.startswith("A")}
+    return {p for p in added if p.endswith(SUFFIX)}
 
 
 def added_at(path: str, head: str) -> int:
-    """When the note file was added in head's history (commit time), for the order of the notes."""
-    r = git("log", "-1", "--diff-filter=A", "--format=%ct", head, "--", path, check=False)
+    """When head's first-parent history gained the note file (a merge's time, not its branch's)."""
+    r = git("log", "--first-parent", "-1", "--diff-filter=A", "--format=%ct", head, "--", path, check=False)
     return int(r.stdout.strip() or 0)
 
 
+def read_note(head: str, path: str) -> str:
+    r = subprocess.run(["git", "-C", str(ROOT), "show", f"{head}:{path}"], capture_output=True, check=True)
+    try:
+        return r.stdout.decode("utf-8")
+    except UnicodeDecodeError as e:
+        raise NoteError(f"not UTF-8 ({e})") from e
+
+
 def notes_for(platform: str, base: str | None, head: str) -> list[str]:
-    """The texts of the notes for `platform` present at head and not at base (base None: all), newest first."""
-    new = files_at(head) - (files_at(base) if base else set())
+    """The texts of the notes for `platform` added between base and head (base None: all), newest first."""
     found = []
-    for path in new:
+    for path in new_files(base, head):
         try:
-            platforms, body = parse(git("show", f"{head}:{path}").stdout)
+            platforms, body = parse(read_note(head, path))
         except NoteError as e:
             print(f"::warning::{path} skipped: {e}", file=sys.stderr)
             continue
@@ -185,7 +213,7 @@ def check(head: str = "HEAD") -> list[str]:
     problems = []
     for path in sorted(files_at(head)):
         try:
-            _, body = parse(git("show", f"{head}:{path}").stdout)
+            _, body = parse(read_note(head, path))
         except NoteError as e:
             problems.append(f"{path}: {e}")
             continue
@@ -193,7 +221,9 @@ def check(head: str = "HEAD") -> list[str]:
             problems.append(f"{path}: {len(body)} characters; a note must fit Google Play's {LIMITS['android']}")
     r = git("ls-tree", "-r", "--name-only", head, "--", NOTES_DIR + "/", check=False)
     for path in r.stdout.split():
-        if not path.endswith(SUFFIX) and pathlib.PurePosixPath(path).name != "README.md":
+        if path.count("/") != 1:
+            problems.append(f"{path}: a note sits directly in {NOTES_DIR}/")
+        elif not path.endswith(SUFFIX) and pathlib.PurePosixPath(path).name != "README.md":
             problems.append(f"{path}: a note file ends in {SUFFIX}")
     return problems
 
@@ -202,6 +232,10 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="mode", required=True)
     sub.add_parser("check")
+    rec = sub.add_parser("record", help="tag the commit of build --build as the platform's --version")
+    rec.add_argument("--platform", choices=PLATFORMS, required=True)
+    rec.add_argument("--version", required=True)
+    rec.add_argument("--build", type=int, required=True)
     show = sub.add_parser("show")
     show.add_argument("--platform", choices=PLATFORMS, required=True)
     show.add_argument("--base", default="")
@@ -214,6 +248,13 @@ def main() -> None:
         for p in problems:
             print(f"::error::{p}")
         sys.exit(1 if problems else 0)
+    if args.mode == "record":
+        commit = commit_of(args.build)
+        if commit is None:
+            print(f"::warning::No master commit has build number {args.build}; nothing tagged")
+        else:
+            record(args.platform, args.version, commit)
+        return
     base = args.base or latest_tag(args.platform, args.head)
     print(release_text(args.platform, base, args.head, args.limit or None))
 

@@ -283,10 +283,11 @@ without rebuilding, as the Android app's promotion moves a Closed testing build 
 - **What's New** is the note files under `release-notes/` (`release-notes/README.md`) added
   between the App Store's live build and this one, so each note goes out once on iOS, whatever
   Android has already shipped; with none, "Corrections to the texts and improvements to the
-  app." Each run tags the live version's build (`ios/<version>`) as the record. Edit the text in
+  app." Each run tags the live version's build (`ios/<version>`) as the record, in a job of its
+  own. Edit the text in
   App Store Connect before Apple's review starts if a release deserves more.
 - **Releasing now**: a manual run from the Actions tab submits the newest valid build, of any
-  age, or the build number given, with the notes given or the file's;
+  age, or the build number given, with the notes given or those from `release-notes/`;
   *Only say what would be submitted* reads App Store Connect and changes nothing.
 - **Pausing**: disable the workflow in the Actions tab. A version in review can be taken back
   with *Remove from Review* in App Store Connect; the next run then fills in that version again
