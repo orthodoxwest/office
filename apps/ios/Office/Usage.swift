@@ -27,6 +27,9 @@ import Foundation
  * sandbox receipt, and a simulator none of the store's: neither reports (`storeInstall`), so each
  * submission's review is not a new reader, and the store's own installs are the readers counted.
  *
+ * Each beacon also carries the build's number on a header of its own (`usageBuildHeader`), which
+ * every reader of the build shares, so the report can tell how many readers have a correction.
+ *
  * Beacons go to the production server until a reply names the site's new address
  * (`usageEndpointHeader`); the app keeps that and posts there from then on.
  */
@@ -218,9 +221,14 @@ final class Usage {
         return "DivineOffice/\(version) (iOS \(os.majorVersion).\(os.minorVersion))"
     }()
 
+    /// The build's number (`CFBundleVersion`: master's commit count, as Android's version code is).
+    private static let build: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""
+
     /**
      * Posts one beacon as the web's page does: the header that marks it as a beacon, and the
-     * day's identifier as the cookie the server would otherwise have set.
+     * day's identifier as the cookie the server would otherwise have set. Beside them, the build's
+     * number, which the server counts apart from the beacon's words, so the report can say how
+     * soon a correction reaches readers.
      */
     static func send(endpoint: String, id: String, body: String, done: @escaping (Bool, String?) -> Void) {
         guard let url = URL(string: endpoint) else { return done(false, nil) }
@@ -230,6 +238,7 @@ final class Usage {
         request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
         request.setValue("office-usage=\(id)", forHTTPHeaderField: "Cookie")
         request.setValue(agent, forHTTPHeaderField: "User-Agent")
+        if !build.isEmpty { request.setValue(build, forHTTPHeaderField: usageBuildHeader()) }
         request.httpBody = Data(body.utf8)
         session.dataTask(with: request) { _, response, error in
             let http = response as? HTTPURLResponse

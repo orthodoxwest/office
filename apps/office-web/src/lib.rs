@@ -490,6 +490,28 @@ mod routing_tests {
         assert!(dated.contains("Lauds for Friday, December 25, 2026: The Nativity of Our Lord."), "the preview names the feast");
         let (_, home) = get("example.org", "/").await;
         assert!(home.contains("og:title\" content=\"Daily Office\"") && !home.contains("noindex"));
+        // A search result shows what was crawled days ago, so an undated page's title and
+        // description name no day, and the day's heading is kept out of the snippet.
+        let title = |page: &str| page.split("<title>").nth(1).and_then(|t| t.split("</title>").next()).unwrap_or("").to_string();
+        assert_eq!(title(&home), "Daily Office — The Benedictine Divine Office for the Orthodox Western Rite");
+        assert_eq!(title(&today), "Lauds — Daily Office");
+        assert!(
+            today.contains("<meta name=\"description\" content=\"Lauds for today in the Benedictine Divine Office of the Antiochian Western Rite Vicariate, composed for the day with its feast, psalms, hymn and propers.\">"),
+            "{today}"
+        );
+        assert!(home.contains("data-nosnippet") && today.contains("data-nosnippet"));
+        assert_eq!(title(&dated), "Lauds — Friday, December 25, 2026", "a dated hour keeps its date");
+        let (_, dated_home) = get("example.org", "/?date=2026-12-25").await;
+        assert_eq!(title(&dated_home), "Daily Office — Friday, December 25, 2026");
+        assert!(!dated_home.contains("ld+json") && !today.contains("ld+json"), "only home names the site");
+        let site_data = home
+            .split("<script type=\"application/ld+json\">")
+            .nth(1)
+            .and_then(|s| s.split("</script>").next())
+            .expect("home names the site");
+        let site_data: serde_json::Value = serde_json::from_str(site_data).expect(site_data);
+        assert_eq!(site_data["@type"], "WebSite");
+        assert_eq!(site_data["url"], "https://example.org/");
         assert!(home.contains("icons&#x2f;share-card.png") && home.contains("summary_large_image"));
         let (status, _) = get("example.org", &pwa::asset_url("icons/share-card.png")).await;
         assert_eq!(status, StatusCode::OK, "the preview card is served");

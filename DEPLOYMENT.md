@@ -79,6 +79,19 @@ in a simulator (`Usage.storeInstall`). `client:browser|pwa|android|ios` separate
 the web app installed to a home screen, and the native apps. The server also counts a
 first-day visit under `new-client:<client>`, so new readers split by client; no beacon sends it.
 
+**App builds.** Each native app's beacon carries its build number on an `X-Office-Build` header
+(`presentation::usage::BUILD_HEADER`): Android's version code and iOS's `CFBundleVersion`, which are
+both master's commit count when the build was made. The server counts a reader once a day under
+`build:android:<n>` or `build:ios:<n>` beside the beacon's words, which stay a closed vocabulary; a
+browser's header, or one that is not a plain number, is ignored. Every copy of a build sends the
+same number, so it says nothing of the reader. The report's "App builds" gives, for each app's
+newest builds, the share of its readers in the last seven days on that build or a newer one, and
+how many days after a build's first day half and nine in ten of the app's readers were. A
+correction merged at master's Nth commit is in build N and every later one, so "how long until a
+correction reaches most readers" is that table read at the first build at or past N. Readers of
+builds from before the header was sent count below every build. For a quick look at the store
+itself: `SELECT day, scope, users FROM totals WHERE scope LIKE 'build:%' ORDER BY day DESC, scope`.
+
 `week:first|again` and `month:first|again` say whether today is the first reporting day this
 browser or installation is counted in its calendar week (Monday to Sunday) and month, so a week's
 `week:first` counts add up to that week's readers, and a month's likewise, with nothing sent that

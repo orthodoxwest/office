@@ -3702,6 +3702,25 @@ test("posture cues sit in the psalm verses as red rubric runs", async ({ page })
   expect(style.smaller).toBe(true);
 });
 
+test("the Little Hours show posture cues only when a priest or deacon leads", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/prime/2026-10-04?form=private");
+  const psalm = page.locator(".psalm").first();
+  const cues = psalm.locator(".posture");
+  await expect(cues.first()).toBeAttached();
+  for (const cue of await cues.all()) await expect(cue).toBeHidden();
+  for (const form of ["deacon", "priest"]) {
+    await choosePrayerForm(page, form);
+    await expect(psalm.locator(".psalm-verses .verse").first().locator(".mediant + .posture")).toHaveText("Sit.");
+    await expect(psalm.locator(".gloria-patri .source-line > .posture")).toHaveText(["Bow.", "Stand upright."]);
+  }
+  await choosePrayerForm(page, "private");
+  for (const cue of await cues.all()) await expect(cue).toBeHidden();
+  // Lauds keeps its cues under every form.
+  await page.goto("/lauds/2026-10-04?form=private");
+  await expect(page.locator(".psalm").first().locator(".posture").first()).toBeVisible();
+});
+
 test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async ({ page }) => {
   const instruction = "The first stanza of the following hymn is said kneeling.";
   for (const theme of ["light", "dark"]) {
@@ -6971,13 +6990,17 @@ test("a chant score fills its column at every width and keeps its own when the e
 
 // Every frame's heights of the scores shown, from the page's first frame. A long page may be
 // painted before it is all parsed, so a frame can show fewer scores than the next: each score is
-// compared with itself.
+// compared with itself. While the page is still parsing, its last score may be the one the parser
+// is inside, its notation not yet read (a frame of "422/0", then "422/422"), so it is left out
+// until a later score or the end of parsing closes it.
 async function logScoreHeights(page) {
   await page.addInitScript(() => {
     window.__scores = [];
     const loop = () => {
       if (document.body) {
-        const heights = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).map((e) => Math.round(e.getBoundingClientRect().height));
+        const shown = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent);
+        if (document.readyState === "loading") shown.pop();
+        const heights = shown.map((e) => Math.round(e.getBoundingClientRect().height));
         if (heights.length) window.__scores.push(heights.join("/"));
       }
       if (performance.now() < 10000) requestAnimationFrame(loop);
@@ -7530,18 +7553,20 @@ test("a pressed row takes the pool of light and bare words dim", async ({ page }
 // The native apps (presentation::stores): a phone sees only its own store, and Reminders leads
 // with the app and shuts the calendar's fold before it is painted. Were there no App Store
 // listing (APP_STORE_ID unset), an iPhone would see neither the offer nor the fold's title, and
-// its page would read as the calendar alone.
+// its page would read as the calendar alone. A Fire tablet's Silk calls itself Android but has
+// no Google Play: it is offered no store, and its page is the calendar alone.
 for (const [platform, userAgent] of [
   ["android", "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"],
   ["ios", "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1"],
+  ["fire", "Mozilla/5.0 (Linux; Android 11; KFRASWI) AppleWebKit/537.36 (KHTML, like Gecko) Silk/130.4.1 like Chrome/130.0.6723.102 Safari/537.36"],
 ]) {
-  test(`Reminders and the colophon offer the ${platform} reader their own app`, async ({ browser }) => {
+  test(`Reminders and the colophon offer the ${platform} reader only their own store`, async ({ browser }) => {
     const context = await browser.newContext({ userAgent, viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, serviceWorkers: "block" });
     const page = await context.newPage();
     await page.goto("/reminders");
     await expect(page.locator("html")).toHaveAttribute("data-platform", platform);
     const ios = await page.locator(".reminder-calendar.has-ios").count() > 0;
-    const offered = platform === "android" || ios;
+    const offered = platform === "android" || (platform === "ios" && ios);
     const fold = page.locator("details.reminder-calendar");
     expect(await fold.evaluate((d) => d.open)).toBe(!offered);
     await expect(page.locator(".reminders-app")).toBeVisible({ visible: offered });

@@ -21,6 +21,7 @@ import org.orthodoxwest.office.core.UsageEvent
 import org.orthodoxwest.office.core.UsageHabits
 import org.orthodoxwest.office.core.usageAdvertisedEndpoint
 import org.orthodoxwest.office.core.usageBeacon
+import org.orthodoxwest.office.core.usageBuildHeader
 import org.orthodoxwest.office.core.usageEndpoint
 import org.orthodoxwest.office.core.usageEndpointHeader
 import org.orthodoxwest.office.core.usagePeriods
@@ -49,6 +50,9 @@ import org.orthodoxwest.office.core.usageTally
  * crawls it; each would count as a new reader. Nothing on those phones reliably says so (not all
  * carry Test Lab's setting, and the Play Store installs the build), but each is wiped within
  * minutes of the install, so an installation reports only once it is [SETTLING] old.
+ *
+ * Each beacon also carries the build's number on a header of its own (`usageBuildHeader`), which
+ * every reader of the build shares, so the report can tell how many readers have a correction.
  *
  * Beacons go to the production server until a reply names the site's new address
  * (`usageEndpointHeader`); the app keeps that and posts there from then on.
@@ -217,7 +221,10 @@ class Usage(
 
         /**
          * Posts one beacon as the web's page does: the header that marks it as a beacon, and the
-         * day's identifier as the cookie the server would otherwise have set.
+         * day's identifier as the cookie the server would otherwise have set. Beside them, the
+         * build's number (its version code, master's commit count, as iOS's build number is), which
+         * the server counts apart from the beacon's words, so the report can say how soon a
+         * correction reaches readers.
          */
         private fun send(endpoint: String, id: String, body: String): Reply {
             val connection = URL(endpoint).openConnection() as HttpURLConnection
@@ -232,6 +239,7 @@ class Usage(
                 connection.setRequestProperty("Content-Type", "text/plain")
                 connection.setRequestProperty("Cookie", "office-usage=$id")
                 connection.setRequestProperty("User-Agent", agent)
+                connection.setRequestProperty(usageBuildHeader(), BuildConfig.VERSION_CODE.toString())
                 connection.outputStream.use { it.write(body.toByteArray()) }
                 Reply(connection.responseCode in 200..299, connection.getHeaderField(usageEndpointHeader()))
             } finally {

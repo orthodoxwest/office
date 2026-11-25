@@ -1323,7 +1323,7 @@ mod tests {
     #[test]
     fn ordo_month_page_holds_one_month_between_its_neighbours() {
         let body = ordo("/calendar/2026/09");
-        assert!(body.contains("<title>September 2026 — Ordo</title>"));
+        assert!(body.contains("<title>September 2026 — Ordo — Daily Office</title>"));
         assert_eq!(body.matches(r#"<tr class="day "#).count(), 30);
         assert!(body.contains(r#"id="d-2026-09-01""#) && body.contains(r#"id="d-2026-09-30""#));
         assert!(!body.contains(r#"id="d-2026-08-31""#) && !body.contains(r#"id="d-2026-10-01""#));
@@ -1446,7 +1446,7 @@ mod tests {
     #[test]
     fn ordo_whole_year_keeps_every_day_and_jumps_within_itself() {
         let body = ordo("/calendar/2026/all");
-        assert!(body.contains("<title>Ordo 2026 — Whole year</title>"));
+        assert!(body.contains("<title>Ordo 2026 — Whole year — Daily Office</title>"));
         assert_eq!(body.matches(r#"<tr class="day "#).count(), 365);
         assert!(body.contains(r##"<a href="#january" aria-label="January""##));
         assert!(body.contains(r#"<section class="month" id="december">"#));

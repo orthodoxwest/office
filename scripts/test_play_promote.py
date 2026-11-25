@@ -16,18 +16,27 @@ PROMOTE = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = PROMOTE
 SPEC.loader.exec_module(PROMOTE)
 
-NOTES = [{"language": "en-US", "text": "Feast pages redesigned."}]
-TESTING = [{"status": "completed", "versionCodes": ["120"], "releaseNotes": NOTES}]
+TESTING = [{"status": "completed", "versionCodes": ["120"]}]
+
+
+def notes(base, head):
+    """The release notes the stand-in release_notes gives for the notes added from base to head."""
+    return [{"language": "en-US", "text": f"Notes {base}..{head}"}]
 
 
 NOW = PROMOTE.dt.datetime(2026, 11, 12, 15, 0, tzinfo=PROMOTE.dt.timezone.utc)
 
 
-def run(argv, production, testing=TESTING, uploads=(), notes=()):
+OUTPUTS = []
+
+
+def run(argv, production, testing=TESTING, uploads=()):
     """main()'s production release for these tracks and uploads, or None when it sends nothing.
 
-    `uploads` are version codes (their commit is "c<code>"); `notes` is whatsnew.txt's text at every commit."""
+    `uploads` are version codes; every version code's commit is "c<code>", except 999's, which is
+    not on master. The step outputs written go to OUTPUTS."""
     sent = []
+    OUTPUTS.clear()
 
     class Play:
         def __init__(self, _key):
@@ -44,7 +53,9 @@ def run(argv, production, testing=TESTING, uploads=(), notes=()):
 
     with mock.patch.object(PROMOTE, "Play", Play), \
             mock.patch.object(PROMOTE, "uploads", lambda _hours: [(c, f"c{c}") for c in uploads]), \
-            mock.patch.object(PROMOTE, "notes_at", lambda _sha: list(notes)), \
+            mock.patch.object(PROMOTE.release_notes, "commit_of", lambda n: None if n == 999 else f"c{n}"), \
+            mock.patch.object(PROMOTE.release_notes, "release_text", lambda _p, base, head: notes(base, head)[0]["text"]), \
+            mock.patch.object(PROMOTE, "output", lambda k, v: OUTPUTS.append((k, v))), \
             mock.patch.object(PROMOTE, "now", lambda: NOW), \
             mock.patch.dict(os.environ, {"PLAY_SERVICE_ACCOUNT_JSON": "{}"}), \
             mock.patch.object(sys, "argv", ["play-promote.py", *argv]), \
@@ -60,32 +71,37 @@ def staged(code, hours_ago, name=None):
 
 
 class AutoTest(unittest.TestCase):
-    def test_a_tested_build_goes_to_a_fifth_with_its_notes_and_start(self):
+    def test_a_tested_build_goes_to_a_fifth_with_the_notes_since_production_and_start(self):
         release = run(["auto", "--rollout", "0.2"], [{"status": "completed", "versionCodes": ["100"]}],
                       uploads=[120, 110])
         self.assertEqual(release, {"versionCodes": ["120"], "status": "inProgress", "userFraction": 0.2,
-                                   "releaseNotes": NOTES, "name": "0.1.120 staged 2026-11-12T15:00Z"})
+                                   "releaseNotes": notes("c100", "c120"), "name": "0.1.120 staged 2026-11-12T15:00Z"})
+        # Production's completed build is handed to the tag step, not the release just sent for review.
+        self.assertEqual(OUTPUTS, [("live", "100")])
 
     def test_a_day_old_build_replaced_on_testing_is_still_promoted(self):
         # Merges land more than once a day, so the build on Closed testing now (130) is never a day
         # old; 120, uploaded a day ago and since replaced there, goes out with its own notes.
-        later = [{"status": "completed", "versionCodes": ["130"], "releaseNotes": NOTES}]
-        own = [{"language": "en-US", "text": "Compline's hymn corrected."}]
+        later = [{"status": "completed", "versionCodes": ["130"]}]
         release = run(["auto"], [{"status": "completed", "versionCodes": ["100"]}], testing=later,
-                      uploads=[120, 110], notes=own)
+                      uploads=[120, 110])
         self.assertEqual(release["versionCodes"], ["120"])
-        self.assertEqual(release["releaseNotes"], own)
+        self.assertEqual(release["releaseNotes"], notes("c100", "c120"))
 
-    def test_a_build_without_notes_goes_without(self):
+    def test_the_first_release_carries_every_note(self):
         release = run(["auto"], [], testing=[], uploads=[120])
         self.assertEqual(release["versionCodes"], ["120"])
-        self.assertNotIn("releaseNotes", release)
+        self.assertEqual(release["releaseNotes"], notes(None, "c120"))
 
     def test_a_staged_rollout_is_finished_once_it_has_run_its_time(self):
-        release = run(["auto"], [{"status": "completed", "versionCodes": ["100"]}, staged(110, 48)], uploads=[120])
+        rollout = staged(110, 48) | {"releaseNotes": notes("c100", "c110")}
+        release = run(["auto"], [{"status": "completed", "versionCodes": ["100"]}, rollout], uploads=[120])
         self.assertEqual(release["status"], "completed")
         self.assertEqual(release["versionCodes"], ["110"])
+        self.assertEqual(release["releaseNotes"], notes("c100", "c110"))
         self.assertNotIn("userFraction", release)
+        # 110 is not out to everyone until this release is committed, so 100 is still what is tagged.
+        self.assertEqual(OUTPUTS, [("live", "100")])
 
     def test_a_young_staged_rollout_waits_and_holds_back_newer_builds(self):
         self.assertIsNone(run(["auto"], [staged(110, 23)], uploads=[120]))
@@ -128,36 +144,35 @@ class UploadsTest(unittest.TestCase):
         ), [(120, "old"), (110, "older")])
 
 
-class NotesTest(unittest.TestCase):
-    def notes(self, returncode, stdout):
-        with mock.patch.object(PROMOTE.subprocess, "run", lambda *_a, **_kw: mock.Mock(returncode=returncode, stdout=stdout)):
-            return PROMOTE.notes_at("abc")
-
-    def test_comment_lines_dropped(self):
-        self.assertEqual(self.notes(0, "# What's new\n#\n\nFeast pages redesigned.\n"),
-                         [{"language": "en-US", "text": "Feast pages redesigned."}])
-
-    def test_empty_or_missing_is_no_notes(self):
-        self.assertEqual(self.notes(0, "# only comments\n"), [])
-        self.assertEqual(self.notes(128, ""), [])
-
-
 class ManualTest(unittest.TestCase):
     def test_testings_newest_goes_to_everyone(self):
         release = run(["manual", "--rollout", "1"], [{"status": "completed", "versionCodes": ["100"]}])
-        self.assertEqual(release, {"versionCodes": ["120"], "status": "completed", "releaseNotes": NOTES})
+        self.assertEqual(release, {"versionCodes": ["120"], "status": "completed", "releaseNotes": notes("c100", "c120")})
 
     def test_a_named_build_at_a_share(self):
         release = run(["manual", "--rollout", "0.5", "--version-code", "115"], [])
         self.assertEqual(release, {"versionCodes": ["115"], "status": "inProgress", "userFraction": 0.5,
-                                   "name": "0.1.115 staged 2026-11-12T15:00Z"})
+                                   "releaseNotes": notes(None, "c115"), "name": "0.1.115 staged 2026-11-12T15:00Z"})
 
     def test_never_older_than_production(self):
         with self.assertRaises(SystemExit), contextlib.redirect_stdout(io.StringIO()):
             run(["manual", "--version-code", "90"], [{"status": "completed", "versionCodes": ["100"]}])
 
-    def test_dry_run_sends_nothing(self):
-        self.assertIsNone(run(["manual", "--dry-run"], []))
+    def test_dry_run_sends_and_tags_nothing(self):
+        self.assertIsNone(run(["manual", "--dry-run"], [{"status": "completed", "versionCodes": ["100"]}]))
+        self.assertEqual(OUTPUTS, [])
+
+    def test_replacing_a_staged_or_halted_release_carries_its_notes_again(self):
+        # 110 reached a fifth of users (or none, if Google rejected it); 120's notes count from 100.
+        for status in ("inProgress", "halted"):
+            production = [{"status": "completed", "versionCodes": ["100"]},
+                          {"status": status, "versionCodes": ["110"], "userFraction": 0.2}]
+            release = run(["manual", "--rollout", "1"], production)
+            self.assertEqual(release["releaseNotes"], notes("c100", "c120"), status)
+
+    def test_a_build_not_on_master_gets_the_standing_line(self):
+        release = run(["manual", "--version-code", "999"], [{"status": "completed", "versionCodes": ["100"]}])
+        self.assertEqual(release["releaseNotes"][0]["text"], PROMOTE.release_notes.DEFAULT_NOTES)
 
     def test_rollout_out_of_range(self):
         with self.assertRaises(SystemExit):

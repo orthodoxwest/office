@@ -108,7 +108,7 @@ impl Engine {
         canonicalize_source_refs(&mut hour, t);
         collapse_uniform_antiphons(&mut hour);
         mark_psalm_doxologies(&mut hour);
-        crate::posture::mark_postures(&mut hour, day, hour_name);
+        crate::posture::mark_postures(&mut hour, day, hour_name, form);
         mark_announced_antiphons(&mut hour, day, hour_name);
         crate::unrepeated::mark_unrepeated_openings(&mut hour);
         crate::chant::attach_scores(&mut hour, t);

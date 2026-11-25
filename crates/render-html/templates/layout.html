@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  {%- set description %}{% block description %}The Benedictine Divine Office of the Antiochian Western Rite Vicariate: Lauds through Compline for each day, with the ordo and liturgical calendar.{% endblock %}{% endset %}
+  {%- set description %}{% block description %}Pray the Benedictine Divine Office of the Orthodox Western Rite: Lauds through Compline for each day, with the ordo and calendar of the Antiochian Western Rite Vicariate.{% endblock %}{% endset %}
   <meta name="description" content="{{ description }}">
   <title>{% block title %}Daily Office{% endblock %}</title>
   {# Search engines and link previews (Messages, WhatsApp, Facebook, Slack) read these. A dated
@@ -24,6 +24,9 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Daily Office, the Benedictine Divine Office of the Western Rite: a gold cross in its ring over the name, on a night sky of gold-leaf stars, above a band reading Pray the hours">
   <meta name="twitter:card" content="summary_large_image">
+  {# Home names the site for search results (Google's site names read WebSite data on the
+       home page); the address's own wording is its other name. #}
+  {% if canonical == "/" %}<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Daily Office","alternateName":["Orthodox West Breviary","Benedictine Divine Office of the Western Rite"],"url":{{ (site ~ "/")|script_string }},"inLanguage":"en"}</script>{% endif %}
   {% endif %}
   {# The system's edge (Chromium's toolbar, an installed app's status bar) takes the wall's
        colour, style.css's --bg in each theme. Here, before the pre-paint script, so a stored
@@ -49,10 +52,13 @@
         }
       } catch (e) {}
       {# The reader's phone, if it is one, so the colophon names only its own app (style.css's
-           "The apps"). iPadOS calls itself a Mac, but a Mac has no touch screen. #}
+           "The apps"). iPadOS calls itself a Mac, but a Mac has no touch screen. A Fire tablet
+           (Silk, or a KF model) calls itself Android but has no Google Play, so it is offered no
+           store until the app is on Amazon's. #}
       try {
         var ua = navigator.userAgent || "";
-        var platform = /Android/.test(ua) ? "android"
+        var platform = /Silk\/|; KF[A-Z]{2,6}[;)]/.test(ua) ? "fire"
+          : /Android/.test(ua) ? "android"
           : (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) ? "ios" : "";
         if (platform) document.documentElement.setAttribute("data-platform", platform);
       } catch (e) {}
@@ -270,7 +276,7 @@
     {% block footer_matter %}{% endblock %}
     {# The native apps, in one quiet line (presentation::stores). A reader on a phone sees only
          their own platform's, by the pre-paint script's data-platform; one on an iPhone or iPad
-         sees nothing until the App Store listing is set. #}
+         sees nothing until the App Store listing is set, and one on a Fire tablet nothing yet. #}
     <p class="app-stores{% if app_store_url %} has-ios{% endif %}">{{ apps_lead }} <span class="app-store" data-store="android"><a href="{{ play_url|url }}">Android</a></span>{% if app_store_url %}<span class="app-store-and">, </span><span class="app-store" data-store="ios"><a href="{{ app_store_url|url }}">{{ apps_apple }}</a></span>{% endif %}</p>
   </footer>
 </body>

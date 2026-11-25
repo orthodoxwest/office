@@ -48,11 +48,13 @@ jobs:
       contents: read
       # The Publish to Play runs say when each build reached Closed testing.
       actions: read
+    outputs:
+      live: ${{ steps.promote.outputs.live }}
 
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          # Version codes are commit counts.
+          # Version codes are commit counts; the release notes compare commits and tags.
           fetch-depth: 0
           persist-credentials: false
 
@@ -60,6 +62,7 @@ jobs:
         run: python3 -m pip install --quiet --disable-pip-version-check google-auth==2.40.3 requests==2.32.4
 
       - name: Promote
+        id: promote
         env:
           PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           GITHUB_TOKEN: ${{ github.token }}
@@ -81,3 +84,25 @@ jobs:
             if [ "$DRY_RUN" = true ]; then set -- "$@" --dry-run; fi
           fi
           python3 scripts/play-promote.py "$@"
+
+  # Tags production's newest completed build (android/0.1.<code>), the release notes' record, in a
+  # job of its own: the token that can push never meets the Google client installed from PyPI.
+  tag:
+    name: Tag what production has out
+    needs: promote
+    if: needs.promote.outputs.live != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          # Version codes are commit counts.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Tag
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          LIVE: ${{ needs.promote.outputs.live }}
+        run: python3 scripts/release_notes.py record --platform android --version "0.1.$LIVE" --build "$LIVE"
