@@ -30,7 +30,7 @@ NOW = PROMOTE.dt.datetime(2026, 11, 12, 15, 0, tzinfo=PROMOTE.dt.timezone.utc)
 OUTPUTS = []
 
 
-def run(argv, production, testing=TESTING, uploads=()):
+def run(argv, production, testing=TESTING, uploads=(), tagged=()):
     """main()'s production release for these tracks and uploads, or None when it sends nothing.
 
     `uploads` are version codes; every version code's commit is "c<code>", except 999's, which is
@@ -54,6 +54,7 @@ def run(argv, production, testing=TESTING, uploads=()):
     with mock.patch.object(PROMOTE, "Play", Play), \
             mock.patch.object(PROMOTE, "uploads", lambda _hours: [(c, f"c{c}") for c in uploads]), \
             mock.patch.object(PROMOTE.release_notes, "commit_of", lambda n: None if n == 999 else f"c{n}"), \
+            mock.patch.object(PROMOTE.release_notes, "has_tag", lambda _p, v: v in tagged), \
             mock.patch.object(PROMOTE.release_notes, "release_text", lambda _p, base, head: notes(base, head)[0]["text"]), \
             mock.patch.object(PROMOTE, "output", lambda k, v: OUTPUTS.append((k, v))), \
             mock.patch.object(PROMOTE, "now", lambda: NOW), \
@@ -79,6 +80,11 @@ class AutoTest(unittest.TestCase):
         # Production's completed build is handed to the tag step, not the release just sent for review.
         self.assertEqual(OUTPUTS, [("live", "100")])
 
+    def test_already_tagged_live_build_skips_tag_output(self):
+        self.assertIsNone(run(["auto"], [{"status": "completed", "versionCodes": ["120"]}],
+                              uploads=[120], tagged={"0.1.120"}))
+        self.assertEqual(OUTPUTS, [])
+
     def test_a_day_old_build_replaced_on_testing_is_still_promoted(self):
         # Merges land more than once a day, so the build on Closed testing now (130) is never a day
         # old; 120, uploaded a day ago and since replaced there, goes out with its own notes.
@@ -100,8 +106,8 @@ class AutoTest(unittest.TestCase):
         self.assertEqual(release["versionCodes"], ["110"])
         self.assertEqual(release["releaseNotes"], notes("c100", "c110"))
         self.assertNotIn("userFraction", release)
-        # 110 is not out to everyone until this release is committed, so 100 is still what is tagged.
-        self.assertEqual(OUTPUTS, [("live", "100")])
+        # Finishing an already-reviewed staged rollout makes 110 live now, so it is tagged right away.
+        self.assertEqual(OUTPUTS, [("live", "110")])
 
     def test_a_young_staged_rollout_waits_and_holds_back_newer_builds(self):
         self.assertIsNone(run(["auto"], [staged(110, 23)], uploads=[120]))
@@ -148,6 +154,15 @@ class ManualTest(unittest.TestCase):
     def test_testings_newest_goes_to_everyone(self):
         release = run(["manual", "--rollout", "1"], [{"status": "completed", "versionCodes": ["100"]}])
         self.assertEqual(release, {"versionCodes": ["120"], "status": "completed", "releaseNotes": notes("c100", "c120")})
+
+    def test_manual_notes_override(self):
+        release = run(["manual", "--rollout", "1", "--notes", "Custom release note."],
+                      [{"status": "completed", "versionCodes": ["100"]}])
+        self.assertEqual(release["releaseNotes"], [{"language": "en-US", "text": "Custom release note."}])
+
+    def test_manual_notes_over_limit_rejected(self):
+        with self.assertRaises(SystemExit):
+            run(["manual", "--rollout", "1", "--notes", "x" * 501], [])
 
     def test_a_named_build_at_a_share(self):
         release = run(["manual", "--rollout", "0.5", "--version-code", "115"], [])

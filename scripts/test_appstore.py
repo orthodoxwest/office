@@ -529,6 +529,43 @@ class MainTest(unittest.TestCase):
         self.assertIn(STORE.DEFAULT_NOTES, err)
         self.assertNotIn("Notes from HEAD.", err)
 
+    def test_tag_output_emitted_only_when_untagged(self):
+        reads = dict(self.READS)
+        reads[f"/v1/apps/{APP}/appStoreVersions"] = {"data": [ON_SALE]}
+        reads["/v1/appStoreVersions/v100/build"] = {"data": {"type": "builds", "id": "b1", "attributes": {"version": "800"}}}
+        reads["/v1/reviewSubmissions"] = {"data": []}
+        reads["/v1/builds"] = builds_response((800, "1.0.0", 30, "VALID", "IN_BETA_TESTING"))
+        for already_tagged, expected in ((False, [{"version": "1.0.0", "build": "800"}]), (True, [])):
+            emitted = []
+            with mock.patch.object(STORE.release_notes, "has_tag", lambda _p, _v: already_tagged), \
+                    mock.patch.object(STORE, "output", lambda **kw: emitted.append(kw)):
+                self.run_main(["auto"], reads)
+            self.assertEqual(emitted, expected)
+
+
+class ReleaseNotesTest(unittest.TestCase):
+    def test_live_build_reads_highest_released_version_and_handles_errors(self):
+        older = version("v090", "0.9.0", "REPLACED_WITH_NEW_VERSION")
+        api = FakeApi({"/v1/appStoreVersions/v100/build": {"data": {"attributes": {"version": "800"}}}})
+        self.assertEqual(STORE.live_build(api, [older, ON_SALE]), ("1.0.0", 800))
+        self.assertIsNone(STORE.live_build(api, [version("v101", "1.0.1", "WAITING_FOR_REVIEW")]))
+
+        class BrokenApi:
+            def call(self, _m, _p):
+                raise STORE.ApiError("503", 503)
+
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertIsNone(STORE.live_build(BrokenApi(), [ON_SALE]))
+
+    def test_notes_between_uses_live_build_then_tag_fallback(self):
+        self.assertEqual(STORE.notes_between(800, None), STORE.DEFAULT_NOTES)
+        with mock.patch.object(STORE.release_notes, "commit_of", lambda n: "c800" if n == 800 else None), \
+                mock.patch.object(STORE.release_notes, "latest_tag", lambda _p, _c: "ctag"), \
+                mock.patch.object(STORE.release_notes, "release_text", lambda p, b, h: f"{p}:{b}..{h}"):
+            self.assertEqual(STORE.notes_between(800, "c900"), "ios:c800..c900")
+            self.assertEqual(STORE.notes_between(999, "c900"), "ios:ctag..c900")
+            self.assertEqual(STORE.notes_between(None, "c900"), "ios:ctag..c900")
+
 
 class TokenTest(unittest.TestCase):
     def test_der_signature_to_raw(self):

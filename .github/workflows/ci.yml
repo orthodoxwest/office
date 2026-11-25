@@ -248,7 +248,8 @@ jobs:
           script: |
             const isIgnored = filename =>
               filename.startsWith('data/') ||
-              filename.startsWith('tests/fixtures/golden/');
+              filename.startsWith('tests/fixtures/golden/') ||
+              filename.startsWith('release-notes/');
 
             let files;
             if (context.eventName === 'pull_request') {

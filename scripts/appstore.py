@@ -583,7 +583,7 @@ def run(args: argparse.Namespace) -> None:
         return
 
     live = live_build(api, versions)
-    if live and not args.dry_run:
+    if live and not args.dry_run and not release_notes.has_tag("ios", live[0]):
         # The workflow's next step, which alone holds a token that can push, tags it ios/<version>.
         output(version=live[0], build=str(live[1]))
     submissions = read_submissions(api, app)
