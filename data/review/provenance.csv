@@ -3190,3 +3190,4 @@ shared/leader/dead-pre-collect-prayers,31ab72550a74,diurnal,,77*,verified,codex,
 shared/leader/greeting-clergy,4bbd0f1b4623,diurnal,,9,verified,codex,2026-09-10,Word-for-word after normalization
 shared/leader/greeting-lay,dc209da1dc8f,diurnal,,9,verified,codex,2026-09-10,Word-for-word after normalization
 shared/leader/let-us-pray,5788e6d65d17,diurnal,,9,verified,codex,2026-09-10,Word-for-word after normalization
+shared/leader/marian-kneeling-private,971c8482687d,diurnal-rubrics.pdf,General Rubrics XXXIX.3,53,verified,claude,2026-11-25,"The rubric's sentence without the Officiant's rising at the Collect, for private recitation, where there is no Officiant; the choir form keeps it (shared/formulas/marian-kneeling-rubric)."

@@ -403,6 +403,7 @@ pub fn resolve_element(elem: &HourElement, t: &OfficeTexts) -> OfficeElement {
         "officiant-greeting" => oe.leader_slot = "greeting".to_string(),
         "officiant-confession" => oe.leader_slot = "confession".to_string(),
         "officiant-opening" => oe.leader_slot = "opening".to_string(),
+        "marian-rubric" => oe.leader_slot = "marian-kneeling".to_string(),
         "secret-prayer" => oe.voice = voice::build_prayer_voice(&elem.reference, &oe.text, false),
         // The Triduum's concluding Our Father is entirely silent (p. 313).
         "silent-prayer" => oe.voice = vec![VoiceSpan::new(oe.text.clone(), false, None)],

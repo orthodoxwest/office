@@ -614,6 +614,10 @@ Ref = shared/formulas/may-they-rest-in-peace
 Condition = not-appended-office-of-the-dead,not-office-of-the-dead,not-triduum
 Label = Final Antiphon of the Blessed Virgin Mary
 
+# Said kneeling except on Sundays (from Saturday Vespers) and in Paschaltide.
+Type = marian-rubric
+Ref = shared/formulas/marian-kneeling-rubric
+
 Type = marian
 Ref = seasonal
 

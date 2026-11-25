@@ -1582,6 +1582,30 @@ fn final_antiphons_are_said_kneeling_except_on_sundays_and_in_paschaltide() {
     }
 }
 
+#[test]
+fn the_kneeling_rubric_heads_the_final_antiphon_where_it_is_knelt() {
+    // The rule above, as composed: before the antiphon at Lauds, Vespers and
+    // Compline on the days it is knelt, and in each prayer form's words.
+    let (days, m) = year(2026);
+    const CHOIR: &str = "shared/formulas/marian-kneeling-rubric";
+    const ALONE: &str = "shared/leader/marian-kneeling-private";
+    for (date, knelt) in
+        [("2026-11-23", [true, true, true]), ("2026-11-28", [true, false, false]), ("2026-11-29", [false; 3]), ("2026-04-21", [false; 3])]
+    {
+        let d = &days[Date::parse(date).unwrap().ordinal() as usize - 1];
+        for (hour, knelt) in ["lauds", "vespers", "compline"].into_iter().zip(knelt) {
+            for form in PrayerForm::ALL {
+                let h = engine().compose_hour(hour, d, &m, form).unwrap();
+                let section = h.sections.iter().find(|s| s.elements.iter().any(|e| e.slot_ref == "marian-antiphon")).unwrap();
+                let refs: Vec<_> = section.elements.iter().map(|e| e.source_ref.as_str()).collect();
+                let rubric = if form == PrayerForm::Private { ALONE } else { CHOIR };
+                assert_eq!(refs.first() == Some(&rubric), knelt, "{date} {hour} {form:?}");
+                assert!(!refs.contains(&if form == PrayerForm::Private { CHOIR } else { ALONE }), "{date} {hour} {form:?}");
+            }
+        }
+    }
+}
+
 /// Maintainer's direction, 2026-10-11: the app shows each Hour fully
 /// assembled, so the Diurnal's Triduum rubrics that only say what is omitted
 /// or where the next part is (pp. 311, 314-316, 360-362) are left to the
