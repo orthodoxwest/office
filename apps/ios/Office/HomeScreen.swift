@@ -722,8 +722,9 @@ private struct Frontispiece: View {
                 let lit = now?.lit ?? HourLit(view)
                 VStack(spacing: 0) {
                     // A phone says what the hour is under the invitation's words, so the hours' table
-                    // keeps one shape whichever hour is now; the niche glosses every hour in its table.
-                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil, gloss: tier.desk ? "" : lit.note, glossSize: tier.gloss, glossInk: home.nowGloss,
+                    // keeps one shape whichever hour is now; the niche glosses every hour in its table,
+                    // and under the invitation only an eve's "First Vespers of …" (#959).
+                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil, gloss: tier.desk && !lit.eve ? "" : lit.note, glossSize: tier.gloss, glossInk: home.nowGloss,
                              // The hour now, once prayed, on its own day (Compline after midnight is
                              // yesterday's), as the web's `.pray-now.is-prayed`.
                              prayed: view.isToday && lit.label == view.prayNowLabel && model.hoursPrayed(on: view.prayNowDate).contains(view.prayNowHour)) {
@@ -1148,7 +1149,7 @@ private struct HourDirectory: View {
                     } else {
                         HStack(spacing: 0) {
                             VStack(spacing: m.px(2)) {
-                                PeriodIcon(period: row.period, color: o.flat, alpha: 0.9)
+                                PeriodIcon(period: row.period, color: o.flat, alpha: periodSignAlpha(row.hours, current))
                                     .scaleEffect(desk ? 1.12 : 1)
                                 Text(row.label).type(label).foregroundStyle(labelInk).lineLimit(1).fixedSize()
                             }
@@ -1308,7 +1309,7 @@ private struct HourList: View {
     var body: some View {
         HourListLayout(middle: m.px(tier.listMiddle)) {
             VStack(spacing: m.px(4)) {
-                PeriodIcon(period: period, color: o.flat, alpha: 0.9).scaleEffect(1.25)
+                PeriodIcon(period: period, color: o.flat, alpha: periodSignAlpha(hours, current)).scaleEffect(1.25)
                 Text(label).type(labelStyle).foregroundStyle(labelInk).lineLimit(1).fixedSize()
             }
             .padding(.trailing, m.px(22.4))
@@ -1402,17 +1403,27 @@ private struct HourListLayout: Layout {
     }
 }
 
+/// A period's sign in home's table: lit while one of its hours is now, the other two standing back,
+/// and all three alike when no hour is (the web's `.home-hour-group:has(.is-current)`).
+func periodSignAlpha(_ hours: [String], _ current: String) -> Double {
+    if current.isEmpty { return 0.9 }
+    return hours.contains(current) ? 1 : 0.52
+}
+
 /// What home's light rests on: the hour that is now (none in the small hours, when Compline is the
-/// day before's), and the invitation's words and gloss (the hour it opens).
+/// day before's), and the invitation's words and gloss (the hour it opens), and whether that gloss
+/// is the eve's "First Vespers of …" (`eve`).
 struct HourLit: Equatable {
     let hour: String
     let note: String
     let label: String
+    let eve: Bool
 
     init(_ view: HomeView) {
         hour = view.currentHour
         note = view.prayNowGloss
         label = view.prayNowLabel
+        eve = view.prayNowEve
     }
 }
 

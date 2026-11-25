@@ -81,6 +81,9 @@ pub struct HomeData {
     /// What the hour the invitation opens is ("Evening prayer"), set under its words on a phone
     /// so the hours' table keeps one shape whichever hour is now; empty for "Open Lauds".
     pub pray_now_gloss: String,
+    /// Whether the gloss is the eve's "First Vespers of …", which the wide niche sets under the
+    /// invitation too (#959).
+    pub pray_now_eve: bool,
     pub pray_now_link: String,
     pub hours: Vec<HomeHourLink>,
 }

@@ -435,9 +435,9 @@ extension EnvironmentValues {
         set { self[WideKey.self] = newValue }
     }
 
-    /// Whether a wide page is narrower than the hours' header holds on one line (from 701pt to 1000
-    /// of the page's measure): there an hour's links take a rank of their own under the brand, and
-    /// About stands beside Settings.
+    /// Whether a wide page is narrower than the hours' header once held on one line (from 701pt to
+    /// 1000 of the page's measure): there the versicles' markers stay in their gutter, as the web's
+    /// do at those widths.
     var ranked: Bool {
         get { self[RankedKey.self] }
         set { self[RankedKey.self] = newValue }

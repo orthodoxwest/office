@@ -454,7 +454,7 @@ private fun Frontispiece(
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val frame = frontispieceFrame(p)
-    val light = rememberHourLight(HourLit(view.currentHour, view.prayNowGloss, view.prayNowLabel), lightMoves)
+    val light = rememberHourLight(HourLit(view.currentHour, view.prayNowGloss, view.prayNowLabel, view.prayNowEve), lightMoves)
     val panelPlaster = ImageBitmap.imageResource(p.panel)
     var picking by remember { mutableStateOf(false) }
     val follow = LocalFollow.current
@@ -775,10 +775,11 @@ private fun Frontispiece(
                     Spacer(Modifier.height(tier.bandGap))
                     // The light moves with the hours: drawn each frame of a pass from the shared
                     // figures, and at rest from the view.
-                    val lit = light?.lit ?: HourLit(view.currentHour, view.prayNowGloss, view.prayNowLabel)
+                    val lit = light?.lit ?: HourLit(view.currentHour, view.prayNowGloss, view.prayNowLabel, view.prayNowEve)
                     // A phone says what the hour is under the invitation's words, so the hours' table keeps
-                    // one shape whichever hour is now; the niche glosses every hour in its table.
-                    PrayNow(lit.label, tier.pray, tier.prayTop, tier.prayBottom, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null, light?.words ?: 1f, gloss = if (desk) "" else lit.note, glossSize = tier.gloss, glossInk = home.nowGloss, prayed = invitePrayed && lit.label == view.prayNowLabel) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
+                    // one shape whichever hour is now; the niche glosses every hour in its table, and
+                    // under the invitation only an eve's "First Vespers of …" (#959).
+                    PrayNow(lit.label, tier.pray, tier.prayTop, tier.prayBottom, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null, light?.words ?: 1f, gloss = if (desk && !lit.eve) "" else lit.note, glossSize = tier.gloss, glossInk = home.nowGloss, prayed = invitePrayed && lit.label == view.prayNowLabel) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
                     HourDirectory(lit.hour, light, prayed, tier, titulusNow(p, season), home) { onHour(date, it) }
                 }
@@ -1089,7 +1090,7 @@ private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<Str
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    PeriodIcon(period, o.flat, modifier = if (desk) Modifier.scale(1.12f) else Modifier, alpha = 0.9f)
+                    PeriodIcon(period, o.flat, modifier = if (desk) Modifier.scale(1.12f) else Modifier, alpha = periodSignAlpha(hours, current))
                     Text(label, Modifier.padding(top = 2.dp), softWrap = false, style = labelStyle)
                 }
                 Spacer(Modifier.width(1.dp))
@@ -1179,7 +1180,7 @@ private fun HourList(
         contents = listOf(
             {
                 Column(Modifier.padding(end = 22.4.dp).semantics(mergeDescendants = true) { heading() }, horizontalAlignment = Alignment.CenterHorizontally) {
-                    PeriodIcon(period, o.flat, modifier = Modifier.scale(1.25f), alpha = 0.9f)
+                    PeriodIcon(period, o.flat, modifier = Modifier.scale(1.25f), alpha = periodSignAlpha(hours, current))
                     Text(label, Modifier.padding(top = 4.dp), softWrap = false, style = labelStyle)
                 }
             },
@@ -1233,8 +1234,21 @@ private fun HourList(
     }
 }
 
-/** What home's light rests on: the hour that is now (none in the small hours), the invitation's words and its gloss. */
-internal data class HourLit(val hour: String, val note: String, val label: String)
+/**
+ * A period's sign in home's table: lit while one of its hours is now, the other two standing back,
+ * and all three alike when no hour is (the web's `.home-hour-group:has(.is-current)`).
+ */
+internal fun periodSignAlpha(hours: List<String>, current: String): Float = when {
+    current.isEmpty() -> 0.9f
+    current in hours -> 1f
+    else -> 0.52f
+}
+
+/**
+ * What home's light rests on: the hour that is now (none in the small hours), the invitation's
+ * words and its gloss, and whether that gloss is the eve's "First Vespers of …" (`eve`).
+ */
+internal data class HourLit(val hour: String, val note: String, val label: String, val eve: Boolean = false)
 
 /** The light moving with the hours (the web's `HOUR_LIGHT`, `render_blocks::hour_light`), from one hour to the next. */
 internal class HourLightPass(val from: HourLit, val to: HourLit)
