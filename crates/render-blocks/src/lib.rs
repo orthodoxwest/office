@@ -179,6 +179,10 @@ pub struct Block {
     pub phrases: bool,
     /// The space above the block, after the block shown before it ([`space_blocks`]).
     pub space: Space,
+    /// Whether this block belongs to a Gospel Canticle's climax (its label or
+    /// opening verse), which fronts may illuminate with a threshold mark and an
+    /// elevated initial.
+    pub gospel: bool,
 }
 
 impl Block {
@@ -194,6 +198,7 @@ impl Block {
             score: String::new(),
             phrases: false,
             space: Space::None,
+            gospel: false,
         }
     }
 
@@ -461,6 +466,7 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
                 let kind = if announced { BlockKind::AnnouncementNote } else { BlockKind::AntiphonNote };
                 out.push(Block { kind, ..rubric_block(&unrepeated) });
             }
+            let gospel = elem.is_gospel_canticle();
             if !elem.label.is_empty() {
                 let mut runs = match elem.psalm_label_parts() {
                     Some((word, greek, "")) => vec![Run::new(word, RunStyle::Plain), Run::new(typeset(greek), RunStyle::Numeral)],
@@ -479,9 +485,15 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
                         Some(&presentation::gloss::PSALM_INCIPIT_GLOSS),
                     ));
                 }
-                out.push(Block::new(BlockKind::ItemLabel, runs));
+                let mut label_block = Block::new(BlockKind::ItemLabel, runs);
+                label_block.gospel = gospel;
+                out.push(label_block);
             }
+            let verse_start = out.len();
             psalm_verses(out, &elem.text, &elem.postures, elem.unrepeated.as_ref().map_or(0, |u| u.words));
+            if gospel && let Some(first_verse) = out[verse_start..].iter_mut().find(|b| b.kind == BlockKind::Verse && b.drop_cap) {
+                first_verse.gospel = true;
+            }
             if let Some(doxology) = doxology.filter(|d| !d.text.is_empty()) {
                 out.push(gloria_patri(&doxology.text, &doxology.postures));
             }

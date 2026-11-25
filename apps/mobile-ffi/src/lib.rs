@@ -1904,6 +1904,9 @@ pub struct BlockView {
     /// A quiet note opened by tapping `marker` (e.g. "Ant."), with no underline at rest.
     #[uniffi(default = None)]
     pub marker_gloss: Option<GlossView>,
+    /// Whether this block belongs to a Gospel Canticle's climax (label or opening verse).
+    #[uniffi(default = false)]
+    pub gospel: bool,
 }
 
 impl From<render_blocks::Block> for BlockView {
@@ -1917,6 +1920,7 @@ impl From<render_blocks::Block> for BlockView {
             space: b.space.into(),
             score: b.score,
             phrases: b.phrases,
+            gospel: b.gospel,
             runs: b
                 .runs
                 .into_iter()

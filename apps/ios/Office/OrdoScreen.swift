@@ -395,10 +395,12 @@ private struct OrdoHeader: View {
                         VStack(spacing: 0) {
                             Button { model.open(.ordo(year: year, month: mo, day: 0)) } label: {
                                 Text(monthShort(mo).uppercased()).type(.label(12.48, 0.06))
-                                    .foregroundStyle(current ? p.accent : p.muted)
+                                    .foregroundStyle(current ? p.titulus : p.muted)
                                     .frame(maxWidth: .infinity, minHeight: 44)
-                                    .overlay(alignment: .bottom) {
-                                        if current { Rectangle().fill(p.goldLine).frame(height: 2) }
+                                    .overlay(alignment: .top) {
+                                        if current {
+                                            Rectangle().fill(p.gold).frame(width: 4, height: 4).rotationEffect(.degrees(45)).padding(.top, m.px(4))
+                                        }
                                     }
                             }
                             .buttonStyle(Quiet())

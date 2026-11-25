@@ -777,8 +777,10 @@ private fun Frontispiece(
                     // figures, and at rest from the view.
                     val lit = light?.lit ?: HourLit(view.currentHour, view.prayNowGloss, view.prayNowLabel)
                     // A phone says what the hour is under the invitation's words, so the hours' table keeps
-                    // one shape whichever hour is now; the niche glosses every hour in its table.
-                    PrayNow(lit.label, tier.pray, tier.prayTop, tier.prayBottom, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null, light?.words ?: 1f, gloss = if (desk) "" else lit.note, glossSize = tier.gloss, glossInk = home.nowGloss, prayed = invitePrayed && lit.label == view.prayNowLabel) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
+                    // one shape whichever hour is now; the niche glosses every hour in its table, and carries
+                    // the First Vespers eve gloss on the invitation too (#959).
+                    val inviteGloss = if (desk && !lit.note.startsWith("First Vespers")) "" else lit.note
+                    PrayNow(lit.label, tier.pray, tier.prayTop, tier.prayBottom, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null, light?.words ?: 1f, gloss = inviteGloss, glossSize = tier.gloss, glossInk = home.nowGloss, prayed = invitePrayed && lit.label == view.prayNowLabel) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
                     HourDirectory(lit.hour, light, prayed, tier, titulusNow(p, season), home) { onHour(date, it) }
                 }
@@ -1083,14 +1085,17 @@ private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<Str
                     .then(if (i > 0) Modifier.onGloballyPositioned { joints[i - 1] = it.positionInParent().y - 1f } else Modifier)
                     .crownUnit("r-period$i"),
             ) {
+                val periodNow = current in hours
+                val periodAlpha = if (current.isEmpty() || periodNow) 1f else 0.52f
+                val periodStyle = if (periodNow) labelStyle.copy(color = p.titulus) else labelStyle
                 Column(
                     Modifier.width(labelWidth).fillMaxHeight().padding(vertical = 6.dp).padding(start = 1.4.dp)
                         .semantics(mergeDescendants = true) { heading() },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    PeriodIcon(period, o.flat, modifier = if (desk) Modifier.scale(1.12f) else Modifier, alpha = 0.9f)
-                    Text(label, Modifier.padding(top = 2.dp), softWrap = false, style = labelStyle)
+                    PeriodIcon(period, o.flat, modifier = if (desk) Modifier.scale(1.12f) else Modifier, alpha = periodAlpha)
+                    Text(label, Modifier.padding(top = 2.dp), softWrap = false, style = periodStyle)
                 }
                 Spacer(Modifier.width(1.dp))
                 Row(Modifier.weight(1f).heightIn(min = tier.row), verticalAlignment = Alignment.CenterVertically) {

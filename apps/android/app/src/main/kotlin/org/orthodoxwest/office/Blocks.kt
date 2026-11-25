@@ -155,7 +155,21 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
             if (glossed.isEmpty()) Text(runs(block), Modifier.fillMaxWidth(), style = style)
             else GlossedText(runs(block), block, open, { open = it }, Modifier.fillMaxWidth(), style)
         }
-        BlockKind.ITEM_LABEL -> ItemLabel(block, glossed.isNotEmpty(), open, { open = it }, m.fillMaxWidth(), Type.itemLabel.copy(color = p.titulus))
+        BlockKind.ITEM_LABEL -> Column(m.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            if (block.gospel) {
+                val ink = LocalOrnament.current.flat
+                Row(
+                    Modifier.widthIn(max = 152.dp).fillMaxWidth(0.48f).padding(bottom = Space.LINE.of(LocalDensity.current.bodyLine())),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Box(Modifier.weight(1f).height(1.dp).background(ink.copy(alpha = 0.52f)))
+                    PaintedCross(Modifier.size(10.8.dp), ink = ink)
+                    Box(Modifier.weight(1f).height(1.dp).background(ink.copy(alpha = 0.52f)))
+                }
+            }
+            ItemLabel(block, glossed.isNotEmpty(), open, { open = it }, Modifier.fillMaxWidth(), Type.itemLabel.copy(color = p.titulus))
+        }
         BlockKind.LATIN_TITLE, BlockKind.CANTICLE_SECTION -> rubricText(
             m.fillMaxWidth(),
             text.copy(color = p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center),

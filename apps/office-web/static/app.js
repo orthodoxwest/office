@@ -3534,6 +3534,8 @@ function plainClickOpensHere(e, link) {
     if (el) {
       el.textContent = gloss;
       el.hidden = !gloss;
+      if (gloss && gloss.indexOf("First Vespers") === 0) el.setAttribute("data-eve", "");
+      else el.removeAttribute("data-eve");
     }
   }
   function setPrayNowLabel(prayNow, label) {
@@ -6373,6 +6375,284 @@ function plainClickOpensHere(e, link) {
   if ("ResizeObserver" in window) new ResizeObserver(draw).observe(nav);
   else window.addEventListener("resize", draw);
   if (document.fonts) document.fonts.ready.then(draw);
+})();
+
+// The hour's headpiece and header closing rule: struck with home's seeded pen
+// (rule()) so the hour page shares the frescoed hand of home. Without script
+// the CSS gradients and border remain intact.
+(function () {
+  var header = document.querySelector(".page-hour .hour-header");
+  var h1 = header && header.querySelector("h1");
+  if (!header || !h1) return;
+  var NS = "http://www.w3.org/2000/svg";
+  var lastW = 0, lastH = 0, lastHeaderW = 0;
+  function makePath(d, cls) {
+    var p = document.createElementNS(NS, "path");
+    p.setAttribute("d", d);
+    if (cls) p.setAttribute("class", cls);
+    return p;
+  }
+  function draw() {
+    var w = h1.offsetWidth, h = h1.offsetHeight, hw = header.offsetWidth;
+    if (!w || !hw || (w === lastW && h === lastH && hw === lastHeaderW)) return;
+    lastW = w;
+    lastH = h;
+    lastHeaderW = hw;
+    var svg = h1.querySelector(":scope > svg.hour-head-rules");
+    if (!svg) {
+      svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("class", "hour-head-rules");
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("focusable", "false");
+      h1.appendChild(svg);
+      header.classList.add("is-ruled");
+    }
+    svg.setAttribute("viewBox", "0 0 " + w + " " + h);
+    svg.textContent = "";
+    var gap = Math.min(w * 0.22, 20);
+    var mid = w / 2;
+    var leftEnd = Math.max(8, mid - gap);
+    var rightStart = Math.min(w - 8, mid + gap);
+    // Upper double rule flanking the sun/moon/cross sign
+    svg.appendChild(makePath(rule(0, 1.1, leftEnd, 1.1, 1.9, 61), "rule-heavy"));
+    svg.appendChild(makePath(rule(0, 5.4, leftEnd, 5.4, 1.0, 161), "rule-fine"));
+    svg.appendChild(makePath(rule(rightStart, 1.1, w, 1.1, 1.9, 62), "rule-heavy"));
+    svg.appendChild(makePath(rule(rightStart, 5.4, w, 5.4, 1.0, 162), "rule-fine"));
+    // Lower double rule flanking the day-colour lozenge
+    var lozengeGap = Math.min(w * 0.16, 11);
+    var lEnd = Math.max(8, mid - lozengeGap);
+    var rStart = Math.min(w - 8, mid + lozengeGap);
+    svg.appendChild(makePath(rule(0, h - 5.4, lEnd, h - 5.4, 1.0, 63), "rule-fine"));
+    svg.appendChild(makePath(rule(0, h - 1.1, lEnd, h - 1.1, 1.9, 163), "rule-heavy"));
+    svg.appendChild(makePath(rule(rStart, h - 5.4, w, h - 5.4, 1.0, 64), "rule-fine"));
+    svg.appendChild(makePath(rule(rStart, h - 1.1, w, h - 1.1, 1.9, 164), "rule-heavy"));
+    // Closing rule at the foot of the hour header
+    var hSvg = header.querySelector(":scope > svg.hour-header-foot-rule");
+    if (!hSvg) {
+      hSvg = document.createElementNS(NS, "svg");
+      hSvg.setAttribute("class", "hour-header-foot-rule");
+      hSvg.setAttribute("aria-hidden", "true");
+      hSvg.setAttribute("focusable", "false");
+      header.appendChild(hSvg);
+    }
+    hSvg.setAttribute("viewBox", "0 0 " + hw + " 4");
+    hSvg.textContent = "";
+    hSvg.appendChild(makePath(rule(0, 2, hw, 2, 1.1, 69), "rule-foot"));
+  }
+  draw();
+  if ("ResizeObserver" in window) {
+    var ro = new ResizeObserver(draw);
+    ro.observe(h1);
+    ro.observe(header);
+  } else {
+    window.addEventListener("resize", draw);
+  }
+  if (document.fonts) document.fonts.ready.then(draw);
+})();
+
+// Quiet wayfinding inside long hours:
+// - Wide screens (>= 1180px): a whisper-quiet marginal Rubric Rail in the empty
+//   left plaster margin, dimmed while reading and clickable to jump.
+// - Phones (zero persistent chrome): strictly at the top edge, tapping the
+//   colour band / progress hairline unfolds a painted Breviary Index Card.
+(function () {
+  var hourEl = document.querySelector(".page-hour .office-hour");
+  var elements = hourEl && hourEl.querySelector(".elements");
+  if (!hourEl || !elements) return;
+
+  function visible(el) {
+    if (el.tagName !== "SUMMARY" && el.closest("details:not([open])")) return false;
+    return el.getClientRects().length > 0;
+  }
+
+  function cleanLabel(el) {
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll(".sr-only").forEach(function (n) { n.remove(); });
+    return (clone.textContent || "").replace(/\s+/g, " ").trim();
+  }
+
+  function collectParts() {
+    var nodes = elements.querySelectorAll(
+      ":scope > .section-heading, :scope > details.session-prayers > summary, :scope > .chapter > .section-heading, :scope > .hymn > .section-heading, :scope > .canticle-gospel > .item-label, [data-martyrology-variant] > .section-heading, .leader-slot > [data-leaders] > .section-heading"
+    );
+    var parts = [];
+    var seen = Object.create(null);
+    nodes.forEach(function (node) {
+      if (!visible(node)) return;
+      var label = cleanLabel(node);
+      if (!label) return;
+      // Shorten verbose canticle labels ("The Song of Zacharias · Benedictus...")
+      if (node.classList.contains("item-label") && label.indexOf("·") >= 0) {
+        label = label.split("·")[0].trim();
+      }
+      if (!node.id) {
+        var base = "part-" + label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        var id = base, n = 2;
+        while (seen[id] || document.getElementById(id)) id = base + "-" + (n++);
+        node.id = id;
+      }
+      seen[node.id] = true;
+      parts.push({ id: node.id, el: node, label: label, gospel: !!node.closest(".canticle-gospel") });
+    });
+    return parts;
+  }
+
+  var parts = collectParts();
+  if (parts.length < 3) return;
+
+  var hourTitle = (document.querySelector(".hour-header h1") || {}).textContent || "Hour";
+  hourTitle = hourTitle.trim();
+
+  // Desktop Marginal Rubric Rail
+  var rail = document.createElement("nav");
+  rail.className = "hour-rail";
+  rail.setAttribute("aria-label", "Parts of " + hourTitle);
+  var railHeading = document.createElement("span");
+  railHeading.className = "hour-rail-title";
+  railHeading.textContent = hourTitle;
+  rail.appendChild(railHeading);
+  var railList = document.createElement("ol");
+  railList.setAttribute("role", "list");
+  rail.appendChild(railList);
+
+  // Phone top-edge trigger (strictly at the top edge, zero visible chrome)
+  var edgeBtn = document.createElement("button");
+  edgeBtn.type = "button";
+  edgeBtn.className = "hour-index-edge";
+  edgeBtn.setAttribute("aria-label", "Parts of " + hourTitle);
+  edgeBtn.setAttribute("aria-expanded", "false");
+
+  // Phone Breviary Index Card overlay
+  var backdrop = document.createElement("div");
+  backdrop.className = "hour-index-backdrop";
+  backdrop.hidden = true;
+  var card = document.createElement("div");
+  card.className = "hour-index-card";
+  card.setAttribute("role", "dialog");
+  card.setAttribute("aria-modal", "true");
+  card.setAttribute("aria-label", "Parts of " + hourTitle);
+  var cardHead = document.createElement("div");
+  cardHead.className = "hour-index-head";
+  var cardTitle = document.createElement("span");
+  cardTitle.className = "hour-index-title";
+  cardTitle.textContent = hourTitle + " · Parts of the Hour";
+  var closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "hour-index-close";
+  closeBtn.textContent = "Close";
+  cardHead.appendChild(cardTitle);
+  cardHead.appendChild(closeBtn);
+  var cardList = document.createElement("ol");
+  cardList.className = "hour-index-list";
+  cardList.setAttribute("role", "list");
+  card.appendChild(cardHead);
+  card.appendChild(cardList);
+  backdrop.appendChild(card);
+
+  var railLinks = [];
+  var cardLinks = [];
+
+  function jumpTo(part) {
+    closeIndex(false);
+    var top = part.el.getBoundingClientRect().top + window.scrollY - 28;
+    var smooth = !window.matchMedia || !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: Math.max(0, top), behavior: smooth ? "smooth" : "auto" });
+  }
+
+  parts.forEach(function (part) {
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = "#" + part.id;
+    a.className = "hour-rail-link" + (part.gospel ? " is-gospel" : "");
+    a.textContent = part.label;
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      jumpTo(part);
+    });
+    li.appendChild(a);
+    railList.appendChild(li);
+    railLinks.push(a);
+
+    var cli = document.createElement("li");
+    var cb = document.createElement("button");
+    cb.type = "button";
+    cb.className = "hour-index-item" + (part.gospel ? " is-gospel" : "");
+    cb.textContent = part.label;
+    cb.addEventListener("click", function () { jumpTo(part); });
+    cli.appendChild(cb);
+    cardList.appendChild(cli);
+    cardLinks.push(cb);
+  });
+
+  hourEl.appendChild(rail);
+  hourEl.appendChild(edgeBtn);
+  hourEl.appendChild(backdrop);
+
+  function openIndex() {
+    updateActive();
+    backdrop.hidden = false;
+    edgeBtn.setAttribute("aria-expanded", "true");
+    closeBtn.focus();
+  }
+  function closeIndex(restoreFocus) {
+    if (backdrop.hidden) return;
+    backdrop.hidden = true;
+    edgeBtn.setAttribute("aria-expanded", "false");
+    if (restoreFocus) edgeBtn.focus();
+  }
+  edgeBtn.addEventListener("click", function () {
+    if (backdrop.hidden) openIndex();
+    else closeIndex(true);
+  });
+  closeBtn.addEventListener("click", function () { closeIndex(true); });
+  backdrop.addEventListener("click", function (e) {
+    if (e.target === backdrop) closeIndex(true);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !backdrop.hidden) closeIndex(true);
+  });
+
+  var activeIdx = -1;
+  var ticking = false;
+  function updateActive() {
+    ticking = false;
+    var idx = 0;
+    for (var i = 0; i < parts.length; i++) {
+      var r = parts[i].el.getBoundingClientRect();
+      if (r.top <= 140) idx = i;
+    }
+    if (idx === activeIdx) return;
+    activeIdx = idx;
+    for (var j = 0; j < parts.length; j++) {
+      var current = j === idx;
+      railLinks[j].classList.toggle("is-current", current);
+      if (current) railLinks[j].setAttribute("aria-current", "location");
+      else railLinks[j].removeAttribute("aria-current");
+      cardLinks[j].classList.toggle("is-current", current);
+      if (current) cardLinks[j].setAttribute("aria-current", "location");
+      else cardLinks[j].removeAttribute("aria-current");
+    }
+  }
+  window.addEventListener("scroll", function () {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(updateActive);
+    }
+  }, { passive: true });
+  updateActive();
+})();
+
+// Ordo mobile rank key disclosure: open automatically on wide screens, closed
+// on phones so the month strip and rows stay uncluttered.
+(function () {
+  var d = document.querySelector(".calendar-ranks-disclosure");
+  if (!d || !window.matchMedia) return;
+  var wide = window.matchMedia("(min-width: 701px)");
+  function sync() {
+    if (wide.matches) d.open = true;
+  }
+  sync();
+  if (wide.addEventListener) wide.addEventListener("change", sync);
 })();
 
 // About the Office (style.css "About the Office"): ruled with home's pen, plus

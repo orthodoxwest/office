@@ -82,7 +82,7 @@
            picker unfolds under its own control instead. #}
       <div class="home-stage">
       <div class="home-hours-face">
-      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}"><span class="pray-now-label">{{ pray_now_label }}</span> <span class="pray-now-gloss"{% if not pray_now_gloss %} hidden{% endif %}>{{ pray_now_gloss|typeset }}</span></a></p>
+      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}"><span class="pray-now-label">{{ pray_now_label }}</span> <span class="pray-now-gloss"{% if pray_now_gloss and pray_now_gloss[:13] == "First Vespers" %} data-eve=""{% endif %}{% if not pray_now_gloss %} hidden{% endif %}>{{ pray_now_gloss|typeset }}</span></a></p>
       <nav class="home-hour-links" aria-label="Hours for the day">
         <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
           <h3 class="home-hour-group-label" id="home-hours-morning">
@@ -216,10 +216,13 @@
         var gloss = prayNow.querySelector(".pray-now-gloss");
         var row = hour && entry[3] === 0 && card.querySelector('.home-hour-link[data-hour="' + hour + '"]');
         var note = hour && card.querySelector('.home-hour-link[data-hour="' + hour + '"] .home-hour-link-note');
-        var said = (row && row.getAttribute("data-eve")) || (note ? note.textContent : "");
+        var eve = row && row.getAttribute("data-eve");
+        var said = eve || (note ? note.textContent : "");
         if (gloss) {
           gloss.textContent = said;
           gloss.hidden = !said;
+          if (eve) gloss.setAttribute("data-eve", "");
+          else gloss.removeAttribute("data-eve");
         }
       })();
     </script>

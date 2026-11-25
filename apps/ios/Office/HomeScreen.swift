@@ -722,8 +722,10 @@ private struct Frontispiece: View {
                 let lit = now?.lit ?? HourLit(view)
                 VStack(spacing: 0) {
                     // A phone says what the hour is under the invitation's words, so the hours' table
-                    // keeps one shape whichever hour is now; the niche glosses every hour in its table.
-                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil, gloss: tier.desk ? "" : lit.note, glossSize: tier.gloss, glossInk: home.nowGloss,
+                    // keeps one shape whichever hour is now; the niche glosses every hour in its table,
+                    // and carries the First Vespers eve gloss on the invitation too (#959).
+                    let inviteGloss = (tier.desk && !lit.note.hasPrefix("First Vespers")) ? "" : lit.note
+                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil, gloss: inviteGloss, glossSize: tier.gloss, glossInk: home.nowGloss,
                              // The hour now, once prayed, on its own day (Compline after midnight is
                              // yesterday's), as the web's `.pray-now.is-prayed`.
                              prayed: view.isToday && lit.label == view.prayNowLabel && model.hoursPrayed(on: view.prayNowDate).contains(view.prayNowHour)) {
@@ -1146,11 +1148,14 @@ private struct HourDirectory: View {
                     if tier.list {
                         HourList(period: row.period, label: row.label, hours: row.hours, current: current, light: light, prayed: prayed, tier: tier, now: now, home: home, labelStyle: label, labelInk: labelInk, open: open)
                     } else {
+                        let periodNow = row.hours.contains(current)
+                        let periodAlpha = (current.isEmpty || periodNow) ? 1.0 : 0.52
+                        let periodInk = periodNow ? p.titulus : labelInk
                         HStack(spacing: 0) {
                             VStack(spacing: m.px(2)) {
-                                PeriodIcon(period: row.period, color: o.flat, alpha: 0.9)
+                                PeriodIcon(period: row.period, color: o.flat, alpha: periodAlpha)
                                     .scaleEffect(desk ? 1.12 : 1)
-                                Text(row.label).type(label).foregroundStyle(labelInk).lineLimit(1).fixedSize()
+                                Text(row.label).type(label).foregroundStyle(periodInk).lineLimit(1).fixedSize()
                             }
                             .padding(.vertical, m.px(6))
                             .padding(.leading, m.px(1.4))

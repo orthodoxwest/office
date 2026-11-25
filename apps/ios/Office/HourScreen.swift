@@ -278,6 +278,8 @@ struct HourScreen: View {
     @State private var width: CGFloat = 0
     @State private var headerHeight: CGFloat = 0
     @State private var epilogueHeight: CGFloat = 0
+    /// Whether the quiet top-edge Breviary Index Card is open.
+    @State private var indexOpen = false
     /// Where the reader was when the prayer form or the Martyrology changed, until the hour is
     /// composed again.
     @State private var held: Held?
@@ -414,7 +416,90 @@ struct HourScreen: View {
             // The cross's place in the ending moves with the text size (the menu's Text row).
             .onChange(of: m, initial: true) { reading.endMark = (top: m.px(endCrossTop), size: m.px(endCrossSize)) }
             .onChange(of: rows.count, initial: true) { reading.rows = rows.count }
-            .overlay(alignment: .top) { ProgressHairline(reading: reading).ignoresSafeArea(edges: .top) }
+            .overlay(alignment: .top) {
+                let parts: [(id: String, label: String)] = rows.compactMap { row in
+                    switch row {
+                    case let .toggle(label, _, id, _):
+                        return label.isEmpty ? nil : (id, label)
+                    case let .block(_, block, id, _, _):
+                        if block.kind == .heading || block.kind == .commemorationHeading || (block.kind == .itemLabel && block.gospel) {
+                            let raw = block.runs.map(\.text).joined().trimmingCharacters(in: .whitespacesAndNewlines)
+                            let label = (block.kind == .itemLabel && raw.contains("·")) ? String(raw.prefix { $0 != "·" }).trimmingCharacters(in: .whitespaces) : raw
+                            return label.isEmpty ? nil : (id, label)
+                        }
+                        return nil
+                    }
+                }
+                ZStack(alignment: .top) {
+                    ProgressHairline(reading: reading).ignoresSafeArea(edges: .top)
+                    if parts.count >= 3 {
+                        Color.clear.frame(height: 22).contentShape(Rectangle())
+                            .onTapGesture { indexOpen.toggle() }
+                            .accessibilityAddTraits(.isButton)
+                            .accessibilityLabel("Parts of \(view.title)")
+                    }
+                }
+            }
+            .overlay {
+                if indexOpen {
+                    let parts: [(id: String, label: String)] = rows.compactMap { row in
+                        switch row {
+                        case let .toggle(label, _, id, _):
+                            return label.isEmpty ? nil : (id, label)
+                        case let .block(_, block, id, _, _):
+                            if block.kind == .heading || block.kind == .commemorationHeading || (block.kind == .itemLabel && block.gospel) {
+                                let raw = block.runs.map(\.text).joined().trimmingCharacters(in: .whitespacesAndNewlines)
+                                let label = (block.kind == .itemLabel && raw.contains("·")) ? String(raw.prefix { $0 != "·" }).trimmingCharacters(in: .whitespaces) : raw
+                                return label.isEmpty ? nil : (id, label)
+                            }
+                            return nil
+                        }
+                    }
+                    let topEdge = p.dark ? p.lining : p.oak
+                    ZStack(alignment: .top) {
+                        (p.dark ? Color(rgb: 6, 11, 18, 0.56) : Color(rgb: 36, 28, 23, 0.28))
+                            .ignoresSafeArea()
+                            .onTapGesture { indexOpen = false }
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 0) {
+                                HStack {
+                                    Text("\(view.title.uppercased()) · PARTS OF THE HOUR").type(.label(11.5, 0.1)).foregroundStyle(p.titulus)
+                                    Spacer()
+                                    Button { indexOpen = false } label: {
+                                        Text("CLOSE").type(.label(11, 0.08)).foregroundStyle(p.muted).padding(.horizontal, 6).padding(.vertical, 4)
+                                    }
+                                    .buttonStyle(Quiet())
+                                }
+                                .padding(.bottom, m.px(8))
+                                Hairline(color: p.lining.opacity(0.4)).padding(.bottom, m.px(6))
+                                ForEach(parts, id: \.id) { part in
+                                    Button {
+                                        indexOpen = false
+                                        withAnimation(.easeInOut(duration: 0.25)) {
+                                            scroll.scrollTo(part.id, anchor: .top)
+                                        }
+                                    } label: {
+                                        Text(part.label).type(Scale.body).foregroundStyle(p.text)
+                                            .frame(maxWidth: .infinity, minHeight: 42, alignment: .leading)
+                                            .padding(.horizontal, m.px(8))
+                                    }
+                                    .buttonStyle(Quiet())
+                                }
+                            }
+                            .padding(m.px(14))
+                        }
+                        .frame(maxWidth: m.px(336), maxHeight: 460)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .background(p.surface)
+                        .overlay(Rectangle().stroke(p.border, lineWidth: 1))
+                        .overlay(alignment: .top) { Rectangle().fill(topEdge).frame(height: 2.5) }
+                        .overlay(Rectangle().stroke(p.surfaceEdge, lineWidth: 1).padding(4))
+                        .shadow(color: p.dark ? Color.black.opacity(0.5) : Color(rgb: 36, 28, 23, 0.18), radius: m.px(12), y: m.px(8))
+                        .padding(.top, m.px(20))
+                        .padding(.horizontal, m.px(16))
+                    }
+                }
+            }
             .revealing(scroll)
             // Begun again on the hour composed in another form, so it reads the rows now shown.
             .task(id: "\(date.iso)/\(view.hour)/\(composition)") { await watchPrayed() }
@@ -815,17 +900,23 @@ private struct FirstClassFrame: View {
     let top: CGFloat
     let bottom: CGFloat
     @Environment(\.palette) private var p
+    @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
 
     var body: some View {
         Canvas { ctx, size in
-            let height = size.height - top - bottom
+            let t = top + m.px(5)
+            let height = size.height - t - bottom
             guard height > 0 else { return }
             let side = size.width < m.px(frameClear) ? m.px(5) : (size.width - m.px(measure)) / 2 - m.px(24)
             let ink = GraphicsContext.Shading.color(p.lining.opacity(0.6))
+            let knop = GraphicsContext.Shading.color(o.flat.opacity(0.8))
+            let r = m.px(2)
             for x in [side, size.width - side - 3] {
-                ctx.fill(Path(CGRect(x: x, y: top, width: 1, height: height)), with: ink)
-                ctx.fill(Path(CGRect(x: x + 2, y: top, width: 1, height: height)), with: ink)
+                ctx.fill(Path(CGRect(x: x, y: t, width: 1, height: height)), with: ink)
+                ctx.fill(Path(CGRect(x: x + 2, y: t, width: 1, height: height)), with: ink)
+                ctx.fill(Path(ellipseIn: CGRect(x: x + 1.5 - r, y: t - r, width: 2 * r, height: 2 * r)), with: knop)
+                ctx.fill(Path(ellipseIn: CGRect(x: x + 1.5 - r, y: t + height - r, width: 2 * r, height: 2 * r)), with: knop)
             }
         }
         .allowsHitTesting(false)

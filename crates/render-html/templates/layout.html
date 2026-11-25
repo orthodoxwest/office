@@ -221,24 +221,10 @@
       {# Closed by default: desktop CSS shows the menu panel regardless of
            [open], and the native <details>/<summary> toggle lets no-JS mobile
            visitors expand it with a tap — no script needed either way. #}
-      {# Hour links appear only on hour pages, where hopping between hours is
-           the task. Home's prayer card already lists all seven, so repeating
-           them in the header there (and on ordo/reminders) was just noise. #}
-      {%- set on_hour = p in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %}
       <details class="site-menu">
         <summary>Menu</summary>
         <div class="site-menu-panel">
         <nav aria-label="Primary">
-          {%- if on_hour %}
-          <a href="{{ nav_link("/lauds", d)|url }}" data-nav="hour" data-hour="lauds"{% if p == "lauds" %} class="active" aria-current="page"{% endif %}>Lauds</a>
-          <a href="{{ nav_link("/prime", d)|url }}" data-nav="hour" data-hour="prime"{% if p == "prime" %} class="active" aria-current="page"{% endif %}>Prime</a>
-          <a href="{{ nav_link("/terce", d)|url }}" data-nav="hour" data-hour="terce"{% if p == "terce" %} class="active" aria-current="page"{% endif %}>Terce</a>
-          <a href="{{ nav_link("/sext", d)|url }}" data-nav="hour" data-hour="sext"{% if p == "sext" %} class="active" aria-current="page"{% endif %}>Sext</a>
-          <a href="{{ nav_link("/none", d)|url }}" data-nav="hour" data-hour="none"{% if p == "none" %} class="active" aria-current="page"{% endif %}>None</a>
-          <a href="{{ nav_link("/vespers", d)|url }}" data-nav="hour" data-hour="vespers"{% if p == "vespers" %} class="active" aria-current="page"{% endif %}>Vespers</a>
-          <a href="{{ nav_link("/compline", d)|url }}" data-nav="hour" data-hour="compline"{% if p == "compline" %} class="active" aria-current="page"{% endif %}>Compline</a>
-          <span class="nav-divider" aria-hidden="true"></span>
-          {%- endif %}
           <a href="{{ nav_link("/calendar", d)|url }}" data-nav="calendar"{% if p in ["calendar", "find", "feast"] %} class="active"{% endif %}{% if p == "calendar" %} aria-current="page"{% endif %}>Ordo</a>
           <a class="nav-secondary{% if p == "reminders" %} active{% endif %}" href="{{ nav_link("/reminders", d)|url }}" data-nav="reminders"{% if p == "reminders" %} aria-current="page"{% endif %}>Reminders</a>
           <a class="nav-secondary{% if p == "about" %} active{% endif %}" href="/about" data-nav="about"{% if p == "about" %} aria-current="page"{% endif %}>{{ about_menu }}</a>
@@ -251,11 +237,6 @@
         </div>
         </div>
       </details>
-      {# A wide hour too narrow for its links beside the brand sets them in a rank of their own, which
-           has no room for About: it stands up here beside Settings instead (style.css). #}
-      {%- if on_hour %}
-      <a class="site-about" href="/about" data-nav="about">{{ about_menu }}</a>
-      {%- endif %}
       {# Wide screens: the same preferences behind their own disclosure at the
            end of the header, so no page ends in a settings panel. Hidden on
            phones, whose menu carries them. #}

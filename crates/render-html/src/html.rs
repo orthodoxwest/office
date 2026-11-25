@@ -163,7 +163,12 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
             if !unrepeated.is_empty() {
                 sb.push_str(&render_rubric_spans(&unrepeated, "rubric unrepeated-note"));
             }
-            sb.push_str(&format!("<div class=\"{}\">", elem.kind.as_str()));
+            let gospel = elem.is_gospel_canticle();
+            if gospel {
+                sb.push_str("<div class=\"canticle canticle-gospel\"><span class=\"canticle-threshold\" aria-hidden=\"true\"></span>");
+            } else {
+                sb.push_str(&format!("<div class=\"{}\">", elem.kind.as_str()));
+            }
             if !elem.label.is_empty() {
                 sb.push_str("<h3 class=\"item-label\">");
                 match elem.psalm_label_parts() {

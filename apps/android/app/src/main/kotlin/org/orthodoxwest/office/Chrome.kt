@@ -496,15 +496,11 @@ class SiteNav(
 fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: SiteNav? = null) {
     val p = LocalPalette.current
     val wide = LocalWide.current && nav != null
-    // From 701 to 999dp an hour's links don't fit beside the brand and Settings: left in the row
-    // they would crowd it, so they take a centred rank of their own beneath, as a book sets its
-    // running head over the page. About, which that rank has no room for, stands beside Settings.
-    val rank = wide && LocalRanked.current && nav?.onHour != null
     Column {
         Row(
             // The web's nav shell: held to 68rem, so the whole list fits on one line.
             Modifier.fillMaxWidth().wrapContentWidth().widthIn(max = if (wide) 1088.dp else Dp.Infinity).fillMaxWidth()
-                .padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = if (rank) 0.dp else 5.6.dp).heightIn(min = 44.dp),
+                .padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = 5.6.dp).heightIn(min = 44.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // (On home each of the header's words is a row of the crown's play: Crown.kt.)
@@ -519,9 +515,7 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
                 Text(if (LocalWide.current) " DAILY OFFICE" else "DAILY OFFICE", Modifier.padding(start = 6.08.dp), style = Type.brand.copy(color = p.text))
             }
             Spacer(Modifier.weight(1f))
-            if (rank) {
-                InlineNav(nav!!, links = false, modifier = Modifier.crownUnit("r-nav"))
-            } else if (wide) {
+            if (wide) {
                 InlineNav(nav!!, modifier = Modifier.crownUnit("r-nav"))
             } else {
                 Row(Modifier.crownUnit("r-menu").tap(label = "Menu", onClick = onMenu).disclosed(menuOpen).padding(start = 12.8.dp, end = 3.2.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -530,16 +524,11 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
                 }
             }
         }
-        if (rank) {
-            Box(Modifier.fillMaxWidth().padding(top = 2.4.dp, bottom = 5.6.dp), contentAlignment = Alignment.Center) {
-                InlineNav(nav!!, about = false, settings = false, modifier = Modifier.crownUnit("r-links"))
-            }
-        }
         // The beam: a 4dp course of oak, its upper edge catching the light as a timber's arris does.
         Box(
             Modifier.fillMaxWidth().height(5.dp).drawBehind {
                 drawRect(p.materialHighlight, size = size.copy(height = 1.dp.toPx()))
-                drawRect(p.oak.copy(alpha = 0.55f), Offset(0f, 1.dp.toPx()), size.copy(height = 4.dp.toPx()))
+                drawRect(p.oak.copy(alpha = 0.55f), Offset(0f, 1.dp.toPx()), size = size.copy(height = 4.dp.toPx()))
             },
         )
     }
@@ -547,8 +536,7 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
 
 /**
  * The desktop header's links (`.site-menu nav`): muted, the current one in ink over the lining's
- * rule; Reminders and About quieter. `links`, `about` and `settings` choose the pages' links, About
- * and Settings after them, which a ranked header sets apart.
+ * rule; Reminders and About quieter. Direct hour links live on Home and the hour epilogue.
  */
 @Composable
 private fun InlineNav(nav: SiteNav, links: Boolean = true, about: Boolean = true, settings: Boolean = true, modifier: Modifier = Modifier) {
@@ -569,10 +557,6 @@ private fun InlineNav(nav: SiteNav, links: Boolean = true, about: Boolean = true
             }
         }
         if (links) {
-            nav.onHour?.let { onHour ->
-                nav.hours.forEach { h -> link(hourLabel(h), h == nav.currentHour) { onHour(h) } }
-                Box(Modifier.padding(horizontal = 2.4.dp).width(1.dp).height(24.dp).background(p.border))
-            }
             link("Ordo", nav.ordoCurrent, onClick = nav.onOrdo)
             link("Reminders", nav.remindersCurrent, secondary = true, onClick = nav.onReminders)
         }
@@ -599,31 +583,40 @@ private fun MenuRow(content: @Composable RowScope.() -> Unit) {
 }
 
 /**
- * A menu cell, muted until it is the one: a `page` (an hour, the Ordo, Reminders, About) is in ink
- * over the lining's rule when current, a chosen setting in the accent over the ornament's
- * (`--ornament`). `spoken` names a cell drawn as a glyph.
+ * A menu cell, muted until it is the one: a `page` (the Ordo, Reminders, About) is in ink over a
+ * word-measured lining rule when current, a chosen setting in the accent over a word-measured
+ * ornament rule (`--ornament`). `spoken` names a cell drawn as a glyph.
  */
 @Composable
 private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle, page: Boolean = false, spoken: String? = null, onClick: () -> Unit) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val haptics = LocalHapticFeedback.current
+    val ruleColor = if (page) p.lining else o.flat
     Box(
         Modifier.weight(1f).heightIn(min = 44.dp).tap(label = spoken, selected = current, lit = Lit(homeInk(p).nowPool)) {
             if (!page && !current) haptics.chose()
             onClick()
-        }
-            .then(if (page) Modifier.goldUnderline(current, p.lining, width = 1.5.dp) else Modifier.goldUnderline(current, o.flat)),
+        },
         contentAlignment = Alignment.Center,
-    ) { Text(label, style = style.copy(color = if (!current) p.muted else if (page) p.text else p.accent, textAlign = TextAlign.Center)) }
+    ) {
+        Text(
+            label,
+            Modifier.drawBehind {
+                if (current) {
+                    val y = size.height + 3.dp.toPx()
+                    drawLine(ruleColor, Offset(0f, y), Offset(size.width, y), 1.5.dp.toPx())
+                }
+            },
+            style = style.copy(color = if (!current) p.muted else if (page) p.text else p.accent, textAlign = TextAlign.Center),
+        )
+    }
 }
 
 /**
- * The site menu's dropdown panel: on an hour, the day's hours (2/3/2 as on home, a hairline between
- * the bands); the Ordo, Reminders and About; then the Theme, Text and Martyrology rows, the current
- * choice in the accent over the ornament's rule. The pages are muted, the current one underlined in
- * the lining. `prefsOnly` is the wide header's Settings: the preference rows alone, under the
- * header's end at `end`.
+ * The site menu's plaster-and-oak tablet: the Ordo, Reminders and About parted by gilt points;
+ * then the Theme, Text, Martyrology and Chant rows, the current choice in the accent over a
+ * word-measured ornament rule. `prefsOnly` is the wide header's Settings: the preference rows alone.
  */
 @Composable
 fun MenuPanel(
@@ -648,8 +641,9 @@ fun MenuPanel(
 ) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
-    val nav = Type.label(13.12f, 0.06f)
+    val nav = Type.label(12.8f, 0.06f)
     val plaster = ImageBitmap.imageResource(p.panel)
+    val topEdge = if (p.dark) o.line else p.oak
     // The panel drops a little as it fades in, and lifts as it fades out, on Tempo's settle
     // (leaving faster than it came); it stays in the window until it has gone.
     val shown = remember { MutableTransitionState(false) }
@@ -672,44 +666,33 @@ fun MenuPanel(
             Column(
                 Modifier
                     .padding(start = ShadowRoom, end = ShadowRoom, top = ShadowRise, bottom = ShadowRoom + 8.dp)
-                    // The web's soft shadow under the panel: `0 .45rem 1rem rgba(36, 28, 23, .09)`.
-                    .dropShadow(RectangleShape, Shadow(radius = 16.dp, color = Color(36, 28, 23).copy(alpha = 0.09f), offset = DpOffset(0.dp, 7.2.dp)))
-                    .width(if (prefsOnly) 288.dp else 336.dp)
+                    .dropShadow(RectangleShape, Shadow(radius = 22.dp, color = Color(if (p.dark) 0 else 36, if (p.dark) 0 else 28, if (p.dark) 0 else 23).copy(alpha = if (p.dark) 0.45f else 0.14f), offset = DpOffset(0.dp, 8.dp)))
+                    .width(if (prefsOnly) 312.dp else 336.dp)
                     .background(p.surface)
                     .then(if (p.dark) Modifier.drawBehind { nightPlaster(plaster) } else Modifier)
                     .border(1.dp, p.border)
-                    // The panel's top edge is the painted line (`--ornament-line`), with the surface's
-                    // edge catching the light just inside it (`inset 0 1px 0 var(--surface-edge)`).
+                    // Plaster-and-oak tablet: oak/ornament top course + delicate inset inner hairline.
                     .drawBehind {
-                        drawRect(o.line, size = size.copy(height = 2.dp.toPx()))
-                        val w = 1.dp.toPx()
-                        drawRect(p.surfaceEdge, Offset(w, 2.dp.toPx()), size.copy(width = size.width - 2 * w, height = w))
+                        drawRect(topEdge, size = size.copy(height = 2.5.dp.toPx()))
+                        val inset = 4.dp.toPx()
+                        drawRect(p.surfaceEdge, Offset(inset, inset + 1.5.dp.toPx()), Size(size.width - 2 * inset, size.height - 2 * inset - 1.5.dp.toPx()), style = Stroke(1.dp.toPx()))
                     }
                     .verticalScroll(rememberScrollState())
-                    .padding(10.4.dp),
+                    .padding(12.dp),
             ) {
-                if (onHour != null && !prefsOnly) {
-                    listOf(listOf("lauds", "prime"), listOf("terce", "sext", "none"), listOf("vespers", "compline")).forEachIndexed { i, row ->
-                        // A hairline between the bands, so the grouping reads without labels.
-                        if (i > 0) Hairline(p.surfaceEdge)
-                        MenuRow { row.forEach { h -> MenuCell(hourLabel(h).uppercase(), h == currentHour, nav, page = true, spoken = hourLabel(h)) { onHour(h) } } }
-                        Spacer(Modifier.height(2.4.dp))
-                    }
-                    Hairline(p.border, Modifier.padding(vertical = 4.dp))
-                }
                 if (!prefsOnly) {
-                    // Ordo, Reminders and About share one three-up row, matching Terce · Sext · None above.
+                    // Ordo, Reminders and About share one balanced three-up row parted by gilt points.
                     MenuRow {
                         MenuCell("ORDO", onOrdoCurrent, nav, page = true, spoken = "Ordo", onClick = onOrdo)
-                        // Habit setup and introduction: quieter than the Ordo, as on the web (`.nav-secondary`).
+                        GiltPoint()
                         MenuCell("REMINDERS", onRemindersCurrent, Type.label(11.52f, 0.04f), page = true, spoken = "Reminders", onClick = onReminders)
+                        GiltPoint()
                         MenuCell(about.uppercase(), onAboutCurrent, Type.label(11.52f, 0.04f), page = true, spoken = about, onClick = onAbout)
                     }
-                    Hairline(p.border, Modifier.padding(top = 6.4.dp))
-                    Spacer(Modifier.height(6.4.dp))
+                    Hairline(p.border, Modifier.padding(top = 5.6.dp, bottom = 6.4.dp))
                 }
                 MenuRow {
-                    Text("THEME", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
+                    Text("THEME", Modifier.width(72.dp).padding(start = 10.4.dp), style = Type.label(11.2f, 0.09f).copy(color = p.titulus))
                     ThemeChoice.entries.forEach { t -> MenuCell(t.label.uppercase(), t == theme, Type.label(12f, 0.06f), spoken = t.label) { onTheme(t) } }
                 }
                 // The names are the church's, so a line says what they are, as on the web.
@@ -725,7 +708,7 @@ fun MenuPanel(
                 )
                 Hairline(p.surfaceEdge)
                 MenuRow {
-                    Text("TEXT", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
+                    Text("TEXT", Modifier.width(72.dp).padding(start = 10.4.dp), style = Type.label(11.2f, 0.09f).copy(color = p.titulus))
                     TextSize.entries.forEach { s ->
                         val size = when (s) { TextSize.SMALL -> 13f; TextSize.DEFAULT -> 16f; TextSize.LARGE -> 20f }
                         val spoken = when (s) { TextSize.SMALL -> "Smaller text"; TextSize.DEFAULT -> "Default text size"; TextSize.LARGE -> "Larger text" }
@@ -733,17 +716,17 @@ fun MenuPanel(
                     }
                 }
                 // The Martyrology at Prime: Off and On under the last two themes, the longer label
-                // taking the first theme's cell, as on the web.
+                // taking the left tracks, as on the web.
                 val martyrology = LocalMartyrology.current
                 Hairline(p.surfaceEdge)
                 MenuRow {
-                    Row(Modifier.width(54.dp)) {
+                    Row(Modifier.width(72.dp)) {
                         Text(
                             "MARTYROLOGY",
                             // Said as the web's group names the row.
                             Modifier.semantics { contentDescription = "Martyrology at Prime" }
                                 .padding(start = 10.4.dp).wrapContentWidth(Alignment.Start, unbounded = true),
-                            style = Type.label(10.56f, 0.08f).copy(color = p.muted),
+                            style = Type.label(11.2f, 0.09f).copy(color = p.titulus),
                             maxLines = 1,
                             softWrap = false,
                         )
@@ -759,7 +742,7 @@ fun MenuPanel(
                 if (chant.offered) {
                     Hairline(p.surfaceEdge)
                     MenuRow {
-                        Text("CHANT", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
+                        Text("CHANT", Modifier.width(72.dp).padding(start = 10.4.dp), style = Type.label(11.2f, 0.09f).copy(color = p.titulus))
                         Spacer(Modifier.weight(1f))
                         listOf("OFF" to false, "ON" to true).forEach { (label, on) ->
                             MenuCell(label, on == chant.on, Type.label(12f, 0.06f), spoken = "Chant ${label.lowercase()}") { chant.onChange(on) }

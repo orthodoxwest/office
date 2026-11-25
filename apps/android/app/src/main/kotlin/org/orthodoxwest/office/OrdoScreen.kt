@@ -360,16 +360,15 @@ private fun OrdoHeader(
                     Column(Modifier.weight(1f)) {
                         Box(
                             Modifier.fillMaxWidth().heightIn(min = 44.dp)
-                                .drawBehind {
-                                    val w = 2.dp.toPx()
-                                    if (current) drawLine(p.goldLine, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)
-                                }
                                 .tap(label = m.getDisplayName(JavaTextStyle.FULL, Locale.US), selected = current) { onMonth(year, m.value) },
                             contentAlignment = Alignment.Center,
                         ) {
+                            if (current) {
+                                GiltPoint(Modifier.align(Alignment.TopCenter).padding(top = 4.dp))
+                            }
                             Text(
                                 m.getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
-                                style = Type.label(12.48f, 0.06f).copy(color = if (current) p.accent else p.muted),
+                                style = Type.label(12.48f, 0.06f).copy(color = if (current) p.titulus else p.muted),
                             )
                         }
                         CourseBand(

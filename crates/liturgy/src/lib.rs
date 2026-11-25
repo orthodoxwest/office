@@ -369,6 +369,14 @@ impl OfficeElement {
         }
     }
 
+    /// Whether this element is one of the three Gospel Canticles (Benedictus,
+    /// Magnificat, Nunc Dimittis), the liturgical climax of Lauds, Vespers, and
+    /// Compline.
+    pub fn is_gospel_canticle(&self) -> bool {
+        self.kind == ElementType::Canticle
+            && matches!(self.source_ref.as_str(), "canticles/benedictus" | "canticles/magnificat" | "canticles/nunc-dimittis")
+    }
+
     /// What a renderer prints: an announced antiphon's opening words, or the
     /// whole text.
     pub fn display_text(&self) -> String {

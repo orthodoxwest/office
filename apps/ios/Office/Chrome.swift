@@ -232,11 +232,6 @@ struct SiteHeader: View {
 
     var body: some View {
         let nav = SiteNav(model)
-        // From 701 to 999pt (1099 at Larger text) an hour's links don't fit beside the brand and
-        // Settings: left in the row they would crowd it, so they take a centred rank of their own
-        // beneath, as a book sets its running head over the page. About, which that rank has no
-        // room for, stands beside Settings.
-        let rank = wide && ranked && nav.onHour != nil
         VStack(spacing: 0) {
             HStack(spacing: 0) {
                 Button(action: model.goHome) {
@@ -258,9 +253,7 @@ struct SiteHeader: View {
                 .buttonStyle(Quiet())
                 .accessibilityLabel("Daily Office, home")
                 Spacer(minLength: m.px(8))
-                if rank {
-                    InlineNav(nav: nav, links: false)
-                } else if wide {
+                if wide {
                     InlineNav(nav: nav)
                 } else {
                     Button { model.toggle(.menu) } label: {
@@ -279,17 +272,11 @@ struct SiteHeader: View {
             }
             .padding(.horizontal, m.px(gutter))
             .padding(.top, m.px(6.4))
-            .padding(.bottom, rank ? 0 : m.px(5.6))
+            .padding(.bottom, m.px(5.6))
             .frame(minHeight: 44)
             // The web's nav shell: held to 68rem, so the whole list fits on one line.
             .frame(maxWidth: wide ? m.px(1088) : .infinity)
             .frame(maxWidth: .infinity)
-            if rank {
-                InlineNav(nav: nav, about: false, settings: false)
-                    .padding(.top, m.px(2.4))
-                    .padding(.bottom, m.px(5.6))
-                    .frame(maxWidth: .infinity)
-            }
             // The beam: a 4pt course of oak, its upper edge catching the light as a timber's arris does.
             VStack(spacing: 0) {
                 Rectangle().fill(p.materialHighlight).frame(height: 1)
@@ -300,10 +287,9 @@ struct SiteHeader: View {
     }
 }
 
-/// The desktop header's links (`.site-menu nav`), muted: the current one in ink over the lining's terracotta; Reminders and About quieter.
+/// The desktop header's links (`.site-menu nav`), muted: the current one in ink over the lining's terracotta; Reminders and About quieter. Direct hour links live on Home and the hour epilogue.
 private struct InlineNav: View {
     let nav: SiteNav
-    /// The pages' links, About, and Settings after them; a ranked header sets the links apart.
     var links = true
     var about = true
     var settings = true
@@ -314,10 +300,6 @@ private struct InlineNav: View {
     var body: some View {
         HStack(spacing: 0) {
             if links {
-                if let onHour = nav.onHour {
-                    ForEach(nav.hours, id: \.self) { h in link(hourLabel(h), h == nav.currentHour) { onHour(h) } }
-                    Rectangle().fill(p.border).frame(width: 1, height: m.px(24)).padding(.horizontal, m.px(2.4))
-                }
                 link("Ordo", nav.ordoCurrent, action: nav.onOrdo)
                 link("Reminders", nav.remindersCurrent, secondary: true, action: nav.onReminders)
             }
@@ -359,11 +341,9 @@ private struct InlineNav: View {
 }
 
 /**
- * The site menu's panel: on an hour, the day's hours (2/3/2 as on home, a hairline between the
- * bands); the Ordo, Reminders and About, the current page underlined in the lining's terracotta;
- * then the Theme, Text and Martyrology rows, muted, the current choice in the accent over the
- * gilding's rule. `prefsOnly` is the wide header's Settings: the Theme, Text and Martyrology rows
- * alone. Its top edge is the painted line, which follows the season of the page shown.
+ * The site menu's plaster-and-oak tablet: the Ordo, Reminders and About parted by gilt points,
+ * then the Theme, Text, Martyrology and Chant rows with word-measured gold underlines.
+ * `prefsOnly` is the wide header's Settings: the preference rows alone.
  */
 struct MenuPanel: View {
     var prefsOnly = false
@@ -375,29 +355,19 @@ struct MenuPanel: View {
 
     var body: some View {
         let nav = SiteNav(model)
-        let style = TextStyle.label(13.12, 0.06)
+        let style = TextStyle.label(12.8, 0.06)
+        let topEdge = p.dark ? o.line : p.oak
         VStack(spacing: 0) {
-            if let onHour = nav.onHour, !prefsOnly {
-                let bands = [["lauds", "prime"], ["terce", "sext", "none"], ["vespers", "compline"]]
-                ForEach(Array(bands.enumerated()), id: \.offset) { i, row in
-                    HStack(spacing: 0) {
-                        ForEach(row, id: \.self) { h in link(hourLabel(h).uppercased(), h == nav.currentHour, style) { onHour(h) } }
-                    }
-                    // A hairline between the bands, so the grouping reads without labels.
-                    .overlay(alignment: .top) { if i > 0 { Hairline(color: p.surfaceEdge) } }
-                    .padding(.bottom, m.px(2.4))
-                }
-                Hairline(color: p.border).padding(.vertical, m.px(4))
-            }
             if !prefsOnly {
-                // Ordo, Reminders and About share one three-up row, matching Terce · Sext · None above.
+                // Ordo, Reminders and About share one balanced three-up row parted by gilt points.
                 HStack(spacing: 0) {
                     link("ORDO", nav.ordoCurrent, style, action: nav.onOrdo)
-                    // Habit setup and the page for newcomers, not hours: quieter than the Ordo, as on the web.
+                    GiltPoint()
                     link("REMINDERS", nav.remindersCurrent, .label(11.52, 0.04), action: nav.onReminders)
+                    GiltPoint()
                     link(aboutPage.menu.uppercased(), nav.aboutCurrent, .label(11.52, 0.04), action: nav.onAbout)
                 }
-                Hairline(color: p.border).padding(.top, m.px(6.4)).padding(.bottom, m.px(6.4))
+                Hairline(color: p.border).padding(.top, m.px(5.6)).padding(.bottom, m.px(6.4))
             }
             HStack(spacing: 0) {
                 rowLabel("THEME")
@@ -418,20 +388,18 @@ struct MenuPanel: View {
                     cell("A", s == model.textSize, .label(s == .small ? 13 : s == .standard ? 16 : 20, 0), spoken: textSizeName(s)) {
                         guard s != model.textSize else { return }
                         chose()
-                        // At once, as on the web: the prayer is set again at its new size in one
-                        // frame, never seen re-wrapping, and the hour holds the reader's row.
                         model.chooseTextSize(s)
                     }
                 }
             }
             .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
             // The Martyrology at Prime: Off and On under the last two themes, the longer label
-            // taking the first theme's cell, as on the web.
+            // taking the left tracks, as on the web.
             HStack(spacing: 0) {
-                Text("MARTYROLOGY").type(.label(10.56, 0.08)).foregroundStyle(p.muted)
+                Text("MARTYROLOGY").type(.label(11.2, 0.09)).foregroundStyle(p.titulus)
                     .lineLimit(1).fixedSize()
                     .padding(.leading, m.px(10.4))
-                    .frame(width: m.px(54), alignment: .leading)
+                    .frame(width: m.px(72), alignment: .leading)
                     .accessibilityHidden(true)
                 Color.clear.frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
                 ForEach([false, true], id: \.self) { on in
@@ -447,10 +415,10 @@ struct MenuPanel: View {
             // Chant, laid out as the Martyrology's row, once a hymn or Marian antiphon has a score.
             if model.offersChant {
                 HStack(spacing: 0) {
-                    Text("CHANT").type(.label(10.56, 0.08)).foregroundStyle(p.muted)
+                    Text("CHANT").type(.label(11.2, 0.09)).foregroundStyle(p.titulus)
                         .lineLimit(1).fixedSize()
                         .padding(.leading, m.px(10.4))
-                        .frame(width: m.px(54), alignment: .leading)
+                        .frame(width: m.px(72), alignment: .leading)
                         .accessibilityHidden(true)
                     Color.clear.frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
                     ForEach([false, true], id: \.self) { on in
@@ -465,8 +433,8 @@ struct MenuPanel: View {
                 hint(Text(prefHints.chant))
             }
         }
-        .padding(m.px(10.4))
-        .frame(maxWidth: m.px(prefsOnly ? 288 : 336))
+        .padding(m.px(12))
+        .frame(maxWidth: m.px(prefsOnly ? 312 : 336))
         // Its own height, whatever the screen offers: a row never takes up the room below it.
         .fixedSize(horizontal: false, vertical: true)
         .background {
@@ -482,13 +450,10 @@ struct MenuPanel: View {
             }
         }
         .overlay(Rectangle().stroke(p.border, lineWidth: 1))
-        // The panel's top edge is the painted line (`--ornament-line`).
-        .overlay(alignment: .top) { Rectangle().fill(o.line).frame(height: 2) }
-        // The web's shadow, in both themes: a light catching the edge under the painted line
-        // (`inset 0 1px 0 var(--surface-edge)`), and a soft one cast below (`0 0.45rem 1rem`,
-        // its blur twice a SwiftUI radius).
-        .overlay(alignment: .top) { Rectangle().fill(p.surfaceEdge).frame(height: 1).padding(.top, 2).padding(.horizontal, 0.5) }
-        .shadow(color: Color(rgb: 36, 28, 23, 0.09), radius: m.px(8), y: m.px(7.2))
+        // Plaster-and-oak tablet: oak/ornament top course + delicate inset inner hairline.
+        .overlay(alignment: .top) { Rectangle().fill(topEdge).frame(height: 2.5) }
+        .overlay(Rectangle().stroke(p.surfaceEdge, lineWidth: 1).padding(4))
+        .shadow(color: p.dark ? Color.black.opacity(0.45) : Color(rgb: 36, 28, 23, 0.14), radius: m.px(11), y: m.px(8))
     }
 
     /// A quiet italic line under a row whose names need saying (the web's `.pref-hint`).
@@ -496,8 +461,8 @@ struct MenuPanel: View {
         t.type(TextStyle(size: 12.8, line: 17.3, italic: true)).foregroundStyle(p.muted)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, m.px(10.4))
-            .padding(.top, m.px(7.2))
-            .padding(.bottom, m.px(9.6))
+            .padding(.top, m.px(4.8))
+            .padding(.bottom, m.px(8.8))
     }
 
     /// A button's name in its hint, upright in small caps as the button is in capitals (the web's `.pref-name`).
@@ -506,33 +471,34 @@ struct MenuPanel: View {
     }
 
     private func rowLabel(_ s: String) -> some View {
-        Text(s).type(.label(10.56, 0.08)).foregroundStyle(p.muted)
-            .frame(width: m.px(54), alignment: .leading)
+        Text(s).type(.label(11.2, 0.09)).foregroundStyle(p.titulus)
+            .frame(width: m.px(72), alignment: .leading)
             .padding(.leading, m.px(10.4))
             .accessibilityHidden(true)
     }
 
-    /// A link of the site's navigation: muted, the current page in ink over the lining's terracotta.
+    /// A link of the site's navigation: muted, the current page in ink over a word-measured lining rule.
     private func link(_ label: String, _ current: Bool, _ style: TextStyle, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label).type(style).foregroundStyle(current ? p.text : p.muted)
-                .frame(maxWidth: .infinity, minHeight: 44)
                 .overlay(alignment: .bottom) {
-                    if current { Rectangle().fill(p.lining).frame(height: 1.5) }
+                    if current { Rectangle().fill(p.lining).frame(height: 1.5).offset(y: m.px(3)) }
                 }
+                .frame(maxWidth: .infinity, minHeight: 44)
         }
         .buttonStyle(Lit())
         .accessibilityLabel(label.capitalized)
         .accessibilityAddTraits(current ? .isSelected : [])
     }
 
-    /// A setting's choice: muted, the chosen one in the accent over the gilding's rule (the web's
-    /// `[aria-pressed="true"]`), marked as the current hour is on home.
+    /// A setting's choice: muted, the chosen one in the accent over a word-measured gold rule.
     private func cell(_ label: String, _ current: Bool, _ style: TextStyle, spoken: String? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label).type(style).foregroundStyle(current ? p.accent : p.muted)
+                .overlay(alignment: .bottom) {
+                    if current { Rectangle().fill(o.flat).frame(height: 1.5).offset(y: m.px(3)) }
+                }
                 .frame(maxWidth: .infinity, minHeight: 44)
-                .goldUnderline(current, o.flat)
         }
         .buttonStyle(Lit())
         .accessibilityLabel(spoken ?? label.capitalized)

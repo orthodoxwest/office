@@ -737,7 +737,7 @@ summary:focus-visible {
 .site-prefs .theme-switch,
 .site-prefs .text-size-switch {
   display: grid;
-  grid-template-columns: 3.4rem repeat(3, minmax(0, 1fr));
+  grid-template-columns: 4.5rem repeat(3, minmax(0, 1fr));
   align-items: stretch;
 }
 
@@ -745,12 +745,11 @@ summary:focus-visible {
   border-top: 1px solid var(--surface-edge);
 }
 
-/* Off and On sit under the last two themes; the longer label takes the
-   first theme's cell. */
+/* Off and On sit cleanly on the right; the longer label takes the left two tracks. */
 .site-prefs .martyrology-switch,
 .site-prefs .chant-switch {
   display: grid;
-  grid-template-columns: 3.4rem repeat(3, minmax(0, 1fr));
+  grid-template-columns: 4.5rem repeat(3, minmax(0, 1fr));
   align-items: stretch;
   border-top: 1px solid var(--surface-edge);
 }
@@ -764,7 +763,7 @@ summary:focus-visible {
 .pref-hint {
   grid-column: 1 / -1;
   margin: 0;
-  padding: 0.45rem 0.65rem 0.6rem;
+  padding: 0.3rem 0.65rem 0.55rem;
   color: var(--muted);
   font-size: 0.8rem;
   font-style: italic;
@@ -782,10 +781,11 @@ summary:focus-visible {
   display: flex;
   align-items: center;
   padding-left: 0.65rem;
-  color: var(--muted);
-  font-size: 0.66rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--titulus);
+  font-size: 0.7rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.09em;
+  text-transform: none;
 }
 
 /* The phone menu's copy; wide screens use the one under Settings. */
@@ -841,21 +841,22 @@ summary:focus-visible {
   outline-offset: 2px;
 }
 
-/* Hung from the nav shell, a little below the header's rule, at the gutter
-   the page copy uses (as the phone menu's panel is), and over the page. */
+/* Plaster-and-oak tablet hung from the nav shell, a little below the header's
+   beam, framed by a delicate double inner hairline. */
 .settings-prefs {
   position: absolute;
   z-index: 50;
   top: calc(100% + 0.7rem + 1px + 0.35rem);
   right: max(var(--page-gutter), env(safe-area-inset-right));
-  width: 18rem;
-  padding: 0.65rem;
+  width: 19.5rem;
+  padding: 0.8rem 0.75rem;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-top: 2px solid var(--ornament-line);
+  border-top: 2.5px solid var(--oak);
   box-shadow:
-    inset 0 1px 0 var(--surface-edge),
-    0 0.45rem 1rem rgba(36, 28, 23, 0.09);
+    inset 0 0 0 4px var(--surface),
+    inset 0 0 0 5px var(--surface-edge),
+    0 0.65rem 1.8rem rgba(36, 28, 23, 0.14);
 }
 
 .site-settings:not([open]) > .settings-prefs {
@@ -870,10 +871,10 @@ summary:focus-visible {
   background-color: transparent;
   color: var(--muted);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 0.4rem 0.65rem;
+  padding: 0.4rem 0.45rem;
   cursor: pointer;
   line-height: 1.2;
 }
@@ -886,7 +887,7 @@ summary:focus-visible {
   font-size: 0.9rem;
   letter-spacing: normal;
   text-transform: none;
-  padding: 0.35rem 0.8rem;
+  padding: 0.35rem 0.65rem;
   line-height: 1;
 }
 
@@ -921,13 +922,15 @@ summary:focus-visible {
   color: var(--accent);
 }
 
-/* Chosen is marked the way the current hour is marked on home: a gold
-   underline, not a filled cell. One vocabulary for "this is the one". */
+/* Chosen is marked with a delicate word-measured gold underline rather than a
+   full-cell shelf bar. */
 .theme-option[aria-pressed="true"],
 .text-size-option[aria-pressed="true"] {
   background-color: transparent;
   color: var(--accent);
-  box-shadow: inset 0 -1px 0 var(--ornament);
+  box-shadow: none;
+  text-decoration: underline 1.5px var(--ornament);
+  text-underline-offset: 0.35em;
 }
 
 .theme-option:focus-visible,
@@ -960,7 +963,7 @@ summary:focus-visible {
   .text-size-option {
     min-height: 2.75rem;
     font-size: 0.75rem;
-    padding: 0.5rem 0.35rem;
+    padding: 0.5rem 0.3rem;
   }
 
   .text-size-option {
@@ -989,14 +992,12 @@ summary:focus-visible {
 @media (min-width: 701px) and (pointer: coarse) {
   .site-brand,
   .site-menu nav a,
-  .site-about,
   .site-settings > summary {
     position: relative;
   }
 
   .site-brand::after,
   .site-menu nav a::after,
-  .site-about::after,
   .site-settings > summary::before {
     content: "";
     position: absolute;
@@ -1007,77 +1008,8 @@ summary:focus-visible {
   }
 }
 
-/* A tablet's width holds the hours' full list but not beside the brand and
-   Settings: left to wrap, it broke wherever it ran out and stranded
-   Reminders on a line of its own. There the list takes a rank to itself
-   under them, centred, as a book sets its running head over the page, and
-   About, which the rank has no room for at Larger text, stands beside
-   Settings (#927). The upper bound is where brand, links and Settings fit
-   on one line: the header is 58.5rem, 936px at the default size and 1029px
-   at Larger text, which keeps the rank to 1099px, as the apps keep it below
-   1000 of their own measure, which Larger text makes 1100. */
-@media (min-width: 701px) and (max-width: 999px) {
-  .page-hour .site-nav-shell {
-    flex-wrap: wrap;
-    row-gap: 0.15rem;
-  }
-
-  .page-hour .site-menu {
-    order: 3;
-    flex-basis: 100%;
-  }
-
-  .page-hour .site-menu-panel {
-    justify-content: center;
-  }
-
-  .page-hour .site-menu nav {
-    flex-wrap: nowrap;
-    justify-content: center;
-  }
-
-  .page-hour .site-menu nav a[data-nav="about"] {
-    display: none;
-  }
-
-  .page-hour .site-about {
-    display: block;
-    margin-left: auto;
-  }
-}
-
-@media (min-width: 1000px) and (max-width: 1099px) {
-  html[data-text-size="large"] .page-hour .site-nav-shell {
-    flex-wrap: wrap;
-    row-gap: 0.15rem;
-  }
-
-  html[data-text-size="large"] .page-hour .site-menu {
-    order: 3;
-    flex-basis: 100%;
-  }
-
-  html[data-text-size="large"] .page-hour .site-menu-panel {
-    justify-content: center;
-  }
-
-  html[data-text-size="large"] .page-hour .site-menu nav {
-    flex-wrap: nowrap;
-    justify-content: center;
-  }
-
-  html[data-text-size="large"] .page-hour .site-menu nav a[data-nav="about"] {
-    display: none;
-  }
-
-  html[data-text-size="large"] .page-hour .site-about {
-    display: block;
-    margin-left: auto;
-  }
-}
-
-/* Narrow screens: collapse the full list into a compact menu so the office
-   text starts high on the page and remains the visual focus. */
+/* Narrow screens: collapse the full list into a compact plaster-and-oak menu
+   tablet so the office text starts high on the page and remains the focus. */
 @media (max-width: 700px) {
   .site-header {
     position: relative;
@@ -1092,6 +1024,18 @@ summary:focus-visible {
 
   .site-menu {
     flex: 0 0 auto;
+  }
+
+  /* Soft architectural scrim behind the open phone menu so peeking prayer text
+     does not collide visually with the panel edge. */
+  .site-menu[open]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    top: calc(3.5rem + env(safe-area-inset-top, 0px));
+    z-index: 40;
+    background: rgba(36, 28, 23, 0.22);
+    pointer-events: none;
   }
 
   .site-menu > summary {
@@ -1127,88 +1071,74 @@ summary:focus-visible {
   .site-menu-panel {
     display: block;
     position: absolute;
-    top: calc(100% + 0.1rem);
+    z-index: 55;
+    top: calc(100% + 0.2rem);
     /* The shell is padded now that the header is full-bleed, so `right: 0`
        would put the panel against the screen edge instead of the gutter the
        page copy uses. */
     right: max(var(--page-gutter), env(safe-area-inset-right));
     width: min(21rem, calc(100vw - 2rem));
-    padding: 0.65rem;
+    padding: 0.85rem 0.75rem;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-top: 2px solid var(--ornament-line);
+    border-top: 2.5px solid var(--oak);
     box-shadow:
-      inset 0 1px 0 var(--surface-edge),
-      0 0.45rem 1rem rgba(36, 28, 23, 0.09);
+      inset 0 0 0 4px var(--surface),
+      inset 0 0 0 5px var(--surface-edge),
+      0 0.65rem 1.8rem rgba(36, 28, 23, 0.16);
   }
 
   .site-menu:not([open]) > .site-menu-panel {
     display: none;
   }
 
-  /* Six tracks so the hours fall into home's Morning / Day / Evening bands:
-     two, three, two — no Compline stranded on a row of its own. Ordo,
-     Reminders and About take thirds, like the middle band. Centred like the home
-     directory, since the day row's cells have their own edges. */
+  /* Ordo, Reminders and About share one balanced three-up row parted by gilt
+     points. Direct hour links live on Home and the hour epilogue. */
   .site-menu nav {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 0.15rem 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
   }
 
   .site-menu nav a {
-    grid-column: span 3;
-    justify-content: center;
-    text-align: center;
-  }
-
-  .site-menu nav a[data-hour="terce"],
-  .site-menu nav a[data-hour="sext"],
-  .site-menu nav a[data-hour="none"],
-  .site-menu nav a[data-nav="calendar"],
-  .site-menu nav a[data-nav="reminders"],
-  .site-menu nav a[data-nav="about"] {
-    grid-column: span 2;
-  }
-
-  /* A hairline between the bands, so the grouping reads without labels. */
-  .site-menu nav a[data-hour="terce"],
-  .site-menu nav a[data-hour="sext"],
-  .site-menu nav a[data-hour="none"],
-  .site-menu nav a[data-hour="vespers"],
-  .site-menu nav a[data-hour="compline"] {
-    border-top: 1px solid var(--surface-edge);
-  }
-
-  .site-menu nav a {
+    position: relative;
     display: flex;
     align-items: center;
+    justify-content: center;
+    text-align: center;
     min-height: 2.75rem;
-    padding: 0.55rem 0.4rem;
-    font-size: 0.82rem;
+    padding: 0.55rem 0.35rem;
+    font-size: 0.8rem;
   }
 
-  /* The current page wears the header's terracotta underline — a filled
-     cell reads as a settings panel. */
+  .site-menu nav a + a::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 3.5px;
+    height: 3.5px;
+    background: var(--ornament);
+    opacity: 0.55;
+    transform: translate(-50%, -50%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  /* The current page wears a word-measured terracotta underline. */
   .site-menu nav a.active {
     background-color: transparent;
     border-bottom: none;
-    box-shadow: inset 0 -1.5px 0 var(--lining);
-  }
-
-  .nav-divider {
-    grid-column: 1 / -1;
-    width: auto;
-    height: 1px;
-    margin: 0.25rem 0;
+    box-shadow: none;
+    text-decoration: underline 1.5px var(--lining);
+    text-underline-offset: 0.35em;
   }
 
   /* Preferences close the menu, below a rule like the one between the hours
      and Ordo. */
   .menu-prefs {
     display: grid;
-    margin-top: 0.4rem;
-    padding-top: 0.4rem;
+    margin-top: 0.35rem;
+    padding-top: 0.45rem;
     border-top: 1px solid var(--border);
   }
 }
@@ -13447,6 +13377,580 @@ body.page-home::before {
   }
 }
 
+/* ── Visual & UX Polish: Painter's hand, plaster tablets, quiet wayfinding ── */
+
+/* 1. Hand-ruled hour headpiece and header closing rule (app.js strikes them
+      with home's seeded pen; without script the CSS gradients and border stay). */
+.page-hour .hour-header {
+  position: relative;
+}
+
+.page-hour .hour-header.is-ruled {
+  border-bottom-color: transparent;
+}
+
+.page-hour .hour-header.is-ruled h1 {
+  background: none;
+}
+
+.page-hour .hour-header.is-ruled h1::after {
+  background: none;
+}
+
+.page-hour .hour-header h1 > svg.hour-head-rules {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.page-hour .hour-header h1 > svg.hour-head-rules path {
+  fill: var(--lining);
+}
+
+.page-hour .hour-header h1 > svg.hour-head-rules path.rule-fine {
+  opacity: 0.78;
+}
+
+.page-hour .hour-header > svg.hour-header-foot-rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 4px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.page-hour .hour-header > svg.hour-header-foot-rule path {
+  fill: color-mix(in srgb, var(--lining) 38%, transparent);
+}
+
+/* 2. First-class feast frame joinery: clean corner returns and small knops
+      in --ornament (which automatically veil in Passiontide and stand down on
+      bare hours). */
+.page-hour.rank-first-class .office-hour::before,
+.page-hour.rank-first-class .office-hour::after {
+  position: relative;
+  margin-block: 0.35rem 0.6rem;
+}
+
+.page-hour.rank-first-class:not(.hour-bare) .office-hour::before {
+  box-shadow:
+    0 -3px 0 -0.5px var(--ornament),
+    0 3px 0 -0.5px var(--ornament);
+}
+
+.page-hour.rank-first-class:not(.hour-bare) .office-hour::after {
+  box-shadow:
+    0 -3px 0 -0.5px var(--ornament),
+    0 3px 0 -0.5px var(--ornament);
+}
+
+/* 3. Gospel Canticle climax (Benedictus, Magnificat, Nunc Dimittis): a quiet
+      painted threshold mark in --ornament (veils automatically in Passiontide,
+      withdraws to --muted on bare/black hours) and an elevated initial. */
+.canticle-gospel {
+  position: relative;
+}
+
+.canticle-threshold {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: min(9.5rem, 48%);
+  margin: 0 auto var(--space-line);
+}
+
+.canticle-threshold::before,
+.canticle-threshold::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: color-mix(in srgb, var(--ornament) 52%, transparent);
+}
+
+.canticle-gospel > .item-label::before {
+  content: "";
+  display: block;
+  width: 0.68rem;
+  height: 0.68rem;
+  margin: calc(-1 * var(--space-line) - 0.36rem) auto var(--space-line);
+  background: var(--ornament);
+  -webkit-mask: url("ornaments/cross.svg") center / contain no-repeat;
+  mask: url("ornaments/cross.svg") center / contain no-repeat;
+}
+
+body.hour-bare .canticle-threshold::before,
+body.hour-bare .canticle-threshold::after {
+  background: color-mix(in srgb, var(--muted) 38%, transparent);
+}
+
+body.hour-bare .canticle-gospel > .item-label::before {
+  background: var(--muted);
+}
+
+.canticle-gospel .initial-lead {
+  font-size: 3.55em;
+}
+
+/* 4. Balanced epilogue continuation when Previous (Lauds) or Next (Compline)
+      is absent: clean two-item balance with a single centered gilt point. */
+.page-hour .hour-continuation:has(> span:empty) {
+  grid-template-columns: auto 1fr auto;
+}
+
+.page-hour .hour-continuation:has(> span:first-child:empty) > span:first-child,
+.page-hour .hour-continuation:has(> span:last-child:empty) > span:last-child {
+  display: none;
+}
+
+.page-hour .hour-continuation:has(> span:first-child:empty) > .day-hours-link {
+  grid-column: 1;
+  justify-self: start;
+  padding-left: 0;
+}
+
+.page-hour .hour-continuation:has(> span:first-child:empty) > .day-hours-link::after {
+  left: auto;
+  right: -1.1rem;
+}
+
+.page-hour .hour-continuation:has(> span:first-child:empty) > .next-hour {
+  grid-column: 3;
+}
+
+.page-hour .hour-continuation:has(> span:last-child:empty) > .previous-hour {
+  grid-column: 1;
+}
+
+.page-hour .hour-continuation:has(> span:last-child:empty) > .day-hours-link {
+  grid-column: 3;
+  justify-self: end;
+  padding-right: 0;
+}
+
+.page-hour .hour-continuation:has(> span:last-child:empty) > .day-hours-link::before {
+  left: -1.1rem;
+}
+
+/* Subtle flanking rules beside the closing consecration cross. */
+.page-hour .hour-epilogue {
+  position: relative;
+}
+
+/* 5. Whisper-brief ribbon resume mark when reopening mid-hour (data-place). */
+.is-ribbon-mark {
+  position: relative;
+}
+
+.is-ribbon-mark::before {
+  content: "";
+  position: absolute;
+  left: -0.9rem;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  background: var(--ornament);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes ribbon-settle {
+    0% { opacity: 0; transform: rotate(45deg) scale(0.7); }
+    18% { opacity: 0.95; transform: rotate(45deg) scale(1); }
+    72% { opacity: 0.85; transform: rotate(45deg) scale(1); }
+    100% { opacity: 0; transform: rotate(45deg) scale(0.85); }
+  }
+  .is-ribbon-mark::before {
+    animation: ribbon-settle 2.4s ease-out forwards;
+  }
+}
+
+/* 6. Floating plaster-and-oak tablet polish for Gloss notes, Reading key,
+      and dark-theme menu/settings scrim & shadows. */
+.gloss-note {
+  border-radius: 1px;
+  box-shadow:
+    inset 0 0 0 3px var(--surface),
+    inset 0 0 0 4px var(--surface-edge),
+    0 0.55rem 1.5rem rgba(36, 28, 23, 0.16);
+}
+
+.reading-key-panel {
+  border-top: 2px solid var(--lining);
+  box-shadow:
+    inset 0 0 0 3px var(--surface),
+    inset 0 0 0 4px var(--surface-edge);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .settings-prefs,
+  :root:not([data-theme="light"]) .site-menu-panel {
+    border-top-color: var(--ornament-line);
+    box-shadow:
+      inset 0 0 0 4px var(--surface),
+      inset 0 0 0 5px var(--surface-edge),
+      0 0.85rem 2.2rem rgba(0, 0, 0, 0.48);
+  }
+  :root:not([data-theme="light"]) .site-menu[open]::before {
+    background: rgba(6, 11, 18, 0.52);
+  }
+}
+
+:root[data-theme="dark"] .settings-prefs,
+:root[data-theme="dark"] .site-menu-panel {
+  border-top-color: var(--ornament-line);
+  box-shadow:
+    inset 0 0 0 4px var(--surface),
+    inset 0 0 0 5px var(--surface-edge),
+    0 0.85rem 2.2rem rgba(0, 0, 0, 0.48);
+}
+
+:root[data-theme="dark"] .site-menu[open]::before {
+  background: rgba(6, 11, 18, 0.52);
+}
+
+/* 7. Quiet Hour Wayfinding:
+      - Desktop (>= 1180px): whisper-quiet marginal Rubric Rail in the empty
+        left plaster margin.
+      - Phones & tablets (< 1180px): strictly top-edge invisible trigger over
+        the colour band / hairline opening a painted Breviary Index Card. */
+.hour-rail {
+  display: none;
+}
+
+@media screen and (min-width: 1180px) {
+  .hour-rail {
+    display: block;
+    position: fixed;
+    top: 6.5rem;
+    left: max(1.25rem, calc(50% - 31.5rem));
+    width: 9.75rem;
+    max-height: calc(100vh - 9rem);
+    overflow-y: auto;
+    z-index: 20;
+    opacity: 0.52;
+    transition: opacity 220ms ease;
+  }
+
+  .hour-rail:hover,
+  .hour-rail:focus-within {
+    opacity: 0.96;
+  }
+
+  .hour-rail-title {
+    display: block;
+    padding-left: 0.85rem;
+    margin-bottom: 0.55rem;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.12em;
+  }
+
+  .hour-rail ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .hour-rail-link {
+    position: relative;
+    display: block;
+    padding: 0.18rem 0 0.18rem 0.85rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.84rem;
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    transition: color 160ms ease;
+  }
+
+  .hour-rail-link:hover {
+    color: var(--text);
+  }
+
+  .hour-rail-link.is-current {
+    color: var(--titulus);
+  }
+
+  .hour-rail-link.is-current::before {
+    content: "";
+    position: absolute;
+    left: 0.1rem;
+    top: 0.62em;
+    width: 4.5px;
+    height: 4.5px;
+    background: var(--ornament);
+    transform: translateY(-50%) rotate(45deg);
+  }
+}
+
+/* Strictly top-edge phone trigger: zero visible chrome in the hour header. */
+.hour-index-edge {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(20px + env(safe-area-inset-top, 0px));
+  z-index: 125;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media screen and (min-width: 1180px) {
+  .hour-index-edge {
+    display: none;
+  }
+}
+
+.hour-index-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 160;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1rem 1.5rem;
+  background: rgba(36, 28, 23, 0.28);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hour-index-backdrop {
+    background: rgba(6, 11, 18, 0.56);
+  }
+}
+
+:root[data-theme="dark"] .hour-index-backdrop {
+  background: rgba(6, 11, 18, 0.56);
+}
+
+.hour-index-card {
+  width: min(21rem, 100%);
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+  padding: 0.9rem 1rem 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2.5px solid var(--oak);
+  box-shadow:
+    inset 0 0 0 4px var(--surface),
+    inset 0 0 0 5px var(--surface-edge),
+    0 0.75rem 2rem rgba(36, 28, 23, 0.18);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hour-index-card {
+    border-top-color: var(--ornament-line);
+    box-shadow:
+      inset 0 0 0 4px var(--surface),
+      inset 0 0 0 5px var(--surface-edge),
+      0 0.85rem 2.2rem rgba(0, 0, 0, 0.5);
+  }
+}
+
+:root[data-theme="dark"] .hour-index-card {
+  border-top-color: var(--ornament-line);
+  box-shadow:
+    inset 0 0 0 4px var(--surface),
+    inset 0 0 0 5px var(--surface-edge),
+    0 0.85rem 2.2rem rgba(0, 0, 0, 0.5);
+}
+
+.hour-index-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.55rem;
+  margin-bottom: 0.45rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--lining) 40%, transparent);
+}
+
+.hour-index-title {
+  color: var(--titulus);
+  font-size: 0.84rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+}
+
+.hour-index-close {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  min-height: 2.25rem;
+  padding: 0.2rem 0.35rem;
+  cursor: pointer;
+}
+
+.hour-index-close:hover {
+  color: var(--accent);
+}
+
+.hour-index-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.1rem;
+}
+
+.hour-index-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2.6rem;
+  padding: 0.35rem 0.65rem 0.35rem 1.15rem;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.hour-index-item.is-current {
+  color: var(--titulus);
+  background: radial-gradient(closest-side, var(--now-pool), color-mix(in srgb, var(--now-pool) 45%, transparent) 60%, transparent);
+}
+
+.hour-index-item.is-current::before {
+  content: "";
+  position: absolute;
+  left: 0.35rem;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  background: var(--ornament);
+  transform: translateY(-50%) rotate(45deg);
+}
+
+/* 8. Home micro-polish:
+      - Show First Vespers gloss on wide screens too (#959)
+      - Subtly illuminate the current period's sun/moon glyph & label
+      - Quiet warm illumination on hovering the Pray tablet */
+@media (min-width: 701px) {
+  .page-home .pray-now-gloss[data-eve]:not([hidden]) {
+    display: block;
+    margin-top: 0.12rem;
+    color: var(--now-gloss);
+    font-size: 0.92rem;
+    font-style: italic;
+    letter-spacing: 0;
+    line-height: 1.25;
+  }
+}
+
+.page-home .home-hour-links:has(.home-hour-link.is-current) .home-hour-group:not(:has(.home-hour-link.is-current)) .home-period-ornament {
+  opacity: 0.52;
+}
+
+.page-home .home-hour-group:has(.home-hour-link.is-current) .home-period-ornament {
+  opacity: 1;
+}
+
+.page-home .home-hour-group:has(.home-hour-link.is-current) .home-hour-group-label {
+  color: var(--titulus);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(.page-home, .about-door) .pray-now:hover {
+    box-shadow: inset 0 0 26px color-mix(in srgb, var(--ochre) 16%, transparent);
+  }
+}
+
+/* 9. Ordo mobile month strip breathing room & collapsible rank key. */
+.month-jump a[aria-current] {
+  color: var(--titulus);
+  border-bottom-color: transparent;
+}
+
+.month-jump a[aria-current]::before {
+  content: "";
+  position: absolute;
+  top: 0.35rem;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background: var(--ornament);
+  transform: translateX(-50%) rotate(45deg);
+  pointer-events: none;
+}
+
+.calendar-ranks-disclosure {
+  flex-basis: 100%;
+}
+
+.calendar-ranks-disclosure > summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  width: fit-content;
+  padding: 0.25rem 0;
+}
+
+.calendar-ranks-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.calendar-ranks-disclosure > summary::after {
+  content: "▾"; content: "▾" / "";
+  margin-left: 0.35em;
+  color: color-mix(in srgb, currentColor 70%, transparent);
+  font-size: 0.85em;
+}
+
+.calendar-ranks-disclosure[open] > summary::after {
+  content: "▴"; content: "▴" / "";
+}
+
+@media (min-width: 701px) {
+  .calendar-ranks-disclosure > summary {
+    display: none;
+  }
+
+  .calendar-ranks-disclosure::details-content {
+    content-visibility: visible;
+  }
+}
+
+/* 10. Search results (find.html): Feast-page titulus ink and painted divider. */
+.find-feast {
+  border-bottom: 1px solid color-mix(in srgb, var(--lining) 35%, transparent);
+}
+
+.find-name.is-greater {
+  color: var(--titulus);
+}
+
+.find-meta {
+  font-style: italic;
+}
+
+.find-meta a {
+  font-style: normal;
+}
+
 /* ── Print ──
    Kept last so screen material declared above cannot leak back into paper.
    Gold prints as pale grey, so gilded caps return to flat dark ink; clearing
@@ -13455,6 +13959,10 @@ body.page-home::before {
 @media print {
   .page-hour.rank-first-class .office-hour::before,
   .page-hour.rank-first-class .office-hour::after,
+  .hour-rail,
+  .hour-index-edge,
+  .hour-index-backdrop,
+  .is-ribbon-mark::before,
   header,
   footer,
   .day-nav,

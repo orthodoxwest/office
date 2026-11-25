@@ -299,6 +299,8 @@
       if (!line) return false;
       var r = line.getBoundingClientRect();
       window.scrollTo(0, window.scrollY + r.top + into * r.height - edge());
+      line.classList.add("is-ribbon-mark");
+      window.setTimeout(function () { line.classList.remove("is-ribbon-mark"); }, 2600);
       return true;
     }
     function forget() {

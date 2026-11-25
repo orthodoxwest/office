@@ -14,6 +14,8 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -36,6 +38,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -46,11 +50,13 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -217,8 +223,9 @@ fun HourScreen(
         val columns = hymnColumns(view.sections, prayer)
         // The unit of the office's rhythm: the body line at the prayer's size.
         val line = prayer.bodyLine()
+        val knop = if (view.bare) null else LocalOrnament.current.flat
         LazyColumn(
-            Modifier.fillMaxSize().firstClassFrame(view.firstClass, listState, p.lining),
+            Modifier.fillMaxSize().firstClassFrame(view.firstClass, listState, p.lining, knop),
             state = listState,
             contentPadding = PaddingValues(top = insets.calculateTopPadding(), bottom = insets.calculateBottomPadding()),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -307,7 +314,88 @@ fun HourScreen(
                 )
             }
         }
+        val scope = rememberCoroutineScope()
+        var indexOpen by remember(view.hour, date) { mutableStateOf(false) }
+        val parts = remember(view.sections, open.toMap()) {
+            val out = mutableListOf<Pair<String, Int>>()
+            var cursor = BEFORE_OFFICE
+            view.sections.forEachIndexed { i, section ->
+                val expanded = if (section.collapsible) open[section.label] ?: view.prayersOpen else true
+                if (section.collapsible) {
+                    if (section.label.isNotEmpty()) out.add(section.label to cursor)
+                    cursor += 1
+                    if (!expanded) return@forEachIndexed
+                }
+                section.blocks.forEach { block ->
+                    if (block.kind == BlockKind.HEADING || block.kind == BlockKind.COMMEMORATION_HEADING || (block.kind == BlockKind.ITEM_LABEL && block.gospel)) {
+                        val raw = block.runs.joinToString("") { it.text }.trim()
+                        val label = if (block.kind == BlockKind.ITEM_LABEL && raw.contains("·")) raw.substringBefore("·").trim() else raw
+                        if (label.isNotEmpty()) out.add(label to cursor)
+                    }
+                    cursor += 1
+                }
+            }
+            out
+        }
         ProgressHairline(listState)
+        // Strictly at the top edge: zero visible chrome in the hour header; tapping opens the index card.
+        if (parts.size >= 3) {
+            Box(
+                Modifier.fillMaxWidth().height(20.dp)
+                    .clickable(onClickLabel = "Parts of ${view.title}") { indexOpen = !indexOpen },
+            )
+        }
+        if (indexOpen && parts.size >= 3) {
+            val o = LocalOrnament.current
+            val topEdge = if (p.dark) o.line else p.oak
+            val active = listState.firstVisibleItemIndex
+            val activePart = parts.indexOfLast { it.second <= active + 1 }.coerceAtLeast(0)
+            Box(
+                Modifier.fillMaxSize()
+                    .background(Color(if (p.dark) 6 else 36, if (p.dark) 11 else 28, if (p.dark) 18 else 23).copy(alpha = if (p.dark) 0.56f else 0.28f))
+                    .clickable { indexOpen = false }
+                    .padding(top = insets.calculateTopPadding() + 20.dp, start = 16.dp, end = 16.dp, bottom = 24.dp),
+                contentAlignment = Alignment.TopCenter,
+            ) {
+                Column(
+                    Modifier.widthIn(max = 336.dp).fillMaxWidth()
+                        .background(p.surface)
+                        .border(1.dp, p.border)
+                        .drawBehind {
+                            drawRect(topEdge, size = size.copy(height = 2.5.dp.toPx()))
+                            val insetPx = 4.dp.toPx()
+                            drawRect(p.surfaceEdge, Offset(insetPx, insetPx + 1.5.dp.toPx()), Size(size.width - 2 * insetPx, size.height - 2 * insetPx - 1.5.dp.toPx()), style = androidx.compose.ui.graphics.drawscope.Stroke(1.dp.toPx()))
+                        }
+                        .clickable(enabled = false) {}
+                        .verticalScroll(rememberScrollState())
+                        .padding(14.dp),
+                ) {
+                    Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("${view.title.uppercase()} · PARTS OF THE HOUR", style = Type.label(11.5f, 0.1f).copy(color = p.titulus))
+                        Text("CLOSE", Modifier.clickable { indexOpen = false }.padding(horizontal = 6.dp, vertical = 4.dp), style = Type.label(11f, 0.08f).copy(color = p.muted))
+                    }
+                    Hairline(p.lining.copy(alpha = 0.4f), Modifier.padding(bottom = 6.dp))
+                    parts.forEachIndexed { idx, (label, itemIdx) ->
+                        val current = idx == activePart
+                        Row(
+                            Modifier.fillMaxWidth().heightIn(min = 42.dp)
+                                .clickable {
+                                    indexOpen = false
+                                    scope.launch { listState.animateScrollToItem(itemIdx) }
+                                }
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (current) {
+                                GiltPoint()
+                                Spacer(Modifier.width(8.dp))
+                            }
+                            Text(label, style = Type.body.copy(fontSize = 16.sp, color = if (current) p.titulus else p.text))
+                        }
+                    }
+                }
+            }
+        }
     }
     }
 }
@@ -320,7 +408,7 @@ fun HourScreen(
  * web's from 920px. Drawn from the list's layout, so the frame scrolls with the page and runs
  * the whole screen while the title is above it and the epilogue below.
  */
-private fun Modifier.firstClassFrame(on: Boolean, state: LazyListState, lining: Color): Modifier {
+private fun Modifier.firstClassFrame(on: Boolean, state: LazyListState, lining: Color, knop: Color? = null): Modifier {
     if (!on) return this
     return drawBehind {
         val info = state.layoutInfo
@@ -329,7 +417,7 @@ private fun Modifier.firstClassFrame(on: Boolean, state: LazyListState, lining: 
         fun y(item: LazyListItemInfo) = (item.offset - info.viewportStartOffset).toFloat()
         val title = items.firstOrNull { it.key == "title" }
         val top = when {
-            title != null -> y(title)
+            title != null -> y(title) + 5.dp.toPx()
             // The title has scrolled past: the frame runs in from the top of the screen.
             items.first().key.let { it != "band" && it != "chrome" } -> 0f
             else -> return@drawBehind
@@ -343,6 +431,11 @@ private fun Modifier.firstClassFrame(on: Boolean, state: LazyListState, lining: 
         for (x in listOf(side, size.width - side - 3 * px)) {
             drawRect(ink, Offset(x, top), Size(px, bottom - top))
             drawRect(ink, Offset(x + 2 * px, top), Size(px, bottom - top))
+            if (knop != null) {
+                val r = 2.dp.toPx()
+                if (title != null) drawCircle(knop.copy(alpha = 0.8f), r, Offset(x + 1.5f * px, top))
+                if (epilogue != null) drawCircle(knop.copy(alpha = 0.8f), r, Offset(x + 1.5f * px, bottom))
+            }
         }
     }
 }

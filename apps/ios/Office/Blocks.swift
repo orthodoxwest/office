@@ -420,11 +420,22 @@ struct BlockRow: View {
                 let incipit = labelPart(block, block.runs[latin...])
                 // The note hangs from the Prose that was tapped, whose box `glossRect` is measured in,
                 // so its arrow points at the number however the label is centred.
-                ViewThatFits(in: .horizontal) {
-                    noted(prose.fixedSize(horizontal: true, vertical: false), glosses, popoverBinding)
-                    VStack(spacing: 0) {
-                        noted(Prose(spec: proseSpec(title, p, o, m), openGloss: openGloss, onGloss: tapGloss), glosses, popoverBinding)
-                        Prose(spec: proseSpec(incipit, p, o, m))
+                VStack(spacing: m.px(4)) {
+                    if block.gospel {
+                        HStack(spacing: m.px(8)) {
+                            Rectangle().fill(o.flat.opacity(0.52)).frame(height: 1)
+                            PaintedMark(.cross, size: m.px(10.8), color: o.flat)
+                            Rectangle().fill(o.flat.opacity(0.52)).frame(height: 1)
+                        }
+                        .frame(maxWidth: m.px(152))
+                        .accessibilityHidden(true)
+                    }
+                    ViewThatFits(in: .horizontal) {
+                        noted(prose.fixedSize(horizontal: true, vertical: false), glosses, popoverBinding)
+                        VStack(spacing: 0) {
+                            noted(Prose(spec: proseSpec(title, p, o, m), openGloss: openGloss, onGloss: tapGloss), glosses, popoverBinding)
+                            Prose(spec: proseSpec(incipit, p, o, m))
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -438,6 +449,18 @@ struct BlockRow: View {
                         }
                     }
                 }
+            } else if block.kind == .itemLabel && block.gospel {
+                VStack(spacing: m.px(4)) {
+                    HStack(spacing: m.px(8)) {
+                        Rectangle().fill(o.flat.opacity(0.52)).frame(height: 1)
+                        PaintedMark(.cross, size: m.px(10.8), color: o.flat)
+                        Rectangle().fill(o.flat.opacity(0.52)).frame(height: 1)
+                    }
+                    .frame(maxWidth: m.px(152))
+                    .accessibilityHidden(true)
+                    noted(prose, glosses, popoverBinding)
+                }
+                .frame(maxWidth: .infinity)
             } else if block.kind == .stanza || block.kind == .hymnRubric {
                 // The hymn's column, centred: the rag balanced by an equal indent on the left,
                 // as the web's fit-content `.hymn-verses`.

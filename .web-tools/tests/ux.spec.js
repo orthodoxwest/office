@@ -7391,9 +7391,29 @@ test("a link chosen in the open phone menu puts the menu away before the page go
   await page.evaluate(() => document.addEventListener("click", () => {
     window.reportMenu(getComputedStyle(document.querySelector(".site-menu-panel")).display);
   }));
-  await page.locator('.site-menu nav a[data-hour="lauds"]').click();
-  await page.waitForURL(/\/lauds\//);
+  await page.locator('.site-menu nav a[data-nav="calendar"]').click();
+  await page.waitForURL(/\/calendar/);
   expect(seen).toEqual(["none"]);
+});
+
+test("hour menu omits direct hour links and quiet wayfinding adapts by viewport", async ({ page }) => {
+  // Desktop (>= 1180px): no hour links in menu, marginal Rubric Rail present, Gospel Canticle marked.
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openDatedPage(page, `/lauds/${testDate}`);
+  await expect(page.locator('.site-menu nav a[data-hour]')).toHaveCount(0);
+  await expect(page.locator(".canticle-gospel")).toHaveCount(1);
+  await expect(page.locator(".hour-rail")).toBeVisible();
+  await expect(page.locator(".hour-rail-link").first()).toBeVisible();
+
+  // Phone (390px): Rubric Rail hidden, strictly top-edge trigger opens Breviary Index Card.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openDatedPage(page, `/lauds/${testDate}`);
+  await expect(page.locator(".hour-rail")).toBeHidden();
+  await expect(page.locator(".hour-index-backdrop")).toBeHidden();
+  await page.locator(".hour-index-edge").click();
+  await expect(page.locator(".hour-index-card")).toBeVisible();
+  await page.locator(".hour-index-close").click();
+  await expect(page.locator(".hour-index-backdrop")).toBeHidden();
 });
 
 test("the brand on today's home stays put", async ({ page, baseURL }) => {
