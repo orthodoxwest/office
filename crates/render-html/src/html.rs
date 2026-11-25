@@ -277,12 +277,16 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
     sb
 }
 
+/// How every posture cue's run opens, so a page for several prayer forms can
+/// tag the cues only some of them take (see `leader::leader_sections`).
+pub(crate) const POSTURE_OPEN: &str = "<span class=\"posture gloss-quiet\"";
+
 /// Posture cues at one anchor, each a red rubric run with a quiet gloss.
 fn posture_html(cues: &[PostureCue], at: PostureAnchor) -> String {
     posture_cues_at(cues, at)
         .map(|cue| {
             format!(
-                "<span class=\"posture gloss-quiet\" data-gloss-title=\"{}\" data-gloss=\"{}\">{cue}</span> ",
+                "{POSTURE_OPEN} data-gloss-title=\"{}\" data-gloss=\"{}\">{cue}</span> ",
                 esc_text(POSTURE_GLOSS.title),
                 esc_text(POSTURE_GLOSS.note)
             )

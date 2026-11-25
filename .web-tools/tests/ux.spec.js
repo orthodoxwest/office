@@ -3702,6 +3702,25 @@ test("posture cues sit in the psalm verses as red rubric runs", async ({ page })
   expect(style.smaller).toBe(true);
 });
 
+test("the Little Hours show posture cues only when a priest or deacon leads", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/prime/2026-10-04?form=private");
+  const psalm = page.locator(".psalm").first();
+  const cues = psalm.locator(".posture");
+  await expect(cues.first()).toBeAttached();
+  for (const cue of await cues.all()) await expect(cue).toBeHidden();
+  for (const form of ["deacon", "priest"]) {
+    await choosePrayerForm(page, form);
+    await expect(psalm.locator(".psalm-verses .verse").first().locator(".mediant + .posture")).toHaveText("Sit.");
+    await expect(psalm.locator(".gloria-patri .source-line > .posture")).toHaveText(["Bow.", "Stand upright."]);
+  }
+  await choosePrayerForm(page, "private");
+  for (const cue of await cues.all()) await expect(cue).toBeHidden();
+  // Lauds keeps its cues under every form.
+  await page.goto("/lauds/2026-10-04?form=private");
+  await expect(page.locator(".psalm").first().locator(".posture").first()).toBeVisible();
+});
+
 test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async ({ page }) => {
   const instruction = "The first stanza of the following hymn is said kneeling.";
   for (const theme of ["light", "dark"]) {

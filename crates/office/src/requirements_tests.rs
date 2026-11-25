@@ -549,9 +549,68 @@ fn psalmody_posture_cues_follow_the_parish_booklets() {
     for (hour, date) in [("lauds", Date::new(2026, 11, 2)), ("lauds", moveable.good_friday), ("vespers", moveable.good_friday)] {
         assert!(cues(hour, date).iter().all(|(_, _, got)| got.is_empty()), "{hour} {date}");
     }
-    // Only Lauds and Vespers are cued.
-    for hour in ["prime", "terce", "compline"] {
+    // Said privately, only Lauds and Vespers are cued.
+    for hour in ["prime", "terce", "sext", "none", "compline"] {
         assert!(cues(hour, Date::new(2026, 10, 4)).iter().all(|(_, _, got)| got.is_empty()), "{hour}");
+    }
+}
+
+#[test]
+fn little_hours_take_posture_cues_when_a_priest_or_deacon_leads() {
+    // The prayer form stands in for praying in choir: with a priest or deacon
+    // the Little Hours take the Lauds pattern, said privately they stay bare,
+    // and Lauds, Vespers and Compline are the same under every form.
+    let (days, moveable) = year(2026);
+    let cues = |hour: &str, date: Date, form: PrayerForm| -> Vec<(String, Vec<String>)> {
+        let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], &moveable, form).unwrap();
+        composed
+            .sections
+            .iter()
+            .flat_map(|s| &s.elements)
+            .filter(|e| e.kind.is_psalmody() || e.kind == ElementType::PsalmDoxology)
+            .map(|e| {
+                let at = |c: &liturgy::PostureCue| match c.at {
+                    PostureAnchor::AfterMediant(n) => format!("{} *{n}", c.posture.as_str()),
+                    PostureAnchor::BeforeVerse(n) => format!("{} ^{n}", c.posture.as_str()),
+                };
+                (e.source_ref.clone(), e.postures.iter().map(at).collect())
+            })
+            .collect()
+    };
+    let sunday = Date::new(2026, 10, 4);
+    for form in [PrayerForm::Deacon, PrayerForm::Priest] {
+        // Sunday Prime: Psalm 119 in four parts, each under its own Gloria.
+        let prime = cues("prime", sunday, form);
+        assert_eq!(
+            prime,
+            ["i", "ii", "iii", "iv"]
+                .iter()
+                .flat_map(|part| [
+                    (format!("psalms/119-{part}"), vec!["sit *0".to_string(), "stand *7".to_string()]),
+                    ("ordinary/shared/gloria-patri".to_string(), vec!["bow ^0".to_string(), "stand-upright ^1".to_string()]),
+                ])
+                .collect::<Vec<_>>(),
+            "{form:?}"
+        );
+        for hour in ["terce", "sext", "none"] {
+            let got = cues(hour, sunday, form);
+            assert!(!got.is_empty() && got.iter().all(|(_, c)| !c.is_empty()), "{hour} {form:?}: {got:?}");
+        }
+        // The Athanasian Creed and its Gloria are left uncued (#973), while
+        // the psalms before it keep theirs.
+        let trinity = cues("prime", Date::new(2026, 6, 7), form);
+        let creed = trinity.iter().position(|(s, _)| s == "proper/trinity-sunday/athanasian-creed").expect("creed");
+        assert!(trinity[creed].1.is_empty() && trinity[creed + 1].1.is_empty(), "{form:?}: {:?}", &trinity[creed..]);
+        assert_eq!(trinity[creed - 1].1, ["bow ^0", "stand-upright ^1"], "{form:?}");
+        // Nothing is cued without the Gloria in the Triduum.
+        for hour in ["prime", "terce", "sext", "none"] {
+            assert!(cues(hour, moveable.good_friday, form).iter().all(|(_, c)| c.is_empty()), "{hour} {form:?} Good Friday");
+        }
+        for hour in ["lauds", "vespers", "compline"] {
+            for date in [sunday, Date::new(2026, 1, 19), Date::new(2026, 11, 2)] {
+                assert_eq!(cues(hour, date, form), cues(hour, date, PrayerForm::Private), "{hour} {date} {form:?}");
+            }
+        }
     }
 }
 
