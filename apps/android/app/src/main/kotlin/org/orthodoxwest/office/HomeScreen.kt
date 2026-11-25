@@ -778,8 +778,8 @@ private fun Frontispiece(
                     val lit = light?.lit ?: HourLit(view.currentHour, view.prayNowGloss, view.prayNowLabel, view.prayNowEve)
                     // A phone says what the hour is under the invitation's words, so the hours' table keeps
                     // one shape whichever hour is now; the niche glosses every hour in its table, and
-                    // under the invitation only an eve's "First Vespers of …" (#959).
-                    PrayNow(lit.label, tier.pray, tier.prayTop, tier.prayBottom, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null, light?.words ?: 1f, gloss = if (desk && !lit.eve) "" else lit.note, glossSize = tier.gloss, glossInk = home.nowGloss, prayed = invitePrayed && lit.label == view.prayNowLabel) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
+                    // under the invitation only an eve's "First Vespers of …" (#959), at the phone's size as on the web.
+                    PrayNow(lit.label, tier.pray, tier.prayTop, tier.prayBottom, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null, light?.words ?: 1f, gloss = if (desk && !lit.eve) "" else lit.note, glossSize = 13.76f, glossInk = home.nowGloss, prayed = invitePrayed && lit.label == view.prayNowLabel) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
                     HourDirectory(lit.hour, light, prayed, tier, titulusNow(p, season), home) { onHour(date, it) }
                 }

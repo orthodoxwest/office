@@ -193,12 +193,16 @@ fn home_invites_to_the_current_office_only_today() {
 fn home_says_first_vespers_on_the_eve_of_a_feast() {
     let core = OfficeCore::new().unwrap();
     let eve = civil(2026, 12, 24);
-    assert_eq!(core.home(eve, eve, 18).unwrap().pray_now_gloss, "First Vespers of the Nativity of Our Lord");
-    assert_eq!(core.home(eve, eve, 21).unwrap().pray_now_gloss, "Prayer before sleep");
+    // The flag the wide niche reads to keep the gloss under its invitation (#959).
+    let vespers = core.home(eve, eve, 18).unwrap();
+    assert_eq!((vespers.pray_now_gloss.as_str(), vespers.pray_now_eve), ("First Vespers of the Nativity of Our Lord", true));
+    let compline = core.home(eve, eve, 21).unwrap();
+    assert_eq!((compline.pray_now_gloss.as_str(), compline.pray_now_eve), ("Prayer before sleep", false));
     let saturday = civil(2026, 11, 28);
     assert_eq!(core.home(saturday, saturday, 18).unwrap().pray_now_gloss, "First Vespers of I Sunday of Advent");
     let plain = civil(2026, 12, 23);
-    assert_eq!(core.home(plain, plain, 18).unwrap().pray_now_gloss, "Evening prayer");
+    let evening = core.home(plain, plain, 18).unwrap();
+    assert_eq!((evening.pray_now_gloss.as_str(), evening.pray_now_eve), ("Evening prayer", false));
 }
 
 #[test]

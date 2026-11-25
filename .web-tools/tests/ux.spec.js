@@ -775,6 +775,29 @@ test("the light moves from Sext to None on an open home, and settles as a fresh 
   await expect(page.locator(".pray-now-gloss")).toHaveText("Afternoon prayer");
 });
 
+// A wide screen shows the invitation's gloss only on an eve (#959): as the
+// light brings First Vespers in, the gloss comes with the words, dipped from
+// the start of the pass, not set at full ink at the seat.
+test("on a wide eve the First Vespers gloss comes in with the invitation's words", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await holdTheLight(page);
+  await page.clock.pauseAt(new Date("2026-12-24T16:59:58-05:00"));
+  await openDatedPage(page, "/?date=2026-12-24");
+  const gloss = page.locator(".pray-now-gloss");
+  await expect(gloss).toBeHidden();
+  await page.clock.runFor(3000);
+  await page.clock.resume();
+  await lightAt(page, 700);
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Vespers");
+  await expect(gloss).toBeVisible();
+  await expect(gloss).toHaveText(/^First Vespers of /);
+  const [glossInk, wordsInk] = await page.evaluate(() => [".pray-now-gloss", ".pray-now-words"].map((s) => Number(getComputedStyle(document.querySelector(s)).opacity)));
+  expect(glossInk).toBeLessThan(1);
+  expect(glossInk).toBeCloseTo(wordsInk, 2);
+  await lightAt(page, 1400);
+  expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["vespers"] });
+});
+
 test("a second turn of the hour during a pass settles the first", async ({ page }) => {
   await holdTheLight(page);
   await page.clock.pauseAt(new Date("2026-03-15T12:59:58-04:00"));
@@ -4798,6 +4821,16 @@ test("the ordo's rank key folds on a phone, and the shown month takes a gilt poi
   await bare.goto(`${baseURL}/calendar/2026/03`);
   await expect(bare.locator("#calendar-ranks")).toBeVisible();
   await expect(bare.locator(".calendar-ranks-toggle")).toBeHidden();
+  // The key is folded from the first layout (html.js, set before app.js
+  // loads), so its toggle answers on its own: a page whose app.js never runs
+  // still opens it.
+  const blocked = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await blocked.route(/\/static\/app\.js/, (route) => route.abort());
+  await blocked.goto(`${baseURL}/calendar/2026/03`);
+  await expect(blocked.locator("#calendar-ranks")).toBeHidden();
+  await blocked.getByRole("button", { name: "Rank key" }).click();
+  await expect(blocked.locator("#calendar-ranks")).toBeVisible();
+  await blocked.close();
   await context.close();
 });
 

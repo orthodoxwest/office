@@ -723,8 +723,8 @@ private struct Frontispiece: View {
                 VStack(spacing: 0) {
                     // A phone says what the hour is under the invitation's words, so the hours' table
                     // keeps one shape whichever hour is now; the niche glosses every hour in its table,
-                    // and under the invitation only an eve's "First Vespers of …" (#959).
-                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil, gloss: tier.desk && !lit.eve ? "" : lit.note, glossSize: tier.gloss, glossInk: home.nowGloss,
+                    // and under the invitation only an eve's "First Vespers of …" (#959), at the phone's size as on the web.
+                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil, gloss: tier.desk && !lit.eve ? "" : lit.note, glossSize: 13.76, glossInk: home.nowGloss,
                              // The hour now, once prayed, on its own day (Compline after midnight is
                              // yesterday's), as the web's `.pray-now.is-prayed`.
                              prayed: view.isToday && lit.label == view.prayNowLabel && model.hoursPrayed(on: view.prayNowDate).contains(view.prayNowHour)) {

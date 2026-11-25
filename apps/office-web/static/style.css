@@ -3769,7 +3769,7 @@ body.season-passiontide .hour-end-mark::after {
   font-family: Georgia, "Times New Roman", "Ordo Cross", serif;
 }
 /* The strip's room for the year's course is reserved in its own padding and
-   row gap (the band 3px below each month's underline, the lozenge hung beneath
+   row gap (the band 3px below each month's cell, the lozenge hung beneath
    it), so the band adds no height of its own and nothing shifts. */
 .month-jump {
   display: grid;
@@ -3949,7 +3949,9 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
   order: 1;
   margin-bottom: 0.35rem;
 }
-/* "Rank key": a phone's, with script, to unfold the key (calendar.html). */
+/* "Rank key": a phone's, with script, to unfold the key. Its handler is inline
+   beside it (calendar.html), not in the deferred app.js, so the key is folded
+   from the first layout and its toggle works even where app.js never runs. */
 .calendar-ranks-toggle {
   display: none;
 }
@@ -4354,9 +4356,11 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
    colour passing from the vigil's into the feast's. It is drawn, not bound:
    both rails stay as they are. .day-lead carries the row's rail colour, its
    .day-thread the other row's. Each end runs 1px under its rail, which lies
-   above it, and the feast's half starts 1px up, over the rule, where the two
-   halves overlap, so no rounding of two edges (WebKit, at a fractional pixel
-   ratio or text size) leaves a line of ground or rule between them. Not a
+   above it; the feast's half starts 1px up, over the rule, and the vigil's
+   runs 2px down, through the rule into the feast's row. WebKit snaps each
+   row to the device grid on its own, so at a fractional pixel ratio a 1px
+   overlap at the rule can round to none, and a line of rule shows between
+   the halves; 2px always keeps a device row of thread there. Not a
    pseudo-element: td:first-child::after is the Today note and the phone's
    tr::after its pressed pool. The apps draw the same (OrdoScreen.swift, .kt). */
 .month-table .day-lead {
@@ -4372,8 +4376,8 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
   pointer-events: none;
 }
 .month-table .day-thread.to-feast {
-  bottom: -1px;
-  height: calc(0.65rem + 2px);
+  bottom: -2px;
+  height: calc(0.65rem + 3px);
   background: linear-gradient(var(--thread-own), var(--thread-mid));
 }
 .month-table .day-thread.from-vigil {
@@ -4893,7 +4897,7 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
     top: 0.45rem;
     bottom: 0.45rem;
   }
-  .month-table .day-thread.to-feast { height: calc(0.45rem + 2px); }
+  .month-table .day-thread.to-feast { height: calc(0.45rem + 3px); }
   .month-table .day-thread.from-vigil { height: calc(0.45rem + 2px); }
 }
 

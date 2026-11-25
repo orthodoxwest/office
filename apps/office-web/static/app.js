@@ -1556,18 +1556,6 @@ function plainClickOpensHere(e, link) {
     }
   });
 
-  // A phone's rank key, folded under "Rank key" (style.css keeps the toggle to
-  // phones and the key open on wide screens).
-  var ranksToggle = document.querySelector(".calendar-ranks-toggle");
-  var ranksKey = document.getElementById("calendar-ranks");
-  if (ranksToggle && ranksKey) {
-    ranksToggle.addEventListener("click", function () {
-      var open = ranksToggle.getAttribute("aria-expanded") !== "true";
-      ranksToggle.setAttribute("aria-expanded", String(open));
-      ranksKey.classList.toggle("is-open", open);
-    });
-  }
-
   // Native disclosures start closed at every width, including without JS.
   // A deliberate bulk action is useful for comparing offices across the year.
   var calendarExpand = document.querySelector(".calendar-expand");
@@ -3707,9 +3695,11 @@ function plainClickOpensHere(e, link) {
       pass.words = words;
       run(words, dip, { duration: T });
     }
-    // The gloss under the words, on a phone, goes out and comes back with them.
+    // The gloss under the words goes out and comes back with them: a phone's
+    // always, a wide screen's as an eve's "First Vespers of …" comes or goes
+    // (shown or hidden at the seat, it is dipped from the start all the same).
     var glossEl = prayNow ? prayNowGloss(prayNow) : null;
-    if (glossEl && wasGloss !== gloss && glossEl.getClientRects().length) {
+    if (glossEl && wasGloss !== gloss) {
       run(glossEl, dip, { duration: T });
     }
 

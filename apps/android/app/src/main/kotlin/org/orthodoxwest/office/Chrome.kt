@@ -512,7 +512,7 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
             }
             Spacer(Modifier.weight(1f))
             if (wide) {
-                InlineNav(nav!!, modifier = Modifier.crownUnit("r-nav"))
+                InlineNav(nav, modifier = Modifier.crownUnit("r-nav"))
             } else {
                 Row(Modifier.crownUnit("r-menu").tap(label = "Menu", onClick = onMenu).disclosed(menuOpen).padding(start = 12.8.dp, end = 3.2.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("MENU", style = Type.menu.copy(color = p.accent))

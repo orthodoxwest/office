@@ -447,8 +447,8 @@ extension EnvironmentValues {
 /// The web's breakpoint (style.css `min-width: 701px`).
 let wideFrom: CGFloat = 701
 
-/// Where the hours' header holds its links, About among them, beside the brand and Settings, in the
-/// page's own measure (style.css `max-width: 999px`, and 1099px at Larger text): the header is 58.5rem.
+/// Where a wide page's versicles hang their markers in the margin (style.css `max-width: 999px`),
+/// in the page's own measure.
 let rankedBelow: CGFloat = 1000
 
 /// Sets a style from the type scale, at the page's size.
