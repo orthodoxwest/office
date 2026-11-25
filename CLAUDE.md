@@ -28,7 +28,8 @@ crates/
                            schedule (app.js mirrors it), home's invitation, the report-issue link,
                            the usage beacon's vocabulary (server, app.js and native apps),
                            the ordo's year's course (course.rs: each month's runs of day colours
-                           under the month strip, which the web and the apps draw),
+                           under the month strip, which the web and the apps draw, and the
+                           date picker's day marks, which app.js fetches from /api/day-marks),
                            the crown's tap (crown.rs: which look it turns to, and the play's
                            timetable and pigments; app.js and style.css mirror them, the
                            apps read them through mobile-ffi's crown_plan)

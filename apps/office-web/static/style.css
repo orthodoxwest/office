@@ -562,13 +562,6 @@ summary:focus-visible {
   outline-offset: 3px;
 }
 
-/* Selected prayer text keeps the room: a warm wash from the existing palette
-   rather than the platform's default blue, which belongs to no theme here.
-   Background only, so ink contrast is untouched in both Nave and Apse. */
-::selection {
-  background: var(--pressed-wash);
-}
-
 /* The date picker submits itself on change when JavaScript is available.
    Scope this narrowly: Reminders also has secondary buttons, and a generic
    utility class once hid its Copy action along with these Go fallbacks. */
@@ -2293,6 +2286,40 @@ html[data-newcomer] .home-season {
   background: radial-gradient(closest-side, var(--now-pool), color-mix(in srgb, var(--now-pool) 55%, transparent) 52%, transparent);
 }
 
+/* The day's colour, a whisper-thin hairline under its figure (#953), and on a
+   first-class feast a gilt lozenge riding it, as home gilds the day: opening
+   the picker shows the month's liturgical shape (Lent's violet, Laetare's rose,
+   Easter's white week) with no words added. Below the chosen day's gold rule,
+   which is cut to the figures; the marks come with the year's letters from
+   /api/day-marks, and a picker without them is the plain kalendar. */
+.date-picker-day {
+  position: relative;
+}
+.date-picker-day[data-color]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 0.95rem;
+  height: 2px;
+  background: var(--day-color);
+  opacity: 0.6;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.date-picker-day[data-first-class]::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 4.5px;
+  height: 4.5px;
+  background: var(--gold);
+  transform: translate(-50%, 50%) rotate(45deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* The chosen day reads as the chosen prayer form does: oak ink on a gold
    rule. Cut to the figures, so a single digit gets a short rule. */
 .date-picker-days [aria-selected="true"] .date-picker-day,
@@ -2353,6 +2380,11 @@ html[data-newcomer] .home-season {
 }
 
 @media (forced-colors: active) {
+  .date-picker-day::before,
+  .date-picker-day::after {
+    display: none;
+  }
+
   .date-picker-days [aria-selected="true"] .date-picker-day > span,
   .date-picker-months [aria-selected="true"] .date-picker-month {
     text-decoration: underline;
@@ -2488,6 +2520,12 @@ html[data-newcomer] .home-season {
   opacity: 0;
   transition-property: opacity;
   transition-duration: 0s;
+}
+
+/* Under Passiontide's veil the closing cross takes matte veiled cloth rather
+   than gilt foil. */
+body.season-passiontide .hour-end-mark::after {
+  background: linear-gradient(128deg, var(--ornament-hi) 8%, var(--ornament) 52%, var(--ornament-lo) 92%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -2942,8 +2980,12 @@ html[data-newcomer] .home-season {
   .octave-note .gloss-quiet::before,
   .penitential-badge.gloss-quiet::before,
   .home-season .gloss-quiet::before,
+  .feast .gloss-quiet::before,
   .hour-meta .gloss-quiet::before,
   .home-versicle .gloss-quiet::before,
+  .psalm-incipit.gloss-quiet::before,
+  .hymn-title .gloss-quiet::before,
+  .marian-antiphon h3 .gloss-quiet::before,
   .feast-text h3 .gloss-quiet::before {
     inset: -0.15rem -0.25rem;
     height: auto;
@@ -3337,9 +3379,14 @@ html[data-newcomer] .home-season {
 }
 
 /* A posture cue at the mediant ("Sit.") ends the first line with it. Opening
-   the second line beside the initial, it read as the half-verse's first word. */
+   the second line beside the initial, it read as the half-verse's first word.
+   A cue only some prayer forms take (the Little Hours, cued when a priest or
+   deacon leads) carries data-leaders and moves the break only while shown. */
 @supports selector(:has(+ *)) {
-  .psalm-verses .verse.initial-divided > .mediant:has(+ .posture)::after {
+  .psalm-verses .verse.initial-divided > .mediant:has(+ .posture:not([data-leaders]))::after,
+  :root:is(:not([data-leader]), [data-leader="private"]) .psalm-verses .verse.initial-divided > .mediant:has(+ .posture[data-leaders~="private"])::after,
+  :root[data-leader="deacon"] .psalm-verses .verse.initial-divided > .mediant:has(+ .posture[data-leaders~="deacon"])::after,
+  :root[data-leader="priest"] .psalm-verses .verse.initial-divided > .mediant:has(+ .posture[data-leaders~="priest"])::after {
     content: none;
   }
 
@@ -3881,7 +3928,40 @@ html[data-newcomer] .home-season {
   height: 100%;
   shape-rendering: crispEdges;
 }
-.month-course rect { fill: var(--day-color); }
+.month-course rect {
+  fill: var(--day-color);
+  transition: opacity 0.2s ease;
+}
+.month-course-pin {
+  position: absolute;
+  top: 5.5px;
+  width: 4.5px;
+  height: 4.5px;
+  background: var(--day-color);
+  transform: translateX(-50%) rotate(45deg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.calendar[data-selected-color] .month-course rect {
+  opacity: 0.16;
+}
+.calendar[data-selected-color="white"] .month-course rect[data-color="white"],
+.calendar[data-selected-color="red"] .month-course rect[data-color="red"],
+.calendar[data-selected-color="violet"] .month-course rect[data-color="violet"],
+.calendar[data-selected-color="green"] .month-course rect[data-color="green"],
+.calendar[data-selected-color="rose"] .month-course rect[data-color="rose"],
+.calendar[data-selected-color="black"] .month-course rect[data-color="black"] {
+  opacity: 1;
+}
+.calendar[data-selected-color="white"] .month-course-pin[data-color="white"],
+.calendar[data-selected-color="red"] .month-course-pin[data-color="red"],
+.calendar[data-selected-color="violet"] .month-course-pin[data-color="violet"],
+.calendar[data-selected-color="green"] .month-course-pin[data-color="green"],
+.calendar[data-selected-color="rose"] .month-course-pin[data-color="rose"],
+.calendar[data-selected-color="black"] .month-course-pin[data-color="black"] {
+  opacity: 1;
+}
 /* Before its stroke (calendar.html decides, app.js lays it) the band is held
    unseen; the hairline stands in its room. */
 html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
@@ -3900,9 +3980,45 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
   transform: translate(-50%, 50%) rotate(45deg);
   pointer-events: none;
 }
-/* Forced colours keep no pigment: the band stands down, as the rails do. */
+/* Year frontispiece liturgical colour key: mirrors About's legend so the 12
+   month course bands can be read directly on the Ordo itself. */
+.ordo-color-key {
+  margin: 0.85rem 0 0.25rem;
+}
+.ordo-color-key .about-ordo-legend {
+  margin-top: 0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ordo-color-key .day-color-red,
+  :root:not([data-theme="light"]) .date-picker-day.day-color-red,
+  :root:not([data-theme="light"]) .month-course-pin.day-color-red { --day-color: #c9503f; }
+  :root:not([data-theme="light"]) .ordo-color-key .day-color-green,
+  :root:not([data-theme="light"]) .date-picker-day.day-color-green,
+  :root:not([data-theme="light"]) .month-course-pin.day-color-green { --day-color: #4f8a52; }
+  :root:not([data-theme="light"]) .ordo-color-key .day-color-violet,
+  :root:not([data-theme="light"]) .date-picker-day.day-color-violet,
+  :root:not([data-theme="light"]) .month-course-pin.day-color-violet { --day-color: #8d62ad; }
+  :root:not([data-theme="light"]) .ordo-color-key .day-color-black,
+  :root:not([data-theme="light"]) .month-course-pin.day-color-black { --day-color: #6a7380; }
+}
+:root[data-theme="dark"] .ordo-color-key .day-color-red,
+:root[data-theme="dark"] .date-picker-day.day-color-red,
+:root[data-theme="dark"] .month-course-pin.day-color-red { --day-color: #c9503f; }
+:root[data-theme="dark"] .ordo-color-key .day-color-green,
+:root[data-theme="dark"] .date-picker-day.day-color-green,
+:root[data-theme="dark"] .month-course-pin.day-color-green { --day-color: #4f8a52; }
+:root[data-theme="dark"] .ordo-color-key .day-color-violet,
+:root[data-theme="dark"] .date-picker-day.day-color-violet,
+:root[data-theme="dark"] .month-course-pin.day-color-violet { --day-color: #8d62ad; }
+:root[data-theme="dark"] .ordo-color-key .day-color-black,
+:root[data-theme="dark"] .month-course-pin.day-color-black { --day-color: #6a7380; }
+/* Forced colours keep no pigment: the band and its key stand down, as the rails do. */
 @media (forced-colors: active) {
-  .month-course { display: none; }
+  .month-course,
+  .ordo-color-key { display: none; }
+}
+@media print {
+  .ordo-color-key { display: none; }
 }
 .calendar-tools {
   display: flex;
@@ -7722,6 +7838,11 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 @media (max-width: 700px) {
   .page-home .pray-now-gloss:not([hidden]) {
     display: block;
+    /* One line, whatever the hour's gloss: a long "First Vespers of …" is cut
+       short rather than growing the tablet (presentation::first_vespers_gloss). */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     margin-top: 0.08rem;
     color: var(--now-gloss);
     font-size: 0.86rem;
@@ -7955,6 +8076,24 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   margin-left: 0.3em;
   color: var(--gold);
   font-size: 0.7em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* The invitation to the hour now, once that hour is prayed (app.js): the
+   directory's small gilt cross at its words' shoulder, taking no room, so
+   the tablet keeps its height and still opens the hour. */
+.page-home .pray-now-label {
+  position: relative;
+}
+
+.page-home .pray-now-prayed {
+  position: absolute;
+  top: 0.12em;
+  left: 100%;
+  margin-left: 0.28em;
+  color: var(--gold);
+  font-size: 0.6em;
   line-height: 1;
   white-space: nowrap;
 }
@@ -8582,6 +8721,11 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   position: relative;
   width: 100%;
   aspect-ratio: 320 / 144;
+  touch-action: pan-y;
+}
+
+.js .about-horologium-stage {
+  cursor: ew-resize;
 }
 
 .about-horologium-svg {
@@ -8598,12 +8742,27 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 .about-horologium-svg .h-halo-1 { stop-color: var(--h-halo-1); }
 .about-horologium-svg .h-halo-2 { stop-color: var(--h-halo-2); }
 
-/* Stars belong only to Apse's night vault, never painted onto Nave's limewash. */
+/* Stars belong only to Apse's night vault, never painted onto Nave's limewash.
+   Along the arc they brighten toward evening and Compline and quiet at midday. */
 .about-horologium-stars {
   display: none;
   fill: var(--ornament-hi);
   opacity: 0.62;
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .about-horologium-stars {
+    transition: opacity 0.45s ease;
+  }
+}
+
+.about-horologium[data-active="sext"] .about-horologium-stars { opacity: 0.24; }
+.about-horologium[data-active="terce"] .about-horologium-stars,
+.about-horologium[data-active="none"] .about-horologium-stars { opacity: 0.38; }
+.about-horologium[data-active="prime"] .about-horologium-stars { opacity: 0.50; }
+.about-horologium[data-active="lauds"] .about-horologium-stars,
+.about-horologium[data-active="vespers"] .about-horologium-stars { opacity: 0.68; }
+.about-horologium[data-active="compline"] .about-horologium-stars { opacity: 0.88; }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .about-horologium-stars {
@@ -9074,6 +9233,18 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   border-top-color: transparent;
 }
 
+.about-specimen-form-note {
+  margin: 0.3rem 0 0 !important;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.about-specimen-form-note[hidden] {
+  display: none;
+}
+
 .about-specimen-opening {
   margin-top: 0.5rem !important;
   padding-top: 0.48rem;
@@ -9086,6 +9257,11 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 
 .about-specimen-unsaid {
   color: var(--unsaid-on-plaster);
+}
+
+.js .about-specimen [data-key],
+.js .about-specimen [data-key-direct] {
+  cursor: pointer;
 }
 
 /* Soft pool of light cast onto the matching element inside the specimen leaf */
@@ -9279,6 +9455,27 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   height: 5px;
 }
 
+.about-ordo-month-hits {
+  position: absolute;
+  top: -6px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 0.7407%;
+}
+
+.about-ordo-month-hit {
+  display: block;
+  border-radius: 1px;
+  text-decoration: none;
+}
+
+.about-ordo-month-hit:hover {
+  background: color-mix(in srgb, var(--ornament) 14%, transparent);
+}
+
 .about-ordo-run {
   fill: var(--day-color);
   transition: opacity 0.2s ease;
@@ -9302,6 +9499,29 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   opacity: 1;
 }
 
+/* Rare colours (Rose, Black) occupy only single-day slivers on the 405-unit ribbon;
+   a quiet diamond pin above each day surfaces only while that colour is chosen. */
+.about-ordo-pin {
+  position: absolute;
+  top: -7px;
+  width: 4.5px;
+  height: 4.5px;
+  background: var(--day-color);
+  transform: translateX(-50%) rotate(45deg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.about-ordo-ribbon[data-selected-color="rose"] .about-ordo-pin[data-color="rose"],
+.about-ordo-ribbon[data-selected-color="black"] .about-ordo-pin[data-color="black"],
+.about-ordo-ribbon[data-selected-color="white"] .about-ordo-pin[data-color="white"],
+.about-ordo-ribbon[data-selected-color="red"] .about-ordo-pin[data-color="red"],
+.about-ordo-ribbon[data-selected-color="violet"] .about-ordo-pin[data-color="violet"],
+.about-ordo-ribbon[data-selected-color="green"] .about-ordo-pin[data-color="green"] {
+  opacity: 1;
+}
+
 .about-ordo-today {
   position: absolute;
   top: 8px;
@@ -9309,6 +9529,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   height: 5px;
   background: var(--ornament);
   transform: translateX(-50%) rotate(45deg);
+  pointer-events: none;
 }
 
 /* Each name stands at its own month's start (view.rs's AboutRibbonLabel), as the band's
@@ -9525,6 +9746,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   .about-gilt-point,
   .about-era::before,
   .about-ordo-today,
+  .about-ordo-pin,
   .about-ordo-swatch i {
     forced-color-adjust: none;
     background: CanvasText;
@@ -9534,6 +9756,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 @media print {
   .about-horologium-stops,
   .about-specimen-toggle,
+  .about-ordo-month-hits,
   .about-ordo-meaning {
     display: none;
   }
@@ -10253,22 +10476,23 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 }
 
 /* ── Selection ──
-   A gold wash rather than the browser's blue: selecting a verse to copy
-   should look like light falling on the page, not like a form field. Text
-   colour is left at the theme's own so the selected words stay legible. */
+   A wash of the season's ornament rather than the browser's blue: selecting a
+   verse to copy looks like light falling on the page, veiling with Passiontide
+   and warming at Easter. Text colour is left at the theme's own so selected
+   words stay legible. */
 ::selection {
-  background: rgba(201, 172, 114, 0.45);
+  background: color-mix(in srgb, var(--ornament) 34%, transparent);
   color: var(--text);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) ::selection {
-    background: rgba(216, 188, 116, 0.3);
+    background: color-mix(in srgb, var(--ornament) 28%, transparent);
   }
 }
 
 :root[data-theme="dark"] ::selection {
-  background: rgba(216, 188, 116, 0.3);
+  background: color-mix(in srgb, var(--ornament) 28%, transparent);
 }
 
 /* ── Painted caps ──
@@ -14068,6 +14292,7 @@ body.page-home::before {
   --crown-peach: 214, 160, 128;
   --crown-teal: 72, 112, 118;
   --crown-cross-ember: 186, 118, 52;
+  --crown-cross-ember-veiled: 141, 127, 156;
   /* The edge of the page's change: blue hour, rose gold. Thin. */
   --crown-edge-dusk: #7f86b8;
   --crown-edge-dawn: #f6c9a4;
@@ -14381,6 +14606,12 @@ body.page-home::before {
   background: rgb(var(--crown-cross-ember));
   -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
   mask: url("ornaments/consecration.svg") center / contain no-repeat;
+}
+
+/* In Passiontide the consecrated cross stays under its veil even during
+   the crown's play, warming to veiled plum-slate rather than gilt amber. */
+body.season-passiontide .crown-cross-ember {
+  background: rgb(var(--crown-cross-ember-veiled));
 }
 
 .page-home .home-hero.crown-dusk .crown-cross-ember {

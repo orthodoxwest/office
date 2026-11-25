@@ -16,7 +16,7 @@
 //! - how long before: "ten minutes before", "at the hour", or, on the web's feed, "with no alert";
 //! - with no hour or no day chosen, a plain line says so instead.
 
-use calendar::Date;
+use calendar::{Date, MoveableDates};
 
 /// The days of the week as the rule names them, Monday first as the page's Days row.
 pub const DAY_PLURALS: [&str; 7] = ["Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays", "Sundays"];
@@ -191,6 +191,17 @@ pub fn next_reminder(hour: &str, today: Date, on: Date, time: &str) -> String {
     format!("Next: {}, {day} at {time}.", hour_name(hour))
 }
 
+/// Whether a reminder for `hour` of the office day `date` comes without its bell: the bells are
+/// silent through the Sacred Triduum, from the Gloria of Maundy Thursday to the Easter Vigil, so
+/// the hours from Vespers of Maundy Thursday through None of Holy Saturday are called without one
+/// (#950). The bell rings again from Vespers of Holy Saturday. The apps deliver these reminders
+/// silently (iOS with no sound, Android on its silent channel); the web's calendar feed rings
+/// nothing of its own.
+pub fn reminder_silent(hour: &str, date: Date, moveable: &MoveableDates) -> bool {
+    let evening = matches!(hour, "vespers" | "compline");
+    (date == moveable.holy_thursday && evening) || date == moveable.good_friday || (date == moveable.holy_saturday && !evening)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -302,5 +313,18 @@ mod tests {
         assert_eq!(next(6, "5:50 PM"), "Next: Vespers, Thursday at 5:50 PM.");
         assert_eq!(next(7, "5:50 PM"), "Next: Vespers, next Friday at 5:50 PM.");
         assert_eq!(next_reminder("lauds", today, today.add_days(1), "6:35 AM"), "Next: Lauds, tomorrow at 6:35 AM.");
+    }
+
+    #[test]
+    fn the_bell_is_silent_from_maundy_thursday_vespers_to_holy_saturday_none() {
+        // Julian Pascha 2026 is 12 April: Maundy Thursday the 9th, Holy Saturday the 11th.
+        let m = MoveableDates::compute(2026);
+        let day = |d| Date::new(2026, 4, d);
+        let silent = |hour, d| reminder_silent(hour, day(d), &m);
+        assert!(!silent("none", 9) && silent("vespers", 9) && silent("compline", 9));
+        assert!(["lauds", "prime", "terce", "sext", "none", "vespers", "compline"].iter().all(|h| silent(h, 10)));
+        assert!(silent("lauds", 11) && silent("none", 11));
+        assert!(!silent("vespers", 11) && !silent("compline", 11));
+        assert!(!silent("lauds", 12) && !silent("vespers", 8));
     }
 }

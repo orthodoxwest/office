@@ -96,9 +96,17 @@
        lozenge hangs under it at today's place (--today-x, which app.js moves
        with the local date). #}
   <nav class="month-jump" aria-label="Jump to month">
-    {% for m in month_links %}<a href="{{ m.href|url }}" aria-label="{{ m.name }}" data-month="{{ m.month }}"{% if m.today %} class="is-today-month" style="--today-x: {{ m.today_x }}"{% endif %}{% if m.current %} aria-current="page"{% endif %}>{{ m.abbr }}<span class="month-course" aria-hidden="true"><svg viewBox="0 0 31 1" preserveAspectRatio="none" focusable="false">{% for r in m.course %}<rect x="{{ r.start }}" width="{{ r.days }}" height="1" class="day-color-{{ r.color }}"/>{% endfor %}</svg></span></a>{% endfor %}
+    {% for m in month_links %}<a href="{{ m.href|url }}" aria-label="{{ m.name }}" data-month="{{ m.month }}"{% if m.today %} class="is-today-month" style="--today-x: {{ m.today_x }}"{% endif %}{% if m.current %} aria-current="page"{% endif %}>{{ m.abbr }}<span class="month-course" aria-hidden="true"><svg viewBox="0 0 31 1" preserveAspectRatio="none" focusable="false">{% for r in m.course %}<rect x="{{ r.start }}" width="{{ r.days }}" height="1" class="day-color-{{ r.color }}" data-color="{{ r.color }}"/>{% endfor %}</svg>{% for p in m.rare_pins %}<span class="month-course-pin day-color-{{ p.color }}" data-color="{{ p.color }}" style="left: {{ p.left_pct }}"></span>{% endfor %}</span></a>{% endfor %}
   </nav>
   {% if view == "year" %}
+  {% if ordo_colors %}
+  <div class="ordo-color-key">
+    <div class="about-ordo-legend" role="group" aria-label="Liturgical colors">
+      {% for c in ordo_colors %}<button type="button" class="about-ordo-swatch day-color-{{ c.slug }}" data-color="{{ c.slug }}" data-name="{{ c.name }}" data-meaning="{{ c.meaning }}"{% if c.note %} data-note="{{ c.note }}"{% endif %} aria-pressed="false"><i aria-hidden="true"></i>{{ c.name }}</button>{% endfor %}
+    </div>
+    <p class="about-ordo-meaning" aria-live="polite"></p>
+  </div>
+  {% endif %}
   {# The frontispiece's one tool sits where a month keeps its own. #}
   <div class="calendar-tools">
     <a class="calendar-whole-year" href="{{ all_link|url }}">The whole year on one page</a>

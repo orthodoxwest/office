@@ -59,7 +59,11 @@ final class CoreTests: XCTestCase {
         XCTAssertTrue(zip(hours, hours.dropFirst()).allSatisfy { $0.angle > $1.angle })
         XCTAssertFalse(page.specimen.aloneVersicle.isEmpty)
         XCTAssertFalse(page.specimen.priestVersicle.isEmpty)
+        XCTAssertFalse(page.specimen.deaconNote.isEmpty)
+        XCTAssertFalse(page.specimen.priestNote.isEmpty)
         XCTAssertEqual(page.ordoColors.count, 6)
+        XCTAssertEqual(ordoColors().count, 6)
+        XCTAssertEqual(dayNameGloss(name: "Feria")?.term, "Feria")
         let links = page.blocks.flatMap(\.runs).map(\.link).filter { !$0.isEmpty }
         XCTAssertFalse(links.isEmpty)
         for link in links {
@@ -72,6 +76,22 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(aboutLink("/privacy", defaults: defaults), .web(URL(string: "https://orthodoxwestbreviary.com/privacy")!))
         defaults.set("https://example.org/api/usage", forKey: "usage-endpoint")
         XCTAssertEqual(aboutLink("/privacy", defaults: defaults), .web(URL(string: "https://example.org/privacy")!))
+    }
+
+    /// While the hours follow the sun, About gives today's sun's times, and Compline keeps its words.
+    func testAboutGivesTheSunsTimesButCompline() {
+        let periods = about().periods
+        XCTAssertEqual(aboutSunPeriods(periods, sun: nil), periods)
+        let sun: [String: (hour: Int, minute: Int)] = ["lauds": (6, 48), "sext": (12, 14), "vespers": (17, 19), "compline": (21, 0)]
+        let hours = aboutSunPeriods(periods, sun: sun).flatMap(\.hours)
+        let time = { (slug: String) in hours.first { $0.hour == slug }?.time ?? "" }
+        XCTAssertTrue(time("lauds").hasPrefix("sunrise · "), time("lauds"))
+        XCTAssertTrue(time("sext").hasPrefix("solar noon · "), time("sext"))
+        XCTAssertTrue(time("vespers").hasPrefix("sunset · "), time("vespers"))
+        XCTAssertEqual(time("compline"), periods.last?.hours.last?.time)
+        XCTAssertEqual(time("prime"), periods.first?.hours.last?.time)
+        XCTAssertEqual(aboutSunTime(hour: "lauds", clock: "6:48 AM"), "sunrise · 6:48 am")
+        XCTAssertEqual(aboutTimeSpoken(time: "sunrise · 6:48 am"), "sunrise, 6:48 am")
     }
 
     /// About lights the hour home lights, none from midnight to 2 am, and ends with home's invitation.
@@ -534,6 +554,20 @@ final class ReminderTests: XCTestCase {
         XCTAssertGreaterThan(after.fireDate, first.fireDate)
     }
 
+    /// The bells are silent from Vespers of Maundy Thursday through None of Holy Saturday (#950).
+    func testTheTriduumsRemindersComeWithoutTheBell() throws {
+        let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 4, day: 9, hour: 0, minute: 0)))
+        let plan = try ReminderScheduler.plan(settings(["lauds": (7, 0), "vespers": (18, 0)]), now: now, core: Office.core.get(), calendar: calendar)
+        let silent = plan.prefix(6).map { "\($0.date.iso) \($0.hour) \($0.silent)" }
+        XCTAssertEqual(silent, [
+            "2026-04-09 lauds false", "2026-04-09 vespers true",
+            "2026-04-10 lauds true", "2026-04-10 vespers true",
+            "2026-04-11 lauds true", "2026-04-11 vespers false",
+        ])
+        XCTAssertNil(ReminderScheduler.content(plan[1]).sound)
+        XCTAssertNotNil(ReminderScheduler.content(plan[0]).sound)
+    }
+
     func testTheScheduleStopsAtIOSsLimit() throws {
         let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 15, hour: 0, minute: 0)))
         let all = Dictionary(uniqueKeysWithValues: hourNames().enumerated().map { ($0.element, (6 + 2 * $0.offset, 0)) })
@@ -568,6 +602,20 @@ final class ReminderTests: XCTestCase {
         let plan = try ReminderScheduler.plan(bySun(philadelphia), now: now, core: Office.core.get(), calendar: calendar)
         let first = plan.prefix(3).map { "\($0.hour) \($0.at.hour ?? -1):\($0.at.minute ?? -1)" }
         XCTAssertEqual(first, ["lauds 5:22", "vespers 20:23", "compline 21:23"])
+    }
+
+    /// About gives the same day's sun as the reminders: Philadelphia at midsummer.
+    func testAboutGivesTheSunsTimesAtThePlaceKept() throws {
+        let day = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 6, day: 21, hour: 12)))
+        let core = try Office.core.get()
+        XCTAssertNil(settings(["lauds": (6, 45)]).sunTimes(on: day, core: core, calendar: calendar))
+        let sun = bySun(philadelphia).sunTimes(on: day, core: core, calendar: calendar)
+        let hours = aboutSunPeriods(about().periods, sun: sun).flatMap(\.hours)
+        let time = { (slug: String) in hours.first { $0.hour == slug }?.time ?? "" }
+        XCTAssertTrue(time("lauds").hasPrefix("sunrise · 5:32"), time("lauds"))
+        XCTAssertTrue(time("vespers").hasPrefix("sunset · ") && time("vespers").contains(":33"), time("vespers"))
+        XCTAssertTrue(time("prime").hasPrefix("first hour · "), time("prime"))
+        XCTAssertEqual(time("compline"), about().periods.last?.hours.last?.time)
     }
 
     func testEachDayTakesItsOwnOffsetAcrossAClockChange() throws {

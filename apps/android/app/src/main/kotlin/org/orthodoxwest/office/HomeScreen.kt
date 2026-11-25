@@ -80,6 +80,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
@@ -88,6 +89,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
@@ -102,6 +104,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.LightFrame
+import org.orthodoxwest.office.core.dayNameGloss
 import org.orthodoxwest.office.core.homeGlosses
 import org.orthodoxwest.office.core.hourLightAt
 import org.orthodoxwest.office.core.hourLightTotalMs
@@ -480,6 +483,11 @@ private fun Frontispiece(
     // The hours prayed on this day, marked again when one is prayed.
     val context = LocalContext.current
     val prayed = remember(date, Prayed.version) { Prayed.hours(context, date) }
+    // Whether the invitation is to the hour now and that hour is prayed: its day is the
+    // invitation's own, so Compline after midnight asks yesterday's marks (the web's `.pray-now.is-prayed`).
+    val invitePrayed = remember(view.isToday, view.prayNowDate, view.prayNowHour, Prayed.version) {
+        view.isToday && view.prayNowHour in Prayed.hours(context, LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day))
+    }
     val day = dayColor(view.color, p)
     // The lining's inner line is the day's colour, beside the cross on the plaster; a white day's
     // would be tan there, and takes the gold line by day.
@@ -516,6 +524,7 @@ private fun Frontispiece(
     if (head != null) {
         head.arch = tier.arch
         head.black = black
+        head.veiled = season == "passiontide"
         head.picking = picking
         head.catchInk = mix(Leaf(ornament(Apse, season)).hi, Color.White, 0.62f)
         head.cross = { dark ->
@@ -632,15 +641,29 @@ private fun Frontispiece(
                     }
                     // The day's feast leads to its page, underlined as the web's `.feast-link`, though in
                     // its own ink: a text decoration takes no colour.
-                    FeastName(
-                        view.feastName,
-                        view.feastAlias,
-                        tier.feast,
-                        Modifier.padding(top = 2.dp).widthIn(max = tier.feastMeasure).crownUnit("w-feast")
-                            .then(if (view.feastId.isEmpty()) Modifier else Modifier.tap(action = "open the feast's page") { onFeast(view.feastId) }),
-                        linked = view.feastId.isNotEmpty(),
-                        reserve = reserve,
-                    )
+                    val dayGloss = if (view.feastId.isEmpty()) dayNameGloss(view.feastName) else null
+                    val feastBoxMod = Modifier.padding(top = 2.dp).widthIn(max = tier.feastMeasure).crownUnit("w-feast")
+                    if (dayGloss != null) {
+                        GlossMark(dayGloss, view.feastName, feastBoxMod, reaches = false) {
+                            FeastName(
+                                view.feastName,
+                                view.feastAlias,
+                                tier.feast,
+                                Modifier,
+                                linked = false,
+                                reserve = reserve,
+                            )
+                        }
+                    } else {
+                        FeastName(
+                            view.feastName,
+                            view.feastAlias,
+                            tier.feast,
+                            feastBoxMod.then(if (view.feastId.isEmpty()) Modifier else Modifier.tap(action = "open the feast's page") { onFeast(view.feastId) }),
+                            linked = view.feastId.isNotEmpty(),
+                            reserve = reserve,
+                        )
+                    }
                     if (view.octaveNote.isNotEmpty()) {
                         GlossMark(HOME_GLOSSES.octave, view.octaveNote, Modifier.crownUnit("w-octave").then(reserve.at("octave")), reaches = false) {
                             Text(view.octaveNote, style = Type.small.copy(color = muted), onTextLayout = reserve.layout("octave"))
@@ -755,7 +778,7 @@ private fun Frontispiece(
                     val lit = light?.lit ?: HourLit(view.currentHour, view.prayNowGloss, view.prayNowLabel)
                     // A phone says what the hour is under the invitation's words, so the hours' table keeps
                     // one shape whichever hour is now; the niche glosses every hour in its table.
-                    PrayNow(lit.label, tier.pray, tier.prayTop, tier.prayBottom, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null, light?.words ?: 1f, gloss = if (desk) "" else lit.note, glossSize = tier.gloss, glossInk = home.nowGloss) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
+                    PrayNow(lit.label, tier.pray, tier.prayTop, tier.prayBottom, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null, light?.words ?: 1f, gloss = if (desk) "" else lit.note, glossSize = tier.gloss, glossInk = home.nowGloss, prayed = invitePrayed && lit.label == view.prayNowLabel) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
                     HourDirectory(lit.hour, light, prayed, tier, titulusNow(p, season), home) { onHour(date, it) }
                 }
@@ -971,7 +994,7 @@ private fun Modifier.throughPadding(side: Dp): Modifier = this.layout { measurab
  * italic line under the words says what the hour is (`gloss`, the web's `.pray-now-gloss`).
  */
 @Composable
-fun PrayNow(label: String, size: Float, top: Dp, bottom: Dp, frontal: Color, wash: Color, lifted: Color?, words: Float = 1f, gloss: String = "", glossSize: Float = 13.76f, glossInk: Color = Color.Unspecified, onClick: () -> Unit) {
+fun PrayNow(label: String, size: Float, top: Dp, bottom: Dp, frontal: Color, wash: Color, lifted: Color?, words: Float = 1f, gloss: String = "", glossSize: Float = 13.76f, glossInk: Color = Color.Unspecified, prayed: Boolean = false, onClick: () -> Unit) {
     val p = LocalPalette.current
     val tablet = ImageBitmap.imageResource(R.drawable.tablet)
     // The tablet answers the finger as a thing, not a dimmed word (the web's `.pray-now:active`):
@@ -987,6 +1010,8 @@ fun PrayNow(label: String, size: Float, top: Dp, bottom: Dp, frontal: Color, was
             .heightIn(min = 44.dp)
             .crownUnit("r-pray")
             .tap(source = source, onClick = onClick)
+            // Said after the words and the gloss, as the web's "Prayed" and iOS's value.
+            .then(if (prayed) Modifier.semantics { stateDescription = "Prayed" } else Modifier)
             .drawBehind {
                 tabletWash(tablet, lerp(wash, deeper, held))
                 invitationRules(p.lining, frontal)
@@ -998,9 +1023,15 @@ fun PrayNow(label: String, size: Float, top: Dp, bottom: Dp, frontal: Color, was
         // The words (and the gloss under them) alone go out and come back as the light moves to
         // another hour.
         Column(if (words < 1f) Modifier.alpha(words) else Modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(label, style = Type.body.copy(fontSize = size.sp, lineHeight = (size * 1.3f).sp, letterSpacing = (size * 0.012f).sp, color = lifted ?: if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
+            Box {
+                Text(label, style = Type.body.copy(fontSize = size.sp, lineHeight = (size * 1.3f).sp, letterSpacing = (size * 0.012f).sp, color = lifted ?: if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
+                // The hour now, once prayed: the directory's small gilt cross at the words'
+                // shoulder, taking no room, so the tablet keeps its height and still opens the hour.
+                if (prayed) PaintedCross(Modifier.align(Alignment.TopEnd).offset(x = (size * 0.6f).dp, y = (size * 0.18f).dp).size((size * 0.42f).dp), ink = p.gold)
+            }
             if (gloss.isNotEmpty()) {
-                Text(gloss, Modifier.padding(top = 1.3.dp), style = Type.small.copy(fontSize = glossSize.sp, lineHeight = (glossSize * 1.2f).sp, color = glossInk, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center))
+                // One line: a long "First Vespers of …" is cut short rather than growing the tablet.
+                Text(gloss, Modifier.padding(top = 1.3.dp), style = Type.small.copy(fontSize = glossSize.sp, lineHeight = (glossSize * 1.2f).sp, color = glossInk, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }

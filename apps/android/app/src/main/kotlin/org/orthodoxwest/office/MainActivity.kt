@@ -658,6 +658,7 @@ fun OfficeApp(
                                 view = aboutView,
                                 today = today,
                                 clockHour = clockHour,
+                                reminders = reminders,
                                 chrome = chrome,
                                 insets = insets,
                                 onOpen = onOpen,

@@ -698,6 +698,9 @@ struct Disclosure: View {
 /// Change date's day links, worded as the web's.
 private let dayNav = dayNavWords()
 
+/// How a screen reader names a first-class feast in the picker (`presentation::course::FIRST_CLASS_SPOKEN`).
+private let firstClassWords = firstClassSpoken()
+
 /// How far back and ahead of this year the picker reaches (presentation's offered_years), as the
 /// web's (app.js YEARS_BACK, YEARS_AHEAD); the ordo's year links stop at its ends too.
 let yearsBack = 30
@@ -730,6 +733,8 @@ struct DayPicker: View {
     @State private var turn: CGFloat = 1
     /// The days' width, of which a turning month travels a fifth, as Android's does.
     @State private var daysWidth: CGFloat = 0
+    /// Each month's marks (#953), by `year * 12 + month`, loaded off the main thread as it is shown.
+    @State private var marks: [Int: [DayMarkView]] = [:]
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -797,6 +802,7 @@ struct DayPicker: View {
                     let travel = daysWidth > 0 ? daysWidth / 5 : 60
                     days
                         .id(year * 12 + month)
+                        .task(id: year * 12 + month) { await loadMarks(year, month) }
                         .transition(reduceMotion ? .opacity : .asymmetric(
                             insertion: .offset(x: travel * turn).combined(with: .opacity.animation(.easeOut(duration: 0.18).delay(0.06))),
                             removal: .offset(x: -travel * turn).combined(with: .opacity.animation(.easeIn(duration: 0.09)))
@@ -869,9 +875,33 @@ struct DayPicker: View {
         .accessibilityLabel(label)
     }
 
+    /// The month's marks from the calendar, once; until they come the days are plain.
+    private func loadMarks(_ y: Int, _ mo: Int) async {
+        guard marks[y * 12 + mo] == nil else { return }
+        if case let .success(got) = await compose({ try Office.core.get().dayMarks(year: Int32(y), month: Int32(mo)) }) {
+            marks[y * 12 + mo] = got
+        }
+    }
+
+    /// A day's marks (#953, `.date-picker-day[data-color]`): a whisper-thin hairline of its colour
+    /// under the figure, below the chosen day's gold rule, and on a first-class feast a gilt lozenge
+    /// riding it, as home gilds the day.
+    private func dayMark(_ mark: DayMarkView) -> some View {
+        ZStack {
+            Rectangle().fill(dayColor(mark.color, p).opacity(0.6)).frame(width: m.px(15.2), height: m.px(2))
+            if mark.firstClass {
+                Rectangle().fill(p.gold).frame(width: m.px(4.5), height: m.px(4.5)).rotationEffect(.degrees(45))
+            }
+        }
+        .frame(height: m.px(2))
+        .padding(.bottom, m.px(4))
+        .accessibilityHidden(true)
+    }
+
     /// A month's days in six weeks always, blank where the month is not.
     private var days: some View {
         let first = CivilDate(year: Int32(year), month: Int32(month), day: 1)
+        let monthMarks = marks[year * 12 + month] ?? []
         let lead = first.weekday - 1
         let length = civil.range(of: .day, in: .month, for: first.date)?.count ?? 30
         return VStack(spacing: 0) {
@@ -887,6 +917,7 @@ struct DayPicker: View {
                         let n = week * 7 + i - lead + 1
                         if (1...length).contains(n) {
                             let day = CivilDate(year: Int32(year), month: Int32(month), day: Int32(n))
+                            let mark = monthMarks.indices.contains(n - 1) ? monthMarks[n - 1] : nil
                             Button {
                                 chose()
                                 pick(day)
@@ -896,10 +927,11 @@ struct DayPicker: View {
                                     .foregroundStyle(i == 0 ? p.rubric : day == shown ? p.accent : p.text)
                                     .goldUnderline(day == shown, p.goldLine)
                                     .frame(maxWidth: .infinity, minHeight: 44)
+                                    .overlay(alignment: .bottom) { if let mark { dayMark(mark) } }
                                     .background { if day == today { todayPool } }
                             }
                             .buttonStyle(Lit())
-                            .accessibilityLabel(spokenDay(day, today: today))
+                            .accessibilityLabel(spokenDay(day, today: today) + (mark?.firstClass == true ? ", \(firstClassWords)" : ""))
                             .accessibilityAddTraits(day == shown ? .isSelected : [])
                         } else {
                             // As tall as a day's cell at any text size, and no taller.

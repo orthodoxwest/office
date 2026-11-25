@@ -3,11 +3,14 @@ package org.orthodoxwest.office
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.text.format.DateFormat
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -54,6 +57,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
@@ -93,8 +97,17 @@ import org.orthodoxwest.office.core.RunStyle
 import org.orthodoxwest.office.core.RunView
 import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.aboutNow
+import org.orthodoxwest.office.core.aboutSunTime
+import org.orthodoxwest.office.core.aboutTimeSpoken
+import org.orthodoxwest.office.core.colorDaysNote
 import org.orthodoxwest.office.core.courseSpan
+import org.orthodoxwest.office.core.rareColorMaxDays
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
@@ -115,6 +128,7 @@ fun AboutScreen(
     view: AboutView,
     today: LocalDate,
     clockHour: Int,
+    reminders: ReminderSettings,
     chrome: @Composable () -> Unit,
     insets: PaddingValues,
     onOpen: (Page) -> Unit,
@@ -136,6 +150,11 @@ fun AboutScreen(
     val body = Type.body.copy(lineHeight = 31.sp, color = p.text)
     val now = remember(today, clockHour) { runCatching { aboutNow(today.toCivil(), clockHour) }.getOrNull() }
     val currentHour = now?.current.orEmpty()
+    // While the reminders follow the sun here, the hours' times are today's sun's.
+    val periods = remember(view, today, reminders) {
+        val clock = DateTimeFormatter.ofPattern(if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm a", Locale.getDefault())
+        sunPeriods(view.periods, reminders.sunTimes(today, ZoneId.systemDefault()), clock)
+    }
 
     // Extract head epigraph, intro, hours heading/note, and remaining prose sections from shared blocks.
     val verse = remember(view) { view.blocks.firstOrNull { it.kind == "verse" } }
@@ -154,13 +173,14 @@ fun AboutScreen(
                 AboutSectionHeading(parsed.hoursHeading, seed = 110)
             }
             Horologium(
-                periods = view.periods,
+                periods = periods,
                 current = currentHour,
                 pinned = pinnedHour,
                 onSelect = { slug -> pinnedHour = if (pinnedHour == slug) null else slug },
+                onPin = { slug -> pinnedHour = slug },
             )
             HoursDirectory(
-                periods = view.periods,
+                periods = periods,
                 current = currentHour,
                 preview = pinnedHour?.takeIf { it != currentHour },
                 onHour = { onOpen(Page.Hour(today, it)) },
@@ -238,6 +258,7 @@ fun AboutScreen(
                                 form = specimenForm,
                                 litKey = litKey,
                                 onForm = { specimenForm = it },
+                                onToggleKey = { key -> litKey = if (litKey == key) null else key },
                             )
                             Spacer(Modifier.height(16.dp))
                             i++
@@ -266,6 +287,7 @@ fun AboutScreen(
                                 label = view.ribbonLabel,
                                 selected = selectedColor,
                                 onSelect = { slug -> selectedColor = if (selectedColor == slug) null else slug },
+                                onMonth = { y, m -> onOpen(Page.Ordo(y, m, 0)) },
                             )
                             i++
                         }
@@ -474,12 +496,26 @@ private fun AboutSectionHeading(text: String, seed: Int) {
  * Compline) along the arc and shifts the theme-faithful wash (honest warm plaster light in Nave;
  * quiet vaulted night sky with subtle gold-leaf stars and a travelling lantern halo in Apse).
  */
+private data class VaultStar(val x: Float, val y: Float, val r: Float, val eightRay: Boolean, val weight: Float)
+
+private val HOROLOGIUM_STARS = listOf(
+    VaultStar(102f, 56f, 3.4f, true, 0.88f),
+    VaultStar(134f, 38f, 4.2f, true, 0.96f),
+    VaultStar(176f, 35f, 2.9f, false, 0.78f),
+    VaultStar(218f, 52f, 3.9f, true, 0.92f),
+    VaultStar(82f, 84f, 2.6f, false, 0.74f),
+    VaultStar(154f, 54f, 2.4f, false, 0.68f),
+    VaultStar(238f, 82f, 3.1f, true, 0.82f),
+    VaultStar(192f, 62f, 2.4f, false, 0.72f),
+)
+
 @Composable
 private fun Horologium(
     periods: List<AboutPeriodView>,
     current: String,
     pinned: String?,
     onSelect: (String) -> Unit,
+    onPin: (String) -> Unit,
 ) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
@@ -487,10 +523,25 @@ private fun Horologium(
     val activeSlug = pinned ?: current.ifEmpty { "compline" }
     val active = hours.firstOrNull { it.hour == activeSlug } ?: hours.lastOrNull() ?: return
     val isNow = active.hour == current && current.isNotEmpty()
+    var dragAngle by remember { mutableStateOf<Float?>(null) }
     val animatedAngle by animateFloatAsState(
         targetValue = active.angle.toFloat(),
         animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing),
         label = "horologium-angle",
+    )
+    val displayAngle = dragAngle ?: animatedAngle
+    val starTargetAlpha = when (active.hour) {
+        "sext" -> 0.24f
+        "terce", "none" -> 0.38f
+        "prime" -> 0.50f
+        "lauds", "vespers" -> 0.68f
+        "compline" -> 0.88f
+        else -> 0.62f
+    }
+    val starAlpha by animateFloatAsState(
+        targetValue = starTargetAlpha,
+        animationSpec = tween(durationMillis = 450, easing = FastOutSlowInEasing),
+        label = "horologium-stars",
     )
 
     // Theme-faithful dome wash stops: Nave stays warm plaster (never dark sky or stars);
@@ -518,7 +569,7 @@ private fun Horologium(
             // Not a live region, as on the web and iOS: each stop already names its hour, and a
             // readout spoken at every pass would talk over the page.
             mod.clearAndSetSemantics {
-                contentDescription = "${if (isNow) "Now, " else ""}${active.time}. ${active.name}, ${active.gloss}"
+                contentDescription = "${if (isNow) "Now, " else ""}${aboutTimeSpoken(active.time)}. ${active.name}, ${active.gloss}"
             },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -547,7 +598,29 @@ private fun Horologium(
     }
 
     Column(Modifier.fillMaxWidth().padding(top = 3.dp, bottom = 13.6.dp)) {
-        BoxWithConstraints(Modifier.fillMaxWidth().aspectRatio(320f / 144f)) {
+        BoxWithConstraints(
+            Modifier.fillMaxWidth().aspectRatio(320f / 144f)
+                .pointerInput(hours) {
+                    fun updateFromPosition(pos: Offset) {
+                        if (size.width <= 0 || size.height <= 0) return
+                        val svgX = (pos.x / size.width) * 320f
+                        val svgY = (pos.y / size.height) * 144f
+                        val deg = Math.toDegrees(atan2((128f - svgY).toDouble(), (svgX - 160f).toDouble())).toFloat().coerceIn(12f, 168f)
+                        dragAngle = deg
+                        val nearest = hours.minByOrNull { kotlin.math.abs(it.angle.toFloat() - deg) }
+                        if (nearest != null) onPin(nearest.hour)
+                    }
+                    detectHorizontalDragGestures(
+                        onDragStart = { updateFromPosition(it) },
+                        onHorizontalDrag = { change, _ ->
+                            change.consume()
+                            updateFromPosition(change.position)
+                        },
+                        onDragEnd = { dragAngle = null },
+                        onDragCancel = { dragAngle = null },
+                    )
+                },
+        ) {
             val boxW = maxWidth
             val boxH = maxHeight
 
@@ -569,18 +642,53 @@ private fun Horologium(
                     arcTo(Rect(cx - rx, cy - ry, cx + rx, cy + ry), 180f, 180f, false)
                     close()
                 }
-                val orb = arcPt(animatedAngle)
+                val orb = arcPt(displayAngle)
                 val washRadius = max(size.width, size.height) * 0.68f
                 drawPath(dome, Brush.radialGradient(0f to wash0, 0.52f to wash1, 1f to wash2, center = orb, radius = washRadius))
 
                 if (p.dark) {
                     clipPath(dome) {
-                        val stars = listOf(
-                            Triple(102f, 56f, 1.3f), Triple(134f, 38f, 1.6f), Triple(176f, 35f, 1.2f), Triple(218f, 52f, 1.5f),
-                            Triple(82f, 84f, 1.1f), Triple(154f, 54f, 1.0f), Triple(238f, 82f, 1.2f), Triple(192f, 62f, 1.0f),
-                        )
-                        stars.forEach { (x, y, r) ->
-                            drawCircle(o.hi.copy(alpha = 0.62f), r * sx, Offset(x * sx, y * sy))
+                        // Parish apse 8-ray principal stars and 4-ray minor stars, matching about.html.
+                        HOROLOGIUM_STARS.forEach { s ->
+                            val r = s.r * sx
+                            val px = s.x * sx
+                            val py = s.y * sy
+                            val starPath = Path().apply {
+                                if (s.eightRay) {
+                                    val w = r * 0.19f
+                                    val c = r * 0.25f
+                                    val d = r * 0.45f
+                                    moveTo(px, py - r)
+                                    lineTo(px + w, py - c)
+                                    lineTo(px + d, py - d)
+                                    lineTo(px + c, py - w)
+                                    lineTo(px + r, py)
+                                    lineTo(px + c, py + w)
+                                    lineTo(px + d, py + d)
+                                    lineTo(px + w, py + c)
+                                    lineTo(px, py + r)
+                                    lineTo(px - w, py + c)
+                                    lineTo(px - d, py + d)
+                                    lineTo(px - c, py + w)
+                                    lineTo(px - r, py)
+                                    lineTo(px - c, py - w)
+                                    lineTo(px - d, py - d)
+                                    lineTo(px - w, py - c)
+                                    close()
+                                } else {
+                                    val w = r * 0.21f
+                                    moveTo(px, py - r)
+                                    lineTo(px + w, py - w)
+                                    lineTo(px + r, py)
+                                    lineTo(px + w, py + w)
+                                    lineTo(px, py + r)
+                                    lineTo(px - w, py + w)
+                                    lineTo(px - r, py)
+                                    lineTo(px - w, py - w)
+                                    close()
+                                }
+                            }
+                            drawPath(starPath, o.hi.copy(alpha = (starAlpha * s.weight).coerceIn(0f, 1f)))
                         }
                     }
                 }
@@ -609,7 +717,7 @@ private fun Horologium(
 
                 // Lit arc from Lauds (168°) to the current orb angle
                 val startSweep = 180f + (180f - 168f)
-                val sweep = (168f - animatedAngle).coerceAtLeast(0.5f)
+                val sweep = (168f - displayAngle).coerceAtLeast(0.5f)
                 val litArc = Path().apply {
                     arcTo(Rect(cx - rx, cy - ry, cx + rx, cy + ry), startSweep, sweep, false)
                 }
@@ -686,7 +794,7 @@ private fun Horologium(
                 Box(
                     Modifier.offset { IntOffset(xPx, yPx) }
                         .size(44.dp)
-                        .tap(label = "${h.name}: ${h.gloss}, ${h.time}", selected = h.hour == active.hour) { onSelect(h.hour) },
+                        .tap(label = "${h.name}: ${h.gloss}, ${aboutTimeSpoken(h.time)}", selected = h.hour == active.hour) { onSelect(h.hour) },
                 )
             }
         }
@@ -694,6 +802,22 @@ private fun Horologium(
         if (largeFont) {
             readout(Modifier.fillMaxWidth().padding(top = 8.dp))
         }
+    }
+}
+
+/**
+ * The table's hours with today's times by the sun ("sunrise · 6:48 am") in place of their own,
+ * when [sun] has them; Compline, and every hour while the sun does not time them, keep theirs.
+ */
+internal fun sunPeriods(periods: List<AboutPeriodView>, sun: Map<String, LocalTime>?, clock: DateTimeFormatter): List<AboutPeriodView> {
+    if (sun == null) return periods
+    return periods.map { period ->
+        period.copy(
+            hours = period.hours.map { h ->
+                val time = sun[h.hour]?.let { aboutSunTime(h.hour, it.format(clock)) }.orEmpty()
+                if (time.isEmpty()) h else h.copy(time = time)
+            },
+        )
     }
 }
 
@@ -771,7 +895,7 @@ private fun HoursDirectory(
                             Spacer(Modifier.width(10.4.dp))
                             Column(Modifier.weight(1f).alignByBaseline()) {
                                 Text(h.gloss, style = glossStyle)
-                                Text(h.time, style = timeStyle)
+                                Text(h.time, Modifier.semantics { contentDescription = aboutTimeSpoken(h.time) }, style = timeStyle)
                             }
                         }
                     }
@@ -794,6 +918,7 @@ private fun SpecimenLeaf(
     form: String,
     litKey: String?,
     onForm: (String) -> Unit,
+    onToggleKey: (String) -> Unit,
 ) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
@@ -801,6 +926,8 @@ private fun SpecimenLeaf(
     val wash = homeInk(p).tabletWash
     val pool = homeInk(p).nowPool
     val lineStyle = Type.body.copy(fontSize = 16.5.sp, lineHeight = 24.sp, color = p.text)
+    var openingLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    val crossIndex = remember(specimen.openingVersicle) { specimen.openingVersicle.indexOf('✠') }
 
     Column(
         Modifier.fillMaxWidth().drawBehind {
@@ -817,7 +944,7 @@ private fun SpecimenLeaf(
         ) {
             Text(
                 specimen.label,
-                Modifier.padding(end = 10.dp),
+                Modifier.padding(end = 10.dp).pointerInput(Unit) { detectTapGestures { onToggleKey("form") } },
                 softWrap = false,
                 style = Type.body.copy(
                     fontSize = 11.84.sp,
@@ -845,7 +972,9 @@ private fun SpecimenLeaf(
         // Lauds' opening as the hour prints it: its rubric, the secret Our Father, the ✠ where it falls.
         Text(
             specimen.rubric,
-            Modifier.fillMaxWidth().litPool(litKey == "rubric", pool).padding(bottom = 6.dp),
+            Modifier.fillMaxWidth().litPool(litKey == "rubric", pool)
+                .pointerInput(Unit) { detectTapGestures { onToggleKey("rubric") } }
+                .padding(bottom = 6.dp),
             style = lineStyle.copy(fontSize = 15.sp, color = p.rubric, fontStyle = FontStyle.Italic),
         )
         Text(
@@ -854,7 +983,9 @@ private fun SpecimenLeaf(
                 append(" ")
                 withStyle(SpanStyle(color = if (p.dark) p.unsaid else p.muted)) { append(specimen.secretSilent) }
             },
-            Modifier.fillMaxWidth().litPool(litKey == "secret", pool).padding(bottom = 8.dp),
+            Modifier.fillMaxWidth().litPool(litKey == "secret", pool)
+                .pointerInput(Unit) { detectTapGestures { onToggleKey("secret") } }
+                .padding(bottom = 8.dp),
             style = lineStyle,
         )
 
@@ -866,7 +997,7 @@ private fun SpecimenLeaf(
                     contentDescription = "Versicle. " + specimen.openingVersicle.replace("✠", "sign of the cross,")
                 },
         ) {
-            Text("℣.", Modifier.width(27.dp), style = lineStyle.copy(color = p.rubric))
+            Text("℣.", Modifier.width(27.dp).pointerInput(Unit) { detectTapGestures { onToggleKey("vr") } }, style = lineStyle.copy(color = p.rubric))
             Text(
                 buildAnnotatedString {
                     val parts = specimen.openingVersicle.split("✠", limit = 2)
@@ -876,27 +1007,45 @@ private fun SpecimenLeaf(
                         append(parts[1])
                     }
                 },
+                Modifier.pointerInput(crossIndex) {
+                    detectTapGestures { pos ->
+                        val offset = openingLayout?.getOffsetForPosition(pos) ?: -1
+                        if (crossIndex >= 0 && offset in (crossIndex - 1)..(crossIndex + 1)) onToggleKey("cross")
+                        else onToggleKey("vr")
+                    }
+                },
                 style = lineStyle,
+                onTextLayout = { openingLayout = it },
             )
         }
         Row(
-            Modifier.fillMaxWidth().litPool(litKey == "vr", pool).padding(bottom = 8.dp)
+            Modifier.fillMaxWidth().litPool(litKey == "vr", pool)
+                .pointerInput(Unit) { detectTapGestures { onToggleKey("vr") } }
+                .padding(bottom = 8.dp)
                 .clearAndSetSemantics { contentDescription = "Response. ${specimen.openingResponse}" },
         ) {
             Text("℟.", Modifier.width(27.dp), style = lineStyle.copy(color = p.rubric))
             Text(specimen.openingResponse, style = lineStyle)
         }
 
-        // The close's greeting, as the chosen form gives it: a deacon greets as a priest does.
+        // The close's greeting, as the chosen form gives it: a deacon greets as a priest does,
+        // while a quiet note names how Deacon and Priest differ across the hours.
         RuledDivider(p.lining.copy(alpha = 0.19f), 0.75f, seed = 170)
         val clergy = form != "private"
         val formV = if (clergy) specimen.priestVersicle else specimen.aloneVersicle
         val formR = if (clergy) specimen.priestResponse else specimen.aloneResponse
+        val formNote = when (form) {
+            "deacon" -> specimen.deaconNote
+            "priest" -> specimen.priestNote
+            else -> ""
+        }
         Column(
-            Modifier.fillMaxWidth().litPool(litKey == "form", pool).padding(top = 7.dp)
+            Modifier.fillMaxWidth().litPool(litKey == "form", pool)
+                .pointerInput(Unit) { detectTapGestures { onToggleKey("form") } }
+                .padding(top = 7.dp)
                 .clearAndSetSemantics {
                     liveRegion = LiveRegionMode.Polite
-                    contentDescription = "Versicle. $formV Response. $formR"
+                    contentDescription = "Versicle. $formV Response. $formR" + if (formNote.isNotEmpty()) " $formNote" else ""
                 },
         ) {
             Row(Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
@@ -906,6 +1055,13 @@ private fun SpecimenLeaf(
             Row(Modifier.fillMaxWidth()) {
                 Text("℟.", Modifier.width(27.dp), style = lineStyle.copy(color = p.rubric))
                 Text(formR, style = lineStyle)
+            }
+            if (formNote.isNotEmpty()) {
+                Text(
+                    formNote,
+                    Modifier.padding(top = 5.dp),
+                    style = Type.body.copy(fontSize = 13.76.sp, lineHeight = 19.sp, color = p.muted, fontStyle = FontStyle.Italic),
+                )
             }
         }
     }
@@ -1048,19 +1204,43 @@ private fun OrdoRibbon(
     label: String,
     selected: String?,
     onSelect: (String) -> Unit,
+    onMonth: (Int, Int) -> Unit,
 ) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val span = courseSpan().toInt()
     val gap = 3
     val total = 12 * span + 11 * gap
+    val rareColors = remember(course) {
+        if (course == null) emptySet()
+        else {
+            val maxDays = rareColorMaxDays().toInt()
+            val totals = mutableMapOf<String, Int>()
+            course.forEach { m -> m.runs.forEach { r -> totals[r.color] = (totals[r.color] ?: 0) + r.days } }
+            totals.filterValues { it in 1..maxDays }.keys
+        }
+    }
 
     Column(Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 4.dp)) {
         if (!course.isNullOrEmpty()) {
             val todayFrac = ((today.monthValue - 1) * (span + gap) + today.dayOfMonth.coerceIn(1, span) - 0.5f) / total.toFloat()
-            Box(Modifier.fillMaxWidth().height(15.dp).clearAndSetSemantics { contentDescription = label }) {
-                Canvas(Modifier.fillMaxWidth().height(5.dp)) {
+            Box(
+                Modifier.fillMaxWidth().height(23.dp)
+                    .pointerInput(today.year, total) {
+                        detectTapGestures { offset ->
+                            if (size.width > 0) {
+                                val x = (offset.x / size.width) * total
+                                val mi = (x / (span + gap)).toInt().coerceIn(0, 11)
+                                onMonth(today.year, mi + 1)
+                            }
+                        }
+                    }
+                    .clearAndSetSemantics { contentDescription = label },
+            ) {
+                Canvas(Modifier.fillMaxWidth().fillMaxHeight()) {
                     val unit = size.width / total.toFloat()
+                    val barTop = 8.dp.toPx()
+                    val barH = 5.dp.toPx()
                     course.forEachIndexed { mi, month ->
                         val ox = mi * (span + gap)
                         var end = 0
@@ -1069,32 +1249,29 @@ private fun OrdoRibbon(
                             val alpha = if (selected == null || selected == r.color) 1f else 0.16f
                             drawRect(
                                 color = col.copy(alpha = alpha),
-                                topLeft = Offset((ox + r.start) * unit, 0f),
-                                size = Size(r.days * unit, size.height),
+                                topLeft = Offset((ox + r.start) * unit, barTop),
+                                size = Size(r.days * unit, barH),
                             )
+                            if (selected == r.color && r.color in rareColors) {
+                                val midX = (ox + r.start + r.days / 2f) * unit
+                                val pr = 2.4.dp.toPx()
+                                val pinY = barTop - 4.5.dp.toPx()
+                                lozenge(Offset(midX, pinY), pr, col, null)
+                            }
                             end = max(end, r.start + r.days)
                         }
                         if (end < span) {
                             drawRect(
                                 color = p.lining.copy(alpha = 0.22f),
-                                topLeft = Offset((ox + end) * unit, size.height * 0.4f),
-                                size = Size((span - end) * unit, size.height * 0.2f),
+                                topLeft = Offset((ox + end) * unit, barTop + barH * 0.4f),
+                                size = Size((span - end) * unit, barH * 0.2f),
                             )
                         }
                     }
-                }
-                // Today's gilt diamond hanging beneath today's place on the ribbon
-                Canvas(Modifier.fillMaxWidth().padding(top = 8.dp).height(6.dp)) {
+                    // Today's gilt diamond hanging beneath today's place on the ribbon
                     val x = size.width * todayFrac
                     val r = 2.8.dp.toPx()
-                    val lozenge = Path().apply {
-                        moveTo(x, 0f)
-                        lineTo(x + r, r)
-                        lineTo(x, 2 * r)
-                        lineTo(x - r, r)
-                        close()
-                    }
-                    drawPath(lozenge, o.flat)
+                    lozenge(Offset(x, barTop + barH + 3.dp.toPx() + r), r, o.flat, null)
                 }
             }
             // Each name stands at its own month's start, as the web's (view.rs AboutRibbonLabel).
@@ -1147,8 +1324,12 @@ private fun OrdoRibbon(
 
         val active = colors.firstOrNull { it.slug == selected }
         if (active != null) {
+            val note = remember(course, active.slug, today.year) {
+                if (!course.isNullOrEmpty()) colorDaysNote(course, active.slug, today.year) else ""
+            }
+            val line = "${active.name} — ${active.meaning}" + if (note.isNotEmpty()) " ($note)" else ""
             Text(
-                "${active.name} — ${active.meaning}",
+                line,
                 Modifier.padding(top = 6.dp).semantics { liveRegion = LiveRegionMode.Polite },
                 style = Type.body.copy(fontSize = 14.4.sp, lineHeight = 20.sp, color = p.muted, fontStyle = FontStyle.Italic),
             )
@@ -1156,7 +1337,7 @@ private fun OrdoRibbon(
     }
 }
 
-private fun ribbonColor(slug: String, p: Palette): Color = when {
+internal fun ribbonColor(slug: String, p: Palette): Color = when {
     p.dark && slug == "black" -> Color(0xFF6A7380)
     else -> dayColor(slug, p)
 }

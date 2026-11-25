@@ -626,6 +626,61 @@ test("the phone's table of hours keeps one shape whichever hour is now", async (
   await expect(page.locator(".pray-now-gloss")).toBeHidden();
 });
 
+// On an evening that already keeps the morrow, the invitation to Vespers says
+// so (presentation::Invitation::on_eve, #951), by the reader's clock: the
+// afternoon's None and the evening's Compline keep their own glosses, and the
+// table's Vespers keeps "Evening prayer".
+test("the invitation names First Vespers on the eve of a feast", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-12-24T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-24");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("First Vespers of the Nativity of Our Lord");
+  await expect(page.locator('.home-hour-link[data-hour="vespers"] .home-hour-link-note')).toHaveText("Evening prayer");
+  await page.clock.setFixedTime(new Date("2026-12-24T21:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-24");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Prayer before sleep");
+  await page.clock.setFixedTime(new Date("2026-12-23T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-23");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Evening prayer");  const tablet = () => page.evaluate(() => Math.round(document.querySelector(".pray-now").getBoundingClientRect().height));
+  const plain = await tablet();
+  // The longest name keeps the gloss to one line, so the tablet keeps its height.
+  await page.clock.setFixedTime(new Date("2026-11-17T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-11-17");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("First Vespers of the Dedication of the Basilica of the Holy Apostles Peter & Paul");
+  expect(await tablet()).toBe(plain);
+});
+
+// The invitation to the hour now, once that hour is prayed, takes the
+// directory's small gilt cross at its words' shoulder (#954): its link still
+// opens the hour, and the tablet keeps its height. Compline after midnight
+// asks the marks of the day it belongs to.
+test("the invitation to an hour already prayed takes the gilt cross and keeps its height", async ({ page }) => {
+  const tablet = () => page.evaluate(() => Math.round(document.querySelector(".pray-now").getBoundingClientRect().height));
+  await page.clock.setFixedTime(new Date("2026-03-15T18:00:00-04:00"));
+  await openDatedPage(page, `/?date=${testDate}`);
+  const prayNow = page.locator(".pray-now");
+  await expect(prayNow).not.toHaveClass(/is-prayed/);
+  const plain = await tablet();
+  await page.evaluate(() => {
+    localStorage.setItem("office-prayed", JSON.stringify({ "2026-03-15": ["vespers"], "2026-03-14": ["compline"] }));
+  });
+  await page.reload();
+  await expect(prayNow).toHaveClass(/is-prayed/);
+  await expect(prayNow.locator(".pray-now-prayed .sr-only")).toHaveText("Prayed");
+  await expect(prayNow).toHaveAttribute("href", "/vespers/2026-03-15");
+  await expect(prayNow.locator(".pray-now-label")).toContainText("Pray Vespers");
+  expect(await tablet()).toBe(plain);
+  // At one in the morning, yesterday's Compline is invited, and it was prayed.
+  await page.clock.setFixedTime(new Date("2026-03-15T01:00:00-04:00"));
+  await page.reload();
+  await expect(prayNow).toHaveAttribute("href", "/compline/2026-03-14");
+  await expect(prayNow).toHaveClass(/is-prayed/);
+  // Mid-morning's Terce was not.
+  await page.clock.setFixedTime(new Date("2026-03-15T10:00:00-04:00"));
+  await page.reload();
+  await expect(prayNow).not.toHaveClass(/is-prayed/);
+  await expect(prayNow.locator(".pray-now-prayed")).toHaveCount(0);
+});
+
 // The light moves with the hours (app.js HOUR_LIGHT, render_blocks::hour_light).
 // Its animations are held almost still as they are made, so a test sets the
 // pass's clock itself rather than racing it.
@@ -3647,6 +3702,25 @@ test("posture cues sit in the psalm verses as red rubric runs", async ({ page })
   expect(style.smaller).toBe(true);
 });
 
+test("the Little Hours show posture cues only when a priest or deacon leads", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/prime/2026-10-04?form=private");
+  const psalm = page.locator(".psalm").first();
+  const cues = psalm.locator(".posture");
+  await expect(cues.first()).toBeAttached();
+  for (const cue of await cues.all()) await expect(cue).toBeHidden();
+  for (const form of ["deacon", "priest"]) {
+    await choosePrayerForm(page, form);
+    await expect(psalm.locator(".psalm-verses .verse").first().locator(".mediant + .posture")).toHaveText("Sit.");
+    await expect(psalm.locator(".gloria-patri .source-line > .posture")).toHaveText(["Bow.", "Stand upright."]);
+  }
+  await choosePrayerForm(page, "private");
+  for (const cue of await cues.all()) await expect(cue).toBeHidden();
+  // Lauds keeps its cues under every form.
+  await page.goto("/lauds/2026-10-04?form=private");
+  await expect(page.locator(".psalm").first().locator(".posture").first()).toBeVisible();
+});
+
 test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async ({ page }) => {
   const instruction = "The first stanza of the following hymn is said kneeling.";
   for (const theme of ["light", "dark"]) {
@@ -4157,6 +4231,43 @@ test("home's date picker opens the chosen day's home", async ({ page }) => {
   await picker.getByRole("button", { name: "Previous month" }).click();
   await picker.getByRole("link", { name: "Saturday, February 14, 2026" }).click();
   await expect(page).toHaveURL(/\/\?date=2026-02-14$/);
+});
+
+// The picker marks each day with a hairline of its colour and gilds the
+// first-class feasts (#953), so the month's shape shows with no words added.
+test("the date picker marks each day's colour and gilds first-class feasts", async ({ page }) => {
+  // The marks are asked for only when the picker opens.
+  const asked = [];
+  page.on("request", req => {
+    if (req.url().includes("/api/day-marks/")) {
+      asked.push(req.url());
+    }
+  });
+  await openDatedPage(page, `/lauds/${testDate}`);
+  expect(asked).toEqual([]);
+  await page.locator("button.hour-meta-date").click();
+  const picker = page.getByRole("group", { name: "Choose a date" });
+  const day = slug => picker.locator(`.date-picker-day[data-date="${slug}"]`);
+  // Laetare in rose, Lent's ferias in violet, the Annunciation gilt on white.
+  await expect(day("2026-03-22")).toHaveAttribute("data-color", "rose");
+  await expect(day("2026-03-16")).toHaveAttribute("data-color", "violet");
+  await expect(day("2026-03-25")).toHaveAttribute("data-color", "white");
+  await expect(day("2026-03-25")).toHaveAttribute("data-first-class", "");
+  await expect(day("2026-03-25")).toHaveAttribute("aria-label", "Wednesday, March 25, 2026, first-class feast");
+  await expect(day("2026-03-16")).not.toHaveAttribute("data-first-class", /.*/);
+  // The hairline is drawn in the day's colour, under the figure.
+  const hairline = await day("2026-03-16").evaluate(link => {
+    const after = getComputedStyle(link, "::after");
+    return { height: after.height, background: after.backgroundColor };
+  });
+  expect(hairline.height).toBe("2px");
+  // Lent's violet, the ordo rails' own (.day-color-violet).
+  expect(hairline.background).toBe("rgb(106, 58, 138)");
+  // Next month: Good Friday black and plain, Pascha gilt.
+  await picker.getByRole("button", { name: "Next month" }).click();
+  await expect(day("2026-04-10")).toHaveAttribute("data-color", "black");
+  await expect(day("2026-04-10")).not.toHaveAttribute("data-first-class", /.*/);
+  await expect(day("2026-04-12")).toHaveAttribute("data-first-class", "");
 });
 
 test("without JavaScript the native date field still jumps", async ({ browser, baseURL }) => {
@@ -5474,11 +5585,13 @@ test("the installed web app reports itself apart from a browser tab", async ({ p
 
 // The device keeps only the day it first opened the Office; the beacon says first or returning.
 test("a browser is new on the day it first opens the Office and returning after", async ({ page }) => {
+  // A fixed day: run across a real midnight, the first day would turn returning between visits.
+  await page.clock.setFixedTime(new Date("2026-03-18T12:00:00-04:00"));
   const events = [];
   await captureUsage(page, events);
   const visit = async () => {
     events.length = 0;
-    await page.goto(`/?date=${easternDay()}`);
+    await page.goto("/?date=2026-03-18");
     await engage(page);
     await expect.poll(() => events.length).toBe(1);
     // Leave for a page that never reports before the test changes storage: a beacon still
@@ -5501,15 +5614,18 @@ test("a browser is new on the day it first opens the Office and returning after"
 test("a browser opens its week and month on the first day it is counted in them", async ({ page }) => {
   const events = [];
   let online = true;
+  // A fixed Wednesday, so the week began earlier in the same month, and no real midnight (or a
+  // Monday's) turns the week between visits.
+  const today = "2026-03-18";
+  await page.clock.setFixedTime(new Date(`${today}T12:00:00-04:00`));
   await captureUsage(page, events, () => (online ? 204 : 503));
   const visit = async () => {
     events.length = 0;
-    await page.goto(`/?date=${easternDay()}`);
+    await page.goto(`/?date=${today}`);
     await engage(page);
     await expect.poll(() => events.length).toBe(1);
     return events[0].match(/week:\w+ month:\w+/)[0];
   };
-  const today = easternDay();
   const kept = () => page.evaluate(() => [localStorage.getItem("office-counted"), localStorage.getItem("office-counted-before")]);
   // A beacon the server did not count opens nothing.
   online = false;
@@ -5529,12 +5645,10 @@ test("a browser opens its week and month on the first day it is counted in them"
     await page.goto("/privacy");
     await page.evaluate((d) => { localStorage.setItem("office-counted", d); localStorage.removeItem("office-counted-before"); }, day);
   };
-  if (weekStart !== today && weekStart.slice(0, 7) === today.slice(0, 7)) {
-    await earlier(weekStart);
-    expect(await visit()).toBe("week:again month:again");
-    await expect.poll(kept).toEqual([today, weekStart]);
-    expect(await visit()).toBe("week:again month:again");
-  }
+  await earlier(weekStart);
+  expect(await visit()).toBe("week:again month:again");
+  await expect.poll(kept).toEqual([today, weekStart]);
+  expect(await visit()).toBe("week:again month:again");
   // Last counted a year ago: a new week and a new month.
   await earlier(`${Number(today.slice(0, 4)) - 1}${today.slice(4)}`.replace(/-02-29$/, "-02-28"));
   expect(await visit()).toBe("week:first month:first");
@@ -7517,4 +7631,94 @@ test("mobile screen readers hear clean liturgical marks, inert menu backdrop, an
   await expect(page.locator(".month-table abbr.day-mobile-rank[role='button']").first()).toHaveAttribute("aria-label", /Double|Class|Feria|Simple/i);
   await expect(page.locator(".month > h2").first()).toHaveAttribute("aria-label", "March");
 });
+
+test("subtle details: Horologium stars and keys, Specimen clergy note and reverse highlight, Ordo color key and pins, quiet glosses, and Passiontide veiling", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T15:00:00-04:00"));
+  await openDatedPage(page, "/about");
+
+  // 1. Horologium: parish multi-ray star paths (no circle dots), arrow-key nav, and clean SR separators.
+  expect(await page.locator(".about-horologium-stars path").count()).toBe(8);
+  expect(await page.locator(".about-horologium-stars circle").count()).toBe(0);
+  const firstStop = page.locator(".about-horologium-stop").first();
+  await firstStop.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "prime");
+  await expect(page.locator(".about-horologium-title em .sr-only")).toHaveText(", ");
+  await page.keyboard.press("End");
+  await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "compline");
+
+  // 2. Specimen leaf: Deacon vs Priest note and bidirectional line -> key illumination.
+  const specimen = page.locator(".about-specimen");
+  const formNote = specimen.locator(".about-specimen-form-note");
+  await expect(formNote).toBeHidden();
+  await specimen.locator('.about-specimen-opt[data-form="deacon"]').click();
+  await expect(formNote).toBeVisible();
+  const deaconNoteText = await formNote.textContent();
+  await specimen.locator('.about-specimen-opt[data-form="priest"]').click();
+  await expect(formNote).toBeVisible();
+  const priestNoteText = await formNote.textContent();
+  expect(deaconNoteText).not.toBe(priestNoteText);
+  await specimen.locator('.about-specimen-opt[data-form="private"]').click();
+  await expect(formNote).toBeHidden();
+
+  await specimen.locator(".about-specimen-rubric").click();
+  await expect(page.locator('.about-key-row[data-key="rubric"]')).toHaveClass(/is-active/);
+  await specimen.locator(".about-specimen-cross").click();
+  await expect(page.locator('.about-key-row[data-key="cross"]')).toHaveClass(/is-active/);
+  await specimen.locator(".about-specimen-cross").click();
+  await expect(page.locator('.about-key-row[data-key="cross"]')).not.toHaveClass(/is-active/);
+
+  // 3. About Ordo ribbon: 12 clickable month hits, rare Rose/Black pins, and year day-count/date note.
+  const ribbon = page.locator(".about-ordo-ribbon");
+  expect(await ribbon.locator(".about-ordo-month-hit").count()).toBe(12);
+  await expect(ribbon.locator(".about-ordo-month-hit").first()).toHaveAttribute("href", /^\/calendar\/\d{4}\/01$/);
+  await ribbon.locator('.about-ordo-swatch[data-color="rose"]').click();
+  await expect(ribbon.locator(".about-ordo-meaning")).toContainText("Mar 22");
+  // The pin fades in, so wait for the transition to settle rather than read it mid-fade.
+  await expect(ribbon.locator('.about-ordo-pin[data-color="rose"]').first()).toHaveCSS("opacity", "1");
+
+  // 4. Ordo year frontispiece interactive color key and rare-color course pins.
+  await page.goto("/calendar/2026");
+  await page.waitForLoadState("load");
+  const cal = page.locator(".calendar");
+  const ordoKey = cal.locator(".ordo-color-key");
+  await expect(ordoKey).toBeVisible();
+  await ordoKey.locator('.about-ordo-swatch[data-color="rose"]').click();
+  await expect(cal).toHaveAttribute("data-selected-color", "rose");
+  await expect(ordoKey.locator(".about-ordo-meaning")).toContainText("Mar 22");
+  await expect(cal.locator('.month-course-pin[data-color="rose"]').first()).toHaveCSS("opacity", "1");
+
+  // 5. Quiet glosses on Feria, named seasons, psalm incipits (non-tabbable), and Marian antiphons.
+  await page.goto("/?date=2026-09-22");
+  await page.waitForLoadState("load");
+  await page.locator(".feast .gloss-quiet").click();
+  await expect(page.locator("#gloss-note")).toContainText("Feria");
+
+  await page.goto("/compline/2026-03-15");
+  await page.waitForLoadState("load");
+  await page.locator(".hour-meta .gloss-quiet").first().click();
+  await expect(page.locator("#gloss-note")).toContainText("Lent");
+  const incipit = page.locator(".psalm-incipit.gloss-quiet").first();
+  await expect(incipit).not.toHaveAttribute("tabindex", "0");
+  await incipit.click();
+  await expect(page.locator("#gloss-note")).toContainText("Latin opening");
+  await page.locator(".marian-antiphon h3 .gloss-quiet").click();
+  await expect(page.locator("#gloss-note")).toContainText("Ave Regina");
+
+  // 6. Scrolling dismisses an open gloss popover on the Ordo month page.
+  await page.goto("/calendar/2026/03");
+  await page.waitForLoadState("load");
+  await page.locator(".calendar-title h1 .gloss-quiet").click();
+  await expect(page.locator("#gloss-note")).not.toHaveClass(/closed/);
+  await page.evaluate(() => window.scrollBy(0, 260));
+  await expect(page.locator("#gloss-note")).toHaveClass(/faded/);
+
+  // 7. Passiontide veiling: matte end-mark (no gild.png foil) and veiled cross-ember token.
+  await page.goto("/lauds/2026-03-30");
+  await page.waitForLoadState("load");
+  await expect(page.locator("body")).toHaveClass(/season-passiontide/);
+  const endBg = await page.locator(".hour-end-mark").evaluate((el) => getComputedStyle(el, "::after").backgroundImage);
+  expect(endBg).not.toContain("gild.png");
+});
+
 

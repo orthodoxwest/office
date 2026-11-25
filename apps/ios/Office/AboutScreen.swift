@@ -45,6 +45,24 @@ struct AboutPage: View {
     }
 }
 
+/// The table's hours with today's times by the sun ("sunrise · 6:48 am") in place of their
+/// own, when `sun` has them; Compline, and every hour while the sun does not time them, keep theirs.
+func aboutSunPeriods(_ periods: [AboutPeriodView], sun: [String: (hour: Int, minute: Int)]?) -> [AboutPeriodView] {
+    guard let sun else { return periods }
+    var civil = Calendar(identifier: .gregorian)
+    civil.timeZone = .current
+    return periods.map { period in
+        AboutPeriodView(label: period.label, hours: period.hours.map { h -> AboutHourView in
+            guard let t = sun[h.hour],
+                  let date = civil.date(from: DateComponents(year: 2026, month: 1, day: 1, hour: t.hour, minute: t.minute))
+            else { return h }
+            let time = aboutSunTime(hour: h.hour, clock: date.formatted(date: .omitted, time: .shortened))
+            if time.isEmpty { return h }
+            return AboutHourView(hour: h.hour, name: h.name, gloss: h.gloss, time: time, angle: h.angle, night: h.night)
+        })
+    }
+}
+
 /**
  * About the Office, set as the web's `/about`: the feast page's painted frontispiece head, an
  * illuminated drop-cap introduction, the interactive Horologium over an open hand-ruled hours
@@ -63,6 +81,10 @@ struct AboutScreen: View {
     @State private var specimenForm = "private"
     @State private var litKey: String?
     @State private var selectedColor: String?
+    /// The table's hours with today's times by the sun, while the reminders follow it; nil keeps
+    /// the page's own. Read again when the day turns or a new place is read.
+    @State private var sunPeriods: [AboutPeriodView]?
+    @ObservedObject private var location = PhoneLocation.shared
 
     /// The hour it is now, as home has it (`presentation::about`): nil only if the core refuses the date.
     private var now: AboutNow? { try? aboutNow(today: model.today, clockHour: Int32(model.clockHour)) }
@@ -73,6 +95,7 @@ struct AboutScreen: View {
         let verse = view.blocks.first { $0.kind == "verse" }
         let intro = view.blocks.first { $0.kind == "intro" }?.text ?? ""
         let parsed = partitionAboutBlocks(view.blocks)
+        let periods = sunPeriods ?? view.periods
 
         GeometryReader { geo in
             let wide = geo.size.width >= aboutRailFrom
@@ -96,7 +119,7 @@ struct AboutScreen: View {
                                     }
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     VStack(alignment: .leading, spacing: 0) {
-                                        hoursColumn(parsed: parsed, current: currentHour)
+                                        hoursColumn(parsed: parsed, periods: periods, current: currentHour)
                                         doorBlock(now: now, fillWidth: true)
                                     }
                                     .frame(width: min(376, geo.size.width * 0.36), alignment: .leading)
@@ -116,7 +139,7 @@ struct AboutScreen: View {
                                     wide: false
                                 )
                                 introBlock(intro)
-                                hoursColumn(parsed: parsed, current: currentHour)
+                                hoursColumn(parsed: parsed, periods: periods, current: currentHour)
                                     .padding(.top, m.px(22))
                                 proseSections(parsed.sections)
                                 doorBlock(now: now, fillWidth: false)
@@ -129,6 +152,7 @@ struct AboutScreen: View {
                 }
             }
         }
+        .task(id: "\(model.today.year)-\(model.today.month)-\(model.today.day) \(location.revision)") { readSun() }
         // A paragraph's links open the app's own pages, or the browser.
         .environment(\.openURL, OpenURLAction { url in
             switch aboutLink(url.absoluteString) {
@@ -148,6 +172,16 @@ struct AboutScreen: View {
         })
     }
 
+    /// Today's times by the sun at the place kept, for `model.today` (its local noon).
+    private func readSun() {
+        let t = model.today
+        var civil = Calendar.current
+        civil.timeZone = .current
+        let day = civil.date(from: DateComponents(year: Int(t.year), month: Int(t.month), day: Int(t.day), hour: 12)) ?? Date()
+        let sun = (try? Office.core.get()).flatMap { ReminderStore.load().sunTimes(on: day, core: $0, calendar: civil) }
+        sunPeriods = sun == nil ? nil : aboutSunPeriods(view.periods, sun: sun)
+    }
+
     @ViewBuilder private func introBlock(_ text: String) -> some View {
         if !text.isEmpty {
             BlockRow(block: BlockView(
@@ -164,19 +198,20 @@ struct AboutScreen: View {
         }
     }
 
-    @ViewBuilder private func hoursColumn(parsed: AboutPartition, current: String) -> some View {
+    @ViewBuilder private func hoursColumn(parsed: AboutPartition, periods: [AboutPeriodView], current: String) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             if !parsed.hoursHeading.isEmpty {
                 AboutSectionHeading(text: parsed.hoursHeading, seed: 110)
             }
             AboutHorologium(
-                periods: view.periods,
+                periods: periods,
                 current: current,
                 pinned: pinnedHour,
-                onSelect: { slug in pinnedHour = pinnedHour == slug ? nil : slug }
+                onSelect: { slug in pinnedHour = pinnedHour == slug ? nil : slug },
+                onPin: { slug in pinnedHour = slug }
             )
             AboutHoursDirectory(
-                periods: view.periods,
+                periods: periods,
                 current: current,
                 preview: pinnedHour != current ? pinnedHour : nil
             )
@@ -226,7 +261,8 @@ struct AboutScreen: View {
                             specimen: view.specimen,
                             form: specimenForm,
                             litKey: litKey,
-                            onForm: { specimenForm = $0 }
+                            onForm: { specimenForm = $0 },
+                            onToggleKey: { key in litKey = litKey == key ? nil : key }
                         )
                         .padding(.bottom, m.px(16))
                     case let .keys(items):
@@ -242,7 +278,8 @@ struct AboutScreen: View {
                             colors: view.ordoColors,
                             label: view.ribbonLabel,
                             selected: selectedColor,
-                            onSelect: { slug in selectedColor = selectedColor == slug ? nil : slug }
+                            onSelect: { slug in selectedColor = selectedColor == slug ? nil : slug },
+                            onMonth: { y, mo in model.open(.ordo(year: y, month: mo, day: 0)) }
                         )
                     }
                 }
@@ -478,10 +515,23 @@ private struct AboutHorologium: View {
     let current: String
     let pinned: String?
     let onSelect: (String) -> Void
+    let onPin: (String) -> Void
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var dragAngle: Double?
+
+    private func starAlpha(for slug: String) -> Double {
+        switch slug {
+        case "sext": return 0.24
+        case "terce", "none": return 0.38
+        case "prime": return 0.50
+        case "lauds", "vespers": return 0.68
+        case "compline": return 0.88
+        default: return 0.62
+        }
+    }
 
     var body: some View {
         let hours = periods.flatMap(\.hours)
@@ -489,7 +539,9 @@ private struct AboutHorologium: View {
         if let active = hours.first(where: { $0.hour == activeSlug }) ?? hours.last {
             let isNow = active.hour == current && !current.isEmpty
             let largeType = m.type > 1.35
-            let readoutSpoken = "\(isNow ? "Now, " : "")\(active.time). \(active.name), \(active.gloss)"
+            let readoutSpoken = "\(isNow ? "Now, " : "")\(aboutTimeSpoken(time: active.time)). \(active.name), \(active.gloss)"
+            let displayAngle = dragAngle ?? active.angle
+            let stars = starAlpha(for: active.hour)
             let readout = VStack(spacing: m.px(1)) {
                 Text((isNow ? "Now · " : "") + active.time)
                     .type(TextStyle(size: 11.2, line: 14.5, tracking: 1.5, smallCaps: true))
@@ -508,16 +560,37 @@ private struct AboutHorologium: View {
                         hours: hours,
                         activeSlug: active.hour,
                         activeNight: active.night,
-                        angle: active.angle,
+                        angle: displayAngle,
+                        starAlpha: stars,
                         p: p,
                         o: o
                     )
-                    .animation(reduceMotion ? nil : .easeOut(duration: 0.42), value: active.angle)
+                    .animation(reduceMotion || dragAngle != nil ? nil : .easeOut(duration: 0.42), value: displayAngle)
+                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: stars)
 
                     GeometryReader { geo in
                         let w = geo.size.width
                         let h = geo.size.height
                         let cardinal = TextStyle(size: 8.5, line: 11, tracking: 1.2, smallCaps: true)
+
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .gesture(
+                                DragGesture(minimumDistance: 8)
+                                    .onChanged { value in
+                                        guard w > 0, h > 0 else { return }
+                                        let svgX = Double(value.location.x / w) * 320.0
+                                        let svgY = Double(value.location.y / h) * 144.0
+                                        let deg = min(168.0, max(12.0, atan2(128.0 - svgY, svgX - 160.0) * 180.0 / .pi))
+                                        dragAngle = deg
+                                        if let nearest = hours.min(by: { abs($0.angle - deg) < abs($1.angle - deg) }) {
+                                            onPin(nearest.hour)
+                                        }
+                                    }
+                                    .onEnded { _ in
+                                        dragAngle = nil
+                                    }
+                            )
 
                         Text("Dawn").type(cardinal).foregroundStyle(p.muted)
                             .position(x: w * (42.0 / 320.0) + 14, y: h - 6)
@@ -547,7 +620,7 @@ private struct AboutHorologium: View {
                             }
                             .buttonStyle(.plain)
                             .position(x: px, y: py)
-                            .accessibilityLabel("\(hr.name): \(hr.gloss), \(hr.time)")
+                            .accessibilityLabel("\(hr.name): \(hr.gloss), \(aboutTimeSpoken(time: hr.time))")
                             .accessibilityAddTraits(hr.hour == active.hour ? .isSelected : [])
                         }
                     }
@@ -571,12 +644,16 @@ private struct HorologiumCanvas: View, Animatable {
     let activeSlug: String
     let activeNight: Bool
     var angle: Double
+    var starAlpha: Double
     let p: Palette
     let o: Ornament
 
-    var animatableData: Double {
-        get { angle }
-        set { angle = newValue }
+    var animatableData: AnimatablePair<Double, Double> {
+        get { AnimatablePair(angle, starAlpha) }
+        set {
+            angle = newValue.first
+            starAlpha = newValue.second
+        }
     }
 
     private func washColors() -> (Color, Color, Color) {
@@ -606,6 +683,44 @@ private struct HorologiumCanvas: View, Animatable {
             if i == 0 { path.move(to: pt) } else { path.addLine(to: pt) }
         }
         if close { path.closeSubpath() }
+        return path
+    }
+
+    private func vaultStarPath(px: CGFloat, py: CGFloat, r: CGFloat, eightRay: Bool) -> Path {
+        var path = Path()
+        if eightRay {
+            let w = r * 0.19
+            let c = r * 0.25
+            let d = r * 0.45
+            path.move(to: CGPoint(x: px, y: py - r))
+            path.addLine(to: CGPoint(x: px + w, y: py - c))
+            path.addLine(to: CGPoint(x: px + d, y: py - d))
+            path.addLine(to: CGPoint(x: px + c, y: py - w))
+            path.addLine(to: CGPoint(x: px + r, y: py))
+            path.addLine(to: CGPoint(x: px + c, y: py + w))
+            path.addLine(to: CGPoint(x: px + d, y: py + d))
+            path.addLine(to: CGPoint(x: px + w, y: py + c))
+            path.addLine(to: CGPoint(x: px, y: py + r))
+            path.addLine(to: CGPoint(x: px - w, y: py + c))
+            path.addLine(to: CGPoint(x: px - d, y: py + d))
+            path.addLine(to: CGPoint(x: px - c, y: py + w))
+            path.addLine(to: CGPoint(x: px - r, y: py))
+            path.addLine(to: CGPoint(x: px - c, y: py - w))
+            path.addLine(to: CGPoint(x: px - d, y: py - d))
+            path.addLine(to: CGPoint(x: px - w, y: py - c))
+            path.closeSubpath()
+        } else {
+            let w = r * 0.21
+            path.move(to: CGPoint(x: px, y: py - r))
+            path.addLine(to: CGPoint(x: px + w, y: py - w))
+            path.addLine(to: CGPoint(x: px + r, y: py))
+            path.addLine(to: CGPoint(x: px + w, y: py + w))
+            path.addLine(to: CGPoint(x: px, y: py + r))
+            path.addLine(to: CGPoint(x: px - w, y: py + w))
+            path.addLine(to: CGPoint(x: px - r, y: py))
+            path.addLine(to: CGPoint(x: px - w, y: py - w))
+            path.closeSubpath()
+        }
         return path
     }
 
@@ -640,13 +755,20 @@ private struct HorologiumCanvas: View, Animatable {
             if p.dark {
                 var clipped = ctx
                 clipped.clip(to: dome)
-                let stars: [(CGFloat, CGFloat, CGFloat)] = [
-                    (102, 56, 1.3), (134, 38, 1.6), (176, 35, 1.2), (218, 52, 1.5),
-                    (82, 84, 1.1), (154, 54, 1.0), (238, 82, 1.2), (192, 62, 1.0),
+                // Parish apse 8-ray principal stars and 4-ray minor stars, matching about.html.
+                let stars: [(CGFloat, CGFloat, CGFloat, Bool, Double)] = [
+                    (102, 56, 3.4, true, 0.88),
+                    (134, 38, 4.2, true, 0.96),
+                    (176, 35, 2.9, false, 0.78),
+                    (218, 52, 3.9, true, 0.92),
+                    (82, 84, 2.6, false, 0.74),
+                    (154, 54, 2.4, false, 0.68),
+                    (238, 82, 3.1, true, 0.82),
+                    (192, 62, 2.4, false, 0.72),
                 ]
-                for (x, y, r) in stars {
-                    let rr = r * sx
-                    clipped.fill(Path(ellipseIn: CGRect(x: x * sx - rr, y: y * sy - rr, width: 2 * rr, height: 2 * rr)), with: .color(o.hi.opacity(0.62)))
+                for (x, y, r, eightRay, weight) in stars {
+                    let star = vaultStarPath(px: x * sx, py: y * sy, r: r * sx, eightRay: eightRay)
+                    clipped.fill(star, with: .color(o.hi.opacity(min(1.0, max(0.0, starAlpha * weight)))))
                 }
             }
 
@@ -798,7 +920,7 @@ private struct AboutHoursDirectory: View {
         }
         .buttonStyle(Lit { PoolOfLight(at: UnitPoint(x: 0.3, y: 0.5), size: CGSize(width: 0.88, height: 1.16)) })
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel([h.name, h.gloss, h.time, isNow ? "now" : nil].compactMap { $0 }.joined(separator: ", "))
+        .accessibilityLabel([h.name, h.gloss, aboutTimeSpoken(time: h.time), isNow ? "now" : nil].compactMap { $0 }.joined(separator: ", "))
         .accessibilityAddTraits(.isButton)
     }
 }
@@ -813,11 +935,20 @@ private struct AboutSpecimenLeaf: View {
     let form: String
     let litKey: String?
     let onForm: (String) -> Void
+    let onToggleKey: (String) -> Void
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
 
     private var lineStyle: TextStyle { Scale.body.sized(16.5, line: 24) }
+
+    private func formNote(_ f: String) -> String {
+        switch f {
+        case "deacon": return specimen.deaconNote
+        case "priest": return specimen.priestNote
+        default: return ""
+        }
+    }
 
     var body: some View {
         let wash = HomeInk.of(p).tabletWash
@@ -826,6 +957,8 @@ private struct AboutSpecimenLeaf: View {
                 .type(TextStyle(size: 11.84, line: 16, tracking: 1.65, smallCaps: true))
                 .foregroundStyle(p.titulus)
                 .fixedSize(horizontal: true, vertical: false)
+                .contentShape(Rectangle())
+                .onTapGesture { onToggleKey("form") }
             let toggle = HStack(spacing: m.px(8)) {
                 formTab(specimen.aloneLabel, selected: form == "private") { onForm("private") }
                 Rectangle().fill(o.flat.opacity(0.72)).frame(width: 3.5, height: 3.5).rotationEffect(.degrees(45))
@@ -859,6 +992,8 @@ private struct AboutSpecimenLeaf: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, m.px(6))
                 .background { if litKey == "rubric" { SpecimenLitPool() } }
+                .contentShape(Rectangle())
+                .onTapGesture { onToggleKey("rubric") }
 
             (Text(specimen.secretVoiced + " ").foregroundColor(p.text)
                 + Text(specimen.secretSilent).foregroundColor(p.dark ? p.unsaid : p.muted))
@@ -866,6 +1001,8 @@ private struct AboutSpecimenLeaf: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, m.px(8))
                 .background { if litKey == "secret" { SpecimenLitPool() } }
+                .contentShape(Rectangle())
+                .onTapGesture { onToggleKey("secret") }
 
             RuledDivider(color: p.lining.opacity(0.19), weight: 0.75, seed: 171)
                 .padding(.bottom, m.px(8))
@@ -878,6 +1015,8 @@ private struct AboutSpecimenLeaf: View {
             }
             .padding(.bottom, m.px(4))
             .background { if litKey == "vr" || litKey == "cross" { SpecimenLitPool() } }
+            .contentShape(Rectangle())
+            .onTapGesture { onToggleKey("vr") }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Versicle. " + specimen.openingVersicle.replacingOccurrences(of: "✠", with: "sign of the cross,"))
 
@@ -888,15 +1027,19 @@ private struct AboutSpecimenLeaf: View {
             }
             .padding(.bottom, m.px(8))
             .background { if litKey == "vr" { SpecimenLitPool() } }
+            .contentShape(Rectangle())
+            .onTapGesture { onToggleKey("vr") }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Response. \(specimen.openingResponse)")
 
-            // The close's greeting, as the chosen form gives it: a deacon greets as a priest does.
+            // The close's greeting, as the chosen form gives it: a deacon greets as a priest does,
+            // while a quiet note names how Deacon and Priest differ across the hours.
             RuledDivider(color: p.lining.opacity(0.19), weight: 0.75, seed: 170)
 
             let clergy = form != "private"
             let formV = clergy ? specimen.priestVersicle : specimen.aloneVersicle
             let formR = clergy ? specimen.priestResponse : specimen.aloneResponse
+            let note = formNote(form)
             VStack(alignment: .leading, spacing: m.px(4)) {
                 HStack(alignment: .firstTextBaseline, spacing: 0) {
                     Text("℣.").type(lineStyle).foregroundStyle(p.rubric).frame(width: m.px(27), alignment: .leading)
@@ -908,11 +1051,19 @@ private struct AboutSpecimenLeaf: View {
                     Text(formR).type(lineStyle).foregroundStyle(p.text)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                if !note.isEmpty {
+                    Text(note)
+                        .type(Scale.bodyItalic.sized(13.76, line: 19))
+                        .foregroundStyle(p.muted)
+                        .padding(.top, m.px(2))
+                }
             }
             .padding(.top, m.px(7))
             .background { if litKey == "form" { SpecimenLitPool() } }
+            .contentShape(Rectangle())
+            .onTapGesture { onToggleKey("form") }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Versicle. \(formV) Response. \(formR)")
+            .accessibilityLabel("Versicle. \(formV) Response. \(formR)" + (note.isEmpty ? "" : " \(note)"))
         }
         .padding(.horizontal, m.px(18))
         .padding(.vertical, m.px(15))
@@ -932,7 +1083,8 @@ private struct AboutSpecimenLeaf: View {
             let clergy = next != "private"
             let v = clergy ? specimen.priestVersicle : specimen.aloneVersicle
             let r = clergy ? specimen.priestResponse : specimen.aloneResponse
-            UIAccessibility.post(notification: .announcement, argument: "Versicle. \(v) Response. \(r)")
+            let note = formNote(next)
+            UIAccessibility.post(notification: .announcement, argument: "Versicle. \(v) Response. \(r)" + (note.isEmpty ? "" : " \(note)"))
         }
     }
 
@@ -1076,6 +1228,25 @@ private struct AboutLineageList: View {
     }
 }
 
+/// Shared ribbon/swatch colour lift for Apse dark mode.
+func ordoRibbonColor(_ slug: String, _ p: Palette) -> Color {
+    if p.dark && slug == "black" { return Color(hex: 0x6A7380) }
+    return dayColor(slug, p)
+}
+
+/// Rare colours in a year's course (Rose, Black: 1..rareColorMaxDays total days).
+func rareCourseColors(_ course: [CourseMonthView]?) -> Set<String> {
+    guard let course, !course.isEmpty else { return [] }
+    let maxDays = Int(rareColorMaxDays())
+    var totals: [String: Int] = [:]
+    for month in course {
+        for run in month.runs {
+            totals[run.color, default: 0] += Int(run.days)
+        }
+    }
+    return Set(totals.compactMap { (1...maxDays).contains($0.value) ? $0.key : nil })
+}
+
 /// The current year's liturgical color ribbon and interactive 6-color diamond legend in "The Ordo".
 private struct AboutOrdoRibbon: View {
     let course: [CourseMonthView]?
@@ -1085,19 +1256,16 @@ private struct AboutOrdoRibbon: View {
     let label: String
     let selected: String?
     let onSelect: (String) -> Void
+    let onMonth: (Int, Int) -> Void
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
-
-    private func ribbonColor(_ slug: String) -> Color {
-        if p.dark && slug == "black" { return Color(hex: 0x6A7380) }
-        return dayColor(slug, p)
-    }
 
     var body: some View {
         let span = Int(courseSpan())
         let gap = 3
         let total = 12 * span + 11 * gap
+        let rare = rareCourseColors(course)
 
         VStack(alignment: .leading, spacing: 0) {
             if let course, !course.isEmpty {
@@ -1105,39 +1273,48 @@ private struct AboutOrdoRibbon: View {
                 let todayFrac = CGFloat((Int(today.month) - 1) * (span + gap) + day - 1) + 0.5
                 let frac = todayFrac / CGFloat(total)
 
-                Canvas { ctx, size in
-                    let unit = size.width / CGFloat(total)
-                    for (mi, month) in course.enumerated() {
-                        let ox = mi * (span + gap)
-                        var end = 0
-                        for r in month.runs {
-                            let col = ribbonColor(r.color)
-                            let alpha = (selected == nil || selected == r.color) ? 1.0 : 0.16
-                            ctx.fill(
-                                Path(CGRect(x: CGFloat(ox + Int(r.start)) * unit, y: 0, width: CGFloat(r.days) * unit, height: 5)),
-                                with: .color(col.opacity(alpha))
-                            )
-                            end = max(end, Int(r.start + r.days))
+                GeometryReader { geo in
+                    Canvas { ctx, size in
+                        let unit = size.width / CGFloat(total)
+                        let barTop: CGFloat = 8
+                        let barH: CGFloat = 5
+                        for (mi, month) in course.enumerated() {
+                            let ox = mi * (span + gap)
+                            var end = 0
+                            for r in month.runs {
+                                let col = ordoRibbonColor(r.color, p)
+                                let alpha = (selected == nil || selected == r.color) ? 1.0 : 0.16
+                                ctx.fill(
+                                    Path(CGRect(x: CGFloat(ox + Int(r.start)) * unit, y: barTop, width: CGFloat(r.days) * unit, height: barH)),
+                                    with: .color(col.opacity(alpha))
+                                )
+                                if selected == r.color && rare.contains(r.color) {
+                                    let midX = (CGFloat(ox + Int(r.start)) + CGFloat(r.days) / 2.0) * unit
+                                    ctx.fill(lozenge(CGPoint(x: midX, y: barTop - 4.5), 2.4), with: .color(col))
+                                }
+                                end = max(end, Int(r.start + r.days))
+                            }
+                            if end < span {
+                                ctx.fill(
+                                    Path(CGRect(x: CGFloat(ox + end) * unit, y: barTop + 2, width: CGFloat(span - end) * unit, height: 1)),
+                                    with: .color(p.lining.opacity(0.22))
+                                )
+                            }
                         }
-                        if end < span {
-                            ctx.fill(
-                                Path(CGRect(x: CGFloat(ox + end) * unit, y: 2, width: CGFloat(span - end) * unit, height: 1)),
-                                with: .color(p.lining.opacity(0.22))
-                            )
-                        }
+                        // Today's gilt diamond hanging beneath today's place
+                        let x = size.width * frac
+                        let r: CGFloat = 2.8
+                        ctx.fill(lozenge(CGPoint(x: x, y: barTop + barH + 3 + r), r), with: .color(o.flat))
                     }
-                    // Today's gilt diamond hanging beneath today's place
-                    let x = size.width * frac
-                    let r: CGFloat = 2.8
-                    var lozenge = Path()
-                    lozenge.move(to: CGPoint(x: x, y: 8))
-                    lozenge.addLine(to: CGPoint(x: x + r, y: 8 + r))
-                    lozenge.addLine(to: CGPoint(x: x, y: 8 + 2 * r))
-                    lozenge.addLine(to: CGPoint(x: x - r, y: 8 + r))
-                    lozenge.closeSubpath()
-                    ctx.fill(lozenge, with: .color(o.flat))
+                    .contentShape(Rectangle())
+                    .gesture(SpatialTapGesture().onEnded { value in
+                        guard geo.size.width > 0 else { return }
+                        let x = (value.location.x / geo.size.width) * CGFloat(total)
+                        let mi = min(11, max(0, Int(x / CGFloat(span + gap))))
+                        onMonth(Int(today.year), mi + 1)
+                    })
                 }
-                .frame(height: 15)
+                .frame(height: 23)
                 .accessibilityElement()
                 .accessibilityLabel(label)
 
@@ -1159,7 +1336,7 @@ private struct AboutOrdoRibbon: View {
                     let isSelected = selected == c.slug
                     Button { onSelect(c.slug) } label: {
                         HStack(spacing: 5.5) {
-                            Rectangle().fill(ribbonColor(c.slug)).frame(width: 5.5, height: 5.5).rotationEffect(.degrees(45))
+                            Rectangle().fill(ordoRibbonColor(c.slug, p)).frame(width: 5.5, height: 5.5).rotationEffect(.degrees(45))
                             Text(c.name).type(Scale.body.sized(13.76, line: 18)).foregroundStyle(isSelected ? p.text : p.muted)
                         }
                         .padding(.vertical, 3)
@@ -1175,7 +1352,9 @@ private struct AboutOrdoRibbon: View {
             .padding(.top, m.px(10))
 
             if let active = colors.first(where: { $0.slug == selected }) {
-                Text("\(active.name) — \(active.meaning)")
+                let note = (course.map { !$0.isEmpty ? colorDaysNote(course: $0, color: active.slug, year: today.year) : "" }) ?? ""
+                let line = "\(active.name) — \(active.meaning)" + (note.isEmpty ? "" : " (\(note))")
+                Text(line)
                     .type(Scale.bodyItalic.sized(14.4, line: 20))
                     .foregroundStyle(p.muted)
                     .padding(.top, m.px(6))

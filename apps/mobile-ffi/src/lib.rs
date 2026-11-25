@@ -76,6 +76,8 @@ pub struct OfficeCore {
     keepings: Mutex<HashMap<i32, Arc<YearIndex>>>,
     /// Each year's course under the ordo's month strip, built from the calendar alone.
     courses: Mutex<HashMap<i32, Vec<CourseMonthView>>>,
+    /// Each year's date-picker marks, built from the calendar alone.
+    marks: Mutex<HashMap<i32, Arc<Vec<DayMarkView>>>>,
 }
 
 #[uniffi::export]
@@ -95,6 +97,7 @@ impl OfficeCore {
             feasts,
             keepings: Mutex::new(HashMap::new()),
             courses: Mutex::new(HashMap::new()),
+            marks: Mutex::new(HashMap::new()),
         }))
     }
 
@@ -149,7 +152,7 @@ impl OfficeCore {
         let year = self.year(shown.year())?;
         let day = year.days.get(shown.ordinal() as usize - 1).ok_or_else(|| failed(format!("no office day for {shown}")))?;
         let heading = day_heading(day);
-        let invite = invitation(shown, now, clock_hour_i8(clock_hour));
+        let invite = invitation(shown, now, clock_hour_i8(clock_hour)).on_eve(day.vespers.first_vespers_of());
         let versicle = if home_shows_versicle(day) {
             self.engine.compose_hour("lauds", day, &year.moveable, PrayerForm::Private).ok().and_then(|h| hour_versicle(&h))
         } else {
@@ -175,7 +178,7 @@ impl OfficeCore {
             is_today: shown == now,
             pray_now_label: invite.label,
             pray_now_hour: invite.hour.to_string(),
-            pray_now_gloss: invite.gloss.to_string(),
+            pray_now_gloss: typeset(&invite.gloss),
             pray_now_date: CivilDate::from(invite.date),
             current_hour: invite.current.to_string(),
         })
@@ -242,6 +245,7 @@ impl OfficeCore {
                     feast: typeset(&day_name(day)),
                     summary: typeset(&reminder_summary(&c.hour, day)),
                     description: typeset(&reminder_description(day)),
+                    silent: presentation::reminders::reminder_silent(&c.hour, date, &year.moveable),
                 });
             }
         }
@@ -289,6 +293,51 @@ impl OfficeCore {
         courses.insert(year, course.clone());
         Ok(course)
     }
+}
+
+#[uniffi::export]
+impl OfficeCore {
+    /// The date picker's marks for a month's days, the first first (#953): each day's colour, for
+    /// the hairline under its figure, and whether home keeps it as a first-class feast, for the
+    /// gilt lozenge on it (`presentation::course::day_marks`, as the web's /api/day-marks). The
+    /// calendar alone, no hour composed; kept per year.
+    pub fn day_marks(&self, year: i32, month: i32) -> Result<Vec<DayMarkView>, OfficeError> {
+        if !(1..=12).contains(&month) {
+            return Err(failed(format!("invalid month {month}")));
+        }
+        let cached = self.marks.lock().map_err(|e| failed(e.to_string()))?.get(&year).cloned();
+        let marks = match cached {
+            Some(m) => m,
+            None => {
+                let cal = build_calendar(year, &self.calendar).map_err(failed)?;
+                let marks = presentation::course::day_marks(&cal.days, &MoveableDates::compute(year));
+                let views: Vec<DayMarkView> = cal
+                    .days
+                    .iter()
+                    .zip(marks)
+                    .map(|(d, m)| DayMarkView {
+                        month: d.date.month() as i32,
+                        color: m.color.as_str().to_string(),
+                        first_class: m.first_class,
+                    })
+                    .collect();
+                let views = Arc::new(views);
+                let mut all = self.marks.lock().map_err(|e| failed(e.to_string()))?;
+                if all.len() >= MAX_COURSE_YEARS {
+                    all.clear();
+                }
+                all.insert(year, Arc::clone(&views));
+                views
+            }
+        };
+        Ok(marks.iter().filter(|m| m.month == month).cloned().collect())
+    }
+}
+
+/// How a screen reader names a first-class feast in the date picker, after the day's date (#953).
+#[uniffi::export]
+pub fn first_class_spoken() -> String {
+    presentation::course::FIRST_CLASS_SPOKEN.to_string()
 }
 
 /// The years of course kept at once: a reader turning far through the years starts afresh.
@@ -468,6 +517,7 @@ pub struct CrownPlan {
     pub sky_peach: CrownRgb,
     pub sky_teal: CrownRgb,
     pub cross_ember: CrownRgb,
+    pub cross_ember_veiled: CrownRgb,
     /// The cross's answer to the hand, in real ms from the tap (not slowed by `pace`): it gives
     /// to `cross_press` of its size and back, catches the light (brightest `cross_catch_peak` of
     /// the way through `cross_catch_len`), and at dusk takes its ember gold at once.
@@ -540,6 +590,7 @@ pub fn crown_plan(to_dark: bool) -> CrownPlan {
         sky_peach: rgb(c::SKY_PEACH),
         sky_teal: rgb(c::SKY_TEAL),
         cross_ember: rgb(c::CROSS_EMBER),
+        cross_ember_veiled: rgb(c::CROSS_EMBER_VEILED),
         cross_press: c::CROSS_PRESS,
         cross_press_len: c::CROSS_PRESS_LEN,
         cross_catch_len: c::CROSS_CATCH_LEN,
@@ -932,6 +983,20 @@ pub fn hour_note(slug: String) -> String {
     hour_gloss(&slug).to_string()
 }
 
+/// An hour's time on the About page while the hours follow the sun, from today's time for it in
+/// the phone's clock style: "sunrise · 6:48 am" (`presentation::about::about_sun_time`).
+/// Empty for Compline, which keeps the page's own words.
+#[uniffi::export]
+pub fn about_sun_time(hour: String, clock: String) -> String {
+    presentation::about::about_sun_time(&hour, &clock).unwrap_or_default()
+}
+
+/// What a screen reader says for an hour's time on the About page: "sunrise, 6:48 am".
+#[uniffi::export]
+pub fn about_time_spoken(time: String) -> String {
+    presentation::about::about_time_spoken(&time)
+}
+
 /// Why the sun setting is greyed out, under its switch.
 #[uniffi::export]
 pub fn sun_unavailable_note() -> String {
@@ -1010,6 +1075,10 @@ pub struct ReminderView {
     pub summary: String,
     /// Rank, season, colour and commemorations, as the feed describes the event.
     pub description: String,
+    /// Delivered without the bell: the bells are silent through the Triduum, from Vespers of
+    /// Maundy Thursday through None of Holy Saturday (`presentation::reminders::reminder_silent`).
+    #[uniffi(default = false)]
+    pub silent: bool,
 }
 
 /// The reminder page's hours as the web offers them: the suggested time and
@@ -1169,10 +1238,42 @@ pub fn penitential_gloss(label: String) -> Option<GlossView> {
     presentation::gloss::penitential_gloss(&label).map(|g| GlossView::of(g, true))
 }
 
-/// Quiet gloss for a less-familiar liturgical season label (Septuagesima, Passiontide).
+/// Quiet gloss for a liturgical season label.
 #[uniffi::export]
 pub fn season_gloss(label: String) -> Option<GlossView> {
     presentation::gloss::season_gloss(&label).map(|g| GlossView::of(g, true))
+}
+
+/// Quiet gloss for a plain day name without a feast page ("Feria", "Advent feria", "Vigil of …").
+#[uniffi::export]
+pub fn day_name_gloss(name: String) -> Option<GlossView> {
+    presentation::gloss::day_name_gloss(&name).map(|g| GlossView::of(g, true))
+}
+
+/// Rare-day threshold for the liturgical color ribbon (Rose, Black).
+#[uniffi::export]
+pub fn rare_color_max_days() -> u32 {
+    presentation::course::RARE_COLOR_MAX_DAYS
+}
+
+/// Short parenthetical note for a liturgical color across `course` in `year`: dates for rare colors
+/// ("Mar 15, Dec 13"), or day count for frequent ones ("92 days in 2026").
+#[uniffi::export]
+pub fn color_days_note(course: Vec<CourseMonthView>, color: String, year: i32) -> String {
+    let Ok(parsed) = calendar::Color::parse(&color) else { return String::new() };
+    let months: Vec<Vec<presentation::course::CourseRun>> = course
+        .into_iter()
+        .map(|m| {
+            m.runs
+                .into_iter()
+                .filter_map(|r| {
+                    let color = calendar::Color::parse(&r.color).ok()?;
+                    Some(presentation::course::CourseRun { start: r.start.max(0) as u32, days: r.days.max(0) as u32, color })
+                })
+                .collect()
+        })
+        .collect();
+    presentation::course::color_days_note(&months, parsed, year)
 }
 
 #[uniffi::export]
@@ -1250,6 +1351,8 @@ pub struct AboutSpecimenView {
     pub alone_response: String,
     pub priest_versicle: String,
     pub priest_response: String,
+    pub deacon_note: String,
+    pub priest_note: String,
     pub secret_voiced: String,
     pub secret_silent: String,
 }
@@ -1308,8 +1411,8 @@ pub fn about_now(today: CivilDate, clock_hour: i32) -> Result<AboutNow, OfficeEr
 #[uniffi::export]
 pub fn about() -> AboutView {
     use presentation::about::{
-        ABOUT, ABOUT_HOURS, ABOUT_INTRODUCTION, ABOUT_KICKER, ABOUT_MENU, ABOUT_ON_THE_WEB, ABOUT_ORDO_COLORS, ABOUT_SPECIMEN, ABOUT_TITLE,
-        AboutBlock, AboutRun, about_horologium_angle, about_horologium_is_night, about_runs,
+        ABOUT, ABOUT_HOURS, ABOUT_INTRODUCTION, ABOUT_KICKER, ABOUT_MENU, ABOUT_ON_THE_WEB, ABOUT_SPECIMEN, ABOUT_TITLE, AboutBlock,
+        AboutRun, about_horologium_angle, about_horologium_is_night, about_runs,
     };
     let block = |kind: &str| AboutBlockView {
         kind: kind.into(),
@@ -1388,13 +1491,11 @@ pub fn about() -> AboutView {
         alone_response: ABOUT_SPECIMEN.alone_response.into(),
         priest_versicle: ABOUT_SPECIMEN.priest_versicle.into(),
         priest_response: ABOUT_SPECIMEN.priest_response.into(),
+        deacon_note: ABOUT_SPECIMEN.deacon_note.into(),
+        priest_note: ABOUT_SPECIMEN.priest_note.into(),
         secret_voiced: ABOUT_SPECIMEN.secret_voiced.into(),
         secret_silent: ABOUT_SPECIMEN.secret_silent.into(),
     };
-    let ordo_colors = ABOUT_ORDO_COLORS
-        .iter()
-        .map(|c| AboutOrdoColorView { slug: c.slug.into(), name: c.name.into(), meaning: c.meaning.into() })
-        .collect();
     AboutView {
         kicker: ABOUT_KICKER.into(),
         title: ABOUT_TITLE.into(),
@@ -1403,9 +1504,18 @@ pub fn about() -> AboutView {
         blocks,
         periods,
         specimen,
-        ordo_colors,
+        ordo_colors: ordo_colors(),
         ribbon_label: presentation::about::ABOUT_RIBBON_LABEL.into(),
     }
+}
+
+/// The six liturgical colors in legend order, shared between About's ribbon and the Ordo frontispiece.
+#[uniffi::export]
+pub fn ordo_colors() -> Vec<AboutOrdoColorView> {
+    presentation::about::ABOUT_ORDO_COLORS
+        .iter()
+        .map(|c| AboutOrdoColorView { slug: c.slug.into(), name: c.name.into(), meaning: c.meaning.into() })
+        .collect()
 }
 
 /// Whether home offers the introduction: the app's first day is within the newcomer week.
@@ -1485,7 +1595,8 @@ pub struct HomeView {
     pub pray_now_date: CivilDate,
     /// What the hour the invitation opens is, for a newcomer: "Evening prayer", which a phone
     /// sets in the invitation under its words (the wide niche glosses every hour in its table);
-    /// empty for "Open Lauds".
+    /// empty for "Open Lauds". On an evening whose Vespers already keeps the morrow, "First Vespers
+    /// of …" (`presentation::first_vespers_gloss`).
     pub pray_now_gloss: String,
     /// The hour the directory marks as now, or empty.
     pub current_hour: String,
@@ -1505,6 +1616,15 @@ pub struct OrdoMonthView {
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct CourseMonthView {
     pub runs: Vec<CourseRunView>,
+}
+
+/// One day in the date picker: its `color` ("white", "red", "green", "violet", "rose", "black"),
+/// drawn as a hairline under its figure, and whether it is a first-class feast, a gilt lozenge.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct DayMarkView {
+    pub month: i32,
+    pub color: String,
+    pub first_class: bool,
 }
 
 /// `days` days of `color` ("white", "red", "green", "violet", "rose", "black"), from `start` days
