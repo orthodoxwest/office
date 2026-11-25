@@ -172,10 +172,14 @@ def main() -> None:
     ap.add_argument("--rollout", type=float, default=0.2, help="share of users for a new release, above 0 and at most 1")
     ap.add_argument("--stage-hours", type=float, default=47.0, help="hours a staged rollout runs before it is finished (auto)")
     ap.add_argument("--version-code", type=int, default=0, help="the build to release (manual; default Closed testing's newest)")
+    ap.add_argument("--notes", default="", help="What's new (manual); empty uses the notes in release-notes/ since production's last completed build")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
     if not 0 < args.rollout <= 1:
         sys.exit(f"::error::rollout must be above 0 and at most 1, not {args.rollout}")
+    custom_notes = args.notes.strip()
+    if len(custom_notes) > release_notes.LIMITS["android"]:
+        sys.exit(f"::error::Release notes are {len(custom_notes)} characters; Play takes at most {release_notes.LIMITS['android']}")
 
     play = Play(os.environ["PLAY_SERVICE_ACCOUNT_JSON"])
     testing, production = play.track(TESTING), play.track(PRODUCTION)
@@ -185,8 +189,10 @@ def main() -> None:
     shipped = (newest(production, ("completed",)) or (0, None))[0]
     log(f"Closed testing: {[(r.get('status'), codes(r)) for r in testing]}")
     log(f"Production: {[(r.get('status'), codes(r), r.get('userFraction')) for r in production]}")
-    if shipped and not args.dry_run:
-        output("live", str(shipped))
+
+    def emit_tag(code: int) -> None:
+        if code and not args.dry_run and not release_notes.has_tag("android", f"0.1.{code}", code):
+            output("live", str(code))
 
     release = None
     if args.mode == "manual":
@@ -195,7 +201,9 @@ def main() -> None:
             sys.exit("::error::Closed testing has no release to promote")
         if code < live_code:
             sys.exit(f"::error::Production already has {live_code}, newer than {code}")
-        release = release_of(code, args.rollout, notes_between(shipped, release_notes.commit_of(code)))
+        notes = ([{"language": "en-US", "text": custom_notes}] if custom_notes
+                 else notes_between(shipped, release_notes.commit_of(code)))
+        release = release_of(code, args.rollout, notes)
         message = f"Releasing {code} to {args.rollout:.0%} of production"
     else:
         halted = [r for r in production if r.get("status") == "halted"]
@@ -230,6 +238,7 @@ def main() -> None:
 
     if release is None:
         play.abandon()
+        emit_tag(shipped)
         return
     if args.dry_run:
         summary(f"Dry run: {message}")
@@ -238,6 +247,8 @@ def main() -> None:
         return
     play.set_production(release)
     new = live_code not in codes(release)
+    # A staged rollout was already reviewed when started; finishing it reaches everyone now.
+    emit_tag(max(codes(release)) if (not new and release.get("status") == "completed") else shipped)
     summary(f"{message}." + (" Google reviews it before it reaches anyone." if new else ""))
     if release.get("releaseNotes"):
         summary("What's new:\n\n" + release["releaseNotes"][0]["text"])

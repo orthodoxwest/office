@@ -248,7 +248,8 @@ jobs:
           script: |
             const isIgnored = filename =>
               filename.startsWith('data/') ||
-              filename.startsWith('tests/fixtures/golden/');
+              filename.startsWith('tests/fixtures/golden/') ||
+              filename.startsWith('release-notes/');
 
             let files;
             if (context.eventName === 'pull_request') {
@@ -291,7 +292,7 @@ jobs:
             const run = files.length === 0 || files.some(filename => !isIgnored(filename));
             core.notice(run
               ? 'Running UX tests because the change includes application or test files.'
-              : 'Skipping UX tests because only data and golden files changed.');
+              : 'Skipping UX tests because only data, golden and release-note files changed.');
             core.setOutput('run', run ? 'true' : 'false');
 
   # Built once on a bare runner, which already has a C toolchain, and handed

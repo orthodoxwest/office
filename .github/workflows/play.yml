@@ -128,9 +128,9 @@ jobs:
               exit 1
             fi
             mkdir -p "$RUNNER_TEMP/whatsnew"
-            printf '%s\n' "$NOTES" > "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
+            printf '%s' "$NOTES" > "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
             echo "dir=$RUNNER_TEMP/whatsnew" >> "$GITHUB_OUTPUT"
-            echo "Release notes:"; cat "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
+            echo "Release notes:"; cat "$RUNNER_TEMP/whatsnew/whatsnew-en-US"; echo
           else
             echo "No release notes"
           fi

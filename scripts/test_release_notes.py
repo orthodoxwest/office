@@ -106,6 +106,72 @@ class RepoTest(unittest.TestCase):
         head = self.commit({"release-notes/new.txt": "New note."})
         self.assertEqual(RN.notes_for("ios", base, head), ["New note."])
 
+    def test_deleting_a_shipped_note_and_adding_a_similar_one_does_not_drop_the_new_note(self):
+        base = self.commit({"release-notes/old.txt": "Posture cues now appear in the little hours of the office."})
+        head = self.commit(
+            {"release-notes/new.txt": "Posture cues now appear in Vespers and Lauds of the office."},
+            remove=["release-notes/old.txt"],
+        )
+        self.assertEqual(RN.notes_for("ios", base, head),
+                         ["Posture cues now appear in Vespers and Lauds of the office."])
+
+    def test_a_note_renamed_with_an_edit_is_not_new(self):
+        # Git weighs similarity line by line: one word changed in three lines leaves about half.
+        base = self.commit({"release-notes/ordo.txt": "Platforms: android\nThe ordo's month strip now scrolls to today,\n"
+                                                      "and the year view marks every feast of the Lord in gold.\n"})
+        self.git("rm", "-q", "release-notes/ordo.txt")
+        head = self.commit({"release-notes/ordo-strip.txt": "Platforms: android\nThe ordo's month strip now scrolls to today,\n"
+                                                            "and the year view marks each feast of the Lord in gold.\n"})
+        self.assertEqual(RN.notes_for("android", base, head), [])
+
+    def test_a_shipped_note_deleted_and_a_similar_one_added_later_are_two_notes(self):
+        shared = "Platforms: android\n\nThe ordo's month strip now scrolls to today.\n"
+        base = self.commit({"release-notes/strip.txt": shared + "Tap a day to open it.\n"})
+        self.commit(remove=["release-notes/strip.txt"])
+        head = self.commit({"release-notes/strip-days.txt": shared + "Tap a day to see its feasts.\n"})
+        self.assertEqual(RN.notes_for("android", base, head),
+                         ["The ordo's month strip now scrolls to today. Tap a day to see its feasts."])
+
+    def test_a_note_renamed_and_broadened_goes_to_the_new_platform_only(self):
+        base = self.commit({"release-notes/feat.txt": "Platforms: android\n\nA feature that is new.\nIt does a thing.\n"})
+        self.git("rm", "-q", "release-notes/feat.txt")
+        head = self.commit({"release-notes/feature.txt": "A feature that is new.\nIt does a thing.\n"})
+        self.assertEqual(RN.notes_for("ios", base, head), ["A feature that is new. It does a thing."])
+        self.assertEqual(RN.notes_for("android", base, head), [])
+
+    def test_a_base_outside_heads_history_compares_the_trees(self):
+        start = self.commit({"release-notes/old.txt": "Old."})
+        self.git("checkout", "-q", "-b", "side")
+        side = self.commit({"release-notes/side.txt": "Side."})
+        self.git("checkout", "-q", "master")
+        head = self.commit({"release-notes/new.txt": "New."})
+        self.assertEqual(RN.notes_for("ios", side, head), ["New."])
+        self.assertEqual(RN.notes_for("ios", start, head), ["New."])
+
+    def test_renaming_an_unshipped_note_keeps_its_sort_order(self):
+        base = self.commit({"app.txt": "x"})
+        self.commit({"release-notes/older.txt": "Older."})
+        self.commit({"release-notes/draft.txt": "Newer."})
+        self.git("mv", "release-notes/draft.txt", "release-notes/final.txt")
+        head = self.commit()
+        self.assertEqual(RN.notes_for("ios", base, head), ["Newer.", "Older."])
+
+    def test_broadening_platforms_delivers_to_the_new_platform_only(self):
+        a = self.commit({"release-notes/feat.txt": "Platforms: android\n\nA feature."})
+        b = self.commit({"release-notes/feat.txt": "A feature."})
+        self.assertEqual(RN.notes_for("ios", a, b), ["A feature."])
+        self.assertEqual(RN.notes_for("android", a, b), [])
+
+    def test_spaces_and_non_ascii_filenames(self):
+        base = self.commit({"app.txt": "x"})
+        head = self.commit({
+            "release-notes/my feature.txt": "Has a space.",
+            "release-notes/café.txt": "Has an accent.",
+        })
+        self.assertEqual(set(RN.notes_for("ios", base, head)), {"Has a space.", "Has an accent."})
+        self.assertEqual(RN.check(), [])
+        self.assertEqual(RN.check(head), [])
+
     def test_a_note_merged_from_a_branch_sorts_by_the_merge(self):
         start = self.commit()
         self.git("checkout", "-q", "-b", "side")
@@ -130,27 +196,50 @@ class RepoTest(unittest.TestCase):
         a = self.commit({"release-notes/one.txt": "One."})
         b = self.commit({"release-notes/two.txt": "Two."})
         self.assertIsNone(RN.latest_tag("ios"))
+        self.assertFalse(RN.has_tag("ios", "1.0.0", 1))
         with contextlib.redirect_stdout(io.StringIO()):
             RN.record("ios", "1.0.0", a, push=False)
             RN.record("ios", "1.0.0", b, push=False)  # left as it is, with a warning
+        self.assertTrue(RN.has_tag("ios", "1.0.0", 1))
+        # On another build's commit it counts as missing, so the tagging step runs and warns.
+        self.assertFalse(RN.has_tag("ios", "1.0.0", 2))
         self.assertEqual(RN.latest_tag("ios"), a)
         self.assertIsNone(RN.latest_tag("android"))
         self.assertEqual(RN.notes_for("ios", RN.latest_tag("ios"), b), ["Two."])
 
     def test_check(self):
         self.commit({"release-notes/README.md": "About.", "release-notes/ok.txt": "Fine.",
+                     "release-notes/ios-ok.txt": "Platforms: ios\n\n" + "i" * 600,
+                     "release-notes/ios-long.txt": "Platforms: ios\n\n" + "i" * 4001,
                      "release-notes/long.txt": "x" * 501, "release-notes/web.txt": "Platforms: web\n\nNo.",
                      "release-notes/wrong.md": "Not a note.", "release-notes/sub/deep.txt": "Nested."})
         (self.root / "release-notes/latin1.txt").write_bytes("Caf\xe9.".encode("latin-1"))
         self.git("add", "release-notes/latin1.txt")
         self.commit()
+        for problems in (RN.check(), RN.check("HEAD")):
+            self.assertEqual(len(problems), 6, problems)
+            self.assertTrue(any("deep.txt" in p for p in problems))
+            self.assertTrue(any("latin1.txt" in p and "UTF-8" in p for p in problems))
+            self.assertTrue(any("long.txt" in p for p in problems))
+            self.assertTrue(any("ios-long.txt" in p for p in problems))
+            self.assertTrue(any("web.txt" in p for p in problems))
+            self.assertTrue(any("wrong.md" in p for p in problems))
+
+    def test_check_catches_uncommitted_notes(self):
+        self.commit({"release-notes/ok.txt": "Fine."})
+        self.assertEqual(RN.check(), [])
+        (self.root / "release-notes/uncommitted.txt").write_text("Platforms: web\n\nBad.")
         problems = RN.check()
-        self.assertEqual(len(problems), 5, problems)
-        self.assertTrue(any("deep.txt" in p for p in problems))
-        self.assertTrue(any("latin1.txt" in p and "UTF-8" in p for p in problems))
-        self.assertTrue(any("long.txt" in p for p in problems))
-        self.assertTrue(any("web.txt" in p for p in problems))
-        self.assertTrue(any("wrong.md" in p for p in problems))
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("uncommitted.txt", problems[0])
+        self.assertEqual(RN.check("HEAD"), [])
+
+    def test_check_skips_files_git_ignores(self):
+        self.commit({".gitignore": ".DS_Store\n", "release-notes/ok.txt": "Fine."})
+        (self.root / "release-notes/.DS_Store").write_bytes(b"\x00\x01")
+        self.assertEqual(RN.check(), [])
+        (self.root / "release-notes/ok.txt").unlink()  # deleted, not yet committed
+        self.assertEqual(RN.check(), [])
 
 
 class CheckedInTest(unittest.TestCase):
