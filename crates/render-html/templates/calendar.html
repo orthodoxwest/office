@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}{% if view == "month" %}{{ months[0].name }} {{ year }} — Ordo{% elif view == "all" %}Ordo {{ year }} — Whole year{% else %}Ordo {{ year }}{% endif %}{% endblock %}
+{% extends "layout.html" %}{% block title %}{% if view == "month" %}{{ months[0].name }} {{ year }} — Ordo{% elif view == "all" %}Ordo {{ year }} — Whole year{% else %}Ordo {{ year }}{% endif %} — Daily Office{% endblock %}{% block description %}The ordo for {{ year }} of the Antiochian Western Rite Vicariate: each day’s feast, rank and liturgical colour, with fasts, Ember days and the moveable feasts, for the Benedictine Divine Office.{% endblock %}
 {% block head %}{% if view == "month" %}
 {#- Returning to the ordo opens at the day chosen (the menu's Ordo from a day or an hour carries
      #d-date; Back keeps the browser's own place). Browsers set a #fragment's row in place only

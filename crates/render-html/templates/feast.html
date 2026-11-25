@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}{{ name }} — Feasts{% endblock %}{% block description %}{{ name }}: {{ date }}, and how it is kept in the Benedictine Divine Office of the Antiochian Western Rite Vicariate in the years ahead.{% endblock %}{% block content %}{% from "macros.html" import feast_years %}
+{% extends "layout.html" %}{% block title %}{{ name }} — Daily Office{% endblock %}{% block description %}{{ name }}: {{ date }}, and how it is kept in the Benedictine Divine Office of the Antiochian Western Rite Vicariate in the years ahead.{% endblock %}{% block content %}{% from "macros.html" import feast_years %}
 <div class="calendar feast-page">
   <a class="find-back" href="{{ back.href|url }}"><span aria-hidden="true">&lsaquo; </span>{{ back.label|typeset }}</a>
   <header class="feast-head is-{{ register }} day-color-{{ color }}" id="calendar-top">

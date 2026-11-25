@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  {%- set description %}{% block description %}The Benedictine Divine Office of the Antiochian Western Rite Vicariate: Lauds through Compline for each day, with the ordo and liturgical calendar.{% endblock %}{% endset %}
+  {%- set description %}{% block description %}Pray the Benedictine Divine Office of the Orthodox Western Rite: Lauds through Compline for each day, with the ordo and calendar of the Antiochian Western Rite Vicariate.{% endblock %}{% endset %}
   <meta name="description" content="{{ description }}">
   <title>{% block title %}Daily Office{% endblock %}</title>
   {# Search engines and link previews (Messages, WhatsApp, Facebook, Slack) read these. A dated
@@ -24,6 +24,9 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Daily Office, the Benedictine Divine Office of the Western Rite: a gold cross in its ring over the name, on a night sky of gold-leaf stars, above a band reading Pray the hours">
   <meta name="twitter:card" content="summary_large_image">
+  {# Home names the site for search results (Google's site names read WebSite data on the
+       home page); the address's own wording is its other name. #}
+  {% if canonical == "/" %}<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Daily Office","alternateName":["Orthodox West Breviary","Benedictine Divine Office of the Western Rite"],"url":{{ (site ~ "/")|script_string }},"inLanguage":"en"}</script>{% endif %}
   {% endif %}
   {# The system's edge (Chromium's toolbar, an installed app's status bar) takes the wall's
        colour, style.css's --bg in each theme. Here, before the pre-paint script, so a stored

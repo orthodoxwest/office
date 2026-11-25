@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}Daily Office — {{ date_str }}{% endblock %}{% block content %}
+{% extends "layout.html" %}{% block title %}{% if noindex %}Daily Office — {{ date_str }}{% else %}Daily Office — The Benedictine Divine Office for the Orthodox Western Rite{% endif %}{% endblock %}{% block content %}
 <div class="home">
   {% if from_feast %}<a class="from-feast" href="{{ from_feast.href|url }}"><span aria-hidden="true">&lsaquo; </span>{{ from_feast.label|typeset }}</a>{% endif %}
   <span class="sr-only">Liturgical color: {{ color }}</span>
@@ -15,7 +15,7 @@
     {# The consecration cross opens the card (at the niche's crown on a
          desktop): decorative, outside the reading and focus order. #}
     <span class="home-crown" aria-hidden="true"></span>
-    <section class="home-summary day-color-{{ color }}" aria-labelledby="home-date-heading">
+    <section class="home-summary day-color-{{ color }}" aria-labelledby="home-date-heading" data-nosnippet>
       {# By night on a phone, the apse's painted sky inside the head, down to
            the frieze; app.js sets its gold-leaf stars in it, clear of the
            day's words. Without script the sky has no stars. #}
