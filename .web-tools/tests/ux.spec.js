@@ -683,7 +683,9 @@ test("the invitation to an hour already prayed takes the gilt cross and keeps it
 
 // The light moves with the hours (app.js HOUR_LIGHT, render_blocks::hour_light).
 // Its animations are held almost still as they are made, so a test sets the
-// pass's clock itself rather than racing it.
+// pass's clock itself rather than racing it. The page's clock is paused two
+// seconds short of the turn, not left running from there: a slow load on a
+// busy runner would otherwise reach the turn before the test looks.
 async function holdTheLight(page) {
   await page.addInitScript(() => {
     const animate = Element.prototype.animate;
@@ -716,7 +718,7 @@ const homeAtRest = (page) =>
 
 test("the light moves from Sext to None on an open home, and settles as a fresh page", async ({ page }) => {
   await holdTheLight(page);
-  await page.clock.install({ time: new Date("2026-03-15T12:59:58-04:00") });
+  await page.clock.pauseAt(new Date("2026-03-15T12:59:58-04:00"));
   await openDatedPage(page, `/?date=${testDate}`);
   const invitation = page.locator(".pray-now");
   await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Sext");
@@ -724,6 +726,7 @@ test("the light moves from Sext to None on an open home, and settles as a fresh 
   expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
 
   await page.clock.runFor(3000);
+  await page.clock.resume();
   // The hour has turned for a screen reader at once …
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute("data-hour", "none");
   await expect(invitation).toHaveAttribute("href", /\/none\//);
@@ -746,9 +749,10 @@ test("the light moves from Sext to None on an open home, and settles as a fresh 
 
 test("a second turn of the hour during a pass settles the first", async ({ page }) => {
   await holdTheLight(page);
-  await page.clock.install({ time: new Date("2026-03-15T12:59:58-04:00") });
+  await page.clock.pauseAt(new Date("2026-03-15T12:59:58-04:00"));
   await openDatedPage(page, `/?date=${testDate}`);
   await page.clock.runFor(3000);
+  await page.clock.resume();
   await lightAt(page, 300);
   // Another turn arrives (a clock set forward) while the first is under way.
   await page.clock.setSystemTime(new Date("2026-03-15T17:00:01-04:00"));
@@ -766,9 +770,10 @@ test.describe("under reduced motion", () => {
   test.use({ reducedMotion: "reduce" });
   test("the light does not move: the new hour comes at once", async ({ page }) => {
     await holdTheLight(page);
-    await page.clock.install({ time: new Date("2026-03-15T12:59:58-04:00") });
+    await page.clock.pauseAt(new Date("2026-03-15T12:59:58-04:00"));
     await openDatedPage(page, `/?date=${testDate}`);
     await page.clock.runFor(3000);
+    await page.clock.resume();
     await expect(page.locator(".pray-now-label")).toHaveText("Pray None");
     expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
     expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["none"] });
@@ -782,10 +787,11 @@ test("a page hidden at the turn of the hour is corrected on its return, without 
     Object.defineProperty(document, "hidden", { get: () => window.pageHidden });
     Object.defineProperty(document, "visibilityState", { get: () => (window.pageHidden ? "hidden" : "visible") });
   });
-  await page.clock.install({ time: new Date("2026-03-15T12:59:58-04:00") });
+  await page.clock.pauseAt(new Date("2026-03-15T12:59:58-04:00"));
   await openDatedPage(page, `/?date=${testDate}`);
   await page.evaluate(() => { window.pageHidden = true; });
   await page.clock.runFor(3000);
+  await page.clock.resume();
   await page.evaluate(() => {
     window.pageHidden = false;
     document.dispatchEvent(new Event("visibilitychange"));
@@ -805,21 +811,26 @@ test("a turn found late, after a sleeping timer, corrects home without moving th
   expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
 });
 
-test("the light leaves Compline at midnight and gathers on Lauds at two", async ({ page }) => {
+test("the light leaves Compline at midnight", async ({ page }) => {
   await holdTheLight(page);
-  await page.clock.install({ time: new Date("2026-07-29T23:59:58-04:00") });
+  await page.clock.pauseAt(new Date("2026-07-29T23:59:58-04:00"));
   await openDatedPage(page, "/?date=2026-07-29");
   await page.clock.runFor(3000);
+  await page.clock.resume();
   // Only the one pool dies; the invitation's words stay.
   await lightAt(page, 700);
   await expect(page.locator(".home-hour-link.is-passing")).toHaveCount(1);
   expect(await page.evaluate(() => document.querySelectorAll(".pray-now-words").length)).toBe(0);
   await lightAt(page, 1400);
   expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: [] });
+});
 
-  await page.clock.setSystemTime(new Date("2026-07-30T01:59:58-04:00"));
+test("the light gathers on Lauds at two", async ({ page }) => {
+  await holdTheLight(page);
+  await page.clock.pauseAt(new Date("2026-07-30T01:59:58-04:00"));
   await openDatedPage(page, "/?date=2026-07-30");
   await page.clock.runFor(3000);
+  await page.clock.resume();
   await lightAt(page, 300);
   await expect(page.locator(".home-hour-link.is-passing")).toHaveCount(1);
   await expect(page.locator(".pray-now-label")).toHaveText("Pray Compline");
@@ -1896,7 +1907,10 @@ for (const dir of ["dusk", "dawn"]) {
 // The page keeps answering through the whole play. WebKit stalled for
 // seconds (no script, timer or frame) while the new page's still stood at
 // an opacity of exactly 0 waiting for its glow (#923); the glow starts from a
-// thousandth instead.
+// thousandth instead. The watch starts once the transition's parts are up:
+// making the stills at the turn holds the page too, for a few hundred ms
+// alone and two or three seconds on a loaded runner, and that is the
+// browser's capture, not the stall.
 for (const dir of ["dusk", "dawn"]) {
   test(`the page keeps answering through the crown's ${dir}`, async ({ page }) => {
     test.setTimeout(60_000);
@@ -1905,11 +1919,16 @@ for (const dir of ["dusk", "dawn"]) {
     const [x, y] = await crownPoint(page);
     await page.evaluate(() => {
       window.__gap = 0;
+      window.__watched = false;
+      const up = () => document.getAnimations().some((a) => String(a.effect?.pseudoElement || "").startsWith("::view-transition") && a.playState === "running");
       let last = performance.now();
+      let watching = false;
       const ch = new MessageChannel();
       ch.port1.onmessage = () => {
         const now = performance.now();
-        window.__gap = Math.max(window.__gap, now - last);
+        if (watching) window.__gap = Math.max(window.__gap, now - last);
+        // Asked only until the parts are up: it is costly in WebKit.
+        else if (up()) watching = window.__watched = true;
         last = now;
         setTimeout(() => ch.port2.postMessage(0), 20);
       };
@@ -1918,8 +1937,11 @@ for (const dir of ["dusk", "dawn"]) {
     await page.mouse.click(x, y);
     await crownPlayed(page);
     await crownAtRest(page);
-    // (A frame or two of the stills is slow in WebKit; seconds are not.)
-    expect(await page.evaluate(() => window.__gap)).toBeLessThan(2000);
+    const { gap, watched } = await page.evaluate(() => ({ gap: window.__gap, watched: window.__watched }));
+    // The watch saw the transition's parts running …
+    expect(watched).toBe(true);
+    // … and the page never stood still for seconds under them.
+    expect(gap).toBeLessThan(2000);
   });
 }
 
