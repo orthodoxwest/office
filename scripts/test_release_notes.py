@@ -115,6 +115,39 @@ class RepoTest(unittest.TestCase):
         self.assertEqual(RN.notes_for("ios", base, head),
                          ["Posture cues now appear in Vespers and Lauds of the office."])
 
+    def test_a_note_renamed_with_an_edit_is_not_new(self):
+        # Git weighs similarity line by line: one word changed in three lines leaves about half.
+        base = self.commit({"release-notes/ordo.txt": "Platforms: android\nThe ordo's month strip now scrolls to today,\n"
+                                                      "and the year view marks every feast of the Lord in gold.\n"})
+        self.git("rm", "-q", "release-notes/ordo.txt")
+        head = self.commit({"release-notes/ordo-strip.txt": "Platforms: android\nThe ordo's month strip now scrolls to today,\n"
+                                                            "and the year view marks each feast of the Lord in gold.\n"})
+        self.assertEqual(RN.notes_for("android", base, head), [])
+
+    def test_a_shipped_note_deleted_and_a_similar_one_added_later_are_two_notes(self):
+        shared = "Platforms: android\n\nThe ordo's month strip now scrolls to today.\n"
+        base = self.commit({"release-notes/strip.txt": shared + "Tap a day to open it.\n"})
+        self.commit(remove=["release-notes/strip.txt"])
+        head = self.commit({"release-notes/strip-days.txt": shared + "Tap a day to see its feasts.\n"})
+        self.assertEqual(RN.notes_for("android", base, head),
+                         ["The ordo's month strip now scrolls to today. Tap a day to see its feasts."])
+
+    def test_a_note_renamed_and_broadened_goes_to_the_new_platform_only(self):
+        base = self.commit({"release-notes/feat.txt": "Platforms: android\n\nA feature that is new.\nIt does a thing.\n"})
+        self.git("rm", "-q", "release-notes/feat.txt")
+        head = self.commit({"release-notes/feature.txt": "A feature that is new.\nIt does a thing.\n"})
+        self.assertEqual(RN.notes_for("ios", base, head), ["A feature that is new. It does a thing."])
+        self.assertEqual(RN.notes_for("android", base, head), [])
+
+    def test_a_base_outside_heads_history_compares_the_trees(self):
+        start = self.commit({"release-notes/old.txt": "Old."})
+        self.git("checkout", "-q", "-b", "side")
+        side = self.commit({"release-notes/side.txt": "Side."})
+        self.git("checkout", "-q", "master")
+        head = self.commit({"release-notes/new.txt": "New."})
+        self.assertEqual(RN.notes_for("ios", side, head), ["New."])
+        self.assertEqual(RN.notes_for("ios", start, head), ["New."])
+
     def test_renaming_an_unshipped_note_keeps_its_sort_order(self):
         base = self.commit({"app.txt": "x"})
         self.commit({"release-notes/older.txt": "Older."})
@@ -163,11 +196,13 @@ class RepoTest(unittest.TestCase):
         a = self.commit({"release-notes/one.txt": "One."})
         b = self.commit({"release-notes/two.txt": "Two."})
         self.assertIsNone(RN.latest_tag("ios"))
-        self.assertFalse(RN.has_tag("ios", "1.0.0"))
+        self.assertFalse(RN.has_tag("ios", "1.0.0", 1))
         with contextlib.redirect_stdout(io.StringIO()):
             RN.record("ios", "1.0.0", a, push=False)
             RN.record("ios", "1.0.0", b, push=False)  # left as it is, with a warning
-        self.assertTrue(RN.has_tag("ios", "1.0.0"))
+        self.assertTrue(RN.has_tag("ios", "1.0.0", 1))
+        # On another build's commit it counts as missing, so the tagging step runs and warns.
+        self.assertFalse(RN.has_tag("ios", "1.0.0", 2))
         self.assertEqual(RN.latest_tag("ios"), a)
         self.assertIsNone(RN.latest_tag("android"))
         self.assertEqual(RN.notes_for("ios", RN.latest_tag("ios"), b), ["Two."])
@@ -198,6 +233,13 @@ class RepoTest(unittest.TestCase):
         self.assertEqual(len(problems), 1, problems)
         self.assertIn("uncommitted.txt", problems[0])
         self.assertEqual(RN.check("HEAD"), [])
+
+    def test_check_skips_files_git_ignores(self):
+        self.commit({".gitignore": ".DS_Store\n", "release-notes/ok.txt": "Fine."})
+        (self.root / "release-notes/.DS_Store").write_bytes(b"\x00\x01")
+        self.assertEqual(RN.check(), [])
+        (self.root / "release-notes/ok.txt").unlink()  # deleted, not yet committed
+        self.assertEqual(RN.check(), [])
 
 
 class CheckedInTest(unittest.TestCase):

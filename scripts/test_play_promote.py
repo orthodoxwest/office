@@ -54,7 +54,7 @@ def run(argv, production, testing=TESTING, uploads=(), tagged=()):
     with mock.patch.object(PROMOTE, "Play", Play), \
             mock.patch.object(PROMOTE, "uploads", lambda _hours: [(c, f"c{c}") for c in uploads]), \
             mock.patch.object(PROMOTE.release_notes, "commit_of", lambda n: None if n == 999 else f"c{n}"), \
-            mock.patch.object(PROMOTE.release_notes, "has_tag", lambda _p, v: v in tagged), \
+            mock.patch.object(PROMOTE.release_notes, "has_tag", lambda _p, v, _b: v in tagged), \
             mock.patch.object(PROMOTE.release_notes, "release_text", lambda _p, base, head: notes(base, head)[0]["text"]), \
             mock.patch.object(PROMOTE, "output", lambda k, v: OUTPUTS.append((k, v))), \
             mock.patch.object(PROMOTE, "now", lambda: NOW), \

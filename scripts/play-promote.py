@@ -191,7 +191,7 @@ def main() -> None:
     log(f"Production: {[(r.get('status'), codes(r), r.get('userFraction')) for r in production]}")
 
     def emit_tag(code: int) -> None:
-        if code and not args.dry_run and not release_notes.has_tag("android", f"0.1.{code}"):
+        if code and not args.dry_run and not release_notes.has_tag("android", f"0.1.{code}", code):
             output("live", str(code))
 
     release = None

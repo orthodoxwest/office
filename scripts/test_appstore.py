@@ -537,7 +537,7 @@ class MainTest(unittest.TestCase):
         reads["/v1/builds"] = builds_response((800, "1.0.0", 30, "VALID", "IN_BETA_TESTING"))
         for already_tagged, expected in ((False, [{"version": "1.0.0", "build": "800"}]), (True, [])):
             emitted = []
-            with mock.patch.object(STORE.release_notes, "has_tag", lambda _p, _v: already_tagged), \
+            with mock.patch.object(STORE.release_notes, "has_tag", lambda _p, _v, _b: already_tagged), \
                     mock.patch.object(STORE, "output", lambda **kw: emitted.append(kw)):
                 self.run_main(["auto"], reads)
             self.assertEqual(emitted, expected)

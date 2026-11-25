@@ -103,42 +103,78 @@ def files_at(commit: str) -> set[str]:
     return {p for p in r.stdout.split("\0") if p.endswith(SUFFIX)}
 
 
-def diff_notes(base: str, head: str) -> tuple[set[str], set[str]]:
-    """(added, modified) note files between base and head. A renamed note counts as the note it was,
-    with a high similarity threshold so deleting a shipped note and adding a similar new one does
-    not pair them."""
-    files_at(base)  # stops on a base git cannot read
-    r = git("diff", "-z", "--name-status", "--find-renames=90%", base, head,
+def kept_notes(base: str, head: str) -> dict[str, str]:
+    """The note files at head that base had, each with its path at base, comparing the two trees
+    (a renamed note counting as the note it was). Only for a base outside head's history, where
+    note_origins cannot follow the commits between them."""
+    r = git("diff", "-z", "--name-status", "--find-renames", base, head,
             "--", NOTES_DIR + "/", check=False)
     if r.returncode != 0:
         sys.exit(f"::error::Cannot compare {NOTES_DIR}/ between {base} and {head}: {r.stderr.strip()}")
-    tokens = r.stdout.split("\0")
-    if tokens and tokens[-1] == "":
-        tokens.pop()
-    added, modified = set(), set()
-    i = 0
+    at_base = files_at(base)
+    kept = {p: p for p in at_base & files_at(head)}
+    kept |= {new: old for status, old, new in changes(r.stdout) if status == "R" and old in at_base}
+    return kept
+
+
+def changes(out: str) -> list[tuple[str, str | None, str]]:
+    """(status letter, old path for a rename or copy, path) from `git diff -z --name-status`."""
+    tokens = out.split("\0")
+    found, i = [], 0
     while i < len(tokens):
-        status = tokens[i]
-        if status[0] in ("R", "C"):
+        status = tokens[i].lstrip("\n")
+        if not status:
+            i += 1
+        elif status[0] in "RC":
+            found.append((status[0], tokens[i + 1], tokens[i + 2]))
             i += 3
-            continue
-        path = tokens[i + 1]
-        if path.endswith(SUFFIX):
-            if status == "A":
-                added.add(path)
-            elif status == "M":
-                modified.add(path)
-        i += 2
-    return added, modified
+        else:
+            found.append((status[0], None, tokens[i + 1]))
+            i += 2
+    return found
 
 
-def added_at(path: str, head: str, modified: bool = False) -> int:
-    """When head's first-parent history gained the note file (a merge's time, not its branch's),
-    or when it was last changed if it gained this platform in an edit."""
-    args = ["log", "--first-parent", "-1", "--no-renames", "--format=%ct"]
-    if not modified:
-        args.append("--diff-filter=A")
-    r = git(*args, head, "--", path, check=False)
+def note_origins(base: str | None, head: str) -> dict[str, tuple[str | None, int]]:
+    """For each note file at head: its path at base (None for a note new since base), and the time
+    it counts from: when head's first-parent history gained it (a merge's time, not its branch's),
+    or for a note base had, when it last changed.
+
+    Renames are followed one first-parent commit at a time, so a pull request that renames a note,
+    even editing it, keeps it the note it was, while deleting a shipped note in one pull request and
+    adding a similar one in another never pairs them."""
+    heads = files_at(head)
+    if base is None:
+        state: dict[str, tuple[str | None, int]] = {}
+        span = head
+    else:
+        state = {p: (p, 0) for p in files_at(base)}  # also stops on a base git cannot read
+        if git("merge-base", "--is-ancestor", base, head, check=False).returncode != 0:
+            kept = kept_notes(base, head)
+            return {p: (kept.get(p), 0 if p in kept else added_at(p, head)) for p in heads}
+        span = f"{base}..{head}"
+    r = git("log", "--first-parent", "--reverse", "--diff-merges=first-parent", "-z", "--name-status",
+            "--find-renames", "--format=%x01%ct", span, "--", NOTES_DIR + "/", check=False)
+    if r.returncode != 0:
+        sys.exit(f"::error::Cannot read the history of {NOTES_DIR}/ up to {head}: {r.stderr.strip()}")
+    for chunk in r.stdout.split("\x01")[1:]:
+        when, _, rest = chunk.partition("\0")
+        for status, old, path in changes(rest):
+            if status == "D":
+                state.pop(path, None)
+                continue
+            origin, since = state.pop(old, (None, None)) if status == "R" else state.get(path, (None, None))
+            if status in "AC" or since is None:
+                origin, since = None, int(when)
+            elif origin is not None:
+                since = int(when)
+            state[path] = (origin, since)
+    return {p: state.get(p, (None, 0)) for p in heads}
+
+
+def added_at(path: str, head: str) -> int:
+    """When head's first-parent history gained the note file (a merge's time, not its branch's)."""
+    r = git("log", "--first-parent", "-1", "--no-renames", "--diff-filter=A", "--format=%ct", head,
+            "--", path, check=False)
     return int(r.stdout.strip() or 0)
 
 
@@ -151,29 +187,19 @@ def read_note(head: str, path: str) -> str:
 
 
 def notes_for(platform: str, base: str | None, head: str) -> list[str]:
-    """The texts of the notes for `platform` added between base and head (base None: all), newest first."""
-    if base is None:
-        added, modified = files_at(head), set()
-    else:
-        added, modified = diff_notes(base, head)
+    """The texts of the notes for `platform` new between base and head (base None: all), newest
+    first. A note base had counts as new only for a platform its Platforms line has gained since."""
     found = []
-    for path in added:
+    for path, (origin, since) in note_origins(base, head).items():
         try:
             platforms, body = parse(read_note(head, path))
+            if platform in platforms and origin is not None:
+                platforms -= parse(read_note(base, origin))[0]
         except NoteError as e:
             print(f"::warning::{path} skipped: {e}", file=sys.stderr)
             continue
         if platform in platforms:
-            found.append((added_at(path, head), path, body))
-    for path in modified:
-        try:
-            platforms, body = parse(read_note(head, path))
-            base_platforms, _ = parse(read_note(base, path))
-        except NoteError as e:
-            print(f"::warning::{path} skipped: {e}", file=sys.stderr)
-            continue
-        if platform in platforms and platform not in base_platforms:
-            found.append((added_at(path, head, modified=True), path, body))
+            found.append((since, path, body))
     return [body for _, _, body in sorted(found, key=lambda f: (-f[0], f[1]))]
 
 
@@ -210,10 +236,12 @@ def latest_tag(platform: str, head: str = "HEAD") -> str | None:
     return git("rev-list", "-n", "1", r.stdout.strip()).stdout.strip() or None
 
 
-def has_tag(platform: str, version: str) -> bool:
-    """Whether the platform's tag for `version` already exists locally."""
+def has_tag(platform: str, version: str, build: int) -> bool:
+    """Whether the platform's tag for `version` already exists on build's commit. A tag on another
+    commit counts as missing, so the tagging step runs and warns about it."""
     name = TAG_PREFIX[platform] + version
-    return git("rev-list", "-n", "1", f"refs/tags/{name}", check=False).returncode == 0
+    have = git("rev-list", "-n", "1", f"refs/tags/{name}", check=False)
+    return have.returncode == 0 and have.stdout.strip() == commit_of(build)
 
 
 def push_args() -> list[str]:
@@ -257,12 +285,9 @@ def read_worktree_note(path: str) -> str:
 def check(head: str | None = None) -> list[str]:
     """What is wrong with the note files (working tree by default, or commit `head`), one line each."""
     if head is None:
-        notes_root = ROOT / NOTES_DIR
-        all_paths = sorted(
-            p.relative_to(ROOT).as_posix()
-            for p in notes_root.rglob("*")
-            if p.is_file()
-        ) if notes_root.is_dir() else []
+        # Tracked and untracked files, but not ones git ignores (a Finder .DS_Store, say).
+        r = git("ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", NOTES_DIR + "/")
+        all_paths = sorted({p for p in r.stdout.split("\0") if p and (ROOT / p).is_file()})
         reader = read_worktree_note
     else:
         r = git("ls-tree", "-r", "-z", "--name-only", head, "--", NOTES_DIR + "/", check=False)
