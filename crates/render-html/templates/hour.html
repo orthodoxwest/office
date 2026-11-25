@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}{{ hour.title }} — {{ date_str }}{% endblock %}{% block description %}{{ hour.title }} for {{ date_str }}{% if hour.feast %}: {{ hour.feast|typeset }}{% endif %}. The Benedictine Divine Office of the Antiochian Western Rite Vicariate.{% endblock %}
+{% extends "layout.html" %}{% block title %}{% if noindex %}{{ hour.title }} — {{ date_str }}{% else %}{{ hour.title }} — Daily Office{% endif %}{% endblock %}{% block description %}{% if noindex %}{{ hour.title }} for {{ date_str }}{% if hour.feast %}: {{ hour.feast|typeset }}{% endif %}. The Benedictine Divine Office of the Antiochian Western Rite Vicariate.{% else %}{{ hour.title }} for today in the Benedictine Divine Office of the Antiochian Western Rite Vicariate, composed for the day with its feast, psalms, hymn and propers.{% endif %}{% endblock %}
 {% block head %}
 {#- The ribbon (presentation::reopens_at_place). An hour the reader was taken away from in the
      middle, and whose page was then closed by the browser or the system (a discarded tab, an
@@ -56,7 +56,7 @@
   <div class="color-band color-band-{{ hour.color }}" id="hour-band"><span class="sr-only">Liturgical color: {{ hour.color }}</span></div>
   {# The day's colour reaches the title's lozenge; the headpiece is set
        into the title's upper rule, as home and the ordo open their pages. #}
-  <div class="hour-header day-color-{{ hour.color }}">
+  <div class="hour-header day-color-{{ hour.color }}" data-nosnippet>
     {# Lauds is sung at sunrise and Vespers and Compline at its going down:
          their headpieces carry the sun and the moon in place of the cross. #}
     {{ headpiece("sun" if hour_name == "lauds" else ("moon" if hour_name in ["vespers", "compline"] else "")) }}
