@@ -262,6 +262,8 @@ class FakeApi:
                 if isinstance(answer, Exception):
                     raise answer
                 return answer() if callable(answer) else answer
+            if path.startswith("/v1/appStoreVersions/") and path.endswith("/build"):
+                return {"data": {"type": "builds", "id": "b800", "attributes": {"version": "800"}}}
             if path.startswith("/v1/appStoreVersions/") and path.count("/") == 3:
                 self.version_reads += 1
                 return {"data": version(path.rsplit("/", 1)[1], "1.0.1", "READY_FOR_REVIEW")}
@@ -487,13 +489,13 @@ class RetryTest(unittest.TestCase):
 
 class MainTest(unittest.TestCase):
     def run_main(self, argv, reads):
-        # commit_of finds nothing: the default notes, never HEAD's file, are used.
+        # commit_of finds nothing: the default notes, never HEAD's notes, are used.
         api = FakeApi(reads)
         out, err = io.StringIO(), io.StringIO()
         with mock.patch.object(STORE, "Api", lambda *a, **k: api), \
                 mock.patch.object(STORE, "now", lambda: NOW), \
                 mock.patch.object(STORE, "commit_of", lambda n: None), \
-                mock.patch.object(STORE, "notes_at", lambda c: "Notes from HEAD."), \
+                mock.patch.object(STORE.release_notes, "release_text", lambda *a, **k: "Notes from HEAD."), \
                 mock.patch.dict(os.environ, {"ASC_KEY_ID": "K", "ASC_ISSUER_ID": "I", "ASC_KEY": "P",
                                              "GITHUB_STEP_SUMMARY": ""}), \
                 mock.patch.object(sys, "argv", ["appstore.py", *argv]), \

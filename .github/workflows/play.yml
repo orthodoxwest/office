@@ -27,8 +27,8 @@ on:
       - "Cargo.toml"
       - "Cargo.lock"
       - ".github/workflows/play.yml"
-      # Editing the notes alone uploads nothing; the next app change carries them.
-      - "!apps/android/whatsnew.txt"
+      # Release notes (release-notes/) are outside these paths: a note alone uploads nothing, and
+      # the next app change carries it.
   workflow_dispatch:
     inputs:
       track:
@@ -41,7 +41,7 @@ on:
         type: string
         default: "1"
       notes:
-        description: "Release notes (what's new); empty uses apps/android/whatsnew.txt"
+        description: "Release notes (what's new); empty uses the notes in release-notes/ since the last Android release"
         type: string
         default: ""
 
@@ -109,16 +109,17 @@ jobs:
           # The version code counts commits, so the bundle needs full history.
           fetch-depth: 0
 
-      # The notes are apps/android/whatsnew.txt as checked in (a manual run's input replaces it),
-      # never anything taken from the merge. Empty means no notes. Checked before the build, so
-      # a text Play would refuse stops the run early.
+      # The notes are the files under release-notes/ added since the last Android release (its
+      # android/ tag; scripts/release_notes.py), so testers see everything production has yet to
+      # get. A manual run's input replaces them. Checked before the build, so a text Play would
+      # refuse stops the run early.
       - name: Write the release notes
         id: notes
         env:
           NOTES: ${{ inputs.notes }}
         run: |
           if [ -z "$NOTES" ]; then
-            NOTES=$(grep -v '^#' apps/android/whatsnew.txt | sed '/./,$!d')
+            NOTES=$(python3 scripts/release_notes.py show --platform android)
           fi
           if [ -n "$NOTES" ]; then
             LENGTH=$(printf '%s' "$NOTES" | python3 -c 'import sys; print(len(sys.stdin.read()))')

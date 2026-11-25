@@ -44,6 +44,9 @@ apps/
                            (see apps/android/README.md; `make android`, `make android-screenshots`)
   ios/                     SwiftUI app; build-core.sh builds the XCFramework and Swift bindings,
                            XcodeGen the project (see apps/ios/README.md; `make ios`, macOS only)
+release-notes/             The apps' "What's new": one short .txt per notable reader-facing change
+                           (most PRs add none); each platform's release carries the notes added
+                           since its last (scripts/release_notes.py, release-notes/README.md)
 tests/fixtures/            Rendered-hour, ordo, audit and 28-year parity snapshots;
                            broken corpora for validation boundary tests
 tools/
@@ -88,6 +91,7 @@ scripts/
   project-status.py        Clergy-facing status report (`make project-status`)
   sweep-targets.py         Delete target/ in idle checkouts (`make sweep-targets`)
   play-promote.py          Promote a Closed testing build to Play production (play-promote.yml)
+  release_notes.py         Gathers release-notes/ for a platform's release; tags what each store has out
   appstore.py              iOS version numbers (testflight.yml) and daily App Review submission
                            (appstore-promote.yml)
   verify-psalms.py         Read-only comparison with the official BCP Psalter
@@ -101,6 +105,9 @@ can see or use on one front lands on the others in the same PR. Shared words go 
 `presentation`, shared structure in `render-blocks` (its tests hold the apps to the web's
 words), and each front draws them in its own idiom. When a front truly cannot follow yet, the
 PR says so and an issue tracks the rest.
+
+A notable change a reader will see also adds a release note, `release-notes/<slug>.txt`, a sentence
+or two in plain words (release-notes/README.md). Fixes, text corrections and internal work add none.
 
 ## Reference materials & verification
 
