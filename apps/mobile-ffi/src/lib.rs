@@ -945,6 +945,13 @@ pub fn usage_endpoint_header() -> String {
     presentation::usage::ENDPOINT_HEADER.to_string()
 }
 
+/// The request header a beacon carries the app's build number on (its version code, or
+/// `CFBundleVersion`): `presentation::usage::BUILD_HEADER`.
+#[uniffi::export]
+pub fn usage_build_header() -> String {
+    presentation::usage::BUILD_HEADER.to_string()
+}
+
 /// The endpoint a beacon response's header names, if the app may post there.
 #[uniffi::export]
 pub fn usage_advertised_endpoint(value: String) -> Option<String> {

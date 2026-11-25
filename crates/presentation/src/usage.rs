@@ -17,6 +17,36 @@ pub const ENDPOINT: &str = "https://orthodoxwestbreviary.com/api/usage";
 /// posts there next time, so builds already installed follow the site to its new address.
 pub const ENDPOINT_HEADER: &str = "office-usage-endpoint";
 
+/// The request header on which a native app's beacon carries its build number: the count of
+/// master's commits it was built from (`git rev-list --count HEAD`), which Android's version code
+/// and iOS's `CFBundleVersion` both are. So one number orders every build of either app, and a
+/// correction merged at master's Nth commit is in every build numbered N or more. The server
+/// counts a reader once a day under `build:<client>:<n>` ([`build_scope`]); the beacon's words
+/// stay a closed vocabulary. Builds from before it was sent say nothing, and are older than any
+/// build that does.
+pub const BUILD_HEADER: &str = "x-office-build";
+
+/// The scope a native app's beacon is counted under for its build: `build:android:2009`. None for
+/// a browser, which is always the site's current build, or a header that is not a plain build
+/// number.
+pub fn build_scope(dimensions: &[String], header: &str) -> Option<String> {
+    let client = dimensions.iter().find_map(|d| d.strip_prefix("client:")).filter(|c| matches!(*c, "android" | "ios"))?;
+    let build = parse_build(header)?;
+    Some(format!("build:{client}:{build}"))
+}
+
+/// A build number as the header says it: one to six digits, no leading zero.
+pub fn parse_build(text: &str) -> Option<u32> {
+    let ok = (1..=6).contains(&text.len()) && text.bytes().all(|b| b.is_ascii_digit()) && !text.starts_with('0');
+    ok.then(|| text.parse().ok()).flatten()
+}
+
+/// A stored `build:<client>:<n>` scope's client and build.
+pub fn build_of(scope: &str) -> Option<(&str, u32)> {
+    let (client, build) = scope.strip_prefix("build:")?.split_once(':')?;
+    Some((client, parse_build(build)?))
+}
+
 /// The longest beacon body the server reads. A longer one is refused whole, so the limit keeps
 /// well clear of the longest beacon any front writes (`beacons_fit_the_limit`).
 pub const MAX_BEACON: usize = 288;
@@ -499,6 +529,31 @@ mod tests {
         for body in ["site visit:returning client:android", "site client:ios", "site visit:first", "site"] {
             assert_eq!(new_client(&dims(body)), None, "{body:?}");
         }
+    }
+
+    #[test]
+    fn an_apps_build_is_counted_apart_from_its_words() {
+        let dims = |body: &str| parse_event(body).unwrap().dimensions;
+        assert_eq!(build_scope(&dims("lauds client:android"), "2009").as_deref(), Some("build:android:2009"));
+        assert_eq!(build_scope(&dims("site client:ios visit:first"), "31").as_deref(), Some("build:ios:31"));
+        assert_eq!(build_of("build:ios:31"), Some(("ios", 31)));
+        // A browser is always the current site; an app that says nothing, or something else, is unbuilt.
+        for (body, header) in [
+            ("lauds client:browser", "2009"),
+            ("lauds client:pwa", "2009"),
+            ("lauds", "2009"),
+            ("lauds client:android", ""),
+            ("lauds client:android", "0"),
+            ("lauds client:android", "02009"),
+            ("lauds client:android", "1234567"),
+            ("lauds client:android", "20 09"),
+            ("lauds client:android", "+2009"),
+            ("lauds client:android", "2009:ios"),
+        ] {
+            assert_eq!(build_scope(&dims(body), header), None, "{body:?} {header:?}");
+        }
+        // No build scope is taken for a dimension, so the beacon's vocabulary stays closed.
+        assert_eq!(dimension_key("build:android:2009"), None);
     }
 
     #[test]

@@ -6990,13 +6990,17 @@ test("a chant score fills its column at every width and keeps its own when the e
 
 // Every frame's heights of the scores shown, from the page's first frame. A long page may be
 // painted before it is all parsed, so a frame can show fewer scores than the next: each score is
-// compared with itself.
+// compared with itself. While the page is still parsing, its last score may be the one the parser
+// is inside, its notation not yet read (a frame of "422/0", then "422/422"), so it is left out
+// until a later score or the end of parsing closes it.
 async function logScoreHeights(page) {
   await page.addInitScript(() => {
     window.__scores = [];
     const loop = () => {
       if (document.body) {
-        const heights = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).map((e) => Math.round(e.getBoundingClientRect().height));
+        const shown = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent);
+        if (document.readyState === "loading") shown.pop();
+        const heights = shown.map((e) => Math.round(e.getBoundingClientRect().height));
         if (heights.length) window.__scores.push(heights.join("/"));
       }
       if (performance.now() < 10000) requestAnimationFrame(loop);
