@@ -49,10 +49,13 @@
         }
       } catch (e) {}
       {# The reader's phone, if it is one, so the colophon names only its own app (style.css's
-           "The apps"). iPadOS calls itself a Mac, but a Mac has no touch screen. #}
+           "The apps"). iPadOS calls itself a Mac, but a Mac has no touch screen. A Fire tablet
+           (Silk, or a KF model) calls itself Android but has no Google Play, so it is offered no
+           store until the app is on Amazon's. #}
       try {
         var ua = navigator.userAgent || "";
-        var platform = /Android/.test(ua) ? "android"
+        var platform = /Silk\/|; KF[A-Z]{2,6}[;)]/.test(ua) ? "fire"
+          : /Android/.test(ua) ? "android"
           : (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) ? "ios" : "";
         if (platform) document.documentElement.setAttribute("data-platform", platform);
       } catch (e) {}
@@ -270,7 +273,7 @@
     {% block footer_matter %}{% endblock %}
     {# The native apps, in one quiet line (presentation::stores). A reader on a phone sees only
          their own platform's, by the pre-paint script's data-platform; one on an iPhone or iPad
-         sees nothing until the App Store listing is set. #}
+         sees nothing until the App Store listing is set, and one on a Fire tablet nothing yet. #}
     <p class="app-stores{% if app_store_url %} has-ios{% endif %}">{{ apps_lead }} <span class="app-store" data-store="android"><a href="{{ play_url|url }}">Android</a></span>{% if app_store_url %}<span class="app-store-and">, </span><span class="app-store" data-store="ios"><a href="{{ app_store_url|url }}">{{ apps_apple }}</a></span>{% endif %}</p>
   </footer>
 </body>
