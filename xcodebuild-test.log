@@ -1,0 +1,255 @@
+Command line invocation:
+    /Applications/Xcode_27.1.app/Contents/Developer/usr/bin/xcodebuild test-without-building -xctestrun build/dd/Build/Products/Office_iphonesimulator27.1-arm64.xctestrun -destination id=DCDCF35C-0201-463A-89F5-A1BD72100DF3
+
+2026-11-26 19:36:20.995 xcodebuild[2632:13890] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-26 19:36:52.324117+0000 Office[3634:17137] [framework] CoreUI: CUIThemeStore: No theme registered with id=0
+2026-11-26 19:36:52.324518+0000 Office[3634:17137] [framework] CoreUI: CUIThemeStore: No theme registered with id=0
+2026-11-26 19:36:52.753787+0000 Office[3634:17137] [XPCErrors] non-launching port is incompatible with service identifier "com.apple.PointerUI.pointeruid.default-service"
+2026-11-26 19:36:53.047946+0000 Office[3634:17137] [API] cannot add handler to 0 from 0 - dropping
+IOSurfaceClientSetSurfaceNotify failed e00002c7
+2026-11-26 19:36:53.101725+0000 Office[3634:17137] fopen failed for data file: errno = 2 (No such file or directory)
+2026-11-26 19:36:53.662895+0000 Office[3634:17137] fopen failed for data file: errno = 2 (No such file or directory)
+2026-11-26 19:36:53.690706+0000 Office[3634:17137] [error] building pipeline path_exterior-jfa10la4feba4 took 0.589831 seconds
+2026-11-26 19:36:54.040722+0000 Office[3634:17137] [] CVPixelBufferCreate returned err -6680. width 800, height 1063, pixel format RGBA, options [ExtendedPixelsRight = 0, ExtendedPixelsBottom = 0, BytesPerRowAlignment = 64]
+2026-11-26 19:36:54.041085+0000 Office[3634:17137] [] CVPixelBufferCreate returned err -6680. width 800, height 1063, pixel format RGBA, options [ExtendedPixelsRight = 0, ExtendedPixelsBottom = 0, BytesPerRowAlignment = 64]
+2026-11-26 19:36:54.743354+0000 Office[3634:17137] [API] cannot add handler to 0 from 0 - dropping
+2026-11-26 19:36:57.466 xcodebuild[2632:13890] [MT] DVTAssertions: Warning in DVTiOSFrameworks/IDEiOSSupportCore/DVTiPhoneSimulator.m:661
+Details:  SimDevice native architecture is nil. Device: SimDevice : Apple Watch Ultra 4 (49mm) (E67E53BC-9A06-4643-BD70-6A1ECAE16789) : state={ Shutdown } deviceType={ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Ultra-4-49mm: SimDeviceType : Apple Watch Ultra 4 (49mm) (com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Ultra-4-49mm) } runtime={ com.apple.CoreSimulator.SimRuntime.watchOS-27-0: (null) }, supportedArches: (
+)
+Object:   <DVTiPhoneSimulator: 0x79c056fc00>
+Method:   -nativeArchitecture
+Thread:   <_NSMainThread: 0x1009f4d40>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-11-26 19:36:57.466 xcodebuild[2632:13890] [MT] DVTAssertions: Warning in DVTiOSFrameworks/IDEiOSSupportCore/DVTiPhoneSimulator.m:661
+Details:  SimDevice native architecture is nil. Device: SimDevice : Apple Watch SE 3 (40mm) (29AF471F-64DF-4513-81E4-00ACC8570EF2) : state={ Shutdown } deviceType={ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-SE-3-40mm: SimDeviceType : Apple Watch SE 3 (40mm) (com.apple.CoreSimulator.SimDeviceType.Apple-Watch-SE-3-40mm) } runtime={ com.apple.CoreSimulator.SimRuntime.watchOS-27-0: (null) }, supportedArches: (
+)
+Object:   <DVTiPhoneSimulator: 0x79c0298000>
+Method:   -nativeArchitecture
+Thread:   <_NSMainThread: 0x1009f4d40>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-11-26 19:36:57.467 xcodebuild[2632:13890] [MT] DVTAssertions: Warning in DVTiOSFrameworks/IDEiOSSupportCore/DVTiPhoneSimulator.m:661
+Details:  SimDevice native architecture is nil. Device: SimDevice : Apple Watch Series 12 (42mm) (9D4D8D16-33D1-45E3-865D-C38C4FA63B8D) : state={ Shutdown } deviceType={ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-12-42mm: SimDeviceType : Apple Watch Series 12 (42mm) (com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-12-42mm) } runtime={ com.apple.CoreSimulator.SimRuntime.watchOS-27-0: (null) }, supportedArches: (
+)
+Object:   <DVTiPhoneSimulator: 0x79c056fa00>
+Method:   -nativeArchitecture
+Thread:   <_NSMainThread: 0x1009f4d40>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-11-26 19:36:57.467 xcodebuild[2632:13890] [MT] DVTAssertions: Warning in DVTiOSFrameworks/IDEiOSSupportCore/DVTiPhoneSimulator.m:661
+Details:  SimDevice native architecture is nil. Device: SimDevice : Apple Watch SE 3 (44mm) (A0B9FB34-5993-450B-B226-8AD37DD5D584) : state={ Shutdown } deviceType={ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-SE-3-44mm: SimDeviceType : Apple Watch SE 3 (44mm) (com.apple.CoreSimulator.SimDeviceType.Apple-Watch-SE-3-44mm) } runtime={ com.apple.CoreSimulator.SimRuntime.watchOS-27-0: (null) }, supportedArches: (
+)
+Object:   <DVTiPhoneSimulator: 0x79c056fe00>
+Method:   -nativeArchitecture
+Thread:   <_NSMainThread: 0x1009f4d40>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-11-26 19:36:57.468 xcodebuild[2632:13890] [MT] DVTAssertions: Warning in DVTiOSFrameworks/IDEiOSSupportCore/DVTiPhoneSimulator.m:661
+Details:  SimDevice native architecture is nil. Device: SimDevice : Apple Watch Series 12 (46mm) (EC430E7F-98D4-4E9E-83E9-967EBD463A35) : state={ Shutdown } deviceType={ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-12-46mm: SimDeviceType : Apple Watch Series 12 (46mm) (com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-12-46mm) } runtime={ com.apple.CoreSimulator.SimRuntime.watchOS-27-0: (null) }, supportedArches: (
+)
+Object:   <DVTiPhoneSimulator: 0x79c056f800>
+Method:   -nativeArchitecture
+Thread:   <_NSMainThread: 0x1009f4d40>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-11-26 19:36:57.490 xcodebuild[2632:13890] [MT] DVTAssertions: Warning in DVTiOSFrameworks/IDEiOSSupportCore/DVTiPhoneSimulator.m:661
+Details:  SimDevice native architecture is nil. Device: SimDevice : Apple Watch Ultra 4 (49mm) (E67E53BC-9A06-4643-BD70-6A1ECAE16789) : state={ Shutdown } deviceType={ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Ultra-4-49mm: SimDeviceType : Apple Watch Ultra 4 (49mm) (com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Ultra-4-49mm) } runtime={ com.apple.CoreSimulator.SimRuntime.watchOS-27-0: (null) }, supportedArches: (
+)
+Object:   <DVTiPhoneSimulator: 0x79c056fc00>
+Method:   -nativeArchitecture
+Thread:   <_NSMainThread: 0x1009f4d40>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-11-26 19:36:57.490 xcodebuild[2632:13890] [MT] DVTAssertions: Warning in DVTiOSFrameworks/IDEiOSSupportCore/DVTiPhoneSimulator.m:661
+Details:  SimDevice native architecture is nil. Device: SimDevice : Apple Watch SE 3 (40mm) (29AF471F-64DF-4513-81E4-00ACC8570EF2) : state={ Shutdown } deviceType={ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-SE-3-40mm: SimDeviceType : Apple Watch SE 3 (40mm) (com.apple.CoreSimulator.SimDeviceType.Apple-Watch-SE-3-40mm) } runtime={ com.apple.CoreSimulator.SimRuntime.watchOS-27-0: (null) }, supportedArches: (
+)
+Object:   <DVTiPhoneSimulator: 0x79c0298000>
+Method:   -nativeArchitecture
+Thread:   <_NSMainThread: 0x1009f4d40>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-11-26 19:36:57.491 xcodebuild[2632:13890] [MT] DVTAssertions: Warning in DVTiOSFrameworks/IDEiOSSupportCore/DVTiPhoneSimulator.m:661
+Details:  SimDevice native architecture is nil. Device: SimDevice : Apple Watch Series 12 (42mm) (9D4D8D16-33D1-45E3-865D-C38C4FA63B8D) : state={ Shutdown } deviceType={ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-12-42mm: SimDeviceType : Apple Watch Series 12 (42mm) (com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-12-42mm) } runtime={ com.apple.CoreSimulator.SimRuntime.watchOS-27-0: (null) }, supportedArches: (
+)
+Object:   <DVTiPhoneSimulator: 0x79c056fa00>
+Method:   -nativeArchitecture
+Thread:   <_NSMainThread: 0x1009f4d40>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-11-26 19:36:57.491 xcodebuild[2632:13890] [MT] DVTAssertions: Warning in DVTiOSFrameworks/IDEiOSSupportCore/DVTiPhoneSimulator.m:661
+Details:  SimDevice native architecture is nil. Device: SimDevice : Apple Watch SE 3 (44mm) (A0B9FB34-5993-450B-B226-8AD37DD5D584) : state={ Shutdown } deviceType={ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-SE-3-44mm: SimDeviceType : Apple Watch SE 3 (44mm) (com.apple.CoreSimulator.SimDeviceType.Apple-Watch-SE-3-44mm) } runtime={ com.apple.CoreSimulator.SimRuntime.watchOS-27-0: (null) }, supportedArches: (
+)
+Object:   <DVTiPhoneSimulator: 0x79c056fe00>
+Method:   -nativeArchitecture
+Thread:   <_NSMainThread: 0x1009f4d40>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-11-26 19:36:57.491 xcodebuild[2632:13890] [MT] DVTAssertions: Warning in DVTiOSFrameworks/IDEiOSSupportCore/DVTiPhoneSimulator.m:661
+Details:  SimDevice native architecture is nil. Device: SimDevice : Apple Watch Series 12 (46mm) (EC430E7F-98D4-4E9E-83E9-967EBD463A35) : state={ Shutdown } deviceType={ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-12-46mm: SimDeviceType : Apple Watch Series 12 (46mm) (com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-12-46mm) } runtime={ com.apple.CoreSimulator.SimRuntime.watchOS-27-0: (null) }, supportedArches: (
+)
+Object:   <DVTiPhoneSimulator: 0x79c056f800>
+Method:   -nativeArchitecture
+Thread:   <_NSMainThread: 0x1009f4d40>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+Test Suite 'All tests' started at 2026-11-26 19:36:59.190.
+Test Suite 'OfficeTests.xctest' started at 2026-11-26 19:36:59.191.
+Test Suite 'ChromeLayoutTests' started at 2026-11-26 19:36:59.192.
+Test Case '-[OfficeTests.ChromeLayoutTests testTheMenuKeepsItsOwnHeight]' started.
+Test Case '-[OfficeTests.ChromeLayoutTests testTheMenuKeepsItsOwnHeight]' passed (0.152 seconds).
+Test Case '-[OfficeTests.ChromeLayoutTests testThePickersWeeksKeepADaysHeightAtAnySize]' started.
+Test Case '-[OfficeTests.ChromeLayoutTests testThePickersWeeksKeepADaysHeightAtAnySize]' passed (0.317 seconds).
+Test Suite 'ChromeLayoutTests' passed at 2026-11-26 19:36:59.673.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.469 (0.481) seconds
+Test Suite 'CoreTests' started at 2026-11-26 19:36:59.673.
+Test Case '-[OfficeTests.CoreTests testAboutGivesTheSunsTimesButCompline]' started.
+Test Case '-[OfficeTests.CoreTests testAboutGivesTheSunsTimesButCompline]' passed (0.008 seconds).
+Test Case '-[OfficeTests.CoreTests testAboutLightsAndInvitesToTheHourHomeDoes]' started.
+Test Case '-[OfficeTests.CoreTests testAboutLightsAndInvitesToTheHourHomeDoes]' passed (0.001 seconds).
+Test Case '-[OfficeTests.CoreTests testAFeastIsFoundAndItsPageLeadsToItsDays]' started.
+Test Case '-[OfficeTests.CoreTests testAFeastIsFoundAndItsPageLeadsToItsDays]' passed (0.150 seconds).
+Test Case '-[OfficeTests.CoreTests testARubricsSecretlyCarriesItsNote]' started.
+Test Case '-[OfficeTests.CoreTests testARubricsSecretlyCarriesItsNote]' passed (0.043 seconds).
+Test Case '-[OfficeTests.CoreTests testComposesAnHourFromTheEmbeddedCorpus]' started.
+Test Case '-[OfficeTests.CoreTests testComposesAnHourFromTheEmbeddedCorpus]' passed (0.005 seconds).
+Test Case '-[OfficeTests.CoreTests testEachShortcutOpensTheDayItIsChosen]' started.
+Test Case '-[OfficeTests.CoreTests testEachShortcutOpensTheDayItIsChosen]' passed (0.001 seconds).
+Test Case '-[OfficeTests.CoreTests testTheAboutPageHasTheSevenHoursAndLinksOnlyWhereTheAppCanGo]' started.
+Test Case '-[OfficeTests.CoreTests testTheAboutPageHasTheSevenHoursAndLinksOnlyWhereTheAppCanGo]' passed (0.018 seconds).
+Test Case '-[OfficeTests.CoreTests testTheGapsFollowTheSharedRhythm]' started.
+Test Case '-[OfficeTests.CoreTests testTheGapsFollowTheSharedRhythm]' passed (0.011 seconds).
+Test Suite 'CoreTests' passed at 2026-11-26 19:36:59.927.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.237 (0.253) seconds
+Test Suite 'CrownTests' started at 2026-11-26 19:36:59.927.
+Test Case '-[OfficeTests.CrownTests testAPlainTapSettlesOnTheTurnedThemeAndSavesIt]' started.
+Test Case '-[OfficeTests.CrownTests testAPlainTapSettlesOnTheTurnedThemeAndSavesIt]' passed (0.010 seconds).
+Test Case '-[OfficeTests.CrownTests testThePlayKeepsItsOrder]' started.
+Test Case '-[OfficeTests.CrownTests testThePlayKeepsItsOrder]' passed (0.053 seconds).
+Test Case '-[OfficeTests.CrownTests testTheTapTurnsTheLookAndTheTapBackRestoresTheChoice]' started.
+Test Case '-[OfficeTests.CrownTests testTheTapTurnsTheLookAndTheTapBackRestoresTheChoice]' passed (0.001 seconds).
+Test Suite 'CrownTests' passed at 2026-11-26 19:37:00.546.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.064 (0.618) seconds
+Test Suite 'PlaceTests' started at 2026-11-26 19:37:00.546.
+Test Case '-[OfficeTests.PlaceTests testAFeastPageNamesItsWayBack]' started.
+Test Case '-[OfficeTests.PlaceTests testAFeastPageNamesItsWayBack]' passed (0.001 seconds).
+Test Case '-[OfficeTests.PlaceTests testAnInterruptedHourOpensAtItsPlaceOnlyWithinTheLimit]' started.
+Test Case '-[OfficeTests.PlaceTests testAnInterruptedHourOpensAtItsPlaceOnlyWithinTheLimit]' passed (0.002 seconds).
+Test Case '-[OfficeTests.PlaceTests testAPageOfTheSameKindReplacesTheOneShown]' started.
+Test Case '-[OfficeTests.PlaceTests testAPageOfTheSameKindReplacesTheOneShown]' passed (0.002 seconds).
+Test Case '-[OfficeTests.PlaceTests testCivilDatesStepAcrossMonths]' started.
+Test Case '-[OfficeTests.PlaceTests testCivilDatesStepAcrossMonths]' passed (0.050 seconds).
+Test Case '-[OfficeTests.PlaceTests testPagesRoundTripThroughSavedState]' started.
+Test Case '-[OfficeTests.PlaceTests testPagesRoundTripThroughSavedState]' passed (0.001 seconds).
+Test Case '-[OfficeTests.PlaceTests testTheEndCrossGildsOnceMarkedAndWhollyShown]' started.
+Test Case '-[OfficeTests.PlaceTests testTheEndCrossGildsOnceMarkedAndWhollyShown]' passed (0.001 seconds).
+Test Case '-[OfficeTests.PlaceTests testTheKeptPlaceCarriesTheReading]' started.
+Test Case '-[OfficeTests.PlaceTests testTheKeptPlaceCarriesTheReading]' passed (0.002 seconds).
+Test Case '-[OfficeTests.PlaceTests testTheOrdoOpensAgainAtTheDayChosen]' started.
+Test Case '-[OfficeTests.PlaceTests testTheOrdoOpensAgainAtTheDayChosen]' passed (0.001 seconds).
+Test Case '-[OfficeTests.PlaceTests testTheSearchTakesItsWordsInPlace]' started.
+Test Case '-[OfficeTests.PlaceTests testTheSearchTakesItsWordsInPlace]' passed (0.067 seconds).
+Test Suite 'PlaceTests' passed at 2026-11-26 19:37:00.677.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.127 (0.131) seconds
+Test Suite 'ProseTests' started at 2026-11-26 19:37:00.677.
+Test Case '-[OfficeTests.ProseTests testALongOpeningRunsBesideADeepInitial]' started.
+Test Case '-[OfficeTests.ProseTests testALongOpeningRunsBesideADeepInitial]' passed (0.010 seconds).
+Test Case '-[OfficeTests.ProseTests testAShortOpeningRaisesItsInitial]' started.
+Test Case '-[OfficeTests.ProseTests testAShortOpeningRaisesItsInitial]' passed (0.001 seconds).
+Test Case '-[OfficeTests.ProseTests testAShortPsalmOpeningElevatesItsInitial]' started.
+Test Case '-[OfficeTests.ProseTests testAShortPsalmOpeningElevatesItsInitial]' passed (0.001 seconds).
+Test Case '-[OfficeTests.ProseTests testEachHymnHasOneCentredColumn]' started.
+Test Case '-[OfficeTests.ProseTests testEachHymnHasOneCentredColumn]' passed (0.013 seconds).
+Test Case '-[OfficeTests.ProseTests testEveryLineBesideADeepInitialStartsAtItsEdge]' started.
+Test Case '-[OfficeTests.ProseTests testEveryLineBesideADeepInitialStartsAtItsEdge]' passed (0.002 seconds).
+Test Case '-[OfficeTests.ProseTests testEveryLineBoxIsTheStylesLineHeight]' started.
+Test Case '-[OfficeTests.ProseTests testEveryLineBoxIsTheStylesLineHeight]' passed (0.001 seconds).
+Test Case '-[OfficeTests.ProseTests testTheSmallCapsTakeTheRestOfTheFirstWord]' started.
+Test Case '-[OfficeTests.ProseTests testTheSmallCapsTakeTheRestOfTheFirstWord]' passed (0.011 seconds).
+Test Suite 'ProseTests' passed at 2026-11-26 19:37:00.748.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.040 (0.071) seconds
+Test Suite 'ReminderTests' started at 2026-11-26 19:37:00.758.
+Test Case '-[OfficeTests.ReminderTests testAboutGivesTheSunsTimesAtThePlaceKept]' started.
+Test Case '-[OfficeTests.ReminderTests testAboutGivesTheSunsTimesAtThePlaceKept]' passed (0.003 seconds).
+Test Case '-[OfficeTests.ReminderTests testEachDayTakesItsOwnOffsetAcrossAClockChange]' started.
+Test Case '-[OfficeTests.ReminderTests testEachDayTakesItsOwnOffsetAcrossAClockChange]' passed (0.002 seconds).
+Test Case '-[OfficeTests.ReminderTests testEachReminderRingsItsLeadBeforeTheOffice]' started.
+Test Case '-[OfficeTests.ReminderTests testEachReminderRingsItsLeadBeforeTheOffice]' passed (0.008 seconds).
+Test Case '-[OfficeTests.ReminderTests testOnlyTheChosenDaysAndNothingWhenOff]' started.
+Test Case '-[OfficeTests.ReminderTests testOnlyTheChosenDaysAndNothingWhenOff]' passed (0.006 seconds).
+Test Case '-[OfficeTests.ReminderTests testPastTheLimitTheChosenTimesStand]' started.
+Test Case '-[OfficeTests.ReminderTests testPastTheLimitTheChosenTimesStand]' passed (0.002 seconds).
+Test Case '-[OfficeTests.ReminderTests testTheNextLineIsReadAgainAsItsReminderComesOrTheDayTurns]' started.
+Test Case '-[OfficeTests.ReminderTests testTheNextLineIsReadAgainAsItsReminderComesOrTheDayTurns]' passed (0.004 seconds).
+Test Case '-[OfficeTests.ReminderTests testTheScheduleStopsAtIOSsLimit]' started.
+Test Case '-[OfficeTests.ReminderTests testTheScheduleStopsAtIOSsLimit]' passed (0.004 seconds).
+Test Case '-[OfficeTests.ReminderTests testTheSettingAndPlaceAreKept]' started.
+Test Case '-[OfficeTests.ReminderTests testTheSettingAndPlaceAreKept]' passed (0.013 seconds).
+Test Case '-[OfficeTests.ReminderTests testTheSunTimesTheHoursAtThePlaceKept]' started.
+Test Case '-[OfficeTests.ReminderTests testTheSunTimesTheHoursAtThePlaceKept]' passed (0.002 seconds).
+Test Case '-[OfficeTests.ReminderTests testTheTriduumsRemindersComeWithoutTheBell]' started.
+Test Case '-[OfficeTests.ReminderTests testTheTriduumsRemindersComeWithoutTheBell]' passed (0.003 seconds).
+Test Case '-[OfficeTests.ReminderTests testTodaysSunTimesForThePage]' started.
+Test Case '-[OfficeTests.ReminderTests testTodaysSunTimesForThePage]' passed (0.001 seconds).
+Test Suite 'ReminderTests' passed at 2026-11-26 19:37:00.838.
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.049 (0.081) seconds
+Test Suite 'SVGTests' started at 2026-11-26 19:37:00.838.
+Test Case '-[OfficeTests.SVGTests testArcsAndRelativeCommands]' started.
+Test Case '-[OfficeTests.SVGTests testArcsAndRelativeCommands]' passed (0.004 seconds).
+Test Case '-[OfficeTests.SVGTests testThePaintedMarksStandInTheirBoxes]' started.
+Test Case '-[OfficeTests.SVGTests testThePaintedMarksStandInTheirBoxes]' passed (0.002 seconds).
+Test Suite 'SVGTests' passed at 2026-11-26 19:37:00.845.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.005 (0.006) seconds
+Test Suite 'SpokenTests' started at 2026-11-26 19:37:00.845.
+Test Case '-[OfficeTests.SpokenTests testAPostureCueIsAnAside]' started.
+Test Case '-[OfficeTests.SpokenTests testAPostureCueIsAnAside]' passed (0.058 seconds).
+Test Case '-[OfficeTests.SpokenTests testChantScoresSpeakCleanWordsAndStanzaNumbers]' started.
+Test Case '-[OfficeTests.SpokenTests testChantScoresSpeakCleanWordsAndStanzaNumbers]' passed (0.076 seconds).
+Test Case '-[OfficeTests.SpokenTests testSigilsAreNamedAndTheCrossIsSaid]' started.
+Test Case '-[OfficeTests.SpokenTests testSigilsAreNamedAndTheCrossIsSaid]' passed (0.297 seconds).
+Test Case '-[OfficeTests.SpokenTests testTheMarksForTheEyeAreSilent]' started.
+Test Case '-[OfficeTests.SpokenTests testTheMarksForTheEyeAreSilent]' passed (0.500 seconds).
+Test Suite 'SpokenTests' passed at 2026-11-26 19:37:01.780.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.932 (0.935) seconds
+Test Suite 'UsageTests' started at 2026-11-26 19:37:01.781.
+Test Case '-[OfficeTests.UsageTests testAFailedBeaconIsTriedAgainOnTheNextVisit]' started.
+Test Case '-[OfficeTests.UsageTests testAFailedBeaconIsTriedAgainOnTheNextVisit]' passed (0.022 seconds).
+Test Case '-[OfficeTests.UsageTests testAFreshInstallationWaitsBeforeReporting]' started.
+Test Case '-[OfficeTests.UsageTests testAFreshInstallationWaitsBeforeReporting]' passed (0.016 seconds).
+Test Case '-[OfficeTests.UsageTests testANewcomerIsOfferedTheIntroductionForAWeek]' started.
+Test Case '-[OfficeTests.UsageTests testANewcomerIsOfferedTheIntroductionForAWeek]' passed (0.015 seconds).
+Test Case '-[OfficeTests.UsageTests testAnHourThatCouldNotReportIsSaidNextTime]' started.
+Test Case '-[OfficeTests.UsageTests testAnHourThatCouldNotReportIsSaidNextTime]' passed (0.009 seconds).
+Test Case '-[OfficeTests.UsageTests testAnHourWithAScoreSaysWhetherItsNotationWasShown]' started.
+Test Case '-[OfficeTests.UsageTests testAnHourWithAScoreSaysWhetherItsNotationWasShown]' passed (0.006 seconds).
+Test Case '-[OfficeTests.UsageTests testAnInstallationIsNewOnItsFirstDayOnly]' started.
+Test Case '-[OfficeTests.UsageTests testAnInstallationIsNewOnItsFirstDayOnly]' passed (0.018 seconds).
+Test Case '-[OfficeTests.UsageTests testAnInstallationSaysHowItKeepsTheHours]' started.
+Test Case '-[OfficeTests.UsageTests testAnInstallationSaysHowItKeepsTheHours]' passed (0.014 seconds).
+Test Case '-[OfficeTests.UsageTests testAnInstallationThatReportedBeforeIsReturning]' started.
+Test Case '-[OfficeTests.UsageTests testAnInstallationThatReportedBeforeIsReturning]' passed (0.012 seconds).
+Test Case '-[OfficeTests.UsageTests testAWeekAndAMonthOpenOnTheirFirstCountedDay]' started.
+Test Case '-[OfficeTests.UsageTests testAWeekAndAMonthOpenOnTheirFirstCountedDay]' passed (0.024 seconds).
+Test Case '-[OfficeTests.UsageTests testAWeekOpensOnlyWhenABeaconIsCounted]' started.
+Test Case '-[OfficeTests.UsageTests testAWeekOpensOnlyWhenABeaconIsCounted]' passed (0.014 seconds).
+Test Case '-[OfficeTests.UsageTests testBeaconsFollowTheSiteToTheAddressItNames]' started.
+Test Case '-[OfficeTests.UsageTests testBeaconsFollowTheSiteToTheAddressItNames]' passed (0.014 seconds).
+Test Case '-[OfficeTests.UsageTests testDebugBuildsNeverReport]' started.
+Test Case '-[OfficeTests.UsageTests testDebugBuildsNeverReport]' passed (0.019 seconds).
+Test Case '-[OfficeTests.UsageTests testEachPageCountsOnceADay]' started.
+Test Case '-[OfficeTests.UsageTests testEachPageCountsOnceADay]' passed (0.012 seconds).
+Test Case '-[OfficeTests.UsageTests testOpeningTheAppDoesNotSpendItsFirstDay]' started.
+Test Case '-[OfficeTests.UsageTests testOpeningTheAppDoesNotSpendItsFirstDay]' passed (0.009 seconds).
+Test Case '-[OfficeTests.UsageTests testTheArchiveIsNotCounted]' started.
+Test Case '-[OfficeTests.UsageTests testTheArchiveIsNotCounted]' passed (0.009 seconds).
+Test Case '-[OfficeTests.UsageTests testTheIdentifierLastsOneReportingDay]' started.
+Test Case '-[OfficeTests.UsageTests testTheIdentifierLastsOneReportingDay]' passed (0.009 seconds).
+Test Suite 'UsageTests' passed at 2026-11-26 19:37:02.022.
+	 Executed 16 tests, with 0 failures (0 unexpected) in 0.223 (0.242) seconds
+Test Suite 'OfficeTests.xctest' passed at 2026-11-26 19:37:02.025.
+	 Executed 62 tests, with 0 failures (0 unexpected) in 2.145 (2.833) seconds
+Test Suite 'All tests' passed at 2026-11-26 19:37:02.025.
+	 Executed 62 tests, with 0 failures (0 unexpected) in 2.145 (2.836) seconds
+2026-11-26 19:37:02.319 xcodebuild[2632:13890] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-26 19:37:02.321 xcodebuild[2632:13890] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-26 19:37:02.339 xcodebuild[2632:13890] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-26 19:37:03.188 xcodebuild[2632:13890] [MT] IDETestOperationsObserverDebug: 44.711 elapsed -- Testing started completed.
+2026-11-26 19:37:03.188 xcodebuild[2632:13890] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-11-26 19:37:03.188 xcodebuild[2632:13890] [MT] IDETestOperationsObserverDebug: 44.712 sec, +44.712 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/Library/Developer/Xcode/DerivedData/Office-ghojwaqiswjzgodcbuyaewysugwd/Logs/Test/Test-Office-2026.11.26_19-36-16-+0000.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started
