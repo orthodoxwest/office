@@ -1,31 +1,33 @@
 #!/usr/bin/env python3
-"""Promote a Closed testing build of the Android app to production on Google Play.
+"""Move the Android app up Google Play's tracks: Internal testing, Closed testing, production.
 
 Run by .github/workflows/play-promote.yml; see apps/android/README.md ("Promoting to production").
+Every merge goes to Internal testing (play.yml); this script moves builds on from there.
 
   auto       Once a day. If production has a staged rollout this script started at least
-             --stage-hours ago, finish it (all users); while it is younger, wait. Otherwise
-             release to --rollout of users the newest build that was uploaded to Closed testing
-             at least --min-age hours ago and is newer than production's, whether or not a later
-             merge has since replaced it there (merges land more often than once a day, so the
-             build on Closed testing now is seldom a day old). A halted
-             rollout, or a staged one started elsewhere, is left alone, and nothing newer goes
-             out until it is finished, resumed or replaced in Play Console.
+             --stage-hours ago, finish it (all users); while it is younger, wait. Otherwise, if
+             Closed testing's build is newer than production's and has been there --min-age
+             hours, release it to --rollout of users. A halted rollout, or a staged one started
+             elsewhere, is left alone, and nothing newer goes out until it is finished, resumed
+             or replaced in Play Console. Then, once production has Closed testing's build (or
+             Closed testing is empty), Internal testing's newest build moves up to Closed testing,
+             so each build has a day with testers before the public gets it.
   manual     Release --version-code (default: Closed testing's newest) to --rollout of users now.
 
-Nothing is rebuilt: production gets a bundle Play already has, by its version code. Its release
-notes are the note files under release-notes/ added since production's newest completed build
-(scripts/release_notes.py): a staged, halted or replaced release may never reach everyone, so
-its notes go again with the next. Each run writes that build's version code as the step output
-`live`, and the workflow's next step tags it (android/0.1.<code>). A staged release is named with the time it
-started ("0.1.120 staged 2026-11-12T15:00Z"), which is how a later run knows its age; Google's
-review comes out of that time. --dry-run reads Play and says what it would do.
+Nothing is rebuilt: each track gets a bundle Play already has, by its version code. Play's API can
+release only a bundle some track still holds, which is why a build waits its day on Closed testing
+rather than being picked out of older uploads: a merge replaces the build on Internal testing.
 
-Needs PLAY_SERVICE_ACCOUNT_JSON (the Play upload's service account). In auto mode, the age of a
-build comes from the Publish to Play workflow's runs (GITHUB_TOKEN, GITHUB_REPOSITORY): each push
-run that succeeded uploaded the build whose version code is its commit's count (as
-apps/android/app/build.gradle.kts numbers them), so the run's finishing time is when the build
-reached Closed testing.
+Production's release notes are the note files under release-notes/ added since production's newest
+completed build (scripts/release_notes.py): a staged, halted or replaced release may never reach
+everyone, so its notes go again with the next. Closed testing gets Internal testing's notes. Each
+run writes production's completed build as the step output `live`, and the workflow's next step
+tags it (android/0.1.<code>). A release is named with the time this script made it ("0.1.120 staged
+2026-11-12T15:00Z" in production, "0.1.120 tested from 2026-11-12T15:00Z" on Closed testing),
+which is how a later run knows its age; a build put on Closed testing some other way counts as a
+day old. Google's review comes out of those times. --dry-run reads Play and says what it would do.
+
+Needs PLAY_SERVICE_ACCOUNT_JSON (the Play upload's service account).
 """
 
 from __future__ import annotations
@@ -35,17 +37,17 @@ import datetime as dt
 import json
 import os
 import re
-import subprocess
 import sys
-import urllib.request
 
 import release_notes
 
 PACKAGE = "org.orthodoxwest.office"
 API = f"https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{PACKAGE}"
 TESTING = "alpha"  # Closed testing
+INTERNAL = "internal"
 PRODUCTION = "production"
 STAGED = re.compile(r"staged (\d{4}-\d\d-\d\dT\d\d:\d\dZ)")
+TESTED = re.compile(r"tested from (\d{4}-\d\d-\d\dT\d\d:\d\dZ)")
 
 
 def log(msg: str) -> None:
@@ -81,8 +83,10 @@ class Play:
     def track(self, name: str) -> list[dict]:
         return self._call("GET", f"/edits/{self.edit}/tracks/{name}").get("releases", [])
 
-    def set_production(self, release: dict) -> None:
-        self._call("PUT", f"/edits/{self.edit}/tracks/{PRODUCTION}", {"track": PRODUCTION, "releases": [release]})
+    def put(self, track: str, release: dict) -> None:
+        self._call("PUT", f"/edits/{self.edit}/tracks/{track}", {"track": track, "releases": [release]})
+
+    def commit(self) -> None:
         self._call("POST", f"/edits/{self.edit}:commit")
 
     def abandon(self) -> None:
@@ -108,32 +112,10 @@ def now() -> dt.datetime:
     return dt.datetime.now(dt.timezone.utc)
 
 
-def staged_at(release: dict) -> dt.datetime | None:
-    """When this script started a staged release, from its name; None for one started elsewhere."""
-    m = STAGED.search(release.get("name", ""))
+def named_at(release: dict, pattern: re.Pattern) -> dt.datetime | None:
+    """When this script made a release, from its name; None for one made elsewhere."""
+    m = pattern.search(release.get("name", ""))
     return dt.datetime.strptime(m.group(1), "%Y-%m-%dT%H:%MZ").replace(tzinfo=dt.timezone.utc) if m else None
-
-
-def uploads(min_age: float) -> list[tuple[int, str]]:
-    """(version code, commit) of the builds Publish to Play's push runs uploaded at least min_age hours ago, newest first."""
-    repo, token = os.environ["GITHUB_REPOSITORY"], os.environ["GITHUB_TOKEN"]
-    url = (
-        f"https://api.github.com/repos/{repo}/actions/workflows/play.yml/runs"
-        "?branch=master&event=push&status=success&per_page=50"
-    )
-    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"})
-    with urllib.request.urlopen(req) as resp:
-        runs = json.load(resp)["workflow_runs"]
-    found = []
-    for run in runs:
-        # When the run last changed: its finish, or later if re-run, which only makes a build look younger.
-        done = dt.datetime.fromisoformat(run["updated_at"].replace("Z", "+00:00"))
-        if now() - done < dt.timedelta(hours=min_age):
-            continue
-        count = subprocess.run(["git", "rev-list", "--count", run["head_sha"]], capture_output=True, text=True)
-        if count.returncode == 0:  # a commit no longer in master's history is skipped
-            found.append((int(count.stdout.strip()), run["head_sha"]))
-    return sorted(found, reverse=True)
 
 
 def notes_between(shipped: int, commit: str | None) -> list[dict]:
@@ -168,7 +150,7 @@ def output(name: str, value: str) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("mode", choices=["auto", "manual"])
-    ap.add_argument("--min-age", type=float, default=24.0, help="hours since a build was uploaded to Closed testing (auto)")
+    ap.add_argument("--min-age", type=float, default=24.0, help="hours a build is on Closed testing before production gets it (auto)")
     ap.add_argument("--rollout", type=float, default=0.2, help="share of users for a new release, above 0 and at most 1")
     ap.add_argument("--stage-hours", type=float, default=47.0, help="hours a staged rollout runs before it is finished (auto)")
     ap.add_argument("--version-code", type=int, default=0, help="the build to release (manual; default Closed testing's newest)")
@@ -211,7 +193,7 @@ def main() -> None:
         if halted:
             summary(f"Production's rollout of {codes(halted[0])} is halted; nothing promoted until it is resumed or replaced.")
         elif staged:
-            started = staged_at(staged[0])
+            started = named_at(staged[0], STAGED)
             if started is None:
                 summary(f"Production's staged rollout of {codes(staged[0])} was started outside this workflow; "
                         "finish or replace it in Play Console, or with a manual run, and promotion resumes.")
@@ -222,37 +204,62 @@ def main() -> None:
                 release = {k: v for k, v in staged[0].items() if k != "userFraction"} | {"status": "completed"}
                 message = f"Finishing the staged rollout of {codes(staged[0])}: all users now get it"
         else:
-            # The newest build a day old, even one a later merge has replaced on Closed testing: merges
-            # land more often than daily, so waiting for the build there now to age never promotes.
-            # Every such build went to Internal testing unreviewed, and Google reviews the release.
-            # Not checked against Play's bundle list, which left out replaced builds and so blocked
-            # every one; a version code Play lacks fails the commit with Play's error.
-            ready = [(c, sha) for c, sha in uploads(args.min_age) if c > live_code]
-            log(f"Uploaded at least {args.min_age:g} hours ago, newer than production: {[c for c, _ in ready]}")
-            if ready:
-                code, sha = ready[0]
-                release = release_of(code, args.rollout, notes_between(shipped, sha))
-                message = f"Releasing {code} to {args.rollout:.0%} of production (uploaded at least {args.min_age:g} hours ago)"
+            tested = newest(testing, ("completed",))
+            if tested and tested[0] > live_code:
+                code, on_testing = tested
+                since = named_at(on_testing, TESTED)  # None: put there by hand, or before this script
+                if since is None or now() - since >= dt.timedelta(hours=args.min_age):
+                    release = release_of(code, args.rollout, notes_between(shipped, release_notes.commit_of(code)))
+                    message = f"Releasing {code} to {args.rollout:.0%} of production after its day on Closed testing"
+                else:
+                    summary(f"{code} reached Closed testing {since:%Y-%m-%d %H:%M} UTC; production gets it once it "
+                            f"has been there {args.min_age:g} hours.")
             else:
-                summary(f"Nothing to promote: production has {live_code or 'nothing'}, and no newer build was uploaded {args.min_age:g} hours ago or more.")
+                summary(f"Nothing to promote: production has {live_code or 'nothing'}, and Closed testing nothing newer.")
 
-    if release is None:
+    # Moving up: Internal testing's newest build goes to Closed testing once production has Closed
+    # testing's (or it has none). Waiting until then gives each build its whole day there.
+    step = None
+    if args.mode == "auto":
+        out = max([live_code, *codes(release or {})])
+        on_testing = (newest(testing, ("completed", "inProgress", "halted")) or (0, None))[0]
+        internal = newest(play.track(INTERNAL), ("completed",))
+        log(f"Internal testing: {internal[0] if internal else 'nothing'}")
+        if internal and on_testing <= out and internal[0] > max(on_testing, out):
+            code, source = internal
+            step = {"versionCodes": [str(code)], "status": "completed", "name": f"0.1.{code} tested from {now():%Y-%m-%dT%H:%MZ}"}
+            if source.get("releaseNotes"):
+                step["releaseNotes"] = source["releaseNotes"]
+
+    if release is None and step is None:
         play.abandon()
         emit_tag(shipped)
         return
     if args.dry_run:
-        summary(f"Dry run: {message}")
-        log(json.dumps(release, indent=2))
+        if release:
+            summary(f"Dry run: {message}")
+            log(json.dumps(release, indent=2))
+        if step:
+            summary(f"Dry run: moving {codes(step)[0]} up to Closed testing")
+            log(json.dumps(step, indent=2))
         play.abandon()
         return
-    play.set_production(release)
+    if release:
+        play.put(PRODUCTION, release)
+    if step:
+        play.put(TESTING, step)
+    play.commit()
+    if step:
+        summary(f"Moved {codes(step)[0]} up to Closed testing; production gets it after {args.min_age:g} hours there.")
+    if release is None:
+        emit_tag(shipped)
+        return
     new = live_code not in codes(release)
     # A staged rollout was already reviewed when started; finishing it reaches everyone now.
     emit_tag(max(codes(release)) if (not new and release.get("status") == "completed") else shipped)
     summary(f"{message}." + (" Google reviews it before it reaches anyone." if new else ""))
     if release.get("releaseNotes"):
         summary("What's new:\n\n" + release["releaseNotes"][0]["text"])
-
 
 if __name__ == "__main__":
     main()

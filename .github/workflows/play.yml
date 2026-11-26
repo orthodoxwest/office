@@ -3,13 +3,13 @@ name: Publish to Play
 # Builds the signed store bundle from master and uploads it to a Google Play track. Setup and the
 # secrets it reads are in apps/android/README.md ("Publishing from CI").
 #
-# Every merge to master that changes the app goes to Internal testing and Closed testing (the
-# `alpha` track) at once: Internal reaches the maintainers within minutes, unreviewed, so a bad build
-# shows there first; Closed testing reaches testers once Google's review passes, and a newer merge
-# replaces a release still in review.
+# Every merge to master that changes the app goes to Internal testing, which reaches the maintainers
+# within minutes, unreviewed, so a bad build shows there first. Once a day play-promote.yml moves
+# Internal's newest build up to Closed testing (the `alpha` track), where testers get it once
+# Google's review passes, and production gets it after its day there.
 # Those runs use the `play-internal` environment, with no reviewer, and skip quietly until
 # PLAY_SERVICE_ACCOUNT_JSON is set. The public gets a build when play-promote.yml promotes it
-# (daily, once it was uploaded a day before), when it is promoted in Play Console, or
+# (daily, after a day on Closed testing), when it is promoted in Play Console, or
 # when a manual run from the Actions tab uploads it; manual runs use the `play` environment, so
 # give it a required reviewer.
 #
@@ -68,7 +68,7 @@ jobs:
         run: echo "play=$HAS_PLAY" >> "$GITHUB_OUTPUT"
 
   publish:
-    name: Build and upload to ${{ inputs.track || 'internal and closed testing' }}
+    name: Build and upload to ${{ inputs.track || 'internal testing' }}
     needs: ready
     # A manual run without the credentials still fails, at the upload, so the missing secret shows.
     if: github.event_name == 'workflow_dispatch' || needs.ready.outputs.play == 'true'
@@ -78,7 +78,7 @@ jobs:
       contents: read
     env:
       # One upload, released on each comma-separated track in the same edit.
-      TRACKS: ${{ inputs.track || 'internal,alpha' }}
+      TRACKS: ${{ inputs.track || 'internal' }}
 
     steps:
       - name: Release from master only
