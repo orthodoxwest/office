@@ -226,3 +226,7 @@ R. After the order of Melchisedech.
 
 [chapter-terce]
 @use commons/confessor-bishop/chapter-lauds
+
+[collect-alternate]
+# SOURCE: Monastic Diurnal pp. 36*–37* (Common of a Confessor and Bishop, Another Collect)
+O Lord, we beseech thee, hear the prayers which we offer thee on the solemnity of blessed N., thy Bishop and Confessor: and by the interceding merits of him who worthily attained to serve thee, absolve us from all our sins.

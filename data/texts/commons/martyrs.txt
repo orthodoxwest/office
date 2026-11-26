@@ -241,3 +241,7 @@ R. Let them also be merry and joyful.
 # SOURCE: diurnal p. 27*
 V. The righteous live for evermore.
 R. Their reward also is with the Lord.
+
+[collect-alternate]
+# SOURCE: Monastic Diurnal p. 27* (Common of Many Martyrs out of Paschaltide, Another Collect; the book's "N. and N." written "N." as in [collect])
+O God, who makest us glad by the yearly solemnity of thy holy Martyrs N.: mercifully grant that we who rejoice in their merits may be enkindled by their examples.

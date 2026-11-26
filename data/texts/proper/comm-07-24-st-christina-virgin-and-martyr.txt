@@ -1,0 +1,3 @@
+[commemoration-collect]
+# SOURCE: ordo 'Col. "We beseech thee" 49*' (Diurnal p. 49*, For a Virgin Martyr, Another Collect)
+@use commons/virgin-martyr/collect-alternate

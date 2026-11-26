@@ -1,0 +1,4 @@
+[commemoration-collect]
+# SOURCE: ordo 2023–2026 'Col. "We beseech" 45*' (the Abbot's collect, Diurnal p. 45*); the Diurnal's
+# January 15 entry (p. 458) gives "O God, who makest us glad, p. 45*" instead. Needs ruling #982.
+@use commons/confessor/collect-abbot
