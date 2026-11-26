@@ -654,9 +654,9 @@ impl AboutData {
     pub fn new(chrome: Chrome, now: calendar::Date, clock_hour: i8) -> AboutData {
         use crate::escape::html_escape_string as esc;
         use presentation::about::{
-            ABOUT, ABOUT_HOROLOGIUM_HEIGHT, ABOUT_HOURS, ABOUT_KICKER, ABOUT_NIGHT, ABOUT_SPECIMEN, ABOUT_TITLE, AboutBlock,
-            AboutRun, about_current_hour, about_horologium_angle, about_horologium_is_night, about_horologium_point,
-            about_horologium_sign, about_runs,
+            ABOUT, ABOUT_HOROLOGIUM_HEIGHT, ABOUT_HOURS, ABOUT_KICKER, ABOUT_NIGHT, ABOUT_SPECIMEN, ABOUT_TITLE, AboutBlock, AboutRun,
+            about_current_hour, about_horologium_angle, about_horologium_is_night, about_horologium_point, about_horologium_sign,
+            about_runs,
         };
         let current = about_current_hour(clock_hour);
         let invite = presentation::invitation(now, now, clock_hour);

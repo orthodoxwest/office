@@ -3,6 +3,11 @@ import UIKit
 
 private let homeGlossesShared = homeGlosses()
 
+/// Home's Night row, set before the day's three periods: Matins, which the app does not yet pray,
+/// so it is no link, never the hour that is now, and takes no part in the light or the marks of
+/// hours prayed (the web's `.home-hour-group-night`). Its words are the core's (`home_night`).
+private let homeNightShared = homeNight()
+
 private let periods: [(period: Period, label: String, hours: [String])] = [
     (.morning, "Morning", ["lauds", "prime"]),
     (.day, "Day", ["terce", "sext", "none"]),
@@ -205,6 +210,9 @@ struct HomeTier {
     let listMiddle: CGFloat
     /// A short screen's niche (a phone on its side), fitted down to the invitation.
     let shortScreen: Bool
+    /// A phone to 760 high (the web's `max-height: 760px`): Matins' band is one line, its mark
+    /// after its name, as tall as the line.
+    let soonInline: Bool
     private let step: Int
     private let type: Int
     private let short: Bool
@@ -221,6 +229,7 @@ struct HomeTier {
         zoom = wide?.zoom ?? 1
         listMiddle = wide?.listMiddle ?? 0
         shortScreen = wide?.short ?? false
+        soonInline = !desk && tall <= 760
         self.heavy = heavy
         step = desk ? 0 : tall >= 880 ? 2 : tall >= 800 ? 1 : 0
         type = desk || screen < 375 ? 0 : tall >= 880 ? 2 : tall >= 830 ? 1 : 0
@@ -370,6 +379,8 @@ struct HomeTier {
     /// The periods' labels: larger in the niche, where they stand beside the list.
     var period: CGFloat { desk ? legible(list ? 15.2 : 13.76) : 11.52 }
     var periodTracking: CGFloat { list ? 0.16 : desk ? 0.14 : 0.12 }
+    /// "coming soon" under an hour not yet prayed in the app: 0.72rem on a phone, 0.8rem wider.
+    var soon: CGFloat { desk ? legible(12.8) : 11.52 }
     var metaGap: CGFloat { pick(8.8, 8.8, 16, 19.2) }
     /// The season and "Change date" at the foot, in small caps.
     var meta: CGFloat { desk ? legible(15.2) : 13.44 }
@@ -1136,30 +1147,34 @@ private struct HourDirectory: View {
         let desk = tier.desk
         let label = TextStyle(size: tier.period, line: tier.period * 1.6, tracking: tier.period * tier.periodTracking, smallCaps: true)
         let labelInk = mix(p.accent, p.muted, desk ? 0.7 : 0.45)
-        // One width for the three period labels, widened past the web's 83pt only when the
+        // One width for the four period labels, widened past the web's 83pt only when the
         // reader's font size needs it, so the hours still line up in columns.
         let font = label.uiFont(m)
-        let widest = periods.map { ProseLayout.advance($0.label, font) + label.tracking * m.type * CGFloat($0.label.count) }.max() ?? 0
+        let night = homeNightShared
+        let widest = ([night.label] + periods.map(\.label)).map { ProseLayout.advance($0, font) + label.tracking * m.type * CGFloat($0.count) }.max() ?? 0
         let labelWidth = max(widest + m.px(8), m.px(desk ? 80 : 83))
         VStack(spacing: 0) {
+            // The Night first: Matins alone and centred in its band, coming soon.
+            Group {
+                if tier.list {
+                    HourList(period: .night, label: night.label, hours: [night.hour], current: current, light: light, prayed: prayed, tier: tier, now: now, home: home, labelStyle: label, labelInk: labelInk, night: night, open: open)
+                } else {
+                    HStack(spacing: 0) {
+                        periodHead(.night, night.label, [night.hour], label: label, labelInk: labelInk, width: labelWidth)
+                        Color.clear.frame(width: 1)
+                        soonCell(night)
+                            .frame(minHeight: tier.soonInline ? 0 : m.px(tier.row))
+                    }
+                }
+            }
+            .modifier(HourBand(i: 0))
             ForEach(Array(periods.enumerated()), id: \.offset) { i, row in
                 Group {
                     if tier.list {
                         HourList(period: row.period, label: row.label, hours: row.hours, current: current, light: light, prayed: prayed, tier: tier, now: now, home: home, labelStyle: label, labelInk: labelInk, open: open)
                     } else {
                         HStack(spacing: 0) {
-                            VStack(spacing: m.px(2)) {
-                                PeriodIcon(period: row.period, color: o.flat, alpha: periodSignAlpha(row.hours, current))
-                                    .scaleEffect(desk ? 1.12 : 1)
-                                Text(row.label).type(label).foregroundStyle(labelInk).lineLimit(1).fixedSize()
-                            }
-                            .padding(.vertical, m.px(6))
-                            .padding(.leading, m.px(1.4))
-                            .frame(width: labelWidth)
-                            .frame(maxHeight: .infinity)
-                            .accessibilityElement(children: .ignore)
-                            .accessibilityLabel(row.label)
-                            .accessibilityAddTraits(.isHeader)
+                            periodHead(row.period, row.label, row.hours, label: label, labelInk: labelInk, width: labelWidth)
                             Color.clear.frame(width: 1)
                             HStack(spacing: 0) {
                                 ForEach(Array(row.hours.enumerated()), id: \.offset) { j, h in
@@ -1170,21 +1185,7 @@ private struct HourDirectory: View {
                         }
                     }
                 }
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 1)
-                // The rule above each band: the frame's above the first, finer ones between.
-                .overlay(alignment: .top) {
-                    Canvas { ctx, size in
-                        let rule = i == 0
-                            ? ruledLine(0, 0.5, size.width, 0.5, 1.3, seed: 31)
-                            : ruledLine(0, 0.5, size.width, 0.5, 0.9, seed: UInt32(41 + i - 1))
-                        ctx.fill(rule, with: .color(p.lining.opacity(i == 0 ? 0.78 : 0.36)))
-                    }
-                    .frame(height: 2)
-                    .allowsHitTesting(false)
-                }
-                // Each band hands its ink over in one move under the crown's play.
-                .crownInk("r-band\(i)")
+                .modifier(HourBand(i: i + 1))
             }
         }
         .padding(.bottom, 1)
@@ -1195,6 +1196,69 @@ private struct HourDirectory: View {
             .frame(height: 2)
             .allowsHitTesting(false)
         }
+    }
+
+    /// A band's period in the margin: its sign over its label, the sign dimmed while another
+    /// period's hour is now.
+    private func periodHead(_ period: Period, _ text: String, _ hours: [String], label: TextStyle, labelInk: Color, width: CGFloat) -> some View {
+        VStack(spacing: m.px(2)) {
+            PeriodIcon(period: period, color: o.flat, alpha: periodSignAlpha(hours, current))
+                .scaleEffect(tier.desk ? 1.12 : 1)
+            Text(text).type(label).foregroundStyle(labelInk).lineLimit(1).fixedSize()
+        }
+        .padding(.vertical, m.px(6))
+        .padding(.leading, m.px(1.4))
+        .frame(width: width)
+        .frame(maxHeight: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(text)
+        .accessibilityAddTraits(.isHeader)
+    }
+
+    /**
+     * The Night's one hour, alone and centred in its band (the web's `.home-hour-soon`): Matins,
+     * not yet prayed in the app, so no button, no pool and no gilt point. Its name stands in the
+     * quiet ink, and "coming soon" in small capitals: in the niche on its gloss's line under it
+     * ("The night office · coming soon"), on a phone under the name, and on a phone to 760 high
+     * after the name on one line, the band no taller than that line.
+     */
+    private func soonCell(_ night: HomeNightView) -> some View {
+        let gloss = tier.desk ? night.gloss : ""
+        let name = Text(night.name)
+            .type(TextStyle(size: tier.hour, line: tier.hour * 1.2, tracking: 0.31))
+            .foregroundStyle(soonNameInk(p))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+        return Group {
+            if tier.soonInline {
+                HStack(alignment: .firstTextBaseline, spacing: m.px(9.6)) {
+                    name
+                    SoonMark(text: night.comingSoon, size: tier.soon)
+                }
+                .padding(.vertical, m.px(1.6))
+            } else {
+                VStack(spacing: 0) {
+                    name
+                    if gloss.isEmpty {
+                        SoonMark(text: night.comingSoon, size: tier.soon)
+                    } else {
+                        HStack(alignment: .firstTextBaseline, spacing: m.px(5.1)) {
+                            Text(gloss)
+                                .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
+                                .foregroundStyle(p.muted)
+                                .lineLimit(1)
+                                .fixedSize()
+                            Text("·").type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15)).foregroundStyle(p.muted)
+                            SoonMark(text: night.comingSoon, size: tier.soon)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, m.px(2))
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel([night.name, gloss.isEmpty ? nil : gloss, night.comingSoon].compactMap { $0 }.joined(separator: ", "))
     }
 
     /// One hour of a band: its name, its gloss (in the niche every hour's, on a phone none), the
@@ -1284,7 +1348,7 @@ private struct HourDirectory: View {
 }
 
 /**
- * One period of the niche's list of seven (the web's from 1000px high upright, 1146px on its
+ * One period of the niche's list of seven (the web's from 1000px high upright, 1203px on its
  * side): its label in the margin beside its hours, and each hour on a line of its own, its name and
  * its gloss on one baseline parted by a gilt point; the label and the hours, read as one block,
  * stand centred in the niche (`NicheLayout.listMiddle`).
@@ -1301,6 +1365,8 @@ private struct HourList: View {
     let home: HomeInk
     let labelStyle: TextStyle
     let labelInk: Color
+    /// The Night's band: its one hour, Matins, coming soon, in place of `hours`' lines.
+    var night: HomeNightView? = nil
     let open: (String) -> Void
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
@@ -1317,10 +1383,47 @@ private struct HourList: View {
             .accessibilityLabel(label)
             .accessibilityAddTraits(.isHeader)
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(hours, id: \.self) { h in line(h) }
+                if let night {
+                    soonLine(night)
+                } else {
+                    ForEach(hours, id: \.self) { h in line(h) }
+                }
             }
             .padding(.vertical, m.px(4.8))
         }
+    }
+
+    /**
+     * Matins on its line, not yet prayed in the app: no button and no pool, its name in the quiet
+     * ink with its gloss beside it as the others', and "coming soon" under the gloss.
+     */
+    private func soonLine(_ night: HomeNightView) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 0) {
+            Text(night.name)
+                .type(TextStyle(size: tier.hour, line: tier.hour * 1.2, tracking: 0.31))
+                .foregroundStyle(soonNameInk(p))
+                .lineLimit(1)
+                .fixedSize()
+                .frame(width: m.px(100.8), alignment: .leading)
+            // The gilt point stands at the gloss's middle, as on the hours' lines.
+            Canvas { ctx, s in ctx.fill(lozenge(CGPoint(x: s.width / 2, y: s.height / 2), 1.75), with: .color(o.flat.opacity(0.7))) }
+                .frame(width: 5, height: 5)
+                .alignmentGuide(.firstTextBaseline) { d in d[VerticalAlignment.center] + m.px(tier.gloss * 0.3) }
+                .padding(.trailing, m.px(13.6))
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: m.px(1.6)) {
+                Text(night.gloss)
+                    .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
+                    .foregroundStyle(p.muted)
+                    .lineLimit(1)
+                    .fixedSize()
+                SoonMark(text: night.comingSoon, size: tier.soon)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(minHeight: m.px(tier.row))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel([night.name, night.gloss, night.comingSoon].joined(separator: ", "))
     }
 
     private func line(_ h: String) -> some View {
@@ -1403,8 +1506,56 @@ private struct HourListLayout: Layout {
     }
 }
 
-/// A period's sign in home's table: lit while one of its hours is now, the other two standing back,
-/// and all three alike when no hour is (the web's `.home-hour-group:has(.is-current)`).
+/// The ruled band of one period in home's table, `i` from the top: the rule above it (the frame's
+/// above the first, finer ones between), and its ink handed over in one move under the crown's play.
+private struct HourBand: ViewModifier {
+    let i: Int
+    @Environment(\.palette) private var p
+
+    func body(content: Content) -> some View {
+        content
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, 1)
+            .overlay(alignment: .top) {
+                Canvas { ctx, size in
+                    let rule = i == 0
+                        ? ruledLine(0, 0.5, size.width, 0.5, 1.3, seed: 31)
+                        : ruledLine(0, 0.5, size.width, 0.5, 0.9, seed: UInt32(41 + i - 1))
+                    ctx.fill(rule, with: .color(p.lining.opacity(i == 0 ? 0.78 : 0.36)))
+                }
+                .frame(height: 2)
+                .allowsHitTesting(false)
+            }
+            .crownInk("r-band\(i)")
+    }
+}
+
+/// An hour not yet prayed in the app (Matins): its name in the quiet ink, the text's mixed 55%
+/// with the muted (the web's `.home-hour-soon .home-hour-link-name`).
+func soonNameInk(_ p: Palette) -> Color { mix(p.text, p.muted, 0.55) }
+
+/// "coming soon" under an hour not yet prayed in the app, in letter-spaced small capitals in the
+/// accent mixed half with the muted ink (the web's `.home-hour-soon-mark` and `.about-hour-soon`).
+struct SoonMark: View {
+    let text: String
+    let size: CGFloat
+    /// Its spacing and leading, in ems.
+    var tracking: CGFloat = 0.16
+    var leading: CGFloat = 1.2
+    @Environment(\.palette) private var p
+
+    var body: some View {
+        Text(text)
+            .type(TextStyle(size: size, line: size * leading, tracking: size * tracking, smallCaps: true))
+            .foregroundStyle(mix(p.accent, p.muted, 0.5))
+            .lineLimit(1)
+            .fixedSize()
+    }
+}
+
+/// A period's sign in home's table: lit while one of its hours is now, the others standing back,
+/// and all alike when no hour is (the web's `.home-hour-group:has(.is-current)`). The Night's
+/// Matins is never now, so its star only ever stands back or stands with the rest.
 func periodSignAlpha(_ hours: [String], _ current: String) -> Double {
     if current.isEmpty { return 0.9 }
     return hours.contains(current) ? 1 : 0.52

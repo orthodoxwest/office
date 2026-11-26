@@ -133,10 +133,23 @@ class AccessibilityTest {
     fun aboutHasHeadingsAndOpensEachHour() {
         show(Page.About)
         compose.onNodeWithText("About the Office").assert(isHeading())
-        compose.onNodeWithText("The seven hours").assert(isHeading())
+        compose.onNodeWithText("The hours").assert(isHeading())
         compose.onNode(hasContentDescription("The Divine Office is the Church", substring = true)).assertExists()
         compose.onNodeWithText("Lauds").assert(role(Role.Button))
         compose.onNodeWithText("Compline").assert(role(Role.Button))
+        // Matins is shown, coming soon, and opens nothing; its station on the figure is reached
+        // like the others.
+        compose.onNodeWithText("Matins").assert(SemanticsMatcher.keyNotDefined(SemanticsActions.OnClick))
+        compose.onNodeWithContentDescription("Matins: The night office, before dawn").assert(role(Role.Button))
+    }
+
+    /** Home's Night band: its heading, and Matins one stop that says it is coming and opens nothing. */
+    @Test
+    fun homesMatinsIsComingSoonAndNoLink() {
+        show(Page.Home(lent))
+        compose.onNodeWithText("Night").assert(isHeading())
+        compose.onNode(hasContentDescription("Matins", substring = true)).assert(hasContentDescription("coming soon", substring = true))
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.OnClick))
     }
 
     @Test

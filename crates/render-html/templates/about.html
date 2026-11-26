@@ -109,7 +109,7 @@
           <div class="about-hour{% if h.is_current %} is-current{% endif %}" data-hour="{{ h.slug }}">
             {%- if h.coming_soon %}
             <dt><span class="about-hour-soon-name">{{ h.name }}</span></dt>
-            <dd><span class="about-hour-gloss">{{ h.gloss }}</span> <span class="about-hour-time">{{ h.time }}</span> <span class="about-hour-soon">{{ coming_soon }}</span></dd>
+            <dd><span class="about-hour-gloss">{{ h.gloss }}</span> <span class="about-hour-time">{{ h.time }} <span class="about-hour-soon">{{ coming_soon }}</span></span></dd>
             {%- else %}
             <dt><a href="{{ h.url|url }}"{% if h.is_current %} aria-current="time"{% endif %}>{{ h.name }}</a></dt>
             <dd><span class="about-hour-gloss">{{ h.gloss }}</span> <span class="about-hour-time">{{ h.time }}</span></dd>

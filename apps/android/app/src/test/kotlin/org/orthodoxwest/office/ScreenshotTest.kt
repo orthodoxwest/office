@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -98,6 +99,15 @@ class ScreenshotTest {
     /** Terce's gloss, the widest among the day's three, takes a second line rather than being cut off. */
     @Test
     fun homeTerce() { show(Page.Home(lent), ThemeChoice.NAVE, clockHour = 10); shoot("home-terce") }
+
+    /** A phone up to 760 high sets Matins and "coming soon" on one line, its band only the line's height. */
+    @Test
+    @Config(qualifiers = "w375dp-h667dp-xxhdpi")
+    fun homeShortPhone() { show(Page.Home(lent), ThemeChoice.NAVE, clockHour = 10); shoot("home-short-nave") }
+
+    @Test
+    @Config(qualifiers = "w375dp-h667dp-xxhdpi")
+    fun homeShortPhoneApse() { show(Page.Home(lent), ThemeChoice.APSE, clockHour = 10); shoot("home-short-apse") }
 
     @Test
     fun homeAnotherDay() { show(Page.Home(LocalDate.of(2026, 12, 25)), ThemeChoice.NAVE); shoot("home-christmas") }
@@ -287,6 +297,25 @@ class ScreenshotTest {
     @Test
     @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
     fun aboutApse() { show(Page.About, ThemeChoice.APSE); shoot("about-apse") }
+
+    /** Matins chosen on the Horologium: the star under the horizon, the day's gilt put out. */
+    @Test
+    @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
+    fun aboutMatinsNave() {
+        show(Page.About, ThemeChoice.NAVE)
+        compose.onNodeWithContentDescription("Matins: The night office, before dawn").performClick()
+        compose.waitForIdle()
+        shoot("about-matins-nave")
+    }
+
+    @Test
+    @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
+    fun aboutMatinsApse() {
+        show(Page.About, ThemeChoice.APSE)
+        compose.onNodeWithContentDescription("Matins: The night office, before dawn").performClick()
+        compose.waitForIdle()
+        shoot("about-matins-apse")
+    }
 
     /** About closes the phone's menu on every page, an hour's included. */
     @Test
