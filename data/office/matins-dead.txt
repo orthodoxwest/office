@@ -1,0 +1,258 @@
+# Matins of the Dead, said on All Souls' Day with all three Nocturns
+# (Monastic Diurnal pp. 81*-99*). The engine composes it in place of Matins
+# when the office is of the Dead (crates/office/src/matins.rs).
+
+[Pre-Office-Dead]
+# Diurnal p. 81*: unless Matins follows the carrying of the body to the Church
+# or Matins and Lauds of the occurrent Office, "Our Father, Hail Mary, and I
+# believe are said secretly: otherwise the Office begins at once with the
+# Invitatory". Kept in the main prayer flow, as at Lauds of the Dead.
+
+Type = secret-prayer
+Ref = ordinary/shared/our-father
+
+Type = secret-prayer
+Ref = ordinary/shared/hail-mary
+
+Type = secret-prayer
+Ref = ordinary/shared/apostles-creed
+
+[Invitatory]
+# Diurnal p. 82*: the Invitatory "is always said in the Office of the Dead when
+# it is recited with three Nocturns". There is no hymn: the first Nocturn
+# follows the invitatory psalm at once (p. 83*).
+Label = Invitatory
+
+Type = invitatory
+Ref = proper/all-souls/invitatory
+
+[Nocturn-1]
+# Diurnal pp. 83*-88*. On All Souls' Day the three Nocturns are all said
+# (p. 82*), so the weekday on which each is said alone does not apply. Every
+# psalm ends with Rest eternal in place of the Glory be (p. 72*), and the
+# antiphons are doubled, as at Lauds and Vespers of the Dead. The lessons are
+# read without Absolution, Blessing or Title, and end without But thou
+# (pp. 86*-87*).
+Label = Nocturn I
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-1
+
+Type = psalm
+Ref = psalms/005
+
+Type = gloria-patri
+Ref = office
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-1
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-2
+
+Type = psalm
+Ref = psalms/006
+
+Type = gloria-patri
+Ref = office
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-2
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-3
+
+Type = psalm
+Ref = psalms/007
+
+Type = gloria-patri
+Ref = office
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-3
+
+Type = versicle
+Ref = proper/all-souls/nocturn-1-versicle
+
+Type = rubric
+Ref = shared/formulas/secret-our-father-throughout-rubric
+
+Type = silent-prayer
+Ref = ordinary/shared/our-father
+
+Type = lesson
+Ref = proper/all-souls/lesson-i
+
+Type = responsory
+Ref = proper/all-souls/responsory-i
+
+Type = lesson
+Ref = proper/all-souls/lesson-ii
+
+Type = responsory
+Ref = proper/all-souls/responsory-ii
+
+Type = lesson
+Ref = proper/all-souls/lesson-iii
+
+Type = responsory
+Ref = proper/all-souls/responsory-iii
+
+[Nocturn-2]
+# Diurnal pp. 88*-93*.
+Label = Nocturn II
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-4
+
+Type = psalm
+Ref = psalms/023
+
+Type = gloria-patri
+Ref = office
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-4
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-5
+
+Type = psalm
+Ref = psalms/025
+
+Type = gloria-patri
+Ref = office
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-5
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-6
+
+Type = psalm
+Ref = psalms/027
+
+Type = gloria-patri
+Ref = office
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-6
+
+Type = versicle
+Ref = proper/all-souls/nocturn-2-versicle
+
+Type = rubric
+Ref = shared/formulas/secret-our-father-throughout-rubric
+
+Type = silent-prayer
+Ref = ordinary/shared/our-father
+
+Type = lesson
+Ref = proper/all-souls/lesson-iv
+
+Type = responsory
+Ref = proper/all-souls/responsory-iv
+
+Type = lesson
+Ref = proper/all-souls/lesson-v
+
+Type = responsory
+Ref = proper/all-souls/responsory-v
+
+Type = lesson
+Ref = proper/all-souls/lesson-vi
+
+Type = responsory
+Ref = proper/all-souls/responsory-vi
+
+[Nocturn-3]
+# Diurnal pp. 93*-99*. The ninth responsory is "Deliver me, O Lord, from
+# death eternal", said "in place of the preceding whenever three Nocturns are
+# said for the Departed" (p. 99*).
+Label = Nocturn III
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-7
+
+Type = psalm
+Ref = psalms/040
+
+Type = gloria-patri
+Ref = office
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-7
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-8
+
+Type = psalm
+Ref = psalms/041
+
+Type = gloria-patri
+Ref = office
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-8
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-9
+
+Type = psalm
+Ref = psalms/042
+
+Type = gloria-patri
+Ref = office
+
+Type = antiphon
+Ref = proper/all-souls/matins-antiphon-9
+
+Type = versicle
+Ref = proper/all-souls/nocturn-3-versicle
+
+Type = rubric
+Ref = shared/formulas/secret-our-father-throughout-rubric
+
+Type = silent-prayer
+Ref = ordinary/shared/our-father
+
+Type = lesson
+Ref = proper/all-souls/lesson-vii
+
+Type = responsory
+Ref = proper/all-souls/responsory-vii
+
+Type = lesson
+Ref = proper/all-souls/lesson-viii
+
+Type = responsory
+Ref = proper/all-souls/responsory-viii
+
+Type = lesson
+Ref = proper/all-souls/lesson-ix
+
+Type = responsory
+Ref = proper/all-souls/responsory-ix
+
+[Collect]
+# Diurnal p. 99*: "If Matins with one or three Nocturns be separated from
+# Lauds, after the last R. is added" The Lord be with you, "Then the Collect
+# (or Collects) as above at Vespers, p. 77*", with Rest eternal and May they
+# rest in peace. The app sets Matins apart as its own hour.
+
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
+Type = prayer
+Ref = shared/leader/let-us-pray
+
+Type = proper-collect
+Ref = collect
+
+[Closing-Dead]
+
+Type = versicle
+Ref = shared/formulas/rest-eternal-versicle
+
+Type = versicle
+Ref = shared/formulas/may-they-rest-in-peace

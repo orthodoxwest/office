@@ -39,6 +39,15 @@ R. Amen.
 Rest eternal * grant unto them, O Lord.
 And let light perpetual * shine upon them.
 
+[rest-eternal-invitatory]
+# SOURCE: Monastic Diurnal.pdf, p. 83* (Matins of the Dead, after the invitatory psalm)
+# Said after Psalm 95 in place of the Glory be, as the invitatory prints it.
+Rest eternal grant unto them, O Lord: † and let light perpetual shine upon them.
+
+[secret-our-father-throughout-rubric]
+# SOURCE: Monastic Diurnal.pdf, pp. 86*, 91*, 97* (Matins of the Dead, after each Nocturn's versicle)
+Our Father secretly throughout.
+
 [rest-eternal-versicle]
 # SOURCE: Monastic Diurnal.pdf, p. 81* (Vespers of the Dead); p. 106* (Lauds of the Dead)
 # After the Collect the Diurnal prints Rest eternal as a versicle and response, unlike

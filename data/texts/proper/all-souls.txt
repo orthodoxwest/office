@@ -180,3 +180,184 @@ R. They will not be afraid of any evil tidings.
 # SOURCE: Monastic Diurnal.pdf, p. 653
 O God, the Giver of pardon and the Author of man's salvation: we humbly beseech thy mercy to grant that the souls of all the faithful who have departed out of this world, blessed Mary ever Virgin and all thy Saints praying for them, may attain to the fellowship of everlasting blessedness. Through Christ our Lord.
 R. Amen.
+
+# Matins of the Dead (Monastic Diurnal pp. 81*-99*), said on All Souls' Day
+# with all three Nocturns (data/office/matins-dead.txt). Before its psalm each
+# antiphon is printed whole with a dagger at its intonation; the texts here are
+# the forms printed after the psalm, as at Lauds and Vespers of the Dead. The
+# responsories are written out as they are said: where the book prints only
+# the cue of a repeat or of Rest eternal, the words are given whole, and the
+# dagger that marks a responsory's intonation is left out as an antiphon's is.
+
+[invitatory]
+# SOURCE: Monastic Diurnal.pdf, p. 82* (Matins of the Dead, Invitatory)
+# Printed with "Repeat: The King.": the antiphon is said twice before the psalm.
+The King unto whom all live, * O come, let us worship.
+
+[matins-antiphon-1]
+# SOURCE: Monastic Diurnal.pdf, pp. 83*-84* (Matins of the Dead, Nocturn I, Psalm 5)
+Make thy way plain, O Lord my God, before my face.
+
+[matins-antiphon-2]
+# SOURCE: Monastic Diurnal.pdf, pp. 84*-85* (Matins of the Dead, Nocturn I, Psalm 6)
+Turn thee, O Lord, and deliver my soul: for in death no man remembereth thee.
+
+[matins-antiphon-3]
+# SOURCE: Monastic Diurnal.pdf, pp. 85*-86* (Matins of the Dead, Nocturn I, Psalm 7)
+Lest he devour my soul like a lion, and tear it in pieces, while there is none to help.
+
+[nocturn-1-versicle]
+# SOURCE: Monastic Diurnal.pdf, p. 86* (Matins of the Dead, Nocturn I)
+V. From the gate of hell.
+R. Deliver their souls, O Lord.
+
+[lesson-i]
+# SOURCE: Monastic Diurnal.pdf, pp. 86*-87* (Matins of the Dead, Lesson i)
+!Job 7:16-21
+Let me alone, O Lord, for my days are vanity. What is man, that thou shouldest magnify him? and that thou shouldest set thy heart upon him? and that thou shouldest visit him every morning, and try him every moment? How long wilt thou not depart from me, nor let me alone till I swallow down my spittle? I have sinned; what shall I do unto thee, O thou preserver of men? why hast thou set me as a mark against thee, so that I am a burden to myself? And why dost thou not pardon my transgression, and take away mine iniquity? for now shall I sleep in the dust; and thou shalt seek me in the morning, but I shall not be.
+
+[responsory-i]
+# SOURCE: Monastic Diurnal.pdf, p. 87* (Matins of the Dead, after Lesson i)
+R. I know that my Redeemer liveth, and that he shall stand at the latter day upon the earth: * And in my flesh shall I see God my Saviour.
+V. Whom I shall see for myself, and mine eyes shall behold, and not another.
+R. And in my flesh shall I see God my Saviour.
+
+[lesson-ii]
+# SOURCE: Monastic Diurnal.pdf, p. 87* (Matins of the Dead, Lesson ii)
+!Job 10:1-7
+My soul is weary of my life; I will leave my complaint upon myself; I will speak in the bitterness of my soul. I will say unto God, Do not condemn me; shew me wherefore thou contendest with me. Is it good unto thee that thou shouldest oppress, that thou shouldest despise the work of thine hands, and shine upon the counsel of the wicked? Hast thou eyes of flesh? or seest thou as man seeth? Are thy days as the days of man? are thy years as man's days, that thou enquirest after mine iniquity, and searchest after my sin? Thou knowest that I am not wicked; and there is none that can deliver out of thine hand.
+
+[responsory-ii]
+# SOURCE: Monastic Diurnal.pdf, p. 87* (Matins of the Dead, after Lesson ii)
+R. Thou who didst raise Lazarus already corrupting from the grave; * Grant them rest, O Lord, and a place of forgiveness.
+V. Thou who shalt come to judge the quick and the dead, and the world by fire.
+R. Grant them rest, O Lord, and a place of forgiveness.
+
+[lesson-iii]
+# SOURCE: Monastic Diurnal.pdf, pp. 87*-88* (Matins of the Dead, Lesson iii)
+!Job 10:8-12
+Thine hands have made me and fashioned me together round about; yet thou dost destroy me. Remember, I beseech thee, that thou hast made me as the clay; and wilt thou bring me into dust again? Hast thou not poured me out as milk, and curdled me like cheese? Thou hast clothed me with skin and flesh, and hast fenced me with bones and sinews. Thou hast granted me life and favour, and thy visitation hath preserved my spirit.
+
+[responsory-iii]
+# SOURCE: Monastic Diurnal.pdf, p. 88* (Matins of the Dead, after Lesson iii)
+R. O Lord, when thou comest to judge the earth, where shall I hide myself from the wrath of thy countenance? * For I have sinned grievously in my life.
+V. I am afraid of my transgressions, and I am ashamed before thee: when thou comest to judgment, O condemn me not.
+R. For I have sinned grievously in my life.
+V. Rest eternal grant unto them, O Lord: and let light perpetual shine upon them.
+R. For I have sinned grievously in my life.
+
+[matins-antiphon-4]
+# SOURCE: Monastic Diurnal.pdf, p. 88* (Matins of the Dead, Nocturn II, Psalm 23)
+He shall feed me in a green pasture.
+
+[matins-antiphon-5]
+# SOURCE: Monastic Diurnal.pdf, pp. 89*-90* (Matins of the Dead, Nocturn II, Psalm 25)
+Remember not the sins and offences of my youth, O Lord.
+
+[matins-antiphon-6]
+# SOURCE: Monastic Diurnal.pdf, pp. 90*-91* (Matins of the Dead, Nocturn II, Psalm 27)
+I believe verily to see the goodness of the Lord in the land of the living.
+
+[nocturn-2-versicle]
+# SOURCE: Monastic Diurnal.pdf, p. 91* (Matins of the Dead, Nocturn II)
+V. The Lord shall set them with the princes.
+R. Even with the princes of his people.
+
+[lesson-iv]
+# SOURCE: Monastic Diurnal.pdf, pp. 91*-92* (Matins of the Dead, Lesson iv)
+# The lesson begins mid-verse, as printed.
+!Job 13:22-28
+Answer thou me. How many are mine iniquities and sins? make me to know my transgression and my sin. Wherefore hidest thou thy face, and holdest me for thine enemy? Wilt thou break a leaf driven to and fro? and wilt thou pursue the dry stubble? For thou writest bitter things against me, and makest me to possess the iniquities of my youth. Thou puttest my feet also in the stocks, and lookest narrowly unto all my paths; thou settest a print upon the heels of my feet. And I am as a rotten thing that consumeth, as a garment that is moth eaten.
+
+[responsory-iv]
+# SOURCE: Monastic Diurnal.pdf, p. 92* (Matins of the Dead, after Lesson iv)
+R. Remember me, O God, that my life is wind: * The eye of him that hath seen me shall see me no more.
+V. Out of the deep have I called unto thee, O Lord: Lord, hear my voice.
+R. The eye of him that hath seen me shall see me no more.
+
+[lesson-v]
+# SOURCE: Monastic Diurnal.pdf, p. 92* (Matins of the Dead, Lesson v)
+!Job 14:1-6
+Man that is born of a woman is of few days, and full of trouble. He cometh forth like a flower, and is cut down: he fleeth also as a shadow, and continueth not. And dost thou open thine eyes upon such an one, and bringest me into judgment with thee? Who can bring a clean thing out of an unclean? not one. Seeing his days are determined, the number of his months are with thee, thou hast appointed his bounds that he cannot pass; turn from him, that he may rest, till he shall accomplish, as an hireling, his day.
+
+[responsory-v]
+# SOURCE: Monastic Diurnal.pdf, p. 92* (Matins of the Dead, after Lesson v)
+R. Woe is me, O Lord, for I have sinned grievously all the days of my life! O wretched man, what shall I do? Whither shall I flee, but unto thee, O my God? * Have mercy upon me, when thou comest at the day of judgment.
+V. My soul is sore troubled; but, Lord, be thou my helper.
+R. Have mercy upon me, when thou comest at the day of judgment.
+
+[lesson-vi]
+# SOURCE: Monastic Diurnal.pdf, pp. 92*-93* (Matins of the Dead, Lesson vi)
+!Job 14:13-16
+O that thou wouldest hide me in the grave, that thou wouldest keep me secret, until thy wrath be past, that thou wouldest appoint me a set time, and remember me! If a man die, shall he live again? all the days of my appointed time will I wait, till my change come. Thou shalt call, and I will answer thee: thou wilt have a desire to the work of thine hands. For now thou numberest my steps: dost thou not watch over my sin?
+
+[responsory-vi]
+# SOURCE: Monastic Diurnal.pdf, p. 93* (Matins of the Dead, after Lesson vi)
+# Rest eternal is printed as a cue; its words are those printed in full after
+# the third responsory (p. 88*).
+R. Remember not my trespasses, O Lord, * When thou shalt come to judge the world by fire.
+V. Make thy way plain before my face, O Lord my God.
+R. When thou shalt come to judge the world by fire.
+V. Rest eternal grant unto them, O Lord: and let light perpetual shine upon them.
+R. When thou shalt come to judge the world by fire.
+
+[matins-antiphon-7]
+# SOURCE: Monastic Diurnal.pdf, pp. 93*-94* (Matins of the Dead, Nocturn III, Psalm 40)
+O Lord, let it be thy pleasure to deliver me; make haste, O Lord, to help me.
+
+[matins-antiphon-8]
+# SOURCE: Monastic Diurnal.pdf, pp. 94*-95* (Matins of the Dead, Nocturn III, Psalm 41)
+Heal my soul, O Lord, for I have sinned against thee.
+
+[matins-antiphon-9]
+# SOURCE: Monastic Diurnal.pdf, pp. 95*-97* (Matins of the Dead, Nocturn III, Psalm 42)
+# "the presence of the Lord", where the psalm has "of God", as printed.
+My soul is athirst for God, yea, even for the living God: when shall I come to appear before the presence of the Lord?
+
+[nocturn-3-versicle]
+# SOURCE: Monastic Diurnal.pdf, p. 97* (Matins of the Dead, Nocturn III)
+V. O deliver not the soul of thy turtle-dove unto the multitude of the enemies.
+R. Forget not the congregation of the poor for ever.
+
+[lesson-vii]
+# SOURCE: Monastic Diurnal.pdf, p. 97* (Matins of the Dead, Lesson vii)
+# Printed "17:1-3; 11-15"; written with the comma the corpus puts between
+# verses of one chapter.
+!Job 17:1-3, 11-15
+My breath is corrupt, my days are extinct, the graves are ready for me. Are there not mockers with me? and doth not mine eye continue in their provocation? Lay down now, put me in a surety with thee; who is he that will strike hands with me? My days are past, my purposes are broken off, even the thoughts of my heart. They change the night into day: the light is short because of darkness. If I wait, the grave is mine house: I have made my bed in the darkness. I have said to corruption, Thou art my father: to the worm, Thou art my mother, and my sister. And where is now my hope? as for my hope, who shall see it?
+
+[responsory-vii]
+# SOURCE: Monastic Diurnal.pdf, p. 97* (Matins of the Dead, after Lesson vii)
+R. The while I trespass daily and have no repentance, the fear of death appalleth me: * Because in hell there is no redemption, have mercy upon me, O God, and save me.
+V. Save me, O God, for thy Name's sake, and deliver me in thy strength.
+R. Because in hell there is no redemption, have mercy upon me, O God, and save me.
+
+[lesson-viii]
+# SOURCE: Monastic Diurnal.pdf, pp. 97*-98* (Matins of the Dead, Lesson viii)
+!Job 19:20-27
+My bone cleaveth to my skin and to my flesh, and I am escaped with the skin of my teeth. Have pity upon me, have pity upon me, O ye my friends; for the hand of God hath touched me. Why do ye persecute me as God, and are not satisfied with my flesh? Oh that my words were now written! oh that they were printed in a book! that they were graven with an iron pen and lead in the rock for ever! For I know that my Redeemer liveth, and that he shall stand at the latter day upon the earth: and though after my skin worms destroy this body, yet in my flesh shall I see God: whom I shall see for myself and mine eyes shall behold, and not another; though my reins be consumed within me.
+
+[responsory-viii]
+# SOURCE: Monastic Diurnal.pdf, p. 98* (Matins of the Dead, after Lesson viii)
+R. Judge me not, O Lord, according to my deeds; for I have done nothing worthy in thy sight: wherefore I humbly beseech thy Majesty, * That thou, O God, mayest do away mine offences.
+V. Wash me throughly, O Lord, from mine unrighteousness, and cleanse me from my sin.
+R. That thou, O God, mayest do away mine offences.
+
+[lesson-ix]
+# SOURCE: Monastic Diurnal.pdf, p. 98* (Matins of the Dead, Lesson ix)
+!Job 10:18-22
+Wherefore then hast thou brought me forth out of the womb? Oh that I had given up the ghost, and no eye had seen me! I should have been as though I had not been; I should have been carried from the womb to the grave. Are not my days few? cease then, and let me alone, that I may take comfort a little, before I go whence I shall not return, even to the land of darkness and the shadow of death; a land of darkness, as darkness itself; and of the shadow of death, without any order, and where the light is as darkness.
+
+[responsory-ix]
+# SOURCE: Monastic Diurnal.pdf, p. 99* (Matins of the Dead, after Lesson ix)
+# Said "in place of the preceding whenever three Nocturns are said for the
+# Departed"; the responsory said when the third Nocturn only is said (p. 98*)
+# is not composed. Printed with every repeat in full; after Rest eternal the
+# whole responsory is said again.
+R. Deliver me, O Lord, from death eternal in that day of trembling: * When heaven and earth shall be shaken: * When thou shalt come to judge the world by fire.
+V. Trembling taketh hold upon me, and fearfulness, as the sifting draweth on, and the wrath to come.
+R. When heaven and earth shall be shaken.
+V. Ah, that day, that day of anger, of calamity and misery; Ah, that great day, and exceeding bitter!
+R. When thou shalt come to judge the world by fire.
+V. Rest eternal grant unto them, O Lord, and let light perpetual shine upon them.
+R. Deliver me, O Lord, from death eternal in that day of trembling: when heaven and earth shall be shaken, when thou shalt come to judge the world by fire.

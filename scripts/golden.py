@@ -22,7 +22,7 @@ PARITY_YEARS = 28
 
 def render(path):
     name = path.name
-    if match := re.fullmatch(r"(lauds|prime|terce|sext|none|vespers|compline)-(\d{4}-\d{2}-\d{2})\.txt", name):
+    if match := re.fullmatch(r"(matins|lauds|prime|terce|sext|none|vespers|compline)-(\d{4}-\d{2}-\d{2})\.txt", name):
         args = list(match.groups())
     elif match := re.fullmatch(r"ordo-(\d{4})\.txt", name):
         args = ["ordo", match[1]]

@@ -11,6 +11,7 @@ office/sext.txt: opening hour definition: $DATA/office/sext.txt does not exist
 office/none.txt: opening hour definition: $DATA/office/none.txt does not exist
 office/compline.txt: $DATA/office/compline.txt:2: invalid condition in section [Odd]: unknown condition "when-the-moon-is-full"
 office/vespers-holy-saturday.txt: opening hour definition: $DATA/office/vespers-holy-saturday.txt does not exist
+office/matins-dead.txt: opening hour definition: $DATA/office/matins-dead.txt does not exist
 ordinary/vespers/festal-psalmody: antiphon ref not found in corpus: psalm-antiphon-9
 ordinary/vespers/festal-psalmody: psalm ref not found in corpus: psalms/999
 proper/st-nobody/vespers-psalmody: invalid Vespers psalmody declaration: line 1: expected <antiphon-key> = <psalm-key>

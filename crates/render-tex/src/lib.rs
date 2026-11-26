@@ -5,7 +5,8 @@ use calendar::Color;
 use corpus::lines::{BlockKind, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
 use corpus::typography::typeset;
 use liturgy::{
-    ElementType, OfficeElement, OfficeHour, OfficeSection, PostureAnchor, PostureCue, RubricSpan, VoiceSpan, posture_cues_at, split_words,
+    ElementType, INVITATORY_ANTIPHON, OfficeElement, OfficeHour, OfficeSection, PostureAnchor, PostureCue, RubricSpan, VoiceSpan,
+    posture_cues_at, split_words,
 };
 
 const PREAMBLE: &str = include_str!("preamble.tex");
@@ -152,16 +153,7 @@ fn tex_element(elem: &OfficeElement, ant: &str, chant: Option<&Chant<'_>>) -> St
             if unrepeated > 0 && psalm.contains("\\begin{psalmverses}") {
                 b.push_str(&format_rubric_spans(&elem.unrepeated_rubric()));
             }
-            if !elem.label.is_empty() {
-                let label = match elem.psalm_label_parts() {
-                    Some((word, greek, "")) => format!("{}\\psalmnum{{{}}}", tex_line(word), tex_line(greek)),
-                    Some((word, greek, hebrew)) => {
-                        format!("{}\\psalmnum{{{}~\\psalmheb{{{}}}}}", tex_line(word), tex_line(greek), tex_line(hebrew))
-                    }
-                    None => tex_line(&elem.label),
-                };
-                b.push_str(&format!("\n\\psalmlabel{{{label}}}{{{}}}\n\n", tex_line(&elem.incipit)));
-            }
+            b.push_str(&psalm_label(elem));
             b.push_str(&psalm);
         }
         ElementType::Hymn => {
@@ -213,10 +205,41 @@ fn tex_element(elem: &OfficeElement, ant: &str, chant: Option<&Chant<'_>>) -> St
             }
             b.push_str(&format_collect(&elem.text));
         }
-        ElementType::ShortResponsory => b.push_str(&format_short_responsory(&elem.text)),
+        ElementType::ShortResponsory | ElementType::Responsory => b.push_str(&format_short_responsory(&elem.text)),
+        ElementType::Invitatory => {
+            b.push_str(&psalm_label(elem));
+            for line in elem.text.split('\n').filter(|l| !l.trim().is_empty()) {
+                match line.strip_prefix(INVITATORY_ANTIPHON) {
+                    Some(antiphon) => b.push_str(&format!("\\ant{{{}}}\n\n", mediant_line(antiphon))),
+                    None => b.push_str(&format_block(line)),
+                }
+            }
+        }
+        ElementType::Lesson => {
+            if !elem.label.is_empty() {
+                b.push_str(&format!("\\sectionheading{{{}}}\n\n", tex_line(&elem.label)));
+            }
+            if !elem.incipit.is_empty() {
+                b.push_str(&format!("{{\\centering\\scriptureref{{{}}}\\par}}\\nopagebreak\n", tex_line(&elem.incipit)));
+            }
+            b.push_str(&format_collect(&elem.text));
+        }
         ElementType::CorporateLordPrayer => b.push_str(&format_corporate_lord_prayer(elem)),
     }
     b
+}
+
+/// A psalm's, canticle's or invitatory's label line; nothing when it has no label.
+fn psalm_label(elem: &OfficeElement) -> String {
+    if elem.label.is_empty() {
+        return String::new();
+    }
+    let label = match elem.psalm_label_parts() {
+        Some((word, greek, "")) => format!("{}\\psalmnum{{{}}}", tex_line(word), tex_line(greek)),
+        Some((word, greek, hebrew)) => format!("{}\\psalmnum{{{}~\\psalmheb{{{}}}}}", tex_line(word), tex_line(greek), tex_line(hebrew)),
+        None => tex_line(&elem.label),
+    };
+    format!("\n\\psalmlabel{{{label}}}{{{}}}\n\n", tex_line(&elem.incipit))
 }
 
 fn format_rubric(elem: &OfficeElement) -> String {

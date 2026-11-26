@@ -272,7 +272,10 @@ Produces a complete LuaLaTeX document (half-letter 5.5"×8.5") from a composed `
 ## Liturgical specifics
 
 - **Calendar**: Julian paschalion, pre-1962 ranking system
-- **Hours**: Lauds, Prime, Terce, Sext, None, Vespers, Compline (no Matins)
+- **Hours**: Lauds, Prime, Terce, Sext, None, Vespers, Compline. Matins is composed only in its
+  Office of the Dead form (All Souls, `data/office/matins-dead.txt`) and only the CLI offers it
+  (`./office matins 2026-11-02`): `liturgy::COMPOSABLE_HOURS` is what the engine composes,
+  `HOUR_NAMES` what the fronts publish
 - **Psalter**: Coverdale (Book of Common Prayer)
 - **English only**
 - **AWRV additions**: post-schism Eastern saints (St. Raphael of Brooklyn, St. Innocent of Alaska, St. Tikhon of Moscow, St. Herman of Alaska)

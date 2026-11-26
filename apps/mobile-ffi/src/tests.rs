@@ -244,6 +244,8 @@ fn matins_is_shown_coming_soon_under_night() {
     assert_eq!((home.gloss.as_str(), home.coming_soon.as_str()), ("The night office", "coming soon"));
     assert!(crate::reminder_periods().iter().all(|p| !p.hours.iter().any(|h| h == "matins")));
     let core = OfficeCore::new().unwrap();
+    // The engine composes Matins of the Dead for the CLI; the apps do not ask for it yet.
+    assert!(core.compose("matins".into(), 2026, 11, 2, "private".into(), false, false).is_err());
     let today = civil(2026, 3, 15);
     for hour in 0..24 {
         assert_ne!(core.home(today, today, hour).unwrap().current_hour, "matins", "{hour}");

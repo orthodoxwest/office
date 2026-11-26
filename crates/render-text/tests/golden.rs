@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use calendar::{CalendarData, Date, MoveableDates, build_calendar};
 use liturgy::PrayerForm;
-use office::{Day, Engine, HOUR_NAMES, resolve_office_days};
+use office::{COMPOSABLE_HOURS, Day, Engine, resolve_office_days};
 use render_text::format_office_hour;
 use tools::fs::FsData;
 
@@ -24,7 +24,7 @@ fn hour_goldens_match() {
         let Some(stem) = name.strip_suffix(".txt") else { continue };
         let Some((hour, date)) = stem.split_once('-') else { continue };
         let Some(date) = Date::parse(date) else { continue };
-        if !HOUR_NAMES.contains(&hour) {
+        if !COMPOSABLE_HOURS.contains(&hour) {
             continue;
         }
         let (days, moveable) = years.entry(date.year()).or_insert_with(|| {

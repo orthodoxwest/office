@@ -32,7 +32,20 @@ pub enum ElementType {
     Dialogue,
     /// The office's corporate form of the Lord's Prayer.
     CorporateLordPrayer,
+    /// Matins' invitatory: Psalm 95 with its antiphon woven through it, whole
+    /// and half. Lines beginning [`INVITATORY_ANTIPHON`] are the antiphon's
+    /// repeats; the rest are the psalm's strophes and its doxology.
+    Invitatory,
+    /// A Matins lesson. Its `label` is the heading ("Lesson I") and its
+    /// `incipit` the reference ("Job 7:16-21").
+    Lesson,
+    /// A Matins responsory after a lesson, written out as it is said: the ℟
+    /// with its repetend after `*`, each ℣ followed by the ℟'s repeated words.
+    Responsory,
 }
+
+/// How an [`ElementType::Invitatory`] marks a line of its antiphon.
+pub const INVITATORY_ANTIPHON: &str = "Ant. ";
 
 impl ElementType {
     pub fn as_str(self) -> &'static str {
@@ -57,6 +70,9 @@ impl ElementType {
             ElementType::ShortResponsory => "short-responsory",
             ElementType::Dialogue => "dialogue",
             ElementType::CorporateLordPrayer => "corporate-lord-prayer",
+            ElementType::Invitatory => "invitatory",
+            ElementType::Lesson => "lesson",
+            ElementType::Responsory => "responsory",
         }
     }
 
@@ -208,6 +224,7 @@ pub struct OfficeElement {
     pub kind: ElementType,
     pub text: String,
     pub label: String,
+    /// A psalm or canticle's Latin incipit, or a lesson's reference, set beside the label.
     pub incipit: String,
     pub rubric: String,
     pub voice: Vec<VoiceSpan>,
@@ -491,8 +508,13 @@ pub struct OfficeSection {
     pub elements: Vec<OfficeElement>,
 }
 
-/// The seven hours, in canonical order.
+/// The seven hours, in canonical order: the hours the fronts publish.
 pub const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+
+/// The hours the engine composes, in canonical order: the published
+/// [`HOUR_NAMES`] and Matins, which only the CLI offers until the fronts
+/// publish it. Matins is composed so far only in its Office of the Dead form.
+pub const COMPOSABLE_HOURS: [&str; 8] = ["matins", "lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
 
 /// How the office is prayed: privately or led by clergy.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
