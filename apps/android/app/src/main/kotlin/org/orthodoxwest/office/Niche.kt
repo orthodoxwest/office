@@ -96,9 +96,9 @@ fun nicheTokens(p: Palette): NicheTokens = if (!p.dark) {
  */
 data class NicheFigures(val card: Float, val fit: Float, val air: Float, val least: Float, val share: Float) {
     companion object {
-        val Landscape = NicheFigures(card = 37.5f, fit = 50.8125f, air = 1.6f, least = 0.96f, share = 0.62f)
+        val Landscape = NicheFigures(card = 37.5f, fit = 49.40625f, air = 1.6f, least = 0.96f, share = 0.62f)
         val LandscapeList = NicheFigures(card = 37.5f, fit = 64.75f, air = 1.6f, least = 0.96f, share = 0.62f)
-        val Upright = NicheFigures(card = 34.5f, fit = 52.3125f, air = 2.4f, least = 0.9f, share = 0.8f)
+        val Upright = NicheFigures(card = 34.5f, fit = 50.90625f, air = 2.4f, least = 0.9f, share = 0.8f)
         val UprightList = NicheFigures(card = 34.5f, fit = 66.25f, air = 2.4f, least = 0.9f, share = 0.8f)
         val Short = NicheFigures(card = 37.5f, fit = 35.25f, air = 0.5f, least = 0.5f, share = 0.62f)
 

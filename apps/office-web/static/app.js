@@ -6575,7 +6575,12 @@ function plainClickOpensHere(e, link) {
     var renderedAngle = (stopBySlug[currentSlug] || stopBySlug.compline).angle;
     var animId = null;
 
+    var lastDeg = null;
     function placeOrb(deg) {
+      // Rising (the drawn angle growing) from under the horizon by the Night
+      // foot, the sign is coming back up to a day hour: the gilt waits for it.
+      var rising = lastDeg !== null && deg > lastDeg;
+      lastDeg = deg;
       var rad = (deg * Math.PI) / 180;
       var x = CX + Math.cos(rad) * RX;
       var y = CY - Math.sin(rad) * (Math.sin(rad) >= 0 ? RY : NIGHT_RY);
@@ -6586,10 +6591,11 @@ function plainClickOpensHere(e, link) {
       }
       if (litArc) {
         // The gilt is the day so far: none from Lauds back round to Matins, the whole day once
-        // the sign has gone under past Night, fading as it nears Matins.
+        // the sign has gone under past Night on its way to Matins, fading as it nears it; none
+        // while it comes back up that way.
         var d = ((deg % 360) + 360) % 360;
         var ex = x, ey = y, k = 1;
-        if (d > 168 && d <= 270) k = 0;
+        if ((d > 168 && d <= 270) || (d > 270 && rising)) k = 0;
         else if (d > 270) { ex = CX + RX; ey = CY; k = Math.max(0, 1 - (360 - d) / 40); }
         litArc.setAttribute("d", "M " + DAWN_X.toFixed(1) + " " + DAWN_Y.toFixed(1) + " A " + RX + " " + RY + " 0 0 1 " + ex.toFixed(1) + " " + ey.toFixed(1));
         litArc.style.opacity = k === 1 ? "" : (0.78 * k).toFixed(2);
@@ -6651,8 +6657,8 @@ function plainClickOpensHere(e, link) {
       updateReadout(stop, isPreview);
 
       var targetAngle = stop.angle;
-      // Matins stands under the horizon at 270° (−90°): the sign goes under by the nearer foot,
-      // and comes back up by the foot it went under.
+      // Matins stands under the horizon at 270° (−90°): the sign goes under by the foot nearer
+      // the hour it leaves, and comes back up by the foot nearer the hour it goes to.
       if (stop.angle > 180) targetAngle = renderedAngle <= 90 ? stop.angle - 360 : stop.angle;
       else if (renderedAngle < 0 && targetAngle > 90) renderedAngle += 360;
       else if (renderedAngle > 180 && targetAngle <= 90) renderedAngle -= 360;

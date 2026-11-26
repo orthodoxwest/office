@@ -340,9 +340,10 @@ pub const ABOUT: &[AboutBlock] = &[
     AboutBlock::OrdoRibbon,
     AboutBlock::Heading("This app"),
     AboutBlock::Paragraph(
-        "The psalms follow the Coverdale translation, and the texts are checked against the printed \
-         Western Rite books. You can set up [Reminders](/reminders) for the hours you pray, or open \
-         Settings (under Menu on a phone) to switch between the Nave and Apse themes, adjust text \
+        "The psalms follow Coverdale’s translation as printed in the 1662 Book of Common Prayer (not \
+         the 1928 revision), and the texts are checked against the printed Western Rite books. You \
+         can set up [Reminders](/reminders) for the hours you pray, or open Settings (under Menu on \
+         a phone) to switch between the Nave and Apse themes, adjust text \
          size, include the Martyrology at Prime, or display chant notation where available. The mobile \
          apps work without a connection.",
     ),

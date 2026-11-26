@@ -67,9 +67,9 @@ struct NicheFigures {
     let least: CGFloat
     let share: CGFloat
 
-    static let landscape = NicheFigures(card: 37.5, fit: 50.8125, air: 1.6, least: 0.96, share: 0.62)
+    static let landscape = NicheFigures(card: 37.5, fit: 49.40625, air: 1.6, least: 0.96, share: 0.62)
     static let landscapeList = NicheFigures(card: 37.5, fit: 64.75, air: 1.6, least: 0.96, share: 0.62)
-    static let upright = NicheFigures(card: 34.5, fit: 52.3125, air: 2.4, least: 0.9, share: 0.8)
+    static let upright = NicheFigures(card: 34.5, fit: 50.90625, air: 2.4, least: 0.9, share: 0.8)
     static let uprightList = NicheFigures(card: 34.5, fit: 66.25, air: 2.4, least: 0.9, share: 0.8)
     static let short = NicheFigures(card: 37.5, fit: 35.25, air: 0.5, least: 0.5, share: 0.62)
 

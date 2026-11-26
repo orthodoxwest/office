@@ -88,7 +88,7 @@
         </svg>
         <div class="about-horologium-stops" role="group" aria-label="Hours along the arc of the day">
           {%- for s in horologium.stops %}
-          <button type="button" class="about-horologium-stop{% if s.slug == horologium.active_slug %} is-active{% endif %}{% if s.night %} is-night-stop{% endif %}" style="left: {{ s.left_pct }}; top: {{ s.top_pct }};" data-hour="{{ s.slug }}" data-name="{{ s.name }}" data-gloss="{{ s.gloss }}" data-time="{{ s.time }}" data-angle="{{ s.angle }}" data-night="{{ 'true' if s.night else 'false' }}" data-sign="{{ s.sign }}" aria-label="{{ s.name }}: {{ s.gloss }}, {{ s.time }}" aria-pressed="{{ 'true' if s.slug == horologium.active_slug else 'false' }}"></button>
+          <button type="button" class="about-horologium-stop{% if s.slug == horologium.active_slug %} is-active{% endif %}{% if s.night %} is-night-stop{% endif %}" style="left: {{ s.left_pct }}; top: {{ s.top_pct }};" data-hour="{{ s.slug }}" data-name="{{ s.name }}" data-gloss="{{ s.gloss }}" data-time="{{ s.time }}" data-angle="{{ s.angle }}" data-night="{{ 'true' if s.night else 'false' }}" data-sign="{{ s.sign }}" aria-label="{{ s.name }}: {{ s.gloss }}, {{ s.time }}{% if s.coming_soon %}, {{ coming_soon }}{% endif %}" aria-pressed="{{ 'true' if s.slug == horologium.active_slug else 'false' }}"></button>
           {%- endfor %}
         </div>
         {# Not a live region: each stop's button already names its hour, and a readout spoken at

@@ -67,7 +67,8 @@ class AboutTest {
 
     /**
      * The sign goes under to Matins by the nearer foot and comes back up the way it went, never
-     * across the sky; the gilt day is gone while it is under, and fades in only past Night.
+     * across the sky; the gilt day is gone while it is under, and fades in only past Night on the
+     * way down to Matins: coming back up by the Night foot it has none.
      */
     @Test
     fun theSignGoesUnderByTheNearerFoot() {
@@ -84,7 +85,11 @@ class AboutTest {
         assertEquals(0f, horologiumLit(270f).second)
         assertEquals(0f, horologiumLit(-90f).second)
         assertEquals(0.75f, horologiumLit(-10f).second, 1e-4f)
+        assertEquals(0.75f, horologiumLit(-10f, rising = false).second, 1e-4f)
         assertEquals(0f, horologiumLit(-10f).first)
+        assertEquals(0f, horologiumLit(-10f, rising = true).second)
+        assertEquals(0f, horologiumLit(350f, rising = true).second)
+        assertEquals(90f to 1f, horologiumLit(90f, rising = true))
     }
 
     /** AboutScreen opens the ordo and the reminders itself, and leaves the rest to the browser. */

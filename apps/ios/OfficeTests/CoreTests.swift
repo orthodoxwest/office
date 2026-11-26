@@ -150,6 +150,18 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(horologiumGlide(from: 156, to: 270).span, 114)
         XCTAssertEqual(horologiumGlide(from: 270, to: 168).span, 102)
         XCTAssertEqual(horologiumGlide(from: 0, to: 0).span, 0)
+        // The gilt day: so far on the day's arc; none between Lauds and Matins; past Night the
+        // whole day, fading in on the way down to Matins and dark on the way back up.
+        XCTAssertEqual(horologiumLit(angle: 90).to, 90)
+        XCTAssertEqual(horologiumLit(angle: 90).k, 1)
+        XCTAssertEqual(horologiumLit(angle: 90, rising: true).k, 1)
+        XCTAssertEqual(horologiumLit(angle: 200).k, 0)
+        XCTAssertEqual(horologiumLit(angle: 270).k, 0)
+        XCTAssertEqual(horologiumLit(angle: -90).k, 0)
+        XCTAssertEqual(horologiumLit(angle: -10).k, 0.75, accuracy: 1e-9)
+        XCTAssertEqual(horologiumLit(angle: -10).to, 0)
+        XCTAssertEqual(horologiumLit(angle: -10, rising: true).k, 0)
+        XCTAssertEqual(horologiumLit(angle: 350, rising: true).k, 0)
     }
 
     /// About lights the hour home lights, none from midnight to 2 am, and ends with home's invitation.

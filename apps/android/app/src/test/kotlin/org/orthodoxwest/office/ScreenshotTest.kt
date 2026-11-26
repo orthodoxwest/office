@@ -303,7 +303,7 @@ class ScreenshotTest {
     @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
     fun aboutMatinsNave() {
         show(Page.About, ThemeChoice.NAVE)
-        compose.onNodeWithContentDescription("Matins: The night office, before dawn").performClick()
+        compose.onNodeWithContentDescription("Matins: The night office, before dawn, coming soon").performClick()
         compose.waitForIdle()
         shoot("about-matins-nave")
     }
@@ -312,7 +312,7 @@ class ScreenshotTest {
     @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
     fun aboutMatinsApse() {
         show(Page.About, ThemeChoice.APSE)
-        compose.onNodeWithContentDescription("Matins: The night office, before dawn").performClick()
+        compose.onNodeWithContentDescription("Matins: The night office, before dawn, coming soon").performClick()
         compose.waitForIdle()
         shoot("about-matins-apse")
     }

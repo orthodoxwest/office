@@ -179,6 +179,7 @@ fun AboutScreen(
                 periods = periods,
                 height = view.horologiumHeight.toFloat(),
                 nightDepth = view.horologiumNightDepth.toFloat(),
+                comingSoon = view.comingSoon,
                 current = currentHour,
                 pinned = pinnedHour,
                 onSelect = { slug -> pinnedHour = if (pinnedHour == slug) null else slug },
@@ -527,6 +528,7 @@ private fun Horologium(
     periods: List<AboutPeriodView>,
     height: Float,
     nightDepth: Float,
+    comingSoon: String,
     current: String,
     pinned: String?,
     onSelect: (String) -> Unit,
@@ -550,6 +552,14 @@ private fun Horologium(
         if (span < 0.2f) rendered.snapTo(target) else rendered.animateTo(target, tween(if (span > 100f) 620 else 420, easing = FastOutSlowInEasing))
     }
     val displayAngle = dragAngle ?: rendered.value
+    // Whether the sign is climbing (its drawn angle increasing), kept from the last angle that
+    // differed, so a recomposition at the same angle does not forget it (app.js's `lastDeg`).
+    val climb = remember { floatArrayOf(displayAngle, 0f) }
+    if (displayAngle != climb[0]) {
+        climb[1] = if (displayAngle > climb[0]) 1f else 0f
+        climb[0] = displayAngle
+    }
+    val rising = climb[1] > 0f
     val starTargetAlpha = when (active.hour) {
         "sext" -> 0.24f
         "terce", "none" -> 0.38f
@@ -571,14 +581,14 @@ private fun Horologium(
         when (active.hour) {
             "lauds", "vespers" -> Triple(Color(208, 134, 102, 56), Color(46, 72, 108, 72), Color(18, 28, 40, 0))
             "sext" -> Triple(Color(232, 198, 122, 66), Color(46, 72, 108, 66), Color(18, 28, 40, 0))
-            "compline" -> Triple(Color(154, 182, 224, 56), Color(34, 56, 88, 82), Color(18, 28, 40, 0))
+            "compline", "matins" -> Triple(Color(154, 182, 224, 56), Color(34, 56, 88, 82), Color(18, 28, 40, 0))
             else -> Triple(Color(214, 178, 108, 56), Color(46, 72, 108, 72), Color(18, 28, 40, 0))
         }
     } else {
         when (active.hour) {
             "lauds", "vespers" -> Triple(Color(196, 118, 92, 51), Color(216, 166, 86, 20), Color(250, 243, 233, 0))
             "sext" -> Triple(Color(224, 178, 86, 66), Color(224, 178, 86, 23), Color(250, 243, 233, 0))
-            "compline" -> Triple(Color(146, 134, 122, 41), Color(146, 134, 122, 13), Color(250, 243, 233, 0))
+            "compline", "matins" -> Triple(Color(146, 134, 122, 41), Color(146, 134, 122, 13), Color(250, 243, 233, 0))
             else -> Triple(Color(216, 166, 86, 56), Color(216, 166, 86, 18), Color(250, 243, 233, 0))
         }
     }
@@ -743,8 +753,9 @@ private fun Horologium(
 
                 // Lit arc from Lauds (168°) to the current orb angle: the day so far. None while
                 // the sign is between Lauds and Matins; once it has gone under past Night, the
-                // whole day to the Night foot, fading to nothing as it nears Matins.
-                val (litTo, lit) = horologiumLit(displayAngle)
+                // whole day to the Night foot, fading to nothing as it nears Matins; none while it
+                // comes back up from under the horizon.
+                val (litTo, lit) = horologiumLit(displayAngle, rising)
                 if (lit > 0f) {
                     val startSweep = 180f + (180f - 168f)
                     val sweep = (168f - litTo).coerceAtLeast(0.5f)
@@ -850,11 +861,15 @@ private fun Horologium(
                 val fracX = (160.0 + cos(rad) * 118.0) / 320.0
                 val fracY = (128.0 - up * (if (up >= 0.0) 104.0 else nightDepth.toDouble())) / height
                 val xPx = with(density) { (boxW.toPx() * fracX - tapPx / 2f).roundToInt() }
-                val yPx = with(density) { (boxH.toPx() * fracY - tapPx / 2f).roundToInt() }
+                // Kept inside the figure: Matins stands 10/160 above its foot, and a touch past
+                // the box's edge would not reach its target.
+                val yPx = with(density) { (boxH.toPx() * fracY - tapPx / 2f).coerceAtMost((boxH.toPx() - tapPx).toDouble()).roundToInt() }
                 Box(
                     Modifier.offset { IntOffset(xPx, yPx) }
                         .size(44.dp)
-                        .tap(label = "${h.name}: ${h.gloss}, ${aboutTimeSpoken(h.time)}", selected = h.hour == active.hour) { onSelect(h.hour) },
+                        // Matins' stop says it is coming, as the web's button: "Matins: The night
+                        // office, before dawn, coming soon".
+                        .tap(label = "${h.name}: ${h.gloss}, ${aboutTimeSpoken(h.time)}" + if (h.comingSoon) ", $comingSoon" else "", selected = h.hour == active.hour) { onSelect(h.hour) },
                 )
             }
         }
@@ -868,8 +883,8 @@ private fun Horologium(
 /**
  * Where the Horologium's sign glides from and to, as app.js's `goTo`: the angle it is drawn at and
  * the stop's, unwrapped by a turn so that it goes under the horizon to Matins (270°) by the nearer
- * foot (to −90° through Night from an hour at 90° or less, through Dawn from one past it) and
- * comes back up the way it went, never sweeping across the sky.
+ * foot (to −90° through Night from an hour at 90° or less, through Dawn from one past it), and
+ * returns from it by the foot nearer the stop, never sweeping across the sky.
  */
 internal fun horologiumGlide(drawn: Float, stop: Float): Pair<Float, Float> = when {
     stop > 180f -> drawn to if (drawn <= 90f) stop - 360f else stop
@@ -882,12 +897,15 @@ internal fun horologiumGlide(drawn: Float, stop: Float): Pair<Float, Float> = wh
  * The gilt "lit" arc for the sign at `angle`: how far round from Lauds it reaches (an angle on the
  * day's arc) and its strength. The day so far; none while the sign is between Lauds and Matins;
  * once it has gone under past Night the whole day to the Night foot, fading to nothing as it
- * nears Matins (app.js's `placeOrb`).
+ * nears Matins. While it comes back up from under the horizon by the Night foot (`rising`: the
+ * drawn angle increasing) there is none: the gilt fades in only on the way down to Matins
+ * (app.js's `placeOrb`, its `lastDeg` and `rising`).
  */
-internal fun horologiumLit(angle: Float): Pair<Float, Float> {
+internal fun horologiumLit(angle: Float, rising: Boolean = false): Pair<Float, Float> {
     val d = ((angle % 360f) + 360f) % 360f
     return when {
         d > 168f && d <= 270f -> 0f to 0f
+        d > 270f && rising -> 0f to 0f
         d > 270f -> 0f to max(0f, 1f - (360f - d) / 40f)
         else -> angle to 1f
     }

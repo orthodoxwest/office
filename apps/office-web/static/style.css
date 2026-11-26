@@ -7952,14 +7952,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   color: color-mix(in srgb, var(--text) 55%, var(--muted));
 }
 
-.page-home .home-hour-soon:hover,
-:root[data-theme="dark"] .page-home .home-hour-soon:hover {
-  background: none;
-}
-
-.page-home .home-hour-soon::after {
-  content: none;
-}
+/* (Nor does it take a hover's ink or a press's pool: the hover is kept
+   from it where it is set, and the pool here, after the links' own.) */
 
 .page-home .home-hour-soon-mark {
   color: color-mix(in srgb, var(--accent) 50%, var(--muted));
@@ -7986,10 +7980,25 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   }
 
   .page-home .home-hour-soon-line > .home-hour-link-note + .home-hour-soon-mark::before {
-    content: "·";
+    content: "·" / "";
     margin-inline-end: 0.4em;
     color: var(--muted);
     font-variant-caps: normal;
+  }
+}
+
+/* In the niche's glossed table Matins, no target, is one line: its name, its
+   gloss and its mark ("Matins  The night office · coming soon"), so the
+   fourth band costs a line, not a row, and a 768px laptop keeps "Change
+   date" above the fold. (The list of seven sets it as its other lines.) */
+@media (min-width: 701px) {
+  .page-home .home-hour-link.home-hour-soon {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.75em;
+    min-height: 0;
+    padding-block: 0.35rem 0.3rem;
   }
 }
 
@@ -7999,12 +8008,35 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 @media (max-width: 700px) and (max-height: 760px) {
   .page-home .home-hour-link.home-hour-soon {
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: baseline;
     gap: 0.6em;
     min-height: 0;
     padding-block: 0.1rem;
     align-self: center;
+  }
+
+  /* The band's height comes from the joints below the frieze, as on a
+     fast day with a commemoration below (the touch targets keep theirs). */
+  .page-home .pray-now {
+    padding-block: 0.45rem 0.5rem;
+  }
+
+  .page-home .pray-now-wrap {
+    margin-bottom: 0.45rem;
+  }
+
+  .page-home .home-prayer-card h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  /* And its sign stands beside its label, not over it, so the band is one
+     line high. */
+  .page-home .home-hour-group-night .home-hour-group-label {
+    flex-direction: row;
+    gap: 0.3rem;
+    padding-block: 0.25rem;
   }
 }
 
@@ -8039,15 +8071,15 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 }
 
 @media (hover: hover) {
-  .page-home .home-hour-link:not(.is-current):hover,
-  :root[data-theme="dark"] .page-home .home-hour-link:not(.is-current):hover {
+  .page-home .home-hour-link:not(.is-current, .home-hour-soon):hover,
+  :root[data-theme="dark"] .page-home .home-hour-link:not(.is-current, .home-hour-soon):hover {
     background: color-mix(in srgb, var(--accent) 6%, transparent);
     color: var(--accent);
   }
 }
 
 @media (hover: hover) and (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .page-home .home-hour-link:not(.is-current):hover {
+  :root:not([data-theme="light"]) .page-home .home-hour-link:not(.is-current, .home-hour-soon):hover {
     background: color-mix(in srgb, var(--accent) 8%, transparent);
   }
 }
@@ -8713,7 +8745,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
      warm sunlit ochre across the day, quiet pearl-umber for Compline.
    - Apse stays vaulted night sky with gold-leaf stars, shifting the orb's
      lantern glow from amber-rose at dawn/dusk to warm gold at noon and cool
-     moonlight at Compline. */
+     moonlight at Compline, which Matins, in the night, keeps. */
 .about-horologium[data-active="lauds"],
 .about-horologium[data-active="vespers"] {
   --h-wash-0: rgba(196, 118, 92, 0.2);
@@ -8725,7 +8757,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   --h-wash-1: rgba(224, 178, 86, 0.09);
 }
 
-.about-horologium[data-active="compline"] {
+.about-horologium[data-active="compline"],
+.about-horologium[data-active="matins"] {
   --h-wash-0: rgba(146, 134, 122, 0.16);
   --h-wash-1: rgba(146, 134, 122, 0.05);
 }
@@ -8740,7 +8773,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
     --h-wash-0: rgba(232, 198, 122, 0.26);
     --h-wash-1: rgba(46, 72, 108, 0.26);
   }
-  :root:not([data-theme="light"]) .about-horologium[data-active="compline"] {
+  :root:not([data-theme="light"]) .about-horologium[data-active="compline"],
+  :root:not([data-theme="light"]) .about-horologium[data-active="matins"] {
     --h-wash-0: rgba(154, 182, 224, 0.22);
     --h-wash-1: rgba(34, 56, 88, 0.32);
   }
@@ -8757,7 +8791,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   --h-wash-1: rgba(46, 72, 108, 0.26);
 }
 
-:root[data-theme="dark"] .about-horologium[data-active="compline"] {
+:root[data-theme="dark"] .about-horologium[data-active="compline"],
+:root[data-theme="dark"] .about-horologium[data-active="matins"] {
   --h-wash-0: rgba(154, 182, 224, 0.22);
   --h-wash-1: rgba(34, 56, 88, 0.32);
 }
@@ -9112,7 +9147,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 }
 
 .about-hour-soon::before {
-  content: "·";
+  content: "·" / "";
   margin-inline-end: 0.35em;
   color: var(--muted);
   letter-spacing: 0;
@@ -11928,6 +11963,11 @@ html {
     --pool-gain var(--tempo-touch-out) var(--tempo-touch-out-curve);
 }
 
+/* Matins, no link, takes no pool. */
+.page-home .home-hour-links .home-hour-soon::after {
+  content: none;
+}
+
 /* The hour that is now, and while the light moves (app.js's HOUR_LIGHT) the
    hour it leaves and the hour it comes to, whose pools the pass fades. */
 .page-home .home-hour-link:is(.is-current, .is-passing)::after {
@@ -12382,7 +12422,7 @@ html:where(:has(> body.page-hour))::before {
     --niche-below: 6.375rem;
     /* NicheFigures.landscape */
     --card-w: 37.5rem;
-    --niche-fit: 50.8125rem;
+    --niche-fit: 49.40625rem;
     --niche-air: 1.6rem;
     --niche-least: 0.96;
     --niche-share: 0.62;
@@ -12396,7 +12436,7 @@ html:where(:has(> body.page-hour))::before {
 
   /* The small words never fall under 12px on the glass, however small the
      niche (a short screen): each stands back from the zoom just enough. */
-  .page-home .home-hero :is(.home-date-weekday, .feast, .home-hour-link-name, .home-hour-link-note, .home-hour-group-label, .penitential-badge, .commemorations, .octave-note, .home-versicle, .home-frieze-text, .not-today-link, .home-season, .home-introduction, .home-date-nav > summary) {
+  .page-home .home-hero :is(.home-date-weekday, .feast, .home-hour-link-name, .home-hour-link-note, .home-hour-group-label, .penitential-badge, .commemorations, .octave-note, .home-versicle, .home-frieze-text, .not-today-link, .home-season, .home-introduction, .home-date-nav > summary, .home-hour-soon-mark) {
     zoom: max(1, calc(12 / (var(--niche-zoom) * var(--floor-px))));
   }
 
@@ -12423,6 +12463,10 @@ html:where(:has(> body.page-hour))::before {
 
   .page-home .home-hero .not-today-link {
     --floor-px: 12.48;
+  }
+
+  .page-home .home-hero .home-hour-soon-mark {
+    --floor-px: 12.8;
   }
 
   .page-home .home-hero .home-date-weekday {
@@ -12806,6 +12850,15 @@ html:where(:has(> body.page-hour))::before {
     font-size: 1.24rem;
   }
 
+  .page-home .home-hour-link.home-hour-soon {
+    display: grid;
+    align-items: baseline;
+    justify-content: start;
+    gap: 0;
+    min-height: max(3.1rem, calc(44px / var(--niche-zoom)));
+    padding: 0.25rem 0 0.15rem;
+  }
+
   /* Matins' mark stands under its gloss, in the glosses' column. */
   .page-home .home-hour-soon-line {
     flex-direction: column;
@@ -12860,7 +12913,7 @@ html:where(:has(> body.page-hour))::before {
   .page-home main {
     /* NicheFigures.upright */
     --card-w: 34.5rem;
-    --niche-fit: 52.3125rem;
+    --niche-fit: 50.90625rem;
     --niche-air: 2.4rem;
     --niche-least: 0.9;
     --niche-share: 0.8;

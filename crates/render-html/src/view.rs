@@ -514,6 +514,8 @@ pub struct AboutHorologiumStop {
     pub night: bool,
     /// `star`, `moon` or `sun` (`presentation::about::about_horologium_sign`).
     pub sign: &'static str,
+    /// Shown and not yet prayed in the app (`presentation::hour_coming_soon`): its stop says so.
+    pub coming_soon: bool,
     pub is_current: bool,
     pub x: String,
     pub y: String,
@@ -785,6 +787,7 @@ impl AboutData {
                     angle,
                     night: about_horologium_is_night(slug),
                     sign: about_horologium_sign(slug),
+                    coming_soon: presentation::hour_coming_soon(slug),
                     is_current: *slug == current,
                     x: format!("{x:.1}"),
                     y: format!("{y:.1}"),

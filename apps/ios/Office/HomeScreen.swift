@@ -210,9 +210,13 @@ struct HomeTier {
     let listMiddle: CGFloat
     /// A short screen's niche (a phone on its side), fitted down to the invitation.
     let shortScreen: Bool
-    /// A phone to 760 high (the web's `max-height: 760px`): Matins' band is one line, its mark
+    /// A phone to 760 high (the web's `max-height: 760px`) at up to 130% type: Matins' band is one line, its mark
     /// after its name, as tall as the line.
     let soonInline: Bool
+    /// A phone to 760 high, at any type size (the web's `max-width: 700px` and `max-height: 760px`): the
+    /// joints below the frieze close up there on every day, and the Night's star stands beside its label,
+    /// so its fourth band costs as little height as it can.
+    let shortPhone: Bool
     private let step: Int
     private let type: Int
     private let short: Bool
@@ -229,7 +233,8 @@ struct HomeTier {
         zoom = wide?.zoom ?? 1
         listMiddle = wide?.listMiddle ?? 0
         shortScreen = wide?.short ?? false
-        soonInline = !desk && tall <= 760
+        soonInline = !desk && tall <= 760 && dyn <= 1.3
+        shortPhone = !desk && tall <= 760
         self.heavy = heavy
         step = desk ? 0 : tall >= 880 ? 2 : tall >= 800 ? 1 : 0
         type = desk || screen < 375 ? 0 : tall >= 880 ? 2 : tall >= 830 ? 1 : 0
@@ -365,10 +370,15 @@ struct HomeTier {
     var band: CGFloat { pick(legible(14.4), 12.8, 12.8, 13.6) }
     var bandTracking: CGFloat { desk ? 0.2 : 0.15 }
     var bandPad: CGFloat { pick(2.56, 3.2, 3.2, 3.84) }
-    var bandGap: CGFloat { pick(17.6, 12, 16, 20) }
+    /// Under the band, to the invitation: 0.75rem on a phone, 0.5rem on a short one (`shortPhone`).
+    var bandGap: CGFloat { shortPhone ? 8 : pick(17.6, 12, 16, 20) }
     var pray: TextStyle { pick(Scale.body.sized(25.6, line: 33.28), Scale.body.sized(19.2, line: 24.96), Scale.body.sized(22.4, line: 29.12), Scale.body.sized(24, line: 31.2)).tracked(0.38) }
-    var prayPad: CGFloat { pick(15, 11.9, 13.5, 15.9) }
-    var prayGap: CGFloat { pick(14.4, 11.2, 20, 24) }
+    /// The invitation's padding over and under its words, its 1pt line included; a short phone
+    /// (`shortPhone`) closes it to 0.45rem 0.5rem and the space under it to 0.45rem, as the web's
+    /// does there on every day: the joints below the frieze give the Night's band its height.
+    var prayPad: CGFloat { shortPhone ? 8.2 : pick(15, 11.9, 13.5, 15.9) }
+    var prayPadBottom: CGFloat { shortPhone ? 9 : prayPad }
+    var prayGap: CGFloat { shortPhone ? 7.2 : pick(14.4, 11.2, 20, 24) }
     /// An hour's row: the niche's table 3.5rem, its list 3.1rem (a thumb's height at its least zoom).
     var row: CGFloat { desk ? max(list ? 49.6 : 56, 44 / zoom) : pick(56, 44, 54.4, 62.4) }
     var hour: CGFloat { desk ? legible(list ? 19.84 : 18.56) : 15.68 }
@@ -735,7 +745,7 @@ private struct Frontispiece: View {
                     // A phone says what the hour is under the invitation's words, so the hours' table
                     // keeps one shape whichever hour is now; the niche glosses every hour in its table,
                     // and under the invitation only an eve's "First Vespers of …" (#959), at the phone's size as on the web.
-                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil, gloss: tier.desk && !lit.eve ? "" : lit.note, glossSize: 13.76, glossInk: home.nowGloss,
+                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, padBottom: tier.prayPadBottom, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil, gloss: tier.desk && !lit.eve ? "" : lit.note, glossSize: 13.76, glossInk: home.nowGloss,
                              // The hour now, once prayed, on its own day (Compline after midnight is
                              // yesterday's), as the web's `.pray-now.is-prayed`.
                              prayed: view.isToday && lit.label == view.prayNowLabel && model.hoursPrayed(on: view.prayNowDate).contains(view.prayNowHour)) {
@@ -1030,6 +1040,8 @@ struct PrayNow: View {
     var words: Double = 1
     let style: TextStyle
     let pad: CGFloat
+    /// The padding under the words, where it differs from `pad` over them (a short phone's home).
+    var padBottom: CGFloat? = nil
     let frontal: Color
     let wash: Color
     let lifted: Color?
@@ -1068,7 +1080,8 @@ struct PrayNow: View {
             .opacity(words)
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity, minHeight: 44)
-            .padding(.vertical, m.px(pad))
+            .padding(.top, m.px(pad))
+            .padding(.bottom, m.px(padBottom ?? pad))
             .padding(.horizontal, m.px(13.8))
         }
         .accessibilityValue(prayed ? "prayed" : "")
@@ -1160,10 +1173,10 @@ private struct HourDirectory: View {
                     HourList(period: .night, label: night.label, hours: [night.hour], current: current, light: light, prayed: prayed, tier: tier, now: now, home: home, labelStyle: label, labelInk: labelInk, night: night, open: open)
                 } else {
                     HStack(spacing: 0) {
-                        periodHead(.night, night.label, [night.hour], label: label, labelInk: labelInk, width: labelWidth)
+                        periodHead(.night, night.label, [night.hour], label: label, labelInk: labelInk, width: labelWidth, night: true)
                         Color.clear.frame(width: 1)
                         soonCell(night)
-                            .frame(minHeight: tier.soonInline ? 0 : m.px(tier.row))
+                            .frame(minHeight: tier.soonInline || tier.desk ? 0 : m.px(tier.row))
                     }
                 }
             }
@@ -1199,14 +1212,20 @@ private struct HourDirectory: View {
     }
 
     /// A band's period in the margin: its sign over its label, the sign dimmed while another
-    /// period's hour is now.
-    private func periodHead(_ period: Period, _ text: String, _ hours: [String], label: TextStyle, labelInk: Color, width: CGFloat) -> some View {
-        VStack(spacing: m.px(2)) {
+    /// period's hour is now. The Night's (`night`) gives its band only a line's height where its
+    /// one hour takes no more: on a short phone its star stands beside "Night", not over it (the
+    /// web's row, 0.3rem apart, 0.25rem over and under), and in the niche's table it has no padding
+    /// of its own; either way its label's line is 1.2, as the web's.
+    private func periodHead(_ period: Period, _ text: String, _ hours: [String], label: TextStyle, labelInk: Color, width: CGFloat, night: Bool = false) -> some View {
+        let beside = night && tier.shortPhone
+        let tight = night && (tier.shortPhone || tier.desk)
+        let stack = beside ? AnyLayout(HStackLayout(spacing: m.px(4.8))) : AnyLayout(VStackLayout(spacing: m.px(2)))
+        return stack {
             PeriodIcon(period: period, color: o.flat, alpha: periodSignAlpha(hours, current))
                 .scaleEffect(tier.desk ? 1.12 : 1)
-            Text(text).type(label).foregroundStyle(labelInk).lineLimit(1).fixedSize()
+            Text(text).type(tight ? label.sized(label.size, line: label.size * 1.2) : label).foregroundStyle(labelInk).lineLimit(1).fixedSize()
         }
-        .padding(.vertical, m.px(6))
+        .padding(.vertical, m.px(beside ? 4 : tight ? 0 : 6))
         .padding(.leading, m.px(1.4))
         .frame(width: width)
         .frame(maxHeight: .infinity)
@@ -1218,9 +1237,9 @@ private struct HourDirectory: View {
     /**
      * The Night's one hour, alone and centred in its band (the web's `.home-hour-soon`): Matins,
      * not yet prayed in the app, so no button, no pool and no gilt point. Its name stands in the
-     * quiet ink, and "coming soon" in small capitals: in the niche on its gloss's line under it
-     * ("The night office · coming soon"), on a phone under the name, and on a phone to 760 high
-     * after the name on one line, the band no taller than that line.
+     * quiet ink, and "coming soon" in small capitals: in the niche's table on the name's line after
+     * its gloss ("Matins  The night office · coming soon"), on a phone under the name, and on a
+     * phone to 760 high after the name on one line, the band no taller than that line.
      */
     private func soonCell(_ night: HomeNightView) -> some View {
         let gloss = tier.desk ? night.gloss : ""
@@ -1236,22 +1255,29 @@ private struct HourDirectory: View {
                     SoonMark(text: night.comingSoon, size: tier.soon)
                 }
                 .padding(.vertical, m.px(1.6))
+            } else if !gloss.isEmpty {
+                // The niche's table: one line, centred, on one baseline, with no thumb's height,
+                // only 0.35rem over it and 0.3rem under (the band 2.156rem, as `NicheFigures`' fit
+                // counts it): the name, 0.75em (of the link's 1.1875rem), the gloss, a point, the mark.
+                HStack(alignment: .firstTextBaseline, spacing: m.px(14.25)) {
+                    name
+                    HStack(alignment: .firstTextBaseline, spacing: m.px(5.1)) {
+                        Text(gloss)
+                            .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
+                            .foregroundStyle(p.muted)
+                            .lineLimit(1)
+                            .fixedSize()
+                        Text("·").type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15)).foregroundStyle(p.muted)
+                        SoonMark(text: night.comingSoon, size: tier.soon)
+                    }
+                }
+                .padding(.top, m.px(5.6))
+                .padding(.bottom, m.px(4.8))
             } else {
+                // A taller phone: "coming soon" under the name, wrapping centred at a large type size.
                 VStack(spacing: 0) {
                     name
-                    if gloss.isEmpty {
-                        SoonMark(text: night.comingSoon, size: tier.soon)
-                    } else {
-                        HStack(alignment: .firstTextBaseline, spacing: m.px(5.1)) {
-                            Text(gloss)
-                                .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
-                                .foregroundStyle(p.muted)
-                                .lineLimit(1)
-                                .fixedSize()
-                            Text("·").type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15)).foregroundStyle(p.muted)
-                            SoonMark(text: night.comingSoon, size: tier.soon)
-                        }
-                    }
+                    SoonMark(text: night.comingSoon, size: tier.soon, wraps: true)
                 }
             }
         }
@@ -1542,14 +1568,24 @@ struct SoonMark: View {
     /// Its spacing and leading, in ems.
     var tracking: CGFloat = 0.16
     var leading: CGFloat = 1.2
+    /// Free to take a second line, centred, where a large type size needs it (home's taller
+    /// phone, where it stands alone under the name); otherwise one line at its own width.
+    var wraps = false
     @Environment(\.palette) private var p
 
     var body: some View {
-        Text(text)
+        let mark = Text(text)
             .type(TextStyle(size: size, line: size * leading, tracking: size * tracking, smallCaps: true))
             .foregroundStyle(mix(p.accent, p.muted, 0.5))
-            .lineLimit(1)
-            .fixedSize()
+        if wraps {
+            mark
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        } else {
+            mark
+                .lineLimit(1)
+                .fixedSize()
+        }
     }
 }
 

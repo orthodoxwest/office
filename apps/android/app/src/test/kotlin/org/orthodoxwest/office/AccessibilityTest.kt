@@ -140,7 +140,7 @@ class AccessibilityTest {
         // Matins is shown, coming soon, and opens nothing; its station on the figure is reached
         // like the others.
         compose.onNodeWithText("Matins").assert(SemanticsMatcher.keyNotDefined(SemanticsActions.OnClick))
-        compose.onNodeWithContentDescription("Matins: The night office, before dawn").assert(role(Role.Button))
+        compose.onNodeWithContentDescription("Matins: The night office, before dawn, coming soon").assert(role(Role.Button))
     }
 
     /** Home's Night band: its heading, and Matins one stop that says it is coming and opens nothing. */
