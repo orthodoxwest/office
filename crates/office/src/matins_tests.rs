@@ -12,11 +12,16 @@ fn engine() -> &'static Engine {
 }
 
 fn compose(date: Date, form: PrayerForm) -> Result<OfficeHour, String> {
-    let data = CalendarData::load(&TestData("../../data".into())).unwrap();
-    let cal = build_calendar(date.year(), &data).unwrap();
-    let offices = resolve_office_days(&cal);
-    let days: Vec<Day> = cal.days.into_iter().zip(offices).map(|(c, o)| Day::new(c, o)).collect();
+    let days = year_days(date.year());
     engine().compose_hour("matins", &days[date.ordinal() as usize - 1], &MoveableDates::compute(date.year()), form)
+}
+
+/// The days of `year`, built once per test that asks.
+fn year_days(year: i32) -> Vec<Day> {
+    let data = CalendarData::load(&TestData("../../data".into())).unwrap();
+    let cal = build_calendar(year, &data).unwrap();
+    let offices = resolve_office_days(&cal);
+    cal.days.into_iter().zip(offices).map(|(c, o)| Day::new(c, o)).collect()
 }
 
 fn all_souls() -> OfficeHour {
@@ -42,6 +47,33 @@ fn matins_is_composed_only_for_the_office_of_the_dead() {
     // All Souls falling on a Sunday is kept on the Monday (2025 ordo p. 112).
     assert!(compose(Date::new(2025, 11, 2), PrayerForm::Private).is_err());
     assert_eq!(compose(Date::new(2025, 11, 3), PrayerForm::Private).unwrap().hour, "Matins");
+}
+
+/// Matins is outside the 28-year parity digest, which covers the published
+/// hours, so it is composed here on every All Souls of that range, in every
+/// prayer form: a missing text is a composition error, and the hour is the
+/// same each year whatever the weekday.
+#[test]
+fn matins_of_the_dead_composes_on_every_all_souls() {
+    let mut first: Option<OfficeHour> = None;
+    for year in 2026..2054 {
+        let days = year_days(year);
+        let moveable = MoveableDates::compute(year);
+        let mut found = 0;
+        for day in days.iter().filter(|d| crate::psalmody::is_office_of_the_dead(d)) {
+            for form in PrayerForm::ALL {
+                let hour = engine().compose_hour("matins", day, &moveable, form).unwrap_or_else(|e| panic!("{year} {form:?}: {e}"));
+                if form == PrayerForm::Private {
+                    match &first {
+                        None => first = Some(hour),
+                        Some(f) => assert_eq!(f.sections, hour.sections, "{}", day.date),
+                    }
+                }
+            }
+            found += 1;
+        }
+        assert_eq!(found, 1, "{year}: one day of the Office of the Dead");
+    }
 }
 
 #[test]

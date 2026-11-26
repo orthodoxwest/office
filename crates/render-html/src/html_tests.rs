@@ -518,6 +518,9 @@ fn an_invitatory_sets_its_antiphon_lines_as_antiphons() {
     assert_eq!(got.matches("<p class=\"antiphon\">").count(), 2, "{got}");
     assert_eq!(got.matches("<p class=\"plain-line\">").count(), 1, "{got}");
     has(&got, "<h3 class=\"item-label\">");
+    // Its label is set as a psalm's: the Septuagint number, the Hebrew one muted.
+    has(&got, "<span class=\"psalm-num\">94");
+    has(&got, "psalm-heb gloss-quiet");
     lacks(&got, "Ant. The King");
 }
 

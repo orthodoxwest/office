@@ -324,7 +324,8 @@ fn collapse_uniform_antiphons(hour: &mut OfficeHour) {
 }
 
 /// Whether psalm and canticle antiphons are doubled: only Lauds and Vespers
-/// of a Double office (General Rubrics I.4 / XXIV.8).
+/// of a Double office (General Rubrics I.4 / XXIV.8), and Matins, which is
+/// composed so far only for All Souls, a Double.
 fn antiphons_doubled(day: &Day, hour_name: &str) -> bool {
     if !matches!(hour_name, "lauds" | "vespers" | "matins") {
         return false;

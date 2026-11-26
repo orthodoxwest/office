@@ -348,9 +348,9 @@ impl OfficeElement {
     /// small-cap "1" reads as the section numeral "i", and the Hebrew number in
     /// parentheses is muted beside the number that leads. The Hebrew part is empty
     /// where the two numberings agree; a renderer joins a present one with a
-    /// no-break space. `None` for any other label.
+    /// no-break space. An invitatory's label is its psalm's. `None` for any other label.
     pub fn psalm_label_parts(&self) -> Option<(&str, &str, &str)> {
-        if self.kind != ElementType::Psalm {
+        if !matches!(self.kind, ElementType::Psalm | ElementType::Invitatory) {
             return None;
         }
         let numbers = self.label.strip_prefix("Psalm ")?;

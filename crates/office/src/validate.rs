@@ -58,6 +58,9 @@ const VALID_ELEMENT_TYPES: [&str; 36] = [
     "responsory",
 ];
 
+/// The `Type` values only the Matins composer gives their form.
+const MATINS_ELEMENT_TYPES: [&str; 3] = ["invitatory", "lesson", "responsory"];
+
 /// Every key a `marian seasonal` element may resolve to.
 const MARIAN_CORPUS_KEYS: [&str; 5] = [
     "ordinary/marian/alma-redemptoris-advent",
@@ -124,6 +127,9 @@ pub fn validate_hour_definitions(src: &dyn DataSource) -> Vec<String> {
                 let (kind, reference) = (elem.kind.as_str(), elem.reference.as_str());
                 if !VALID_ELEMENT_TYPES.contains(&kind) {
                     parse_errors.push(format!("{src}: unknown element Type {}", quote(kind)));
+                }
+                if MATINS_ELEMENT_TYPES.contains(&kind) && hour != "matins" {
+                    parse_errors.push(format!("{src}: element Type {} is composed only at Matins", quote(kind)));
                 }
                 match kind {
                     "proper-psalmody" => {
