@@ -226,6 +226,30 @@ fn about_lights_and_invites_to_the_hour_home_does() {
     assert!(web.runs.iter().any(|r| r.link == "https://orthodoxwestbreviary.com"));
 }
 
+/// Matins leads About's table and home's hours under Night, coming soon: no link and no part in
+/// the hour now, nor in reminders, until the app prays it.
+#[test]
+fn matins_is_shown_coming_soon_under_night() {
+    let about = crate::about();
+    let night = &about.periods[0];
+    assert_eq!(night.label, "Night");
+    let matins = &night.hours[0];
+    assert_eq!((matins.hour.as_str(), matins.name.as_str(), matins.gloss.as_str()), ("matins", "Matins", "The night office"));
+    assert!(matins.coming_soon && matins.sign == "star" && matins.angle == 270.0);
+    assert!(about.periods[1..].iter().flat_map(|p| &p.hours).all(|h| !h.coming_soon && h.sign != "star"));
+    assert_eq!(about.coming_soon, "coming soon");
+    assert_eq!((about.horologium_height, about.horologium_night_depth), (160.0, 22.0));
+    let home = crate::home_night();
+    assert_eq!((home.label.as_str(), home.hour.as_str(), home.name.as_str()), ("Night", "matins", "Matins"));
+    assert_eq!((home.gloss.as_str(), home.coming_soon.as_str()), ("The night office", "coming soon"));
+    assert!(crate::reminder_periods().iter().all(|p| !p.hours.iter().any(|h| h == "matins")));
+    let core = OfficeCore::new().unwrap();
+    let today = civil(2026, 3, 15);
+    for hour in 0..24 {
+        assert_ne!(core.home(today, today, hour).unwrap().current_hour, "matins", "{hour}");
+    }
+}
+
 /// About's specimen sets lines an hour prints, as it prints them (the ✠ where it falls, the
 /// rubric's own words), and each form's greeting is the one that form's hour gives.
 #[test]

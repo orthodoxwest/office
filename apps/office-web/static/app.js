@@ -3817,6 +3817,10 @@ function plainClickOpensHere(e, link) {
       var isCurrent = info.offset === 0 && row.getAttribute("data-hour") === info.slug;
       row.classList.toggle("is-current", isCurrent);
       var link = row.querySelector("dt a");
+      // Matins is no link until the app prays it (presentation::hour_coming_soon).
+      if (!link) {
+        return;
+      }
       if (isCurrent) {
         link.setAttribute("aria-current", "time");
       } else {
@@ -6535,7 +6539,9 @@ function plainClickOpensHere(e, link) {
   // sun/moon smoothly across the painted sky and previews that hour below.
   var horologium = page.querySelector(".about-horologium");
   if (horologium) {
-    var CX = 160, CY = 128, RX = 118, RY = 104;
+    // presentation::about::about_horologium_point: the day's arc 104 above the horizon, the
+    // night's course NIGHT_RY under it (ABOUT_HOROLOGIUM_NIGHT_DEPTH), in a 320×160 box.
+    var CX = 160, CY = 128, RX = 118, RY = 104, NIGHT_RY = 22, H = 160;
     var DAWN_RAD = (168 * Math.PI) / 180;
     var DAWN_X = CX + Math.cos(DAWN_RAD) * RX;
     var DAWN_Y = CY - Math.sin(DAWN_RAD) * RY;
@@ -6558,6 +6564,7 @@ function plainClickOpensHere(e, link) {
         time: btn.getAttribute("data-time"),
         angle: parseFloat(btn.getAttribute("data-angle")) || 90,
         night: btn.getAttribute("data-night") === "true",
+        sign: btn.getAttribute("data-sign") || "sun",
       };
       stopList.push(item);
       stopBySlug[item.slug] = item;
@@ -6571,14 +6578,21 @@ function plainClickOpensHere(e, link) {
     function placeOrb(deg) {
       var rad = (deg * Math.PI) / 180;
       var x = CX + Math.cos(rad) * RX;
-      var y = CY - Math.sin(rad) * RY;
+      var y = CY - Math.sin(rad) * (Math.sin(rad) >= 0 ? RY : NIGHT_RY);
       if (orb) orb.setAttribute("transform", "translate(" + x.toFixed(1) + ", " + y.toFixed(1) + ")");
       if (wash) {
         wash.setAttribute("cx", (x / 320 * 100).toFixed(1) + "%");
-        wash.setAttribute("cy", (y / 144 * 100).toFixed(1) + "%");
+        wash.setAttribute("cy", (y / H * 100).toFixed(1) + "%");
       }
       if (litArc) {
-        litArc.setAttribute("d", "M " + DAWN_X.toFixed(1) + " " + DAWN_Y.toFixed(1) + " A " + RX + " " + RY + " 0 0 1 " + x.toFixed(1) + " " + y.toFixed(1));
+        // The gilt is the day so far: none from Lauds back round to Matins, the whole day once
+        // the sign has gone under past Night, fading as it nears Matins.
+        var d = ((deg % 360) + 360) % 360;
+        var ex = x, ey = y, k = 1;
+        if (d > 168 && d <= 270) k = 0;
+        else if (d > 270) { ex = CX + RX; ey = CY; k = Math.max(0, 1 - (360 - d) / 40); }
+        litArc.setAttribute("d", "M " + DAWN_X.toFixed(1) + " " + DAWN_Y.toFixed(1) + " A " + RX + " " + RY + " 0 0 1 " + ex.toFixed(1) + " " + ey.toFixed(1));
+        litArc.style.opacity = k === 1 ? "" : (0.78 * k).toFixed(2);
       }
     }
 
@@ -6600,6 +6614,7 @@ function plainClickOpensHere(e, link) {
       horologium.setAttribute("data-active", stop.slug);
       horologium.setAttribute("data-night", stop.night ? "true" : "false");
       if (orb) orb.classList.toggle("is-night", stop.night);
+      if (orb) orb.classList.toggle("is-star", stop.sign === "star");
       stopButtons.forEach(function (btn) {
         var on = btn.getAttribute("data-hour") === stop.slug;
         btn.classList.toggle("is-active", on);
@@ -6636,6 +6651,11 @@ function plainClickOpensHere(e, link) {
       updateReadout(stop, isPreview);
 
       var targetAngle = stop.angle;
+      // Matins stands under the horizon at 270° (−90°): the sign goes under by the nearer foot,
+      // and comes back up by the foot it went under.
+      if (stop.angle > 180) targetAngle = renderedAngle <= 90 ? stop.angle - 360 : stop.angle;
+      else if (renderedAngle < 0 && targetAngle > 90) renderedAngle += 360;
+      else if (renderedAngle > 180 && targetAngle <= 90) renderedAngle -= 360;
       if (animId) cancelAnimationFrame(animId);
       if ((reduced && reduced.matches) || Math.abs(targetAngle - renderedAngle) < 0.2) {
         renderedAngle = targetAngle;
@@ -6644,7 +6664,7 @@ function plainClickOpensHere(e, link) {
       }
       var startAngle = renderedAngle;
       var startTime = performance.now();
-      var duration = 420;
+      var duration = Math.abs(targetAngle - startAngle) > 100 ? 620 : 420;
       function step(now) {
         var t = Math.min(1, (now - startTime) / duration);
         // Smooth cubic ease-out along the painted arc.
@@ -6733,7 +6753,7 @@ function plainClickOpensHere(e, link) {
         var rect = stage.getBoundingClientRect();
         if (!rect.width || !rect.height) return renderedAngle;
         var svgX = ((e.clientX - rect.left) / rect.width) * 320;
-        var svgY = ((e.clientY - rect.top) / rect.height) * 144;
+        var svgY = ((e.clientY - rect.top) / rect.height) * H;
         var deg = (Math.atan2(CY - svgY, svgX - CX) * 180) / Math.PI;
         return Math.max(12, Math.min(168, deg));
       }

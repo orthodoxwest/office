@@ -7934,6 +7934,48 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+/* The Night's one office, alone and centred in its band: Matins, not yet
+   prayed in the app, so no link. Its name stands in the quiet ink and
+   "coming soon" is set under it in small capitals, where the day's form
+   ("twelve lessons") will stand once it is. */
+.page-home .home-hour-group-night .home-hour-group-links {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.page-home .home-hour-soon {
+  display: flex;
+  align-items: center;
+  cursor: default;
+}
+
+.page-home .home-hour-soon .home-hour-link-name {
+  color: color-mix(in srgb, var(--text) 55%, var(--muted));
+}
+
+.page-home .home-hour-soon:hover,
+:root[data-theme="dark"] .page-home .home-hour-soon:hover {
+  background: none;
+}
+
+.page-home .home-hour-soon::after {
+  content: none;
+}
+
+.page-home .home-hour-soon-mark {
+  color: color-mix(in srgb, var(--accent) 50%, var(--muted));
+  font-size: 0.72rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+}
+
+@media (min-width: 701px) {
+  .page-home .home-hour-soon-mark {
+    margin-top: 0.15rem;
+    font-size: 0.8rem;
+  }
+}
+
 .page-home .home-hour-link {
   position: relative;
   justify-content: center;
@@ -8688,10 +8730,12 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   --h-wash-1: rgba(34, 56, 88, 0.32);
 }
 
+/* 320×160: the day's 144 and the night's shallow course under the horizon, where
+   Matins stands (presentation::about::ABOUT_HOROLOGIUM_HEIGHT). */
 .about-horologium-stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 320 / 144;
+  aspect-ratio: 320 / 160;
   touch-action: pan-y;
 }
 
@@ -8734,6 +8778,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 .about-horologium[data-active="lauds"] .about-horologium-stars,
 .about-horologium[data-active="vespers"] .about-horologium-stars { opacity: 0.68; }
 .about-horologium[data-active="compline"] .about-horologium-stars { opacity: 0.88; }
+.about-horologium[data-active="matins"] .about-horologium-stars { opacity: 0.96; }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .about-horologium-stars {
@@ -8757,6 +8802,16 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   stroke-width: 0.6;
   stroke-dasharray: 2 4;
   opacity: 0.32;
+}
+
+/* The night's course under the horizon, in the inner ring's dots, let go
+   under the words Dawn and Night (its mask). */
+.about-horologium-under {
+  fill: none;
+  stroke: var(--lining);
+  stroke-width: 0.6;
+  stroke-dasharray: 2 4;
+  opacity: 0.42;
 }
 
 .about-horologium-arc {
@@ -8787,12 +8842,23 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 }
 
 .about-horologium-sun,
-.about-horologium-moon {
+.about-horologium-moon,
+.about-horologium-star {
   fill: var(--ornament);
   transition: opacity 0.25s ease;
 }
 
-.about-horologium-moon {
+.about-horologium-moon,
+.about-horologium-star {
+  opacity: 0;
+}
+
+/* Matins: the night's star, in place of the sun and moon. */
+.about-horologium-orb.is-star .about-horologium-star {
+  opacity: 1;
+}
+
+.about-horologium-orb.is-star :is(.about-horologium-sun, .about-horologium-moon) {
   opacity: 0;
 }
 
@@ -8854,11 +8920,12 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   border-radius: 50%;
 }
 
+/* Where it stood over the day's 144 (22% up), now that the night adds 16. */
 .about-horologium-readout {
   position: absolute;
   left: 14%;
   right: 14%;
-  bottom: 22%;
+  bottom: 29.8%;
   text-align: center;
   pointer-events: none;
 }
@@ -8997,6 +9064,22 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   display: block;
   color: var(--muted);
   font-size: 0.84rem;
+}
+
+/* Matins, shown and not yet prayed in the app: its name is no link and stands
+   in the quiet ink, and "coming soon" follows its time in small capitals, as
+   on home. */
+.about-hour-soon-name {
+  color: var(--muted);
+}
+
+.about-hour-soon {
+  display: block;
+  color: color-mix(in srgb, var(--accent) 50%, var(--muted));
+  font-size: 0.78rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.14em;
+  line-height: 1.3;
 }
 
 /* One name column for the seven, as wide as the widest name (the apps
