@@ -225,17 +225,18 @@ clone of `master`.
 The **Publish to Play** workflow (`.github/workflows/play.yml`) builds the bundle from `master`
 and uploads it to Google Play.
 
-- **Every merge to `master` that changes the app** goes to Internal testing and Closed testing
-  at once, with the release notes since the last production release. Internal testing skips Google's
-  review and reaches the maintainers within minutes, so a bad build shows there first; Closed
-  testing reaches testers once the review passes (usually hours), and a newer merge replaces a
-  release still in review.
+- **Every merge to `master` that changes the app** goes to Internal testing, with the release
+  notes since the last production release. Internal testing skips Google's review and reaches the
+  maintainers within minutes, so a bad build shows there first. Once a day the **Promote to
+  production** workflow (below) moves Internal's newest build up to Closed testing, which reaches
+  testers once Google's review passes (usually hours).
 - **The release notes** ("What's new") are the note files under `release-notes/` that pull
   requests add for notable changes (`release-notes/README.md`), never anything taken from the
   merge. A testing upload carries every note added since the newest `android/` tag (what
   production last had out), so testers see what the public has yet to get; with none, the
   standing line "Corrections to the texts and improvements to the app." A note alone uploads
-  nothing; the next app change carries it. A manual run's notes replace them.
+  nothing; the next app change carries it. A manual run's notes replace them. Closed testing
+  gets the notes the build carried on Internal testing.
 - **The public** gets a build when the **Promote to production** workflow moves it there (below),
   or when you promote it in Play Console (*Closed testing → Promote release → Production*); either
   way it is the exact build testers have been running. A manual run of Publish to Play can also upload to any
@@ -259,27 +260,29 @@ done by hand in Play Console.
 ### Promoting to production
 
 The **Promote to production** workflow (`.github/workflows/play-promote.yml`,
-`scripts/play-promote.py`) moves a build from Closed testing to production through the Play API,
-by its version code, without rebuilding. Its release notes are the notes added since
-production's newest *completed* build, so each note goes out once on Android; a staged, halted or
-replaced release may never reach everyone, so its notes go again with the release after it. Each
-run then tags that completed build (`android/0.1.<code>`) as the record, in a job of its own that
-alone holds a token able to push.
+`scripts/play-promote.py`) moves builds up Play's tracks through the Play API, by version code,
+without rebuilding: from Internal testing to Closed testing, and from there to production. Its
+production release notes are the notes added since production's newest *completed* build, so
+each note goes out once on Android; a staged, halted or replaced release may never reach
+everyone, so its notes go again with the release after it. Each run then tags that completed
+build (`android/0.1.<code>`) as the record, in a job of its own that alone holds a token able to
+push.
 
 - **Every day** at 15:00 UTC: a staged rollout the workflow started two days before is
-  finished (all users). Otherwise the newest build uploaded to Closed testing at least 24 hours
-  before, if it is newer than production's, goes to 20% of users. So a merge reaches a fifth of
-  the public 1 to 2 days after testers get it, and everyone two days later. Google's review of
-  each new release (usually hours) comes out of the 20% stage. A build's upload time is when its
-  Publish to Play run finished.
-- **The `hold` track** keeps a build back for that day. Merges land more than once a day, so the
-  build on Closed testing now is seldom a day old, and Play's API cannot release a build a later
-  merge has replaced on Internal and Closed testing (Play Console still lists it, but the API
-  answers "APK version codes could not be found"). So each daily run also puts Closed testing's
-  newest build on `hold`, a closed testing track with no testers, and leaves it there until
-  production has it or something newer; a later run promotes it once it is a day old. The run
-  creates the track if it is missing. If Play refuses (the run warns), create a closed testing
-  track named `hold` in Play Console (*Testing → Closed testing → Create track*), with no testers.
+  finished (all users). Otherwise Closed testing's build, if it is newer than production's and
+  has been there a day (20 hours, as GitHub starts scheduled runs late), goes to 20% of users.
+  Then, once production has Closed testing's build (at any share), Internal testing's newest build
+  moves up to Closed testing. So testers get one build a day, the public a fifth of it a day
+  later and everyone two days after that. Google's review of each release (usually hours) comes
+  out of those stages.
+- **Why a day on Closed testing, not a day since upload:** Play's API can release only a build
+  some track still holds. Merges land more than once a day and each replaces the build on Internal
+  testing, so a build picked from older uploads is usually gone ("APK version codes could not be
+  found"), though Play Console still lists it. A build on Closed testing stays there until the
+  workflow moves the next one up, which waits until production has it.
+- **The Closed testing release's name** ("0.1.130 tested from 2026-11-13T15:00Z") records when
+  the workflow moved it there. A build put on Closed testing another way (by hand, or a manual
+  run of Publish to Play) has no such name and counts as a day old.
 - **The staged release's name** in Play Console ("0.1.120 staged 2026-11-12T15:00Z") records when
   it started; that is how the next runs know its age.
 - **Halting** a rollout in Play Console (*Production → Halt rollout*), or starting one there,
