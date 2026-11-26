@@ -51,12 +51,25 @@ final class CoreTests: XCTestCase {
         let page = about()
         XCTAssertFalse(page.title.isEmpty)
         XCTAssertFalse(page.kicker.isEmpty)
+        // Matins first, under the Night, coming soon; then the seven the app prays.
+        XCTAssertEqual(page.periods.map(\.label), ["Night", "Morning", "Day", "Evening"])
         let hours = page.periods.flatMap(\.hours)
-        XCTAssertEqual(hours.map(\.hour), hourNames())
-        XCTAssertEqual(hours.count, 7)
-        XCTAssertEqual(hours.first?.night, false)
+        XCTAssertEqual(hours.map(\.hour), ["matins"] + hourNames())
+        XCTAssertEqual(hours.filter { !$0.comingSoon }.map(\.hour), hourNames())
+        XCTAssertEqual(hours.count, 8)
+        XCTAssertEqual(hours.first?.sign, "star")
+        XCTAssertEqual(hours.first?.angle, 270)
+        XCTAssertEqual(hours.dropFirst().first?.night, false)
         XCTAssertEqual(hours.last?.night, true)
+        XCTAssertEqual(hours.map(\.sign), ["star", "sun", "sun", "sun", "sun", "sun", "moon", "moon"])
         XCTAssertTrue(zip(hours, hours.dropFirst()).allSatisfy { $0.angle > $1.angle })
+        XCTAssertEqual(page.comingSoon, "coming soon")
+        XCTAssertEqual(page.horologiumHeight, 160)
+        XCTAssertEqual(page.horologiumNightDepth, 22)
+        // The epigraph is two verses, one to a line, and no note follows the hours.
+        let verse = page.blocks.first { $0.kind == "verse" }
+        XCTAssertEqual(verse?.text.split(separator: "\n").count, 2)
+        XCTAssertFalse(page.blocks.contains { $0.kind == "note" && $0.text.contains("Matins") })
         XCTAssertFalse(page.specimen.aloneVersicle.isEmpty)
         XCTAssertFalse(page.specimen.priestVersicle.isEmpty)
         XCTAssertFalse(page.specimen.deaconNote.isEmpty)
@@ -89,9 +102,66 @@ final class CoreTests: XCTestCase {
         XCTAssertTrue(time("sext").hasPrefix("solar noon · "), time("sext"))
         XCTAssertTrue(time("vespers").hasPrefix("sunset · "), time("vespers"))
         XCTAssertEqual(time("compline"), periods.last?.hours.last?.time)
-        XCTAssertEqual(time("prime"), periods.first?.hours.last?.time)
+        XCTAssertEqual(time("prime"), periods.flatMap(\.hours).first { $0.hour == "prime" }?.time)
+        // Matins is not timed by the sun: it keeps its words, and that it is coming soon.
+        XCTAssertEqual(hours.first, periods.first?.hours.first)
         XCTAssertEqual(aboutSunTime(hour: "lauds", clock: "6:48 AM"), "sunrise · 6:48 am")
         XCTAssertEqual(aboutTimeSpoken(time: "sunrise · 6:48 am"), "sunrise, 6:48 am")
+    }
+
+    /// Home's Night row is Matins, coming soon, in the core's words; its sign is the night's star,
+    /// and dims with the others' when another hour is now, as it is never the hour that is now.
+    func testHomeSetsMatinsUnderTheNightComingSoon() throws {
+        let night = homeNight()
+        XCTAssertEqual(night.label, "Night")
+        XCTAssertEqual(night.hour, "matins")
+        XCTAssertEqual(night.name, "Matins")
+        XCTAssertEqual(night.gloss, "The night office")
+        XCTAssertEqual(night.comingSoon, "coming soon")
+        XCTAssertEqual(Period.named(night.label), .night)
+        XCTAssertEqual(Period.named("Evening"), .evening)
+        XCTAssertFalse(hourNames().contains(night.hour))
+        XCTAssertEqual(periodSignAlpha([night.hour], "terce"), 0.52)
+        XCTAssertEqual(periodSignAlpha([night.hour], ""), 0.9)
+        let core = try Office.core.get()
+        let today = CivilDate(year: 2026, month: 3, day: 15)
+        for hour in 0..<24 {
+            XCTAssertNotEqual(try core.home(date: today, today: today, clockHour: Int32(hour)).currentHour, "matins", "\(hour)")
+        }
+    }
+
+    /// The Horologium's sign goes under the horizon to Matins by the nearer foot, and comes back
+    /// up by the foot nearer the hour it goes to, never across the sky; a long move is said so.
+    func testTheHorologiumGoesUnderToMatinsByTheNearerFoot() {
+        // From Compline (10°) through Night to −90°; from Lauds (168°) through Dawn to 270°.
+        XCTAssertEqual(horologiumGlide(from: 10, to: 270).end, -90)
+        XCTAssertEqual(horologiumGlide(from: 168, to: 270).end, 270)
+        XCTAssertEqual(horologiumGlide(from: 90, to: 270).end, -90)
+        // Back up: to Lauds by Dawn, to Compline by Night, wherever it went under.
+        XCTAssertEqual(horologiumGlide(from: -90, to: 168).end, -192)
+        XCTAssertEqual(horologiumGlide(from: 270, to: 168).end, 168)
+        XCTAssertEqual(horologiumGlide(from: -90, to: 10).end, 10)
+        XCTAssertEqual(horologiumGlide(from: 270, to: 10).end, 370)
+        // On the day's arc a move is as it was; a whole turn on is the same place.
+        XCTAssertEqual(horologiumGlide(from: 168, to: 90).end, 90)
+        XCTAssertEqual(horologiumGlide(from: 370, to: 34).end, 394)
+        XCTAssertEqual(horologiumGlide(from: 168, to: 156).span, 12)
+        XCTAssertEqual(horologiumGlide(from: 10, to: 270).span, 100)
+        XCTAssertEqual(horologiumGlide(from: 156, to: 270).span, 114)
+        XCTAssertEqual(horologiumGlide(from: 270, to: 168).span, 102)
+        XCTAssertEqual(horologiumGlide(from: 0, to: 0).span, 0)
+        // The gilt day: so far on the day's arc; none between Lauds and Matins; past Night the
+        // whole day, fading in on the way down to Matins and dark on the way back up.
+        XCTAssertEqual(horologiumLit(angle: 90).to, 90)
+        XCTAssertEqual(horologiumLit(angle: 90).k, 1)
+        XCTAssertEqual(horologiumLit(angle: 90, rising: true).k, 1)
+        XCTAssertEqual(horologiumLit(angle: 200).k, 0)
+        XCTAssertEqual(horologiumLit(angle: 270).k, 0)
+        XCTAssertEqual(horologiumLit(angle: -90).k, 0)
+        XCTAssertEqual(horologiumLit(angle: -10).k, 0.75, accuracy: 1e-9)
+        XCTAssertEqual(horologiumLit(angle: -10).to, 0)
+        XCTAssertEqual(horologiumLit(angle: -10, rising: true).k, 0)
+        XCTAssertEqual(horologiumLit(angle: 350, rising: true).k, 0)
     }
 
     /// About lights the hour home lights, none from midnight to 2 am, and ends with home's invitation.

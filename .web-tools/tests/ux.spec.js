@@ -646,15 +646,16 @@ test("the invitation names First Vespers on the eve of a feast", async ({ page }
   expect(await tablet()).toBe(plain);
 });
 
-// While an hour is now its period's sign is lit and the other two stand back;
-// with no hour now all three rest alike (the apps' periodSignAlpha).
+// While an hour is now its period's sign is lit and the others stand back
+// (Night's too, while Matins is not yet prayed here); with no hour now all
+// four rest alike (the apps' periodSignAlpha).
 test("home lights the sign of the period whose hour is now", async ({ page }) => {
   const signs = () => page.locator(".home-period-ornament").evaluateAll((els) => els.map((el) => getComputedStyle(el).opacity));
   await page.clock.setFixedTime(new Date("2026-03-15T18:00:00-04:00"));
   await openDatedPage(page, `/?date=${testDate}`);
-  await expect.poll(signs).toEqual(["0.52", "0.52", "1"]);
+  await expect.poll(signs).toEqual(["0.52", "0.52", "0.52", "1"]);
   await openDatedPage(page, "/?date=2026-03-16");
-  await expect.poll(signs).toEqual(["0.9", "0.9", "0.9"]);
+  await expect.poll(signs).toEqual(["0.9", "0.9", "0.9", "0.9"]);
 });
 
 // The wide niche glosses every hour in its table and leaves the invitation
@@ -1439,6 +1440,7 @@ test("an upright tablet's niche fills the page and keeps the hours in view", asy
   // At a laptop's size it took two-thirds of an iPad's width and left a third
   // of the screen bare below it. Upright, the niche is a lancet: narrower
   // than the screen, but it takes the screen's height down to "Change date".
+  // (With the Night band a 12.9" iPad's lancet takes 58% of its width.)
   for (const [width, height] of [[820, 1180], [834, 1194], [1024, 1366]]) {
     await page.setViewportSize({ width, height });
     await openDatedPage(page, `/?date=${testDate}`);
@@ -1452,10 +1454,21 @@ test("an upright tablet's niche fills the page and keeps the hours in view", asy
         overflow: document.documentElement.scrollWidth - innerWidth,
       };
     });
-    expect(niche.share, `${width}x${height}`).toBeGreaterThan(0.6);
+    expect(niche.share, `${width}x${height}`).toBeGreaterThan(0.55);
     expect(niche.height, `${width}x${height}: the niche takes the height`).toBeGreaterThan(0.75);
     expect(niche.metaBottom, `${width}x${height}: "Change date" in view`).toBeLessThan(height);
     expect(niche.overflow, `${width}x${height}`).toBeLessThanOrEqual(0);
+  }
+});
+
+// A laptop's 768px keeps "Change date" in view: the Night's band, Matins not
+// yet a target, is one line in the glossed table, not a row.
+test("a 768px laptop keeps Change date above the fold", async ({ page }) => {
+  for (const [width, height] of [[1366, 768], [1024, 768], [1280, 800]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const meta = await page.evaluate(() => document.querySelector(".home-day-meta").getBoundingClientRect().bottom);
+    expect(meta, `${width}x${height}: "Change date" in view`).toBeLessThanOrEqual(height);
   }
 });
 
@@ -1491,7 +1504,7 @@ test("the wide niche glosses every hour and keeps the day and the hours above th
       await openDatedPage(page, `/?date=${date}`);
       const niche = await nicheOnGlass(page);
       const at = `${width}x${height} ${date}`;
-      expect(niche.notes, `${at}: every hour glossed`).toBe(7);
+      expect(niche.notes, `${at}: every hour glossed, Matins too`).toBe(8);
       expect(niche.smallestNote, `${at}: glosses legible`).toBeGreaterThanOrEqual(12);
       for (const part of ["date", "feast", "pray", "hours"]) {
         expect(niche[part], `${at}: ${part} above the fold`).toBeLessThanOrEqual(height);
@@ -1538,7 +1551,7 @@ test("the wide niche scales by one computed zoom, never under its least", async 
 });
 
 test("the wide niche sets the hours one to a line where its heaviest day fits them, a glossed table below", async ({ page }) => {
-  // Upright from 1000px high; on its side from 1146px, where the list's
+  // Upright from 1000px high; on its side from 1203px, where the list's
   // heaviest day fits at the least zoom (below that it was clamped and ran
   // under the fold).
   const rows = async () =>
@@ -1546,7 +1559,7 @@ test("the wide niche sets the hours one to a line where its heaviest day fits th
       const top = (hour) => Math.round(document.querySelector(`.home-hour-link[data-hour="${hour}"]`).getBoundingClientRect().top);
       return { lauds: top("lauds"), prime: top("prime"), terce: top("terce"), none: top("none") };
     });
-  for (const [width, height, list] of [[1280, 800, false], [1180, 820, false], [1728, 1030, false], [1920, 1080, false], [1920, 1200, true], [820, 1180, true]]) {
+  for (const [width, height, list] of [[1280, 800, false], [1180, 820, false], [1728, 1030, false], [1920, 1080, false], [1920, 1200, false], [1920, 1210, true], [820, 1180, true]]) {
     await page.setViewportSize({ width, height });
     await openDatedPage(page, `/?date=${testDate}`);
     const at = await rows();
@@ -1620,7 +1633,7 @@ test("the zoomed niche's hand-ruled joints fall between the periods", async ({ p
         return Math.abs((box.top + box.bottom) / 2 - groups[i].getBoundingClientRect().top);
       });
     });
-    expect(drift.length, `${width}x${height}`).toBe(2);
+    expect(drift.length, `${width}x${height}`).toBe(3);
     for (const d of drift) expect(d, `${width}x${height}: joint on the period's edge`).toBeLessThanOrEqual(2);
   }
 });
@@ -2112,9 +2125,14 @@ const CROWN_LIGHT = {
 // (dusk: arch back 1.18, wall step 15.76 and kick 2.51, card step 15.49 and
 // kick 3.22, faint 7, after 3.64; dawn: arch step 16.05, wall step 24.79 and
 // kick 8.35, card step 18.28 and kick 4.06, faint 8, after 2.94.)
+// WebKit leaves the hours' rows blank from the turn on in this held play,
+// on master too (#986), so its ink is the invitation's alone; since the
+// Night band gave the rows more of the card, that reads 1.93 after dusk
+// and 1.88 after dawn, under 2:1 for 20 and 23 moments. Its ink bounds are
+// those figures with a fifth to spare until #986 is mended.
 const CROWN_LIGHT_WEBKIT = {
-  dusk: { ...CROWN_LIGHT.dusk, wall: { back: 2, step: 24, kick: 4 }, card: { back: 2, step: 23.5, kick: 5 }, faint: 11 },
-  dawn: { ...CROWN_LIGHT.dawn, wall: { back: 5, step: 37, kick: 12.5 }, card: { back: 2, step: 27.5, kick: 7 }, faint: 12, after: 2.5 },
+  dusk: { ...CROWN_LIGHT.dusk, wall: { back: 2, step: 24, kick: 4 }, card: { back: 2, step: 23.5, kick: 5 }, faint: 24, after: 1.6 },
+  dawn: { ...CROWN_LIGHT.dawn, wall: { back: 5, step: 37, kick: 12.5 }, card: { back: 2, step: 27.5, kick: 7 }, faint: 27, after: 1.6 },
 };
 for (const dir of ["dusk", "dawn"]) {
   test(`the crown's ${dir} moves its light one way, without a leap, and keeps the hours readable`, async ({ page }, testInfo) => {
@@ -3048,7 +3066,7 @@ test("desktop frontispiece fits its breakpoint and reader sizes", async ({ page 
 
       const geometry = await page.evaluate(() => {
         const hero = document.querySelector(".home-hero").getBoundingClientRect();
-        const targetHeights = Array.from(document.querySelectorAll(".home-hour-link")).map(
+        const targetHeights = Array.from(document.querySelectorAll("a.home-hour-link")).map(
           (link) => link.getBoundingClientRect().height,
         );
         return {
@@ -7762,9 +7780,10 @@ test("subtle details: Horologium stars and keys, Specimen clergy note and revers
   expect(await page.locator(".about-horologium-stars path").count()).toBe(8);
   expect(await page.locator(".about-horologium-stars circle").count()).toBe(0);
   const firstStop = page.locator(".about-horologium-stop").first();
+  // The stops run from Matins, in the night, through the day to Compline.
   await firstStop.focus();
   await page.keyboard.press("ArrowRight");
-  await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "prime");
+  await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "lauds");
   await expect(page.locator(".about-horologium-title em .sr-only")).toHaveText(", ");
   await page.keyboard.press("End");
   await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "compline");

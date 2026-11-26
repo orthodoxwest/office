@@ -371,8 +371,18 @@ pub fn hour_gloss(slug: &str) -> &'static str {
         "none" => "Afternoon prayer",
         "vespers" => "Evening prayer",
         "compline" => "Prayer before sleep",
+        "matins" => "The night office",
         _ => "",
     }
+}
+
+/// What an hour the app does not yet pray says in its place on home and About: Matins, until
+/// its texts are in. Set in small capitals under the hour's name, which is not a link.
+pub const COMING_SOON: &str = "coming soon";
+
+/// Whether an hour is shown but not yet prayed in the app ([`COMING_SOON`]).
+pub fn hour_coming_soon(slug: &str) -> bool {
+    slug == "matins"
 }
 
 /// How fast home's mark of an hour prayed lets a reader go: words a second, a quick silent

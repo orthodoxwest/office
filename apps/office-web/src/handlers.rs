@@ -448,6 +448,7 @@ impl Server {
             pray_now_eve: invite.eve,
             pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
             hours,
+            night: Default::default(),
         };
         match self.pages.home(&data) {
             Ok(body) => html(StatusCode::OK, body),

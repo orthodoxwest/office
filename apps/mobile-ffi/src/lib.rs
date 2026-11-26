@@ -1326,8 +1326,11 @@ pub struct AboutBlockView {
 }
 
 /// An hour on the About page's table and Horologium: its slug, name, what it is, when it is said,
-/// its angle along the solar arc (degrees, 180 = dawn, 90 = noon, 0 = night), and whether the
-/// Horologium marks it with the crescent moon.
+/// its angle along the Horologium (degrees, 180 = dawn, 90 = noon, 0 = night; 270 = Matins, under
+/// the horizon on the noon axis), and whether the Horologium marks it with the crescent moon.
+/// `sign` is the Horologium's mark for it: `star` (Matins), `moon` or `sun`. `coming_soon` is an
+/// hour shown but not yet prayed in the app (Matins): no link, and [`AboutView::coming_soon`]
+/// set under it.
 #[derive(Clone, Debug, PartialEq, uniffi::Record)]
 pub struct AboutHourView {
     pub hour: String,
@@ -1336,9 +1339,11 @@ pub struct AboutHourView {
     pub time: String,
     pub angle: f64,
     pub night: bool,
+    pub sign: String,
+    pub coming_soon: bool,
 }
 
-/// One of the table's periods (Morning, Day, Evening).
+/// One of the table's periods (Night, Morning, Day, Evening).
 #[derive(Clone, Debug, PartialEq, uniffi::Record)]
 pub struct AboutPeriodView {
     pub label: String,
@@ -1387,6 +1392,13 @@ pub struct AboutView {
     pub ordo_colors: Vec<AboutOrdoColorView>,
     /// What a screen reader hears for the year's ribbon of colors, which is drawn and not read.
     pub ribbon_label: String,
+    /// What an hour not yet prayed in the app says under its time ("coming soon").
+    pub coming_soon: String,
+    /// The Horologium's figure: 320 wide and `horologium_height` high (160), the horizon at 128,
+    /// the day's arc 118 × 104 above it and the night's course 118 × `horologium_night_depth`
+    /// (22) under it, where Matins stands (`presentation::about::about_horologium_point`).
+    pub horologium_height: f64,
+    pub horologium_night_depth: f64,
 }
 
 /// The hour it is now on the About page, as home has it: the hour its table lights (empty from
@@ -1470,8 +1482,8 @@ pub fn about() -> AboutView {
             AboutBlock::Invitation => block("invitation"),
         })
         .collect();
-    let periods = ABOUT_HOURS
-        .iter()
+    let periods = std::iter::once(&presentation::about::ABOUT_NIGHT)
+        .chain(ABOUT_HOURS.iter())
         .map(|(label, hours)| AboutPeriodView {
             label: (*label).into(),
             hours: hours
@@ -1483,6 +1495,8 @@ pub fn about() -> AboutView {
                     time: (*time).into(),
                     angle: about_horologium_angle(slug),
                     night: about_horologium_is_night(slug),
+                    sign: presentation::about::about_horologium_sign(slug).into(),
+                    coming_soon: presentation::hour_coming_soon(slug),
                 })
                 .collect(),
         })
@@ -1514,6 +1528,38 @@ pub fn about() -> AboutView {
         specimen,
         ordo_colors: ordo_colors(),
         ribbon_label: presentation::about::ABOUT_RIBBON_LABEL.into(),
+        coming_soon: presentation::COMING_SOON.into(),
+        horologium_height: presentation::about::ABOUT_HOROLOGIUM_HEIGHT,
+        horologium_night_depth: presentation::about::ABOUT_HOROLOGIUM_NIGHT_DEPTH,
+    }
+}
+
+/// Home's Night row, set before the day's three periods: Matins, which the app does not yet
+/// pray, so it is no link and takes no part in the hour now. The web's home.html sets the same.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct HomeNightView {
+    /// The period's name ("Night").
+    pub label: String,
+    /// The hour's slug ("matins") and name ("Matins").
+    pub hour: String,
+    pub name: String,
+    /// What it is ("The night office"), which the wide layouts set under the name.
+    pub gloss: String,
+    /// "coming soon", set under the name in small capitals.
+    pub coming_soon: String,
+}
+
+/// Home's Night row (Matins, coming soon).
+#[uniffi::export]
+pub fn home_night() -> HomeNightView {
+    let (label, hours) = presentation::about::ABOUT_NIGHT;
+    let hour = hours[0].0;
+    HomeNightView {
+        label: label.into(),
+        hour: hour.into(),
+        name: presentation::title_case(hour),
+        gloss: presentation::hour_gloss(hour).into(),
+        coming_soon: presentation::COMING_SOON.into(),
     }
 }
 

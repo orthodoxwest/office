@@ -58,7 +58,7 @@ func aboutSunPeriods(_ periods: [AboutPeriodView], sun: [String: (hour: Int, min
             else { return h }
             let time = aboutSunTime(hour: h.hour, clock: date.formatted(date: .omitted, time: .shortened))
             if time.isEmpty { return h }
-            return AboutHourView(hour: h.hour, name: h.name, gloss: h.gloss, time: time, angle: h.angle, night: h.night)
+            return AboutHourView(hour: h.hour, name: h.name, gloss: h.gloss, time: time, angle: h.angle, night: h.night, sign: h.sign, comingSoon: h.comingSoon)
         })
     }
 }
@@ -206,6 +206,9 @@ struct AboutScreen: View {
             AboutHorologium(
                 periods: periods,
                 current: current,
+                height: view.horologiumHeight,
+                nightDepth: view.horologiumNightDepth,
+                comingSoon: view.comingSoon,
                 pinned: pinnedHour,
                 onSelect: { slug in pinnedHour = pinnedHour == slug ? nil : slug },
                 onPin: { slug in pinnedHour = slug }
@@ -213,7 +216,8 @@ struct AboutScreen: View {
             AboutHoursDirectory(
                 periods: periods,
                 current: current,
-                preview: pinnedHour != current ? pinnedHour : nil
+                preview: pinnedHour != current ? pinnedHour : nil,
+                comingSoon: view.comingSoon
             )
             if !parsed.hoursNote.isEmpty {
                 Text(parsed.hoursNote)
@@ -505,14 +509,60 @@ private struct AboutSectionHeading: View {
 }
 
 /**
+ * Where the Horologium's sign goes from `from` (its angle as it stands, unwrapped by whole turns)
+ * for an hour at `angle`, as the web's: Matins stands under the horizon at 270° (−90°), and the sign
+ * goes under to it by the nearer foot (through Night from an hour at 90° or less, else through
+ * Dawn) and comes back up by the foot nearer the hour it goes to, never sweeping across the sky.
+ * Gives the angle to animate to (unwrapped as `from` is) and how far the sign travels.
+ */
+func horologiumGlide(from: Double, to angle: Double) -> (end: Double, span: Double) {
+    // As the web holds it, in [−90°, 270°).
+    let start = from - 360 * floor((from + 90) / 360)
+    var a = start
+    var b = angle
+    if angle > 180 {
+        b = a <= 90 ? angle - 360 : angle
+    } else if a < 0 && b > 90 {
+        a += 360
+    } else if a > 180 && b <= 90 {
+        a -= 360
+    }
+    return (from + (b - a), abs(b - a))
+}
+
+/**
+ * The gilt day on the Horologium for the sign at `angle` (unwrapped): how far round from Lauds
+ * (168°) it reaches and its strength. The day so far; none while the sign is between Lauds and
+ * Matins; once it has gone under past Night, the whole day (to 0°), fading to nothing as it nears
+ * Matins. While it comes back up from under the horizon by the Night foot (`rising`: the drawn
+ * angle increasing) there is none: the gilt fades in only on the way down to Matins (app.js's
+ * `placeOrb`, its `lastDeg` and `rising`).
+ */
+func horologiumLit(angle: Double, rising: Bool = false) -> (to: Double, k: Double) {
+    let turned = angle.truncatingRemainder(dividingBy: 360)
+    let d = turned < 0 ? turned + 360 : turned
+    if d > 168 && d <= 270 { return (0, 0) }
+    if d > 270 { return (0, rising ? 0 : max(0, 1 - (360 - d) / 40)) }
+    return (min(167.5, d), 1)
+}
+
+/**
  * The painted Horologium (Arc of the Day): a semicircular solar path with seven tappable stations
- * from Dawn to Night. Tapping any station glides the sun/moon smoothly along the arc and shifts
+ * from Dawn to Night, and Matins under the horizon on the noon axis at the foot of the night's
+ * dotted course (`presentation::about::about_horologium_point`). Tapping any station glides the
+ * sun/moon (the star at Matins) smoothly along the arc, under the horizon to Matins, and shifts
  * the theme-faithful wash (honest warm plaster light in Nave; vaulted night sky with subtle
  * gold-leaf stars and a travelling lantern halo in Apse).
  */
 private struct AboutHorologium: View {
     let periods: [AboutPeriodView]
     let current: String
+    /// The figure's height in its 320-wide units (160), and how deep the night's course dips
+    /// under the horizon at 128 (22).
+    let height: Double
+    let nightDepth: Double
+    /// "coming soon", said after Matins' stop.
+    let comingSoon: String
     let pinned: String?
     let onSelect: (String) -> Void
     let onPin: (String) -> Void
@@ -521,9 +571,21 @@ private struct AboutHorologium: View {
     @Environment(\.metrics) private var m
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var dragAngle: Double?
+    /// The sign's angle as the last move left it, unwrapped by whole turns so a move to or from
+    /// Matins goes under the horizon (`horologiumGlide`). Set on appearing and kept set after, so
+    /// that a glide always starts from where the sign is drawn: were it nil when the hour changes,
+    /// the sign would first be drawn at the new hour's own angle and sweep across the sky to it.
+    /// Nil only before the figure first appears, when it stands at the active hour's own.
+    @State private var orbAngle: Double?
+    /// Whether the last move took the sign's angle up, which keeps the gilt dark while it comes
+    /// back up from Matins (`horologiumLit`).
+    @State private var orbRising = false
+    /// The last move's length: a long one (over 100°, to or from Matins) takes longer.
+    @State private var glideDuration = 0.42
 
     private func starAlpha(for slug: String) -> Double {
         switch slug {
+        case "matins": return 0.96
         case "sext": return 0.24
         case "terce", "none": return 0.38
         case "prime": return 0.50
@@ -540,7 +602,7 @@ private struct AboutHorologium: View {
             let isNow = active.hour == current && !current.isEmpty
             let largeType = m.type > 1.35
             let readoutSpoken = "\(isNow ? "Now, " : "")\(aboutTimeSpoken(time: active.time)). \(active.name), \(active.gloss)"
-            let displayAngle = dragAngle ?? active.angle
+            let displayAngle = dragAngle ?? orbAngle ?? active.angle
             let stars = starAlpha(for: active.hour)
             let readout = VStack(spacing: m.px(1)) {
                 Text((isNow ? "Now · " : "") + active.time)
@@ -560,12 +622,16 @@ private struct AboutHorologium: View {
                         hours: hours,
                         activeSlug: active.hour,
                         activeNight: active.night,
+                        activeSign: active.sign,
                         angle: displayAngle,
+                        rising: orbRising,
                         starAlpha: stars,
+                        height: height,
+                        nightDepth: nightDepth,
                         p: p,
                         o: o
                     )
-                    .animation(reduceMotion || dragAngle != nil ? nil : .easeOut(duration: 0.42), value: displayAngle)
+                    .animation(reduceMotion || dragAngle != nil ? nil : .easeOut(duration: glideDuration), value: displayAngle)
                     .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: stars)
 
                     GeometryReader { geo in
@@ -580,52 +646,67 @@ private struct AboutHorologium: View {
                                     .onChanged { value in
                                         guard w > 0, h > 0 else { return }
                                         let svgX = Double(value.location.x / w) * 320.0
-                                        let svgY = Double(value.location.y / h) * 144.0
+                                        let svgY = Double(value.location.y / h) * height
+                                        // On the day's arc only: Matins is reached by a tap.
                                         let deg = min(168.0, max(12.0, atan2(128.0 - svgY, svgX - 160.0) * 180.0 / .pi))
                                         dragAngle = deg
-                                        if let nearest = hours.min(by: { abs($0.angle - deg) < abs($1.angle - deg) }) {
+                                        // The sign follows the finger, on the day's arc.
+                                        orbAngle = deg
+                                        orbRising = false
+                                        glideDuration = 0.42
+                                        if let nearest = hours.filter({ $0.angle <= 180 }).min(by: { abs($0.angle - deg) < abs($1.angle - deg) }) {
                                             onPin(nearest.hour)
                                         }
                                     }
                                     .onEnded { _ in
+                                        // It settles on the hour the finger left it nearest, from there.
+                                        if let deg = dragAngle, let nearest = hours.filter({ $0.angle <= 180 }).min(by: { abs($0.angle - deg) < abs($1.angle - deg) }) {
+                                            orbAngle = nearest.angle
+                                        }
                                         dragAngle = nil
                                     }
                             )
 
+                        // Under the horizon's ends, where they stood over the day's 144 units.
+                        let foot = h * CGFloat(144.0 / height) - 6
                         Text("Dawn").type(cardinal).foregroundStyle(p.muted)
-                            .position(x: w * (42.0 / 320.0) + 14, y: h - 6)
+                            .position(x: w * (42.0 / 320.0) + 14, y: foot)
                             .allowsHitTesting(false).accessibilityHidden(true)
                         Text("Noon").type(cardinal).foregroundStyle(p.muted)
                             .position(x: w / 2, y: 8)
                             .allowsHitTesting(false).accessibilityHidden(true)
                         Text("Night").type(cardinal).foregroundStyle(p.muted)
-                            .position(x: w * (278.0 / 320.0) - 14, y: h - 6)
+                            .position(x: w * (278.0 / 320.0) - 14, y: foot)
                             .allowsHitTesting(false).accessibilityHidden(true)
 
-                        // Centered readout inside the dome belly at standard Dynamic Type
+                        // Centered readout inside the dome belly at standard Dynamic Type, where it
+                        // stood over the day's 144 units.
                         if !largeType {
                             readout
                                 .frame(width: w * 0.72)
-                                .position(x: w / 2, y: h * 0.67)
+                                .position(x: w / 2, y: h * CGFloat(0.67 * 144.0 / height))
                                 .allowsHitTesting(false)
                         }
 
-                        // 44pt tap targets over each of the seven stations (Apple's minimum)
+                        // 44pt tap targets over each station (Apple's minimum), Matins' first
                         ForEach(Array(hours.enumerated()), id: \.offset) { _, hr in
                             let rad = hr.angle * .pi / 180.0
                             let px = w * CGFloat((160.0 + cos(rad) * 118.0) / 320.0)
-                            let py = h * CGFloat((128.0 - sin(rad) * 104.0) / 144.0)
+                            let ry: Double = sin(rad) >= 0 ? 104.0 : nightDepth
+                            let py = h * CGFloat((128.0 - sin(rad) * ry) / height)
                             Button { onSelect(hr.hour) } label: {
                                 Color.clear.frame(width: 44, height: 44).contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
                             .position(x: px, y: py)
-                            .accessibilityLabel("\(hr.name): \(hr.gloss), \(aboutTimeSpoken(time: hr.time))")
+                            // Matins' stop says it is coming, as the web's button: "Matins: The
+                            // night office, before dawn, coming soon".
+                            .accessibilityLabel("\(hr.name): \(hr.gloss), \(aboutTimeSpoken(time: hr.time))" + (hr.comingSoon ? ", \(comingSoon)" : ""))
                             .accessibilityAddTraits(hr.hour == active.hour ? .isSelected : [])
                         }
                     }
                 }
-                .aspectRatio(320.0 / 144.0, contentMode: .fit)
+                .aspectRatio(320.0 / height, contentMode: .fit)
 
                 if largeType {
                     readout
@@ -635,16 +716,42 @@ private struct AboutHorologium: View {
             }
             .padding(.top, m.px(3))
             .padding(.bottom, m.px(13.6))
+            .onAppear {
+                if orbAngle == nil { orbAngle = active.angle }
+            }
+            .onChange(of: active.hour) { old, new in
+                // While a finger drags the sign, it stands where the finger is.
+                guard let to = hours.first(where: { $0.hour == new })?.angle else { return }
+                if let drag = dragAngle {
+                    orbAngle = drag
+                    return
+                }
+                let from = orbAngle ?? hours.first(where: { $0.hour == old })?.angle ?? to
+                let move = horologiumGlide(from: from, to: to)
+                glideDuration = move.span > 100 ? 0.62 : 0.42
+                orbRising = move.end > from
+                orbAngle = move.end
+            }
         }
     }
 }
+
+/// The Horologium's star at Matins (about.html's `.about-horologium-star`), about its centre.
+private let horologiumStar = svg("M0,-4.2 L0.8,-1.05 L1.9,-1.9 L1.05,-0.8 L4.2,0 L1.05,0.8 L1.9,1.9 L0.8,1.05 L0,4.2 L-0.8,1.05 L-1.9,1.9 L-1.05,0.8 L-4.2,0 L-1.05,-0.8 L-1.9,-1.9 L-0.8,-1.05 Z")
 
 private struct HorologiumCanvas: View, Animatable {
     let hours: [AboutHourView]
     let activeSlug: String
     let activeNight: Bool
+    /// The active hour's sign: `star` (Matins), `moon` or `sun`.
+    let activeSign: String
+    /// The sign's angle, unwrapped by whole turns (`horologiumGlide`).
     var angle: Double
+    /// Whether the last move takes the sign's angle up (`horologiumLit`); not animated.
+    let rising: Bool
     var starAlpha: Double
+    let height: Double
+    let nightDepth: Double
     let p: Palette
     let o: Ornament
 
@@ -661,14 +768,14 @@ private struct HorologiumCanvas: View, Animatable {
             switch activeSlug {
             case "lauds", "vespers": return (Color(rgb: 208, 134, 102, 0.22), Color(rgb: 46, 72, 108, 0.28), Color(rgb: 18, 28, 40, 0))
             case "sext": return (Color(rgb: 232, 198, 122, 0.26), Color(rgb: 46, 72, 108, 0.26), Color(rgb: 18, 28, 40, 0))
-            case "compline": return (Color(rgb: 154, 182, 224, 0.22), Color(rgb: 34, 56, 88, 0.32), Color(rgb: 18, 28, 40, 0))
+            case "compline", "matins": return (Color(rgb: 154, 182, 224, 0.22), Color(rgb: 34, 56, 88, 0.32), Color(rgb: 18, 28, 40, 0))
             default: return (Color(rgb: 214, 178, 108, 0.22), Color(rgb: 46, 72, 108, 0.28), Color(rgb: 18, 28, 40, 0))
             }
         } else {
             switch activeSlug {
             case "lauds", "vespers": return (Color(rgb: 196, 118, 92, 0.20), Color(rgb: 216, 166, 86, 0.08), Color(rgb: 250, 243, 233, 0))
             case "sext": return (Color(rgb: 224, 178, 86, 0.26), Color(rgb: 224, 178, 86, 0.09), Color(rgb: 250, 243, 233, 0))
-            case "compline": return (Color(rgb: 146, 134, 122, 0.16), Color(rgb: 146, 134, 122, 0.05), Color(rgb: 250, 243, 233, 0))
+            case "compline", "matins": return (Color(rgb: 146, 134, 122, 0.16), Color(rgb: 146, 134, 122, 0.05), Color(rgb: 250, 243, 233, 0))
             default: return (Color(rgb: 216, 166, 86, 0.22), Color(rgb: 216, 166, 86, 0.07), Color(rgb: 250, 243, 233, 0))
             }
         }
@@ -727,15 +834,19 @@ private struct HorologiumCanvas: View, Animatable {
     var body: some View {
         Canvas { ctx, size in
             let sx = size.width / 320
-            let sy = size.height / 144
+            let sy = size.height / CGFloat(height)
             let cx = 160 * sx
             let cy = 128 * sy
             let rx = 118 * sx
             let ry = 104 * sy
+            let nightRy = CGFloat(nightDepth) * sy
 
+            // presentation::about::about_horologium_point: the day's arc above the horizon, the
+            // night's shallow course under it.
             func arcPt(_ deg: Double, factor: CGFloat = 1) -> CGPoint {
                 let rad = deg * .pi / 180.0
-                return CGPoint(x: cx + CGFloat(cos(rad)) * rx * factor, y: cy - CGFloat(sin(rad)) * ry * factor)
+                let up = sin(rad) >= 0
+                return CGPoint(x: cx + CGFloat(cos(rad)) * rx * factor, y: cy - CGFloat(sin(rad)) * (up ? ry : nightRy) * factor)
             }
 
             let dome = ellipseArc(cx: cx, cy: cy, rx: rx, ry: ry, fromDeg: 180, toDeg: 0, close: true)
@@ -772,8 +883,8 @@ private struct HorologiumCanvas: View, Animatable {
                 }
             }
 
-            // Station ticks
-            for hr in hours {
+            // Station ticks; none for Matins, under the horizon
+            for hr in hours where hr.sign != "star" {
                 var tick = Path()
                 tick.move(to: arcPt(hr.angle, factor: 0.91))
                 tick.addLine(to: arcPt(hr.angle, factor: 1.0))
@@ -788,9 +899,34 @@ private struct HorologiumCanvas: View, Animatable {
             let main = ellipseArc(cx: cx, cy: cy, rx: rx, ry: ry, fromDeg: 180, toDeg: 0)
             ctx.stroke(main, with: .color(p.lining.opacity(0.52)), lineWidth: 1.15 * sx)
 
-            // Lit arc from Lauds (168°) to orb
-            let lit = ellipseArc(cx: cx, cy: cy, rx: rx, ry: ry, fromDeg: 168, toDeg: min(167.5, angle), steps: 40)
-            ctx.stroke(lit, with: .color(o.flat.opacity(0.78)), lineWidth: 1.5 * sx)
+            // Lit arc from Lauds (168°) to orb: the day so far (`horologiumLit`), none while the
+            // sign comes back up from under the horizon.
+            let gilt = horologiumLit(angle: angle, rising: rising)
+            if gilt.k > 0 {
+                let lit = ellipseArc(cx: cx, cy: cy, rx: rx, ry: ry, fromDeg: 168, toDeg: gilt.to, steps: 40)
+                ctx.stroke(lit, with: .color(o.flat.opacity(0.78 * gilt.k)), lineWidth: 1.5 * sx)
+            }
+
+            // The night's course under the horizon, from Night round to Dawn, in the inner ring's
+            // dots, let go toward each foot so it keeps clear of the words Dawn and Night.
+            let under = ellipseArc(cx: cx, cy: cy, rx: rx, ry: nightRy, fromDeg: 360, toDeg: 180)
+            let lining = p.lining.opacity(0.42)
+            ctx.stroke(
+                under,
+                with: .linearGradient(
+                    Gradient(stops: [
+                        .init(color: lining.opacity(0), location: 0),
+                        .init(color: lining.opacity(0), location: 0.13),
+                        .init(color: lining, location: 0.3),
+                        .init(color: lining, location: 0.7),
+                        .init(color: lining.opacity(0), location: 0.87),
+                        .init(color: lining.opacity(0), location: 1),
+                    ]),
+                    startPoint: CGPoint(x: 42 * sx, y: cy),
+                    endPoint: CGPoint(x: 278 * sx, y: cy)
+                ),
+                style: StrokeStyle(lineWidth: 0.6 * sx, dash: [2 * sx, 4 * sx])
+            )
 
             // Horizon line
             var horizon = Path()
@@ -827,12 +963,20 @@ private struct HorologiumCanvas: View, Animatable {
                     endRadius: haloR
                 )
             )
-            let gScale = (activeNight ? 0.80 : 0.875) * sx
-            let half = 12 * gScale
-            var glyph = ctx
-            glyph.translateBy(x: orb.x - half, y: orb.y - half)
-            glyph.scaleBy(x: gScale, y: gScale)
-            glyph.fill(activeNight ? moonPath : sunPath, with: .color(o.flat))
+            if activeSign == "star" {
+                // Matins: the night's star, the apse's eight rays about 17 units across.
+                var glyph = ctx
+                glyph.translateBy(x: orb.x, y: orb.y)
+                glyph.scaleBy(x: 2.05 * sx, y: 2.05 * sx)
+                glyph.fill(horologiumStar, with: .color(o.flat))
+            } else {
+                let gScale = (activeNight ? 0.80 : 0.875) * sx
+                let half = 12 * gScale
+                var glyph = ctx
+                glyph.translateBy(x: orb.x - half, y: orb.y - half)
+                glyph.scaleBy(x: gScale, y: gScale)
+                glyph.fill(activeNight ? moonPath : sunPath, with: .color(o.flat))
+            }
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
@@ -840,14 +984,17 @@ private struct HorologiumCanvas: View, Animatable {
 }
 
 /**
- * The seven hours in home's three periods, ruled as home's painted page: firm hand-ruled terracotta
+ * The hours in home's four periods, ruled as home's painted page: firm hand-ruled terracotta
  * frame above and below, medium dividers between periods, faint hairlines between hours inside a
- * period, and zero vertical rules or shaded cells.
+ * period, and zero vertical rules or shaded cells. Matins, under the Night, is not yet prayed in
+ * the app: no link, its name in the quiet ink, and `comingSoon` after its time.
  */
 private struct AboutHoursDirectory: View {
     let periods: [AboutPeriodView]
     let current: String
     let preview: String?
+    /// What an hour not yet prayed in the app says under its time ("coming soon").
+    let comingSoon: String
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
@@ -882,7 +1029,11 @@ private struct AboutHoursDirectory: View {
                     VStack(spacing: 0) {
                         ForEach(Array(period.hours.enumerated()), id: \.offset) { j, h in
                             if j > 0 { RuledDivider(color: hairInk, weight: 0.75, seed: UInt32(140 + i * 5 + j)) }
-                            row(h, nameWidth: nameWidth)
+                            if h.comingSoon {
+                                soonRow(h, nameWidth: nameWidth)
+                            } else {
+                                row(h, nameWidth: nameWidth)
+                            }
                         }
                     }
                 }
@@ -922,6 +1073,40 @@ private struct AboutHoursDirectory: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel([h.name, h.gloss, aboutTimeSpoken(time: h.time), isNow ? "now" : nil].compactMap { $0 }.joined(separator: ", "))
         .accessibilityAddTraits(.isButton)
+    }
+
+    /// An hour shown but not yet prayed in the app (Matins): set as a row, but no button and never
+    /// the hour that is now, its name in the muted ink and "coming soon" after its time in small
+    /// capitals. While the figure shows it (tapped there), it takes the preview's pool, as the others.
+    private func soonRow(_ h: AboutHourView, nameWidth: CGFloat) -> some View {
+        let isPreview = h.hour == preview
+        return HStack(alignment: .firstTextBaseline, spacing: m.px(10.4)) {
+            Text(h.name).type(nameStyle).foregroundStyle(p.muted)
+                .lineLimit(1)
+                .fixedSize()
+                .frame(width: nameWidth, alignment: .leading)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(h.gloss).type(TextStyle(size: 16.32, line: 20.9, italic: true)).foregroundStyle(p.text)
+                // "before dawn · coming soon", on the time's line, so the row stands as tall
+                // as the others (the web's `.about-hour-soon`).
+                HStack(alignment: .firstTextBaseline, spacing: m.px(4.7)) {
+                    Text(h.time).type(TextStyle(size: 13.44, line: 17.5)).foregroundStyle(p.muted)
+                    Text("·").type(TextStyle(size: 13.44, line: 17.5)).foregroundStyle(p.muted)
+                    SoonMark(text: comingSoon, size: 13.44, tracking: 0.12, leading: 1.3)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.vertical, m.px(7.7))
+        .padding(.leading, m.px(7))
+        .padding(.trailing, m.px(9))
+        .background {
+            if isPreview {
+                PoolAlongRow(alpha: 0.65)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel([h.name, h.gloss, aboutTimeSpoken(time: h.time), comingSoon].joined(separator: ", "))
     }
 }
 
@@ -1413,9 +1598,11 @@ private struct PoolAlongRow: View {
 }
 
 extension Period {
-    /// A period by its table's label, as the web's `period_ornament`: the moon for any but morning and day.
+    /// A period by its table's label, as the web's `period_ornament`: the star for the night, the
+    /// moon for any but night, morning and day.
     static func named(_ label: String) -> Period {
         switch label.lowercased() {
+        case "night": return .night
         case "morning": return .morning
         case "day": return .day
         default: return .evening

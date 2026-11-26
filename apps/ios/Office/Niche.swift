@@ -67,17 +67,17 @@ struct NicheFigures {
     let least: CGFloat
     let share: CGFloat
 
-    static let landscape = NicheFigures(card: 37.5, fit: 47.25, air: 1.6, least: 0.96, share: 0.62)
-    static let landscapeList = NicheFigures(card: 37.5, fit: 61, air: 1.6, least: 0.96, share: 0.62)
-    static let upright = NicheFigures(card: 34.5, fit: 48.75, air: 2.4, least: 0.9, share: 0.8)
-    static let uprightList = NicheFigures(card: 34.5, fit: 62.5, air: 2.4, least: 0.9, share: 0.8)
+    static let landscape = NicheFigures(card: 37.5, fit: 49.40625, air: 1.6, least: 0.96, share: 0.62)
+    static let landscapeList = NicheFigures(card: 37.5, fit: 64.75, air: 1.6, least: 0.96, share: 0.62)
+    static let upright = NicheFigures(card: 34.5, fit: 50.90625, air: 2.4, least: 0.9, share: 0.8)
+    static let uprightList = NicheFigures(card: 34.5, fit: 66.25, air: 2.4, least: 0.9, share: 0.8)
     static let short = NicheFigures(card: 37.5, fit: 35.25, air: 0.5, least: 0.5, share: 0.62)
 
     /// What is not zoomed above the niche (the header) and below it (the colophon), in rem.
     static let above: CGFloat = 5.0625
     static let below: CGFloat = 6.375
     /// The list of seven on a screen on its side, from this high (an upright one's from 1000).
-    static let listLandscape: CGFloat = 1146
+    static let listLandscape: CGFloat = 1203
     /// A short screen, to this high: the niche is fitted down to the invitation.
     static let shortHeight: CGFloat = 560
 }

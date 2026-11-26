@@ -86,6 +86,32 @@ pub struct HomeData {
     pub pray_now_eve: bool,
     pub pray_now_link: String,
     pub hours: Vec<HomeHourLink>,
+    /// The Night's row before the seven: Matins, not yet prayed in the app.
+    pub night: HomeNight,
+}
+
+/// Home's Night row: Matins under its period, with what it is and that it is coming soon
+/// (`presentation::about::ABOUT_NIGHT`, `presentation::COMING_SOON`). Its words are the same
+/// every day, so its default is the row.
+#[derive(Clone, Debug, Serialize)]
+pub struct HomeNight {
+    pub label: String,
+    pub name: String,
+    pub gloss: String,
+    pub coming_soon: String,
+}
+
+impl Default for HomeNight {
+    fn default() -> Self {
+        let (label, hours) = presentation::about::ABOUT_NIGHT;
+        let slug = hours[0].0;
+        HomeNight {
+            label: label.into(),
+            name: presentation::title_case(slug),
+            gloss: presentation::hour_gloss(slug).into(),
+            coming_soon: presentation::COMING_SOON.into(),
+        }
+    }
 }
 
 /// One prayer form's composition of the hour.
@@ -404,15 +430,18 @@ pub struct AboutData {
     pub chrome: Chrome,
     pub kicker: String,
     pub title: String,
-    pub verse_text: String,
+    /// The epigraph, a verse to a line.
+    pub verse_lines: Vec<String>,
     pub verse_cite: String,
     pub intro: String,
     pub hours_heading: String,
-    /// The seven hours in home's three bands.
+    /// Matins in the Night, then the seven hours in home's three bands.
     pub about_hours: Vec<AboutPeriod>,
-    /// Flat list of the seven hours with Horologium coordinates for the solar arc.
+    /// Flat list of the hours with Horologium coordinates for the arc of the day and the night.
     pub horologium: AboutHorologium,
     pub hours_note: String,
+    /// What an hour not yet prayed in the app says (`presentation::COMING_SOON`).
+    pub coming_soon: String,
     /// The remaining sections of the page (Where to begin, Reading the page, An ancient prayer,
     /// The Ordo, This app) in reading order.
     pub sections: Vec<AboutSection>,
@@ -469,9 +498,12 @@ pub struct AboutHour {
     pub url: String,
     pub gloss: String,
     pub time: String,
+    /// Shown but not yet prayed in the app: unlinked, with `presentation::COMING_SOON`.
+    pub coming_soon: bool,
 }
 
-/// A single station along the Horologium's solar arc (viewBox 320×144, center 160×128, radii 118×104).
+/// A single station along the Horologium's arc (viewBox 320×160, center 160×128, radii 118×104
+/// above the horizon and 118×22 under it: `presentation::about::about_horologium_point`).
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct AboutHorologiumStop {
     pub slug: String,
@@ -480,6 +512,10 @@ pub struct AboutHorologiumStop {
     pub time: String,
     pub angle: f64,
     pub night: bool,
+    /// `star`, `moon` or `sun` (`presentation::about::about_horologium_sign`).
+    pub sign: &'static str,
+    /// Shown and not yet prayed in the app (`presentation::hour_coming_soon`): its stop says so.
+    pub coming_soon: bool,
     pub is_current: bool,
     pub x: String,
     pub y: String,
@@ -620,14 +656,15 @@ impl AboutData {
     pub fn new(chrome: Chrome, now: calendar::Date, clock_hour: i8) -> AboutData {
         use crate::escape::html_escape_string as esc;
         use presentation::about::{
-            ABOUT, ABOUT_HOURS, ABOUT_KICKER, ABOUT_SPECIMEN, ABOUT_TITLE, AboutBlock, AboutRun, about_current_hour,
-            about_horologium_angle, about_horologium_is_night, about_runs,
+            ABOUT, ABOUT_HOROLOGIUM_HEIGHT, ABOUT_HOURS, ABOUT_KICKER, ABOUT_NIGHT, ABOUT_SPECIMEN, ABOUT_TITLE, AboutBlock, AboutRun,
+            about_current_hour, about_horologium_angle, about_horologium_is_night, about_horologium_point, about_horologium_sign,
+            about_runs,
         };
         let current = about_current_hour(clock_hour);
         let invite = presentation::invitation(now, now, clock_hour);
         let block = |kind| AboutBlockView { kind, ..AboutBlockView::default() };
 
-        let mut verse_text = String::new();
+        let mut verse_lines = Vec::new();
         let mut verse_cite = String::new();
         let mut intro = String::new();
         let mut hours_heading = String::new();
@@ -638,7 +675,7 @@ impl AboutData {
         for (i, b) in ABOUT.iter().enumerate() {
             match *b {
                 AboutBlock::Verse { text, cite } => {
-                    verse_text = text.into();
+                    verse_lines = text.lines().map(String::from).collect();
                     verse_cite = cite.into();
                 }
                 AboutBlock::Intro(text) => intro = text.into(),
@@ -712,8 +749,9 @@ impl AboutData {
             }
         }
 
-        let about_hours: Vec<AboutPeriod> = ABOUT_HOURS
-            .iter()
+        // Matins in the Night, then the seven: the table's order and the Horologium's.
+        let periods = || std::iter::once(&ABOUT_NIGHT).chain(ABOUT_HOURS.iter());
+        let about_hours: Vec<AboutPeriod> = periods()
             .map(|(label, hours)| AboutPeriod {
                 label: (*label).into(),
                 hours: hours
@@ -725,19 +763,17 @@ impl AboutData {
                         url: format!("/{slug}"),
                         gloss: presentation::hour_gloss(slug).into(),
                         time: (*time).into(),
+                        coming_soon: presentation::hour_coming_soon(slug),
                     })
                     .collect(),
             })
             .collect();
 
-        // Horologium arc coordinates: viewBox 320×144, center (160, 128), radii (118, 104).
-        let (cx, cy, rx, ry) = (160.0_f64, 128.0_f64, 118.0_f64, 104.0_f64);
-        let point = |deg: f64, scale: f64| {
-            let rad = deg.to_radians();
-            (cx + rad.cos() * rx * scale, cy - rad.sin() * ry * scale)
-        };
-        let stops: Vec<AboutHorologiumStop> = ABOUT_HOURS
-            .iter()
+        // Horologium coordinates: viewBox 320×160, the day's arc over the horizon at y 128 and
+        // the night's shallow course under it (presentation::about::about_horologium_point).
+        let height = ABOUT_HOROLOGIUM_HEIGHT;
+        let point = about_horologium_point;
+        let stops: Vec<AboutHorologiumStop> = periods()
             .flat_map(|(_, hours)| hours.iter())
             .map(|(slug, time)| {
                 let angle = about_horologium_angle(slug);
@@ -750,13 +786,15 @@ impl AboutData {
                     time: (*time).into(),
                     angle,
                     night: about_horologium_is_night(slug),
+                    sign: about_horologium_sign(slug),
+                    coming_soon: presentation::hour_coming_soon(slug),
                     is_current: *slug == current,
                     x: format!("{x:.1}"),
                     y: format!("{y:.1}"),
                     tick_x1: format!("{tx:.1}"),
                     tick_y1: format!("{ty:.1}"),
                     left_pct: format!("{:.2}%", x / 320.0 * 100.0),
-                    top_pct: format!("{:.2}%", y / 144.0 * 100.0),
+                    top_pct: format!("{:.2}%", y / height * 100.0),
                 }
             })
             .collect();
@@ -774,7 +812,7 @@ impl AboutData {
             active_x: format!("{ax:.1}"),
             active_y: format!("{ay:.1}"),
             active_cx_pct: format!("{:.1}%", ax / 320.0 * 100.0),
-            active_cy_pct: format!("{:.1}%", ay / 144.0 * 100.0),
+            active_cy_pct: format!("{:.1}%", ay / height * 100.0),
             active_night: active_stop.night,
             active_is_now: !current.is_empty(),
             dawn_x: format!("{dx:.1}"),
@@ -809,13 +847,14 @@ impl AboutData {
             chrome,
             kicker: ABOUT_KICKER.into(),
             title: ABOUT_TITLE.into(),
-            verse_text,
+            verse_lines,
             verse_cite,
             intro,
             hours_heading,
             about_hours,
             horologium,
             hours_note,
+            coming_soon: presentation::COMING_SOON.into(),
             sections,
             specimen,
             ordo_ribbon: AboutOrdoRibbon { year: now.year(), ..AboutOrdoRibbon::default() },
