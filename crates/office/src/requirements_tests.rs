@@ -1337,6 +1337,42 @@ fn commemoration_definitions_choose_fitting_texts() {
     assert!(!has(&vespers, "The very hairs") && !has(&lauds, "The very hairs"));
 }
 
+/// Commemoration collects the ordos cite by Diurnal page ("Col. 468", 'Col. "O God" 22*'),
+/// checked for every ordo-cited collect by `scripts/ordo-compare.py collects`.
+#[test]
+fn commemoration_collects_follow_the_ordo_citations() {
+    let collect = |date: Date, hour: &str, owner: &str| -> String {
+        let (days, moveable) = year(date.year());
+        let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        composed
+            .sections
+            .iter()
+            .flat_map(|s| &s.elements)
+            .find(|e| e.is_commemoration && e.commemoration_owner_id == owner && e.slot_ref == "commemoration-collect")
+            .unwrap_or_else(|| panic!("{date} {hour}: {owner} has no commemoration collect"))
+            .text
+            .clone()
+    };
+    // A proper collect printed with the day (Diurnal p. 468).
+    let bridget = collect(Date::new(2026, 2, 1), "lauds", "comm-02-01-st-bridget-of-ireland-virgin");
+    assert!(bridget.contains("perfect holiness by the love of piety and devotion"), "{bridget}");
+    // The Common's "Another Collect" (pp. 22*, 23*, 27*, 36*–37*, 49*).
+    let telesphorus = collect(Date::new(2026, 1, 5), "lauds", "comm-01-05-st-telesphorus-of-rome-bishop-and-martyr");
+    assert!(telesphorus.starts_with("O God, who makest us glad by the yearly solemnity of blessed Telesphorus"), "{telesphorus}");
+    let pantaleon = collect(Date::new(2026, 7, 27), "lauds", "comm-07-27-st-pantaleon-martyr");
+    assert!(pantaleon.contains("our bodies may be delivered from all adversities"), "{pantaleon}");
+    let gervase = collect(Date::new(2026, 6, 19), "lauds", "comm-extra-06-19-ss-gervase-and-protase-martyrs");
+    assert!(gervase.starts_with("O God, who makest us glad by the yearly solemnity of thy holy Martyrs"), "{gervase}");
+    let mark = collect(Date::new(2026, 1, 19), "lauds", "comm-01-19-st-mark-of-ephesus-bishop-and-confessor");
+    assert!(mark.starts_with("O Lord, we beseech thee, hear the prayers"), "{mark}");
+    let ursula = collect(Date::new(2026, 10, 21), "lauds", "comm-10-21-ss-ursula-and-companions-martyrs");
+    assert!(ursula.starts_with("Grant us, we beseech thee, O Lord our God"), "{ursula}");
+    // #982 (needs ruling): the ordos' 'Col. "We beseech" 45*' (the Abbot's collect) against
+    // the Diurnal's "O God, who makest us glad" (p. 458). The newest ordo stands until clergy rule.
+    let paul = collect(Date::new(2026, 1, 10), "lauds", "comm-01-10-st-paul-the-first-hermit");
+    assert!(paul.starts_with("We beseech thee, O Lord, let the intercession of blessed Paul"), "{paul}");
+}
+
 /// #602: the Expectation is a feast of Our Lady in white (2017, 2018, 2023 and
 /// 2025 ordos); when an Ember day takes the office the day is violet.
 #[test]

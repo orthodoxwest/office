@@ -1,0 +1,3 @@
+[commemoration-collect]
+# SOURCE: ordo 'Col. "Grant us" 49*' (Common of Virgins, For Many Virgin Martyrs)
+@use commons/virgin-martyr/collect-many

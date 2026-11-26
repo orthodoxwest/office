@@ -214,5 +214,33 @@ class ReferenceParsingTest(unittest.TestCase):
             ["Oct.", "Sun."], ["Sunday within the Nativity Octave", "Day IV within the Nativity Octave"]), ([], []))
 
 
+class CollectCitationTest(unittest.TestCase):
+    def test_collect_citation(self):
+        items = ORDO_COMPARE.pdf_commemoration_items(
+            'Lauds G / Comm. Ignatius (“He that hateth,” & Col. 22*) & Bridget '
+            '(“The kingdom of Heaven” 4*; Col. 468) & Paul (“I will liken” 4*; Col. “We be- seech” 45*) '
+            '& Brothers &c. (“The very hairs” 2*; Col. suppl.) / No Suff.')
+        cites = [ORDO_COMPARE.collect_citation(part) for _, part in items]
+        self.assertEqual(cites, [("22*", ""), ("468", ""), ("45*", "We be- seech"), None])
+
+    def test_page_cites(self):
+        self.assertTrue(ORDO_COMPARE.page_cites("480–481", "481"))
+        self.assertTrue(ORDO_COMPARE.page_cites("66*, 67*", "67*"))
+        self.assertFalse(ORDO_COMPARE.page_cites("22*", "22"))
+        self.assertFalse(ORDO_COMPARE.page_cites("26*", "27*"))
+        self.assertFalse(ORDO_COMPARE.page_cites("", "450"))
+
+    def test_incipit_agrees(self):
+        self.assertTrue(ORDO_COMPARE.incipit_agrees("We be- seech", "We beseech thee, O Lord"))
+        self.assertTrue(ORDO_COMPARE.incipit_agrees("", "Anything"))
+        self.assertFalse(ORDO_COMPARE.incipit_agrees("O God", "Almighty God, mercifully look"))
+
+    def test_pairs_keep_generic_names_apart(self):
+        # "Martyrs" must not take the single martyr matched by name (2026-02-03).
+        pairs = ORDO_COMPARE.pair_commemorations(
+            ["Joseph", "Martyrs"], ["St Joseph of Aleppo, Martyr", "The New Martyrs of Russia"])
+        self.assertEqual(pairs, {0: 0, 1: 1})
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -176,3 +176,7 @@ R. He hath made her to dwell in his tabernacle.
 
 [chapter-terce]
 @use commons/virgin-martyr/chapter-lauds
+
+[collect-many]
+# SOURCE: Monastic Diurnal p. 49* (Common of Virgins, For Many Virgin Martyrs; the book's "N. and N." written "N.")
+Grant us, we beseech thee, O Lord our God, to venerate with unceasing devotion the triumphs of N., thy holy Virgins and Martyrs: that we who are not able to celebrate their victories worthily in thought, at least may often recall them in humble obedience.
