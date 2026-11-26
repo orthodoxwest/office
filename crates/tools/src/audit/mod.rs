@@ -145,9 +145,16 @@ pub fn run(src: &dyn DataSource) -> Result<Report, String> {
             // and versicle commonly come from the Common; the collect is where a proper text
             // most often stands in the Diurnal and the ordo's "Col. NNN".
             let supp = suppress.get(&feast.id).unwrap_or(&none);
-            let proper = ["commemoration-collect", "commemoration-collect-lauds", "commemoration-collect-vespers", "collect"]
-                .iter()
-                .any(|r| corpus.has(&format!("proper/{}/{r}", feast.id)));
+            let proper = [
+                "commemoration-collect",
+                "commemoration-collect-lauds",
+                "commemoration-collect-vespers",
+                "collect",
+                "collect-lauds",
+                "collect-vespers",
+            ]
+            .iter()
+            .any(|r| corpus.has(&format!("proper/{}/{r}", feast.id)));
             if !proper && !supp.contains("*") && !supp.contains("commemoration-collect") {
                 common_commemoration_collects.push(feast.clone());
             }

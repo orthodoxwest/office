@@ -4,7 +4,7 @@
 
 === Commons fallback: 0 feast(s) ===
 
-=== Commemorations on a Common collect: 89 ===
+=== Commemorations on a Common collect: 90 ===
 Check each against the ordo's "Col." citation (scripts/ordo-compare.py collects). Once the
 ordo confirms the Common, add `<id> commemoration-collect` to data/audit-ok.txt.
   St Hyginus of Rome, Bishop & Martyr (comm-01-11-st-hyginus-of-rome-bishop-and-martyr)
@@ -74,6 +74,7 @@ ordo confirms the Common, add `<id> commemoration-collect` to data/audit-ok.txt.
   Ss Cyril & Methodius, Bishops & Confessors (comm-extra-07-07-ss-cyril-and-methodius-bishops-and-confessors)
   St Pius I, Bishop & Martyr (comm-extra-07-11-st-pius-i-pope-and-martyr)
   Ss Nicholas & Habib Khasha, Martyrs (comm-extra-07-16-ss-nicholas-and-habib-khasha-martyrs)
+  Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus (Deacons), Martyrs (comm-extra-08-06-ss-sixtus-ii-pope-and-martyr-felicissimus-and-agapitus)
   St Evaristus, Bishop & Martyr (comm-extra-10-26-st-evaristus-pope-and-martyr)
   St Pontianus, Bishop & Martyr (comm-extra-11-19-st-pontianus-pope-and-martyr)
   St Melchiades, Bishop & Martyr (comm-extra-12-10-st-melchiades-pope-and-martyr)

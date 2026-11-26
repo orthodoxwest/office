@@ -1,3 +1,11 @@
+[commemoration-antiphon]
+# SOURCE: ordo 2024–2026 ("O ye wise virgins" 47*), Common of Virgins, several Virgin Martyrs
+@use commons/virgin-martyr/commemoration-antiphon-many
+
+[commemoration-versicle]
+# SOURCE: Diurnal pp. 47*, 49* (Common of Virgins, several Virgin Martyrs), with the ordo's antiphon
+@use commons/virgin-martyr/commemoration-versicle-many
+
 [commemoration-collect]
 # SOURCE: ordo 'Col. "Grant us" 49*' (Common of Virgins, For Many Virgin Martyrs)
 @use commons/virgin-martyr/collect-many

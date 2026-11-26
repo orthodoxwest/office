@@ -529,49 +529,82 @@ def cmd_commemorations(pdf_path, tsv_path):
             print(f"   ... and {len(bad) - cap} more dates (ORDO_COMPARE_ALL=1 to list every one)")
 
 
-# 'Col. 450', 'Col. (450)', 'Col. "O God" 22*', '(221; Col. 202)'. "Col. suppl." and a bare
-# "Col." (the collect printed with the antiphon) cite no Diurnal page and are skipped.
-COL_RE = re.compile(r'\bCol\.\s*(?:[\u201c"]([^\u201d"]*)[\u201d"]\s*)?\(?\s*(\d+\*?)')
+# 'Col. 450', 'Col. (450)', 'Col. "O God" 22*', 'Col. “Grant”, 22*', 'Col. (“We beseech” 45*)',
+# 'Col., 549', 'Col. (MD 559)', 'Col. p. (450)', 'Col. 639f' and '(221; Col. 202)'. "Col. suppl." and
+# a bare "Col." (the collect printed with the antiphon) cite no Diurnal page and are skipped,
+# and so is a reading ("Col. 3:12-17", Colossians).
+COL_RE = re.compile(
+    r'\bCol\.,?\s*(?:only\s*)?\(?\s*(?:MD\s*)?(?:p\.\s*)?(?:[\u201c"]([^\u201d"]*)[\u201d"],?\s*)?'
+    r'\(?\s*(?:MD\s*)?(?:p\.\s*)?(\d+)(\*?)(ff?)?(?![\d:])')
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
 PROVENANCE = os.path.join(DATA_DIR, "review", "provenance.csv")
+TRIAGE = os.path.join(DATA_DIR, "review", "ordo-triage.csv")
+# Attestations whose page field is a page of the Monastic Diurnal ("diurnal", "Monastic
+# Diurnal.pdf", "Monastic Diurnal; 2026 Ordo").
+DIURNAL_SOURCE_RE = re.compile(r"^(?:diurnal|monastic diurnal)\b", re.I)
 # Pages where the Diurnal prints a text again that the corpus attests at its first printing,
 # so the ordo may cite either page.
 REPRINTED = {
-    # The Office of Saint Mary on Saturday reprints the Common's collect (p. 69*).
-    "commons/blessed-virgin/collect": "69*",
+    # The Office of Saint Mary on Saturday reprints the Common's collect (pp. 69*, 71*).
+    "commons/blessed-virgin/collect": "69*, 71*",
     # The commemoration of the Octave of the Nativity reprints its collect (pp. 195, 197).
     "proper/christmas/collect": "195, 197",
 }
 
 
 def collect_citation(item):
-    """(page, quoted incipit or "") of the collect an ordo commemoration item cites, or None."""
+    """The collect an ordo commemoration item cites, as (pages, quoted incipit or ""), or None.
+
+    The pages are written like an attestation's page field: "639f" covers 639 and 640.
+    """
     m = COL_RE.search(item)
-    return (m.group(2), (m.group(1) or "").strip()) if m else None
+    if not m:
+        return None
+    quoted, number, star, follow = (m.group(1) or "").strip(), int(m.group(2)), m.group(3), m.group(4)
+    last = number + len(follow or "")
+    pages = f"{number}{star}" if last == number else f"{number}{star}-{last}{star}"
+    return pages, quoted
 
 
 def provenance_pages(path=PROVENANCE):
-    """Corpus key -> the printed page(s) its attestation cites, as written there."""
+    """Corpus key -> the Diurnal page(s) its attestation cites, as written there.
+
+    An attestation from another book (a supplement's "PDF p. 10", a Matins sheet) gives no
+    Diurnal page, so the ordo's citation is always reported against it.
+    """
     import csv
     with open(path, newline="") as source:
-        pages = {row["key"]: row["page"] for row in csv.DictReader(source)}
+        pages = {row["key"]: row["page"] for row in csv.DictReader(source)
+                 if DIURNAL_SOURCE_RE.match(row["source"].strip())}
     for key, extra in REPRINTED.items():
         pages[key] = f"{pages.get(key, '')}, {extra}"
     return pages
 
 
+def triaged_collects(year, path=TRIAGE):
+    """{(section, "MM-DD")} of collect findings data/review/ordo-triage.csv classifies."""
+    import csv
+    try:
+        with open(path, newline="") as source:
+            rows = list(csv.DictReader(source))
+    except OSError:
+        return set()
+    sections = {"lauds-commemoration-collect": "Lauds", "vespers-commemoration-collect": "Vespers"}
+    return {(sections[r["aspect"]], r["date"]) for r in rows
+            if r["aspect"] in sections and r["year"] == str(year)}
+
+
 def page_cites(pages, cited):
-    """Whether an attestation's page field ("450", "22*", "480–481", "26*, 27*") holds the cited page."""
-    star = cited.endswith("*")
-    number = int(cited.rstrip("*"))
-    for piece in re.split(r"[,;]", pages or ""):
-        bounds = re.findall(r"(\d+)(\*?)", piece)
-        if not bounds or any((b[1] == "*") != star for b in bounds):
-            continue
-        low, high = int(bounds[0][0]), int(bounds[-1][0])
-        if low <= number <= high:
-            return True
-    return False
+    """Whether an attestation's page field ("450", "22*", "480–481", "26*, 27*") meets the
+    citation ("481", or "639-640" for the ordo's "639f": the text begins there or runs on)."""
+    def spans(text):
+        for piece in re.split(r"[,;]", text or ""):
+            bounds = re.findall(r"(\d+)(\*?)", piece)
+            if bounds and len({b[1] for b in bounds}) == 1:
+                yield bounds[0][1] == "*", int(bounds[0][0]), int(bounds[-1][0])
+    have = list(spans(pages))
+    return any(s == hs and lo <= high and low <= hi
+               for s, low, high in spans(cited) for hs, lo, hi in have)
 
 
 def corpus_text(key, data_dir=DATA_DIR):
@@ -606,9 +639,17 @@ def cmd_collects(pdf_path, tsv_path, provenance=PROVENANCE):
     """
     pdf = pdf_days(pdf_path)
     ours = read_rubrics(tsv_path)
+    with open(tsv_path) as source:
+        if "lauds_comm_collects" not in source.readline():
+            print("warning: this rubrics TSV has no collect columns; rebuild it with the current `office rubrics`",
+                  file=sys.stderr)
+    with open(tsv_path) as source:
+        source.readline()
+        first = source.readline().split("\t", 1)[0]
+    triaged = triaged_collects(first[:4])
     pages = provenance_pages(provenance)
     for names_field, keys_field, sect in (("l_comms", "l_collects", "Lauds"), ("v_comms", "v_collects", "Vespers")):
-        cited = 0
+        cited = excused = 0
         bad = []
         for key in sorted(ours):
             items = pdf_commemoration_items(pdf.get(key, {}).get(sect), pdf.get(key, {}).get("", ""))
@@ -625,11 +666,14 @@ def cmd_collects(pdf_path, tsv_path, provenance=PROVENANCE):
                 cited += 1
                 our_key = our_keys[pairs[pi]]
                 if not page_cites(pages.get(our_key, ""), page) or not incipit_agrees(quoted, corpus_text(our_key)):
+                    if (sect, f"{key[0]:02d}-{key[1]:02d}") in triaged:
+                        excused += 1
+                        continue
                     bad.append((key, pdf_name, page, quoted, our_names[pairs[pi]], our_key, pages.get(our_key, "")))
         common = [b for b in bad if b[5].startswith("commons/")]
         other = [b for b in bad if not b[5].startswith("commons/")]
         print(f"== {sect} commemoration collects: {len(bad)}/{cited} cited collects differ; "
-              f"{len(common)} on a Common ==")
+              f"{len(common)} on a Common; {excused} more excused by ordo-triage.csv ==")
         cap = SAMPLE_CAP if SHOW_ALL else 20
         for label, rows in (("on a Common", common), ("other", other)):
             for (month, day), name, page, quoted, our_name, our_key, our_page in rows[:cap]:

@@ -180,3 +180,12 @@ R. He hath made her to dwell in his tabernacle.
 [collect-many]
 # SOURCE: Monastic Diurnal p. 49* (Common of Virgins, For Many Virgin Martyrs; the book's "N. and N." written "N.")
 Grant us, we beseech thee, O Lord our God, to venerate with unceasing devotion the triumphs of N., thy holy Virgins and Martyrs: that we who are not able to celebrate their victories worthily in thought, at least may often recall them in humble obedience.
+
+[commemoration-antiphon-many]
+# SOURCE: Monastic Diurnal pp. 47* (I Vespers, Ant. on Magnificat) and 49* (Lauds, Ant. on Benedictus), If there are several Virgin Martyrs; the book's flex mark written as the pointing asterisk
+O ye wise Virgins, * arise and trim your lamps: for behold the Bridegroom cometh; go ye out to meet him.
+
+[commemoration-versicle-many]
+# SOURCE: Monastic Diurnal pp. 47* (I Vespers) and 49* (Lauds), If there are several Virgin Martyrs
+V. The Virgins that be her fellows shall bear her company.
+R. And shall be brought unto thee.

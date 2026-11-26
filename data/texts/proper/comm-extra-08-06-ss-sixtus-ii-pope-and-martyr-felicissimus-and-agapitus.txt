@@ -1,3 +1,0 @@
-[commemoration-collect]
-# SOURCE: ordo 'Col. "O God" 26*' (Common of Many Martyrs)
-@use commons/martyrs/collect

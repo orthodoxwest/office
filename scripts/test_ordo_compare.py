@@ -223,7 +223,26 @@ class CollectCitationTest(unittest.TestCase):
         cites = [ORDO_COMPARE.collect_citation(part) for _, part in items]
         self.assertEqual(cites, [("22*", ""), ("468", ""), ("45*", "We be- seech"), None])
 
+    def test_collect_citation_forms(self):
+        cases = {
+            'Col. “Grant”, 22*': ("22*", "Grant"),
+            'Col. (“We beseech” 45*)': ("45*", "We beseech"),
+            'Col., 549': ("549", ""),
+            'Col. (MD 559)': ("559", ""),
+            'Col. only (MD p. 22*)': ("22*", ""),
+            'Col. p. (450)': ("450", ""),
+            '& Col. 639f)': ("639-640", ""),
+            'Col. 194ff': ("194-196", ""),
+        }
+        for text, want in cases.items():
+            self.assertEqual(ORDO_COMPARE.collect_citation(text), want, text)
+        self.assertIsNone(ORDO_COMPARE.collect_citation("Epistle Col. 3:12-17"))
+        self.assertIsNone(ORDO_COMPARE.collect_citation("Col. suppl."))
+
     def test_page_cites(self):
+        self.assertTrue(ORDO_COMPARE.page_cites("640", "639-640"))
+        self.assertTrue(ORDO_COMPARE.page_cites("277, 278", "277-278"))
+        self.assertFalse(ORDO_COMPARE.page_cites("641", "639-640"))
         self.assertTrue(ORDO_COMPARE.page_cites("480–481", "481"))
         self.assertTrue(ORDO_COMPARE.page_cites("66*, 67*", "67*"))
         self.assertFalse(ORDO_COMPARE.page_cites("22*", "22"))
