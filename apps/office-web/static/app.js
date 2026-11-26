@@ -1353,13 +1353,6 @@ function plainClickOpensHere(e, link) {
       }
     }
 
-    document.querySelectorAll('[data-nav="hour"][data-hour]').forEach(function (link) {
-      var hour = link.getAttribute("data-hour");
-      if (hour) {
-        link.setAttribute("href", "/" + hour + "/" + navDate);
-      }
-    });
-
     var ordo = document.querySelector('[data-nav="calendar"]');
     if (ordo) {
       // navDate's own month, so #d-DATE exists on the page it opens.
@@ -3529,11 +3522,13 @@ function plainClickOpensHere(e, link) {
   function prayNowGloss(prayNow) {
     return prayNow.querySelector(".pray-now-gloss");
   }
-  function setPrayNowGloss(prayNow, gloss) {
+  // `eve` marks the eve's "First Vespers of …", which wide screens show too (#959).
+  function setPrayNowGloss(prayNow, gloss, eve) {
     var el = prayNowGloss(prayNow);
     if (el) {
       el.textContent = gloss;
       el.hidden = !gloss;
+      el.toggleAttribute("data-eve", !!eve);
     }
   }
   function setPrayNowLabel(prayNow, label) {
@@ -3588,7 +3583,7 @@ function plainClickOpensHere(e, link) {
   // Plays the change from the hour lit (`was`) and the invitation's words
   // (`wasLabel`) to `lit` and `label`. The links' aria-current has already
   // moved; their look is held at the old hour's until the seat.
-  function passLight(card, was, lit, prayNow, wasLabel, label, wasGloss, gloss) {
+  function passLight(card, was, lit, prayNow, wasLabel, label, wasGloss, gloss, eve) {
     var L = HOUR_LIGHT;
     var T = L.total;
     var moves = was !== lit;
@@ -3638,7 +3633,7 @@ function plainClickOpensHere(e, link) {
         hold(false);
         if (prayNow) {
           setPrayNowLabel(prayNow, label);
-          setPrayNowGloss(prayNow, gloss);
+          setPrayNowGloss(prayNow, gloss, eve);
         }
         // The mark of an hour prayed changes with the words, at the seat, as the apps' does.
         window.dispatchEvent(new Event("officeinvitation"));
@@ -3700,9 +3695,11 @@ function plainClickOpensHere(e, link) {
       pass.words = words;
       run(words, dip, { duration: T });
     }
-    // The gloss under the words, on a phone, goes out and comes back with them.
+    // The gloss under the words goes out and comes back with them: a phone's
+    // always, a wide screen's as an eve's "First Vespers of …" comes or goes
+    // (shown or hidden at the seat, it is dipped from the start all the same).
     var glossEl = prayNow ? prayNowGloss(prayNow) : null;
-    if (glossEl && wasGloss !== gloss && glossEl.getClientRects().length) {
+    if (glossEl && wasGloss !== gloss) {
       run(glossEl, dip, { duration: T });
     }
 
@@ -3794,11 +3791,11 @@ function plainClickOpensHere(e, link) {
     }
     if (passing === true && (was !== lit || (prayNow && (wasLabel !== label || wasGloss !== gloss))) && lightMayPass()) {
       // The pass marks the invitation again at its seat.
-      passLight(card, was, lit, prayNow, wasLabel, label, wasGloss, gloss);
+      passLight(card, was, lit, prayNow, wasLabel, label, wasGloss, gloss, eve);
     } else {
       if (prayNow) {
         setPrayNowLabel(prayNow, label);
-        setPrayNowGloss(prayNow, gloss);
+        setPrayNowGloss(prayNow, gloss, eve);
       }
       // The invitation's mark of an hour prayed follows the hour it now opens.
       window.dispatchEvent(new Event("officeinvitation"));

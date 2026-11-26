@@ -422,14 +422,6 @@ function offlineResponse() {
     "<header class=\"site-header\"><div class=\"site-nav-shell\">" +
     "<a class=\"site-brand\" href=\"/\" data-nav=\"home\"><span aria-hidden=\"true\">✠</span> Daily Office</a>" +
     "<details class=\"site-menu\"><summary>Menu</summary><nav aria-label=\"Primary\">" +
-    "<a href=\"/lauds\" data-nav=\"hour\" data-hour=\"lauds\">Lauds</a>" +
-    "<a href=\"/prime\" data-nav=\"hour\" data-hour=\"prime\">Prime</a>" +
-    "<a href=\"/terce\" data-nav=\"hour\" data-hour=\"terce\">Terce</a>" +
-    "<a href=\"/sext\" data-nav=\"hour\" data-hour=\"sext\">Sext</a>" +
-    "<a href=\"/none\" data-nav=\"hour\" data-hour=\"none\">None</a>" +
-    "<a href=\"/vespers\" data-nav=\"hour\" data-hour=\"vespers\">Vespers</a>" +
-    "<a href=\"/compline\" data-nav=\"hour\" data-hour=\"compline\">Compline</a>" +
-    "<span class=\"nav-divider\" aria-hidden=\"true\"></span>" +
     "<a href=\"/calendar\" data-nav=\"calendar\">Ordo</a>" +
     "<a class=\"nav-secondary\" href=\"/reminders\" data-nav=\"reminders\">Reminders</a>" +
     "<a class=\"nav-secondary\" href=\"/about\" data-nav=\"about\">About</a>" +

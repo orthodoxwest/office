@@ -247,19 +247,16 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   // The phone's home is the arch alone: the colophon is the wide home's.
   await expect(page.locator("footer")).toBeHidden();
 
-  // Hour pages keep the hours in the menu, in home's 2 / 3 / 2 bands.
+  // Hour pages' menus carry no hours either: an hour moves on from its end,
+  // and home lists them all. Ordo, Reminders and About share one row.
   await openDatedPage(page, `/lauds/${testDate}`);
   await page.getByText("Menu", { exact: true }).click();
-  await expect(primary.getByRole("link", { name: "Vespers", exact: true })).toBeVisible();
-  const rows = await primary.locator('[data-nav="hour"]').evaluateAll((links) => {
-    const byTop = new Map();
-    for (const a of links) {
-      const top = Math.round(a.getBoundingClientRect().top);
-      byTop.set(top, [...(byTop.get(top) || []), a.dataset.hour]);
-    }
-    return [...byTop.values()];
-  });
-  expect(rows).toEqual([["lauds", "prime"], ["terce", "sext", "none"], ["vespers", "compline"]]);
+  await expect(primary.getByRole("link", { name: "Ordo", exact: true })).toBeVisible();
+  await expect(primary.locator("[data-hour]")).toHaveCount(0);
+  // Reminders and About are set smaller, a pixel or two off Ordo's top; a new
+  // row would begin a whole cell lower.
+  const tops = await primary.locator("a").evaluateAll((links) => links.map((a) => a.getBoundingClientRect().top));
+  expect(Math.max(...tops) - Math.min(...tops)).toBeLessThan(8);
 });
 
 test("psalm spacing groups each antiphon with its own psalm", async ({ page }) => {
@@ -649,6 +646,37 @@ test("the invitation names First Vespers on the eve of a feast", async ({ page }
   expect(await tablet()).toBe(plain);
 });
 
+// While an hour is now its period's sign is lit and the other two stand back;
+// with no hour now all three rest alike (the apps' periodSignAlpha).
+test("home lights the sign of the period whose hour is now", async ({ page }) => {
+  const signs = () => page.locator(".home-period-ornament").evaluateAll((els) => els.map((el) => getComputedStyle(el).opacity));
+  await page.clock.setFixedTime(new Date("2026-03-15T18:00:00-04:00"));
+  await openDatedPage(page, `/?date=${testDate}`);
+  await expect.poll(signs).toEqual(["0.52", "0.52", "1"]);
+  await openDatedPage(page, "/?date=2026-03-16");
+  await expect.poll(signs).toEqual(["0.9", "0.9", "0.9"]);
+});
+
+// The wide niche glosses every hour in its table and leaves the invitation
+// bare, except on an eve, whose table still says "Evening prayer": there the
+// invitation carries "First Vespers of …" too, on one line (#959).
+test("the wide niche names First Vespers under the invitation on an eve only", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.clock.setFixedTime(new Date("2026-12-24T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-24");
+  const gloss = page.locator(".pray-now-gloss");
+  await expect(gloss).toBeVisible();
+  await expect(gloss).toHaveText("First Vespers of the Nativity of Our Lord");
+  expect(await gloss.evaluate((el) => el.getClientRects().length)).toBe(1);
+  // Compline that evening, and the evening before, keep the bare invitation.
+  await page.clock.setFixedTime(new Date("2026-12-24T21:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-24");
+  await expect(gloss).toBeHidden();
+  await page.clock.setFixedTime(new Date("2026-12-23T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-23");
+  await expect(gloss).toBeHidden();
+});
+
 // The invitation to the hour now, once that hour is prayed, takes the
 // directory's small gilt cross at its words' shoulder (#954): its link still
 // opens the hour, and the tablet keeps its height. Compline after midnight
@@ -745,6 +773,29 @@ test("the light moves from Sext to None on an open home, and settles as a fresh 
   await lightAt(page, 1400);
   expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["none"] });
   await expect(page.locator(".pray-now-gloss")).toHaveText("Afternoon prayer");
+});
+
+// A wide screen shows the invitation's gloss only on an eve (#959): as the
+// light brings First Vespers in, the gloss comes with the words, dipped from
+// the start of the pass, not set at full ink at the seat.
+test("on a wide eve the First Vespers gloss comes in with the invitation's words", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await holdTheLight(page);
+  await page.clock.pauseAt(new Date("2026-12-24T16:59:58-05:00"));
+  await openDatedPage(page, "/?date=2026-12-24");
+  const gloss = page.locator(".pray-now-gloss");
+  await expect(gloss).toBeHidden();
+  await page.clock.runFor(3000);
+  await page.clock.resume();
+  await lightAt(page, 700);
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Vespers");
+  await expect(gloss).toBeVisible();
+  await expect(gloss).toHaveText(/^First Vespers of /);
+  const [glossInk, wordsInk] = await page.evaluate(() => [".pray-now-gloss", ".pray-now-words"].map((s) => Number(getComputedStyle(document.querySelector(s)).opacity)));
+  expect(glossInk).toBeLessThan(1);
+  expect(glossInk).toBeCloseTo(wordsInk, 2);
+  await lightAt(page, 1400);
+  expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["vespers"] });
 });
 
 test("a second turn of the hour during a pass settles the first", async ({ page }) => {
@@ -1659,11 +1710,10 @@ test("a feast's familiar name is set apart in italic and never broken", async ({
   await expect(page.locator(".home .feast-alias")).toHaveCount(0);
 });
 
-test("a tablet's hour header sets the hours as one rank, with no link stranded", async ({ page }) => {
-  // Wide widths hold the same: the prayer's softened field once reached past
-  // the column and, with Large text at the 1000px threshold, past the viewport.
-  // About is reached from every wide hour (#927): among the links where they
-  // stand beside the brand, and beside Settings where they take their own rank.
+test("a wide hour's header keeps its links on the brand's line, with none stranded", async ({ page }) => {
+  // The prayer's softened field once reached past the column and, with Large
+  // text at the 1000px threshold, past the viewport. About is reached from
+  // every wide hour (#927), beside the brand with Ordo and Reminders.
   for (const size of ["small", "default", "large"]) {
     for (const width of [701, 820, 999, 1000, 1030, 1099, 1100, 1280, 1920]) {
       await page.setViewportSize({ width, height: 900 });
@@ -4740,6 +4790,50 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
   await context.close();
 });
 
+// A phone folds the rank key under "Rank key" (each rank glosses itself at a
+// tap); without script, and on a wide screen, the key stands open. The shown
+// month in the strip wears a gilt point above its name, clear of the year's
+// course under it, and no gold underline.
+test("the ordo's rank key folds on a phone, and the shown month takes a gilt point", async ({ page, browser, baseURL }) => {
+  await openDatedPage(page, "/calendar/2026/03");
+  const toggle = page.getByRole("button", { name: "Rank key" });
+  const key = page.locator("#calendar-ranks");
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(key).toBeHidden();
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await expect(key).toBeVisible();
+  await toggle.click();
+  await expect(key).toBeHidden();
+  const month = await page.locator('.month-jump [aria-current="page"]').evaluate((a) => {
+    const after = getComputedStyle(a, "::before");
+    const style = getComputedStyle(a);
+    return { point: after.content !== "none" && after.content !== "normal", underline: style.borderBottomStyle !== "none" && style.borderBottomColor !== "rgba(0, 0, 0, 0)" };
+  });
+  expect(month).toEqual({ point: true, underline: false });
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await expect(toggle).toBeHidden();
+  await expect(key).toBeVisible();
+
+  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+  const bare = await context.newPage();
+  await bare.goto(`${baseURL}/calendar/2026/03`);
+  await expect(bare.locator("#calendar-ranks")).toBeVisible();
+  await expect(bare.locator(".calendar-ranks-toggle")).toBeHidden();
+  // The key is folded from the first layout (html.js, set before app.js
+  // loads), so its toggle answers on its own: a page whose app.js never runs
+  // still opens it.
+  const blocked = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await blocked.route(/\/static\/app\.js/, (route) => route.abort());
+  await blocked.goto(`${baseURL}/calendar/2026/03`);
+  await expect(blocked.locator("#calendar-ranks")).toBeHidden();
+  await blocked.getByRole("button", { name: "Rank key" }).click();
+  await expect(blocked.locator("#calendar-ranks")).toBeVisible();
+  await blocked.close();
+  await context.close();
+});
+
 test("a tap on an ordo day's row opens its office details; its feast name opens the feast and its date leads to the day", async ({ page }) => {
   await openDatedPage(page, "/calendar/2026/03");
   const row = page.locator("#d-2026-03-01");
@@ -7413,8 +7507,8 @@ test("a link chosen in the open phone menu puts the menu away before the page go
   await page.evaluate(() => document.addEventListener("click", () => {
     window.reportMenu(getComputedStyle(document.querySelector(".site-menu-panel")).display);
   }));
-  await page.locator('.site-menu nav a[data-hour="lauds"]').click();
-  await page.waitForURL(/\/lauds\//);
+  await page.locator('.site-menu nav a[data-nav="calendar"]').click();
+  await page.waitForURL(/\/calendar/);
   expect(seen).toEqual(["none"]);
 });
 

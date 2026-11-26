@@ -179,6 +179,7 @@ impl OfficeCore {
             pray_now_label: invite.label,
             pray_now_hour: invite.hour.to_string(),
             pray_now_gloss: typeset(&invite.gloss),
+            pray_now_eve: invite.eve,
             pray_now_date: CivilDate::from(invite.date),
             current_hour: invite.current.to_string(),
         })
@@ -1605,6 +1606,9 @@ pub struct HomeView {
     /// empty for "Open Lauds". On an evening whose Vespers already keeps the morrow, "First Vespers
     /// of …" (`presentation::first_vespers_gloss`).
     pub pray_now_gloss: String,
+    /// Whether that gloss is the eve's "First Vespers of …", which the wide niche sets under the
+    /// invitation too, though its table glosses every hour (#959).
+    pub pray_now_eve: bool,
     /// The hour the directory marks as now, or empty.
     pub current_hour: String,
 }

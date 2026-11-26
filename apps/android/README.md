@@ -31,8 +31,8 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   commemorations and its hours), and the year's frontispiece (the Tabula Temporaria, each
   date leading to its day in the ordo), and About the Office (`AboutScreen.kt`: the core's
   `about()` words, the seven hours as home's table of periods; home offers it as "Introduction"
-  beside Change date in a reader's first week). The site menu carries the day's hours, the Ordo,
-  Reminders and About (left out of a wide hour's header, as on the web), and the Theme
+  beside Change date in a reader's first week). The site menu carries the Ordo, Reminders and About
+  (the hours are on home and at each hour's end, as on the web), and the Theme
   (Default / Nave / Apse), Text (A A A) and Martyrology (Off / On) rows, and Chant (Off / On)
   once a hymn or Marian antiphon has a score: neuma (its bindings in `org.orthodoxwest.neuma`,
   from the same library) engraves the score and `Score.kt` draws it. The date picker's title

@@ -305,9 +305,8 @@ or impose a redesign on an unrelated change.
   tried and read as stickers or sunbursts: keep the day's head plaster. The
   mosaic belongs to the app icon (`tools/genicons.py`), an object seen at
   one scale.
-- From 701px to 999px the hours' header sets its link list as a centred
-  rank of its own under the brand and Settings; left to wrap, it stranded
-  the last link on a line. Under a coarse pointer the header's links and
+- The menu holds Ordo, Reminders and About, not the hours: the hours are
+  reached from home and from the end of each hour. Under a coarse pointer the header's links and
   the ordo's day links answer to a touch-target box drawn by a
   pseudo-element, so type and header height stay as the mouse has them.
 - The footer's colophon and report line stand on a reserve: a feathered
