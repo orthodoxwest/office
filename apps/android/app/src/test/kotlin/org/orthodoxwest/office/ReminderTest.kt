@@ -241,7 +241,7 @@ class ReminderTest {
         assertEquals("sunset · 8:33 pm", times["vespers"])
         assertTrue(times["prime"]!!.startsWith("first hour · 6:"))
         assertTrue(times["sext"]!!.startsWith("solar noon · 1:0"))
-        assertEquals(about().periods.last().hours.last().time, times["compline"])
+        assertEquals(about().periods.flatMap { it.hours }.first { it.hour == "compline" }.time, times["compline"])
     }
 
     @Test

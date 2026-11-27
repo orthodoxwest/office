@@ -86,7 +86,7 @@ pub struct HomeData {
     pub pray_now_eve: bool,
     pub pray_now_link: String,
     pub hours: Vec<HomeHourLink>,
-    /// The Night's row before the seven: Matins, not yet prayed in the app.
+    /// The Night's row after the seven: Matins, not yet prayed in the app.
     pub night: HomeNight,
 }
 
@@ -435,7 +435,7 @@ pub struct AboutData {
     pub verse_cite: String,
     pub intro: String,
     pub hours_heading: String,
-    /// Matins in the Night, then the seven hours in home's three bands.
+    /// The seven hours in home's three bands, then Matins in the Night.
     pub about_hours: Vec<AboutPeriod>,
     /// Flat list of the hours with Horologium coordinates for the arc of the day and the night.
     pub horologium: AboutHorologium,
@@ -749,8 +749,9 @@ impl AboutData {
             }
         }
 
-        // Matins in the Night, then the seven: the table's order and the Horologium's.
-        let periods = || std::iter::once(&ABOUT_NIGHT).chain(ABOUT_HOURS.iter());
+        // The seven, then Matins in the Night, as home reads: the table's order and the
+        // Horologium's.
+        let periods = || ABOUT_HOURS.iter().chain(std::iter::once(&ABOUT_NIGHT));
         let about_hours: Vec<AboutPeriod> = periods()
             .map(|(label, hours)| AboutPeriod {
                 label: (*label).into(),
@@ -800,7 +801,8 @@ impl AboutData {
             .collect();
         // Between midnight and 2 am, `current` is empty (yesterday's Compline): the Horologium
         // rests calmly on Compline without claiming "Now" for today's row.
-        let active_stop = stops.iter().find(|s| s.slug == current).or_else(|| stops.last()).cloned().unwrap_or_default();
+        let active_stop =
+            stops.iter().find(|s| s.slug == current).or_else(|| stops.iter().find(|s| s.slug == "compline")).cloned().unwrap_or_default();
         let (ax, ay) = point(active_stop.angle, 1.0);
         let (dx, dy) = point(about_horologium_angle("lauds"), 1.0);
         let horologium = AboutHorologium {

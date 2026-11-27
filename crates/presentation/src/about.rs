@@ -18,8 +18,8 @@ pub enum AboutBlock {
     Heading(&'static str),
     /// A paragraph of prose, which may carry links.
     Paragraph(&'static str),
-    /// The painted Horologium (solar arc) and the hours: Matins in the night ([`ABOUT_NIGHT`]),
-    /// then the seven in home's three periods ([`ABOUT_HOURS`]).
+    /// The painted Horologium (solar arc) and the hours: the seven in home's three periods
+    /// ([`ABOUT_HOURS`]), then Matins in the night ([`ABOUT_NIGHT`]).
     Hours,
     /// A quiet italic note set under the block before it.
     Note(&'static str),
@@ -132,7 +132,7 @@ pub const ABOUT_HOURS: [(&str, &[(&str, &str)]); 3] = [
     ("Evening", &[("vespers", "toward sunset"), ("compline", "late in the evening")]),
 ];
 
-/// Matins, the night office, which the table and the Horologium set before the seven, under
+/// Matins, the night office, which the table and the Horologium set after the seven, under
 /// home's fourth period. It is not yet prayed in the app ([`crate::hour_coming_soon`]): the
 /// fronts set it unlinked with [`crate::COMING_SOON`], and reminders and the hour schedule leave
 /// it out until it is.

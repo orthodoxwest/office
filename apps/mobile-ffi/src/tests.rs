@@ -226,17 +226,19 @@ fn about_lights_and_invites_to_the_hour_home_does() {
     assert!(web.runs.iter().any(|r| r.link == "https://orthodoxwestbreviary.com"));
 }
 
-/// Matins leads About's table and home's hours under Night, coming soon: no link and no part in
+/// Matins closes About's table and home's hours under Night, after the evening, coming soon: no link and no part in
 /// the hour now, nor in reminders, until the app prays it.
 #[test]
 fn matins_is_shown_coming_soon_under_night() {
     let about = crate::about();
-    let night = &about.periods[0];
+    let labels: Vec<&str> = about.periods.iter().map(|p| p.label.as_str()).collect();
+    assert_eq!(labels, ["Morning", "Day", "Evening", "Night"]);
+    let night = about.periods.last().unwrap();
     assert_eq!(night.label, "Night");
     let matins = &night.hours[0];
     assert_eq!((matins.hour.as_str(), matins.name.as_str(), matins.gloss.as_str()), ("matins", "Matins", "The night office"));
     assert!(matins.coming_soon && matins.sign == "star" && matins.angle == 270.0);
-    assert!(about.periods[1..].iter().flat_map(|p| &p.hours).all(|h| !h.coming_soon && h.sign != "star"));
+    assert!(about.periods[..3].iter().flat_map(|p| &p.hours).all(|h| !h.coming_soon && h.sign != "star"));
     assert_eq!(about.coming_soon, "coming soon");
     assert_eq!((about.horologium_height, about.horologium_night_depth), (160.0, 22.0));
     let home = crate::home_night();
