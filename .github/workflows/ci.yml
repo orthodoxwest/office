@@ -96,6 +96,7 @@ jobs:
           python3 scripts/test_verify_psalms.py
           python3 scripts/test_sweep_targets.py
           python3 scripts/test_play_promote.py
+          python3 scripts/test_ci_gate.py
           python3 scripts/test_release_notes.py
           python3 scripts/test_appstore.py
           python3 scripts/release_notes.py check

@@ -3,7 +3,9 @@ name: iOS TestFlight
 # Builds the iOS app for release with the current Xcode. Pushes to master (and manual runs)
 # also sign it and upload it to TestFlight, where it goes to the external group named below:
 # anyone who joined through the group's public link gets each new build in the TestFlight app,
-# as the Android preview's link always serves the newest APK.
+# as the Android preview's link always serves the newest APK. They wait until every check on the
+# commit (CI, iOS, Android) has passed, so a red commit never reaches testers or the daily App
+# Store promotion.
 #
 # Pull requests, and master until the signing secrets exist, build the archive unsigned, so a
 # change that breaks the release build is caught before it reaches master. Setting the secrets
@@ -51,11 +53,37 @@ env:
   TESTFLIGHT_GROUP: Testers
 
 jobs:
+  checks:
+    name: Wait for the commit's checks
+    # Only an upload waits: a pull request's archive is a check of its own.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    # Long enough for iOS's build, tests and screenshots, queued macOS runners included.
+    timeout-minutes: 180
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts
+      # Nothing reaches readers from a commit whose CI, iOS or Android checks are red or still
+      # running (scripts/ci_gate.py). The publishers (play.yml, testflight.yml) are not waited
+      # on: they wait on the checks themselves.
+      - name: Wait for every check on this commit to pass
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_gate.py --require ci.yml --exclude play.yml --exclude testflight.yml
+
   build:
     name: Archive and upload to TestFlight
     # App Store Connect takes only builds from a current Xcode; from April 2027 that means the
     # iOS 27 SDK (Xcode 27 or later). The xcode-27 image (macOS 27) carries only Xcode 27, and its
     # default is a released one.
+    needs: checks
+    # Skipped checks (a pull request, or a branch) leave the unsigned archive to build at once.
+    if: ${{ !cancelled() && needs.checks.result != 'failure' }}
     runs-on: xcode-27
     timeout-minutes: 90
     permissions:
