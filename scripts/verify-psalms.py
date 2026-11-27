@@ -34,7 +34,8 @@ def words(text):
 
 
 def comparable(text):
-    return re.sub(r" ([,.;:!?])", r"\1", spaces(text.lower().translate(TYPOGRAPHY)))
+    # The flex (†) is the Diurnal's pointing; the official witness has none.
+    return re.sub(r" ([,.;:!?])", r"\1", spaces(text.replace("†", " ").lower().translate(TYPOGRAPHY)))
 
 
 def clean_html(text):

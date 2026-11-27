@@ -11,8 +11,9 @@ use render_html::view::{CommemorationRow, DayRow};
 use serde::Serialize;
 
 use crate::Server;
-use crate::handlers::{ORDERED_HOURS, Req};
+use crate::handlers::Req;
 use crate::http::{response, set};
+use office::HOUR_NAMES;
 
 /// `GET /api/v1/calendar/{year}/{month}`.
 #[derive(Debug, Serialize)]
@@ -99,7 +100,7 @@ fn api_day(row: &DayRow, site: &str) -> ApiDay {
     let date = row.date_slug.clone();
     let weekday = calendar::Date::parse(&date).map(|d| d.weekday().name().to_string()).unwrap_or_default();
     let at = |slug: &str| format!("{site}{}", hour_link(slug, &date));
-    let [lauds, prime, terce, sext, none, vespers, compline] = ORDERED_HOURS.map(|(_, slug)| at(slug));
+    let [lauds, prime, terce, sext, none, vespers, compline] = HOUR_NAMES.map(at);
     ApiDay {
         weekday,
         name: row.feast_name.clone(),

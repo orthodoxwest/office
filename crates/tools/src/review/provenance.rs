@@ -329,8 +329,8 @@ pub struct AttestOptions {
     pub replace: bool,
 }
 
-/// Validates, binds the attestation to the entry's current text, rewrites the ledger atomically,
-/// and prunes any prescreen flag the verification supersedes. Never stores book contents.
+/// Validates, binds the attestation to the entry's current text, and rewrites the ledger atomically.
+/// Never stores book contents.
 pub fn record_attestation(src: &dyn DataSource, dir: &std::path::Path, mut o: AttestOptions) -> Result<EntryProvenance, String> {
     for f in [&mut o.key, &mut o.reviewer, &mut o.source, &mut o.locator, &mut o.page, &mut o.reviewed_on, &mut o.notes] {
         *f = f.trim().to_string();
@@ -376,7 +376,6 @@ pub fn record_attestation(src: &dyn DataSource, dir: &std::path::Path, mut o: At
         csv::write_record(&mut out, &a.row());
     }
     crate::fs::write_atomic(&dir.join(PROVENANCE_FILE), out.as_bytes())?;
-    super::prescreen::prune_prescreen_flag(src, dir, &o.key).map_err(|e| format!("pruning prescreen flag: {e}"))?;
     entry.status = ProvenanceStatus::Verified;
     entry.reviewer = o.reviewer;
     entry.reviewed_on = o.reviewed_on;
@@ -487,6 +486,88 @@ pub fn provenance_csv(p: &ProvenanceInventory) -> String {
 
 pub fn join_nonempty(values: &[&str]) -> String {
     values.iter().map(|v| v.trim()).filter(|v| !v.is_empty()).collect::<Vec<_>>().join(" | ")
+}
+
+/// Verified share of the text a sweep actually renders, each entry weighted
+/// by how often it is prayed.
+pub struct UsageWeighted {
+    pub start_year: i32,
+    pub years: i32,
+    pub rendered_entries: usize,
+    pub verified_entries: usize,
+    pub total_occurrences: usize,
+    pub verified_occurrences: usize,
+    pub needs_review_occurrences: usize,
+    pub source_unknown_occurrences: usize,
+}
+
+pub fn build_usage_weighted(src: &dyn DataSource, start: i32, years: i32) -> Result<UsageWeighted, String> {
+    if years < 1 {
+        return Err("years must be at least 1".into());
+    }
+    let inventory = scan_provenance(src)?;
+    let mut counts: std::collections::HashMap<&str, (ProvenanceStatus, usize)> =
+        inventory.entries.iter().map(|e| (e.key.as_str(), (e.status, 0))).collect();
+    let engine = office::engine::Engine::load(src)?;
+    let cal = calendar::CalendarData::load(src)?;
+    let mut fold = |deps: Vec<String>| {
+        for r in deps {
+            if let Some((_, n)) = counts.get_mut(r.as_str()) {
+                *n += 1;
+            }
+        }
+    };
+    super::sweep::sweep(&engine, &cal, start, years, &|_, e| e, &|_, _, hour| super::explain::hour_dependencies(hour), &mut fold)?;
+
+    let mut u = UsageWeighted {
+        start_year: start,
+        years,
+        rendered_entries: 0,
+        verified_entries: 0,
+        total_occurrences: 0,
+        verified_occurrences: 0,
+        needs_review_occurrences: 0,
+        source_unknown_occurrences: 0,
+    };
+    for (status, occurrences) in counts.into_values().filter(|(_, n)| *n > 0) {
+        u.rendered_entries += 1;
+        u.total_occurrences += occurrences;
+        match status {
+            ProvenanceStatus::Verified => {
+                u.verified_entries += 1;
+                u.verified_occurrences += occurrences;
+            }
+            ProvenanceStatus::NeedsReview => u.needs_review_occurrences += occurrences,
+            ProvenanceStatus::SourceUnknown => u.source_unknown_occurrences += occurrences,
+        }
+    }
+    Ok(u)
+}
+
+fn percent(part: usize, whole: usize) -> f64 {
+    if whole == 0 { 0.0 } else { 100.0 * part as f64 / whole as f64 }
+}
+
+pub fn usage_weighted_summary(u: &UsageWeighted) -> String {
+    let mut w = String::new();
+    let _ = writeln!(w, "=== Usage-weighted provenance: {}-{} ===", u.start_year, u.start_year + u.years - 1);
+    let _ = writeln!(w, "  rendered entries:       {:5}", u.rendered_entries);
+    let _ = writeln!(
+        w,
+        "  verified entries:       {:5} ({:.1}% of rendered entries)",
+        u.verified_entries,
+        percent(u.verified_entries, u.rendered_entries)
+    );
+    let _ = writeln!(w, "  total occurrences:      {:5}", u.total_occurrences);
+    let _ = writeln!(
+        w,
+        "  verified occurrences:   {:5} ({:.1}% of prayed text, usage-weighted)",
+        u.verified_occurrences,
+        percent(u.verified_occurrences, u.total_occurrences)
+    );
+    let _ = writeln!(w, "  needs-review occ.:      {:5}", u.needs_review_occurrences);
+    let _ = writeln!(w, "  source-unknown occ.:    {:5}", u.source_unknown_occurrences);
+    w
 }
 
 #[cfg(test)]

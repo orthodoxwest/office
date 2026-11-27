@@ -22,10 +22,10 @@ struct Palette: Equatable {
     // linings and crosses, opaque and the same in every season; red ochre for the tituli (section
     // headings, psalm numbers, "Ant."), gilt on the Apse; slate blue for the ordo's doubles.
     let lining: Color
-    let titulus: Color
+    var titulus: Color
     let kalendarBlue: Color
     /// The evening hours' moon: the gold on the Nave, silver on the Apse night.
-    let moonInk: Color
+    var moonInk: Color
     let surface: Color
     let surfaceEdge: Color
     let pressedWash: Color
@@ -60,7 +60,7 @@ struct Palette: Equatable {
         pressedWash: Color(rgb: 107, 58, 31, 0.09),
         oak: Color(hex: 0x3F372F),
         materialHighlight: Color(rgb: 255, 255, 255, 0.38),
-        inscriptionGround: Color(hex: 0x545F54),
+        inscriptionGround: Color(hex: 0x4C574D),
         inscriptionEdge: Color(hex: 0x5E2A27),
         inscriptionWash: Color(rgb: 87, 94, 65, 0.055),
         plaster: "plaster_nave.jpg",
@@ -107,10 +107,12 @@ extension Color {
 
 /**
  * The gilding, which alone follows the season ("Seasonal ornament" in style.css): gold leaf
- * through most of the year, veiled in Passiontide, warmed at Eastertide. Functional gold
- * (controls, selections) stays `Palette.gold`. The painted rules are the lining's terracotta,
- * so `line` is `Palette.lining` except where a season gilds or veils it; the church veils its
- * images, not its walls.
+ * through most of the year, quiet through the penitential seasons and on the violet days, veiled
+ * in Passiontide, warmed at Eastertide. Functional gold (controls, selections) stays
+ * `Palette.gold`. The painted rules are the lining's terracotta, so `line` is `Palette.lining`
+ * except where a season gilds or veils it; the church veils its images, not its walls. `cap` is
+ * the initials' ink where it is not the gilding: a bare hour's (the Triduum, the Office of the
+ * Dead) are set in the muted ink, as the web's `--cap-ink`.
  */
 struct Ornament: Equatable {
     let flat: Color
@@ -118,16 +120,36 @@ struct Ornament: Equatable {
     let hi: Color
     let lo: Color
     let ink: Color
+    var cap: Color?
 
     static func of(_ p: Palette, season: String) -> Ornament {
         switch (season, p.dark) {
         case ("passiontide", true): return Ornament(flat: Color(hex: 0xB0A4C2), line: Color(hex: 0x565070), hi: Color(hex: 0xCAC1D7), lo: Color(hex: 0x988AAD), ink: Color(hex: 0xDDD6E8))
         case ("passiontide", false): return Ornament(flat: Color(hex: 0x756A7E), line: Color(hex: 0xB5AABD), hi: Color(hex: 0x8D8395), lo: Color(hex: 0x605469), ink: Color(hex: 0xDDD6E8))
+        case ("quiet", true): return Ornament(flat: Color(hex: 0xB7AA86), line: Color(hex: 0x5C5544), hi: Color(hex: 0xC6BB9A), lo: Color(hex: 0xA4976F), ink: Color(hex: 0xD9D0B4))
+        case ("quiet", false): return Ornament(flat: Color(hex: 0x857350), line: Color(hex: 0xB9AD90), hi: Color(hex: 0x978660), lo: Color(hex: 0x6C5C3C), ink: Color(hex: 0xD9D0B4))
         case ("eastertide", true): return Ornament(flat: Color(hex: 0xE6CF8C), line: Color(hex: 0x7A6A44), hi: Color(hex: 0xF2E2B1), lo: Color(hex: 0xD3B86F), ink: Color(hex: 0xF2E2B1))
         case ("eastertide", false): return Ornament(flat: Color(hex: 0xA4731A), line: Color(hex: 0xD0B06C), hi: Color(hex: 0xC8922D), lo: Color(hex: 0x886011), ink: Color(hex: 0xF2E2B1))
         case (_, true): return Ornament(flat: p.gold, line: p.lining, hi: Color(hex: 0xE7D295), lo: Color(hex: 0xC0A25A), ink: Color(hex: 0xECD9A0))
         default: return Ornament(flat: p.gold, line: p.lining, hi: Color(hex: 0xB98D3C), lo: Color(hex: 0x7D5C1C), ink: Color(hex: 0xECD9A0))
         }
+    }
+}
+
+extension Palette {
+    /**
+     * The palette as the season leaves it ("Seasonal ornament" in style.css). Apse's tituli are
+     * gilt, so they go quiet, veil in Passiontide and warm at Eastertide with the rest of the
+     * gilding; Nave's are painted and stay. The moon goes quiet and veils with the gilding, and at
+     * Eastertide Nave's gold moon warms while Apse's silver keeps its own ink.
+     */
+    func seasoned(_ season: String) -> Palette {
+        guard season == "quiet" || season == "passiontide" || season == "eastertide" else { return self }
+        let o = Ornament.of(self, season: season)
+        var p = self
+        if dark { p.titulus = o.flat }
+        if season != "eastertide" || !dark { p.moonInk = o.flat }
+        return p
     }
 }
 
@@ -143,16 +165,68 @@ func dayColor(_ name: String) -> Color {
     }
 }
 
+/// The band of the day's colour across an hour's top (`.color-band-*`): the rails' colours, but a
+/// white day's is the pale linen of a white vestment, in both themes; on the Apse night red, green,
+/// violet and black take home's lifts, so the band does not sink into the night.
+func bandColor(_ name: String, _ p: Palette) -> Color {
+    name == "white" ? Color(hex: 0xE8E0CC) : dayColor(name, p)
+}
+
+/// A day's colour as `.day-color-*` sets it on an hour's title and the ordo's rails: on the Apse
+/// night white and black are lifted, so they do not sink into the night.
+func titleColor(_ name: String, _ p: Palette) -> Color {
+    switch (name, p.dark) {
+    case ("white", true): return Color(hex: 0xD0B06A)
+    case ("black", true): return Color(hex: 0x8A94A0)
+    default: return dayColor(name)
+    }
+}
+
+/// Halfway from a vigil's colour to its feast's, in Oklab: the web's `color-mix(in oklab, …)` and
+/// Compose's `lerp`, for the ordo's thread from a vigil into its feast.
+func threadMid(_ a: Color, _ b: Color) -> Color {
+    func oklab(_ c: Color) -> (Double, Double, Double) {
+        var r: CGFloat = 0, g: CGFloat = 0, bl: CGFloat = 0, alpha: CGFloat = 0
+        _ = UIColor(c).getRed(&r, green: &g, blue: &bl, alpha: &alpha)
+        func linear(_ v: CGFloat) -> Double {
+            let v = Double(v)
+            return v <= 0.04045 ? v / 12.92 : pow((v + 0.055) / 1.055, 2.4)
+        }
+        let (lr, lg, lb) = (linear(r), linear(g), linear(bl))
+        let l = cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb)
+        let m = cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb)
+        let s = cbrt(0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb)
+        return (
+            0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+            1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+            0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s
+        )
+    }
+    func encoded(_ v: Double) -> Double {
+        let v = min(max(v, 0), 1)
+        return v <= 0.0031308 ? 12.92 * v : 1.055 * pow(v, 1 / 2.4) - 0.055
+    }
+    let (x, y) = (oklab(a), oklab(b))
+    let (lightness, green, blue) = ((x.0 + y.0) / 2, (x.1 + y.1) / 2, (x.2 + y.2) / 2)
+    let l = pow(lightness + 0.3963377774 * green + 0.2158037573 * blue, 3)
+    let m = pow(lightness - 0.1055613458 * green - 0.0638541728 * blue, 3)
+    let s = pow(lightness - 0.0894841775 * green - 1.2914855480 * blue, 3)
+    return Color(
+        .sRGB,
+        red: encoded(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+        green: encoded(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+        blue: encoded(-0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s)
+    )
+}
+
 /// A day's colour as home sets it: on the Apse night white and black are lifted, as `.day-color-*`
 /// is, and so are red, green and violet, which are mixed for limewash and would sink into the night.
 func dayColor(_ name: String, _ p: Palette) -> Color {
     switch (name, p.dark) {
-    case ("white", true): return Color(hex: 0xD0B06A)
-    case ("black", true): return Color(hex: 0x8A94A0)
     case ("red", true): return Color(hex: 0xC9503F)
     case ("green", true): return Color(hex: 0x4F8A52)
     case ("violet", true): return Color(hex: 0x8D62AD)
-    default: return dayColor(name)
+    default: return titleColor(name, p)
     }
 }
 
@@ -314,6 +388,8 @@ enum Scale {
     static let verse = TextStyle(size: 20, line: 33)
     static let rubric = TextStyle(size: 18, line: 27)
     static let heading = TextStyle(size: 19.2, line: 24.96, tracking: 2.112, smallCaps: true)
+    // A commemoration's name, in mixed case under its small-caps kicker, as the web's `.commemoration-name`.
+    static let commemorationName = TextStyle(size: 19.2, line: 25.92, tracking: 0.29)
     static let itemLabel = TextStyle(size: 20, line: 27, tracking: 1.4, smallCaps: true, lining: true)
     static let reference = TextStyle(size: 17, line: 23.8)
     static let verseNumber = TextStyle(size: 15.6, line: 25.74)
@@ -324,6 +400,10 @@ enum Scale {
     static let brand = TextStyle.label(14.4, 0.08)
     static let menu = TextStyle.label(12.48, 0.08)
     static let control = TextStyle.label(11.52, 0.1)
+    /// Home's foot letter, true small capitals: an hour's Prayer form under its title.
+    static let smallCapsControl = TextStyle(size: 14.4, line: 23.04, tracking: 14.4 * 0.08, smallCaps: true)
+    /// The day's name under an hour's title, in the text's ink (`.hour-meta-feast`).
+    static let dayName = TextStyle(size: 17.28, line: 22.46)
 }
 
 // The page's palette, gilding, measures and composition, as the Android app's composition locals.
@@ -355,8 +435,9 @@ extension EnvironmentValues {
         set { self[WideKey.self] = newValue }
     }
 
-    /// Whether a wide page is narrower than the hours' header holds on one line (701–959pt): there
-    /// an hour's links take a rank of their own under the brand and Settings.
+    /// Whether a wide page is narrower than the hours' header once held on one line (from 701pt to
+    /// 1000 of the page's measure): there the versicles' markers stay in their gutter, as the web's
+    /// do at those widths.
     var ranked: Bool {
         get { self[RankedKey.self] }
         set { self[RankedKey.self] = newValue }
@@ -366,8 +447,9 @@ extension EnvironmentValues {
 /// The web's breakpoint (style.css `min-width: 701px`).
 let wideFrom: CGFloat = 701
 
-/// Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 959px`).
-let rankedBelow: CGFloat = 960
+/// Where a wide page's versicles hang their markers in the margin (style.css `max-width: 999px`),
+/// in the page's own measure.
+let rankedBelow: CGFloat = 1000
 
 /// Sets a style from the type scale, at the page's size.
 private struct Typeface: ViewModifier {

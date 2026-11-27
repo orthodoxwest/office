@@ -440,7 +440,7 @@ def render_repair_backlog(rows: list[dict[str, str]]) -> list[str]:
     lines = ["", "## Open repair backlog", "",
              f"{len(rows)} curated open targets from `data/review/repair-backlog.csv`, including earlier-year examples. "
              "This is a selected work list, not the total number of defects: other untriaged ordo findings "
-             "remain in the diagnostic report and finding CSV, and wording review remains in the provenance queue. "
+             "remain in the diagnostic report and finding CSV. "
              "Ordo classifications remain in the triage ledger. Rows are removed in resolving PRs; "
              "report generation never certifies completion."]
     for scope, label in [("ordinary-year", "Ordinary year"), ("triduum", "Triduum")]:

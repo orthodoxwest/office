@@ -1,0 +1,109 @@
+name: Submit to the App Store
+
+# Sends the iOS app's newest TestFlight build to App Review as a new App Store version, without
+# rebuilding: the App Store gets the build master uploaded (scripts/appstore.py,
+# apps/ios/README.md "The App Store").
+#
+# Daily: unless a version is already with Apple or waiting to be released, the newest valid build
+# that was uploaded at least 24 hours before (a soak for master's CI and snapshot checks) and has
+# a higher version than the App Store's is submitted. TestFlight's beta review and testers play
+# no part. Once approved it is released by itself, in Apple's seven-day phased release. A
+# rejection stops the daily runs until a person has read Apple's reasons. Scheduled runs use the `appstore-auto` environment, with no reviewer.
+#
+# A manual run submits a build now (the newest valid one, of any age, unless a build number is
+# given); after a rejection it resubmits the rejected version with that build.
+# It uses the `appstore` environment, which has a required reviewer.
+on:
+  schedule:
+    # 15:00 UTC, mid-morning in America/New_York.
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+    inputs:
+      build:
+        description: "Build number to submit; empty means the newest valid build"
+        type: string
+        default: ""
+      notes:
+        description: "What's New; empty uses the notes in release-notes/ since the App Store's live build"
+        type: string
+        default: ""
+      dry_run:
+        description: "Only say what would be submitted"
+        type: boolean
+        default: false
+
+concurrency:
+  group: appstore-promote
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  promote:
+    name: ${{ github.event_name == 'schedule' && 'Submit a day-old build' || 'Submit to the App Store now' }}
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    # A few minutes of reads and writes, and up to 150 s waiting for a version to be ready.
+    timeout-minutes: 20
+    environment: ${{ github.event_name == 'schedule' && 'appstore-auto' || 'appstore' }}
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.submit.outputs.version }}
+      build: ${{ steps.submit.outputs.build }}
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          # Build numbers are commit counts; the release notes compare commits and tags.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Submit
+        id: submit
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY: ${{ secrets.ASC_KEY }}
+          EVENT: ${{ github.event_name }}
+          BUILD: ${{ inputs.build }}
+          NOTES: ${{ inputs.notes }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ -z "$ASC_KEY_ID" ] || [ -z "$ASC_ISSUER_ID" ] || [ -z "$ASC_KEY" ]; then
+            # Repository secrets (TestFlight's), or ones on both the appstore and appstore-auto environments.
+            echo "::warning::The App Store Connect key is not set for this environment; nothing submitted"
+            exit 0
+          fi
+          if [ "$EVENT" = schedule ]; then
+            set -- auto --min-age 24
+          else
+            set -- manual
+            if [ -n "$BUILD" ]; then set -- "$@" --build "$BUILD"; fi
+            if [ -n "$NOTES" ]; then set -- "$@" "--notes=$NOTES"; fi
+            if [ "$DRY_RUN" = true ]; then set -- "$@" --dry-run; fi
+          fi
+          python3 scripts/appstore.py "$@"
+
+  # Tags the App Store's live version (ios/<version>), the release notes' record, in a job of its
+  # own, so only this step holds a token that can push.
+  tag:
+    name: Tag what the App Store has out
+    needs: promote
+    if: needs.promote.outputs.build != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          # Build numbers are commit counts.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Tag
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.promote.outputs.version }}
+          BUILD: ${{ needs.promote.outputs.build }}
+        run: python3 scripts/release_notes.py record --platform ios --version "$VERSION" --build "$BUILD"

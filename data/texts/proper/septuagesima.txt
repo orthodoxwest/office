@@ -39,7 +39,7 @@ O Lord, we beseech thee favourably to hear the prayers of thy people; that we, w
 
 [chapter-lauds]
 # SOURCE: Monastic Diurnal.pdf, p. 236, 39
-!1 Cor 9:24
+!1 Cor. 9:24
 Brethren: Know ye not that they which run in a race run all, but one receiveth the prize? So run, that ye may obtain.
 R. Thanks be to God.
 
@@ -59,13 +59,13 @@ R. From one generation to another.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 236 (Septuagesima Sunday, At Sext)
-!1 Cor 9:25
+!1 Cor. 9:25
 And every man that striveth for the mastery is temperate in all things. Now they do it to obtain a corruptible crown; * but we an incorruptible.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 237 (Septuagesima Sunday, At None)
-!1 Cor 10:4-5
+!1 Cor. 10:4, 5
 For they drank of that spiritual Rock which followed them: and that Rock was Christ. * But with some of them God was not well pleased.
 R. Thanks be to God.
 
@@ -133,7 +133,7 @@ The Lord said * unto Adam, Of the tree which is in the midst of the garden thou 
 # Vespers-only override for psalm antiphon 3.
 #
 # [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+# Vespers-only override for psalm antiphon 4; without one, Vespers takes Lauds antiphon 5, omitting the fourth.
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.
@@ -146,3 +146,7 @@ The Lord said * unto Adam, Of the tree which is in the midst of the garden thou 
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 236 (At Terce: "Chapter as above at Lauds")
+@use proper/septuagesima/chapter-lauds

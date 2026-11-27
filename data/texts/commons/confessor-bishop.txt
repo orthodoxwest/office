@@ -37,9 +37,6 @@ O ye priests of God, * bless ye the Lord: O ye servants of the Lord, sing a hymn
 # SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At Lauds)
 Good and faithful servant, * enter thou into the joy of thy Lord.
 
-[psalm-antiphon-4-vespers]
-@use commons/confessor-bishop/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 36* (Common of a Confessor and Bishop, At Lauds)
 Well done, * good and faithful servant: thou hast been faithful over a few things, I will make thee ruler over many things, saith the Lord.
@@ -71,19 +68,19 @@ Grant, we beseech thee, Almighty God: that the reverend solemnity of blessed N.,
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At Lauds)
-!Sir 44:17
+!Ecclus. 44:17
 Behold a great priest who in his days pleased God and was found righteous: * and in the time of wrath he was made a reconciliation.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 37* (Common of a Confessor and Bishop, At Sext)
-!Sir 44:19-21
+!Ecclus. 44:19-21
 In glory was there none like unto him, who kept the law of the Most High: * therefore the Lord assured him by an oath that he would bless the nations in his seed.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 37* (Common of a Confessor and Bishop, At None)
-!Sir 45:15-16
+!Ecclus. 45:15, 16
 He consecrated him to execute the office of the priesthood, to bless the people in his Name, * and to offer sacrifices to the Lord, incense, and a sweet savour.
 R. Thanks be to God.
 
@@ -120,13 +117,44 @@ Amen.
 
 [hymn-vespers]
 # SOURCE: office-hymns.zip (This the Confessor, Conf and Bishop Vespers.docx)
-# NOTE: source provides an m.t.v. alternate first-stanza ending for feasts not kept on the saint's death-day; the current resolver has no per-feast hymn-stanza selector.
 Iste Confessor
 
 This the Confessor of the Lord, whose triumph
 Now through the wide world celebrate the faithful,
 Merited this day joyfully to enter
 Heavenly mansions.
+
+Saintly and prudent, continent and humble,
+Chaste was he ever, peaceable and sober,
+While living vigour, coursing through his body,
+Quickened his being.
+
+When to his honoured sepulchre with members
+Languishing sorely, sufferers resorted,
+Oft unto wholeness did the Lord restore them
+At his petition.
+
+Wherefore our chorus chanteth in his honour
+Here, on his feast day, this most willing anthem;
+That in his merits we may have a portion,
+Now and for ever.
+
+His be the glory, power and salvation
+Who, o'er the heavens, dwelling in the highest,
+Earth's mighty fabric ruleth and directeth,
+Onely and Trinal.
+
+Amen.
+[hymn-vespers-mtv]
+# SOURCE: Monastic Diurnal.pdf, p. 34* (Common of a Confessor and Bishop, Hymn: "If it be not the day of the Saint's death
+# (indicated in the Proper by the letters m.t.v.) the last two lines read"); the rest as [hymn-vespers].
+# Sung for a feast whose data sets HymnMtv (crates/office/src/engine.rs).
+Iste Confessor
+
+This the Confessor of the Lord, whose triumph
+Now through the wide world celebrate the faithful,
+On this his feast-day, year by year receiveth
+Merited honours.
 
 Saintly and prudent, continent and humble,
 Chaste was he ever, peaceable and sober,
@@ -198,3 +226,7 @@ R. After the order of Melchisedech.
 
 [chapter-terce]
 @use commons/confessor-bishop/chapter-lauds
+
+[collect-alternate]
+# SOURCE: Monastic Diurnal pp. 36*–37* (Common of a Confessor and Bishop, Another Collect)
+O Lord, we beseech thee, hear the prayers which we offer thee on the solemnity of blessed N., thy Bishop and Confessor: and by the interceding merits of him who worthily attained to serve thee, absolve us from all our sins.

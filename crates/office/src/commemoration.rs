@@ -1,7 +1,7 @@
 //! Commemorations at Lauds and Vespers: heading, antiphon, versicle, invitation, collect.
 
 use calendar::commemoration::lauds_commemorations;
-use calendar::traits::{is_day_within_octave, octave_parent_id};
+use calendar::traits::{is_anticipated_sunday, is_day_within_octave, octave_parent_id};
 use calendar::{Category, Feast, FeastRef, Rank, Season, Weekday};
 use liturgy::{ElementType, OfficeElement};
 
@@ -12,7 +12,7 @@ use crate::engine::{compact_refs, resolve_element};
 use crate::hourdef::HourElement;
 use crate::proper::{
     advent_date_commemoration_antiphon, feast_proper_ids, feast_proper_name, is_synthesized_feria, lookup_commons_text,
-    lookup_section_text, resolve_proper_text, substitute_proper_name,
+    lookup_section_text, paschal_common_antiphon, resolve_proper_text, substitute_proper_name,
 };
 use crate::psalmody::is_office_of_the_dead;
 use crate::texts::OfficeTexts;
@@ -29,7 +29,7 @@ pub fn add_commemorations(day: &Day, hour_name: &str, t: &OfficeTexts, more_coll
     // A saint commemorated within the Octave of Pentecost keeps its Common's
     // Paschaltide forms (2026 ordo, 4-5 June: Boniface "Light perpetual",
     // "Daughters"; #631).
-    let season = if day.is_paschaltide(hour_name) { Season::Easter } else { day.season };
+    let season = day.saints_season(hour_name);
     let mut elems = Vec::new();
     for (i, comm) in comms.iter().enumerate() {
         let lookup = |reference: &str| -> (String, String) {
@@ -46,7 +46,20 @@ pub fn add_commemorations(day: &Day, hour_name: &str, t: &OfficeTexts, more_coll
             if is_synthesized_feria(comm) {
                 return lookup_feria_commemoration(Some(day), comm, day.season, hour_name, reference, t);
             }
-            if is_saturday_sunday_commemoration(day, comm, hour_name, reference) {
+            // An Advent Ember day's collect is "said at all the Hours until
+            // Vespers" (Diurnal p. 177): at Vespers it is a feria of its week,
+            // with the weekday's antiphon and the Sunday's collect (2025 ordo
+            // 17 Dec, "Comm. Fer. ... Col. 170"; 2022 ordo 14 Dec, "Behold the
+            // handmaid of the Lord"; #642).
+            if hour_name == "vespers"
+                && comm.id.starts_with("advent-ember-")
+                && let Some(week) = &day.temporal_week_id
+            {
+                let mut feria = (**comm).clone();
+                feria.proper_id = Some(week.clone());
+                return lookup_feria_commemoration(Some(day), &feria, day.season, hour_name, reference, t);
+            }
+            if is_incoming_sunday_commemoration(day, comm, hour_name, reference) {
                 return lookup_sunday_first_vespers_commemoration(day, comm, reference, t);
             }
             if hour_name == "vespers" && commemoration_takes_first_vespers(day, comm, reference) {
@@ -110,7 +123,7 @@ pub fn octave_commemoration_ref(day: &Day, comm: &Feast, hour_name: &str, refere
         return None;
     }
     if !celebration.is_category(Category::Sunday) {
-        if day.vespers.owner == VespersOwner::IOfFollowing && is_day_within_octave(comm) {
+        if day.vespers.owner() == VespersOwner::IOfFollowing && is_day_within_octave(comm) {
             return Some(format!("proper/{parent}/{reference}-at-first-vespers"));
         }
         return None;
@@ -118,11 +131,11 @@ pub fn octave_commemoration_ref(day: &Day, comm: &Feast, hour_name: &str, refere
     if day.within_octave_of.as_deref() != Some(parent) {
         return None;
     }
-    let context = match day.vespers.owner {
+    let context = match day.vespers.owner() {
         VespersOwner::IOfFollowing => "sunday-first-vespers".to_string(),
         VespersOwner::IIOfPreceding => {
             let mut c = "sunday-second-vespers".to_string();
-            if day.vespers.following_office_octave_of != day.within_octave_of {
+            if day.vespers.following_office_octave_of() != day.within_octave_of.as_deref() {
                 c.push_str("-before-other-office");
             }
             c
@@ -134,21 +147,30 @@ pub fn octave_commemoration_ref(day: &Day, comm: &Feast, hour_name: &str, refere
 
 /// A Sunday commemorated at Saturday Vespers — whether a Saturday feast keeps
 /// II Vespers or a feast on the Sunday takes I Vespers — begins with its own
-/// I-Vespers antiphon and versicle (XIV.14; Diurnal p. 403).
-pub fn is_saturday_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &str, reference: &str) -> bool {
+/// I-Vespers antiphon and versicle (XIV.14; Diurnal p. 403). The Sunday
+/// office said on Saturday when the Octave Day of the Epiphany is Sunday is
+/// outgoing, commemorated with its II-Vespers antiphon (p. 231) (#651).
+/// A Sunday anticipated on Saturday is commemorated at its I Vespers on
+/// Friday "with the Antiphon of Friday as given in the Psalter" (General
+/// Rubrics IV.4-5; 2025 and 2026 ordos, 14 and 6 February: "Fri. Off. ...
+/// He hath put down") (#656).
+pub fn is_incoming_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &str, reference: &str) -> bool {
     hour_name == "vespers"
         && (reference == "commemoration-antiphon" || reference == "commemoration-versicle")
-        && day.civil_weekday() == Weekday::Saturday
+        && (day.civil_weekday() == Weekday::Saturday || is_anticipated_sunday(feast))
         && feast.is_category(Category::Sunday)
+        && day.vespers.incoming_commemoration_ids.contains(&feast.id)
 }
 
 /// Resolves the commemorated Sunday's slot exactly as its own I Vespers
 /// would: historia, the Sunday's "-first" proper, season, Saturday psalter.
+/// The civil evening is kept, so an anticipated Sunday commemorated at
+/// Friday's II Vespers takes Friday's psalter antiphon (IV.4).
 fn lookup_sunday_first_vespers_commemoration(day: &Day, feast: &FeastRef, reference: &str, t: &OfficeTexts) -> (String, String) {
     let mut sunday = day.clone();
-    if !sunday.first_vespers {
+    if !sunday.first_vespers() {
         sunday.cal.date = day.date.add_days(1);
-        sunday.first_vespers = true;
+        sunday.set_first_vespers(true);
     }
     sunday.cal.celebration = Some(feast.clone());
     let slot = if reference == "commemoration-antiphon" { "magnificat-antiphon" } else { "versicle" };
@@ -159,12 +181,29 @@ fn lookup_sunday_first_vespers_commemoration(day: &Day, feast: &FeastRef, refere
 /// its own I-Vespers texts.
 pub fn commemoration_takes_first_vespers(day: &Day, comm: &Feast, reference: &str) -> bool {
     if (comm.rank == Rank::Commemoration && comm.companion_of.is_none())
-        || (!comm.id.is_empty() && comm.id == day.following_office_commemoration_id)
+        || (!comm.id.is_empty() && comm.id == day.following_office_commemoration_id())
         || day.vespers.incoming_commemoration_ids.contains(&comm.id)
     {
         return reference == "commemoration-antiphon" || reference == "commemoration-versicle";
     }
-    is_saturday_sunday_commemoration(day, comm, "vespers", reference)
+    is_incoming_sunday_commemoration(day, comm, "vespers", reference)
+}
+
+/// In Paschaltide an office's own paschal propers come first, as when it is
+/// said (the Saturday Office of Our Lady, Diurnal p. 71*).
+fn paschal_proper(feast: &Feast, season: Season, hour_name: &str, slots: &[&str], t: &OfficeTexts) -> Option<(String, String)> {
+    if season != Season::Easter {
+        return None;
+    }
+    for slot in slots {
+        for id in feast_proper_ids(feast) {
+            let (text, source) = lookup_section_text(&format!("proper/{id}-paschal/"), None, hour_name, slot, t);
+            if !text.is_empty() {
+                return Some((substitute_proper_name(&text, &feast_proper_name(feast)), source));
+            }
+        }
+    }
+    None
 }
 
 /// The I-Vespers texts of an incoming office or Memorial (VIII, X).
@@ -177,11 +216,15 @@ fn lookup_following_office_commemoration(feast: &Feast, season: Season, referenc
         "commemoration-versicle" => &["versicle-first-vespers", "versicle-vespers"],
         _ => &[],
     };
+    if let Some(found) = paschal_proper(feast, season, "vespers", candidates, t) {
+        return found;
+    }
     // The feast's own Vespers text outranks its Common's I-Vespers one.
     for candidate in candidates {
         for id in feast_proper_ids(feast) {
-            let (text, source) = lookup_section_text(&format!("proper/{id}/"), Some(season), "vespers", candidate, t);
-            if !text.is_empty() {
+            let found = lookup_section_text(&format!("proper/{id}/"), Some(season), "vespers", candidate, t);
+            if !found.0.is_empty() {
+                let (text, source) = paschal_common_antiphon(feast, season, "vespers", candidate, found, t);
                 return (substitute_proper_name(&text, &feast_proper_name(feast)), source);
             }
         }
@@ -369,17 +412,26 @@ fn lookup_commemoration_office(
     }
     let proper_name = feast_proper_name(feast);
     let ids = feast_proper_ids(feast);
+    // In Paschaltide an office's paschal propers come first, as when it is said
+    // (the Saturday Office of Our Lady, Diurnal p. 71*).
+    let fallbacks = commemoration_fallback_slots(hour_name, reference, first_vespers);
+    let slots: Vec<&str> = [reference].into_iter().chain(fallbacks.iter().copied()).collect();
+    if let Some(found) = paschal_proper(feast, season, hour_name, &slots, t) {
+        return found;
+    }
     for id in &ids {
-        let (text, resolved) = lookup_section_text(&format!("proper/{id}/"), Some(season), hour_name, reference, t);
-        if !text.is_empty() {
+        let found = lookup_section_text(&format!("proper/{id}/"), Some(season), hour_name, reference, t);
+        if !found.0.is_empty() {
+            let (text, resolved) = paschal_common_antiphon(feast, season, hour_name, reference, found, t);
             return (substitute_proper_name(&text, &proper_name), resolved);
         }
     }
     let fallbacks = commemoration_fallback_slots(hour_name, reference, first_vespers);
     for fallback in &fallbacks {
         for id in &ids {
-            let (text, resolved) = lookup_section_text(&format!("proper/{id}/"), Some(season), hour_name, fallback, t);
-            if !text.is_empty() {
+            let found = lookup_section_text(&format!("proper/{id}/"), Some(season), hour_name, fallback, t);
+            if !found.0.is_empty() {
+                let (text, resolved) = paschal_common_antiphon(feast, season, hour_name, fallback, found, t);
                 return (substitute_proper_name(&text, &proper_name), resolved);
             }
         }

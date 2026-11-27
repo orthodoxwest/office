@@ -24,6 +24,7 @@ Name = St Paul the First Hermit
 Rank = commemoration
 Color = white
 Category = confessor
+ProperName = Paul
 Month = 1
 Day = 10
 Source = awrv
@@ -95,7 +96,9 @@ Day = 19
 Source = awrv
 
 [comm-01-22-ss-vincent-martyr]
-Name = Ss Vincent, Martyr
+# St Vincent alone, as in the Diurnal (p. 461); the ordos' "Ss" is left over
+# from "Ss Vincent & Anastasius" (#648).
+Name = St Vincent, Martyr
 Rank = commemoration
 Color = red
 Category = martyr
@@ -892,6 +895,7 @@ Name = Ss Ursula & companions, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
+ProperName = Ursula and her Companions
 Month = 10
 Day = 21
 Source = awrv
@@ -1223,17 +1227,6 @@ Month = 3
 Day = 17
 Source = awrv
 
-[comm-extra-03-17-st-joseph-of-arimathea-c]
-ProperID = st-joseph-arimathea
-ProperName = Joseph
-Name = St Joseph of Arimathea, C
-Rank = commemoration
-Color = white
-Category = confessor
-Month = 3
-Day = 17
-Source = awrv
-
 [comm-extra-03-20-st-cuthbert-bishop-and-confessor]
 Name = St Cuthbert, Bishop & Confessor
 Rank = commemoration
@@ -1363,7 +1356,7 @@ Source = awrv
 CompanionOf = commemoration-st-paul-apostle
 
 [comm-extra-07-07-ss-cyril-and-methodius-bishops-and-confessors]
-Name = Ss Cyril and Methodius, Bishops & Confessors
+Name = Ss Cyril & Methodius, Bishops & Confessors
 Rank = commemoration
 Color = white
 Category = confessor-bishop
@@ -1417,10 +1410,11 @@ Day = 2
 Source = awrv
 
 [comm-extra-08-06-ss-sixtus-ii-pope-and-martyr-felicissimus-and-agapitus]
-Name = Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus
+Name = Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus (Deacons), Martyrs
 Rank = commemoration
 Color = red
-Category = bishop-martyr
+Category = martyrs
+ProperName = Sixtus, Felicissimus and Agapitus
 Month = 8
 Day = 6
 Source = awrv
@@ -1500,7 +1494,7 @@ Day = 18
 Source = awrv
 
 [comm-extra-01-25-the-conversion-of-st-paul-the-apostle]
-Name = The Conversion of St Paul The Apostle
+Name = The Conversion of St Paul the Apostle
 ProperName = Paul
 Rank = commemoration
 Color = white
@@ -1528,7 +1522,7 @@ Day = 6
 Source = awrv
 
 [comm-extra-02-06-st-photius-bishop-and-confessor]
-Name = St Photius, Bishop and Confessor
+Name = St Photius, Bishop & Confessor
 Rank = commemoration
 Color = white
 Category = confessor-bishop
@@ -1600,7 +1594,7 @@ Day = 17
 Source = awrv
 
 [comm-extra-04-14-st-tiburtius-valerian-and-maximus-martyrs]
-Name = St Tiburtius, Valerian & Maximus, Martyrs
+Name = Ss Tiburtius, Valerian & Maximus, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1619,7 +1613,7 @@ Day = 22
 Source = awrv
 
 [comm-extra-04-26-st-cletus-and-marcellinus-martyrs]
-Name = St Cletus & Marcellinus, Martyrs
+Name = Ss Cletus & Marcellinus, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1629,7 +1623,7 @@ Source = awrv
 
 [comm-extra-05-03-ss-alexander-bp-eventius-theodulus-mm-and-juve]
 ProperName = Alexander, Eventius & Theodulus
-Name = Ss Alexander, Eventius & Theodulus, Martyrs, and St Juvenalis, Bishop & Confessor
+Name = Ss Alexander, Eventius & Theodulus, Martyrs; & St Juvenalis, Bishop & Confessor
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1686,6 +1680,7 @@ Name = Ss Marcellinus, Peter & Erasmus, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
+ProperName = Marcellinus, Peter and Erasmus
 Month = 6
 Day = 2
 Source = awrv
@@ -1730,6 +1725,7 @@ Name = Ss Gervase & Protase, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
+ProperName = Gervase and Protase
 Month = 6
 Day = 19
 Source = awrv
@@ -1759,6 +1755,7 @@ Name = St Joseph of Damascus (Priest) & companions, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
+ProperName = Joseph and his Companions
 Month = 7
 Day = 10
 Source = awrv
@@ -1776,7 +1773,7 @@ Source = awrv
 
 [comm-extra-07-28-ss-nazarius-celsus-martyrs-st-victor-bishop-and]
 ProperName = Nazarius, Celsus & Victor
-Name = Ss Nazarius & Celsus, Martyrs, St Victor, Bishop & Martyr, and St Innocent, Bishop & Confessor
+Name = Ss Nazarius & Celsus, Martyrs; St Victor, Bishop & Martyr; & St Innocent, Bishop & Confessor
 Rank = commemoration
 Color = red
 Category = martyrs

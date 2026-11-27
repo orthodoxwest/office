@@ -1963,7 +1963,8 @@
         "date": "2026-05-16",
         "hour": "terce",
         "slot": "versicle",
-        "ref": "commons/blessed-virgin/versicle-terce",
+        "ref": "commons/virgin-martyr-paschal/versicle-first-vespers",
+        "contains": "and reign, alleluia.",
         "before_slot": "collect"
       },
       {
@@ -3099,6 +3100,633 @@
         "commemoration_owner": "privileged-lenten-feria",
         "slot": "commemoration-collect",
         "ref": "proper/lent-sunday-3/collect-vespers-friday"
+      }
+    ]
+  },
+  {
+    "id": "easter-week-daily-collects",
+    "source": "Monastic Diurnal pp. 367-370: a proper Collect for each day of Easter Week. 2026 ordo, 13-18 Apr.: Lauds, Hours and Vespers 'Col. (367)', '(368)', '(368)', '(368)', '(369)', '(369f)'; 18 Apr. Vespers of Low Sunday 'Col. (371)'. Issue #634.",
+    "cases": [
+      {
+        "date": "2026-04-13",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-monday/collect"
+      },
+      {
+        "date": "2026-04-14",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/easter-tuesday/collect"
+      },
+      {
+        "date": "2026-04-15",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect",
+        "contains": "yearly solemnity of the Lord's Resurrection"
+      },
+      {
+        "date": "2026-04-15",
+        "hour": "terce",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect"
+      },
+      {
+        "date": "2026-04-15",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect"
+      },
+      {
+        "date": "2026-04-16",
+        "hour": "sext",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-5/collect",
+        "contains": "knit together divers nations"
+      },
+      {
+        "date": "2026-04-17",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-6/collect",
+        "contains": "covenant of reconciliation"
+      },
+      {
+        "date": "2026-04-18",
+        "hour": "none",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-7/collect",
+        "contains": "devoutly kept the Paschal Feast"
+      },
+      {
+        "date": "2026-04-18",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/low-sunday/collect"
+      },
+      {
+        "date": "2025-04-23",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect"
+      },
+      {
+        "date": "2027-05-08",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-7/collect"
+      }
+    ]
+  },
+  {
+    "id": "doctor-magnificat-antiphon-in-paschaltide",
+    "source": "Monastic Diurnal p. 528 (St Bede: 'On Magnificat, Ant. O Teacher, p. 43*'), p. 536 (St Ephrem), p. 43* (Common of a Confessor, For a Doctor, both Vespers) and p. 6* section 3 (in Paschaltide the Common of Confessors adds one Alleluia to each antiphon). 2026 ordo, 26 May: 'Mag. Ant. \"O Teacher\" (43*)'. The added Alleluia takes the Diurnal's printed form ', alleluia.' (Common of Apostles in Paschaltide, pp. 16*-17*). Issues #640, #645.",
+    "cases": [
+      {
+        "date": "2026-05-26",
+        "hour": "vespers",
+        "slot": "magnificat-antiphon",
+        "ref": "commons/confessor-paschal/magnificat-antiphon-doctor",
+        "contains": "Son of God, alleluia."
+      },
+      {
+        "date": "2027-06-18",
+        "hour": "vespers",
+        "slot": "magnificat-antiphon",
+        "ref": "commons/confessor-paschal/magnificat-antiphon-doctor",
+        "contains": "Son of God, alleluia."
+      },
+      {
+        "date": "2037-06-18",
+        "hour": "vespers",
+        "slot": "magnificat-antiphon",
+        "ref": "proper/st-ephrem-syrian/magnificat-antiphon"
+      },
+      {
+        "date": "2028-05-01",
+        "hour": "vespers",
+        "commemoration_owner": "st-athanasius",
+        "slot": "commemoration-antiphon",
+        "contains": "Son of God, alleluia."
+      }
+    ]
+  },
+  {
+    "id": "weekday-lauds-canticle-antiphons-in-paschaltide",
+    "source": "Monastic Diurnal pp. 46-79 (weekday Lauds, Ferial and Festal Canticles): the canticle antiphons print their Paschaltide alleluia as '(P. T. Alleluia.)', written ', alleluia.' as for the Commons (#645). Thursday's Ferial Canticle prints its P. T. Ant. in full, 'triumphed gloriously. Alleluia.' (p. 63), and Friday's '...was afraid, alleluia.' (p. 69); both are kept as printed.",
+    "cases": [
+      {
+        "date": "2026-05-04",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "seasonal/easter/psalm-antiphon-4-lauds-monday",
+        "contains": "comfortedst me, alleluia."
+      },
+      {
+        "date": "2026-05-07",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "seasonal/easter/psalm-antiphon-4-lauds-thursday",
+        "contains": "triumphed gloriously. Alleluia."
+      },
+      {
+        "date": "2026-05-15",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "seasonal/easter/psalm-antiphon-4-lauds-friday",
+        "contains": "was afraid, alleluia."
+      },
+      {
+        "date": "2026-05-26",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "ordinary/lauds/festal-canticle-antiphon-tuesday-easter",
+        "contains": "in all your doings, alleluia."
+      },
+      {
+        "date": "2027-05-27",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "ordinary/lauds/festal-canticle-antiphon-thursday-easter",
+        "contains": "saith the Lord, alleluia."
+      }
+    ]
+  },
+  {
+    "id": "apostles-first-vespers-antiphons-in-paschaltide",
+    "source": "Monastic Diurnal p. 16* (Common of Apostles and Evangelists in Paschaltide, At I Vespers: 'Ants. of Lauds, omitting the fourth. Psalms as at I Vespers of the Common of Apostles, p. 7*') and p. 17* (the Lauds antiphons). 2026 ordo, 5 May: 'I of fol. / Ant.(17*) / Ps.(7*)'. Out of Paschaltide the Common's own I Vespers antiphons (p. 7*). Issue #640.",
+    "cases": [
+      {
+        "date": "2026-05-05",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-1",
+        "ref": "commons/apostle-paschal/psalm-antiphon-1",
+        "contains": "shall blossom as the lily, alleluia"
+      },
+      {
+        "date": "2026-05-05",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/apostle-paschal/psalm-antiphon-4-first-vespers",
+        "contains": "Then shall the righteous"
+      },
+      {
+        "date": "2026-08-23",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-1",
+        "ref": "commons/apostle/psalm-antiphon-1-first-vespers"
+      },
+      {
+        "date": "2026-08-23",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/apostle/psalm-antiphon-4-first-vespers"
+      }
+    ]
+  },
+  {
+    "id": "st-andrew-vespers-versicles",
+    "source": "Monastic Diurnal p. 444 (St Andrew, I Vespers: V. of the Common, p. 10*) and p. 446 (II Vespers: Hymn and V. as at Lauds of the Common, p. 11*). Issue #647.",
+    "cases": [
+      {
+        "date": "2027-11-29",
+        "hour": "vespers",
+        "slot": "versicle",
+        "ref": "proper/st-andrew/versicle-first-vespers",
+        "contains": "Their sound is gone out"
+      },
+      {
+        "date": "2027-11-30",
+        "hour": "vespers",
+        "slot": "versicle",
+        "ref": "proper/st-andrew/versicle-vespers",
+        "contains": "They declared the work of God"
+      },
+      {
+        "date": "2029-11-29",
+        "hour": "vespers",
+        "slot": "versicle",
+        "ref": "proper/st-andrew/versicle-first-vespers",
+        "contains": "Their sound is gone out"
+      },
+      {
+        "date": "2029-11-30",
+        "hour": "vespers",
+        "slot": "versicle",
+        "ref": "proper/st-andrew/versicle-vespers",
+        "contains": "They declared the work of God"
+      }
+    ]
+  },
+  {
+    "id": "final-antiphon-hour-boundaries",
+    "source": "Monastic Diurnal, Final Antiphons B.V.M., pp. 153-155. 2026 ordo pp. 18, 22, 53, 69 (#649).",
+    "cases": [
+      {
+        "date": "2026-11-28",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-advent"
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-advent"
+      },
+      {
+        "date": "2027-11-27",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      },
+      {
+        "date": "2027-11-27",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-advent"
+      },
+      {
+        "date": "2026-12-24",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-advent"
+      },
+      {
+        "date": "2026-12-24",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-12-24",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-02-01",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-02-02",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-02-02",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-02-02",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/ave-regina-caelorum"
+      },
+      {
+        "date": "2027-02-02",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2027-02-02",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2027-02-02",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/ave-regina-caelorum"
+      },
+      {
+        "date": "2026-04-08",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/ave-regina-caelorum"
+      },
+      {
+        "date": "2026-04-11",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2026-04-12",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2026-06-05",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      },
+      {
+        "date": "2027-06-26",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2027-06-26",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      }
+    ]
+  },
+  {
+    "id": "confessor-bishop-vespers-omit-lauds-fourth-antiphon",
+    "source": "Monastic Diurnal, Common of a Confessor and Bishop: I Vespers take the antiphons of Lauds omitting the fourth (p. 33*); II Vespers' fourth is Good and faithful servant (p. 39*), in every season; Lauds' fourth is the Benedicite antiphon (p. 35*), alleluia-free after Septuagesima (draft archdiocesan Lauds book p. 654) (#663).",
+    "cases": [
+      {
+        "date": "2027-02-26",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-5",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2030-02-26",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-5",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2030-02-27",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-5",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2030-02-27",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-septuagesima",
+        "contains": "O ye priests of God"
+      },
+      {
+        "date": "2027-04-06",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-5",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2027-04-07",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-5",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2027-04-07",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-lent",
+        "contains": "O ye priests of God"
+      },
+      {
+        "date": "2028-04-07",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-5",
+        "contains": "Good and faithful servant"
+      }
+    ]
+  },
+  {
+    "id": "vespers-lauds-antiphons-omit-fourth",
+    "source": "Monastic Diurnal, passim: Vespers that take the antiphons of Lauds say them \"omitting the fourth\" (St Martin p. 657, St Lucy p. 451, Annunciation p. 502, St Clement p. 667, St Agnes p. 459, Assumption pp. 588, 590; #777), so the fourth psalm takes Lauds' fifth wherever no Vespers antiphon is given. The Holy Rosary has its own Vespers antiphons (p. 618; II Vespers as at I, p. 622) and Christ the King's II Vespers are all as at I (p. 631; 2026 ordo 25 Oct).",
+    "cases": [
+      {
+        "date": "2026-11-10",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/st-martin-tours/psalm-antiphon-5",
+        "contains": "Martin is received"
+      },
+      {
+        "date": "2026-11-11",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/st-martin-tours/psalm-antiphon-5",
+        "contains": "Martin is received"
+      },
+      {
+        "date": "2027-12-13",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/st-lucy/psalm-antiphon-5",
+        "contains": "O my sister Lucy,"
+      },
+      {
+        "date": "2026-03-25",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/annunciation/psalm-antiphon-5",
+        "contains": "Behold the handmaid of the Lord;"
+      },
+      {
+        "date": "2026-11-23",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/st-clement-i/psalm-antiphon-5",
+        "contains": "All the nations"
+      },
+      {
+        "date": "2026-01-20",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/st-agnes-rome/psalm-antiphon-5",
+        "contains": "Rejoice with me"
+      },
+      {
+        "date": "2026-08-15",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/assumption-bvm/psalm-antiphon-5",
+        "contains": "Thou art fair"
+      },
+      {
+        "date": "2026-10-07",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/holy-rosary-bvm/psalm-antiphon-1-vespers",
+        "contains": "Who is this"
+      },
+      {
+        "date": "2026-10-07",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/holy-rosary-bvm/psalm-antiphon-4-vespers",
+        "contains": "The daughters of Sion"
+      },
+      {
+        "date": "2026-10-25",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/christ-the-king/psalm-antiphon-1-vespers",
+        "contains": "He shall be called"
+      }
+    ]
+  },
+  {
+    "id": "christmas-eve-prime-antiphon",
+    "source": "Monastic Diurnal, Christmas Eve, p. 183: \"At Prime, which is said as on Doubles, Ant. O Judah and Jerusalem\", Lauds' first antiphon (p. 182), also when the Vigil falls on Sunday (p. 183) (#658).",
+    "cases": [
+      {
+        "date": "2026-12-24",
+        "hour": "prime",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/vigil-nativity/psalm-antiphon-1-prime",
+        "contains": "O Judah and Jerusalem"
+      },
+      {
+        "date": "2027-12-24",
+        "hour": "prime",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/vigil-nativity/psalm-antiphon-1-prime",
+        "contains": "O Judah and Jerusalem"
+      },
+      {
+        "date": "2028-12-24",
+        "hour": "prime",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/vigil-nativity/psalm-antiphon-1-prime",
+        "contains": "O Judah and Jerusalem"
+      }
+    ]
+  },
+  {
+    "id": "prime-chapter-on-vigils",
+    "source": "Monastic Diurnal p. 6 (Now unto the King on all Sundays and on privileged Vigils; Love the truth on other Ferias and on Common Vigils out of Paschaltide), p. 183 (Vigil of the Nativity, here also on Sunday 2028-12-24), p. 222 (Vigil of the Epiphany); General Rubrics rank table (privileged Vigils: the Nativity, Pentecost, the Epiphany). #658.",
+    "cases": [
+      {
+        "date": "2026-12-24",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2028-12-24",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2033-12-24",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2027-01-05",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2028-01-05",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2026-05-30",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2026-12-24",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "absent": true
+      },
+      {
+        "date": "2028-12-24",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "absent": true
+      },
+      {
+        "date": "2027-01-05",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "absent": true
+      },
+      {
+        "date": "2026-07-24",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "ref": "ordinary/prime/chapter-ferial"
+      },
+      {
+        "date": "2026-07-24",
+        "hour": "prime",
+        "slot": "chapter",
+        "absent": true
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "ref": "ordinary/prime/chapter-ferial"
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "prime",
+        "slot": "chapter",
+        "absent": true
+      },
+      {
+        "date": "2030-02-23",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "ref": "ordinary/prime/chapter-ferial"
+      },
+      {
+        "date": "2030-02-23",
+        "hour": "prime",
+        "slot": "chapter",
+        "absent": true
       }
     ]
   }

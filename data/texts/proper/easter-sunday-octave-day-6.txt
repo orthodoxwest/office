@@ -5,3 +5,7 @@ The eleven disciples, * when they saw the Lord in Galilee, worshipped him, allel
 [magnificat-antiphon]
 # SOURCE: monastic diurnal, p. 369 (Friday in Easter Week)
 All power * is given unto me in heaven and in earth, alleluia.
+
+[collect]
+# SOURCE: monastic diurnal, p. 369 (Friday in Easter Week); 2026 ordo, 17 Apr: "Col. (369)"
+Almighty, everlasting God, who hast conferred the Paschal Mystery upon mankind for a covenant of reconciliation: grant unto our souls that what we celebrate with our lips we may effectually shew forth in our lives.

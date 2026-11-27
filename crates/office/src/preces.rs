@@ -61,6 +61,10 @@ pub fn preces_disposition(day: Option<&Day>, moveable: Option<&MoveableDates>) -
     if day.date.month() == 1 && day.date.day() == 5 {
         return (false, PRECES_SUPPRESSED_VIGIL_EPIPHANY);
     }
+    // Needs ruling (#660): the Diurnal (p. 7: "in Paschaltide they are always
+    // said"; p. 152) and the ordos' Paschaltide note keep the Preces on these
+    // Sundays, but every ordo's day lines 2017-2026 print "No Preces"; the
+    // engine follows the day lines until the clergy rule.
     if day.season == Season::Easter && day.date.weekday() == Weekday::Sunday {
         return (false, PRECES_SUPPRESSED_EASTER_SUNDAY);
     }

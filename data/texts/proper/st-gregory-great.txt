@@ -27,9 +27,6 @@ O ye servants of the Lord, * bless ye the Lord: your servant Gregory hath risen 
 # SOURCE: draft archdiocesan Lauds book, p. 405 (St Gregory the Great)
 Gregory, * mirror of the cloistered, father of the City, beloved of all the world.
 
-[psalm-antiphon-4-vespers]
-@use proper/st-gregory-great/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: Monastic Diurnal.pdf, p. 487
 Gregory, * when he looked upon the youthful Angles, said: They have the countenance of Angels, and such as these should be of the fellowship of the Angels in heaven.
@@ -44,8 +41,8 @@ O God, who hast bestowed upon the soul of thy servant Gregory the reward of eter
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 406 (St Gregory the Great)
-!Sir 50:1
-Behold a great priest, who in his life repaired the house again, and in his days fortified the temple.
+!Ecclus. 50:1
+Behold a great priest, who in his life repaired the house again, * and in his days fortified the temple.
 R. Thanks be to God.
 
 [chapter-vespers]
@@ -165,3 +162,19 @@ Amen.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 487 (March 12, At Terce: "Chapter as above at Lauds")
+@use proper/st-gregory-great/chapter-lauds
+
+[chapter-sext]
+# SOURCE: Monastic Diurnal p. 487 (March 12, At Sext)
+!Ecclus. 47:9, 10
+He set singers also before the altar, that by their voices they might make sweet melody, and daily sing praises in their songs. * He beautified their feasts, and set in order the solemn times until the end.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: Monastic Diurnal p. 488 (March 12, At None)
+!Ecclus. 50:4, 5
+He took care of his people that they should not fall, and fortified the city against besieging. * How was he honoured in the midst of the people!
+R. Thanks be to God.

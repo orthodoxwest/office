@@ -11,7 +11,34 @@ use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
 use crate::dump::{FORMAT, HOUR_NAMES, PRAYER_FORMS, Record, Selection, generate_year};
-use crate::dump_tools::{key, validate};
+
+fn validate(v: &Value) -> Result<(), String> {
+    match v {
+        Value::String(s) if s.is_empty() => Err("empty string (absent values are null)".into()),
+        Value::Number(n) if !n.is_i64() => Err("dump numbers must be signed integers".into()),
+        Value::Array(a) => a.iter().try_for_each(validate),
+        Value::Object(o) => o.values().try_for_each(validate),
+        _ => Ok(()),
+    }
+}
+
+fn key(r: &Value) -> String {
+    let kind = r["kind"].as_str().unwrap_or("unknown");
+    let fields: &[&str] = match kind {
+        "calendar_year" => &["year"],
+        "calendar_day" | "office_day" => &["date"],
+        "corpus_entry" => &["key"],
+        "appointment_scope" => &["id"],
+        "hour" => &["date", "hour", "form"],
+        _ => &[],
+    };
+    let mut key = kind.to_string();
+    for field in fields {
+        key.push(' ');
+        key.push_str(&r[*field].as_str().map(str::to_string).unwrap_or_else(|| r[*field].to_string()));
+    }
+    key
+}
 
 const GROUPS: [&str; 4] = ["content", "presentation", "sources", "decisions"];
 
@@ -59,7 +86,7 @@ impl Hash {
 /// the encoding is unambiguous; the date is part of every group and the section and element
 /// structure of every group but decisions.
 fn hash_hour(h: &OfficeHour, hashes: &mut [Hash; 4]) {
-    let OfficeHour { form: _, date, hour: label, title, season, feast, rank: _, color, sections, decisions } = h;
+    let OfficeHour { form: _, date, hour: label, title, season, feast, rank: _, color, paschaltide: _, bare: _, sections, decisions } = h;
     let [content, presentation, sources, rules] = hashes;
     let date = date.to_string();
     for hash in [&mut *content, &mut *presentation, &mut *sources, &mut *rules] {
@@ -80,7 +107,7 @@ fn hash_hour(h: &OfficeHour, hashes: &mut [Hash; 4]) {
     for hash in [&mut *content, &mut *presentation, &mut *sources] {
         hash.count(sections.len());
     }
-    for OfficeSection { label, collapsible, elements } in sections {
+    for OfficeSection { label, collapsible, bare: _, elements } in sections {
         content.str(label);
         content.bool(*collapsible);
         for hash in [&mut *content, &mut *presentation, &mut *sources] {
@@ -104,6 +131,7 @@ fn hash_hour(h: &OfficeHour, hashes: &mut [Hash; 4]) {
                 commemoration_owner_id,
                 is_commemoration,
                 unrepeated,
+                score,
             } = e;
             content.str(kind.as_str());
             content.str(text);
@@ -114,6 +142,11 @@ fn hash_hour(h: &OfficeHour, hashes: &mut [Hash; 4]) {
             presentation.bool(*announce);
             presentation.opt(unrepeated.as_ref().map(|u| format!("{}:{}", u.words, u.named)).as_deref());
             presentation.str(leader_slot);
+            // Only a scored element hashes its score, so digests of hours without chant stand.
+            if let Some(score) = score {
+                presentation.str(&score.gabc);
+                presentation.str(&format!("{:?}", score.sets));
+            }
             presentation.count(rubric_spans.len());
             for RubricSpan { text, prayed } in rubric_spans {
                 presentation.str(text);
@@ -341,7 +374,9 @@ mod tests {
             feast: String::new(),
             rank: None,
             color: None,
-            sections: vec![OfficeSection { label: String::new(), collapsible: false, elements: vec![e] }],
+            paschaltide: false,
+            bare: false,
+            sections: vec![OfficeSection { label: String::new(), collapsible: false, bare: false, elements: vec![e] }],
             decisions: Vec::new(),
         }
     }

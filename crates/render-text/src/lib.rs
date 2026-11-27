@@ -1,7 +1,7 @@
 //! Plain-text rendering of a composed hour, for the CLI and the text goldens.
 
-use corpus::lines::{psalm_verse_lines, split_leading_verse_number};
-use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, VoiceRole, posture_cues_at, split_words};
+use corpus::lines::{psalm_verse_lines, section_heading, split_leading_verse_number};
+use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, posture_cues_at, split_words};
 
 const MONTHS: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -47,6 +47,7 @@ pub fn format_office_hour(hour: &OfficeHour) -> String {
             } else {
                 elem.display_text()
             };
+            let text = if elem.kind.is_psalmody() { section_headings(&text) } else { text };
             if !text.is_empty() {
                 b.push_str(&text);
                 b.push_str("\n\n");
@@ -54,6 +55,18 @@ pub fn format_office_hour(hour: &OfficeHour) -> String {
         }
     }
     b
+}
+
+/// A canticle's section breaks ("[section: Heading]") as their headings, as
+/// the web sets them (#869).
+fn section_headings(text: &str) -> String {
+    if !text.contains("[section:") {
+        return text.to_string();
+    }
+    text.split('\n')
+        .map(|line| section_heading(line.trim()).map_or_else(|| line.to_string(), str::to_string))
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 /// A psalm's text with the opening words its antiphon has just said in
@@ -97,18 +110,10 @@ fn posture_text(elem: &OfficeElement, text: &str) -> String {
 
 /// Adds only the response sigil the corporate form requires.
 fn corporate_lord_prayer_text(elem: &OfficeElement) -> String {
-    let (mut officiant, mut response) = (String::new(), String::new());
-    for span in &elem.voice {
-        match span.role {
-            Some(VoiceRole::Officiant) => officiant.push_str(&span.text),
-            Some(VoiceRole::Response) => response.push_str(&span.text),
-            Some(VoiceRole::Priest | VoiceRole::All) | None => {}
-        }
+    match elem.lord_prayer_parts() {
+        Some(parts) => parts.voiced().iter().map(|s| s.text.as_str()).collect(),
+        None => elem.text.clone(),
     }
-    if officiant.is_empty() || response.is_empty() {
-        return elem.text.clone();
-    }
-    format!("{}\nR. {}", officiant.trim_end_matches([' ', '\t', '\n']), response.trim())
 }
 
 #[cfg(test)]
@@ -116,6 +121,11 @@ mod tests {
     use liturgy::{Posture, PostureCue};
 
     use super::*;
+
+    #[test]
+    fn canticle_section_breaks_print_as_headings() {
+        assert_eq!(section_headings("1. A * b.\n[section: Ignis succensus est]\n2. C * d."), "1. A * b.\nIgnis succensus est\n2. C * d.");
+    }
 
     #[test]
     fn posture_cues_are_bracketed_in_place() {

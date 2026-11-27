@@ -1,13 +1,24 @@
 //! Text-to-HTML conversion of composed office elements: psalm verses, liturgical blocks, hymns, and
 //! the typography every run of display text passes through.
 
-use corpus::lines::{BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
-use liturgy::{ElementType, OfficeElement, PostureAnchor, PostureCue, RubricSpan, VoiceRole, VoiceSpan, posture_cues_at, split_words};
+use corpus::lines::{
+    BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, marian_antiphon_part, parse_block, parse_hymn, parse_psalm,
+};
+use liturgy::{
+    ChantScore, ElementType, OfficeElement, PostureAnchor, PostureCue, RubricSpan, ScoreSpan, VoiceSpan, posture_cues_at, split_words,
+};
 
 pub(crate) use corpus::typography::soften_drop_cap_opening;
 pub use corpus::typography::typeset;
 
 use crate::escape::html_escape_string;
+use presentation::gloss::{
+    ANTIPHON_GLOSS, CHAPTER_GLOSS, Gloss, GlossRun, ORDO_COMMEMORATION_GLOSS, POSTURE_GLOSS, PSALM_NUMBER_GLOSS, gloss_runs, heading_gloss,
+};
+
+fn quiet_gloss_attrs(gloss: &Gloss) -> String {
+    format!(" class=\"gloss-quiet\" data-gloss-title=\"{}\" data-gloss=\"{}\"", esc_text(gloss.title), esc_text(gloss.note))
+}
 
 // Sigil column classes: a single mark (℣. / ℟.) takes the narrow gutter;
 // spelled-out words take their own class so CSS can move them above the text
@@ -21,17 +32,54 @@ const SIGIL_ALL_CLASS: &str = "sigil sigil-all";
 const SOURCE_LINE_OPEN: &str = "<span class=\"source-line\">";
 
 /// The pointing asterisk between half-verses. A no-break space binds it to
-/// the half it ends, so a wrap can never open a line with the mark.
-const MEDIANT: &str = "\u{a0}<span class=\"mediant\">*</span> ";
+/// the half it ends, so a wrap can never open a line with the mark. Hidden
+/// from screen readers so it is not read aloud as "asterisk" in every verse.
+const MEDIANT: &str = "\u{a0}<span class=\"mediant\" aria-hidden=\"true\">*</span> ";
 
 /// The escape for every run of display text in an hour.
 pub fn esc_text(s: &str) -> String {
     html_escape_string(&typeset(s))
 }
 
-/// Escaped text with the ✠ cross styled.
+/// Escaped text with the ✠ cross styled and named for screen readers,
+/// and the psalm flex † silenced from speech (matching the native apps' `spoken`).
 fn esc_cross(s: &str) -> String {
-    esc_text(s).replace('✠', "<span class=\"cross\">✠</span>")
+    let escaped = esc_text(s);
+    let mut out = String::with_capacity(escaped.len());
+    let mut rest = escaped.as_str();
+    while let Some(i) = rest.find('✠') {
+        let before = &rest[..i];
+        out.push_str(before);
+        let after = &rest[i + '✠'.len_utf8()..];
+        let preceded_by_pause = before.trim_end().ends_with([',', ';', ':']);
+        let followed_by_punct = after.trim_start().starts_with([',', '.', ';', ':', '!', '?']);
+        let spoken = match (preceded_by_pause, followed_by_punct) {
+            (true, true) => "sign of the cross",
+            (true, false) => "sign of the cross,",
+            (false, true) => ", sign of the cross",
+            (false, false) => ", sign of the cross,",
+        };
+        out.push_str("<span class=\"cross\"><span aria-hidden=\"true\">✠</span><span class=\"sr-only\">");
+        out.push_str(spoken);
+        out.push_str("</span></span>");
+        rest = after;
+    }
+    out.push_str(rest);
+    out.replace('†', "<span class=\"flex\" aria-hidden=\"true\">†</span>")
+}
+
+/// A versicle/response/speaker sigil, naming ℣. and ℟. for screen readers and
+/// separating the sigil from the text that follows so words never concatenate.
+fn sigil_html(mark_class: &str, sigil: &str) -> String {
+    match sigil {
+        "℣." => {
+            format!("<span class=\"{mark_class}\"><span aria-hidden=\"true\">℣.</span><span class=\"sr-only\">Versicle.</span></span> ")
+        }
+        "℟." => {
+            format!("<span class=\"{mark_class}\"><span aria-hidden=\"true\">℟.</span><span class=\"sr-only\">Response.</span></span> ")
+        }
+        _ => format!("<span class=\"{mark_class}\">{sigil}</span> "),
+    }
 }
 
 /// A section's elements, a psalm or canticle absorbing the doxology after it.
@@ -56,13 +104,27 @@ pub fn render_section_elements(elems: &[OfficeElement]) -> String {
 
 /// A section heading, separating a commemoration's rubric from its feast.
 pub fn render_section_heading(label: &str) -> String {
+    render_section_heading_in(label, false)
+}
+
+/// A section heading; a bare section's (`OfficeSection::bare`) carries `section-bare`, from which
+/// the rest of the hour sets its initials in the muted ink (the bare sections close the hour).
+pub fn render_section_heading_in(label: &str, bare: bool) -> String {
+    let bare = if bare { " section-bare" } else { "" };
     if let Some(name) = label.strip_prefix("Commemoration of ").filter(|n| !n.is_empty()) {
+        // The Cross keeps its own note; any other is a commemorated feast or season.
+        let kicker = heading_gloss(label).unwrap_or(&ORDO_COMMEMORATION_GLOSS);
         return format!(
-            "<h2 class=\"section-heading commemoration-heading\"><span class=\"commemoration-kicker\">Commemoration of</span> <span class=\"commemoration-name\">{}</span></h2>",
+            "<h2 class=\"section-heading commemoration-heading{bare}\"><span class=\"commemoration-kicker gloss-quiet\" data-gloss-title=\"{}\" data-gloss=\"{}\">Commemoration of</span> <span class=\"commemoration-name\">{}</span></h2>",
+            esc_text(kicker.title),
+            esc_text(kicker.note),
             esc_text(name)
         );
     }
-    format!("<h2 class=\"section-heading\">{}</h2>", esc_text(label))
+    if let Some(gloss) = heading_gloss(label) {
+        return format!("<h2 class=\"section-heading{bare}\"><span{}>{}</span></h2>", quiet_gloss_attrs(gloss), esc_text(label));
+    }
+    format!("<h2 class=\"section-heading{bare}\">{}</h2>", esc_text(label))
 }
 
 fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>) -> String {
@@ -78,14 +140,21 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
         ElementType::Antiphon => {
             if elem.label.is_empty() {
                 let class = if elem.announce { "antiphon antiphon-announce" } else { "antiphon" };
-                sb.push_str(&format!("<p class=\"{class}\"><em>Ant.</em> "));
+                sb.push_str(&format!(
+                    "<p class=\"{class}\"><em{}><span aria-hidden=\"true\">Ant.</span><span class=\"sr-only\">Antiphon.</span></em> ",
+                    quiet_gloss_attrs(&ANTIPHON_GLOSS)
+                ));
                 sb.push_str(&chant_line_html(&elem.display_text()));
                 sb.push_str("</p>");
             } else {
                 sb.push_str("<div class=\"marian-antiphon\"><h3 class=\"item-label\" lang=\"la\">");
-                sb.push_str(&esc_text(&elem.label));
+                if let Some(g) = presentation::gloss::marian_antiphon_gloss(&elem.label) {
+                    sb.push_str(&format!("<span{}>{}</span>", quiet_gloss_attrs(g), esc_text(&elem.label)));
+                } else {
+                    sb.push_str(&esc_text(&elem.label));
+                }
                 sb.push_str("</h3>");
-                sb.push_str(&render_marian_antiphon(&elem.text));
+                sb.push_str(&render_marian_antiphon_scored(&elem.text, elem.score.as_ref()));
                 sb.push_str("</div>");
             }
         }
@@ -97,11 +166,33 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
             sb.push_str(&format!("<div class=\"{}\">", elem.kind.as_str()));
             if !elem.label.is_empty() {
                 sb.push_str("<h3 class=\"item-label\">");
-                sb.push_str(&esc_text(&elem.label));
+                match elem.psalm_label_parts() {
+                    Some((word, greek, hebrew)) => {
+                        sb.push_str(&esc_text(word));
+                        sb.push_str("<span class=\"psalm-num\">");
+                        sb.push_str(&esc_text(greek));
+                        if !hebrew.is_empty() {
+                            sb.push_str(&format!(
+                                "\u{a0}<span class=\"psalm-heb gloss-quiet\" data-gloss-title=\"{}\" data-gloss=\"{}\">",
+                                esc_text(PSALM_NUMBER_GLOSS.title),
+                                esc_text(PSALM_NUMBER_GLOSS.note)
+                            ));
+                            sb.push_str(&esc_text(hebrew));
+                            sb.push_str("</span>");
+                        }
+                        sb.push_str("</span>");
+                    }
+                    None => sb.push_str(&esc_text(&elem.label)),
+                }
                 if !elem.incipit.is_empty() {
-                    // The dot stays with the label; the Latin title wraps whole.
-                    sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}· </span>");
-                    sb.push_str("<span class=\"psalm-incipit\" lang=\"la\">");
+                    // The dot stays with the label; the space outside aria-hidden keeps the
+                    // spoken label and Latin title separated for screen readers.
+                    sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}·</span> ");
+                    sb.push_str(&format!(
+                        "<span class=\"psalm-incipit gloss-quiet\" lang=\"la\" data-gloss-title=\"{}\" data-gloss=\"{}\">",
+                        esc_text(presentation::gloss::PSALM_INCIPIT_GLOSS.title),
+                        esc_text(presentation::gloss::PSALM_INCIPIT_GLOSS.note),
+                    ));
                     sb.push_str(&esc_text(&elem.incipit));
                     sb.push_str("</span>");
                 }
@@ -116,11 +207,21 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
         ElementType::Hymn => {
             sb.push_str("<div class=\"hymn\"><h2 class=\"section-heading\">Hymn</h2>");
             if !elem.label.is_empty() {
-                sb.push_str("<p class=\"hymn-title\" lang=\"la\">");
-                sb.push_str(&esc_text(&elem.label));
-                sb.push_str("</p>");
+                sb.push_str(&format!(
+                    "<p class=\"hymn-title\" lang=\"la\"><span{}>{}</span></p>",
+                    quiet_gloss_attrs(&presentation::gloss::HYMN_TITLE_GLOSS),
+                    esc_text(&elem.label),
+                ));
             }
-            sb.push_str(&render_hymn_stanzas(&elem.text));
+            match &elem.score {
+                Some(score) if score.sets == ScoreSpan::WholeHymn => {
+                    sb.push_str(&crate::chant::whole_hymn_html(score, &elem.text));
+                    sb.push_str("<div data-chant-variant=\"off\">");
+                    sb.push_str(&render_hymn_stanzas(&elem.text));
+                    sb.push_str("</div>");
+                }
+                score => sb.push_str(&render_hymn_stanzas_scored(&elem.text, score.as_ref())),
+            }
             sb.push_str("</div>");
         }
         ElementType::Versicle | ElementType::Response | ElementType::Blessing | ElementType::Doxology | ElementType::Dialogue => {
@@ -154,7 +255,10 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
             }
         }
         ElementType::Chapter => {
-            sb.push_str("<div class=\"chapter\"><h2 class=\"section-heading\">Chapter</h2>");
+            sb.push_str(&format!(
+                "<div class=\"chapter\"><h2 class=\"section-heading\"><span{}>Chapter</span></h2>",
+                quiet_gloss_attrs(&CHAPTER_GLOSS)
+            ));
             if !elem.label.is_empty() {
                 sb.push_str("<p class=\"chapter-ref\">");
                 sb.push_str(&esc_text(&elem.label));
@@ -173,9 +277,21 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
     sb
 }
 
-/// Posture cues at one anchor, each a red rubric run.
+/// How every posture cue's run opens, so a page for several prayer forms can
+/// tag the cues only some of them take (see `leader::leader_sections`).
+pub(crate) const POSTURE_OPEN: &str = "<span class=\"posture gloss-quiet\"";
+
+/// Posture cues at one anchor, each a red rubric run with a quiet gloss.
 fn posture_html(cues: &[PostureCue], at: PostureAnchor) -> String {
-    posture_cues_at(cues, at).map(|cue| format!("<span class=\"posture\">{cue}</span> ")).collect()
+    posture_cues_at(cues, at)
+        .map(|cue| {
+            format!(
+                "{POSTURE_OPEN} data-gloss-title=\"{}\" data-gloss=\"{}\">{cue}</span> ",
+                esc_text(POSTURE_GLOSS.title),
+                esc_text(POSTURE_GLOSS.note)
+            )
+        })
+        .collect()
 }
 
 /// Display text with its first `words` words muted as not said; returns the
@@ -230,7 +346,7 @@ pub fn render_psalm_verses(text: &str, postures: &[PostureCue], unrepeated: usiz
                     sb.push_str("<p class=\"verse\">");
                 } else {
                     sb.push_str(&format!(
-                        "<p class=\"verse numbered\"><span class=\"verse-num\">{}</span><span class=\"verse-body\">",
+                        "<p class=\"verse numbered\"><span class=\"verse-num\" aria-hidden=\"true\">{}</span> <span class=\"verse-body\">",
                         esc_text(number)
                     ));
                 }
@@ -272,13 +388,13 @@ pub fn render_liturgical_block(text: &str) -> String {
     render_block(text, Mode::PreserveLines, false)
 }
 
-fn render_flowing_block(text: &str) -> String {
+pub fn render_flowing_block(text: &str) -> String {
     render_block(text, Mode::Flow, false)
 }
 
 fn render_rubric(elem: &OfficeElement) -> String {
     if elem.rubric_spans.is_empty() {
-        return format!("<p class=\"rubric\">{}</p>", esc_text(&elem.text));
+        return format!("<p class=\"rubric\">{}</p>", rubric_text(&elem.text));
     }
     render_rubric_spans(&elem.rubric_spans, "rubric")
 }
@@ -289,31 +405,48 @@ fn render_rubric_spans(spans: &[RubricSpan], class: &str) -> String {
         if span.prayed {
             sb.push_str(&format!("<span class=\"rubric-prayed\">{}</span>", esc_cross(&span.text)));
         } else {
-            sb.push_str(&esc_text(&span.text));
+            sb.push_str(&rubric_text(&span.text));
         }
     }
     sb.push_str("</p>");
     sb
 }
 
-/// The corporate Lord's Prayer, split between officiant and people; any
-/// incomplete partition falls back to an ordinary prayer.
-fn render_corporate_lord_prayer(elem: &OfficeElement) -> String {
-    let (mut officiant, mut response) = (String::new(), String::new());
-    for span in &elem.voice {
-        match span.role {
-            Some(VoiceRole::Officiant) => officiant.push_str(&span.text),
-            Some(VoiceRole::Response) => response.push_str(&span.text),
-            Some(VoiceRole::Priest | VoiceRole::All) | None => {}
+/// A rubric's instruction text, its glossed terms marked with their notes. The note rides in
+/// attributes, so the page's words are the rubric's own; app.js makes each term a control that
+/// opens it. Typeset whole before it is split, so a quote beside a term takes the right curl.
+fn rubric_text(text: &str) -> String {
+    let typeset = typeset(text);
+    let mut sb = String::new();
+    for run in gloss_runs(&typeset) {
+        match run {
+            GlossRun::Text(t) => sb.push_str(&html_escape_string(t)),
+            GlossRun::Term(t, gloss) => sb.push_str(&format!(
+                "<span class=\"gloss-term\" data-gloss-title=\"{}\" data-gloss=\"{}\">{}</span>",
+                esc_text(gloss.title),
+                esc_text(gloss.note),
+                html_escape_string(t)
+            )),
         }
     }
-    if officiant.is_empty() || response.is_empty() {
-        return render_flowing_block(&elem.text);
+    sb
+}
+
+/// The corporate Lord's Prayer, split between officiant and people; any
+/// incomplete partition falls back to an ordinary prayer. Said in secret up
+/// to a versicle, it is a voiced block with no initial.
+fn render_corporate_lord_prayer(elem: &OfficeElement) -> String {
+    let Some(parts) = elem.lord_prayer_parts() else { return render_flowing_block(&elem.text) };
+    if parts.versicle.is_some() {
+        return render_voice_block(&parts.voiced(), Mode::Flow);
     }
+    let officiant: String = parts.officiant.iter().map(|s| s.text.as_str()).collect();
+    let response = parts.response;
     let flow = |s: &str| s.split('\n').map(str::trim).filter(|l| !l.is_empty()).collect::<Vec<_>>().join(" ");
     format!(
-        "<div class=\"liturgical-block corporate-lord-prayer\"><p class=\"plain-line corporate-lord-prayer-officiant\">{}</p><p class=\"response-line corporate-lord-prayer-response\"><span class=\"{SIGIL_CLASS}\">℟.</span><span class=\"sigil-text\">{}</span></p></div>",
+        "<div class=\"liturgical-block corporate-lord-prayer\"><p class=\"plain-line corporate-lord-prayer-officiant\">{}</p><p class=\"response-line corporate-lord-prayer-response\">{}<span class=\"sigil-text\">{}</span></p></div>",
         chant_line_html(&flow(&officiant)),
+        sigil_html(SIGIL_CLASS, "℟."),
         chant_line_html(&flow(&response))
     )
 }
@@ -402,7 +535,7 @@ fn render_voiced_block(text: &str, spoken_at: &[bool], mode: Mode) -> String {
         };
         flush(&mut sb, &mut prose, &mut prose_blocks, &mut pending_gap);
         emit_gap(&mut sb, &mut pending_gap);
-        sb.push_str(&format!("<p class=\"{line_class}\"><span class=\"{mark_class}\">{sigil}</span><span class=\"sigil-text\">"));
+        sb.push_str(&format!("<p class=\"{line_class}\">{}<span class=\"sigil-text\">", sigil_html(mark_class, sigil)));
         emit_voiced(&mut sb, &line.text, line.offset, spoken_at);
         sb.push_str("</span></p>");
     }
@@ -412,15 +545,39 @@ fn render_voiced_block(text: &str, spoken_at: &[bool], mode: Mode) -> String {
 }
 
 /// A Marian antiphon: its sung lines preserved, its collect flowing.
+#[cfg(test)]
 fn render_marian_antiphon(text: &str) -> String {
+    render_marian_antiphon_scored(text, None)
+}
+
+/// A Marian antiphon with its score, if it has one, offered beside the antiphon's words (up to
+/// the ℣); the ℣, ℟ and collect after it are the same either way.
+fn render_marian_antiphon_scored(text: &str, score: Option<&ChantScore>) -> String {
     const INVITATION: &str = "\n\nLet us pray.\n\n";
+    let sung = |chant: &str| match score {
+        None => render_block(chant, Mode::PreserveFirstBlock, false),
+        Some(score) => {
+            let antiphon = marian_antiphon_part(chant);
+            let rest = chant.trim_start()[antiphon.len()..].trim();
+            let words = ChantScore::spoken(antiphon);
+            let mut sb = crate::chant::score_html(score, &score.gabc, &words);
+            sb.push_str("<div data-chant-variant=\"off\">");
+            sb.push_str(&render_block(antiphon, Mode::PreserveFirstBlock, false));
+            sb.push_str("</div>");
+            if !rest.is_empty() {
+                sb.push_str("<div class=\"liturgical-gap\"></div>");
+                sb.push_str(&render_block(rest, Mode::PreserveFirstBlock, false));
+            }
+            sb
+        }
+    };
     match text.split_once(INVITATION) {
         Some((chant, collect)) if !collect.trim().is_empty() => format!(
             "{}<div class=\"liturgical-gap\"></div><p class=\"plain-line\">Let us pray.</p><div class=\"liturgical-gap\"></div><div class=\"collect\">{}</div>",
-            render_block(chant, Mode::PreserveFirstBlock, false),
+            sung(chant),
             render_flowing_block(collect)
         ),
-        _ => render_block(text, Mode::PreserveFirstBlock, false),
+        _ => sung(text),
     }
 }
 
@@ -461,11 +618,14 @@ fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
             let open_n = prose.len().min(2);
             if open_n > 0 {
                 sb.push_str("<p class=\"chant-line chant-line-opening\">");
+                // The second line is a block of its own (styled), so its
+                // turnover can hang under it rather than under the initial.
                 for (i, l) in prose[..open_n].iter().enumerate() {
                     if i > 0 {
-                        sb.push_str("<br>");
+                        sb.push_str(&format!("<br><span class=\"chant-line-second\">{}</span>", chant_line_html(l)));
+                    } else {
+                        sb.push_str(&chant_line_html(l));
                     }
-                    sb.push_str(&chant_line_html(l));
                 }
                 sb.push_str("</p>");
             }
@@ -529,7 +689,8 @@ fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
         flush(&mut sb, &mut prose, &mut prose_blocks, &mut pending_gap);
         emit_gap(&mut sb, &mut pending_gap);
         sb.push_str(&format!(
-            "<p class=\"{line_class}\"><span class=\"{mark_class}\">{sigil}</span><span class=\"sigil-text\">{}</span></p>",
+            "<p class=\"{line_class}\">{}<span class=\"sigil-text\">{}</span></p>",
+            sigil_html(mark_class, sigil),
             chant_line_html(&line.text)
         ));
     }
@@ -541,6 +702,24 @@ fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
 /// A hymn: one paragraph per stanza, one span per metrical line, a
 /// standalone Amen folded into the verse before it.
 pub fn render_hymn_stanzas(text: &str) -> String {
+    render_hymn_stanzas_scored(text, None)
+}
+
+/// A hymn whose tune, if it has a score, is offered over its first stanza: the score stands
+/// beside the stanza's words, and the reader's Chant setting shows one.
+pub fn render_hymn_stanzas_scored(text: &str, score: Option<&ChantScore>) -> String {
+    hymn_stanzas_html(text, score, true)
+}
+
+/// A feast page's hymn, its stanzas under the fold whose summary names it. The page opens only its
+/// collect on a dropped initial, so the hymn's first stanza has none (as
+/// `render_blocks::feast_hymn_blocks`).
+pub fn render_feast_hymn(text: &str) -> String {
+    hymn_stanzas_html(text, None, false)
+}
+
+/// A hymn's stanzas, the first on the hours' dropped initial when `initial`.
+fn hymn_stanzas_html(text: &str, score: Option<&ChantScore>, initial: bool) -> String {
     let hymn = parse_hymn(text);
     let mut sb = String::from("<div class=\"hymn-verses\">");
     if !hymn.title.is_empty() {
@@ -560,15 +739,25 @@ pub fn render_hymn_stanzas(text: &str) -> String {
             }
             continue;
         }
-        let class = if opening { "hymn-stanza hymn-stanza-opening" } else { "hymn-stanza" };
+        let class = if opening && initial { "hymn-stanza hymn-stanza-opening" } else { "hymn-stanza" };
+        let variant = match score.filter(|_| opening) {
+            Some(score) => {
+                sb.push_str(&crate::chant::score_html(score, &score.gabc, &stanza.join(" ")));
+                " data-chant-variant=\"off\""
+            }
+            None => "",
+        };
         opening = false;
-        sb.push_str(&format!("<p class=\"{class}\">"));
+        sb.push_str(&format!("<p class=\"{class}\"{variant}>"));
         let join_amen = hymn.stanzas.get(i + 1).is_some_and(|s| is_hymn_amen(s));
         for (j, line) in stanza.iter().enumerate() {
             sb.push_str("<span class=\"hymn-line\">");
             sb.push_str(&esc_cross(line));
             if join_amen && j == stanza.len() - 1 {
-                sb.push_str(&format!("<span class=\"hymn-amen\">{}</span>", esc_cross(&hymn.stanzas[i + 1][0])));
+                sb.push_str(&format!(
+                    "<span class=\"sr-only\"> </span><span class=\"hymn-amen\">{}</span>",
+                    esc_cross(&hymn.stanzas[i + 1][0])
+                ));
             }
             sb.push_str("</span>");
         }
@@ -578,7 +767,7 @@ pub fn render_hymn_stanzas(text: &str) -> String {
     sb
 }
 
-fn write_hymn_rubric(sb: &mut String, rubric: &str) {
+pub(crate) fn write_hymn_rubric(sb: &mut String, rubric: &str) {
     sb.push_str(&format!("<p class=\"rubric hymn-rubric\">{}</p>", esc_text(rubric)));
 }
 

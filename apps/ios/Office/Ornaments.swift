@@ -10,15 +10,17 @@ private let sprigRule = svg("M2 10h52")
 private let consecrationRing = svg("M0.70,20.00a19.30,19.30 0 1,0 38.60,0a19.30,19.30 0 1,0 -38.60,0ZM1.90,20.00a18.10,18.10 0 1,0 36.20,0a18.10,18.10 0 1,0 -36.20,0Z")
 private let consecrationCross = svg("M18.75,18.75 18.74,17.65 18.72,16.56 18.67,15.46 18.59,14.36 18.49,13.27 18.36,12.17 18.21,11.07 18.02,9.98 17.81,8.88 17.57,7.79 17.29,6.69 16.98,5.59 16.64,4.50 16.27,3.40 16.79,3.71 17.32,3.62 17.85,3.54 18.39,3.48 18.92,3.43 19.46,3.41 20.00,3.40 20.54,3.41 21.08,3.43 21.61,3.48 22.15,3.54 22.68,3.62 23.21,3.71 23.73,3.40 23.36,4.50 23.02,5.59 22.71,6.69 22.43,7.79 22.19,8.88 21.98,9.98 21.79,11.07 21.64,12.17 21.51,13.27 21.41,14.36 21.33,15.46 21.28,16.56 21.26,17.65 21.25,18.75ZM21.25,18.75 22.35,18.74 23.44,18.72 24.54,18.67 25.64,18.59 26.73,18.49 27.83,18.36 28.93,18.21 30.02,18.02 31.12,17.81 32.21,17.57 33.31,17.29 34.41,16.98 35.50,16.64 36.60,16.27 36.29,16.79 36.38,17.32 36.46,17.85 36.52,18.39 36.57,18.92 36.59,19.46 36.60,20.00 36.59,20.54 36.57,21.08 36.52,21.61 36.46,22.15 36.38,22.68 36.29,23.21 36.60,23.73 35.50,23.36 34.41,23.02 33.31,22.71 32.21,22.43 31.12,22.19 30.02,21.98 28.93,21.79 27.83,21.64 26.73,21.51 25.64,21.41 24.54,21.33 23.44,21.28 22.35,21.26 21.25,21.25ZM21.25,21.25 21.26,22.35 21.28,23.44 21.33,24.54 21.41,25.64 21.51,26.73 21.64,27.83 21.79,28.93 21.98,30.02 22.19,31.12 22.43,32.21 22.71,33.31 23.02,34.41 23.36,35.50 23.73,36.60 23.21,36.29 22.68,36.38 22.15,36.46 21.61,36.52 21.08,36.57 20.54,36.59 20.00,36.60 19.46,36.59 18.92,36.57 18.39,36.52 17.85,36.46 17.32,36.38 16.79,36.29 16.27,36.60 16.64,35.50 16.98,34.41 17.29,33.31 17.57,32.21 17.81,31.12 18.02,30.02 18.21,28.93 18.36,27.83 18.49,26.73 18.59,25.64 18.67,24.54 18.72,23.44 18.74,22.35 18.75,21.25ZM18.75,21.25 17.65,21.26 16.56,21.28 15.46,21.33 14.36,21.41 13.27,21.51 12.17,21.64 11.07,21.79 9.98,21.98 8.88,22.19 7.79,22.43 6.69,22.71 5.59,23.02 4.50,23.36 3.40,23.73 3.71,23.21 3.62,22.68 3.54,22.15 3.48,21.61 3.43,21.08 3.41,20.54 3.40,20.00 3.41,19.46 3.43,18.92 3.48,18.39 3.54,17.85 3.62,17.32 3.71,16.79 3.40,16.27 4.50,16.64 5.59,16.98 6.69,17.29 7.79,17.57 8.88,17.81 9.98,18.02 11.07,18.21 12.17,18.36 13.27,18.49 14.36,18.59 15.46,18.67 16.56,18.72 17.65,18.74 18.75,18.75ZM18.70,18.70 21.30,18.70 21.30,21.30 18.70,21.30Z")
 private let paintedCross = svg("M8.50,8.50 8.49,7.94 8.47,7.37 8.42,6.81 8.35,6.24 8.26,5.68 8.14,5.11 7.99,4.55 7.82,3.99 7.62,3.42 7.39,2.86 7.13,2.29 6.84,1.73 6.53,1.16 6.18,0.60 6.70,1.20 7.23,1.02 7.77,0.87 8.32,0.75 8.88,0.67 9.44,0.62 10.00,0.60 10.56,0.62 11.12,0.67 11.68,0.75 12.23,0.87 12.77,1.02 13.30,1.20 13.82,0.60 13.47,1.16 13.16,1.73 12.87,2.29 12.61,2.86 12.38,3.42 12.18,3.99 12.01,4.55 11.86,5.11 11.74,5.68 11.65,6.24 11.58,6.81 11.53,7.37 11.51,7.94 11.50,8.50ZM11.50,8.50 12.06,8.49 12.63,8.47 13.19,8.42 13.76,8.35 14.32,8.26 14.89,8.14 15.45,7.99 16.01,7.82 16.58,7.62 17.14,7.39 17.71,7.13 18.27,6.84 18.84,6.53 19.40,6.18 18.80,6.70 18.98,7.23 19.13,7.77 19.25,8.32 19.33,8.88 19.38,9.44 19.40,10.00 19.38,10.56 19.33,11.12 19.25,11.68 19.13,12.23 18.98,12.77 18.80,13.30 19.40,13.82 18.84,13.47 18.27,13.16 17.71,12.87 17.14,12.61 16.58,12.38 16.01,12.18 15.45,12.01 14.89,11.86 14.32,11.74 13.76,11.65 13.19,11.58 12.63,11.53 12.06,11.51 11.50,11.50ZM11.50,11.50 11.51,12.06 11.53,12.63 11.58,13.19 11.65,13.76 11.74,14.32 11.86,14.89 12.01,15.45 12.18,16.01 12.38,16.58 12.61,17.14 12.87,17.71 13.16,18.27 13.47,18.84 13.82,19.40 13.30,18.80 12.77,18.98 12.23,19.13 11.68,19.25 11.12,19.33 10.56,19.38 10.00,19.40 9.44,19.38 8.88,19.33 8.32,19.25 7.77,19.13 7.23,18.98 6.70,18.80 6.18,19.40 6.53,18.84 6.84,18.27 7.13,17.71 7.39,17.14 7.62,16.58 7.82,16.01 7.99,15.45 8.14,14.89 8.26,14.32 8.35,13.76 8.42,13.19 8.47,12.63 8.49,12.06 8.50,11.50ZM8.50,11.50 7.94,11.51 7.37,11.53 6.81,11.58 6.24,11.65 5.68,11.74 5.11,11.86 4.55,12.01 3.99,12.18 3.42,12.38 2.86,12.61 2.29,12.87 1.73,13.16 1.16,13.47 0.60,13.82 1.20,13.30 1.02,12.77 0.87,12.23 0.75,11.68 0.67,11.12 0.62,10.56 0.60,10.00 0.62,9.44 0.67,8.88 0.75,8.32 0.87,7.77 1.02,7.23 1.20,6.70 0.60,6.18 1.16,6.53 1.73,6.84 2.29,7.13 2.86,7.39 3.42,7.62 3.99,7.82 4.55,7.99 5.11,8.14 5.68,8.26 6.24,8.35 6.81,8.42 7.37,8.47 7.94,8.49 8.50,8.50ZM8.40,8.40 11.60,8.40 11.60,11.60 8.40,11.60Z")
-private let sunPath = svg("M17.20,12.00A5.2,5.2 0 1,0 6.80,12.00A5.2,5.2 0 1,0 17.20,12.00ZM13.45,5.60 12.00,0.40 10.55,5.60ZM16.46,7.18 16.70,3.86 13.94,5.73ZM18.27,10.06 22.05,6.20 16.82,7.54ZM18.40,13.45 21.40,12.00 18.40,10.55ZM16.82,16.46 22.05,17.80 18.27,13.94ZM13.94,18.27 16.70,20.14 16.46,16.82ZM10.55,18.40 12.00,23.60 13.45,18.40ZM7.54,16.82 7.30,20.14 10.06,18.27ZM5.73,13.94 1.95,17.80 7.18,16.46ZM5.60,10.55 2.60,12.00 5.60,13.45ZM7.18,7.54 1.95,6.20 5.73,10.06ZM10.06,5.73 7.30,3.86 7.54,7.18Z")
-private let moonPath = svg("M14.00 2.61A9.6 9.6 0 1 0 20.18 17.02A7.9 7.9 0 0 1 14.00 2.61Z")
+let sunPath = svg("M17.20,12.00A5.2,5.2 0 1,0 6.80,12.00A5.2,5.2 0 1,0 17.20,12.00ZM13.45,5.60 12.00,0.40 10.55,5.60ZM16.46,7.18 16.70,3.86 13.94,5.73ZM18.27,10.06 22.05,6.20 16.82,7.54ZM18.40,13.45 21.40,12.00 18.40,10.55ZM16.82,16.46 22.05,17.80 18.27,13.94ZM13.94,18.27 16.70,20.14 16.46,16.82ZM10.55,18.40 12.00,23.60 13.45,18.40ZM7.54,16.82 7.30,20.14 10.06,18.27ZM5.73,13.94 1.95,17.80 7.18,16.46ZM5.60,10.55 2.60,12.00 5.60,13.45ZM7.18,7.54 1.95,6.20 5.73,10.06ZM10.06,5.73 7.30,3.86 7.54,7.18Z")
+let moonPath = svg("M14.00 2.61A9.6 9.6 0 1 0 20.18 17.02A7.9 7.9 0 0 1 14.00 2.61Z")
 
-/// Home's period glyphs (home.html), viewBox 24×16, filled: the rising sun, the sun, the moon.
+/// Home's period glyphs (home.html), viewBox 24×16, filled: the night's eight-rayed star (four long
+/// rays, four short), the rising sun, the sun, the moon.
 enum Period: CaseIterable {
-    case morning, day, evening
+    case night, morning, day, evening
 
     var path: Path {
         switch self {
+        case .night: return svg("M12.00,0.10L12.84,5.97L15.11,4.89L14.03,7.16L19.90,8.00L14.03,8.84L15.11,11.11L12.84,10.03L12.00,15.90L11.16,10.03L8.89,11.11L9.97,8.84L4.10,8.00L9.97,7.16L8.89,4.89L11.16,5.97Z")
         case .morning: return svg("M7.60,13.20A4.4,4.4 0 0,1 16.40,13.20ZM1.5,13.40h21v1.1h-21ZM7.36,10.03L3.32,9.60L6.48,12.16ZM8.92,8.50L3.66,4.86L7.30,10.12ZM10.96,7.68L8.40,4.52L8.83,8.56ZM13.15,7.70L12.00,1.40L10.85,7.70ZM15.17,8.56L15.60,4.52L13.04,7.68ZM16.70,10.12L20.34,4.86L15.08,8.50ZM17.52,12.16L20.68,9.60L16.64,10.03Z")
         case .day: return svg("M15.30,8.00A3.3,3.3 0 1,0 8.70,8.00A3.3,3.3 0 1,0 15.30,8.00ZM12.95,3.50L12.00,0.30L11.05,3.50ZM15.07,4.58L15.10,2.63L13.43,3.63ZM16.37,6.57L18.67,4.15L15.42,4.93ZM16.50,8.95L18.20,8.00L16.50,7.05ZM15.42,11.07L18.67,11.85L16.37,9.43ZM13.43,12.37L15.10,13.37L15.07,11.42ZM11.05,12.50L12.00,15.70L12.95,12.50ZM8.93,11.42L8.90,13.37L10.57,12.37ZM7.63,9.43L5.33,11.85L8.58,11.07ZM7.50,7.05L5.80,8.00L7.50,8.95ZM8.58,4.93L5.33,4.15L7.63,6.57ZM10.57,3.63L8.90,2.63L8.93,4.58Z")
         case .evening: return svg("M13.32 1.80A6.34 6.34 0 1 0 17.40 11.32A5.21 5.21 0 0 1 13.32 1.80Z")
@@ -236,10 +238,11 @@ enum HourSign {
     }
 }
 
-/// An hour title's sign alone, the rule itself its line: the ✠ in the lining, the sun gilt, the moon in its own ink.
+/// An hour title's sign alone, the rule itself its line: the ✠ in the lining, the sun gilt (veiled and warmed with the season), the moon in its own ink.
 struct TitleSign: View {
     let sign: HourSign
     @Environment(\.palette) private var p
+    @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
 
     var body: some View {
@@ -249,7 +252,7 @@ struct TitleSign: View {
             // nearer the sun's and moon's weight in the rule's break.
             case .cross: Cross(size: 13.75, color: p.lining)
             // 1.15em and 1.3em of the headpiece's 0.8rem.
-            case .sun: PaintedMark(.sun, size: 14.72 * m.type, color: p.gold)
+            case .sun: PaintedMark(.sun, size: 14.72 * m.type, color: o.flat)
             case .moon: PaintedMark(.moon, size: 16.64 * m.type, color: p.moonInk)
             }
         }
@@ -271,7 +274,8 @@ func lozenge(_ center: CGPoint, _ r: CGFloat) -> Path {
 /**
  * The painted double rule that frames a title, in the lining's terracotta, broken by `gap` at its
  * centre (where the title's sign sits) and optionally interrupted by a lozenge in the day's colour,
- * ringed in the lining. `heavy` is the hour title's upper rule: 2px over 1px, as the home niche's lining.
+ * ringed in the lining and then in the page's ground. `heavy` is the hour title's upper rule: 2px
+ * over 1px, as the home niche's lining.
  */
 struct DoubleRule: View {
     var gap: CGFloat = 0
@@ -303,7 +307,12 @@ struct DoubleRule: View {
                 ctx.stroke(line, with: .color(p.lining), lineWidth: weight)
             }
             if let lozengeColor {
-                let l = lozenge(CGPoint(x: size.width / 2, y: mid), r)
+                let centre = CGPoint(x: size.width / 2, y: mid)
+                // A ring of the page's ground 2px beyond the lining's (`0 0 0 3px var(--bg)`), so the
+                // lozenge breaks the rules rather than sitting on them: the lining's outer edge is
+                // half a pixel past `r`, and a band's width across a lozenge's point is √2 times it.
+                ctx.fill(lozenge(centre, r + m.px(2.5) * CGFloat(2).squareRoot()), with: .color(p.bg))
+                let l = lozenge(centre, r)
                 ctx.fill(l, with: .color(lozengeColor))
                 ctx.stroke(l, with: .color(p.lining), lineWidth: 1)
             }
@@ -330,10 +339,35 @@ struct Diamond: View {
     }
 }
 
+/// An inscription's words between two gilt lozenges, as home's "Pray the hours" band and the
+/// reminder page's group names set them.
+struct Lozenged: View {
+    let text: String
+    let style: TextStyle
+    let ink: Color
+    /// The letters' own paint, where it is not flat `ink` (home's frieze: leaf lit at the heads).
+    var letters: LinearGradient?
+    var diamond: CGFloat = 7.07
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        HStack(spacing: m.px(12)) {
+            Diamond(size: diamond, color: ink)
+            if let letters {
+                Text(text).type(style).foregroundStyle(letters)
+            } else {
+                Text(text).type(style).foregroundStyle(ink)
+            }
+            Diamond(size: diamond, color: ink)
+        }
+    }
+}
+
 /// One of home's period glyphs, filled in `color`.
 struct PeriodIcon: View {
     let period: Period
     let color: Color
+    var alpha: Double = 0.7
     @Environment(\.metrics) private var m
 
     var body: some View {
@@ -341,7 +375,7 @@ struct PeriodIcon: View {
             ctx.fill(period.path.fitted(24, 16, in: CGRect(origin: .zero, size: size)), with: .color(color))
         }
         .frame(width: m.px(19), height: m.px(13))
-        .opacity(0.7)
+        .opacity(alpha)
         .accessibilityHidden(true)
     }
 }
@@ -381,14 +415,56 @@ struct PlasterWall: View {
 }
 
 /**
+ * The wall's own copy behind something that must hide what passes beneath it (the ordo's pinned
+ * month heading): opaque, and lined up with the wall (`wall`, its frame on the screen) as the web's
+ * `background-attachment: fixed` lines its copy up, so it shows no seam, pinned or at rest.
+ */
+struct WallCopy: View {
+    let wall: CGRect
+    @Environment(\.palette) private var p
+
+    var body: some View {
+        GeometryReader { geo in
+            let at = geo.frame(in: .global).origin
+            ZStack(alignment: .topLeading) {
+                p.bg
+                // Scaled and centred on the wall's frame as `PlasterWall` is, then shifted by where this stands on it.
+                if wall.width > 0, wall.height > 0, let image = UIImage(named: p.plaster) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: wall.width, height: wall.height)
+                        .offset(x: wall.minX - at.x, y: wall.minY - at.y)
+                }
+            }
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
+            .clipped()
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/// The vault tile's edge for a field `width` wide (`--apse-tile`). The fields span the screen, so
+/// their width is the web's viewport.
+private func vaultTile(_ width: CGFloat) -> CGFloat {
+    width >= 2400 ? 960 : width >= 1800 ? 832 : width >= wideFrom ? 704 : 528
+}
+
+/**
  * The field a page's wall carries (apse-vault.md), home's and the hour's ending: by night the Apse
- * vault, the hand-set stars of its 528pt tile each at its own opacity in the gilding; by day the
+ * vault, the hand-set stars of its 528pt tile each at its own opacity in the gilding, or with `sky`
+ * (the hour's ending) home's sky, its stars in the apse's matte leaf on one 384pt tile; by day the
  * Nave's powdering, one rosette to each cell of a quincunx in the rubrics' red at 12%, its tile
  * 96×168. Tiled from the field's centre and from `seam` down it, and faded by `fade`'s stops of
- * (fraction, opacity) for the field's height in either theme.
+ * (fraction, opacity) for the field's height in either theme. Unlit, the vault has no stars: a
+ * bare hour's under the veil, the Triduum's (the web's `hour-bare`).
  */
 struct WallField: View {
     var seam: CGFloat = 0
+    var lit: Bool = true
+    /// The hour's ending: by night home's sky, its stars in the apse's matte leaf on one 384pt tile.
+    var sky: Bool = false
     let fade: (_ height: CGFloat, _ dark: Bool) -> [(CGFloat, Double)]
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
@@ -396,10 +472,14 @@ struct WallField: View {
     var body: some View {
         let dark = p.dark
         let star = o.flat
+        let leaf = Leaf(o).mid
         let rosette = p.rubric.opacity(0.12)
         Canvas { ctx, size in
             ctx.drawLayer { layer in
-                let (w, h): (CGFloat, CGFloat) = dark ? (528, 528) : (96, 168)
+                // The vault's tile spreads as the screen widens (`--apse-tile`), so a painted ceiling
+                // never reads as a wallpaper of small stars; the stars are set on a 528pt tile.
+                let tile = sky ? SkyStar.tileSize : vaultTile(size.width)
+                let (w, h): (CGFloat, CGFloat) = dark ? (tile, tile) : (96, 168)
                 // One tile centred on the field, as the web's masks are positioned; whole points
                 // keep the tiles' edges on the pixels, so shapes that cross them meet without a seam.
                 let x0 = ((size.width / 2 - w / 2).truncatingRemainder(dividingBy: w) - w).rounded()
@@ -412,8 +492,11 @@ struct WallField: View {
                         t.translateBy(x: x, y: y)
                         // Each tile keeps its own half of a shape drawn on both its edges, as the mask's repeat does.
                         t.clip(to: Path(CGRect(x: 0, y: 0, width: w, height: h)))
-                        if dark {
-                            for s in vaultStars { t.fill(s.path, with: .color(star.opacity(s.opacity))) }
+                        if dark && sky {
+                            for s in SkyStar.tile where lit { t.fill(s.path, with: .color(leaf.opacity(s.leaf))) }
+                        } else if dark {
+                            t.scaleBy(x: tile / 528, y: tile / 528)
+                            for s in vaultStars where lit { t.fill(s.path, with: .color(star.opacity(s.opacity))) }
                         } else {
                             t.fill(powder, with: .color(rosette))
                         }
@@ -460,16 +543,5 @@ struct Hairline: View {
 
     var body: some View {
         Rectangle().fill(color).frame(height: 1).frame(maxWidth: .infinity).accessibilityHidden(true)
-    }
-}
-
-/// A short vertical hairline between neighbouring items.
-struct VRule: View {
-    let color: Color
-    var height: CGFloat = 14
-    @Environment(\.metrics) private var m
-
-    var body: some View {
-        Rectangle().fill(color).frame(width: 1, height: m.px(height)).accessibilityHidden(true)
     }
 }

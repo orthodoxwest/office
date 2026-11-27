@@ -1,0 +1,24 @@
+# Paschal variants of the Common of Feasts of the B.V.M.: "one Alleluia is
+# added to each Antiphon, Versicle, and Response" (Monastic Diurnal p. 6*, §3),
+# written ", alleluia." (#645). Only the antiphons of the Hours (pp. 65*, 67*)
+# are here: the Office of Saint Mary on Saturday takes them in Paschaltide
+# (pp. 69*, 71*) (#652). Antiphon 4 is said only at Lauds, which that office
+# takes from the psalter, and no feast of the B.V.M. falls in Paschaltide; add
+# it if one ever does. Sections not present here fall through to the regular
+# commons file.
+
+[psalm-antiphon-1]
+# SOURCE: Monastic Diurnal.pdf, pp. 65*, 67* (Common of Feasts B.V.M., Ant. 1 at Lauds and Prime), with p. 6* §3
+While the King * sitteth at his table, my spikenard sendeth forth a sweet-smelling savour, alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: Monastic Diurnal.pdf, pp. 65*, 67* (Common of Feasts B.V.M., Ant. 2 at Lauds and Terce), with p. 6* §3
+His left hand * is under my head, and his right hand doth embrace me, alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: Monastic Diurnal.pdf, pp. 65*, 67* (Common of Feasts B.V.M., Ant. 3 at Lauds and Sext), with p. 6* §3
+I am black, but comely, * O ye daughters of Jerusalem; therefore the King delighteth in me, and hath brought me into his chambers, alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: Monastic Diurnal.pdf, pp. 65*, 67* (Common of Feasts B.V.M., Ant. 5 at Lauds and None), with p. 6* §3
+Thou art beautiful * and pleasant, O holy Mother of God, in thy felicity, alleluia.

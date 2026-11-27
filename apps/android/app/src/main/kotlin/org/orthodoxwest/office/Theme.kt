@@ -80,7 +80,7 @@ val Nave = Palette(
     pressedWash = Color(107, 58, 31).copy(alpha = 0.09f),
     oak = Color(0xFF3F372F),
     materialHighlight = Color.White.copy(alpha = 0.38f),
-    inscriptionGround = Color(0xFF545F54),
+    inscriptionGround = Color(0xFF4C574D),
     inscriptionEdge = Color(0xFF5E2A27),
     inscriptionWash = Color(87, 94, 65).copy(alpha = 0.055f),
     lining = Color(0xFFA85A48),
@@ -120,22 +120,41 @@ val Apse = Palette(
 
 /**
  * The gilding, which alone follows the season ("Seasonal ornament" in style.css): gold leaf
- * through most of the year, veiled in Passiontide, warmed at Eastertide. Functional gold
- * (controls, selections) stays [Palette.gold]. Out of season `line` is the painted lining, as
- * the web's `--ornament-line` resolves to `--lining`. `hi` and `lo` are the leaf's two stops,
- * which the web still lights the Apse vault with; the initials are flat.
+ * through most of the year, quiet through the penitential seasons and on the violet days, veiled
+ * in Passiontide, warmed at Eastertide. Functional gold (controls, selections) stays
+ * [Palette.gold]. Out of season `line` is the painted lining, as the web's `--ornament-line`
+ * resolves to `--lining`. `hi` and `lo` are the leaf's two stops, which the web still lights the
+ * Apse vault with; the initials are flat, in `cap`: the gilding, except on a bare hour (the
+ * Triduum, the Office of the Dead), whose capitals are set in the muted ink (the web's `--cap-ink`).
  */
 @Immutable
-data class Ornament(val flat: Color, val line: Color, val hi: Color, val lo: Color, val ink: Color)
+data class Ornament(val flat: Color, val line: Color, val hi: Color, val lo: Color, val ink: Color, val cap: Color = flat)
 
 fun ornament(palette: Palette, season: String): Ornament = when {
     season == "passiontide" && palette.dark -> Ornament(Color(0xFFB0A4C2), Color(0xFF565070), Color(0xFFCAC1D7), Color(0xFF988AAD), Color(0xFFDDD6E8))
     season == "passiontide" -> Ornament(Color(0xFF756A7E), Color(0xFFB5AABD), Color(0xFF8D8395), Color(0xFF605469), Color(0xFFDDD6E8))
+    season == "quiet" && palette.dark -> Ornament(Color(0xFFB7AA86), Color(0xFF5C5544), Color(0xFFC6BB9A), Color(0xFFA4976F), Color(0xFFD9D0B4))
+    season == "quiet" -> Ornament(Color(0xFF857350), Color(0xFFB9AD90), Color(0xFF978660), Color(0xFF6C5C3C), Color(0xFFD9D0B4))
     season == "eastertide" && palette.dark -> Ornament(Color(0xFFE6CF8C), Color(0xFF7A6A44), Color(0xFFF2E2B1), Color(0xFFD3B86F), Color(0xFFF2E2B1))
     season == "eastertide" -> Ornament(Color(0xFFA4731A), Color(0xFFD0B06C), Color(0xFFC8922D), Color(0xFF886011), Color(0xFFF2E2B1))
     // Apse declares no inscription ink of its own: the band's letters are the root's pale gilt.
     palette.dark -> Ornament(palette.gold, palette.lining, Color(0xFFE7D295), Color(0xFFC0A25A), Color(0xFFECD9A0))
     else -> Ornament(palette.gold, palette.lining, Color(0xFFB98D3C), Color(0xFF7D5C1C), Color(0xFFECD9A0))
+}
+
+/**
+ * The palette as the season leaves it ("Seasonal ornament" in style.css). Apse's tituli are gilt,
+ * so they go quiet, veil in Passiontide and warm at Eastertide with the rest of the gilding;
+ * Nave's are painted and stay. The moon goes quiet and veils with the gilding, and at Eastertide
+ * Nave's gold moon warms while Apse's silver keeps its own ink.
+ */
+fun seasoned(palette: Palette, season: String): Palette {
+    if (season != "quiet" && season != "passiontide" && season != "eastertide") return palette
+    val o = ornament(palette, season)
+    return palette.copy(
+        titulus = if (palette.dark) o.flat else palette.titulus,
+        moonInk = if (season != "eastertide" || !palette.dark) o.flat else palette.moonInk,
+    )
 }
 
 /** The liturgical colours of the ordo rails and the band across an hour's top (`.day-color-*`). */
@@ -160,6 +179,19 @@ fun dayColor(name: String, p: Palette): Color = when {
     p.dark && name == "violet" -> Color(0xFF8D62AD)
     else -> dayColor(name)
 }
+
+/**
+ * A day's colour as an hour's title lozenge and the ordo's rails set it (`.day-color-*` outside
+ * home): on the Apse night white and black alone are lifted.
+ */
+fun railColor(name: String, p: Palette): Color = if (p.dark && (name == "white" || name == "black")) dayColor(name, p) else dayColor(name)
+
+/**
+ * The vestment-trim band across an hour's top (`.color-band-*`): the day's colour, white as ivory
+ * rather than the lozenge's stone, in both themes; on the Apse night red, green, violet and black
+ * take home's lifts, so the band does not sink into the night.
+ */
+fun bandColor(name: String, p: Palette): Color = if (name == "white") Color(0xFFE8E0CC) else dayColor(name, p)
 
 /**
  * The menu's Theme row: Default follows the device; Nave and Apse are the web's names. `window`
@@ -221,6 +253,8 @@ object Type {
     val verse = face(20f, 33f)
     val rubric = face(18f, 27f)
     val heading = face(19.2f, 24.96f).copy(fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 2.112.sp, textAlign = TextAlign.Center)
+    // A commemoration's name, in mixed case under its small-caps kicker, as the web's `.commemoration-name`.
+    val commemorationName = face(19.2f, 25.92f).copy(letterSpacing = 0.29.sp, textAlign = TextAlign.Center)
     val itemLabel = face(20f, 27f).copy(fontFeatureSettings = "$ALL_SMALL_CAPS, lnum", letterSpacing = 1.4.sp, textAlign = TextAlign.Center)
     val reference = face(17f, 23.8f).copy(textAlign = TextAlign.Center)
     val verseNumber = face(15.6f, 25.74f).copy(textAlign = TextAlign.End)
@@ -234,8 +268,18 @@ object Type {
     val brand = label(14.4f, 0.08f)
     val menu = label(12.48f, 0.08f)
     val control = label(11.52f, 0.1f)
+    /**
+     * Home's foot letter, true small capitals: the season and "Change date" at home's foot, and an
+     * hour's Prayer form under its title (`.page-hour .leader-selector > summary`).
+     */
+    val smallCapsControl = label(14.4f, 0.08f).copy(fontFeatureSettings = ALL_SMALL_CAPS)
+    /** The day's name under an hour's title, in the text's ink (`.hour-meta-feast`). */
+    val dayName = face(17.28f, 22.46f).copy(textAlign = TextAlign.Center, lineBreak = androidx.compose.ui.text.style.LineBreak.Heading)
     val small = face(12.48f, 19.97f)
 }
+
+/** The largest system font scale the type follows, as iOS caps Dynamic Type (Theme.swift). */
+const val MaxFontScale = 2f
 
 @Composable
 fun OfficeTheme(
@@ -245,7 +289,8 @@ fun OfficeTheme(
     content: @Composable () -> Unit,
 ) {
     val dark = choice.dark(isSystemInDarkTheme())
-    val palette = if (dark) Apse else Nave
+    val base = if (dark) Apse else Nave
+    val palette = seasoned(base, season)
     val scheme = (if (dark) darkColorScheme() else lightColorScheme()).copy(
         primary = palette.accent,
         background = palette.bg,
@@ -255,12 +300,14 @@ fun OfficeTheme(
         onSurfaceVariant = palette.muted,
         outline = palette.border,
     )
-    // Text size scales every measure together, as the web scales its root.
+    // Text size scales every measure together, as the web scales its root. The system's font scale
+    // reaches the type up to twice its default, as on iOS (Theme.swift `Metrics.factor`): past that
+    // the measure breaks every line.
     val density = LocalDensity.current
-    val scaled = Density(density.density * textSize.scale, density.fontScale)
+    val scaled = Density(density.density * textSize.scale, density.fontScale.coerceAtMost(MaxFontScale))
     CompositionLocalProvider(
         LocalPalette provides palette,
-        LocalOrnament provides ornament(palette, season),
+        LocalOrnament provides ornament(base, season),
         LocalDensity provides scaled,
     ) {
         MaterialTheme(colorScheme = scheme, typography = MaterialTheme.typography.copy(bodyLarge = Type.body.copy(color = palette.text))) {

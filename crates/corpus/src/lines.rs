@@ -29,13 +29,15 @@ pub enum PsalmItem {
 /// A parsed psalm or canticle.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct PsalmText {
+    /// The title block's name line ("Psalm 67", "The Song of Moses").
+    pub title: String,
     pub scripture_ref: String,
     pub items: Vec<PsalmItem>,
 }
 
 /// Parses a psalm or canticle body. The title block — everything above the
-/// first blank line or numbered verse — is dropped except for a "!" scripture
-/// reference. A "Glory be…" line opens a Gloria that the next "as it was…"
+/// first blank line or numbered verse — is dropped except for its name and a
+/// "!" scripture reference. A "Glory be…" line opens a Gloria that the next "as it was…"
 /// line closes; anything else intervening leaves it open where it stands.
 pub fn parse_psalm(text: &str) -> PsalmText {
     parse_psalm_lines(text).0
@@ -65,6 +67,8 @@ fn parse_psalm_lines(text: &str) -> (PsalmText, Vec<usize>) {
         }
         if let Some(r) = trimmed.strip_prefix('!') {
             parsed.scripture_ref = r.to_string();
+        } else if parsed.title.is_empty() {
+            parsed.title = trimmed.to_string();
         }
     }
 
@@ -103,7 +107,7 @@ fn parse_psalm_lines(text: &str) -> (PsalmText, Vec<usize>) {
 }
 
 /// A "[section: Heading]" canticle break.
-fn section_heading(line: &str) -> Option<&str> {
+pub fn section_heading(line: &str) -> Option<&str> {
     let inner = line.strip_prefix("[section:")?.strip_suffix(']')?;
     Some(inner.trim())
 }
@@ -224,6 +228,45 @@ pub fn parse_hymn(text: &str) -> Hymn {
     parsed
 }
 
+/// A hymn's stanzas as sung, each one line of words: rubric stanzas left out, a closing Amen
+/// joined to the stanza before it.
+pub fn hymn_sung_stanzas(text: &str) -> Vec<String> {
+    let mut stanzas: Vec<String> =
+        parse_hymn(text).stanzas.iter().filter(|s| hymn_rubric_stanza(s).is_none()).map(|s| s.join(" ")).collect();
+    let is_amen = |s: &str| s.trim().trim_end_matches(['.', '!', ' ']).eq_ignore_ascii_case("amen");
+    if stanzas.len() > 1 && stanzas.last().is_some_and(|s| is_amen(s)) {
+        let amen = stanzas.pop().unwrap_or_default();
+        if let Some(last) = stanzas.last_mut() {
+            last.push(' ');
+            last.push_str(&amen);
+        }
+    }
+    stanzas
+}
+
+/// The rubrics said before each of a hymn's sung stanzas ([`hymn_sung_stanzas`], one entry to a
+/// stanza): a rubric stanza's instructions go with the stanza after it, and a rubric standing
+/// for the title with the first.
+pub fn hymn_sung_stanza_rubrics(text: &str) -> Vec<Vec<String>> {
+    let hymn = parse_hymn(text);
+    let mut pending: Vec<String> = hymn_rubric_text(&hymn.title).map(str::to_string).into_iter().collect();
+    let mut rubrics = Vec::new();
+    for stanza in &hymn.stanzas {
+        match hymn_rubric_stanza(stanza) {
+            Some(lines) => pending.extend(lines.into_iter().map(str::to_string)),
+            None => rubrics.push(std::mem::take(&mut pending)),
+        }
+    }
+    rubrics.truncate(hymn_sung_stanzas(text).len());
+    rubrics
+}
+
+/// A Marian antiphon's sung part: its text up to the first blank line, before its ℣.
+pub fn marian_antiphon_part(text: &str) -> &str {
+    let text = text.trim_start();
+    text.split_once("\n\n").map_or(text, |(antiphon, _)| antiphon).trim_end()
+}
+
 /// The instruction inside a /:...:/ hymn rubric, delimiters stripped.
 pub fn hymn_rubric_text(line: &str) -> Option<&str> {
     let s = line.trim();
@@ -305,6 +348,13 @@ mod tests {
         for line in parse_block(source).iter().filter(|l| l.kind != BlockKind::Gap) {
             assert_eq!(&source[line.offset..line.offset + line.text.len()], line.text);
         }
+    }
+
+    #[test]
+    fn a_hymns_rubrics_go_with_the_stanza_they_precede() {
+        let text = "Ave, maris stella\n\n/:Kneel.:/\n\nStar of ocean.\n\nMother of God.\n\n/:Stand and bow.:/\n\nGlory be.\n\nAmen.";
+        assert_eq!(hymn_sung_stanzas(text), ["Star of ocean.", "Mother of God.", "Glory be. Amen."]);
+        assert_eq!(hymn_sung_stanza_rubrics(text), [vec!["Kneel."], vec![], vec!["Stand and bow."]]);
     }
 
     #[test]

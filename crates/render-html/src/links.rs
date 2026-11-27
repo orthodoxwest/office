@@ -47,6 +47,27 @@ pub fn calendar_all_link(year: i32) -> String {
     format!("/calendar/{year}/all")
 }
 
+/// The ordo's search for a feast by name.
+pub fn find_link(query: &str) -> String {
+    if query.is_empty() { "/calendar/find".to_string() } else { format!("/calendar/find?q={}", presentation::query_escape(query)) }
+}
+
+/// A feast's page.
+pub fn feast_link(id: &str) -> String {
+    format!("/feast/{id}")
+}
+
+/// A feast's page opened from a day's page (`from` is its date, "2026-11-10") or from the ordo
+/// ("ordo-2026-11-10"), which it offers a way back to. Empty `from` is the plain page.
+pub fn feast_from(id: &str, from: &str) -> String {
+    if from.is_empty() { feast_link(id) } else { format!("/feast/{id}?from={from}") }
+}
+
+/// A day's landing page reached from a feast's page, which it offers a way back to.
+pub fn home_from_feast(date: &str, id: &str) -> String {
+    format!("/?date={date}&from={id}")
+}
+
 /// A build-stamped static asset path.
 pub fn static_url(name: &str, version: &str) -> String {
     let name = name.strip_prefix('/').unwrap_or(name);

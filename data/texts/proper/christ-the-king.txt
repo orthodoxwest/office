@@ -28,6 +28,20 @@ The nation and kingdom * that will not serve thee shall perish; yea, those natio
 [psalm-antiphon]
 @use proper/christ-the-king/psalm-antiphon-1
 
+[psalm-antiphon-1-vespers]
+# II Vespers: "All as at I Vespers, except" the versicle and Magnificat antiphon
+# (Diurnal p. 631); 2026 ordo 25 Oct: "As at 1 Vesp., (627f)".
+@use proper/christ-the-king/psalm-antiphon-1-first-vespers
+
+[psalm-antiphon-2-vespers]
+@use proper/christ-the-king/psalm-antiphon-2-first-vespers
+
+[psalm-antiphon-3-vespers]
+@use proper/christ-the-king/psalm-antiphon-3-first-vespers
+
+[psalm-antiphon-4-vespers]
+@use proper/christ-the-king/psalm-antiphon-4-first-vespers
+
 [psalm-antiphon-1-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 515 (I Vespers, Christ the King)
 He shall be called * the Peaceful One, and his throne shall be established for ever and ever.
@@ -62,19 +76,19 @@ Almighty and everlasting God, who didst will to restore all things in thy well b
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 587 (Christ the King)
-!Col 1:12-13
+!Col. 1:12, 13
 Brethren: Let us give thanks unto the Father, which hath made us meet to be partakers of the inheritance of the saints in light, who hath delivered us from the power of darkness, and hath translated us into the kingdom of his dear Son.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 631 (Christ the King, At Sext)
-!Col 1:16-18
+!Col. 1:16-18
 All things were created by him, and for him: and he is before all things, and by him all things consist. * And he is the head of the body, the Church: who is the beginning, the firstborn from the dead; that in all things he might have the preeminence.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 631 (Christ the King, At None)
-!Col 1:19-20
+!Col. 1:19, 20
 For it pleased the Father that in him should all fulness dwell; and, having made peace through the blood of his cross, * to reconcile all things unto himself, whether they be things in earth, or things in heaven, in Christ Jesus our Lord.
 R. Thanks be to God.
 
@@ -169,10 +183,15 @@ Amen.
 V. His kingdom shall be increased.
 R. And of his peace there shall be no end.
 
-[versicle-vespers]
+[versicle-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 521 (Christ the King)
 V. All power is given unto me.
 R. In heaven and in earth.
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 631 (At II Vespers: "All as at I Vespers, except the following")
+V. His kingdom shall be increased.
+R. And of his peace there shall be no end.
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 588 (Christ the King)
@@ -228,15 +247,3 @@ R. And of his peace there shall be no end.
 #
 # [versicle-first-vespers]
 # Versicle at I Vespers when it differs from II Vespers.
-#
-# [psalm-antiphon-1-vespers]
-# Vespers-only override for psalm antiphon 1.
-#
-# [psalm-antiphon-2-vespers]
-# Vespers-only override for psalm antiphon 2.
-#
-# [psalm-antiphon-3-vespers]
-# Vespers-only override for psalm antiphon 3.
-#
-# [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).

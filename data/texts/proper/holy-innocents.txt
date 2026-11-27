@@ -54,19 +54,19 @@ O God, whose praise the Martyr Innocents confessed this day, not by speaking but
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 201 (Holy Innocents, At Lauds)
-!Rev 14:1
+!Rev. 14:1
 I looked, and lo, a Lamb stood on the mount Sion, and with him an hundred and forty and four thousand, * having his Father's name written in their foreheads.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 203 (Holy Innocents, At Sext)
-!Rev 14:4
+!Rev. 14:4
 These are they which were not defiled with women; for they are virgins. * These are they which follow the Lamb whithersoever he goeth.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 203 (Holy Innocents, At None)
-!Rev 14:4-5
+!Rev. 14:4, 5
 These were redeemed from among men, being the firstfruits unto God and to the Lamb. And in their mouth was found no guile: * for they are without fault before the throne of God.
 R. Thanks be to God.
 

@@ -38,9 +38,6 @@ The Apostles * did speak with other tongues the wonderful works of God, alleluia
 [psalm-antiphon-3-vespers]
 @use proper/pentecost/psalm-antiphon-3
 
-[psalm-antiphon-4-vespers]
-@use proper/pentecost/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 307 (The Feast of Pentecost)
 Receive ye * the Holy Ghost: whosesoever sins ye remit, they are remitted unto them, alleluia.
@@ -59,7 +56,7 @@ O God, who as at this time didst teach the hearts of thy faithful people, by sen
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 304 (The Feast of Pentecost)
-!Acts 2:1-2
+!Acts 2:1, 2
 When the day of Pentecost was fully come, they were all with one accord in one place. And suddenly there came a sound from heaven as of a rushing mighty wind, and it filled all the house where they were sitting.
 R. Thanks be to God.
 
@@ -71,7 +68,7 @@ R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 398 (The Feast of Pentecost, At None)
-!Acts 2:10-11
+!Acts 2:10, 11
 Jews and proselytes, Cretes and Arabians, we do hear them speak in our tongues * the wonderful works of God.
 R. Thanks be to God.
 
@@ -118,6 +115,8 @@ Amen.
 
 [hymn-vespers]
 # SOURCE: Monastic Diurnal.pdf, p. 395, 396
+# Stanza 6 from Vespers for Saturdays & Major Feasts (2026), p. 190, whose wording does not say
+# the Spirit proceeds from the Son (the Diurnal's "That thou dost from them both proceed").
 Veni, Creator Spiritus
 
 Come, Holy Ghost, Creator blest,
@@ -145,10 +144,10 @@ And thine abiding peace bestow;
 If thou be our preventing Guide,
 No evil can our steps betide.
 
-Make thou to us the Father known,
-Teach us the eternal Son to own,
-Be this our never-changing creed,
-That thou dost from them both proceed.
+O let thy grace on us bestow
+The Father and the Son to know,
+And thee, through endless time confessed,
+Of both th'eternal Spirit blest.
 
 To thee who, dead, again dost live,
 All glory, Lord, thy people give;

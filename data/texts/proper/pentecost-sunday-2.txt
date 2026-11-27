@@ -60,7 +60,7 @@ O Lord, who never failest to help and govern those whom thou dost bring up in th
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 325 (Sunday within the Octave of Corpus Christi)
-!1 John 3:13-14
+!1 John 3:13, 14
 Marvel not, my brethren, if the world hate you. We know that we have passed from death unto life, because we love the brethren.
 R. Thanks be to God.
 
@@ -127,6 +127,8 @@ Amen.
 
 [hymn-first-vespers]
 # SOURCE: Monastic Diurnal.pdf, p. 413, 414, 418
+# Last line from Vespers for Saturdays & Major Feasts (2026), p. 210, in place of the Diurnal's
+# "Who from Both with Both is One", which confesses the Spirit's procession from the Son.
 Pange lingua gloriosi
 
 Now, my tongue, the Mystery telling,
@@ -169,7 +171,7 @@ To the Father, and the Son,
 Honour, might, and praise addressing,
 While unending ages run;
 Ever too his love confessing
-Who from Both with Both is One.
+Who from One with both is One.
 
 Amen.
 

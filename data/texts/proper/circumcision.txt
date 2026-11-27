@@ -24,9 +24,6 @@ The Root of Jesse * hath budded: the Star hath come out of Jacob: a Virgin hath 
 # SOURCE: draft archdiocesan Lauds book, p. 106 (Circumcision)
 Lo, Mary * hath brought forth to us the Saviour; whom when John beheld, he cried saying: Behold the Lamb of God, which taketh away the sin of the world, alleluia.
 
-[psalm-antiphon-4-vespers]
-@use proper/circumcision/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 110 (Circumcision)
 A great and wondrous mystery * is made known to us this day; a new thing is wrought in both natures: God is made man; that which was, remained, and that which was not, he assumed; suffering no confusion, nor yet division.
@@ -45,7 +42,7 @@ O God, who by the fruitful virginity of blessed Mary hast bestowed upon mankind 
 
 [chapter-lauds]
 # SOURCE: diurnal p. 211
-!Titus 2:11-12
+!Titus 2:11, 12
 The grace of God that bringeth salvation hath appeared to all men, * teaching us that, denying ungodliness and worldly lusts, * we should live soberly, righteously, and godly in this present world.
 R. Thanks be to God.
 

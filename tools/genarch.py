@@ -4,19 +4,23 @@
 The head is a steep four-centred arch: short haunch arcs centred on the
 springing line, so the head leaves the jambs without a kink, then long upper
 arcs centred below it, meeting at the point. The phone's head rises 0.44 of
-the card's width, the wider niche's 0.40 so a laptop still shows the hours;
-the date sits where the phone's head has opened wide enough for it, and the
-stylesheet's fitted date measure assumes this phone shape.
+the card's width. From 701px the frontispiece is a lancet niche, its head
+proportioned to the screen's orientation: half its width on a landscape
+screen, 0.62 on an upright one. The date sits where the phone's head has
+opened wide enough for it, and the stylesheet's fitted date measure assumes
+this phone shape.
 
 Every layer of the frontispiece (the day's ring, the stone, the panel, the
-lining and its hairline) is the same arch offset by its own distance, as a
+apse's sky by night, the lining and its hairline, a first-class niche's gilt
+fillet) is the same arch offset by its own distance, as a
 moulding's lines are: each arc keeps its centre and gains or loses that
 distance from its radius, and the two upper arcs meet in a mitred point. So
 the polygons are written once, in terms of three custom properties the
 stylesheet sets per layer:
 
   --arch-w     the card's width (from container units: the card is an
-               inline-size container, so its layers can measure it)
+               inline-size container, so its layers can measure it; app.js
+               restates the same width in pixels)
   --arch-lift  how far above the card each layer's box starts, room for an
                outer layer's point
   --arch-d     the layer's offset outward from the card's edge (negative
@@ -32,8 +36,10 @@ The native apps draw the same heads with true arcs rather than polygons, so
 they take each shape's figures (its arcs' centres and radii, in card widths)
 and offset the arcs themselves: Arch.kt for Android, Arch.swift for iOS.
 
+The web's script takes them too (app.js's ARCHES), for the crown's play.
+
 Plain Python, no dependencies; rewrites the marked blocks in style.css,
-Arch.kt and Arch.swift. Run from the repository root.
+Arch.kt, Arch.swift and app.js. Run from the repository root.
 """
 import math
 import re
@@ -46,12 +52,19 @@ KOTLIN = Path("apps/android/app/src/main/kotlin/org/orthodoxwest/office/Arch.kt"
 SWIFT = Path("apps/ios/Office/Arch.swift")
 NATIVE_BEGIN = "// genarch:begin"
 NATIVE_END = "// genarch:end"
+# The web's script takes the same figures, for the crown's play: its spread
+# opens out of the arch in the head's own shape (a feathered mask app.js
+# draws from the arcs; the foot below the springing depends on the page's
+# layout and is summed there).
+JS = Path("apps/office-web/static/app.js")
 
 # rise, haunch radius and the upper arc's centre across, all in card widths
 # from the left springing. The haunches are generous (an upper arc no more
 # than about four times their radius) and finely sampled, so the jamb eases
 # into the curve as a Gothic arch's does rather than turning on a tight,
-# faceted shoulder; the phone comes to a 144° point, the niche to 146°.
+# faceted shoulder; the phone comes to a 144° point, the landscape niche to
+# 137° and the upright one to 125°. The niches are drawn larger, so their
+# arcs are sampled more finely.
 # Changing the phone's shape means refitting the date's max-width in
 # style.css (".page-home .home h1").
 # A taller phone has height to spare under the card, so its head rises
@@ -61,7 +74,8 @@ SHAPES = {
     "phone": dict(rise=0.44, haunch=0.30, centre=0.90, haunch_steps=7, upper_steps=10),
     "tall": dict(rise=0.56, haunch=0.40, centre=1.0, haunch_steps=8, upper_steps=10),
     "taller": dict(rise=0.64, haunch=0.40, centre=1.05, haunch_steps=8, upper_steps=11),
-    "niche": dict(rise=0.40, haunch=0.24, centre=0.86, haunch_steps=8, upper_steps=16),
+    "niche": dict(rise=0.50, haunch=0.34, centre=0.95, haunch_steps=10, upper_steps=12),
+    "upright": dict(rise=0.62, haunch=0.38, centre=1.02, haunch_steps=10, upper_steps=12),
 }
 # Where each shape applies, in order (later ones win).
 MEDIA = {
@@ -69,11 +83,15 @@ MEDIA = {
     "tall": "(max-width: 700px) and (min-height: 800px)",
     "taller": "(max-width: 700px) and (min-height: 880px)",
     "niche": "(min-width: 701px)",
+    "upright": "(min-width: 701px) and (orientation: portrait)",
 }
+# The wide screen's niches, which alone gild a fillet round the head on a
+# first-class day (`.home-summary::before`).
+NICHES = ("niche", "upright")
 # The deepest inward layer each shape draws (the lining's hairline), in card
 # widths at the narrowest card: the samples next to the point must not cross
 # the centre line at that depth.
-DEEPEST = {"phone": 22 / 288, "tall": 22 / 288, "taller": 22 / 288, "niche": 40 / 600}
+DEEPEST = {"phone": 22 / 288, "tall": 22 / 288, "taller": 22 / 288, "niche": 36 / 480, "upright": 36 / 480}
 
 
 def solve(rise, haunch, centre, **_):
@@ -183,12 +201,17 @@ def rules(name, shape):
         f".page-home .home-hero {{\n  --arch-rise: {num(shape['rise'])};\n}}\n\n"
         ".page-home .home-arch::before,\n.page-home .home-arch::after,\n"
         ".page-home .home-arch-edge,\n.page-home .home-hero::before,\n"
-        ".page-home .home-hero::after,\n.page-home .home-arch-fill {\n"
+        ".page-home .home-hero::after,\n.page-home .home-arch-fill,\n.page-home .home-sky,\n"
+        # The crown's play: the old ground's stand-in, the vault and the
+        # light on the horizon are the head inside the lining.
+        ".page-home .home-back,\n.page-home .home-vault,\n.page-home .home-glow {\n"
         f"  clip-path: polygon(\n    {silhouette});\n}}\n\n"
         ".page-home .home-arch-shade::before {\n"
         f"  clip-path: polygon(evenodd,\n    {outside});\n}}\n\n"
-        ".page-home .home-lining::before,\n.page-home .home-lining::after {\n"
-        f"  clip-path: polygon(\n    {band});\n}}\n"
+        ".page-home .home-lining::before,\n.page-home .home-lining::after"
+        # The first-class gilt fillet round the head is the niche's alone.
+        + (",\n.page-home .home-summary::before" if name in NICHES else "")
+        + f" {{\n  clip-path: polygon(\n    {band});\n}}\n"
     )
 
 
@@ -215,7 +238,8 @@ NATIVE_WHERE = {
     "phone": "a phone",
     "tall": "a phone from 800 high",
     "taller": "a phone from 880 high",
-    "niche": "a wide screen's niche",
+    "niche": "a wide screen's niche on its side",
+    "upright": "a wide screen's niche held upright",
 }
 
 
@@ -244,6 +268,21 @@ def swift():
     return "\n".join(lines) + "\n"
 
 
+def javascript():
+    """The heads for app.js, keyed by the rise style.css sets (--arch-rise):
+    haunch radius, the upper arc's centre across, its depth below the
+    springing and its radius, in card widths."""
+    lines = ["    var ARCHES = {"]
+    for name, shape in SHAPES.items():
+        f = {k: num(v, 6) for k, v in figures(shape).items()}
+        lines.append(
+            f"      \"{num(shape['rise'])}\": {{ haunch: {f['haunch']}, centre: {f['centre']}, "
+            f"depth: {f['depth']}, radius: {f['radius']} }}, // {name}"
+        )
+    lines.append("    };")
+    return "\n".join(lines) + "\n"
+
+
 def rewrite(path, begin, end, generated):
     text = path.read_text()
     pattern = re.compile(re.escape(begin) + r".*?" + re.escape(end), re.S)
@@ -266,6 +305,7 @@ def main():
     native = f"{NATIVE_BEGIN}: tools/genarch.py writes this block; edit the script, not the figures.\n"
     rewrite(KOTLIN, NATIVE_BEGIN, NATIVE_END, native + kotlin() + NATIVE_END)
     rewrite(SWIFT, NATIVE_BEGIN, NATIVE_END, native + swift() + NATIVE_END)
+    rewrite(JS, "    " + NATIVE_BEGIN, "    " + NATIVE_END, "    " + native + javascript() + "    " + NATIVE_END)
     for name, shape in SHAPES.items():
         cy, radius = solve(**shape)
         print(f"{name}: point {point_angle(shape):.0f}°, upper radius {radius:.3f}, centre {cy:.3f} below")

@@ -4,12 +4,14 @@
 //!
 //! Like the calendar crate, this crate does no file, network, or clock access.
 
+pub mod chant;
 pub mod commemoration;
 pub mod compline;
 pub mod conclusion;
 pub mod concurrence;
 pub mod day;
 pub mod engine;
+pub mod feast;
 pub mod hourdef;
 pub mod hymn;
 pub mod lauds_psalmody;
@@ -39,31 +41,23 @@ mod proper_tests;
 #[cfg(test)]
 mod testutil;
 
-use calendar::{CalendarDay, MoveableDates, YearCalendar};
+use calendar::YearCalendar;
 
-pub use concurrence::{VespersDesignation, VespersOwner};
-pub use day::Day;
+pub use concurrence::{VespersDesignation, VespersOffice, VespersOwner, VespersPsalms};
+pub use day::{Day, Evening};
 pub use engine::{ComposeOptions, Engine, HOUR_NAMES};
 
 /// The Office-only resolution of one day.
 #[derive(Clone, Debug)]
 pub struct OfficeDay {
-    /// Corpus subkey under `ordinary/marian/`.
-    pub marian_antiphon: &'static str,
     pub vespers: VespersDesignation,
 }
 
-/// Resolves the Office days of a built calendar year, in order.
+/// Resolves the Office days of a built calendar year, in order. The Marian
+/// antiphon turns at an hour, not a day, and is chosen per hour
+/// (`seasonal::marian_antiphon`).
 pub fn resolve_office_days(cal: &YearCalendar) -> Vec<OfficeDay> {
-    let moveable = MoveableDates::compute(cal.year);
-    concurrence::resolve_vespers(&cal.days, &cal.following_jan1)
-        .into_iter()
-        .zip(&cal.days)
-        .map(|(vespers, day): (VespersDesignation, &CalendarDay)| OfficeDay {
-            marian_antiphon: seasonal::marian_antiphon(day.date, &moveable),
-            vespers,
-        })
-        .collect()
+    concurrence::resolve_vespers(&cal.days, &cal.following_jan1).into_iter().map(|vespers| OfficeDay { vespers }).collect()
 }
 
 #[cfg(test)]

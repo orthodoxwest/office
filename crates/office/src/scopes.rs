@@ -52,8 +52,6 @@ fn selectors_overlap(a: &str, b: &str) -> bool {
     slot_matches(a, b.strip_suffix('*').unwrap_or(b)) || slot_matches(b, a.strip_suffix('*').unwrap_or(a))
 }
 
-const HOURS: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
-
 impl AppointmentScopes {
     /// The scopes in file order.
     pub fn list(&self) -> &[AppointmentScope] {
@@ -229,7 +227,7 @@ fn validate(raw: Raw, corpus: &Corpus) -> Result<AppointmentScope, (String, Stri
     }
     let mut seen_hours = Vec::new();
     for hour in &raw.hours {
-        if !HOURS.contains(&hour.as_str()) {
+        if !crate::HOUR_NAMES.contains(&hour.as_str()) {
             return Err(fail(format!("unknown hour {}", data_format::quote(hour))));
         }
         if seen_hours.contains(&hour) {

@@ -277,11 +277,6 @@ impl Corpus {
         refs
     }
 
-    /// Whether `key` is a concrete (non-alias) entry.
-    pub fn is_concrete(&self, key: &str) -> bool {
-        self.texts.contains_key(key)
-    }
-
     /// The concrete renderable entries: no aliases, no `psalmody/`
     /// declarations, no omissions.
     pub fn entries(&self) -> BTreeMap<&str, &str> {
@@ -323,11 +318,6 @@ impl Corpus {
             return Some(f);
         }
         self.canonical_ref(key).and_then(|k| self.collect_conclusions.get(k)).map(String::as_str)
-    }
-
-    /// Records an incipit, for tests.
-    pub fn set_incipit(&mut self, key: &str, incipit: &str) {
-        self.incipits.insert(key.to_string(), incipit.to_string());
     }
 
     /// Iterates the concrete entries (aliases excluded), unordered.

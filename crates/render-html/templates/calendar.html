@@ -1,8 +1,38 @@
-{% extends "layout.html" %}{% block title %}{% if view == "month" %}{{ months[0].name }} {{ year }} — Ordo{% elif view == "all" %}Ordo {{ year }} — Whole year{% else %}Ordo {{ year }}{% endif %}{% endblock %}{% block content %}{% from "macros.html" import headpiece, fish %}
-{% if view == "year" %}
-{# A link into the year from before the ordo was set a month to a page
-     (/calendar/2026#d-2026-09-12, or #september) forwards to that month
-     before the frontispiece paints. #}
+{% extends "layout.html" %}{% block title %}{% if view == "month" %}{{ months[0].name }} {{ year }} — Ordo{% elif view == "all" %}Ordo {{ year }} — Whole year{% else %}Ordo {{ year }}{% endif %} — Daily Office{% endblock %}{% block description %}The ordo for {{ year }} of the Antiochian Western Rite Vicariate: each day’s feast, rank and liturgical colour, with fasts, Ember days and the moveable feasts, for the Benedictine Divine Office.{% endblock %}
+{% block head %}{% if view == "month" %}
+{#- Returning to the ordo opens at the day chosen (the menu's Ordo from a day or an hour carries
+     #d-date; Back keeps the browser's own place). Browsers set a #fragment's row in place only
+     after a first paint at the top: Safari shows the month's head first, and Chromium's
+     cross-fade takes its picture of it. So the month is held unseen, and Chromium holds its
+     first paint, until the month's last row is in and the foot below has set the day in place:
+     it appears at the day, and nothing moves. #}
+<script>
+  (function () {
+    try {
+      if (!/^#d-\d{4}-\d{2}-\d{2}$/.test(location.hash)) return;
+      var arrival = performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
+      if (arrival && arrival.type === "back_forward") return;
+      var root = document.documentElement;
+      root.setAttribute("data-place", "");
+      var hold = document.createElement("style");
+      hold.textContent = "html[data-place] body { visibility: hidden; }";
+      document.head.appendChild(hold);
+      var expect = document.createElement("link");
+      expect.rel = "expect";
+      expect.href = "#ordo-place";
+      expect.setAttribute("blocking", "render");
+      document.head.appendChild(expect);
+      document.addEventListener("DOMContentLoaded", function () {
+        root.removeAttribute("data-place");
+      });
+    } catch (e) {}
+  })();
+</script>
+{% elif view == "year" %}
+{#- A link into the year from before the ordo was set a month to a page
+     (/calendar/2026#d-2026-09-12, or #september) forwards to that month at once,
+     here in the head rather than in the body, which waits for the stylesheet: a
+     page only passing through never waits for it or starts a view transition (#832). #}
 <script>
   (function () {
     var day = /^#d-(\d{4})-(\d{2})-\d{2}$/.exec(location.hash);
@@ -13,9 +43,29 @@
     } else if (month) {
       location.replace("/calendar/{{ year }}/" + (month < 10 ? "0" : "") + month + location.search);
     }
+    window.officeForwarded = Boolean(day || month);
   })();
 </script>
-{% endif %}
+{#- The year's course is laid in on the frontispiece once a session: a first
+     visit, not a return (Back), and never under reduced motion. Decided here,
+     before the first paint, so the band is held unseen from the start and
+     app.js lays it in (its "The year's course"); without storage it is simply
+     there. A stroke app.js never starts is let go after a moment. #}
+<script>
+  (function () {
+    try {
+      if (window.officeForwarded || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      var arrival = performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
+      if (arrival && arrival.type === "back_forward") return;
+      if (sessionStorage.getItem("office-course-laid")) return;
+      sessionStorage.setItem("office-course-laid", "1");
+      var root = document.documentElement;
+      root.setAttribute("data-course-lay", "");
+      setTimeout(function () { root.removeAttribute("data-course-lay"); }, 3000);
+    } catch (e) {}
+  })();
+</script>
+{% endif %}{% endblock %}{% block content %}{% from "macros.html" import headpiece, fish, feast_search %}
 <div class="calendar" data-view="{{ view }}">
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" class="svg-sprite" aria-hidden="true" focusable="false">
     <symbol id="icon-fish" viewBox="0 0 24 12">
@@ -27,40 +77,54 @@
   <div class="calendar-header" id="calendar-top">
     <div class="calendar-title">
       {{ headpiece() }}
-      <h1>{{ year }} Ordo</h1>
+      <h1><span class="gloss-quiet" data-gloss-title="{{ ordo_gloss.title }}" data-gloss="{{ ordo_gloss.note }}">{{ year }} Ordo</span></h1>
       {# The frontispiece reads as the printed ordo's title page. #}
-      <p class="calendar-subtitle">{% if view == "year" and year_roman %}Anno Domini {{ year_roman }}{% else %}Feasts &amp; daily observances{% endif %}</p>
+      <p class="calendar-subtitle">{% if view == "year" and year_roman %}<span lang="la">Anno Domini</span> <span aria-hidden="true">{{ year_roman }}</span><span class="sr-only">{{ year }}</span>{% else %}Feasts &amp; daily observances{% endif %}</p>
     </div>
     <nav class="year-nav" aria-label="Calendar year">
-      {% if year > 1 %}<a href="{{ prev_year_link|url }}" aria-label="Previous year, {{ prev_year }}">&lsaquo; {{ prev_year }}</a>{% else %}<span></span>{% endif %}
+      {% if has_prev_year %}<a href="{{ prev_year_link|url }}"{% if not prev_year_follow %} rel="nofollow"{% endif %} aria-label="Previous year, {{ prev_year }}">&lsaquo; {{ prev_year }}</a>{% else %}<span></span>{% endif %}
       <a id="calendar-today-link" class="calendar-today-link" href="/calendar">Today</a>
-      {% if year < 9999 %}<a href="{{ next_year_link|url }}" aria-label="Next year, {{ next_year }}">{{ next_year }} &rsaquo;</a>{% else %}<span></span>{% endif %}
+      {% if has_next_year %}<a href="{{ next_year_link|url }}"{% if not next_year_follow %} rel="nofollow"{% endif %} aria-label="Next year, {{ next_year }}">{{ next_year }} &rsaquo;</a>{% else %}<span></span>{% endif %}
     </nav>
   </div>
+  {{ feast_search() }}
   {# One month to a page: the strip leads between them, its current month
-       underlined. The whole year keeps it as in-page jumps. #}
+       underlined. The whole year keeps it as in-page jumps. Under each month
+       runs the year's course: the rows' colour rail laid on its side, a day to
+       a 31st of the month's width (presentation::course), so February is
+       short. It is drawn, not read: hidden from the reading order. Today's
+       lozenge hangs under it at today's place (--today-x, which app.js moves
+       with the local date). #}
   <nav class="month-jump" aria-label="Jump to month">
-    {% for m in month_links %}<a href="{{ m.href|url }}" aria-label="{{ m.name }}" data-month="{{ m.month }}"{% if m.today %} class="is-today-month"{% endif %}{% if m.current %} aria-current="page"{% endif %}>{{ m.abbr }}</a>{% endfor %}
+    {% for m in month_links %}<a href="{{ m.href|url }}" aria-label="{{ m.name }}" data-month="{{ m.month }}"{% if m.today %} class="is-today-month" style="--today-x: {{ m.today_x }}"{% endif %}{% if m.current %} aria-current="page"{% endif %}>{{ m.abbr }}<span class="month-course" aria-hidden="true"><svg viewBox="0 0 31 1" preserveAspectRatio="none" focusable="false">{% for r in m.course %}<rect x="{{ r.start }}" width="{{ r.days }}" height="1" class="day-color-{{ r.color }}" data-color="{{ r.color }}"/>{% endfor %}</svg>{% for p in m.rare_pins %}<span class="month-course-pin day-color-{{ p.color }}" data-color="{{ p.color }}" style="left: {{ p.left_pct }}"></span>{% endfor %}</span></a>{% endfor %}
   </nav>
   {% if view == "year" %}
+  {% if ordo_colors %}
+  <div class="ordo-color-key">
+    <div class="about-ordo-legend" role="group" aria-label="Liturgical colors">
+      {% for c in ordo_colors %}<button type="button" class="about-ordo-swatch day-color-{{ c.slug }}" data-color="{{ c.slug }}" data-name="{{ c.name }}" data-meaning="{{ c.meaning }}"{% if c.note %} data-note="{{ c.note }}"{% endif %} aria-pressed="false"><i aria-hidden="true"></i>{{ c.name }}</button>{% endfor %}
+    </div>
+    <p class="about-ordo-meaning" aria-live="polite"></p>
+  </div>
+  {% endif %}
   {# The frontispiece's one tool sits where a month keeps its own. #}
   <div class="calendar-tools">
     <a class="calendar-whole-year" href="{{ all_link|url }}">The whole year on one page</a>
   </div>
   <section class="tabula" aria-labelledby="tabula-heading">
-    <h2 id="tabula-heading">Tabula Temporaria</h2>
+    <h2 id="tabula-heading" lang="la"><span class="gloss-quiet" data-gloss-title="{{ tabula_temporaria_gloss.title }}" data-gloss="{{ tabula_temporaria_gloss.note }}">Tabula Temporaria</span></h2>
     <dl class="tabula-figures">
-      {% for r in tabula.figures %}<div><dt>{{ r.label }}</dt><dd>{{ r.value }}</dd></div>{% endfor %}
+      {% for r in tabula.figures %}<div><dt>{% if r.gloss_note %}<span class="gloss-term" data-gloss-title="{{ r.gloss_title }}" data-gloss="{{ r.gloss_note }}">{{ r.label }}</span>{% else %}{{ r.label }}{% endif %}</dt><dd>{{ r.value }}</dd></div>{% endfor %}
     </dl>
     <div class="tabula-tables">
       <section aria-labelledby="tabula-moveable">
         <h3 id="tabula-moveable">Moveable feasts</h3>
         <dl>
-          {% for r in tabula.moveable %}<div><dt>{{ r.label }}</dt><dd><a href="{{ r.href|url }}">{{ r.value }}</a></dd></div>{% endfor %}
+          {% for r in tabula.moveable %}<div><dt>{% if r.feast_href %}<a class="feast-link" href="{{ r.feast_href|url }}" title="About this feast">{{ r.label }}</a>{% else %}{{ r.label }}{% endif %}</dt><dd><a href="{{ r.href|url }}">{{ r.value }}</a></dd></div>{% endfor %}
         </dl>
       </section>
       <section aria-labelledby="tabula-ember">
-        <h3 id="tabula-ember">Ember days</h3>
+        <h3 id="tabula-ember"><span class="gloss-term" data-gloss-title="{{ ember_days_gloss.title }}" data-gloss="{{ ember_days_gloss.note }}">Ember days</span></h3>
         <dl>
           {% for r in tabula.ember %}<div><dt>{{ r.label }}</dt><dd><a href="{{ r.href|url }}">{{ r.value }}</a></dd></div>{% endfor %}
         </dl>
@@ -72,13 +136,28 @@
   <p class="calendar-legend"><span aria-hidden="true">§</span> Fasting <span aria-hidden="true">·</span> {{ fish() }} Abstinence</p>
   <button type="button" class="calendar-expand" aria-pressed="false" hidden>Show office details</button>
   {# A phone never shows the rank cells' titles, so the key spells them out,
-       each in the ink its days are set in. #}
-  <p class="calendar-legend calendar-ranks"><span class="sr-only">Ranks: </span>{% for abbr, name in [("1cl", "first class"), ("2cl", "second class"), ("gd", "greater double"), ("d", "double"), ("sd", "semi-double"), ("s", "simple"), ("f2", "privileged feria")] %}<span class="rank-key"><span class="rank-key-abbr{% if abbr in ["1cl", "2cl", "gd"] %} is-greater{% elif abbr == "d" %} is-double{% endif %}">{{ abbr }}</span> {{ name }}</span>{% if not loop.last %}<span aria-hidden="true"> · </span>{% endif %}{% endfor %}</p>
+       each in the ink its days are set in. With script a phone keeps it folded
+       under "Rank key" (each rank still glosses itself at a tap); without
+       script, and on a wide screen, it stands open (style.css). Its handler is
+       here, not in the deferred app.js, so it answers even where that never runs. #}
+  <button type="button" class="calendar-ranks-toggle" aria-expanded="false" aria-controls="calendar-ranks">Rank key</button>
+  <p class="calendar-legend calendar-ranks" id="calendar-ranks"><span class="sr-only">Ranks: </span>{% for abbr, name in [("1cl", "first class"), ("2cl", "second class"), ("gd", "greater double"), ("d", "double"), ("sd", "semi-double"), ("s", "simple"), ("f2", "privileged feria")] %}<span class="rank-key"><span class="rank-key-abbr{% if abbr in ["1cl", "2cl", "gd"] %} is-greater{% elif abbr == "d" %} is-double{% endif %}">{{ abbr }}</span> {{ name }}</span>{% if not loop.last %}<span aria-hidden="true"> · </span>{% endif %}{% endfor %}</p>
+  <script>
+    (function () {
+      var toggle = document.querySelector(".calendar-ranks-toggle");
+      var key = document.getElementById("calendar-ranks");
+      toggle.addEventListener("click", function () {
+        var open = toggle.getAttribute("aria-expanded") !== "true";
+        toggle.setAttribute("aria-expanded", String(open));
+        key.classList.toggle("is-open", open);
+      });
+    })();
+  </script>
   </div>
   {% for m in months %}
   <section class="month" id="{{ m.slug }}">
     {# The heading is sticky, so its jump link stays reachable all year. #}
-    <h2>{{ m.name }}<a class="month-top" href="#calendar-top" title="Back to the top of the year"><span aria-hidden="true">&uarr;</span><span class="sr-only">Back to the top of the year</span></a></h2>
+    <h2 aria-label="{{ m.name }}">{{ m.name }}<a class="month-top" href="#calendar-top" title="Back to the top of the year"><span aria-hidden="true">&uarr;</span><span class="sr-only">Back to the top of the year</span></a></h2>
     <table class="month-table">
       <caption class="sr-only">{{ m.name }} {{ year }} ordo with feast, penitential observances, liturgical color, and rank.</caption>
       <thead>
@@ -93,61 +172,76 @@
       </thead>
       <tbody>
         {% for d in m.days %}
-        <tr class="day {{ d.color_class }}" id="d-{{ d.date_slug }}"{% if d.rank %} data-rank="{{ d.rank }}"{% endif %}>
-          <td class="day-num" data-label="Day"><a href="{{ home_link(d.date_slug)|url }}">{{ d.day_num }}</a></td>
+        {#- Days bound together: an octave's rail runs on through its days (.bound-above,
+             .bound-below), and a feast that impedes it stands beside it in its own colour. A
+             vigil leads into its feast by a thread (.lead-to, .lead-from): the outer span holds
+             the row's rail colour, the inner the other row's. #}
+        {%- set thread %}{% if d.lead_to %}<span class="day-lead {{ d.color_class }}" aria-hidden="true"><span class="day-thread to-feast day-color-{{ d.lead_to }}"></span></span>{% elif d.lead_from %}<span class="day-lead {{ d.color_class }}" aria-hidden="true"><span class="day-thread from-vigil day-color-{{ d.lead_from }}"></span></span>{% endif %}{% endset %}
+        <tr class="day {{ d.color_class }}{% if d.bound_above %} bound-above{% endif %}{% if d.bound_below %} bound-below{% endif %}{% if d.lead_to %} lead-to{% endif %}{% if d.lead_from %} lead-from{% endif %}" id="d-{{ d.date_slug }}"{% if d.rank %} data-rank="{{ d.rank }}"{% endif %}>
+          <td class="day-num" data-label="Day">{% if d.rail_inset %}<span class="day-inset day-color-{{ d.rail_inset }}" aria-hidden="true"></span>{% endif %}{{ thread }}<a href="{{ home_link(d.date_slug)|url }}" aria-describedby="n-{{ d.date_slug }}">{{ d.day_num }}</a></td>
           <td class="day-wk" data-label="Weekday">{{ d.weekday }}</td>
-          <td class="day-feast" data-label="Feast">
-            <span class="sr-only">Liturgical color: {{ d.color }}. </span>
+          <td class="day-feast" data-label="Feast">{% if d.rail_inset %}<span class="day-inset day-color-{{ d.rail_inset }}" aria-hidden="true"></span>{% endif %}{{ thread }}
             <div class="day-mobile-head">
-              <a class="day-mobile-date" href="{{ home_link(d.date_slug)|url }}">
+              <a class="day-mobile-date" href="{{ home_link(d.date_slug)|url }}" aria-describedby="n-{{ d.date_slug }}">
                 <span class="day-mobile-num">{{ d.day_num }}</span>
                 <span class="day-mobile-weekday">{{ d.weekday }}</span>
               </a>
               <span class="day-mobile-flags">
                 {# aria-label is not allowed on an abbr; name these the way
                      the wide-table cells below do. Each mark, like the rank,
-                     spells itself out on hover, focus or a tap. #}
-                {% if d.fast %}<abbr class="day-mobile-flag" tabindex="0" title="Day of Fasting"><span aria-hidden="true">§</span><span class="sr-only">Fasting</span></abbr>{% endif %}
-                {% if d.abstinence %}<abbr class="day-mobile-flag" tabindex="0" title="Day of Abstinence">{{ fish() }}<span class="sr-only">Abstinence</span></abbr>{% endif %}
+                     spells itself out in the note a tap opens (app.js). #}
+                {% if d.fast %}<abbr class="day-mobile-flag" tabindex="0" title="{{ fast_day }}"><span aria-hidden="true">§</span><span class="sr-only">Fasting</span></abbr>{% endif %}
+                {% if d.abstinence %}<abbr class="day-mobile-flag" tabindex="0" title="{{ abstinence_day }}">{{ fish() }}<span class="sr-only">Abstinence</span></abbr>{% endif %}
                 {% if d.rank %}{% if d.rank_full %}<abbr class="day-mobile-rank" tabindex="0" title="{{ d.rank_full }}">{{ d.rank }}</abbr>{% else %}<span class="day-mobile-rank">{{ d.rank }}</span>{% endif %}{% endif %}
               </span>
             </div>
-            <a class="day-feast-name" href="{{ home_link(d.date_slug)|url }}">{{ d.feast_name|typeset }}</a>
+            {# The date leads to the day; a feast name with a feast page links inline to it;
+               tapping Office details or the rest of the row opens its office details (app.js). #}
+            <span class="day-feast-name" id="n-{{ d.date_slug }}">{% if d.feast_href %}<a class="feast-link" href="{{ d.feast_href|url }}" title="About this feast">{{ d.feast_name|typeset }}</a>{% else %}{{ d.feast_name|typeset }}{% endif %}</span><span class="sr-only">. Liturgical color: {{ d.color }}.</span>
             {# Kept by monastics and oblates only: the ordo's bracketed line, never the day's office. #}
-            {% if d.monastic %}<div class="day-monastic">{% for o in d.monastic %}<p>[{{ o.heading|typeset }}] <abbr tabindex="0" title="{{ o.rank_full }}">{{ o.rank }}</abbr>{% if o.office %}<span class="day-monastic-office">{{ o.office|typeset }}</span>{% endif %}</p>{% endfor %}</div>{% endif %}
-            {# On cards both disclosures share one line; see .day-disclosures. #}
+            {% if d.monastic %}<div class="day-monastic">{% for o in d.monastic %}<p><span class="gloss-quiet" data-gloss-title="{{ monastic_gloss.title }}" data-gloss="{{ monastic_gloss.note }}">[{{ o.heading|typeset }}]</span> <abbr tabindex="0" title="{{ o.rank_full }}">{{ o.rank }}</abbr>{% if o.office %} <span class="day-monastic-office">{{ o.office|typeset }}</span>{% endif %}</p>{% endfor %}</div>{% endif %}
+            {# One disclosure holds the day's commemorations and its office. #}
             <div class="day-disclosures">
-            {% if d.commemorations %}<details class="day-commemorations"><summary>{{ d.commemorations|length }} commemoration{% if d.commemorations|length > 1 %}s{% endif %}</summary>{% for c in d.commemorations %}<span class="day-commemoration">{{ c|typeset }}</span>{% endfor %}</details>{% endif %}
-            {% if d.benedictus_antiphon or d.magnificat_antiphon or d.lauds_preces or d.lauds_suffrage or d.hours_preces or d.vespers_preces or d.vespers_suffrage or d.vespers_note or d.lauds_comms or d.vespers_comms %}
+            {% if d.commemorations or d.benedictus_antiphon or d.magnificat_antiphon or d.lauds_preces or d.lauds_suffrage or d.lauds_cross or d.hours_preces or d.vespers_preces or d.vespers_suffrage or d.vespers_cross or d.vespers_note or d.lauds_comms or d.vespers_comms %}
             <details class="day-office-details">
               <summary>Office details</summary>
+              {# The row's tap opens these in place; this leads on to the day. #}
+              <a class="day-office-open" href="{{ home_link(d.date_slug)|url }}">{{ open_this_day }}<span aria-hidden="true"> ›</span></a>
               <dl class="day-office-digest">
-              {% if d.benedictus_antiphon or d.lauds_preces or d.lauds_suffrage or d.lauds_comms %}
+              {% if d.commemorations %}
+              <div class="day-office-hour">
+                <dt>Day</dt>
+                <dd>{% for c in d.commemorations %}{% set href = d.commemoration_hrefs[loop.index0] if loop.index0 < d.commemoration_hrefs|length else "" %}<span class="day-office-comm"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_com.title }}" data-gloss="{{ ordo_gloss_com.note }}">Com.</span> {% if href %}<a class="feast-link" href="{{ href|url }}">{{ c|typeset }}</a>{% else %}{{ c|typeset }}{% endif %}</span>{% endfor %}</dd>
+              </div>
+              {% endif %}
+              {% if d.benedictus_antiphon or d.lauds_preces or d.lauds_suffrage or d.lauds_cross or d.lauds_comms %}
               <div class="day-office-hour">
                 <dt>Lauds</dt>
                 <dd>
-                  {% if d.benedictus_antiphon %}<span class="day-office-incipit">Ben. &ldquo;{{ d.benedictus_antiphon }}&rdquo;</span>{% endif %}
-                  {% if d.lauds_preces %}<span class="day-office-badge">Preces</span>{% endif %}
-                  {% if d.lauds_suffrage %}<span class="day-office-badge">Suffrage</span>{% endif %}
-                  {% for c in d.lauds_comms %}<span class="day-office-comm">Com. {{ c.name|typeset }}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
+                  {% if d.benedictus_antiphon %}<span class="day-office-incipit"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_ben.title }}" data-gloss="{{ ordo_gloss_ben.note }}">Ben.</span> &ldquo;{{ d.benedictus_antiphon }}&rdquo;</span>{% endif %}
+                  {% if d.lauds_preces %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_preces.title }}" data-gloss="{{ ordo_gloss_preces.note }}">Preces</span></span>{% endif %}
+                  {% if d.lauds_suffrage %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_suffrage.title }}" data-gloss="{{ ordo_gloss_suffrage.note }}">Suffrage</span></span>{% endif %}
+                  {% if d.lauds_cross %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_cross.title }}" data-gloss="{{ ordo_gloss_cross.note }}">Commemoration of the Cross</span></span>{% endif %}
+                  {% for c in d.lauds_comms %}<span class="day-office-comm"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_com.title }}" data-gloss="{{ ordo_gloss_com.note }}">Com.</span> {% if c.href %}<a class="feast-link" href="{{ c.href|url }}">{{ c.name|typeset }}</a>{% else %}{{ c.name|typeset }}{% endif %}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
                 </dd>
               </div>
               {% endif %}
               {% if d.hours_preces %}
               <div class="day-office-hour">
                 <dt>Hours</dt>
-                <dd><span class="day-office-badge">Preces</span></dd>
+                <dd><span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_preces.title }}" data-gloss="{{ ordo_gloss_preces.note }}">Preces</span></span></dd>
               </div>
               {% endif %}
-              {% if d.magnificat_antiphon or d.vespers_preces or d.vespers_suffrage or d.vespers_comms or d.vespers_note %}
+              {% if d.magnificat_antiphon or d.vespers_preces or d.vespers_suffrage or d.vespers_cross or d.vespers_comms or d.vespers_note %}
               <div class="day-office-hour">
                 <dt>Vespers</dt>
                 <dd>
-                  {% if d.vespers_note %}<span class="day-office-note">{{ d.vespers_note }}</span>{% endif %}
-                  {% if d.magnificat_antiphon %}<span class="day-office-incipit">Mag. &ldquo;{{ d.magnificat_antiphon }}&rdquo;</span>{% endif %}
-                  {% if d.vespers_preces %}<span class="day-office-badge">Preces</span>{% endif %}
-                  {% if d.vespers_suffrage %}<span class="day-office-badge">Suffrage</span>{% endif %}
-                  {% for c in d.vespers_comms %}<span class="day-office-comm">Com. {{ c.name|typeset }}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
+                  {% if d.vespers_note %}{% set vg = d.vespers_note|vespers_note_gloss %}<span class="day-office-note">{% if vg %}<span class="gloss-term" data-gloss-title="{{ vg.title }}" data-gloss="{{ vg.note }}">{{ d.vespers_note }}</span>{% else %}{{ d.vespers_note }}{% endif %}</span>{% endif %}
+                  {% if d.magnificat_antiphon %}<span class="day-office-incipit"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_mag.title }}" data-gloss="{{ ordo_gloss_mag.note }}">Mag.</span> &ldquo;{{ d.magnificat_antiphon }}&rdquo;</span>{% endif %}
+                  {% if d.vespers_preces %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_preces.title }}" data-gloss="{{ ordo_gloss_preces.note }}">Preces</span></span>{% endif %}
+                  {% if d.vespers_suffrage %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_suffrage.title }}" data-gloss="{{ ordo_gloss_suffrage.note }}">Suffrage</span></span>{% endif %}
+                  {% if d.vespers_cross %}<span class="day-office-badge"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_cross.title }}" data-gloss="{{ ordo_gloss_cross.note }}">Commemoration of the Cross</span></span>{% endif %}
+                  {% for c in d.vespers_comms %}<span class="day-office-comm"><span class="gloss-term" data-gloss-title="{{ ordo_gloss_com.title }}" data-gloss="{{ ordo_gloss_com.note }}">Com.</span> {% if c.href %}<a class="feast-link" href="{{ c.href|url }}">{{ c.name|typeset }}</a>{% else %}{{ c.name|typeset }}{% endif %}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
                 </dd>
               </div>
               {% endif %}
@@ -156,8 +250,8 @@
             {% endif %}
             </div>
           </td>
-          <td class="day-penitential-flag" data-label="Fast">{% if d.fast %}<abbr tabindex="0" title="Day of Fasting"><span aria-hidden="true">§</span><span class="sr-only">Fasting</span></abbr>{% endif %}</td>
-          <td class="day-penitential-flag" data-label="Abstinence">{% if d.abstinence %}<abbr tabindex="0" title="Day of Abstinence">{{ fish() }}<span class="sr-only">Abstinence</span></abbr>{% endif %}</td>
+          <td class="day-penitential-flag" data-label="Fast">{% if d.fast %}<abbr tabindex="0" title="{{ fast_day }}"><span aria-hidden="true">§</span><span class="sr-only">Fasting</span></abbr>{% endif %}</td>
+          <td class="day-penitential-flag" data-label="Abstinence">{% if d.abstinence %}<abbr tabindex="0" title="{{ abstinence_day }}">{{ fish() }}<span class="sr-only">Abstinence</span></abbr>{% endif %}</td>
           <td class="day-rank" data-label="Rank">{% if d.rank_full %}<abbr tabindex="0" title="{{ d.rank_full }}">{{ d.rank }}</abbr>{% else %}{{ d.rank }}{% endif %}</td>
         </tr>
         {% endfor %}
@@ -166,11 +260,24 @@
   </section>
   {% endfor %}
   {% if view == "month" %}
+  {#- The day asked for, set in place before the month is first seen (the head block). #}
+  <script>
+    (function () {
+      var root = document.documentElement;
+      if (!root.hasAttribute("data-place")) return;
+      try {
+        var row = document.getElementById(location.hash.slice(1));
+        if (row) row.scrollIntoView({ block: "start" });
+      } catch (e) {}
+      root.removeAttribute("data-place");
+    })();
+  </script>
+  <span id="ordo-place" hidden></span>
   {# The hours' continuation: the same diamond, labels and targets. #}
   <nav class="hour-continuation ordo-continuation" aria-label="Other months">
-    {% if prev_month %}<a class="hour-continuation-link previous-hour" href="{{ prev_month.href|url }}"><span class="continuation-label">Previous month</span><span>&larr; {{ prev_month.name }}</span></a>{% else %}<span></span>{% endif %}
+    {% if prev_month %}<a class="hour-continuation-link previous-hour" href="{{ prev_month.href|url }}"{% if not prev_month.follow %} rel="nofollow"{% endif %}><span class="continuation-label">Previous month</span><span class="sr-only">: </span><span><span aria-hidden="true">&larr; </span>{{ prev_month.name }}</span></a>{% else %}<span></span>{% endif %}
     <a class="day-hours-link" href="{{ year_link|url }}">{{ year }} Ordo</a>
-    {% if next_month %}<a class="hour-continuation-link next-hour" href="{{ next_month.href|url }}"><span class="continuation-label">Next month</span><span>{{ next_month.name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
+    {% if next_month %}<a class="hour-continuation-link next-hour" href="{{ next_month.href|url }}"{% if not next_month.follow %} rel="nofollow"{% endif %}><span class="continuation-label">Next month</span><span class="sr-only">: </span><span>{{ next_month.name }}<span aria-hidden="true"> &rarr;</span></span></a>{% else %}<span></span>{% endif %}
   </nav>
   {% endif %}
   {% endif %}

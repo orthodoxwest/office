@@ -37,7 +37,7 @@
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 137 (Sunday within the Octave of the Epiphany)
-!Rom 12:1
+!Rom. 12:1
 I beseech you therefore, brethren, by the mercies of God, that ye present your bodies a living sacrifice, holy, acceptable unto God, which is your reasonable service.
 R. Thanks be to God.
 
@@ -49,12 +49,12 @@ R. Thanks be to God.
 @use proper/epiphany-sunday-within-octave/chapter-lauds
 
 [chapter-sext]
-!Rom 12:3
+!Rom. 12:3
 For I say, through the grace given unto me, to every man that is among you, not to think of himself more highly than he ought to think; but to think soberly.
 R. Thanks be to God.
 
 [chapter-none]
-!Rom 12:4-5
+!Rom. 12:4, 5
 For as we have many members in one body, and all members have not the same office; so we, being many, are one body in Christ, and every one members one of another.
 R. Thanks be to God.
 

@@ -2,7 +2,9 @@ import { defineConfig } from "@playwright/test";
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:18159";
 const externalServer = Boolean(process.env.PLAYWRIGHT_EXTERNAL_SERVER);
-const serverCommand = "target/release/office serve 127.0.0.1:18159";
+// The server runs from the checkout, where cargo puts the binary unless CARGO_TARGET_DIR says otherwise.
+const targetDir = process.env.CARGO_TARGET_DIR || "target";
+const serverCommand = `${targetDir}/release/office serve 127.0.0.1:18159`;
 // Separate CI invocations must retain both reports and their failure traces.
 const outputRoot = process.env.PLAYWRIGHT_SUITE
   ? `../output/playwright/${process.env.PLAYWRIGHT_SUITE}`
@@ -53,6 +55,22 @@ export default defineConfig({
       name: "mobile-chromium",
       use: {
         browserName: "chromium",
+        viewport: { width: 390, height: 844 },
+        hasTouch: true,
+        isMobile: true,
+        colorScheme: "light",
+      },
+    },
+    // Safari's engine runs the behaviour suite only: pixel snapshots differ
+    // between engines by design, and the visual suite pins Chromium's. Needs
+    // `npx playwright install webkit` locally (the CI container has it).
+    {
+      name: "mobile-webkit",
+      testMatch: "ux.spec.js",
+      // WebKit lays out the long hours some three times slower than Chromium.
+      timeout: 60_000,
+      use: {
+        browserName: "webkit",
         viewport: { width: 390, height: 844 },
         hasTouch: true,
         isMobile: true,

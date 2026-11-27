@@ -83,7 +83,7 @@ Grant us, we beseech thee, O Lord, so to imitate what we honour: that we may lea
 # Vespers-only override for psalm antiphon 3.
 #
 # [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+# Vespers-only override for psalm antiphon 4; without one, Vespers takes Lauds antiphon 5, omitting the fourth.
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.
@@ -96,3 +96,35 @@ Grant us, we beseech thee, O Lord, so to imitate what we honour: that we may lea
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[magnificat-antiphon-first]
+# SOURCE: ordo 2021, 2022, 2025, 2026 (August 2, I Vespers): "And Stephen" (Diurnal p. 194)
+@use proper/st-stephen/benedictus-antiphon
+
+[chapter-lauds]
+# SOURCE: ordo 2023, 2024, 2026 (August 3, Lauds "Chp. &c. (194)"; Diurnal p. 194)
+@use proper/st-stephen/chapter-lauds
+
+[chapter-terce]
+# SOURCE: Diurnal p. 195 (St Stephen, at Terce: chapter as at Lauds); ordo "Hours Of Feast (195f)"
+@use proper/st-stephen/chapter-lauds
+
+[chapter-sext]
+# SOURCE: Diurnal pp. 195–196 (St Stephen, at Sext); ordo "Hours Of Feast (195f)"
+@use proper/st-stephen/chapter-sext
+
+[chapter-none]
+# SOURCE: Diurnal p. 196 (St Stephen, at None); ordo "Hours Of Feast (195f)"
+@use proper/st-stephen/chapter-none
+
+[chapter-vespers]
+# SOURCE: ordo 2023, 2024, 2026 (August 3, Vespers "Chp. (194)"); Diurnal p. 196 prints the same Acts 6:8 at Vespers
+@use proper/st-stephen/chapter-lauds
+
+[versicle-lauds]
+# SOURCE: ordo 2023, 2024, 2026 (August 3, Lauds "Chp. &c. (194)"); St Stephen's hymns are not taken, since they carry the Christmas ending
+@use proper/st-stephen/versicle-lauds
+
+[versicle-vespers]
+# SOURCE: ordo 2023, 2024, 2026 (August 3, Vespers "Short ℟ &c. (196f)")
+@use proper/st-stephen/versicle-vespers

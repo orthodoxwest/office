@@ -141,17 +141,40 @@ fn validate_semantics(feasts: &[Feast]) -> Vec<String> {
         }
     }
     for f in feasts {
+        let octave_names = f.octave_days.iter().chain(f.octave_day_names.values());
+        for name in std::iter::once(&f.name).chain(octave_names) {
+            if let Some(problem) = name_style_problem(name) {
+                errs.push(format!("Feast '{}' name {} {problem} (#695)", f.id, quote(name)));
+            }
+        }
+    }
+    for f in feasts {
         if let Some(rule) = &f.date_rule
             && !is_valid_date_rule(rule)
         {
             errs.push(format!(
-                "Feast '{}' has unrecognized DateRule: {} (expected easter±N, epiphany-sunday-N, advent-sunday-N, pentecost-sunday-N, holy-name, or last-sunday-october)",
+                "Feast '{}' has unrecognized DateRule: {} (expected easter±N, epiphany-sunday-N, advent-sunday-N, pentecost-sunday-N, advent-ember-DAY, september-ember-DAY, holy-name, or last-sunday-october)",
                 f.id,
                 quote(rule)
             ));
         }
     }
     errs
+}
+
+/// Why a feast's name departs from the house style the ordo prints, if it does:
+/// "&" joins names and titles ("Ss Peter & Paul", "Bishop & Confessor"), and
+/// "the" takes a capital only as a name's first word.
+fn name_style_problem(name: &str) -> Option<&'static str> {
+    let mut words = name.split(' ');
+    words.next();
+    if name.split(' ').any(|w| w == "and") {
+        Some("joins with \"and\"; write \"&\"")
+    } else if words.any(|w| w == "The") {
+        Some("capitalizes \"The\" within it")
+    } else {
+        None
+    }
 }
 
 /// The name a saint's Common would put for "N." when it is a title rather than
@@ -193,6 +216,9 @@ fn is_valid_date_rule(rule: &str) -> bool {
     if let Some(s) = rule.strip_prefix("pentecost-sunday-") {
         return number(s).is_some_and(|n| n >= 1);
     }
+    if let Some((season, weekday)) = rule.split_once("-ember-") {
+        return matches!(season, "advent" | "september") && matches!(weekday, "wednesday" | "friday" | "saturday");
+    }
     rule == "holy-name" || rule == "last-sunday-october"
 }
 
@@ -221,6 +247,7 @@ pub fn validate_texts(src: &dyn DataSource) -> Vec<String> {
     for key in texts.corpus.missing_incipits() {
         errs.push(format!("no Latin incipit in data/latin-incipits.txt for: {key}"));
     }
+    errs.extend(office::chant::validate_scores(&texts));
     errs.sort();
     errs
 }

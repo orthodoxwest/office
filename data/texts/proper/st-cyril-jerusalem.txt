@@ -94,7 +94,7 @@
 # Vespers-only override for psalm antiphon 3.
 #
 # [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+# Vespers-only override for psalm antiphon 4; without one, Vespers takes Lauds antiphon 5, omitting the fourth.
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.
@@ -107,3 +107,7 @@
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[collect]
+# SOURCE: Monastic Diurnal pp. 488-489 (March 18, St Cyril of Jerusalem, Collect)
+Grant us, we beseech thee, Almighty God, at the intercession of the blessed Bishop Cyril: so to know thee the only true God, and Jesus Christ whom thou hast sent, that we may ever deserve to be numbered among the sheep that hear his voice.

@@ -47,7 +47,7 @@ Ought not Christ * to have suffered these things, and to enter into his glory? a
 
 [chapter-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 156 (Second Saturday after Easter)
-!1 Pet 2:21-22
+!1 Pet. 2:21, 22
 Dearly beloved: Christ also suffered for us, leaving us an example, that ye should follow his steps: who did no sin, neither was guile found in his mouth.
 R. Thanks be to God.
 
@@ -57,13 +57,13 @@ O God, who by the humiliation of thy Son didst raise up a fallen world: grant un
 
 [chapter-sext]
 # SOURCE: diurnal p. 378
-!1 Peter 2:23,24
+!1 Pet. 2:23, 24
 But he committed himself to him that judgeth righteously: who his own self bare our sins in his own body on the tree, that we, being dead to sins, should live unto righteousness: * by whose stripes ye were healed.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: diurnal p. 378
-!1 Peter 2:25
+!1 Pet. 2:25
 For ye were as sheep going astray; * but are now returned unto the Shepherd and Bishop of your souls.
 R. Thanks be to God.
 

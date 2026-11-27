@@ -26,16 +26,17 @@ pub fn uses_weekday_lauds_psalmody(day: &Day, t: &OfficeTexts) -> bool {
     if !eligible {
         return false;
     }
+    let season = day.saints_season("lauds");
     for id in feast_proper_ids(feast) {
         let mut prefixes = vec![format!("proper/{id}/")];
-        if day.season == Season::Easter {
+        if season == Season::Easter {
             prefixes.insert(0, format!("proper/{id}-paschal/"));
         }
         for prefix in prefixes {
             if !t.get(&format!("{prefix}{LAUDS_PSALMODY_REF}")).is_empty() {
                 return false;
             }
-            let (text, _) = lookup_section_text(&prefix, Some(day.season), "lauds", "psalm-antiphon-1", t);
+            let (text, _) = lookup_section_text(&prefix, Some(season), "lauds", "psalm-antiphon-1", t);
             if !text.is_empty() && !corpus::is_omitted(&text) {
                 return false;
             }

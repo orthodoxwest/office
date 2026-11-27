@@ -11,15 +11,15 @@ use calendar::computus::MoveableDates;
 use calendar::model::FERIA_COMMEMORATION_ID;
 use calendar::occurrence::compare_feast_precedence;
 use calendar::traits::{
-    is_apostolic_companion_commemoration, is_day_within_octave, is_double_or_above, is_ember_day, is_octave_day,
+    is_anticipated_sunday, is_apostolic_companion_commemoration, is_day_within_octave, is_double_or_above, is_ember_day, is_octave_day,
     is_penitential_feria_season, is_privileged_octave_commemoration, is_rogation_day, is_saturday_bvm, is_sunday, is_sunday_first_class,
     is_vigil, octave_parent_id, same_octave_days,
 };
 use calendar::{CalendarDay, Category, Color, Decision, Feast, FeastRef, Rank, Season, Weekday};
 
-/// Which office owns Vespers on an evening. A Vespers split at the Chapter is
-/// not a separate owner: the incoming office owns the hour and only the
-/// psalmody stays behind (see [`VespersDesignation::psalmody_from_preceding`]).
+/// Which office owns Vespers on an evening: the discriminant of [`VespersOffice`]. A Vespers
+/// split at the Chapter is not a separate owner: the incoming office owns the hour and only the
+/// psalmody stays behind (see [`VespersPsalms`]).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum VespersOwner {
     /// Neither adjacent celebration has rights to this evening.
@@ -38,57 +38,147 @@ impl VespersOwner {
     }
 }
 
+/// Where the psalms of a Vespers owned by the following office come from.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum VespersPsalms {
+    /// The incoming office's own.
+    Own,
+    /// The outgoing office's: an incoming Simple begins only at the Chapter (General Rubrics III).
+    FromPreceding,
+}
+
+/// The office that owns an evening's Vespers, with what holds only for that owner.
+#[derive(Clone, Debug)]
+pub enum VespersOffice {
+    /// Neither adjacent celebration has rights to this evening.
+    Unowned,
+    /// II Vespers of the preceding day's office.
+    Second {
+        feast: FeastRef,
+        color: Color,
+        season: Season,
+        /// The following celebration when its office is commemorated here (its antiphon and
+        /// versicle then come from I Vespers, XIV.14).
+        following_commemorated: Option<String>,
+        /// The octave whose office is celebrated tomorrow.
+        following_octave_of: Option<String>,
+    },
+    /// I Vespers of the following day's office.
+    First {
+        feast: FeastRef,
+        /// The following office's colour, or the outgoing office's when the psalms stay with it
+        /// and the day has an office of its own.
+        color: Color,
+        season: Season,
+        /// The following day's octave context.
+        within_octave_of: Option<String>,
+        psalms: VespersPsalms,
+    },
+}
+
 /// The office that owns an evening's Vespers and the evening's commemorations.
 #[derive(Clone, Debug)]
 pub struct VespersDesignation {
-    pub owner: VespersOwner,
-    pub feast: Option<FeastRef>,
-    pub color: Option<Color>,
-    pub season: Option<Season>,
-    /// The following day's octave context when it owns I Vespers.
-    pub within_octave_of: Option<String>,
+    pub office: VespersOffice,
     pub rule: String,
     pub decisions: Vec<Decision>,
     pub commemorations: Vec<FeastRef>,
-    /// The following celebration when its office is commemorated at II
-    /// Vespers (its antiphon and versicle then come from I Vespers, XIV.14).
-    pub following_office_commemoration_id: Option<String>,
     /// Commemorated offices that belong to the following day: each begins
     /// with its own I-Vespers antiphon and versicle (XIV.14; 2026 ordo
     /// 24 January, 23 March, 10 November).
     pub incoming_commemoration_ids: Vec<String>,
-    /// The octave whose office is celebrated tomorrow when this is II Vespers.
-    pub following_office_octave_of: Option<String>,
-    /// A Vespers split at the Chapter: psalmody from the outgoing office.
-    pub psalmody_from_preceding: bool,
-    /// The evening before All Souls: Vespers of the Dead follows.
-    pub appended_office_of_the_dead: bool,
-    pub appended_feast: Option<FeastRef>,
+    /// The office of the dead appended after the evening's Vespers: All Souls on its eve.
+    pub appended: Option<FeastRef>,
 }
 
 impl VespersDesignation {
     /// An evening no office owns, with no commemorations: the zero value.
     pub fn unowned() -> VespersDesignation {
-        VespersDesignation::new(VespersOwner::NotApplicable, "")
+        VespersDesignation::new(VespersOffice::Unowned, "")
     }
 
-    fn new(owner: VespersOwner, rule: &str) -> VespersDesignation {
+    fn new(office: VespersOffice, rule: &str) -> VespersDesignation {
         VespersDesignation {
-            owner,
-            feast: None,
-            color: None,
-            season: None,
-            within_octave_of: None,
+            office,
             rule: rule.to_string(),
             decisions: Vec::new(),
             commemorations: Vec::new(),
-            following_office_commemoration_id: None,
             incoming_commemoration_ids: Vec::new(),
-            following_office_octave_of: None,
-            psalmody_from_preceding: false,
-            appended_office_of_the_dead: false,
-            appended_feast: None,
+            appended: None,
         }
+    }
+
+    pub fn owner(&self) -> VespersOwner {
+        match self.office {
+            VespersOffice::Unowned => VespersOwner::NotApplicable,
+            VespersOffice::Second { .. } => VespersOwner::IIOfPreceding,
+            VespersOffice::First { .. } => VespersOwner::IOfFollowing,
+        }
+    }
+
+    /// The feast or Sunday whose First Vespers the evening is, by its name; none when the
+    /// evening keeps the day's own office or none.
+    pub fn first_vespers_of(&self) -> Option<&str> {
+        match &self.office {
+            VespersOffice::First { feast, .. } => Some(feast.name.as_str()),
+            VespersOffice::Unowned | VespersOffice::Second { .. } => None,
+        }
+    }
+
+    /// The office that owns the evening.
+    pub fn feast(&self) -> Option<&FeastRef> {
+        match &self.office {
+            VespersOffice::Unowned => None,
+            VespersOffice::Second { feast, .. } | VespersOffice::First { feast, .. } => Some(feast),
+        }
+    }
+
+    pub fn color(&self) -> Option<Color> {
+        match self.office {
+            VespersOffice::Unowned => None,
+            VespersOffice::Second { color, .. } | VespersOffice::First { color, .. } => Some(color),
+        }
+    }
+
+    pub fn season(&self) -> Option<Season> {
+        match self.office {
+            VespersOffice::Unowned => None,
+            VespersOffice::Second { season, .. } | VespersOffice::First { season, .. } => Some(season),
+        }
+    }
+
+    /// The following day's octave context when it owns I Vespers.
+    pub fn within_octave_of(&self) -> Option<&str> {
+        match &self.office {
+            VespersOffice::First { within_octave_of, .. } => within_octave_of.as_deref(),
+            VespersOffice::Unowned | VespersOffice::Second { .. } => None,
+        }
+    }
+
+    /// The following celebration when its office is commemorated at II Vespers.
+    pub fn following_office_commemoration_id(&self) -> Option<&str> {
+        match &self.office {
+            VespersOffice::Second { following_commemorated, .. } => following_commemorated.as_deref(),
+            VespersOffice::Unowned | VespersOffice::First { .. } => None,
+        }
+    }
+
+    /// The octave whose office is celebrated tomorrow when this is II Vespers.
+    pub fn following_office_octave_of(&self) -> Option<&str> {
+        match &self.office {
+            VespersOffice::Second { following_octave_of, .. } => following_octave_of.as_deref(),
+            VespersOffice::Unowned | VespersOffice::First { .. } => None,
+        }
+    }
+
+    /// A Vespers split at the Chapter: psalmody from the outgoing office.
+    pub fn psalmody_from_preceding(&self) -> bool {
+        matches!(self.office, VespersOffice::First { psalms: VespersPsalms::FromPreceding, .. })
+    }
+
+    /// The evening before All Souls: Vespers of the Dead follows.
+    pub fn appended_office_of_the_dead(&self) -> bool {
+        self.appended.is_some()
     }
 }
 
@@ -215,8 +305,23 @@ fn second_vespers_commemoration(winner: Option<&Feast>, comm: &Feast, incoming: 
     if comm.id == FERIA_COMMEMORATION_ID || comm.id == "privileged-lenten-feria" {
         return (true, "commemoration:second-vespers-seasonal-feria");
     }
+    // Needs ruling (#642): the ordos also commemorate the Ember days of Advent
+    // and Lent, against XIV.9 (Ember days "only at Lauds"): II Vespers of St
+    // Gregory on Ember Wednesday (2025 ordo 12 March, "For as Jonas") and of
+    // St Thomas on Ember Friday (2018 ordo 21 Dec, "O Day-spring").
+    if advent_or_lenten_ember_day(comm) {
+        return (true, "commemoration:second-vespers-seasonal-ember-day");
+    }
     if is_ember_day(comm) || is_rogation_day(comm) || is_vigil(comm) {
         return (false, "commemoration:second-vespers-feria-or-vigil-lauds-only");
+    }
+    // A Sunday anticipated on a Saturday Double of the I or II Class, "or
+    // some other Feast of XII Lessons", is commemorated "at I Vespers ... and
+    // at Lauds" (IV.4-5; XIV.9), and "nothing is said of the Sunday at II
+    // Vespers" even when it is only commemorated (Notes on the Tables 12):
+    // not at II Vespers of the Purification, 2 February 2075 and 2086 (#656).
+    if !incoming && is_anticipated_sunday(comm) {
+        return (false, "commemoration:second-vespers-anticipated-sunday-exclusion");
     }
     if matches!(comm.rank, Rank::Commemoration | Rank::Simple) {
         if is_apostolic_companion_commemoration(comm) && winner.is_none_or(|w| w.rank != Rank::Double1stClass) {
@@ -308,7 +413,10 @@ fn following_office_commemorated_at_second_vespers(winner: Option<&Feast>, follo
         // Guardian Angels, 2025 ordo 24 Oct Raphael, 2022 ordo 25 Nov
         // Catherine; #542). Doubles of the 1st and 2nd class admit no
         // commemoration of it (2022 ordo 28 Oct Simon & Jude, 2019 ordo 26
-        // July Anne, 2018 ordo 2 Feb Purification).
+        // July Anne, 2018 ordo 2 Feb Purification). Needs ruling (#666): a
+        // Friday feast of Our Lady keeps it too (2021 and 2025 ordos), though
+        // VIII.3 says "no other Commemoration of her is to be made" and the
+        // 2022 ordo prints No Comm. at the Rosary.
         if is_saturday_bvm(feast) && winner.is_some_and(|w| w.rank.weight() < Rank::Double2ndClass.weight()) {
             return (true, "commemoration:following-office-at-second-vespers-saturday-bvm");
         }
@@ -341,10 +449,17 @@ fn same_octave_office(preceding: &CalendarDay, following: &CalendarDay) -> bool 
 /// "A Feria in Advent, in Septuagesimatide, or in Lent" (Diurnal §X), with
 /// the Ember days of Advent and Lent (2021 ordo 24 March, 2022 18 March).
 fn penitential_season_feria(f: &Feast) -> bool {
-    f.id == FERIA_COMMEMORATION_ID
-        || f.id == "privileged-lenten-feria"
-        || f.id.starts_with("lent-ember-")
-        || f.id.starts_with("advent-ember-")
+    f.id == FERIA_COMMEMORATION_ID || f.id == "privileged-lenten-feria" || advent_or_lenten_ember_day(f)
+}
+
+fn advent_or_lenten_ember_day(f: &Feast) -> bool {
+    f.id.starts_with("lent-ember-") || f.id.starts_with("advent-ember-")
+}
+
+/// Ember Saturday's evening is the Sunday's I Vespers, which do not
+/// commemorate it (2026 ordo 19 Dec).
+fn ember_saturday(f: &Feast) -> bool {
+    f.id.ends_with("-ember-saturday")
 }
 
 /// XIV.7-8 applied to the office displaced by I Vespers of the following.
@@ -352,7 +467,7 @@ fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast)
     // A Sunday office anticipated on Saturday ends at None: its evening is the
     // next Sunday's I Vespers, which do not commemorate it (2025 and 2026
     // ordos, 7 February; 2021 ordo, 20 November).
-    if loser.id.ends_with("-anticipated") && loser.is_category(Category::Sunday) {
+    if is_anticipated_sunday(loser) {
         return (false, "commemoration:first-vespers-anticipated-sunday-exclusion");
     }
     let first_class = winner.is_some_and(|w| w.rank == Rank::Double1stClass);
@@ -386,6 +501,15 @@ fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast)
             && !is_vigil(loser)
         {
             return (true, "commemoration:first-vespers-seasonal-feria");
+        }
+        // Needs ruling (#642): XIV.9 commemorates an Ember day "only at
+        // Lauds", but the ordos commemorate an Advent or Lenten one at a
+        // following feast's I Vespers, like the season's other ferias (XIV.8):
+        // 2017 and 2019 ordos 20 Dec (St Thomas), 2022 ordo 18 March (St
+        // Joseph) and 14 Dec (the Conception's octave day), 2025 ordo 17 Dec
+        // (the Expectation). Ember Saturday is left to the Sunday.
+        if advent_or_lenten_ember_day(loser) && !ember_saturday(loser) && winner.is_some() {
+            return (true, "commemoration:first-vespers-seasonal-ember-day");
         }
         return (false, "commemoration:first-vespers-office-ended-at-none");
     }
@@ -463,9 +587,7 @@ fn impeded_double_at_first_vespers(winner: Option<&Feast>, impeder: Option<&Feas
         return (false, "commemoration:impeded-double-first-class-lauds-only");
     }
     if w.is_category(Category::Sunday) {
-        let ended_at_none = impeder.is_some_and(|p| {
-            (p.id.ends_with("-anticipated") && p.is_category(Category::Sunday)) || is_ember_day(p) || is_rogation_day(p) || is_vigil(p)
-        });
+        let ended_at_none = impeder.is_some_and(|p| is_anticipated_sunday(p) || is_ember_day(p) || is_rogation_day(p) || is_vigil(p));
         if ended_at_none {
             return (false, "commemoration:impeded-double-office-ended-at-none");
         }
@@ -512,6 +634,16 @@ pub fn concurrence_winner(prec: &Feast, fol: &Feast) -> (VespersOwner, &'static 
         }
         if feast_is_prec && is_octave_day(feast) {
             return (feast_wins, "concurrence:octave-day-in-possession-vs-sunday");
+        }
+        // The Octave Day of the Epiphany takes I Vespers from the Sunday
+        // within its Octave, commemorating II Vespers of the Sunday, whether
+        // that Sunday falls on 12 January or is said on Saturday the 12th
+        // because the Octave Day is a Sunday (Diurnal p. 231; 2019 ordo,
+        // 12 January; 2025 ordo, 12 January) (#651). Not other octave days:
+        // the Sunday keeps II Vespers before the Octave Day of Ss Peter and
+        // Paul (2026 ordo, 5 July).
+        if feast.id == "epiphany-octave-day" {
+            return (feast_wins, "concurrence:epiphany-octave-day-vs-sunday");
         }
         return (sunday_wins, "concurrence:sunday-below-class-ii");
     }
@@ -888,17 +1020,25 @@ pub fn resolve_concurrence(preceding: &CalendarDay, following: &CalendarDay) -> 
 
 fn resolve_concurrence_owner(preceding: &CalendarDay, following: &CalendarDay) -> VespersDesignation {
     // All Souls ends at None; Vespers are of the displaced All Saints octave.
+    // Needs ruling (#662): these take II Vespers of the feast, as the 2023,
+    // 2025 (3 Nov) and 2026 ordos print ("As of II Vesp. of Feast"); Diurnal
+    // p. 654 says "as at I Vespers of the Feast", and the 2017-2022 ordos ("As
+    // of All Saints'" / "As of the Feast, except: Mag. Ant. 'O how glorious'")
+    // name neither.
     if let Some(octave) = all_souls_octave_vespers_office(preceding) {
         let mut synth = preceding.clone();
         synth.celebration = Some(octave.clone());
         synth.color = octave.color;
         synth.commemorations.retain(|c| c.id != octave.id);
         let mut result = resolve_concurrence(&synth, following);
-        if result.owner == VespersOwner::NotApplicable {
-            result.owner = VespersOwner::IIOfPreceding;
-            result.feast = Some(octave.clone());
-            result.color = Some(octave.color);
-            result.season = Some(preceding.season);
+        if let VespersOffice::Unowned = result.office {
+            result.office = VespersOffice::Second {
+                feast: octave.clone(),
+                color: octave.color,
+                season: preceding.season,
+                following_commemorated: None,
+                following_octave_of: None,
+            };
             result.rule = "concurrence:all-souls-ends-at-none".to_string();
         }
         return result;
@@ -912,23 +1052,42 @@ fn resolve_concurrence_owner(preceding: &CalendarDay, following: &CalendarDay) -
 
     let first_vespers = |rule: &str, fol: &FeastRef| {
         let (comms, decisions) = boundary_commemorations(Some(fol), prec, preceding, following, false, same_octave);
-        let mut d = VespersDesignation::new(VespersOwner::IOfFollowing, rule);
-        d.feast = Some(fol.clone());
-        d.color = Some(following.color);
-        d.season = Some(following.season);
-        d.within_octave_of = following.within_octave_of.clone();
+        let (psalms, color) = if splits_vespers_at_chapter(fol) {
+            // The colour follows the outgoing office when the day has an office of its own.
+            (VespersPsalms::FromPreceding, if preceding.celebration.is_some() { preceding.color } else { following.color })
+        } else {
+            (VespersPsalms::Own, following.color)
+        };
+        let office = VespersOffice::First {
+            feast: fol.clone(),
+            color,
+            season: following.season,
+            within_octave_of: following.within_octave_of.clone(),
+            psalms,
+        };
+        let mut d = VespersDesignation::new(office, rule);
         d.commemorations = comms;
         d.decisions = decisions;
-        apply_chapter_split(d, fol, preceding)
+        if psalms == VespersPsalms::FromPreceding {
+            // A Simple begins only at the Chapter.
+            d.decisions.push(decision("concurrence:simple-begins-at-chapter", "split", &fol.name));
+        }
+        d
     };
-    let second_vespers = |rule: &str, prec: &FeastRef| {
+    // `concurring`: the following office when it too had rights to the evening and yielded.
+    let second_vespers = |rule: &str, prec: &FeastRef, concurring: Option<&FeastRef>| {
         let (boundary, boundary_decisions) = boundary_commemorations(Some(prec), fol, preceding, following, true, same_octave);
         let (comms, decisions) = second_vespers_commemorations(prec, preceding, following, boundary, boundary_decisions);
-        let mut d = VespersDesignation::new(VespersOwner::IIOfPreceding, rule);
-        d.feast = Some(prec.clone());
-        d.color = Some(preceding.color);
-        d.season = Some(preceding.season);
-        d.following_office_octave_of = octave_celebration_parent(following).map(str::to_string);
+        // A following office that yielded the evening is commemorated from its I Vespers.
+        let following_commemorated = concurring.filter(|f| comms.iter().any(|c| c.id == f.id)).map(|f| f.id.clone());
+        let office = VespersOffice::Second {
+            feast: prec.clone(),
+            color: preceding.color,
+            season: preceding.season,
+            following_commemorated,
+            following_octave_of: octave_celebration_parent(following).map(str::to_string),
+        };
+        let mut d = VespersDesignation::new(office, rule);
         d.commemorations = comms;
         d.decisions = decisions;
         d
@@ -938,21 +1097,15 @@ fn resolve_concurrence_owner(preceding: &CalendarDay, following: &CalendarDay) -
         (Some(p), Some(f)) if prec_has_ii && fol_has_i => {
             let (winner, rule) = concurrence_winner(p, f);
             match winner {
-                VespersOwner::IIOfPreceding => {
-                    let mut d = second_vespers(rule, p);
-                    if d.commemorations.iter().any(|c| c.id == f.id) {
-                        d.following_office_commemoration_id = Some(f.id.clone());
-                    }
-                    d
-                }
+                VespersOwner::IIOfPreceding => second_vespers(rule, p, Some(f)),
                 VespersOwner::IOfFollowing | VespersOwner::NotApplicable => first_vespers(rule, f),
             }
         }
         (_, Some(f)) if !prec_has_ii && fol_has_i => first_vespers("concurrence:following-only", f),
-        (Some(p), _) if prec_has_ii => second_vespers("concurrence:preceding-only", p),
+        (Some(p), _) if prec_has_ii => second_vespers("concurrence:preceding-only", p, None),
         _ => {
             let (comms, decisions) = no_owner_commemorations(preceding, following);
-            let mut d = VespersDesignation::new(VespersOwner::NotApplicable, "concurrence:neither-office-has-rights");
+            let mut d = VespersDesignation::new(VespersOffice::Unowned, "concurrence:neither-office-has-rights");
             d.commemorations = comms;
             d.decisions = decisions;
             d
@@ -968,20 +1121,6 @@ fn all_souls_octave_vespers_office(day: &CalendarDay) -> Option<&FeastRef> {
     day.commemorations.iter().find(|c| c.id.starts_with("all-saints-octave-day"))
 }
 
-/// Marks a designation whose incoming Simple begins only at the Chapter. The
-/// colour follows the outgoing office when the day has an office of its own.
-fn apply_chapter_split(mut d: VespersDesignation, fol: &Feast, preceding: &CalendarDay) -> VespersDesignation {
-    if !splits_vespers_at_chapter(fol) {
-        return d;
-    }
-    d.psalmody_from_preceding = true;
-    if preceding.celebration.is_some() {
-        d.color = Some(preceding.color);
-    }
-    d.decisions.push(decision("concurrence:simple-begins-at-chapter", "split", &fol.name));
-    d
-}
-
 /// The designation for each evening of `days`, where `following` is the day
 /// after the last.
 pub fn resolve_vespers(days: &[CalendarDay], following: &CalendarDay) -> Vec<VespersDesignation> {
@@ -992,8 +1131,7 @@ pub fn resolve_vespers(days: &[CalendarDay], following: &CalendarDay) -> Vec<Ves
             if let Some(c) = &next.celebration
                 && c.id == "all-souls"
             {
-                v.appended_office_of_the_dead = true;
-                v.appended_feast = Some(c.clone());
+                v.appended = Some(c.clone());
                 v.decisions.push(decision("vespers:appended-office-of-the-dead", "included", "all-souls"));
             }
             v

@@ -35,6 +35,9 @@ android {
         targetSdk = 36
         versionCode = commitCount()
         versionName = "0.1.$versionCode"
+        // Only the ABIs the Rust core is built for. JNA's AAR carries its dispatch library for
+        // four more (armeabi, mips, mips64, x86), which could never load the engine.
+        ndk { abiFilters += rustAbis }
     }
 
     signingConfigs {

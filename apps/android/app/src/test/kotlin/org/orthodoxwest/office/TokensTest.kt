@@ -5,6 +5,7 @@ import java.io.File
 import kotlin.math.abs
 import kotlin.math.hypot
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -65,6 +66,14 @@ class TokensTest {
 
     private val root get() = rule(":root").takeIf { it.contains("--text:") } ?: error(":root tokens")
 
+    /** The system's font scale reaches the type no further than iOS lets Dynamic Type (Theme.swift). */
+    @Test
+    fun fontScaleStopsWhereIosDoes() {
+        val swift = File("../../ios/Office/Theme.swift").readText()
+        val cap = Regex("""return min\(body / 17, ([0-9.]+)\)""").find(swift)?.groupValues?.get(1)?.toFloat() ?: error("no cap in Theme.swift")
+        assertEquals(cap, MaxFontScale, 0f)
+    }
+
     @Test
     fun naveIsTheRoot() {
         checkPalette(root, Nave)
@@ -106,7 +115,7 @@ class TokensTest {
 
     @Test
     fun seasonsRetintTheGilding() {
-        for ((season, css) in listOf("passiontide" to "body.season-passiontide", "eastertide" to "body.season-eastertide")) {
+        for ((season, css) in listOf("quiet" to "body.season-quiet", "passiontide" to "body.season-passiontide", "eastertide" to "body.season-eastertide")) {
             val block = rule(css)
             val o = ornament(Nave, season)
             check(block, "ornament", o.flat)
@@ -123,13 +132,56 @@ class TokensTest {
             // The season's inscription ink is set on the body in both themes.
             assertEquals(null, value(dark, "inscription-ink"))
             check(block, "inscription-ink", d.ink)
+            // Apse's gilt tituli take the season's gilding; Nave's painted ones stay. Nave's gold
+            // moon follows the season; Apse's silver goes quiet and veils with the gilding, and is
+            // restated at Eastertide.
+            check(dark, "titulus", seasoned(Apse, season).titulus)
+            assertEquals(Nave.titulus, seasoned(Nave, season).titulus)
+            alias(block, "moon-ink", "ornament")
+            assertEquals(o.flat, seasoned(Nave, season).moonInk)
+            if (season == "eastertide") check(dark, "moon-ink", seasoned(Apse, season).moonInk)
+            else assertEquals(d.flat, seasoned(Apse, season).moonInk)
         }
+    }
+
+    /** Home's painted page (HomePaint.kt) takes the web's "Home: the painted page" tokens. */
+    @Test
+    fun homeInk() {
+        check(root, "ochre", Ochre)
+        check(root, "leaf-matte-hi", LeafMatteHi)
+        check(root, "leaf-matte", LeafMatte)
+        check(root, "leaf-matte-lo", LeafMatteLo)
+        check(root, "leaf-shadow", LeafShadow)
+        // Nave's wash and pool are thin ochre: 19% and 34% (`color-mix(... var(--ochre) N%, transparent)`).
+        assertEquals("color-mix(in srgb, var(--ochre) 19%, transparent)", value(root, "tablet-wash")?.trim())
+        assertEquals("color-mix(in srgb, var(--ochre) 34%, transparent)", value(root, "now-pool")?.trim())
+        assertEquals(Ochre.copy(alpha = 0.19f), homeInk(Nave).tabletWash)
+        assertEquals(Ochre.copy(alpha = 0.34f), homeInk(Nave).nowPool)
+        val dark = rule(":root[data-theme=\"dark\"]")
+        val ink = homeInk(Apse)
+        check(dark, "tablet-wash", ink.tabletWash)
+        check(dark, "now-pool", ink.nowPool)
+        check(dark, "now-gloss", ink.nowGloss)
+        check(dark, "sky-deep", ink.skyDeep)
+        check(dark, "sky", ink.sky)
+        check(dark, "sky-low", ink.skyLow)
+        check(dark, "sky-rim", ink.skyRim)
+        check(dark, "lime-white", ink.limeWhite)
+        check(dark, "sky-muted", ink.skyMuted)
+        check(dark, "sky-rubric", ink.skyRubric)
+        check(dark, "lining-lifted", ink.liningLifted)
+        // The current hour's name is lifted by night in the quiet seasons and Passiontide.
+        for (season in listOf("quiet", "passiontide")) {
+            check(rule(":root[data-theme=\"dark\"] body.season-$season"), "titulus-now", titulusNow(Apse, season))
+        }
+        assertEquals(Apse.titulus, titulusNow(Apse, "eastertide"))
+        assertEquals(Nave.titulus, titulusNow(Nave, "quiet"))
     }
 
     /** Home's pointed heads are the web's, as tools/genarch.py writes them for both, in its order. */
     @Test
     fun arches() {
-        val arches = listOf(PhoneArch, TallArch, TallerArch, NicheArch)
+        val arches = listOf(PhoneArch, TallArch, TallerArch, NicheArch, UprightArch)
         val rises = Regex("--arch-rise: ([0-9.]+);").findAll(css).map { it.groupValues[1].toFloat() }.toList()
         assertEquals(rises, arches.map { it.rise })
         for (a in arches) {
@@ -137,5 +189,162 @@ class TokensTest {
             assertEquals(a.radius, a.haunch + hypot(a.centre - a.haunch, a.depth), 1e-5f)
             assertEquals(a.radius, hypot(a.centre - 0.5f, a.rise + a.depth), 1e-5f)
         }
+    }
+
+    private val swift = File("../../ios/Office/Niche.swift").readText()
+
+    /**
+     * The niche's zoom figures are the web's: each `NicheFigures.<name>` rule in style.css, the
+     * Kotlin figures and Niche.swift's, and the unzoomed header and colophon round them.
+     */
+    @Test
+    fun nicheFigures() {
+        val kotlin = mapOf(
+            "landscape" to NicheFigures.Landscape,
+            "landscapeList" to NicheFigures.LandscapeList,
+            "upright" to NicheFigures.Upright,
+            "uprightList" to NicheFigures.UprightList,
+            "short" to NicheFigures.Short,
+        )
+        fun number(block: String, token: String) = (value(block, token) ?: error("--$token missing")).trim().removeSuffix("rem").toFloat()
+        val swiftFigures = Regex("static let (\\w+) = NicheFigures\\(card: ([0-9.]+), fit: ([0-9.]+), air: ([0-9.]+), least: ([0-9.]+), share: ([0-9.]+)\\)")
+            .findAll(swift).associate { m -> m.groupValues[1] to m.groupValues.drop(2).map { it.toFloat() } }
+        assertEquals(kotlin.keys, swiftFigures.keys)
+        for ((name, f) in kotlin) {
+            val at = css.indexOf("/* NicheFigures.$name */").also { assertTrue("no NicheFigures.$name rule", it >= 0) }
+            val block = css.substring(at, css.indexOf("}", at))
+            val web = listOf(number(block, "card-w"), number(block, "niche-fit"), number(block, "niche-air"), number(block, "niche-least"), number(block, "niche-share"))
+            val app = listOf(f.card, f.fit, f.air, f.least, f.share)
+            assertEquals("NicheFigures.$name", web, app)
+            assertEquals("Niche.swift's $name", web, swiftFigures[name])
+        }
+        val main = css.substring(css.indexOf("--niche-above:") - 40, css.indexOf("/* NicheFigures.landscape */"))
+        assertEquals(NicheFigures.ABOVE, number(main, "niche-above"))
+        assertEquals(NicheFigures.BELOW, number(main, "niche-below"))
+        assertTrue(swift.contains("static let above: CGFloat = ${NicheFigures.ABOVE}"))
+        assertTrue(swift.contains("static let below: CGFloat = ${NicheFigures.BELOW}"))
+        // The list on a screen on its side, and the short screen, from the same heights.
+        assertTrue(css.contains("(min-width: 701px) and (min-height: ${NicheFigures.LIST_LANDSCAPE.toInt()}px)"))
+        assertTrue(css.contains("(min-width: 701px) and (max-height: ${NicheFigures.SHORT.toInt()}px)"))
+        assertTrue(swift.contains("static let listLandscape: CGFloat = ${NicheFigures.LIST_LANDSCAPE.toInt()}"))
+        assertTrue(swift.contains("static let shortHeight: CGFloat = ${NicheFigures.SHORT.toInt()}"))
+    }
+
+    /** The niche's reveal by day is the web's `--reveal-*`, in Kotlin and in Niche.swift. */
+    @Test
+    fun reveal() {
+        val block = css.substring(css.indexOf("--reveal-shade:") - 200, css.indexOf("--reveal-cast:") + 60)
+        val t = nicheTokens(Nave)
+        val tokens = mapOf(
+            "reveal-shade" to ("revealShade" to t.revealShade),
+            "reveal-mid" to ("revealMid" to t.revealMid),
+            "reveal-lit" to ("revealLit" to t.revealLit),
+            "reveal-sill" to ("revealSill" to t.revealSill),
+            "reveal-sill-edge" to ("revealSillEdge" to t.revealSillEdge),
+            "reveal-soffit" to ("revealSoffit" to t.revealSoffit),
+            "reveal-arris" to ("arris" to t.arris),
+            "reveal-arris-turn" to ("arrisTurn" to t.arrisTurn),
+            "reveal-arris-shade" to ("arrisShade" to t.arrisShade),
+            "reveal-cast" to ("cast" to t.cast),
+        )
+        for ((token, pair) in tokens) {
+            val (swiftName, color) = pair
+            check(block, token, color)
+            // Niche.swift: `var revealShade = Color(hex: 0xCBBCAA)` or `Color(rgb: 96, 66, 44, 0.3)`.
+            val decl = Regex("var $swiftName = Color\\((hex: 0x([0-9A-Fa-f]{6})|rgb: ([0-9]+), ([0-9]+), ([0-9]+), ([0-9.]+))\\)").find(swift)
+                ?: error("Niche.swift: no $swiftName")
+            val g = decl.groupValues
+            val got = if (g[2].isNotEmpty()) {
+                val hex = g[2].toInt(16)
+                floatArrayOf((hex shr 16 and 255).toFloat(), (hex shr 8 and 255).toFloat(), (hex and 255).toFloat(), 1f)
+            } else {
+                floatArrayOf(g[3].toFloat(), g[4].toFloat(), g[5].toFloat(), g[6].toFloat())
+            }
+            val want = parse(value(block, token)!!)
+            for (i in 0..3) assertEquals("Niche.swift $swiftName vs --$token", want[i], got[i], 0.01f)
+        }
+    }
+
+    /**
+     * A disclosure unfolds and folds alike on every front: UNFOLD_MS and FOLD_MS on the standard
+     * curve are style.css's disclosures, app.js's fallback for browsers without interpolate-size,
+     * and iOS's `unfolding` and `folding`; the ordo's "Show office details" fades the month by
+     * MONTH_OUT_MS and MONTH_IN_MS in app.js and OrdoScreen.swift.
+     */
+    @Test
+    fun oneUnfoldEverywhere() {
+        // The figures themselves are Tempo's, which render-blocks holds style.css, Tempo.kt and
+        // Tempo.swift to; here, that each front's disclosures take them.
+        val standard = "cubic-bezier(0.4, 0, 0.2, 1)"
+        assertEquals(260, UNFOLD_MS)
+        assertEquals(200, FOLD_MS)
+        val at = css.indexOf("@supports (interpolate-size: allow-keywords)").also { assertTrue("no disclosure rules", it >= 0) }
+        val folds = css.substring(at, css.indexOf("is-settling", at))
+        assertTrue(folds.contains("block-size var(--tempo-unfold-in) var(--tempo-unfold-in-curve)"))
+        assertTrue(folds.contains("block-size var(--tempo-unfold-out) var(--tempo-unfold-out-curve)"))
+        assertTrue(folds.contains("opacity calc(var(--tempo-unfold-in) - 60ms) var(--curve-arrive) 60ms"))
+        assertTrue(folds.contains("opacity calc(var(--tempo-unfold-out) / 2) var(--curve-leave)"))
+        val js = File("../../office-web/static/app.js").readText()
+        // app.js's fallback reads style.css's figures rather than keeping its own.
+        assertTrue(js.contains("var beat = opening ? \"tempo-unfold-in\" : \"tempo-unfold-out\";"))
+        assertTrue(js.contains("{ duration: duration, easing: curve }"))
+        assertTrue(js.contains("stage.style.transition = \"height var(--tempo-unfold-in) var(--tempo-unfold-in-curve)\";"))
+        assertFalse("app.js keeps the standard curve's own figures", js.contains(standard))
+        assertTrue(js.contains("{ duration: $MONTH_OUT_MS, easing: \"cubic-bezier(0.4, 0, 1, 1)\", fill: \"forwards\" }"))
+        assertTrue(js.contains("{ duration: $MONTH_IN_MS, easing: \"cubic-bezier(0, 0, 0.2, 1)\" }"))
+        val chrome = File("../../ios/Office/Chrome.swift").readText()
+        assertTrue(chrome.contains("let unfolding = Tempo.unfoldIn.animation"))
+        assertTrue(chrome.contains("let folding = Tempo.unfoldOut.animation"))
+        val ordo = File("../../ios/Office/OrdoScreen.swift").readText()
+        assertTrue(ordo.contains("withAnimation(.timingCurve(0.4, 0, 1, 1, duration: ${MONTH_OUT_MS / 1000.0}))"))
+        assertTrue(ordo.contains("withAnimation(.timingCurve(0, 0, 0.2, 1, duration: ${MONTH_IN_MS / 1000.0}))"))
+    }
+
+    /**
+     * A press and a panel move by Tempo on every front: bare words dim to Tempo's quiet (the web's
+     * `--tempo-touch-quiet`, iOS's `Quiet`, Android's [Dim]), the ordo day's rail runs the row's
+     * height over Tempo's reach and back over its touch, and the menu and Settings panels and the
+     * note settle in and leave on Tempo's settle. render-blocks holds the figures themselves.
+     */
+    @Test
+    fun pressAndPanelKeepTempo() {
+        assertEquals(0.7f, Tempo.TOUCH_QUIET)
+        assertTrue(css.contains("):is(:active, .is-pressed) {\n  opacity: var(--tempo-touch-quiet);\n}"))
+        assertEquals(2, Regex("transition-duration: var\\(--tempo-touch-reach\\);").findAll(css).count())
+        for (way in listOf("in", "out")) {
+            assertEquals(3, Regex("opacity var\\(--tempo-settle-$way\\) var\\(--tempo-settle-$way-curve\\)").findAll(css).count())
+        }
+        val chrome = File("src/main/kotlin/org/orthodoxwest/office/Chrome.kt").readText()
+        assertTrue(chrome.contains("alpha.snapTo(Tempo.TOUCH_QUIET)"))
+        assertTrue(chrome.contains("enter = fadeIn(Tempo.settleIn.spec())"))
+        assertTrue(chrome.contains("exit = fadeOut(Tempo.settleOut.spec())"))
+        val ordo = File("src/main/kotlin/org/orthodoxwest/office/OrdoScreen.kt").readText()
+        assertTrue(ordo.contains("if (pressed) Tempo.touchReach.spec() else Tempo.touchOut.spec()"))
+        assertEquals(2, Regex("\\.drawBehind \\{ dayRail\\(").findAll(ordo).count())
+        val swift = File("../../ios/Office/Chrome.swift").readText()
+        assertTrue(swift.contains(".opacity(configuration.isPressed ? Tempo.touchQuiet : 1)"))
+        assertTrue(swift.contains(".opacity(current && held ? Tempo.touchQuiet : 1)"))
+        val app = File("../../ios/Office/OfficeApp.swift").readText()
+        assertTrue(app.contains(".animation(model.overlay == .none ? Tempo.settleOut.animation : Tempo.settleIn.animation, value: model.overlay)"))
+        val swiftOrdo = File("../../ios/Office/OrdoScreen.swift").readText()
+        assertTrue(swiftOrdo.contains(".animation(held ? Tempo.touchReach.animation : Tempo.touchOut.animation, value: held)"))
+        assertEquals(2, Regex("\\.overlay\\(alignment: \\.topLeading\\) \\{ DayRail\\(").findAll(swiftOrdo).count())
+    }
+
+    /**
+     * The cross under the last Amen gilds by Tempo's gild on every front, by opacity alone: the
+     * web's `.hour-end-mark.is-gilding::after`, Android's [Tempo.gild] and iOS's `Tempo.gild`.
+     * render-blocks holds the figures themselves.
+     */
+    @Test
+    fun theEndCrossGildsByTempo() {
+        val gilding = css.substringAfter("  .hour-end-mark.is-gilding::after {\n").substringBefore("}")
+        assertTrue(gilding.contains("transition-duration: var(--tempo-gild);"))
+        assertTrue(gilding.contains("transition-timing-function: var(--tempo-gild-curve);"))
+        assertTrue(rule(".hour-end-mark::after").contains("transition-property: opacity;"))
+        val hour = File("src/main/kotlin/org/orthodoxwest/office/HourScreen.kt").readText()
+        assertTrue(hour.contains("gold.animateTo(1f, Tempo.gild.spec())"))
+        val swift = File("../../ios/Office/HourScreen.swift").readText()
+        assertTrue(swift.contains("withAnimation(reduceMotion ? nil : Tempo.gild.animation) { gold = 1 }"))
     }
 }

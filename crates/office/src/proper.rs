@@ -64,15 +64,16 @@ pub fn is_per_annum_sunday(f: Option<&Feast>) -> bool {
     if !f.is_category(Category::Sunday) {
         return false;
     }
-    for id in feast_proper_ids(f) {
-        if id == "epiphany-sunday-1" || id == "pentecost-sunday-2" {
-            return false;
-        }
-        if id.starts_with("epiphany-sunday-") || id.starts_with("pentecost-sunday-") {
-            return true;
-        }
+    // The Sunday within the Octave of the Epiphany redirects to its proper
+    // `epiphany-sunday-within-octave` ahead of its own id, so every id is
+    // checked for the exclusion before any is matched: anticipated on the
+    // Saturday, its Friday I Vespers take its own Magnificat antiphon
+    // (Diurnal p. 229; the 2019 ordo commemorates the Sunday with it) (#646).
+    let ids = feast_proper_ids(f);
+    if ids.iter().any(|id| id == "epiphany-sunday-1" || id == "pentecost-sunday-2") {
+        return false;
     }
-    false
+    ids.iter().any(|id| id.starts_with("epiphany-sunday-") || id.starts_with("pentecost-sunday-"))
 }
 
 /// The first non-empty text among `prefix + reference`.
@@ -108,18 +109,77 @@ pub(crate) fn season_ref_candidates(refs: &[String], season: Option<Season>) -> 
     }
 }
 
-/// Resolves a section within one tier: season-qualified, then
-/// hour-qualified, then generic.
+/// Resolves a section within one tier: the hour's own text (its seasonal
+/// form first), then the generic text's seasonal form, then the generic. A
+/// seasonal form varies the text it qualifies, so it never displaces a text
+/// the hour takes in that one's place: Vespers of a Confessor Bishop omit
+/// Lauds' fourth antiphon (Diurnal pp. 33*, 39*), in Septuagesima and Lent
+/// as at other times (#663).
 pub fn lookup_section_text(prefix: &str, season: Option<Season>, hour_name: &str, reference: &str, t: &OfficeTexts) -> (String, String) {
     let hour_candidates = if hour_name.is_empty() { Vec::new() } else { hour_ref_candidates(hour_name, reference) };
     let ref_cands = ref_candidates(reference);
-    for list in [season_ref_candidates(&hour_candidates, season), season_ref_candidates(&ref_cands, season), hour_candidates] {
+    for list in [season_ref_candidates(&hour_candidates, season), hour_candidates] {
         let found = first_text(t, prefix, &list);
         if !found.0.is_empty() {
-            return found;
+            return paschal_common_form(found, season, t);
         }
     }
-    first_text(t, prefix, &ref_cands)
+    // Vespers that take their antiphons from Lauds say them "omitting the
+    // fourth" (the Benedicite's), so the fourth psalm takes Lauds' fifth: the
+    // Diurnal's standing formula, printed some fifty times (pp. 162, 223, 451,
+    // 657, 16*, 46* …) and never otherwise. A tier with no fifth antiphon
+    // keeps its fourth.
+    if hour_name == "vespers" && reference == LAUDS_FOURTH {
+        // Only the fifth itself: the generic `psalm-antiphon` is not Lauds' fifth.
+        let fifth = vec![LAUDS_FIFTH.to_string()];
+        for list in [season_ref_candidates(&fifth, season), fifth] {
+            let found = first_text(t, prefix, &list);
+            if !found.0.is_empty() {
+                return paschal_common_form(found, season, t);
+            }
+        }
+    }
+    let seasonal = season_ref_candidates(&ref_cands, season);
+    for list in [seasonal, ref_cands] {
+        let found = first_text(t, prefix, &list);
+        if !found.0.is_empty() {
+            return paschal_common_form(found, season, t);
+        }
+    }
+    (String::new(), String::new())
+}
+
+const LAUDS_FOURTH: &str = "psalm-antiphon-4";
+const LAUDS_FIFTH: &str = "psalm-antiphon-5";
+
+/// In Paschaltide an `@use` into a Common reads that Common's paschal form
+/// when it has one, as the Common tier itself does (Diurnal p. 6*, §3): the
+/// first hop of the alias chain into `commons/{cat}/{key}` that has a
+/// `commons/{cat}-paschal/{key}` takes it. A key already in a paschal tier
+/// is left alone. The paschal form follows the target's slot, so a proper
+/// borrowing another slot's Common text for its words names a shared/ key
+/// instead (validate.rs, `validate_paschal_redirects`).
+fn paschal_common_form(found: (String, String), season: Option<Season>, t: &OfficeTexts) -> (String, String) {
+    if season != Some(Season::Easter) {
+        return found;
+    }
+    let is_paschal = |key: &str| key.split('/').any(|seg| seg.ends_with("-paschal"));
+    let mut key = found.1.as_str();
+    while !is_paschal(key)
+        && let Some(target) = t.alias_target(key)
+    {
+        if let Some((cat, rest)) = target.strip_prefix("commons/").and_then(|r| r.split_once('/'))
+            && !cat.ends_with("-paschal")
+        {
+            let paschal = format!("commons/{cat}-paschal/{rest}");
+            let text = t.get(&paschal);
+            if !text.is_empty() {
+                return (text.to_string(), paschal);
+            }
+        }
+        key = target;
+    }
+    found
 }
 
 /// Replaces the placeholder "N." with the saint's name.
@@ -198,6 +258,49 @@ pub fn lookup_commons_text(
     lookup_section_text(&format!("commons/{cat}/"), Some(season), hour_name, reference, t)
 }
 
+/// Diurnal p. 6* §3: "in Paschaltide there is a special Common of Apostles,
+/// Evangelists, and Martyrs", while the other Commons are said "as out of
+/// Paschaltide" with Alleluia added. So a Martyr's Proper antiphon that is
+/// written for the rest of the year (it has no Alleluia) yields in
+/// Paschaltide to the Paschal Common of Martyrs' antiphon for the same place:
+/// Ss John and Paul, commemorated in the Octave of Pentecost, take "Light
+/// perpetual" at Vespers and "Daughters of Jerusalem" at Lauds (2021 and 2024
+/// ordos, 25-26 June), not their own "The righteous" and "These are the holy
+/// ones" (pp. 542-543). The Apostles' own antiphons are not displaced so (St
+/// Paul's "O holy Apostle Paul" is no Common's): no ordo shows one in
+/// Paschaltide, and they take Paschaltide's Alleluia instead (XXIV.7).
+/// Nor does a feast with an office of its own, whose Proper gives its psalm
+/// antiphons: St John Baptist's Nativity (Category martyr) keeps "When
+/// Zacharias" and "The mouth of Zacharias" for its octave in the Octave of
+/// Pentecost (2051, 30 June to 1 July).
+pub fn paschal_common_antiphon(
+    feast: &Feast,
+    season: Season,
+    hour_name: &str,
+    reference: &str,
+    found: (String, String),
+    t: &OfficeTexts,
+) -> (String, String) {
+    let special_common = matches!(feast.category, Some(Category::Martyr | Category::Martyrs | Category::BishopMartyr));
+    if season != Season::Easter
+        || !special_common
+        || !base_proper_ref(reference).contains("antiphon")
+        || !found.1.starts_with("proper/")
+        || found.0.to_lowercase().contains("alleluia")
+    {
+        return found;
+    }
+    let own_office = found
+        .1
+        .rsplit_once('/')
+        .is_some_and(|(dir, _)| ["psalm-antiphon", "psalm-antiphon-1"].iter().any(|k| !t.get(&format!("{dir}/{k}")).trim().is_empty()));
+    if own_office {
+        return found;
+    }
+    let common = lookup_commons_text(feast.category, season, hour_name, reference, t);
+    if !common.0.is_empty() && common.1.contains("-paschal/") { common } else { found }
+}
+
 /// The collect of the Little Hours is the collect of Lauds.
 pub fn resolve_proper_collect_text(day: &Day, hour_name: &str, t: &OfficeTexts) -> (String, String) {
     match hour_name {
@@ -230,8 +333,28 @@ pub fn lookup_feast_proper_text(day: &Day, hour_name: &str, reference: &str, t: 
     if ferial_vespers_antiphon(day, hour_name, reference, t) || celebration.id.is_empty() || is_synthesized_feria(celebration) {
         return (String::new(), String::new());
     }
+    // From Septuagesima to Holy Week a Sunday's or feria's own psalm
+    // antiphons are said at Lauds and the Hours; its Vespers keeps the
+    // psalter's unless the proper names Vespers ("Ants. and Psalms of
+    // Sunday", Diurnal pp. 237, 280; "of Monday", pp. 282-284; 2026 ordo, "Sun.
+    // Off. (110-115)", "Mon. Ps. (114-21)") (#776). A Sunday within an
+    // octave is said as on the Feast (Ascension, 2026 ordo, 24 May).
+    if hour_name == "vespers"
+        && base_proper_ref(reference).starts_with("psalm-antiphon")
+        && is_sunday_or_feria(Some(celebration))
+        && matches!(day.season, Season::Septuagesima | Season::Lent | Season::Passiontide)
+    {
+        for feast_id in feast_proper_ids(celebration) {
+            let (text, resolved) = first_text(t, &format!("proper/{feast_id}/"), &hour_candidates);
+            if !text.is_empty() {
+                return (substitute_proper_name(&text, &proper_name), resolved);
+            }
+        }
+        return (String::new(), String::new());
+    }
+    let season = day.saints_season(hour_name);
     for feast_id in feast_proper_ids(celebration) {
-        if day.season == Season::Easter {
+        if season == Season::Easter {
             let prefix = format!("proper/{feast_id}-paschal/");
             for list in [&hour_candidates, &ref_cands] {
                 let (text, resolved) = first_text(t, &prefix, list);
@@ -240,8 +363,9 @@ pub fn lookup_feast_proper_text(day: &Day, hour_name: &str, reference: &str, t: 
                 }
             }
         }
-        let (text, resolved) = lookup_section_text(&format!("proper/{feast_id}/"), Some(day.season), hour_name, reference, t);
-        if !text.is_empty() {
+        let found = lookup_section_text(&format!("proper/{feast_id}/"), Some(season), hour_name, reference, t);
+        if !found.0.is_empty() {
+            let (text, resolved) = paschal_common_antiphon(celebration, season, hour_name, reference, found, t);
             return (substitute_proper_name(&text, &proper_name), resolved);
         }
     }
@@ -259,7 +383,7 @@ fn is_sunday_or_feria(f: Option<&Feast>) -> bool {
 /// it came from, or a "[Proper text not found: …]" marker.
 pub fn resolve_proper_text(day: &Day, hour_name: &str, reference: &str, t: &OfficeTexts) -> (String, String) {
     // At I Vespers prefer a "-first" variant within the proper office.
-    if day.first_vespers && hour_name == "vespers" && !reference.ends_with("-first") {
+    if day.first_vespers() && hour_name == "vespers" && !reference.ends_with("-first") {
         let (text, resolved) = resolve_proper_text(day, hour_name, &format!("{reference}-first"), t);
         if !text.starts_with("[Proper text not found") {
             // A Common's I Vespers text cannot displace the feast's own
@@ -318,7 +442,7 @@ pub fn resolve_proper_text(day: &Day, hour_name: &str, reference: &str, t: &Offi
     // 0.7. Saturday evening before a per-annum Sunday: the historia, the
     // Sunday's own -first proper, then the ferial Saturday antiphon.
     if hour_name == "vespers"
-        && day.first_vespers
+        && day.first_vespers()
         && reference.starts_with("magnificat-antiphon")
         && reference.ends_with("-first")
         && is_per_annum_sunday(celebration)
@@ -403,7 +527,7 @@ pub fn resolve_proper_text(day: &Day, hour_name: &str, reference: &str, t: &Offi
         && let Some(c) = celebration
         && !is_synthesized_feria(c)
     {
-        let (text, resolved) = lookup_commons_text(c.category, day.season, hour_name, reference, t);
+        let (text, resolved) = lookup_commons_text(c.category, day.saints_season(hour_name), hour_name, reference, t);
         if !text.is_empty() {
             return (substitute_proper_name(&text, &proper_name), resolved);
         }
@@ -490,7 +614,7 @@ pub fn resolve_proper_text(day: &Day, hour_name: &str, reference: &str, t: &Offi
 /// the week's Sunday Lauds antiphons ("First Week, Ant.", pp. 163–164).
 pub fn advent_ferial_psalm_antiphon_ref(day: &Day, hour_name: &str, n: u32) -> Option<String> {
     let weekday = day.civil_weekday();
-    if day.season != Season::Advent || day.first_vespers || weekday == Weekday::Sunday {
+    if day.season != Season::Advent || day.first_vespers() || weekday == Weekday::Sunday {
         return None;
     }
     if !matches!(hour_name, "lauds" | "prime" | "terce" | "sext" | "none") {
@@ -525,7 +649,7 @@ pub fn greater_antiphon_day(day: &Day) -> Option<u32> {
         return None;
     }
     let mut o_day = day.date.day();
-    if day.first_vespers {
+    if day.first_vespers() {
         o_day -= 1;
     }
     (17..=23).contains(&o_day).then_some(o_day)

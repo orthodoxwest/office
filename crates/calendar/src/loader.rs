@@ -95,7 +95,7 @@ fn valid_fixed_date(month: i64, day: i64) -> bool {
 /// Per-day octave name keys, `OctaveDay2` through `OctaveDay8`.
 const OCTAVE_DAY_KEYS: [&str; 7] = ["OctaveDay2", "OctaveDay3", "OctaveDay4", "OctaveDay5", "OctaveDay6", "OctaveDay7", "OctaveDay8"];
 
-const KNOWN_FEAST_KEYS: [&str; 24] = [
+const KNOWN_FEAST_KEYS: [&str; 25] = [
     "Name",
     "Rank",
     "Color",
@@ -118,6 +118,7 @@ const KNOWN_FEAST_KEYS: [&str; 24] = [
     "CompanionOf",
     "OnlyWith",
     "SkipRomanLeapShift",
+    "HymnMtv",
     "Source",
     "Notes",
 ];
@@ -221,6 +222,10 @@ pub fn section_to_feast(m: &Section, source_file: &str) -> Result<Feast, String>
     if let Some(v) = flag("SkipRomanLeapShift")? {
         f.skip_roman_leap_shift = v;
     }
+    if let Some(v) = m.get("HymnMtv") {
+        f.hymn_mtv = crate::model::HymnMtv::parse(v)
+            .ok_or_else(|| fail(format!("invalid HymnMtv {} (true, false or unless-first-vespers)", quote(v))))?;
+    }
     if m.get("Source").is_some() {
         f.source = text("Source");
     }
@@ -266,8 +271,18 @@ pub fn section_to_feast(m: &Section, source_file: &str) -> Result<Feast, String>
     if !f.is_vigil && f.vigil_of.is_some() {
         return Err(format!("{source_file}: feast {qid} specifies VigilOf but is not a vigil"));
     }
-    if f.octave_class != OctaveClass::Common && !f.has_octave && !(f.octave_class == OctaveClass::Simple && f.rank == Rank::Simple) {
-        return Err(format!("{source_file}: feast {qid} specifies OctaveClass without HasOctave (except a Simple octave day)"));
+    // Every octave names its Rubrics VII.3 group. A simple octave is kept only
+    // on its octave day, which has its own entry, so the feast and that day
+    // carry `simple` without `HasOctave` (#696).
+    let octave_class_named = m.get("OctaveClass").is_some();
+    if f.has_octave && !octave_class_named {
+        return Err(format!("{source_file}: feast {qid} has HasOctave without OctaveClass"));
+    }
+    if f.has_octave && f.octave_class == OctaveClass::Simple {
+        return Err(format!("{source_file}: feast {qid} has a simple octave, which takes no HasOctave"));
+    }
+    if octave_class_named && !f.has_octave && f.octave_class != OctaveClass::Simple {
+        return Err(format!("{source_file}: feast {qid} specifies OctaveClass without HasOctave (except a simple octave)"));
     }
     Ok(f)
 }
@@ -379,5 +394,18 @@ mod tests {
             parse("[x]\nName = X\nRank = double\nMonth = 7\nDay = 1\nHasOctave = true\n").unwrap_err(),
             "m.txt: observance \"x\": unrecognized key \"HasOctave\""
         );
+    }
+
+    #[test]
+    fn hymn_mtv_parses_its_three_values() {
+        use crate::model::HymnMtv;
+        let parse = |v: &str| {
+            let raw = format!("[x]\nName = X\nRank = double\nColor = white\nCategory = confessor\nMonth = 1\nDay = 14\nHymnMtv = {v}\n");
+            section_to_feast(&parse_ini_sections("f.txt", &raw).unwrap()[0], "f.txt").map(|f| f.hymn_mtv)
+        };
+        assert_eq!(parse("true"), Ok(HymnMtv::Yes));
+        assert_eq!(parse("false"), Ok(HymnMtv::No));
+        assert_eq!(parse("unless-first-vespers"), Ok(HymnMtv::UnlessFirstVespers));
+        assert!(parse("sometimes").unwrap_err().contains("invalid HymnMtv"));
     }
 }

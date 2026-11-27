@@ -1,4 +1,4 @@
-# Prime Martyrology pilot
+# Prime Martyrology
 
 Prime normally ends with a rubric pointing to the Martyrology. A reader who
 turns **Martyrology** on in Settings (off by default; web, Android and iOS)
@@ -8,7 +8,7 @@ all CLI output, the rubric stays. The Triduum still suppresses the whole
 section. Readings follow civil dates regardless of feast transfers; nothing
 else in the calendar or other hours changes.
 
-The trial covers the whole civil year except the held days below, read at
+The corpus covers the whole civil year except the held days below, read at
 Prime on the preceding day; try `/prime/2026-09-07` with the setting on. Terse
 early-layer notices with no later claim are kept without an exact chronology
 (proposed answer to #476, awaiting confirmation). May 29 (Eleutherius at Arce),
@@ -33,13 +33,12 @@ the Martyrology section twice, as the rubric and as the reading
 first paint. The offline copy therefore serves either setting. The native apps
 compose Prime again when the setting changes. Programmatic use goes through
 `Engine::compose_hour_with_options` with
-`ComposeOptions { martyrology: true, ..Default::default() }`. The earlier
-`?preview=martyrology` URL flag is retired and ignored. Making the section
+`ComposeOptions { martyrology: true, ..Default::default() }`. Making the section
 collapsible is a separate decision.
 
 The usage report's **Martyrology at Prime** breakdown (`martyrology:shown|hidden`)
 counts Prime readers on days with a reading, by whether the setting showed it;
-see README, "Usage metrics".
+see DEPLOYMENT.md, "Usage metrics".
 
 Tests cover next-day selection, year and leap-year rollover, civil time across
 DST, missing-text fallback, the Triduum, and (over 2026–2053) that Holy Name and
@@ -71,16 +70,17 @@ dates and order; retained wording is not edited.
 
 ## Adding dates
 
-1. Cache pages and take independent image readings per
-   [scripts/DIURNAL-PIPELINE.md](scripts/DIURNAL-PIPELINE.md); keep raw
-   readings in ignored `output/`.
+1. Cache pages with `scripts/diurnal-pages.py` (see
+   [REVIEWING.md](REVIEWING.md#reading-scanned-pages)); keep raw page images
+   and readings under ignored `output/`.
 2. Record a keep/omit/flag decision per notice with its cited death date or
    range, in ignored `output/`.
 3. Add only days with no flagged notice as `ordinary/martyrology/MM-DD`, and
-   attest the source wording with the document hash and an explicit note of
-   omissions. A partly decided day stays out of the corpus.
+   attest the source wording with `office review attest` and an explicit note
+   of omissions. A partly decided day stays out of the corpus.
 4. Check Prime on the preceding civil date and add tests. Any dated entry
-   becomes live in the preview; the corpus is curated, not filtered at runtime.
+   becomes live when the setting is on; the corpus is curated, not filtered at
+   runtime.
 
 A full year also needs any further moveable-feast announcements (checked
 against the current ordo), the special Christmas announcement, and reviewed

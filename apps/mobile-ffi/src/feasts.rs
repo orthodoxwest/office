@@ -1,0 +1,364 @@
+//! Finding a feast, as the web's "/calendar/find" and "/feast/{id}" pages give it
+//! (presentation::feast): the apps set the same words in their own idiom.
+
+use std::sync::Arc;
+
+use calendar::Date;
+use corpus::typography::typeset;
+use office::feast::{DayOf, FeastTexts, feast_texts};
+use presentation::feast::{
+    FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearIndex, YearKeeping, back_to_day, back_to_ordo,
+    back_to_ordo_year, feast_date, feast_register, feast_subtitle, feast_titulus, is_entry, is_feast_id, is_usual, keeping_class,
+    keeping_label, keeping_note, kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count,
+    row_date, search_years, texts_keeping, texts_source, whole_office_label,
+};
+use presentation::long_date;
+
+use crate::{BlockView, CivilDate, GlossView, OfficeCore, OfficeError, failed};
+
+/// The search's results: the feasts whose names hold the query, each kept this year and next.
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct FindView {
+    /// "Feasts & commemorations, 2026 and 2027".
+    pub subtitle: String,
+    /// "3 feasts", "No feast or saint by that name", or empty before a search.
+    pub count: String,
+    pub results: Vec<FeastResultView>,
+}
+
+/// A feast in the search results.
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct FeastResultView {
+    /// The feast page's id, for `feast_page`.
+    pub id: String,
+    pub name: String,
+    /// "gd", and its full name "Greater Double".
+    pub rank: String,
+    pub rank_full: String,
+    /// "greater" (red), "double" (blue), or empty, as the ordo marks ranks.
+    pub rank_tone: String,
+    /// "February 27 · Bishop & Confessor".
+    pub meta: String,
+    pub years: Vec<FeastYearView>,
+}
+
+/// A feast's keeping in one year, a row leading to that day.
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct FeastYearView {
+    pub year: i32,
+    /// The day, or none when the feast has no date that year.
+    pub date: Option<CivilDate>,
+    /// "Sat, Feb 27", or empty.
+    pub date_label: String,
+    /// "Kept", "Commemorated", "Transferred", "Monastics & Oblates", "Not kept".
+    pub label: String,
+    /// "kept", "commemorated", "transferred", "monastic", "not-kept", for its colour.
+    pub kind: String,
+    /// Kept as the feast usually is: the feast page leaves the status unsaid, as the web's does.
+    pub usual: bool,
+    /// "Friday after Ash Wednesday holds the day", or empty.
+    pub note: String,
+    /// The colour of that day's office.
+    pub color: String,
+}
+
+/// A feast another links to by name.
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct FeastLinkView {
+    pub id: String,
+    pub name: String,
+}
+
+/// The next day the feast is kept, leading to that day.
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct NextKeepingView {
+    /// "Next kept", "Next commemorated", …
+    pub label: String,
+    pub date: CivilDate,
+    /// "Saturday, February 27, 2027".
+    pub date_label: String,
+    pub color: String,
+    /// The next keeping is today: its way on is "Today's hours".
+    pub today: bool,
+}
+
+/// One of the feast's texts, laid out as the hours lay out theirs.
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct FeastTextView {
+    /// "At Lauds · Benedictus", "Collect", …
+    pub label: String,
+    /// From the Common, marked so.
+    pub common: bool,
+    /// A prayer (the collect), set flowing: the first opens on the hours' dropped initial.
+    pub prayer: bool,
+    /// Set for a hymn, to its Latin title (empty where the hymn has none); `None` for any other
+    /// text. A hymn is folded under its label and title, and opens on a tap to its stanzas (the
+    /// web's `details.feast-hymn`).
+    pub hymn_title: Option<String>,
+    /// Laid out as the hours lay them out; a hymn's are its stanzas.
+    pub blocks: Vec<BlockView>,
+    /// Quiet gloss for a non-collapsible text heading ("Collect", "At Lauds · Benedictus", …).
+    pub label_gloss: Option<GlossView>,
+}
+
+/// The day whose hours say the feast's texts in full.
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct WholeOfficeView {
+    /// "the hours of Saturday, February 27, 2027".
+    pub label: String,
+    pub date: CivilDate,
+}
+
+/// A feast's page.
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct FeastPageView {
+    pub id: String,
+    pub name: String,
+    /// "Greater Double · White · Bishop & Confessor".
+    pub subtitle: String,
+    /// Quiet gloss explaining the feast's rank, if any.
+    pub rank_gloss: Option<GlossView>,
+    /// "February 27", or "A moveable feast".
+    pub date: String,
+    /// The titulus over the name: "February 27", or "Its date moves".
+    pub titulus: String,
+    /// "first", "feast" or "plain": how much the head carries (`presentation::feast::feast_register`).
+    pub register: String,
+    /// The feast's own colour.
+    pub color: String,
+    /// For an observance kept by monastics and oblates only, what that means; else empty.
+    pub monastic_note: String,
+    /// For such an observance, the feast of the same saint everyone keeps, and "on March 21.".
+    pub kept_by_all: Option<FeastLinkView>,
+    pub kept_by_all_note: String,
+    pub next: Option<NextKeepingView>,
+    /// "The next eight years".
+    pub years_heading: String,
+    pub years: Vec<FeastYearView>,
+    /// "From the Common of a Confessor and Bishop.", over the texts.
+    pub texts_source: String,
+    pub texts: Vec<FeastTextView>,
+    pub whole_office: Option<WholeOfficeView>,
+}
+
+/// Quiet glosses shared by the Feast page's fixed headings and badges.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct FeastGlosses {
+    pub proper: GlossView,
+    pub common: GlossView,
+    pub monastic: GlossView,
+}
+
+#[uniffi::export]
+pub fn feast_glosses() -> FeastGlosses {
+    let quiet = |g: &presentation::gloss::Gloss| GlossView::of(g, true);
+    FeastGlosses {
+        proper: quiet(&presentation::gloss::PROPER_GLOSS),
+        common: quiet(&presentation::gloss::COMMON_GLOSS),
+        monastic: quiet(&presentation::gloss::MONASTIC_OBSERVANCE_GLOSS),
+    }
+}
+
+/// The fixed words of the search and the feast page.
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct FeastWordsView {
+    pub find_title: String,
+    pub find_prompt: String,
+    pub every_year: String,
+    pub days_hours: String,
+    pub texts_heading: String,
+    pub common_mark: String,
+    pub whole_office: String,
+    pub everyone_keeps: String,
+    pub monastic_heading: String,
+    pub todays_hours: String,
+    /// The way back to today's page: "Today".
+    pub back_today: String,
+}
+
+#[uniffi::export]
+pub fn feast_words() -> FeastWordsView {
+    let w = &FEAST_WORDS;
+    FeastWordsView {
+        find_title: w.find_title.into(),
+        find_prompt: w.find_prompt.into(),
+        every_year: w.every_year.into(),
+        days_hours: w.days_hours.into(),
+        texts_heading: w.texts_heading.into(),
+        common_mark: w.common_mark.into(),
+        whole_office: w.whole_office.into(),
+        everyone_keeps: w.everyone_keeps.into(),
+        monastic_heading: w.monastic_heading.into(),
+        todays_hours: w.todays_hours.into(),
+        back_today: w.back_today.into(),
+    }
+}
+
+/// The feast page's way back to the day's page it was opened from, as the web's: "Today" when
+/// `date` is `today`, else "November 10". A date that is no date gives the search's name.
+#[uniffi::export]
+pub fn feast_back_to_day(date: CivilDate, today: CivilDate) -> String {
+    match (date.parse(), today.parse()) {
+        (Ok(d), Ok(t)) => back_to_day(d, t),
+        _ => FEAST_WORDS.find_title.into(),
+    }
+}
+
+/// The feast page's way back to the ordo's month it was opened from, any day of it: "Ordo,
+/// November 2026". A date that is no date gives the search's name.
+#[uniffi::export]
+pub fn feast_back_to_ordo(date: CivilDate) -> String {
+    date.parse().map(back_to_ordo).unwrap_or_else(|_| FEAST_WORDS.find_title.into())
+}
+
+/// The feast page's way back to the ordo's year it was opened from, as the web's: "2026 Ordo".
+#[uniffi::export]
+pub fn feast_back_to_ordo_year(year: i32) -> String {
+    back_to_ordo_year(year)
+}
+
+/// `usual` leaves its status unsaid, as the feast page does for a year kept as the feast usually is.
+fn year_view(k: &YearKeeping, usual: bool) -> FeastYearView {
+    FeastYearView {
+        year: k.year,
+        date: k.date.map(CivilDate::from),
+        date_label: k.date.map(row_date).unwrap_or_default(),
+        label: keeping_label(&k.keeping).into(),
+        kind: keeping_class(&k.keeping).into(),
+        usual,
+        note: typeset(&keeping_note(&k.keeping)),
+        color: k.color.as_str().into(),
+    }
+}
+
+#[uniffi::export]
+impl OfficeCore {
+    /// The feasts whose names (or familiar names) hold `query`, each with how it is kept in
+    /// `year` and the next. Builds two years' calendars, so call it off the main thread.
+    pub fn find_feasts(&self, query: String, year: i32) -> Result<FindView, OfficeError> {
+        let query: String = query.trim().chars().take(100).collect();
+        let found = self.feasts.search(&query);
+        let mut results = Vec::with_capacity(found.len().min(MAX_RESULTS));
+        for e in found.iter().take(MAX_RESULTS) {
+            let years =
+                [year, year + 1].iter().map(|&y| self.keeping(y).map(|i| year_view(&i.keeping(e), false))).collect::<Result<_, _>>()?;
+            results.push(FeastResultView {
+                id: e.id.clone(),
+                name: typeset(&e.name),
+                rank: e.rank.abbrev().into(),
+                rank_full: e.rank.display_name().into(),
+                rank_tone: rank_tone(e.rank).into(),
+                meta: typeset(&result_meta(e)),
+                years,
+            });
+        }
+        Ok(FindView { subtitle: typeset(&search_years(year)), count: results_count(&query, found.len()), results })
+    }
+
+    /// The page of the feast `id` names, or none. `today` is the device's: the years begin with
+    /// it while this year's keeping is still ahead.
+    pub fn feast_page(&self, id: String, today: CivilDate) -> Result<Option<FeastPageView>, OfficeError> {
+        let Some(entry) = is_feast_id(&id).then(|| self.feasts.get(&id)).flatten() else { return Ok(None) };
+        let now = today.parse()?;
+        let this_year = self.keeping(now.year())?.keeping(entry);
+        let first = if this_year.date.is_some_and(|d| d < now) { now.year() + 1 } else { now.year() };
+        let years: Vec<YearKeeping> =
+            (first..first + FEAST_PAGE_YEARS).map(|y| self.keeping(y).map(|i| i.keeping(entry))).collect::<Result<_, _>>()?;
+        let next = next_keeping(&years, now);
+        // The texts as the office says them the first of these years the feast is kept, else
+        // commemorated (the web's feast page).
+        let said = texts_keeping(&years).and_then(|k| Some((k.date?, matches!(k.keeping, Keeping::Kept | Keeping::Transferred { .. }))));
+        let texts = match said {
+            Some((d, _)) => self.texts_on(entry, d)?,
+            None => FeastTexts::default(),
+        };
+        let kept_by_all = self.feasts.kept_by_all(entry);
+        Ok(Some(FeastPageView {
+            id: entry.id.clone(),
+            name: typeset(&entry.name),
+            subtitle: typeset(&feast_subtitle(entry)),
+            rank_gloss: presentation::gloss::rank_gloss(entry.rank.display_name()).map(|g| GlossView::of(g, true)),
+            date: feast_date(entry),
+            titulus: feast_titulus(entry),
+            register: feast_register(entry).into(),
+            color: entry.color.as_str().into(),
+            monastic_note: if entry.monastic.is_some() { typeset(&monastic_note(entry)) } else { String::new() },
+            kept_by_all: kept_by_all.map(|e| FeastLinkView { id: e.id.clone(), name: typeset(&e.name) }),
+            kept_by_all_note: kept_by_all.map(kept_by_all_note).unwrap_or_default(),
+            next: next.and_then(|k| {
+                let d = k.date?;
+                Some(NextKeepingView {
+                    label: next_label(&k.keeping, d == now).into(),
+                    date: CivilDate::from(d),
+                    date_label: long_date(d),
+                    color: k.color.as_str().into(),
+                    today: d == now,
+                })
+            }),
+            years_heading: YEARS_HEADING.into(),
+            years: years.iter().map(|k| year_view(k, is_usual(entry, &k.keeping))).collect(),
+            texts_source: said.map(|(d, kept)| typeset(&texts_source(texts.proper, texts.common, d, kept))).unwrap_or_default(),
+            texts: texts
+                .texts
+                .into_iter()
+                .map(|t| {
+                    let blocks = match &t.hymn {
+                        Some(_) => render_blocks::feast_hymn_blocks(&t.text),
+                        None => render_blocks::text_blocks(&t.text, t.prayer),
+                    };
+                    let label_gloss = if t.hymn.is_none() {
+                        presentation::gloss::feast_text_gloss(&t.label).map(|g| GlossView::of(g, true))
+                    } else {
+                        None
+                    };
+                    FeastTextView {
+                        label: t.label,
+                        common: t.common,
+                        prayer: t.prayer,
+                        hymn_title: t.hymn,
+                        blocks: blocks.into_iter().map(BlockView::from).collect(),
+                        label_gloss,
+                    }
+                })
+                .collect(),
+            whole_office: next
+                .filter(|k| matches!(k.keeping, Keeping::Kept | Keeping::Transferred { .. }))
+                .and_then(|k| k.date)
+                .map(|d| WholeOfficeView { label: whole_office_label(d), date: CivilDate::from(d) }),
+        }))
+    }
+}
+
+/// The feast pages reach this many years; a reader browsing past them starts afresh.
+const MAX_KEEPING_YEARS: usize = 12;
+
+impl OfficeCore {
+    /// How every feast is kept in `year`: the calendar alone, with no hour composed.
+    fn keeping(&self, year: i32) -> Result<Arc<YearIndex>, OfficeError> {
+        if let Some(y) = self.keepings.lock().map_err(|e| failed(e.to_string()))?.get(&year) {
+            return Ok(Arc::clone(y));
+        }
+        let built = Arc::new(YearIndex::new(year, calendar::build_calendar(year, &self.calendar).map_err(failed)?.days));
+        let mut keepings = self.keepings.lock().map_err(|e| failed(e.to_string()))?;
+        if keepings.len() >= MAX_KEEPING_YEARS {
+            keepings.clear();
+        }
+        Ok(Arc::clone(keepings.entry(year).or_insert(built)))
+    }
+
+    /// The feast's texts as the office says them on `date`, with the Vespers of the evening before.
+    fn texts_on(&self, entry: &FeastEntry, date: Date) -> Result<FeastTexts, OfficeError> {
+        let eve = date.add_days(-1);
+        let eve_year = self.year(eve.year())?;
+        let year = if eve.year() == date.year() { Arc::clone(&eve_year) } else { self.year(date.year())? };
+        let Some(day) = year.days.iter().find(|d| d.date == date) else { return Ok(FeastTexts::default()) };
+        let eve = eve_year.days.iter().find(|d| d.date == eve).map(|day| DayOf { day, moveable: &eve_year.moveable });
+        let is_it = |id: &str, name: &str| is_entry(entry, id, name);
+        Ok(feast_texts(&self.engine, &is_it, eve, DayOf { day, moveable: &year.moveable }))
+    }
+
+    /// The page id of the feast a day keeps or commemorates as `id` and `name`, or empty.
+    pub(crate) fn feast_id(&self, id: &str, name: &str, date: calendar::Date) -> String {
+        self.feasts.find(id, name, date).map(|e| e.id.clone()).unwrap_or_default()
+    }
+}

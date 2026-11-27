@@ -1,45 +1,52 @@
-//! Date-driven Office selections: the Compline Marian antiphon and the
+//! Date-driven Office selections: the Final Antiphon of Our Lady and the
 //! scripture-cycle ("historia") weeks of August–November.
 
 use calendar::{Date, MoveableDates, Weekday};
 
-/// The corpus subkey under `ordinary/marian/` for the antiphon at Compline.
+/// The corpus subkey under `ordinary/marian/` for the Final Antiphon of Our
+/// Lady said at `hour_name` on the civil `date`. The Diurnal bounds each
+/// antiphon by hour, not by day (Final Antiphons B.V.M., pp. 153-155; 2026
+/// ordo, Advent and Paschaltide notes):
 ///
-/// - alma-redemptoris-advent: day before Advent 1 through Dec 24
-/// - alma-redemptoris-christmas: Dec 25 through Feb 1
-/// - ave-regina-caelorum: Feb 2 through Holy Wednesday
-/// - regina-caeli: Holy Saturday through Friday of the Pentecost octave
-/// - salve-regina: Saturday of the Pentecost octave until Advent
+/// - Alma Redemptoris: from Vespers of the Saturday before Advent I through
+///   II Vespers of the Purification, Feb 2; its Advent versicle and collect
+///   give way to the Christmas ones at I Vespers of the Nativity
+/// - Ave Regina caelorum: from Compline of Feb 2 through Compline of Holy
+///   Wednesday
+/// - Regina caeli: from Compline of Holy Saturday through None of the
+///   Saturday in the Octave of Pentecost
+/// - Salve Regina: from I Vespers of Trinity through None of the Saturday
+///   before Advent
 ///
-/// Regina Caeli is sung through None of the Saturday; Salve Regina begins
-/// with I Vespers of Trinity and is therefore that evening's antiphon.
-pub fn marian_antiphon(date: Date, m: &MoveableDates) -> &'static str {
+/// Holy Thursday and Good Friday say none and fall through to Salve Regina.
+pub fn marian_antiphon(date: Date, hour_name: &str, m: &MoveableDates) -> &'static str {
+    let now = (date, hour_order(hour_name));
+    let from = |day: Date, hour: &str| now >= (day, hour_order(hour));
     let year = date.year();
-    let day_before_advent1 = m.advent1.add_days(-1);
-    let dec24 = Date::new(year, 12, 24);
-    let dec25 = Date::new(year, 12, 25);
-    let feb2 = Date::new(year, 2, 2);
-    let pentecost_friday = m.pentecost.add_days(5);
-    let pentecost_saturday = m.pentecost.add_days(6);
-    let two_days_before_advent1 = m.advent1.add_days(-2);
-
-    if date >= day_before_advent1 && date <= dec24 {
-        return "alma-redemptoris-advent";
+    if from(m.advent1.add_days(-1), "vespers") {
+        return if from(Date::new(year, 12, 24), "vespers") { "alma-redemptoris-christmas" } else { "alma-redemptoris-advent" };
     }
-    if date >= dec25 || date < feb2 {
+    if !from(Date::new(year, 2, 2), "compline") {
         return "alma-redemptoris-christmas";
     }
     if date <= m.holy_wednesday {
         return "ave-regina-caelorum";
     }
-    if date >= m.holy_saturday && date <= pentecost_friday {
+    if from(m.holy_saturday, "compline") && !from(m.pentecost.add_days(6), "vespers") {
         return "regina-caeli";
     }
-    if date >= pentecost_saturday && date <= two_days_before_advent1 {
-        return "salve-regina";
-    }
-    // Holy Thursday and Good Friday fall through to Salve Regina.
     "salve-regina"
+}
+
+/// The order of the hours within one civil day; the Little Hours sit
+/// between Lauds and Vespers.
+fn hour_order(hour_name: &str) -> u8 {
+    match hour_name {
+        "lauds" => 0,
+        "vespers" => 2,
+        "compline" => 3,
+        _ => 1,
+    }
 }
 
 const HISTORIA_MONTHS: [&str; 4] = ["august", "september", "october", "november"];

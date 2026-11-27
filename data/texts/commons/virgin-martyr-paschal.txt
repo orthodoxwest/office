@@ -31,9 +31,6 @@ Blessed is the barren * that is undefiled; she shall have fruit in the visitatio
 # SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Antiphon)
 This woman * is beautiful among the daughters of Jerusalem, alleluia.
 
-[psalm-antiphon-4-vespers]
-@use commons/virgin-martyr-paschal/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Antiphon)
 The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who, when he had found one pearl of great price, went and sold all that he had, and bought it, alleluia.

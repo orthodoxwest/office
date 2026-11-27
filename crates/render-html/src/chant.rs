@@ -1,0 +1,497 @@
+//! Chant scores as HTML: neuma engraves a score's SVG on the server at one width measured in the
+//! hymn's own text size, for a browser that can't run the engine, and carries its GABC; chant.js lays it out
+//! again in the browser with neuma's module (static/neuma.mjs) at its column's width, as the
+//! apps lay a score out at theirs, so a score fills its column and reflows with the page and the
+//! reader's text size.
+//!
+//! A score sits beside the words it sets: the page carries both, marked `data-chant-variant`, and
+//! the reader's Chant setting (`data-chant` on the root) shows one (style.css).
+//!
+//! A score must not change its height under a reader once it is drawn, so a browser that has laid
+//! a score out says its column's width in lyric ems in a cookie ([`WIDTH_COOKIE`]), and the server
+//! engraves the next page's scores at that width ([`at_width`]): chant.js finds them already laid
+//! out at its column's width, keeps them, and never fetches the engine.
+
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex, OnceLock};
+
+use liturgy::{ChantScore, ScoreSpan};
+use neuma::{Chant, ChantOptions, Hyphens, Initial, LayoutOptions, SvgOptions};
+
+use crate::escape::html_escape_string;
+use corpus::lines::{hymn_sung_stanza_rubrics, hymn_sung_stanzas};
+
+use crate::html::{typeset, write_hymn_rubric};
+
+/// Staff spaces per lyric em (neuma's default lyric size, GregorioTeX's 10 pt on its staff).
+/// chant.js names the same.
+const LYRIC_SPACES: f32 = 2.45;
+/// SVG units per staff space (neuma's default scale). chant.js names the same.
+const SCALE: f32 = 6.0;
+/// The width, in lyric ems, of the score a page shows until its script lays the score out at
+/// the column's width, or without script: a phone's column is 15 to 20 em at the default text
+/// size, and the score scales down to fit a narrower one.
+pub const FALLBACK_EM: u16 = 17;
+
+/// The cookie in which chant.js keeps its scores' column width, in lyric ems to the sixteenth.
+pub const WIDTH_COOKIE: &str = "chant-width";
+
+/// Steps of a lyric em the column's width is kept in. A width rounded to the nearest sixteenth is
+/// within 1/32 em, 0.46 SVG units, of the column, inside the half unit chant.js lets a score stand
+/// at; and the server's engravings come in some 1,200 widths rather than one per window.
+pub const WIDTH_STEPS: u32 = 16;
+
+/// The widths [`column_em`] accepts, in lyric ems: a phone in its narrowest at the largest text
+/// to a page wider than the prayer's measure.
+const COLUMN_EMS: std::ops::RangeInclusive<f32> = 4.0..=80.0;
+
+/// A score in place of the words it sets. The lyrics sit in an `.sr-only`
+/// span beside the `aria-hidden` SVG so screen readers read and navigate the
+/// words as text rather than an atomic image.
+pub fn score_html(score: &ChantScore, gabc: &Arc<str>, words: &str) -> String {
+    format!(
+        "<div class=\"chant-score\" data-chant-variant=\"on\"><span class=\"sr-only\">{}</span>{}</div>",
+        html_escape_string(&typeset(words.trim())),
+        engraved(&Arc::from(score.with_mode_figure(gabc)), true, phrased(score))
+    )
+}
+
+/// A whole hymn's score set stanza by stanza (`ChantScore::stanza_parts`): each stanza from a new
+/// line with its number, the first alone taking the initial, and each after the rubrics said
+/// before it (kneeling for a stanza), which the score does not carry. Parts that do not pair
+/// with the hymn's stanzas make one score, as written.
+pub fn whole_hymn_html(score: &ChantScore, text: &str) -> String {
+    let stanzas = hymn_sung_stanzas(text);
+    let rubrics = hymn_sung_stanza_rubrics(text);
+    let parts = score.stanza_parts();
+    let mut out = String::from("<div class=\"chant-hymn\" data-chant-variant=\"on\">");
+    if parts.len() != stanzas.len() {
+        rubrics.first().into_iter().flatten().for_each(|r| write_hymn_rubric(&mut out, r));
+        out.push_str(&score_html(score, &score.gabc, &stanza_join(&stanzas)));
+        out.push_str("</div>");
+        return out;
+    }
+    for (i, ((part, words), before)) in parts.iter().zip(&stanzas).zip(&rubrics).enumerate() {
+        before.iter().for_each(|r| write_hymn_rubric(&mut out, r));
+        out.push_str(&format!(
+            "<div class=\"chant-score chant-stanza\"><span class=\"sr-only\">{}</span>{}{}</div>",
+            html_escape_string(&typeset(words.trim())),
+            if i > 0 { format!("<span class=\"chant-stanza-number\" aria-hidden=\"true\">{}.</span>", i + 1) } else { String::new() },
+            engraved(&Arc::from(if i == 0 { score.with_mode_figure(part) } else { part.clone() }), i == 0, true)
+        ));
+    }
+    out.push_str("</div>");
+    out
+}
+
+fn stanza_join(stanzas: &[String]) -> String {
+    stanzas.join(" ")
+}
+
+/// A hymn's score is set phrase by phrase, a line of verse to a staff; an antiphon's as prose.
+fn phrased(score: &ChantScore) -> bool {
+    score.sets != ScoreSpan::Antiphon
+}
+
+/// [`FALLBACK_EM`] in [`WIDTH_STEPS`].
+const FALLBACK_STEPS: u32 = FALLBACK_EM as u32 * WIDTH_STEPS;
+
+/// The score's SVGs at [`FALLBACK_EM`], engraved once per score, initial and phrasing.
+fn engraved(gabc: &Arc<str>, initial: bool, phrases: bool) -> String {
+    engraved_at(gabc, initial, phrases, FALLBACK_STEPS)
+}
+
+type EngravingKey = (Arc<str>, bool, bool, u32);
+
+/// Engraved scores. Those at [`FALLBACK_EM`], one set per score in the corpus, are always kept;
+/// those at readers' columns are kept up to [`Engravings::BUDGET`] bytes, the least
+/// recently used given up first.
+#[derive(Default)]
+struct Engravings {
+    map: HashMap<EngravingKey, (String, u64)>,
+    clock: u64,
+    readers: usize,
+}
+
+impl Engravings {
+    const BUDGET: usize = 32 << 20;
+
+    fn get(&mut self, key: &EngravingKey) -> Option<String> {
+        self.clock += 1;
+        let clock = self.clock;
+        self.map.get_mut(key).map(|(svgs, used)| {
+            *used = clock;
+            svgs.clone()
+        })
+    }
+
+    fn insert(&mut self, key: EngravingKey, svgs: String) {
+        self.clock += 1;
+        let reader = key.3 != FALLBACK_STEPS;
+        if reader {
+            self.readers += svgs.len();
+        }
+        let replaced = self.map.insert(key, (svgs, self.clock));
+        if reader && let Some((old, _)) = replaced {
+            self.readers -= old.len();
+        }
+        while self.readers > Self::BUDGET {
+            let Some(oldest) =
+                self.map.iter().filter(|(k, _)| k.3 != FALLBACK_STEPS).min_by_key(|(_, (_, used))| *used).map(|(k, _)| k.clone())
+            else {
+                break;
+            };
+            if let Some((svgs, _)) = self.map.remove(&oldest) {
+                self.readers -= svgs.len();
+            }
+        }
+    }
+}
+
+/// The score's SVGs at `steps` [`WIDTH_STEPS`] of a lyric em, engraved once per score, initial,
+/// phrasing and width (see [`Engravings`]).
+fn engraved_at(gabc: &Arc<str>, initial: bool, phrases: bool, steps: u32) -> String {
+    static CACHE: OnceLock<Mutex<Engravings>> = OnceLock::new();
+    let cache = CACHE.get_or_init(Default::default);
+    let key = (gabc.clone(), initial, phrases, steps);
+    if let Some(svgs) = cache.lock().ok().and_then(|mut c| c.get(&key)) {
+        return svgs;
+    }
+    let svgs = engrave(gabc, initial, phrases, steps as f32 / WIDTH_STEPS as f32);
+    if let Ok(mut c) = cache.lock() {
+        c.insert(key, svgs.clone());
+    }
+    svgs
+}
+
+/// The column's width that a [`WIDTH_COOKIE`] carries, rounded to [`WIDTH_STEPS`] of a lyric em,
+/// or `None` for a value that is not a plausible column.
+pub fn column_em(cookie: &str) -> Option<u32> {
+    let em: f32 = cookie.trim().parse().ok()?;
+    COLUMN_EMS.contains(&em).then(|| (em * WIDTH_STEPS as f32).round() as u32)
+}
+
+/// A page's scores engraved again at `steps` [`WIDTH_STEPS`] of a lyric em (see [`column_em`]):
+/// each `.chant-width` box this module wrote is set anew from the GABC it carries, and everything
+/// else on the page is left as it was.
+pub fn at_width(html: &str, steps: u32) -> String {
+    const OPEN: &str = "<div class=\"chant-width\" ";
+    if steps == FALLBACK_STEPS || !html.contains(OPEN) {
+        return html.to_string();
+    }
+    let mut out = String::with_capacity(html.len());
+    let mut rest = html;
+    while let Some(start) = rest.find(OPEN) {
+        let box_html = &rest[start..];
+        // The SVG holds no division, so the box ends at the first one closed.
+        let (Some(tag_end), Some(close)) = (box_html.find('>'), box_html.find("</div>")) else { break };
+        let tag = &box_html[..tag_end];
+        let attr = |name: &str| {
+            let pat = format!(" {name}=\"");
+            tag.find(&pat).map(|i| &tag[i + pat.len()..]).and_then(|v| v.split('"').next())
+        };
+        let (Some(gabc), Some(initial), Some(phrases)) = (attr("data-gabc"), attr("data-chant-initial"), attr("data-chant-phrases")) else {
+            break;
+        };
+        out.push_str(&rest[..start]);
+        out.push_str(&engraved_at(&Arc::from(html_unescape(gabc)), initial == "1", phrases == "1", steps));
+        rest = &box_html[close + "</div>".len()..];
+    }
+    out.push_str(rest);
+    out
+}
+
+/// The text [`html_escape_string`] escaped.
+fn html_unescape(s: &str) -> String {
+    s.replace("&#34;", "\"").replace("&#39;", "'").replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
+}
+
+/// The app's own Garamond's metrics ([`presentation::CHANT_LYRIC_METRICS`]), read once.
+fn lyric_metrics() -> Arc<neuma::MetricsTable> {
+    static TABLE: OnceLock<Arc<neuma::MetricsTable>> = OnceLock::new();
+    TABLE
+        .get_or_init(|| {
+            Arc::new(neuma::MetricsTable::from_bytes(presentation::CHANT_LYRIC_METRICS).expect("the lyric metrics table reads"))
+        })
+        .clone()
+}
+
+/// How the page sets a score, as Score.kt, Score.swift and chant.js do: lyrics measured in the
+/// app's own Garamond; a hyphen between every two syllables, as English chant books mark them
+/// for a reader following the words; the initial half the Solesmes size and flush with the
+/// margin, to sit with the page's text initials, the mode's figure over it (the opening score's
+/// `annotation`, `ChantScore::with_mode_figure`); the lyrics nearer their own staff than the
+/// next; the last staff ending at the final bar; and a hymn's phrases each on a staff of its own.
+fn page_options(phrases: bool) -> ChantOptions {
+    ChantOptions::default()
+        .with_measure(lyric_metrics())
+        .with_hyphens(Hyphens::EverySyllable)
+        .with_initial_scale(INITIAL_SCALE)
+        .with_initial_margin(0.0)
+        .with_lyric_drop(LYRIC_DROP)
+        .with_short_last_staff(true)
+        .with_phrase_lines(phrases)
+}
+
+/// The initial's size as a share of the Solesmes one, which runs from the staff's top line to
+/// the lyrics (Score.kt, Score.swift and chant.js name the same): about the height of the page's
+/// own dropped initials.
+const INITIAL_SCALE: f32 = 0.5;
+
+/// The lyric baseline's drop below the staff, in staff spaces (Score.kt, Score.swift and chant.js
+/// name the same): less than GregorioTeX's 3.3, so a staff's words sit with it and the open
+/// space falls between one line's words and the next staff.
+const LYRIC_DROP: f32 = 2.6;
+
+/// The score at `em` lyric ems, sized in ems so that its lyrics are set at the text's size, with
+/// what chant.js lays it out again from: its GABC, whether it takes the initial and is phrased,
+/// its prefix, and the width it was laid out at, in SVG units (chant.js keeps a score laid out
+/// within half a unit of its column).
+fn engrave(gabc: &str, initial: bool, phrases: bool, em: f32) -> String {
+    let options = if initial { page_options(phrases) } else { page_options(phrases).with_initial(Initial::None) };
+    let chant = Chant::with_options(gabc, options);
+    // Ids and classes unique to this score, so scores on one page never share a definition.
+    let prefix = format!("chant{:x}{}", fnv(gabc), if initial { "" } else { "n" });
+    let units_per_em = LYRIC_SPACES * SCALE;
+    let units = em * units_per_em;
+    let layout = chant.layout_with(units, &LayoutOptions::default().with_scale(SCALE));
+    let svg = layout.svg_with(&SvgOptions::default().with_style(false).with_ids(false).with_prefix(prefix.clone()));
+    let (w, h) = (layout_width(&svg), layout_height(&svg));
+    format!(
+        "<div class=\"chant-width\" data-gabc=\"{}\" data-chant-initial=\"{}\" data-chant-phrases=\"{}\" data-chant-prefix=\"{prefix}\" \
+         data-chant-units=\"{units:.3}\" style=\"width:{:.3}em;aspect-ratio:{w:.2}/{h:.2}\">{}</div>",
+        html_escape_string(gabc),
+        u8::from(initial),
+        u8::from(phrases),
+        w / units_per_em,
+        strip_label(&svg)
+    )
+}
+
+/// The `<svg>` without its own label: the score's group carries the words.
+fn strip_label(svg: &str) -> String {
+    let Some(start) = svg.find(" role=\"img\" aria-label=\"") else { return svg.to_string() };
+    let rest = &svg[start + " role=\"img\" aria-label=\"".len()..];
+    let Some(end) = rest.find('"') else { return svg.to_string() };
+    format!("{} aria-hidden=\"true\" focusable=\"false\"{}", &svg[..start], &rest[end + 1..])
+}
+
+fn svg_attr(svg: &str, name: &str) -> f32 {
+    let pat = format!(" {name}=\"");
+    svg.find(&pat).and_then(|i| svg[i + pat.len()..].split('"').next()).and_then(|v| v.parse().ok()).unwrap_or(1.0)
+}
+
+fn layout_width(svg: &str) -> f32 {
+    svg_attr(svg, "width")
+}
+
+fn layout_height(svg: &str) -> f32 {
+    svg_attr(svg, "height")
+}
+
+/// A short stable hash for the score's id prefix.
+fn fnv(s: &str) -> u32 {
+    s.bytes().fold(0x811c_9dc5_u32, |h, b| (h ^ u32::from(b)).wrapping_mul(0x0100_0193))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use liturgy::ScoreSpan;
+
+    const HYMN: &str = "name: Te lucis;\nmode: 8;\n%%\n(c4) TO(g) thee,(g) be(h)fore(j) the(h) close(g) of(h) day,(g.) (::)";
+
+    fn score(gabc: &str, sets: ScoreSpan) -> ChantScore {
+        ChantScore { gabc: Arc::from(gabc), sets }
+    }
+
+    /// A score's HTML for its own GABC.
+    fn html_of(gabc: &str, sets: ScoreSpan, words: &str) -> String {
+        let score = score(gabc, sets);
+        score_html(&score, &score.gabc, words)
+    }
+
+    #[test]
+    fn a_score_carries_its_gabc_and_a_fallback_announced_by_its_words() {
+        let html = html_of(HYMN, ScoreSpan::FirstStanza, "To thee, before the close of day,");
+        assert!(html.starts_with(
+            "<div class=\"chant-score\" data-chant-variant=\"on\"><span class=\"sr-only\">To thee, before the close of day,</span>"
+        ));
+        let opening = score(HYMN, ScoreSpan::FirstStanza).with_mode_figure(HYMN);
+        assert!(html.contains(&format!(" data-gabc=\"{}\"", html_escape_string(&opening))), "{html}");
+        assert!(html.contains(" data-chant-initial=\"1\" data-chant-phrases=\"1\" data-chant-prefix=\"chant"), "{html}");
+        assert!(html.contains(">VIII</text>"), "the mode's figure over the initial: {html}");
+        assert_eq!(html.matches("<svg").count(), 1);
+        assert_eq!(html.matches("aria-hidden=\"true\"").count(), 1, "the SVG");
+        assert!(!html.contains("aria-label=\"TO"), "the SVG's own label is dropped");
+        assert!(!html.contains("<style"), "style.css themes the score");
+    }
+
+    #[test]
+    fn a_score_is_named_by_its_words_typeset() {
+        let html = html_of("name: t;\n%%\n(c4) Heav(g)en's(h) King.(g) (::)", ScoreSpan::FirstStanza, "Heaven's King. ");
+        assert!(html.contains("<span class=\"sr-only\">Heaven\u{2019}s King.</span>"), "{html}");
+    }
+
+    #[test]
+    fn a_gabc_with_markup_in_it_stays_in_its_attribute() {
+        let gabc = "name: \"x\" & <y>;\n%%\n(c4) A(g) <i>b</i>(h) (::)";
+        let html = html_of(gabc, ScoreSpan::Antiphon, "A b");
+        assert!(html.contains("data-gabc=\"name: &#34;x&#34; &amp; &lt;y&gt;;"), "{html}");
+        assert!(!html.contains("<i>b</i>"));
+    }
+
+    #[test]
+    fn a_whole_hymn_parts_at_its_double_bars_keeping_the_amen() {
+        let score = ChantScore {
+            gabc: Arc::from("name: t;\n%%\n(c4) One(g) two.(g) (::) Three(g) four.(g) (::) A(gh)men.(g) (::)"),
+            sets: ScoreSpan::WholeHymn,
+        };
+        let parts = score.stanza_parts();
+        assert_eq!(parts.len(), 2, "{parts:?}");
+        assert!(parts[1].starts_with("name: t;\n%%\n(c4) Three") && parts[1].ends_with("A(gh)men.(g) (::)"), "{}", parts[1]);
+        let html = whole_hymn_html(&score, "/:Kneel.:/\n\nOne two.\n\nThree four.\n\nAmen.");
+        assert_eq!(html.matches("class=\"chant-score chant-stanza\"").count(), 2);
+        assert!(
+            html.starts_with("<div class=\"chant-hymn\" data-chant-variant=\"on\"><p class=\"rubric hymn-rubric\">Kneel.</p>"),
+            "{html}"
+        );
+        assert!(html.contains("<span class=\"chant-stanza-number\" aria-hidden=\"true\">2.</span>"));
+        assert_eq!(html.matches(" data-chant-initial=\"1\"").count(), 1, "only the first stanza takes the initial");
+        assert_eq!(html.matches(" data-chant-initial=\"0\"").count(), 1);
+        assert!(!html.contains("annotation:"), "a score without a mode takes no figure");
+    }
+
+    #[test]
+    fn an_antiphon_is_set_as_prose_and_a_hymn_line_by_line() {
+        let antiphon = html_of(HYMN, ScoreSpan::Antiphon, "x");
+        assert!(antiphon.contains(" data-chant-phrases=\"0\""), "{antiphon}");
+        let hymn = html_of(HYMN, ScoreSpan::WholeHymn, "x");
+        assert!(hymn.contains(" data-chant-phrases=\"1\""), "{hymn}");
+    }
+
+    /// chant.js lays a score out again as the server does: at its lyric size and scale, with the
+    /// page's options, the initial only where the server set one.
+    #[test]
+    fn chant_js_lays_a_score_out_as_the_server_does() {
+        let js = include_str!("../../../apps/office-web/static/chant.js");
+        for line in [
+            format!("var LYRIC_SPACES = {LYRIC_SPACES};"),
+            format!("var SCALE = {SCALE};"),
+            format!("initialScale: {INITIAL_SCALE},"),
+            "everyHyphen: true,".to_string(),
+            "initialMargin: 0,".to_string(),
+            "shortLastStaff: true,".to_string(),
+            format!("lyricDrop: {LYRIC_DROP},"),
+            "phraseLines: box.getAttribute(\"data-chant-phrases\") === \"1\",".to_string(),
+            "font: font,".to_string(),
+            "style: false".to_string(),
+        ] {
+            assert!(js.contains(&line), "chant.js lacks {line:?}");
+        }
+        // The options chant.js names are page_options()'s.
+        let style = page_options(true).style;
+        assert_eq!(style.hyphens, Hyphens::EverySyllable);
+        assert_eq!((style.initial_scale, style.initial_margin, style.short_last_staff), (INITIAL_SCALE, 0.0, true));
+        assert_eq!(style.lyric_drop, LYRIC_DROP);
+        assert!(style.annotation && style.phrase_lines);
+        assert!(!page_options(false).style.phrase_lines);
+    }
+
+    #[test]
+    fn widths_are_set_in_lyric_ems() {
+        let html = html_of(HYMN, ScoreSpan::FirstStanza, "x");
+        assert!(html.contains("style=\"width:17.000em;"), "{html}");
+        // chant.js keeps a score laid out within half a unit of its column's width.
+        assert!(html.contains(&format!(" data-chant-units=\"{:.3}\" ", 17.0 * LYRIC_SPACES * SCALE)), "{html}");
+    }
+
+    /// A score's height: its box's width in ems over its aspect ratio.
+    fn heights(html: &str) -> Vec<f32> {
+        html.split("style=\"width:")
+            .skip(1)
+            .map(|s| {
+                let (w, rest) = s.split_once("em;aspect-ratio:").unwrap();
+                let (ratio, _) = rest.split_once('"').unwrap();
+                let (rw, rh) = ratio.split_once('/').unwrap();
+                w.parse::<f32>().unwrap() * rh.parse::<f32>().unwrap() / rw.parse::<f32>().unwrap()
+            })
+            .collect()
+    }
+
+    const LONG: &str = "name: t;\n%%\n(c4) O(g) bless(h)ed(j) Cre(h)a(g)tor(h) of(g) the(h) light,(g.) (;) who(g) mak(h)est(j) day(h) with(g) ra(h)di(g)ance(h) bright,(g.) (::)";
+
+    /// The server engraves a page's scores at the column a reader's browser reported, in place of
+    /// the fallback's width, so the score the page arrives with is the one chant.js would lay out
+    /// and keeps its height (the reader's place does not move under them).
+    #[test]
+    fn a_page_is_engraved_again_at_the_readers_column() {
+        let page = format!(
+            "<p>before</p>{}<p>between</p>{}<p>after</p>",
+            html_of(LONG, ScoreSpan::Antiphon, "x"),
+            whole_hymn_html(&score(LONG, ScoreSpan::WholeHymn), "O blessed Creator of the light, who makest day with radiance bright,")
+        );
+        let narrow = at_width(&page, column_em("10.250").unwrap());
+        assert!(narrow.starts_with("<p>before</p><div class=\"chant-score\""), "{narrow}");
+        assert!(narrow.contains("</div></div><p>between</p>") && narrow.ends_with("</div></div></div><p>after</p>"), "{narrow}");
+        assert_eq!(narrow.matches("<svg").count(), 2);
+        assert_eq!(narrow.matches(&format!(" data-chant-units=\"{:.3}\" ", 10.25 * LYRIC_SPACES * SCALE)).count(), 2, "{narrow}");
+        // The same scores, their GABC, initial and prefix as they were, set on more staves.
+        for name in ["data-gabc", "data-chant-initial", "data-chant-phrases", "data-chant-prefix", "aria-label"] {
+            let values = |html: &str| {
+                html.match_indices(&format!(" {name}=\""))
+                    .map(|(i, _)| html[i..].split('"').nth(1).unwrap().to_string())
+                    .collect::<Vec<_>>()
+            };
+            assert_eq!(values(&narrow), values(&page), "{name}");
+        }
+        let (was, now) = (heights(&page), heights(&narrow));
+        assert!(now[0] > was[0] && now[1] > was[1], "{was:?} {now:?}");
+        // Engraved as chant.js would set it at that width: the same score as the fallback's way.
+        assert_eq!(narrow, at_width(&narrow, column_em("10.25").unwrap()));
+        // The fallback's own width, and a page without a score, are left alone.
+        assert_eq!(at_width(&page, column_em("17").unwrap()), page);
+        assert_eq!(at_width("<p>words</p>", 164), "<p>words</p>");
+    }
+
+    #[test]
+    fn a_column_is_read_from_the_cookie_only_when_it_is_one() {
+        assert_eq!(column_em("17.875"), Some(286));
+        assert_eq!(column_em(" 21.3333 "), Some(341), "to the nearest sixteenth");
+        assert_eq!(column_em("17.9"), Some(286));
+        for bad in ["", "wide", "NaN", "inf", "-3", "0", "3.9", "80.5", "1e9"] {
+            assert_eq!(column_em(bad), None, "{bad:?}");
+        }
+    }
+
+    /// Readers' widths are given up least recently used first, within the budget; the fallback's
+    /// engravings, which every page is composed with, are never given up.
+    #[test]
+    fn engravings_keep_the_fallback_and_the_recent() {
+        let key = |n: u32, steps: u32| (Arc::<str>::from(format!("g{n}")), true, true, steps);
+        let big = "x".repeat(Engravings::BUDGET / 4);
+        let mut cache = Engravings::default();
+        cache.insert(key(0, FALLBACK_STEPS), big.clone());
+        for n in 1..=4 {
+            cache.insert(key(n, 200), big.clone());
+        }
+        assert!(cache.get(&key(1, 200)).is_some());
+        cache.insert(key(5, 200), big.clone());
+        assert!(cache.get(&key(2, 200)).is_none(), "the least recently used goes");
+        for n in [1, 3, 4, 5] {
+            assert!(cache.get(&key(n, 200)).is_some(), "{n}");
+        }
+        for n in 6..20 {
+            cache.insert(key(n, 201), big.clone());
+        }
+        assert!(cache.get(&key(0, FALLBACK_STEPS)).is_some(), "the fallback's stay");
+        assert!(cache.readers <= Engravings::BUDGET);
+        assert_eq!(cache.readers, cache.map.iter().filter(|(k, _)| k.3 != FALLBACK_STEPS).map(|(_, (s, _))| s.len()).sum::<usize>());
+    }
+
+    #[test]
+    fn a_gabc_survives_its_attribute() {
+        let gabc = "name: \"x\" & <y> 'z';";
+        assert_eq!(html_unescape(&html_escape_string(gabc)), gabc);
+    }
+}

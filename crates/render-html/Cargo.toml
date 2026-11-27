@@ -14,6 +14,7 @@ liturgy.workspace = true
 presentation.workspace = true
 minijinja.workspace = true
 serde.workspace = true
+neuma.workspace = true
 
 [dev-dependencies]
 office.workspace = true

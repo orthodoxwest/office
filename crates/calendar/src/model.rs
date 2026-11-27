@@ -175,10 +175,11 @@ impl Season {
 
 /// General Rubrics VII.1-3 octave groups. The privileged classes are
 /// Easter/Pentecost, Epiphany/Corpus Christi, and Nativity/Ascension/Sacred
-/// Heart.
+/// Heart; the rest of the I Class octaves are common, and a II Class feast's
+/// octave is simple.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default)]
 pub enum OctaveClass {
-    /// The data files spell this as an absent or empty `OctaveClass`.
+    /// Also the class of a feast with no octave, whose `OctaveClass` is absent.
     #[default]
     Common,
     PrivilegedFirst,
@@ -188,20 +189,20 @@ pub enum OctaveClass {
 }
 
 impl OctaveClass {
-    /// The data-file spelling; `None` for the common class.
-    pub fn as_str(self) -> Option<&'static str> {
+    /// The data-file spelling.
+    pub fn as_str(self) -> &'static str {
         match self {
-            OctaveClass::Common => None,
-            OctaveClass::PrivilegedFirst => Some("privileged-first"),
-            OctaveClass::PrivilegedSecond => Some("privileged-second"),
-            OctaveClass::PrivilegedThird => Some("privileged-third"),
-            OctaveClass::Simple => Some("simple"),
+            OctaveClass::Common => "common",
+            OctaveClass::PrivilegedFirst => "privileged-first",
+            OctaveClass::PrivilegedSecond => "privileged-second",
+            OctaveClass::PrivilegedThird => "privileged-third",
+            OctaveClass::Simple => "simple",
         }
     }
 
     pub fn parse(s: &str) -> Option<OctaveClass> {
         match s {
-            "" => Some(OctaveClass::Common),
+            "common" => Some(OctaveClass::Common),
             "privileged-first" => Some(OctaveClass::PrivilegedFirst),
             "privileged-second" => Some(OctaveClass::PrivilegedSecond),
             "privileged-third" => Some(OctaveClass::PrivilegedThird),
@@ -243,6 +244,48 @@ impl CommemorationClass {
             "epiphany-vigil" => Some(CommemorationClass::EpiphanyVigil),
             "post-ascension-feria" => Some(CommemorationClass::PostAscensionFeria),
             _ => None,
+        }
+    }
+}
+
+/// The Diurnal's "m.t.v." mark on a Confessor's feast not kept on his
+/// death-day (p. 34*): the Iste Confessor's first stanza ends "On this his
+/// feast-day, year by year receiveth / Merited honours." Some feasts keep the
+/// mark "unless there be I Vespers" (Hilary, Alphonsus, Charles,
+/// pp. 455, 580, 655), whose eve is the death-day: their I Vespers sing
+/// the hymn unchanged.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum HymnMtv {
+    #[default]
+    No,
+    Yes,
+    UnlessFirstVespers,
+}
+
+impl HymnMtv {
+    pub fn parse(s: &str) -> Option<HymnMtv> {
+        match s.trim().to_ascii_lowercase().as_str() {
+            "false" => Some(HymnMtv::No),
+            "true" => Some(HymnMtv::Yes),
+            "unless-first-vespers" => Some(HymnMtv::UnlessFirstVespers),
+            _ => None,
+        }
+    }
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            HymnMtv::No => "false",
+            HymnMtv::Yes => "true",
+            HymnMtv::UnlessFirstVespers => "unless-first-vespers",
+        }
+    }
+
+    /// Whether the hymn takes the changed lines at this Vespers.
+    pub fn applies(self, first_vespers: bool) -> bool {
+        match self {
+            HymnMtv::No => false,
+            HymnMtv::Yes => true,
+            HymnMtv::UnlessFirstVespers => !first_vespers,
         }
     }
 }
@@ -321,6 +364,8 @@ pub struct Feast {
     pub secondary: bool,
     pub only_with: Option<String>,
     pub skip_roman_leap_shift: bool,
+    /// The Confessor's hymn in its m.t.v. form ([`HymnMtv`]).
+    pub hymn_mtv: HymnMtv,
     /// Free text in the data files ("base" unless given).
     pub source: Option<String>,
     /// Documentation only; never reaches output.
@@ -356,6 +401,7 @@ impl Feast {
             secondary: false,
             only_with: None,
             skip_roman_leap_shift: false,
+            hymn_mtv: HymnMtv::No,
             source: None,
             notes: None,
         }

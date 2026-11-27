@@ -1,25 +1,31 @@
 //! Page templates with native MiniJinja HTML autoescaping and explicit URL filters
 //! (see [`crate::escape`]).
 
-use minijinja::value::Value;
+use minijinja::syntax::SyntaxConfig;
+use minijinja::value::{Serde, Value};
 use minijinja::{AutoEscape, Environment};
 
 use crate::escape::{url_norm, url_part, url_start};
-use crate::html::{render_section_heading, typeset};
+use crate::html::{render_feast_hymn, render_flowing_block, render_liturgical_block, render_section_heading_in, typeset};
 use crate::leader::leader_sections;
 use crate::links::{home_link, hour_link, nav_link};
 use crate::usage::UsageData;
-use crate::view::{CalendarData, ErrorData, HomeData, HourData, NotFoundData, PrivacyData, RemindersData};
+use crate::view::{
+    AboutData, CalendarData, ErrorData, FeastPageData, FindData, HomeData, HourData, NotFoundData, PrivacyData, RemindersData,
+};
 use presentation::{season_label, title_case};
 
-const TEMPLATES: [(&str, &str); 10] = [
+const TEMPLATES: [(&str, &str); 13] = [
     ("layout.html", include_str!("../templates/layout.html")),
     ("macros.html", include_str!("../templates/macros.html")),
     ("home.html", include_str!("../templates/home.html")),
     ("hour.html", include_str!("../templates/hour.html")),
     ("calendar.html", include_str!("../templates/calendar.html")),
+    ("find.html", include_str!("../templates/find.html")),
+    ("feast.html", include_str!("../templates/feast.html")),
     ("reminders.html", include_str!("../templates/reminders.html")),
     ("privacy.html", include_str!("../templates/privacy.html")),
+    ("about.html", include_str!("../templates/about.html")),
     ("404.html", include_str!("../templates/404.html")),
     ("error.html", include_str!("../templates/error.html")),
     ("usage.html", include_str!("../templates/usage.html")),
@@ -36,7 +42,7 @@ impl Pages {
     /// and one that leaves them alone keeps them cached.
     pub fn new(asset_url: impl Fn(&str) -> String + Send + Sync + 'static) -> Result<Pages, String> {
         let mut env = Environment::new();
-        env.set_keep_trailing_newline(true);
+        env.set_syntax(SyntaxConfig::builder().keep_trailing_newline(true).build().map_err(|e| format!("building template syntax: {e}"))?);
         // Native HTML autoescaping also preserves trusted macro and fragment output.
         env.set_auto_escape_callback(|_| AutoEscape::Html);
         env.set_undefined_behavior(minijinja::UndefinedBehavior::Strict);
@@ -47,19 +53,106 @@ impl Pages {
         env.add_filter("urlnorm", |s: String| url_norm(&s));
         env.add_filter("urlpart", |s: String| url_part(&s));
         env.add_filter("typeset", |s: String| typeset(&s));
+        // A JSON string literal that stays inside its <script> (the home's WebSite data).
+        env.add_filter("script_string", |s: String| Value::from_safe_string(script_string(&s)));
         env.add_filter("titlecase", |s: String| title_case(&s));
         env.add_filter("season_label", |s: String| season_label(&s));
+        // A feast's antiphon, versicle or collect, set as the hours set it (℣/℟, the mediant).
+        env.add_filter("feast_text", |s: String| Value::from_safe_string(render_liturgical_block(&s)));
+        // A feast's collect, flowing as the hours set it.
+        env.add_filter("feast_prayer", |s: String| Value::from_safe_string(render_flowing_block(&s)));
+        // A feast's hymn, in stanzas as the hours set it.
+        env.add_filter("feast_hymn", |s: String| Value::from_safe_string(render_feast_hymn(&s)));
+        let w = &presentation::feast::FEAST_WORDS;
+        env.add_global(
+            "feast_words",
+            Value::from_pairs([
+                ("find_title", w.find_title),
+                ("find_prompt", w.find_prompt),
+                ("every_year", w.every_year),
+                ("days_hours", w.days_hours),
+                ("texts_heading", w.texts_heading),
+                ("common_mark", w.common_mark),
+                ("whole_office", w.whole_office),
+                ("everyone_keeps", w.everyone_keeps),
+                ("monastic_heading", w.monastic_heading),
+                ("todays_hours", w.todays_hours),
+            ]),
+        );
         env.add_function("nav_link", |base: String, date: String| nav_link(&base, &date));
         env.add_function("home_link", |date: String| home_link(&date));
         env.add_function("hour_link", |hour: String, date: String| hour_link(&hour, &date));
         env.add_function("static", move |name: String| asset_url(&name));
-        env.add_function("section_heading", |label: String| Value::from_safe_string(render_section_heading(&label)));
+        env.add_function("section_heading", |label: String, bare: Option<bool>| {
+            Value::from_safe_string(render_section_heading_in(&label, bare.unwrap_or(false)))
+        });
+        env.add_global("chant", false);
+        env.add_global("martyrology_hint", presentation::MARTYROLOGY_HINT);
+        env.add_global("chant_hint", presentation::CHANT_HINT);
+        env.add_global("previous_day", presentation::PREVIOUS_DAY);
+        env.add_global("next_day", presentation::NEXT_DAY);
+        // The ordo's § and fish, named in the note they open, as the apps name them.
+        env.add_global("fast_day", presentation::FAST_DAY);
+        env.add_global("abstinence_day", presentation::ABSTINENCE_DAY);
+        env.add_global("open_this_day", presentation::OPEN_THIS_DAY);
+        // How long an hour keeps the reader's place (hour.html's head).
+        env.add_global("place_kept_minutes", presentation::PLACE_KEPT_MINUTES);
+        // The About page's names in the menu and on home, as the apps set them.
+        env.add_global("about_menu", presentation::about::ABOUT_MENU);
+        env.add_global("about_introduction", presentation::about::ABOUT_INTRODUCTION);
+        // The colophon's line on the native apps (presentation::stores); iOS joins it once
+        // APP_STORE_ID is set.
+        env.add_global("apps_lead", presentation::stores::APPS_LEAD);
+        env.add_global("apps_apple", presentation::stores::APPS_APPLE);
+        env.add_global("play_url", presentation::stores::PLAY_URL);
+        env.add_global("app_store_id", presentation::stores::APP_STORE_ID.unwrap_or(""));
+        env.add_global("app_store_url", presentation::stores::app_store_url().unwrap_or_default());
+        env.add_global("play_label", presentation::stores::PLAY_LABEL);
+        env.add_global("app_store_label", presentation::stores::APP_STORE_LABEL);
+        env.add_global("about_apps", presentation::stores::ABOUT_APPS);
+        env.add_global("reminders_app", presentation::stores::REMINDERS_APP);
+        env.add_global("reminders_calendar", presentation::stores::REMINDERS_CALENDAR);
+        env.add_global("reminders_calendar_lead", presentation::stores::REMINDERS_CALENDAR_LEAD);
+        env.add_global("reminders_calendar_intro", presentation::stores::REMINDERS_CALENDAR_INTRO);
+        // The office being prayed from each clock hour, as a script literal for home's pre-paint mark
+        // of the hour ([start, slug, name, day offset], home.html).
+        env.add_global("hour_schedule", Value::from_safe_string(hour_schedule_literal()));
+        // The in-hour "How to read" key and screen gloss notes (`presentation::gloss`).
+        env.add_global("reading_key", reading_key_value());
+        env.add_global("ordo_gloss", gloss_value(&presentation::gloss::ORDO_GLOSS));
+        env.add_global("tabula_temporaria_gloss", gloss_value(&presentation::gloss::TABULA_TEMPORARIA_GLOSS));
+        env.add_global("ember_days_gloss", gloss_value(&presentation::gloss::EMBER_DAYS_GLOSS));
+        env.add_global("ordo_gloss_ben", gloss_value(&presentation::gloss::ORDO_BENEDICTUS_GLOSS));
+        env.add_global("ordo_gloss_mag", gloss_value(&presentation::gloss::ORDO_MAGNIFICAT_GLOSS));
+        env.add_global("ordo_gloss_com", gloss_value(&presentation::gloss::ORDO_COMMEMORATION_GLOSS));
+        env.add_global("ordo_gloss_preces", gloss_value(&presentation::gloss::PRECES_GLOSS));
+        env.add_global("ordo_gloss_suffrage", gloss_value(&presentation::gloss::SUFFRAGE_GLOSS));
+        env.add_global("ordo_gloss_cross", gloss_value(&presentation::gloss::COMMEMORATION_OF_CROSS_GLOSS));
+        env.add_global("monastic_gloss", gloss_value(&presentation::gloss::MONASTIC_OBSERVANCE_GLOSS));
+        env.add_global("proper_gloss", gloss_value(&presentation::gloss::PROPER_GLOSS));
+        env.add_global("common_gloss", gloss_value(&presentation::gloss::COMMON_GLOSS));
+        env.add_global("octave_gloss", gloss_value(&presentation::gloss::OCTAVE_GLOSS));
+        env.add_global("versicle_gloss", gloss_value(&presentation::gloss::VERSICLE_GLOSS));
+        env.add_filter("vespers_note_gloss", |s: String| presentation::gloss::vespers_note_gloss(&s).map(gloss_value));
+        env.add_filter("season_gloss", |s: String| presentation::gloss::season_gloss(&s).map(gloss_value));
+        env.add_filter("day_name_gloss", |s: String| presentation::gloss::day_name_gloss(&s).map(gloss_value));
+        env.add_filter("penitential_gloss", |s: String| presentation::gloss::penitential_gloss(&s).map(gloss_value));
+        env.add_filter("rank_gloss", |s: String| presentation::gloss::rank_gloss(&s).map(gloss_value));
+        env.add_filter("feast_text_gloss", |s: String| presentation::gloss::feast_text_gloss(&s).map(gloss_value));
         Ok(Pages { env })
+    }
+
+    /// Offers the Chant setting in the menu: the data holds a score for a hymn or Marian
+    /// antiphon (office::chant::offers_chant).
+    #[must_use]
+    pub fn with_chant(mut self, offered: bool) -> Pages {
+        self.env.add_global("chant", offered);
+        self
     }
 
     fn render<T: serde::Serialize>(&self, template: &str, data: &T) -> Result<String, String> {
         let tmpl = self.env.get_template(template).map_err(|e| e.to_string())?;
-        tmpl.render(Value::from_serialize(data)).map_err(|e| format!("rendering {template}: {e:#}"))
+        tmpl.render(Value::from(Serde(data))).map_err(|e| format!("rendering {template}: {e:#}"))
     }
 
     pub fn home(&self, data: &HomeData) -> Result<String, String> {
@@ -85,7 +178,7 @@ impl Pages {
                     return Err("martyrology section mismatch".into());
                 }
                 for (section, read) in sections.iter_mut().zip(read) {
-                    if read.label != section.label || read.collapsible != section.collapsible {
+                    if read.label != section.label || read.collapsible != section.collapsible || read.bare != section.bare {
                         return Err("martyrology section mismatch".into());
                     }
                     if read.html != section.html {
@@ -102,8 +195,20 @@ impl Pages {
         self.render("calendar.html", data)
     }
 
+    pub fn find(&self, data: &FindData) -> Result<String, String> {
+        self.render("find.html", data)
+    }
+
+    pub fn feast(&self, data: &FeastPageData) -> Result<String, String> {
+        self.render("feast.html", data)
+    }
+
     pub fn reminders(&self, data: &RemindersData) -> Result<String, String> {
         self.render("reminders.html", data)
+    }
+
+    pub fn about(&self, data: &AboutData) -> Result<String, String> {
+        self.render("about.html", data)
     }
 
     pub fn privacy(&self, data: &PrivacyData) -> Result<String, String> {
@@ -124,13 +229,78 @@ impl Pages {
 }
 
 // Template escaping and the undated brand link.
+/// `presentation::CURRENT_HOUR_SCHEDULE` as a JavaScript array literal: `[[0,"compline","Compline",-1],…]`.
+fn hour_schedule_literal() -> String {
+    let entries: Vec<String> = presentation::CURRENT_HOUR_SCHEDULE
+        .iter()
+        .map(|(start, slug, name, offset)| format!("[{start},\"{slug}\",\"{name}\",{offset}]"))
+        .collect();
+    format!("[{}]", entries.join(","))
+}
+
+fn gloss_value(g: &presentation::gloss::Gloss) -> Value {
+    minijinja::context! {
+        title => g.title,
+        note => g.note,
+    }
+}
+
+fn reading_key_value() -> Value {
+    use presentation::gloss::{
+        READING_KEY_FOOT_AFTER, READING_KEY_FOOT_BEFORE, READING_KEY_FOOT_LINK, READING_KEY_ITEMS, READING_KEY_LABEL, READING_KEY_TITLE,
+    };
+    let items: Vec<Value> = READING_KEY_ITEMS
+        .iter()
+        .map(|item| {
+            minijinja::context! {
+                mark => item.mark,
+                spoken => item.spoken,
+                style => item.style.name(),
+                text => item.text,
+            }
+        })
+        .collect();
+    minijinja::context! {
+        label => READING_KEY_LABEL,
+        title => READING_KEY_TITLE,
+        items => items,
+        foot_before => READING_KEY_FOOT_BEFORE,
+        foot_link => READING_KEY_FOOT_LINK,
+        foot_after => READING_KEY_FOOT_AFTER,
+    }
+}
+
+/// `s` as a JSON string literal, quoted, safe inside a `<script>` element: `<`, `>` and `&` are
+/// escaped too, so no `</script>` or comment opener can close it early.
+fn script_string(s: &str) -> String {
+    let mut out = String::with_capacity(s.len() + 2);
+    out.push('"');
+    for c in s.chars() {
+        match c {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            '<' | '>' | '&' | '\u{2028}' | '\u{2029}' => out.push_str(&format!("\\u{:04x}", c as u32)),
+            c if (c as u32) < 0x20 => out.push_str(&format!("\\u{:04x}", c as u32)),
+            c => out.push(c),
+        }
+    }
+    out.push('"');
+    out
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{Pages, TEMPLATES};
+    use super::{Pages, TEMPLATES, script_string};
     use crate::links::static_url;
 
     fn source(name: &str) -> &'static str {
         TEMPLATES.iter().find(|(n, _)| *n == name).map(|(_, s)| *s).unwrap()
+    }
+
+    #[test]
+    fn script_strings_cannot_close_their_script() {
+        assert_eq!(script_string("https://example.org/"), "\"https://example.org/\"");
+        assert_eq!(script_string("a\"</script><!--\\"), "\"a\\\"\\u003c/script\\u003e\\u003c!--\\\\\"");
     }
 
     #[test]
@@ -159,6 +329,40 @@ mod tests {
     }
 
     #[test]
+    fn about_lights_the_hour_home_lights_and_ends_with_its_invitation() {
+        use crate::view::{AboutData, Chrome};
+        let pages = Pages::new(|name| static_url(name, "test")).unwrap();
+        let today = calendar::Date::new(2026, 11, 13);
+        let chrome = || Chrome { page: "about".into(), ..Chrome::default() };
+        let afternoon = pages.about(&AboutData::new(chrome(), today, 15)).unwrap();
+        assert_eq!(afternoon.matches("about-hour is-current").count(), 1);
+        assert!(afternoon.contains(r#"<div class="about-hour is-current" data-hour="none">"#));
+        assert!(afternoon.contains(r#"<a class="pray-now" href="&#x2f;none&#x2f;2026-11-13">Pray None</a>"#));
+        // The door is the page's last word, after the last paragraph.
+        let door = afternoon.find("about-door").unwrap();
+        assert!(afternoon.find("issues/new\">issue tracker</a>").unwrap() < door);
+        // From midnight to 2am home lights no hour, and invites to yesterday's Compline.
+        let late = pages.about(&AboutData::new(chrome(), today, 1)).unwrap();
+        assert!(!late.contains("is-current"));
+        assert!(late.contains(r#"<a class="pray-now" href="&#x2f;compline&#x2f;2026-11-12">Pray Compline</a>"#));
+    }
+
+    #[test]
+    fn colophon_names_only_the_apps_that_are_in_a_store() {
+        use crate::view::{AboutData, Chrome};
+        let pages = Pages::new(|name| static_url(name, "test")).unwrap();
+        let chrome = Chrome { page: "about".into(), ..Chrome::default() };
+        let html = pages.about(&AboutData::new(chrome, calendar::Date::new(2026, 11, 13), 15)).unwrap();
+        let footer = &html[html.find("<footer>").unwrap()..];
+        assert!(footer.contains(r#"data-store="android"><a href="https:&#x2f;&#x2f;play.google.com&#x2f;store&#x2f;apps&#x2f;details?id=org.orthodoxwest.office">Android</a>"#));
+        // iPhone, Safari's banner and the line for an iPhone reader come with the listing.
+        let ios = presentation::stores::APP_STORE_ID.is_some();
+        assert_eq!(footer.contains(r#"data-store="ios""#), ios);
+        assert_eq!(footer.contains("app-stores has-ios"), ios);
+        assert_eq!(html.contains(r#"name="apple-itunes-app""#), ios);
+    }
+
+    #[test]
     fn layout_brand_is_today_home() {
         let body = source("layout.html");
         // The brand must not carry the page's date, which pins an overnight
@@ -168,5 +372,17 @@ mod tests {
         }
         assert!(!body.contains(r#"nav_link("/", d)"#));
         assert!(!body.contains(r#"{% if p == "home" %} active{% endif %}"#), "not every home page is current");
+    }
+
+    // Home marks the device's hour before its first paint from presentation's schedule, so the
+    // inline script and the server cannot disagree on a boundary.
+    #[test]
+    fn home_marks_the_hour_from_the_shared_schedule() {
+        let pages = Pages::new(|name| static_url(name, "test")).unwrap();
+        let html = pages.home(&crate::view::HomeData { date_slug: "2026-11-13".into(), ..Default::default() }).unwrap();
+        let literal = super::hour_schedule_literal();
+        assert!(literal.starts_with(r#"[[0,"compline","Compline",-1],[2,"lauds","Lauds",0],"#), "{literal}");
+        assert_eq!(literal.matches('[').count(), presentation::CURRENT_HOUR_SCHEDULE.len() + 1);
+        assert!(html.contains(&format!("{literal}.forEach(")), "home's pre-paint script reads the schedule");
     }
 }

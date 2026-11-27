@@ -3,12 +3,12 @@
 use std::io::Write;
 
 use tools::fs::FsData;
-use tools::review::{provenance, zero_occurrence};
+use tools::review::provenance;
 
 /// The findings are already written, so the command fails without a further message.
 pub const REPORTED: &str = "";
 
-/// `validate`: every data layer, the hour definitions, and the review ledgers. Every corpus
+/// `validate`: every data layer, the hour definitions, and text provenance. Every corpus
 /// entry must carry a verified attestation of its current text.
 pub fn cmd_validate(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(), String> {
     if !args.is_empty() {
@@ -21,9 +21,6 @@ pub fn cmd_validate(data: &FsData, args: &[String], out: &mut dyn Write) -> Resu
         Err(e) => errs.push(format!("review provenance: {e}")),
         Ok(inventory) => {
             errs.extend(provenance::unverified_entries(&inventory).into_iter().map(|e| format!("review provenance: {e}")));
-            if let Err(e) = zero_occurrence::load_zero_classifications(data, &inventory) {
-                errs.push(format!("review zero occurrences: {e}"));
-            }
         }
     }
     let io = |e: std::io::Error| e.to_string();

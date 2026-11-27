@@ -1,5 +1,7 @@
+import fs from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { LAST as CROWN_LAST, LINGER, LINGER_SPAN, PACE as CROWN_PACE, centile, contrast, holdCrown, lumas, mean, pixels, seekCrown } from "./crown-play.js";
 
 const testDate = "2026-03-15";
 
@@ -41,13 +43,16 @@ async function fallbackInitials(page) {
 
 // Phones reach Appearance and Text size from the foot of the site menu; wide
 // screens from the header's Settings. Open whichever is showing, choose, and
-// close it again so later measurements see the page.
-async function choosePreference(page, name) {
+// close it again so later measurements see the page. A `group` (the buttons' class)
+// tells apart the settings that share a name, such as the Martyrology's and Chant's On.
+async function choosePreference(page, name, group) {
   const wide = await page.locator(".site-settings > summary").isVisible();
   const disclosure = page.locator(wide ? ".site-settings" : ".site-menu");
   const summary = disclosure.locator(":scope > summary");
   await summary.click();
-  await page.locator(wide ? ".settings-prefs" : ".menu-prefs").getByRole("button", { name, exact: true }).click();
+  const prefs = page.locator(wide ? ".settings-prefs" : ".menu-prefs");
+  const button = prefs.getByRole("button", { name, exact: true });
+  await (group ? button.and(page.locator(group)) : button).click();
   await summary.click();
   await expect(disclosure).not.toHaveAttribute("open", "");
 }
@@ -66,6 +71,32 @@ function textLinesIn(el) {
     for (const rect of range.getClientRects()) if (rect.width) tops.push(rect.top);
   }
   return 1 + (Math.max(...tops) - Math.min(...tops)) / parseFloat(getComputedStyle(el).lineHeight);
+}
+
+// The left edge of each row of text in `el`, top to bottom, leaving out the
+// opening letter: a dropped initial's rows, then its turnovers.
+function rowStartsIn(el) {
+  const leading = parseFloat(getComputedStyle(el).lineHeight);
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const rows = [];
+  let node;
+  let first = el.textContent.search(/\S/) >= 0;
+  while ((node = walker.nextNode())) {
+    if (node.parentElement.closest(".mediant, .posture")) continue;
+    for (let i = 0; i < node.length; i++) {
+      if (/\s/.test(node.textContent[i])) continue;
+      if (first) { first = false; continue; } // The initial has its own box.
+      const range = document.createRange();
+      range.setStart(node, i);
+      range.setEnd(node, i + 1);
+      const rect = range.getBoundingClientRect();
+      if (!rect.width) continue;
+      const row = rows.find((r) => Math.abs(r.top - rect.top) < leading / 2);
+      if (row) row.left = Math.min(row.left, rect.left);
+      else rows.push({ top: rect.top, left: rect.left });
+    }
+  }
+  return rows.sort((a, b) => a.top - b.top).map((r) => r.left);
 }
 
 async function openingTextLines(opening) {
@@ -205,38 +236,27 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   // preference tap inside it does not.
   await page.locator(".menu-prefs").getByRole("button", { name: "Nave", exact: true }).click();
   await expect(menu).toHaveAttribute("open", "");
-  await page.locator("footer").click();
+  // The wall in the gutter at the screen's foot, beside the arch.
+  await page.mouse.click(4, (await page.evaluate(() => innerHeight)) - 4);
   await expect(menu).not.toHaveAttribute("open", "");
   await page.getByText("Menu", { exact: true }).click();
   await page.keyboard.press("Escape");
   await expect(menu).not.toHaveAttribute("open", "");
   await expect(page.locator(".site-menu > summary")).toBeFocused();
 
-  // Home's colophon sits at the foot of the screen, as on desktop, with the
-  // card above it rather than the colophon floating under the card.
-  const [card, footer] = await Promise.all([
-    page.locator(".home").boundingBox(),
-    page.locator("footer").boundingBox(),
-  ]);
-  expect(footer.y).toBeGreaterThanOrEqual(card.y + card.height);
-  const foot = await page.evaluate(
-    () => innerHeight - parseFloat(getComputedStyle(document.body).paddingBottom),
-  );
-  expect(Math.abs(footer.y + footer.height - foot)).toBeLessThan(2);
+  // The phone's home is the arch alone: the colophon is the wide home's.
+  await expect(page.locator("footer")).toBeHidden();
 
-  // Hour pages keep the hours in the menu, in home's 2 / 3 / 2 bands.
+  // Hour pages' menus carry no hours either: an hour moves on from its end,
+  // and home lists them all. Ordo, Reminders and About share one row.
   await openDatedPage(page, `/lauds/${testDate}`);
   await page.getByText("Menu", { exact: true }).click();
-  await expect(primary.getByRole("link", { name: "Vespers", exact: true })).toBeVisible();
-  const rows = await primary.locator('[data-nav="hour"]').evaluateAll((links) => {
-    const byTop = new Map();
-    for (const a of links) {
-      const top = Math.round(a.getBoundingClientRect().top);
-      byTop.set(top, [...(byTop.get(top) || []), a.dataset.hour]);
-    }
-    return [...byTop.values()];
-  });
-  expect(rows).toEqual([["lauds", "prime"], ["terce", "sext", "none"], ["vespers", "compline"]]);
+  await expect(primary.getByRole("link", { name: "Ordo", exact: true })).toBeVisible();
+  await expect(primary.locator("[data-hour]")).toHaveCount(0);
+  // Reminders and About are set smaller, a pixel or two off Ordo's top; a new
+  // row would begin a whole cell lower.
+  const tops = await primary.locator("a").evaluateAll((links) => links.map((a) => a.getBoundingClientRect().top));
+  expect(Math.max(...tops) - Math.min(...tops)).toBeLessThan(8);
 });
 
 test("psalm spacing groups each antiphon with its own psalm", async ({ page }) => {
@@ -272,6 +292,85 @@ test("psalm spacing groups each antiphon with its own psalm", async ({ page }) =
   // psalm's opening one, or two ANT. lines in a row read as a stutter.
   expect(spacing.between).toBeGreaterThan(spacing.within * 2);
   expect(spacing.gloriaGap).toBeGreaterThan(spacing.verseGap * 1.5);
+});
+
+// The hour's vertical rhythm (render_blocks::Space, which the apps share): each
+// space a step of the prayer's body line. Sext's run from the Alleluia through
+// the hymn into the first psalm is the page that showed the steps uneven.
+test("the hour's spaces are the rhythm's steps of the body line", async ({ page }) => {
+  for (const width of [390, 800, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/sext/2026-10-29");
+    const steps = await page.evaluate(() => {
+      const line = parseFloat(getComputedStyle(document.querySelector(".elements")).getPropertyValue("--line"));
+      const gap = (a, b) => (b.getBoundingClientRect().top - a.getBoundingClientRect().bottom) / line;
+      const q = (s) => document.querySelector(s);
+      const stanzas = [...document.querySelectorAll(".hymn .hymn-stanza")];
+      const hymn = q(".hymn");
+      const antiphon = hymn.nextElementSibling;
+      const psalm = antiphon.nextElementSibling;
+      return {
+        line,
+        prayer: parseFloat(getComputedStyle(q(".elements")).fontSize),
+        section: gap(hymn.previousElementSibling, hymn.querySelector(".section-heading")),
+        title: gap(hymn.querySelector(".section-heading"), q(".hymn-title")),
+        hymn: gap(q(".hymn-title"), stanzas[0]),
+        stanza: gap(stanzas[0], stanzas[1]),
+        group: gap(stanzas[stanzas.length - 1], antiphon),
+        antiphon: gap(antiphon, psalm.querySelector(".item-label")),
+        label: gap(psalm.querySelector(".item-label"), psalm.querySelector(".verse")),
+        verse: gap(...psalm.querySelectorAll(".verse")),
+        gloria: gap([...psalm.querySelectorAll(".verse")].pop(), psalm.querySelector(".gloria-patri")),
+      };
+    });
+    // The line is the prayer's body line, so the steps follow the text's size.
+    expect(steps.line).toBeCloseTo(steps.prayer * 1.6, 1);
+    const expected = { section: 1, title: 0.15, hymn: 0.3, stanza: 0.45, group: 0.75, antiphon: 0.3, label: 0.3, verse: 0.15, gloria: 0.45 };
+    for (const [name, step] of Object.entries(expected)) {
+      expect(steps[name], `${name} at ${width}px`).toBeCloseTo(step, 1);
+    }
+  }
+});
+
+test("the rhythm reaches into a prayer form's part and the Martyrology", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("office-prayer-form", "priest");
+    localStorage.setItem("office-martyrology", "on");
+  });
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto("/prime/2026-10-29");
+  const steps = await page.evaluate(() => {
+    const line = parseFloat(getComputedStyle(document.querySelector(".elements")).getPropertyValue("--line"));
+    const shown = (e) => e.getClientRects().length > 0;
+    const leaves = [...document.querySelectorAll(".elements p, .elements h2")].filter(shown);
+    const at = (text) => leaves.findIndex((e) => e.textContent.includes(text));
+    const above = (i) => (leaves[i].getBoundingClientRect().top - leaves[i - 1].getBoundingClientRect().bottom) / line;
+    const heading = at("Martyrology for tomorrow");
+    return {
+      confession: above(at("Then the Confession is repeated")),
+      absolution: above(at("After Confession has been made")),
+      martyrology: above(heading),
+      entry: above(heading + 1),
+      thanks: above(leaves.findIndex((e, i) => i > heading && e.textContent.includes("Thanks be to God"))),
+      // A section's label stands as a part's heading, as the apps' toggle row does.
+      label: (() => {
+        const after = [...document.querySelectorAll(".session-prayers")].pop();
+        const box = after.querySelector("summary").getBoundingClientRect();
+        const before = after.previousElementSibling.getBoundingClientRect();
+        return (box.top - before.bottom) / line;
+      })(),
+      under: (() => {
+        const after = [...document.querySelectorAll(".session-prayers")].pop();
+        const box = after.querySelector("summary").getBoundingClientRect();
+        return (after.querySelector(".session-prayers-content p").getBoundingClientRect().top - box.bottom) / line;
+      })(),
+    };
+  });
+  // Each matches render_blocks::space_before for the same blocks.
+  const expected = { confession: 0.45, absolution: 0.45, martyrology: 1, entry: 0.3, thanks: 0.45, label: 1, under: 0.3 };
+  for (const [name, step] of Object.entries(expected)) {
+    expect(steps[name], name).toBeCloseTo(step, 1);
+  }
 });
 
 test("hour progress completes with the prayer, before the administrative epilogue", async ({
@@ -337,15 +436,20 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
           ".home-hero a[href], .home-hero summary, .home-hero input, .home-hero button",
         ),
       )
-        // date + go-to-today (historical days) + pray + 7 hours + change-date.
-        .slice(0, 11)
+        // The calendar stands inert in the hours' place until Change date turns to it.
+        .filter((element) => !element.closest("[inert]"))
+        // date + the feast's page + go-to-today (historical days) + pray + 7 hours + the first
+        // week's introduction + change-date.
+        .slice(0, 13)
         .map((element) => {
           if (element.matches(".home-date-link")) return "date";
+          if (element.matches(".feast-link")) return "feast";
           // Recovery chrome when the landing day is not local today — intentional
           // after the stale-day fix; sits in the day identity, before Pray now.
           if (element.matches(".not-today-link")) return "go-to-today";
           if (element.matches(".pray-now")) return "pray";
           if (element.matches(".home-hour-link")) return element.getAttribute("data-hour");
+          if (element.matches(".home-introduction")) return "introduction";
           if (element.matches("summary")) return "change-date";
           return "unexpected";
         }),
@@ -357,6 +461,7 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
   // testDate is fixed in the past relative to "today", so Go to today is present.
   expect(order.focusables).toEqual([
     "date",
+    "feast",
     "go-to-today",
     "pray",
     "lauds",
@@ -366,6 +471,7 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
     "none",
     "vespers",
     "compline",
+    "introduction",
     "change-date",
   ]);
 });
@@ -421,14 +527,18 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
 
   const invitation = page.locator(".pray-now");
   const current = page.locator('.home-hour-link[aria-current="time"]');
-  await expect(invitation).toHaveText("Pray Terce");
+  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Terce");
   await expect(invitation).toHaveAttribute("href", `/terce/${testDate}`);
   await expect(current).toHaveAttribute("data-hour", "terce");
   // "Now" is announced, not drawn: the tinted cell and the invitation above
   // carry it visually, so the word is sr-only rather than a chip beside the
   // hour name. Assert it is in the accessibility tree and out of the picture.
   await expect(current.getByText("Now", { exact: true })).toBeAttached();
-  await expect(current.getByText("Now", { exact: true })).not.toBeInViewport();
+  // Clipped to nothing, not scrolled away: WebKit's IntersectionObserver
+  // ignores the target's own clip, so measure the box rather than the viewport.
+  const nowBox = await current.getByText("Now", { exact: true }).boundingBox();
+  expect(nowBox.width * nowBox.height).toBeLessThanOrEqual(1);
+  expect(await current.getByText("Now", { exact: true }).evaluate(el => getComputedStyle(el).clip)).toMatch(/rect\(0(px)?,? 0(px)?,? 0(px)?,? 0(px)?\)/);
   await expect(current.locator("xpath=ancestor::section[1]")).toContainText("Day");
 
   const naveState = await invitation.evaluate((element) => ({
@@ -452,8 +562,9 @@ test("the early-morning invitation opens the previous day's Compline", async ({ 
   await page.clock.setFixedTime(new Date("2026-03-15T01:00:00-04:00"));
   await openDatedPage(page, `/?date=${testDate}`);
 
-  await expect(page.locator(".pray-now")).toHaveText("Pray Compline");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Compline");
   await expect(page.locator(".pray-now")).toHaveAttribute("href", "/compline/2026-03-14");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Prayer before sleep");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveCount(0);
 });
 
@@ -461,25 +572,323 @@ test("the foreground home invitation advances at the next office boundary", asyn
   await page.clock.install({ time: new Date("2026-03-15T10:59:00-04:00") });
   await openDatedPage(page, `/?date=${testDate}`);
 
-  await expect(page.locator(".pray-now")).toHaveText("Pray Terce");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Terce");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "terce",
   );
 
-  // The current hour says what it is under its name, and the line moves with it.
-  const note = page.locator(".home-hour-link-note:visible");
-  await expect(note).toHaveCount(1);
+  // The invitation says what the hour is under its words, and the line moves
+  // with it; the hours' table glosses none on a phone, so it keeps one shape.
+  const note = page.locator(".pray-now-gloss");
+  await expect(note).toBeVisible();
   await expect(note).toHaveText("Mid-morning prayer");
+  await expect(page.locator(".home-hour-link-note:visible")).toHaveCount(0);
 
   await page.clock.fastForward("02:00");
 
-  await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Sext");
   await expect(note).toHaveText("Midday prayer");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "sext",
   );
+});
+
+// A phone's table of hours once took the current hour's gloss under its name,
+// so its rows grew and its names moved as the hours turned ("Mid-morning
+// prayer" took two lines in the day's band). The gloss is the invitation's
+// now, and the table stands the same at every hour.
+test("the phone's table of hours keeps one shape whichever hour is now", async ({ page }) => {
+  const shape = () =>
+    page.evaluate(() => {
+      const table = document.querySelector(".home-hour-links").getBoundingClientRect();
+      return {
+        table: Math.round(table.height),
+        names: Array.from(document.querySelectorAll(".home-hour-link-name")).map((n) => Math.round(n.getBoundingClientRect().top - table.top)),
+      };
+    });
+  const shapes = [];
+  for (const [time, gloss] of [["10:00", "Mid-morning prayer"], ["18:00", "Evening prayer"], ["06:00", "Morning praise"], ["01:00", "Prayer before sleep"]]) {
+    await page.clock.setFixedTime(new Date(`2026-03-15T${time}:00-04:00`));
+    await openDatedPage(page, `/?date=${testDate}`);
+    await expect(page.locator(".pray-now-gloss")).toHaveText(gloss);
+    await expect(page.locator(".home-hour-link-note:visible")).toHaveCount(0);
+    shapes.push(await shape());
+  }
+  // (At one, yesterday's Compline is invited and no hour of the table is now.)
+  shapes.slice(1).forEach((shape) => expect(shape).toEqual(shapes[0]));
+  // Another day's "Open Lauds" says nothing more.
+  await openDatedPage(page, "/?date=2026-03-16");
+  await expect(page.locator(".pray-now-gloss")).toBeHidden();
+});
+
+// On an evening that already keeps the morrow, the invitation to Vespers says
+// so (presentation::Invitation::on_eve, #951), by the reader's clock: the
+// afternoon's None and the evening's Compline keep their own glosses, and the
+// table's Vespers keeps "Evening prayer".
+test("the invitation names First Vespers on the eve of a feast", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-12-24T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-24");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("First Vespers of the Nativity of Our Lord");
+  await expect(page.locator('.home-hour-link[data-hour="vespers"] .home-hour-link-note')).toHaveText("Evening prayer");
+  await page.clock.setFixedTime(new Date("2026-12-24T21:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-24");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Prayer before sleep");
+  await page.clock.setFixedTime(new Date("2026-12-23T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-23");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Evening prayer");  const tablet = () => page.evaluate(() => Math.round(document.querySelector(".pray-now").getBoundingClientRect().height));
+  const plain = await tablet();
+  // The longest name keeps the gloss to one line, so the tablet keeps its height.
+  await page.clock.setFixedTime(new Date("2026-11-17T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-11-17");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("First Vespers of the Dedication of the Basilica of the Holy Apostles Peter & Paul");
+  expect(await tablet()).toBe(plain);
+});
+
+// While an hour is now its period's sign is lit and the others stand back
+// (Night's too, after the evening, while Matins is not yet prayed here); with
+// no hour now all four rest alike (the apps' periodSignAlpha).
+test("home lights the sign of the period whose hour is now", async ({ page }) => {
+  const signs = () => page.locator(".home-period-ornament").evaluateAll((els) => els.map((el) => getComputedStyle(el).opacity));
+  await page.clock.setFixedTime(new Date("2026-03-15T18:00:00-04:00"));
+  await openDatedPage(page, `/?date=${testDate}`);
+  await expect.poll(signs).toEqual(["0.52", "0.52", "1", "0.52"]);
+  await openDatedPage(page, "/?date=2026-03-16");
+  await expect.poll(signs).toEqual(["0.9", "0.9", "0.9", "0.9"]);
+});
+
+// The wide niche glosses every hour in its table and leaves the invitation
+// bare, except on an eve, whose table still says "Evening prayer": there the
+// invitation carries "First Vespers of …" too, on one line (#959).
+test("the wide niche names First Vespers under the invitation on an eve only", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.clock.setFixedTime(new Date("2026-12-24T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-24");
+  const gloss = page.locator(".pray-now-gloss");
+  await expect(gloss).toBeVisible();
+  await expect(gloss).toHaveText("First Vespers of the Nativity of Our Lord");
+  expect(await gloss.evaluate((el) => el.getClientRects().length)).toBe(1);
+  // Compline that evening, and the evening before, keep the bare invitation.
+  await page.clock.setFixedTime(new Date("2026-12-24T21:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-24");
+  await expect(gloss).toBeHidden();
+  await page.clock.setFixedTime(new Date("2026-12-23T18:00:00-05:00"));
+  await openDatedPage(page, "/?date=2026-12-23");
+  await expect(gloss).toBeHidden();
+});
+
+// The invitation to the hour now, once that hour is prayed, takes the
+// directory's small gilt cross at its words' shoulder (#954): its link still
+// opens the hour, and the tablet keeps its height. Compline after midnight
+// asks the marks of the day it belongs to.
+test("the invitation to an hour already prayed takes the gilt cross and keeps its height", async ({ page }) => {
+  const tablet = () => page.evaluate(() => Math.round(document.querySelector(".pray-now").getBoundingClientRect().height));
+  await page.clock.setFixedTime(new Date("2026-03-15T18:00:00-04:00"));
+  await openDatedPage(page, `/?date=${testDate}`);
+  const prayNow = page.locator(".pray-now");
+  await expect(prayNow).not.toHaveClass(/is-prayed/);
+  const plain = await tablet();
+  await page.evaluate(() => {
+    localStorage.setItem("office-prayed", JSON.stringify({ "2026-03-15": ["vespers"], "2026-03-14": ["compline"] }));
+  });
+  await page.reload();
+  await expect(prayNow).toHaveClass(/is-prayed/);
+  await expect(prayNow.locator(".pray-now-prayed .sr-only")).toHaveText("Prayed");
+  await expect(prayNow).toHaveAttribute("href", "/vespers/2026-03-15");
+  await expect(prayNow.locator(".pray-now-label")).toContainText("Pray Vespers");
+  expect(await tablet()).toBe(plain);
+  // At one in the morning, yesterday's Compline is invited, and it was prayed.
+  await page.clock.setFixedTime(new Date("2026-03-15T01:00:00-04:00"));
+  await page.reload();
+  await expect(prayNow).toHaveAttribute("href", "/compline/2026-03-14");
+  await expect(prayNow).toHaveClass(/is-prayed/);
+  // Mid-morning's Terce was not.
+  await page.clock.setFixedTime(new Date("2026-03-15T10:00:00-04:00"));
+  await page.reload();
+  await expect(prayNow).not.toHaveClass(/is-prayed/);
+  await expect(prayNow.locator(".pray-now-prayed")).toHaveCount(0);
+});
+
+// The light moves with the hours (app.js HOUR_LIGHT, render_blocks::hour_light).
+// Its animations are held almost still as they are made, so a test sets the
+// pass's clock itself rather than racing it. The page's clock is paused two
+// seconds short of the turn, not left running from there: a slow load on a
+// busy runner would otherwise reach the turn before the test looks.
+async function holdTheLight(page) {
+  await page.addInitScript(() => {
+    const animate = Element.prototype.animate;
+    window.lightAnimations = [];
+    Element.prototype.animate = function (...args) {
+      const animation = animate.apply(this, args);
+      animation.playbackRate = 1e-6;
+      window.lightAnimations.push(animation);
+      return animation;
+    };
+  });
+}
+async function lightAt(page, ms) {
+  await page.evaluate((t) => {
+    window.lightAnimations.forEach((a) => {
+      if (a.playState !== "idle") a.currentTime = t;
+    });
+  }, ms);
+  // The seat and the end are promises the animations settle.
+  await page.evaluate(() => new Promise((done) => setTimeout(done, 0)));
+}
+const homeAtRest = (page) =>
+  page.evaluate(() => ({
+    passing: document.querySelectorAll(".is-passing").length,
+    // The pass's own, not a control's CSS transitions.
+    animations: window.lightAnimations.filter((a) => a.playState !== "idle").length,
+    words: document.querySelectorAll(".pray-now .pray-now-words").length,
+    current: Array.from(document.querySelectorAll(".home-hour-link.is-current")).map((l) => l.dataset.hour),
+  }));
+
+test("the light moves from Sext to None on an open home, and settles as a fresh page", async ({ page }) => {
+  await holdTheLight(page);
+  await page.clock.pauseAt(new Date("2026-03-15T12:59:58-04:00"));
+  await openDatedPage(page, `/?date=${testDate}`);
+  const invitation = page.locator(".pray-now");
+  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Sext");
+  // Arrival never moves the light.
+  expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
+
+  await page.clock.runFor(3000);
+  await page.clock.resume();
+  // The hour has turned for a screen reader at once …
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute("data-hour", "none");
+  await expect(invitation).toHaveAttribute("href", /\/none\//);
+  // … while the eye sees the light leave Sext: both hours hold a pool.
+  await lightAt(page, 300);
+  await expect(page.locator(".home-hour-link.is-passing")).toHaveCount(2);
+  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Sext");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Midday prayer");
+  expect((await homeAtRest(page)).current).toEqual(["sext"]);
+  // Past the seat, the new hour's look and words, the gloss with them.
+  await lightAt(page, 700);
+  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray None");
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Afternoon prayer");
+  expect((await homeAtRest(page)).current).toEqual(["none"]);
+  // At the end nothing of the pass is left.
+  await lightAt(page, 1400);
+  expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["none"] });
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Afternoon prayer");
+});
+
+// A wide screen shows the invitation's gloss only on an eve (#959): as the
+// light brings First Vespers in, the gloss comes with the words, dipped from
+// the start of the pass, not set at full ink at the seat.
+test("on a wide eve the First Vespers gloss comes in with the invitation's words", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await holdTheLight(page);
+  await page.clock.pauseAt(new Date("2026-12-24T16:59:58-05:00"));
+  await openDatedPage(page, "/?date=2026-12-24");
+  const gloss = page.locator(".pray-now-gloss");
+  await expect(gloss).toBeHidden();
+  await page.clock.runFor(3000);
+  await page.clock.resume();
+  await lightAt(page, 700);
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Vespers");
+  await expect(gloss).toBeVisible();
+  await expect(gloss).toHaveText(/^First Vespers of /);
+  const [glossInk, wordsInk] = await page.evaluate(() => [".pray-now-gloss", ".pray-now-words"].map((s) => Number(getComputedStyle(document.querySelector(s)).opacity)));
+  expect(glossInk).toBeLessThan(1);
+  expect(glossInk).toBeCloseTo(wordsInk, 2);
+  await lightAt(page, 1400);
+  expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["vespers"] });
+});
+
+test("a second turn of the hour during a pass settles the first", async ({ page }) => {
+  await holdTheLight(page);
+  await page.clock.pauseAt(new Date("2026-03-15T12:59:58-04:00"));
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.clock.runFor(3000);
+  await page.clock.resume();
+  await lightAt(page, 300);
+  // Another turn arrives (a clock set forward) while the first is under way.
+  await page.clock.setSystemTime(new Date("2026-03-15T17:00:01-04:00"));
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  // The first pass ends where it was going (None), and the next leaves from there.
+  const passing = await page.evaluate(() => Array.from(document.querySelectorAll(".is-passing")).map((l) => l.dataset.hour));
+  expect(passing).toEqual(["none", "vespers"]);
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray None");
+  await lightAt(page, 1400);
+  expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["vespers"] });
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Vespers");
+});
+
+test.describe("under reduced motion", () => {
+  test.use({ reducedMotion: "reduce" });
+  test("the light does not move: the new hour comes at once", async ({ page }) => {
+    await holdTheLight(page);
+    await page.clock.pauseAt(new Date("2026-03-15T12:59:58-04:00"));
+    await openDatedPage(page, `/?date=${testDate}`);
+    await page.clock.runFor(3000);
+    await page.clock.resume();
+    await expect(page.locator(".pray-now-label")).toHaveText("Pray None");
+    expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
+    expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["none"] });
+  });
+});
+
+test("a page hidden at the turn of the hour is corrected on its return, without moving the light", async ({ page }) => {
+  await holdTheLight(page);
+  await page.addInitScript(() => {
+    window.pageHidden = false;
+    Object.defineProperty(document, "hidden", { get: () => window.pageHidden });
+    Object.defineProperty(document, "visibilityState", { get: () => (window.pageHidden ? "hidden" : "visible") });
+  });
+  await page.clock.pauseAt(new Date("2026-03-15T12:59:58-04:00"));
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.evaluate(() => { window.pageHidden = true; });
+  await page.clock.runFor(3000);
+  await page.clock.resume();
+  await page.evaluate(() => {
+    window.pageHidden = false;
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray None");
+  expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
+  expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["none"] });
+});
+
+test("a turn found late, after a sleeping timer, corrects home without moving the light", async ({ page }) => {
+  await holdTheLight(page);
+  await page.clock.install({ time: new Date("2026-03-15T12:00:00-04:00") });
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.clock.setSystemTime(new Date("2026-03-15T18:00:00-04:00"));
+  await page.clock.runFor("01:01");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Vespers");
+  expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
+});
+
+test("the light leaves Compline at midnight", async ({ page }) => {
+  await holdTheLight(page);
+  await page.clock.pauseAt(new Date("2026-07-29T23:59:58-04:00"));
+  await openDatedPage(page, "/?date=2026-07-29");
+  await page.clock.runFor(3000);
+  await page.clock.resume();
+  // Only the one pool dies; the invitation's words stay.
+  await lightAt(page, 700);
+  await expect(page.locator(".home-hour-link.is-passing")).toHaveCount(1);
+  expect(await page.evaluate(() => document.querySelectorAll(".pray-now-words").length)).toBe(0);
+  await lightAt(page, 1400);
+  expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: [] });
+});
+
+test("the light gathers on Lauds at two", async ({ page }) => {
+  await holdTheLight(page);
+  await page.clock.pauseAt(new Date("2026-07-30T01:59:58-04:00"));
+  await openDatedPage(page, "/?date=2026-07-30");
+  await page.clock.runFor(3000);
+  await page.clock.resume();
+  await lightAt(page, 300);
+  await expect(page.locator(".home-hour-link.is-passing")).toHaveCount(1);
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Compline");
+  await lightAt(page, 1400);
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Lauds");
+  expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["lauds"] });
 });
 
 test("Compline hands on to tomorrow's Lauds", async ({ page }) => {
@@ -489,16 +898,23 @@ test("Compline hands on to tomorrow's Lauds", async ({ page }) => {
   await expect(next.locator(".continuation-label")).toHaveText("Tomorrow");
 });
 
+// The reader moves down the page. The prayed mark reads only what is on
+// screen, so a script scroll stands for a wheel or a swipe in every engine
+// (mobile WebKit in Playwright has no mouse.wheel).
+async function scrollHourBy(page, dy) {
+  await page.evaluate(top => scrollBy({ top, behavior: "instant" }), dy);
+}
+
 // The end of the hour's text reaches the screen.
 async function atHourEnd(page) {
   return page.evaluate(() => document.querySelector(".hour-end-mark").getBoundingClientRect().top < innerHeight);
 }
 
 test("scrolling through an hour in seconds does not mark it prayed", async ({ page }) => {
-  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.clock.pauseAt(new Date("2026-10-07T21:00:00"));
   await page.goto("/compline/2026-10-07");
   for (let i = 0; i < 3 && !(await atHourEnd(page)); i++) {
-    await page.mouse.wheel(0, 3000);
+    await scrollHourBy(page, 3000);
     await page.clock.runFor(1000);
   }
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
@@ -509,11 +925,11 @@ test("scrolling through an hour in seconds does not mark it prayed", async ({ pa
 });
 
 test("an hour read through at a praying pace is marked prayed on home", async ({ page }) => {
-  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.clock.pauseAt(new Date("2026-10-07T21:00:00"));
   await page.goto("/compline/2026-10-07");
   for (let i = 0; i < 60 && !(await atHourEnd(page)); i++) {
     await page.clock.runFor(20_000);
-    await page.mouse.wheel(0, 400);
+    await scrollHourBy(page, 400);
   }
   await page.clock.runFor(2000);
   await page.goto("/?date=2026-10-07");
@@ -526,6 +942,439 @@ test("an hour read through at a praying pace is marked prayed on home", async ({
   await expect(page.locator(".home-hour-link.is-prayed")).toHaveCount(0);
 });
 
+// The cross under the last Amen takes its gold (presentation::EndLeaf). The
+// hour is read through at a praying pace until the cross's top first peeps in,
+// and the watch marks the hour with only its top 8px showing; the gold waits
+// until the cross stands whole. The clock is paused between steps and no step
+// shows more than those 8px, so the mark and the whole cross never meet before
+// the test stands there.
+async function prayToTheCross(page, day, hour) {
+  for (let i = 0; i < 80; i++) {
+    await page.clock.runFor(20_000);
+    const dy = await page.evaluate(() => {
+      const r = document.querySelector(".hour-end-mark").getBoundingClientRect();
+      return Math.min(400, r.top - (innerHeight - 8));
+    });
+    if (dy <= 0) break;
+    await scrollHourBy(page, dy);
+  }
+  const marked = () => page.evaluate(([d, h]) => (JSON.parse(localStorage.getItem("office-prayed") || "{}")[d] || []).includes(h), [day, hour]);
+  for (let i = 0; i < 30 && !(await marked()); i++) await page.clock.runFor(5000);
+  expect(await marked()).toBe(true);
+}
+
+// Stands the whole cross on the screen, 20px above its foot.
+async function standAtTheCross(page) {
+  await page.evaluate(() => {
+    const r = document.querySelector(".hour-end-mark").getBoundingClientRect();
+    scrollBy({ top: r.bottom - innerHeight + 20, behavior: "instant" });
+  });
+}
+
+// The leaf's opacity, and the transitions running on it.
+async function endLeaf(page) {
+  return page.evaluate(() => {
+    const end = document.querySelector(".hour-end-mark");
+    const style = getComputedStyle(end, "::after");
+    return {
+      content: style.content,
+      opacity: style.opacity,
+      fades: document.getAnimations()
+        .filter((a) => a.effect && a.effect.target === end && a.effect.pseudoElement === "::after")
+        .map((a) => ({ property: a.transitionProperty, duration: a.effect.getTiming().duration, easing: a.effect.getTiming().easing })),
+    };
+  });
+}
+
+test("the end cross takes its gold once the hour is marked and the cross stands whole", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.clock.pauseAt(new Date("2026-10-07T21:00:00"));
+  await page.goto("/compline/2026-10-07");
+  const cross = page.locator(".hour-end-mark");
+  // Scrolled through in seconds and left standing at the cross: not prayed, no gold.
+  await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
+  await page.clock.runFor(10_000);
+  await expect(cross).not.toHaveClass(/is-gilding|is-gilt/);
+  expect((await endLeaf(page)).opacity).toBe("0");
+  await page.goto("/compline/2026-10-07");
+  // Opened again and prayed through: the hour is marked as the cross peeps in, and the cross keeps its paint.
+  await prayToTheCross(page, "2026-10-07", "compline");
+  await page.clock.runFor(5000);
+  await expect(cross).not.toHaveClass(/is-gilding|is-gilt/);
+  expect(await endLeaf(page)).toEqual({ content: '""', opacity: "0", fades: [] });
+  // The cross stands whole: the gold comes up evenly by opacity over Tempo's gild.
+  await standAtTheCross(page);
+  await expect(cross).toHaveClass(/is-gilding/);
+  expect((await endLeaf(page)).fades).toEqual([{ property: "opacity", duration: 2000, easing: "cubic-bezier(0.4, 0, 0.2, 1)" }]);
+  await expect.poll(async () => (await endLeaf(page)).opacity, { timeout: 5000 }).toBe("1");
+  // Once: scrolled away and back, it stands gilt with nothing moving.
+  await scrollHourBy(page, -1500);
+  await page.clock.runFor(2000);
+  await standAtTheCross(page);
+  expect(await endLeaf(page)).toEqual({ content: '""', opacity: "1", fades: [] });
+});
+
+test("an hour prayed before opens with its cross gilt, and nothing moves", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.clock.pauseAt(new Date("2026-10-07T21:30:00"));
+  await page.addInitScript(() => localStorage.setItem("office-prayed", JSON.stringify({ "2026-10-07": ["compline"] })));
+  // Gilt before app.js could run: the page's own script under the cross lays it.
+  await page.route("**/app.js*", (route) => route.abort());
+  await page.goto("/compline/2026-10-07");
+  const cross = page.locator(".hour-end-mark");
+  await expect(cross).toHaveClass(/is-gilt/);
+  await standAtTheCross(page);
+  expect(await endLeaf(page)).toEqual({ content: '""', opacity: "1", fades: [] });
+  // Another hour of the day, not prayed, keeps its paint.
+  await page.goto("/vespers/2026-10-07");
+  await expect(page.locator(".hour-end-mark")).not.toHaveClass(/is-gilt/);
+  expect((await endLeaf(page)).opacity).toBe("0");
+});
+
+test("a bare hour's cross takes no leaf, prayed or not", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.clock.pauseAt(new Date("2026-11-02T09:00:00"));
+  // All Souls' Lauds, the Office of the Dead.
+  await page.goto("/lauds/2026-11-02");
+  const cross = page.locator(".hour-end-mark");
+  await expect(cross).toHaveClass(/is-bare/);
+  await prayToTheCross(page, "2026-11-02", "lauds");
+  await standAtTheCross(page);
+  await page.clock.runFor(3000);
+  await expect(cross).not.toHaveClass(/is-gilding|is-gilt/);
+  expect((await endLeaf(page)).content).toBe("none");
+  // Reopened, prayed: still no leaf.
+  await page.reload();
+  await expect(page.locator(".hour-end-mark")).not.toHaveClass(/is-gilt/);
+  expect((await endLeaf(page)).content).toBe("none");
+});
+
+test("an hour ending in a bare section takes no leaf", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.clock.pauseAt(new Date("2026-11-01T19:00:00"));
+  // Vespers of All Saints, then Vespers of the Dead: not a bare hour, but it ends bare.
+  await page.goto("/vespers/2026-11-01");
+  await expect(page.locator("body")).not.toHaveClass(/hour-bare/);
+  const cross = page.locator(".hour-end-mark");
+  await expect(cross).toHaveClass("hour-end-mark is-bare");
+  await prayToTheCross(page, "2026-11-01", "vespers");
+  await standAtTheCross(page);
+  await page.clock.runFor(3000);
+  await expect(cross).not.toHaveClass(/is-gilding|is-gilt/);
+  expect((await endLeaf(page)).content).toBe("none");
+});
+
+test("under reduced motion the end cross is simply gilt", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.clock.pauseAt(new Date("2026-10-07T21:00:00"));
+  await page.goto("/compline/2026-10-07");
+  await prayToTheCross(page, "2026-10-07", "compline");
+  expect((await endLeaf(page)).opacity).toBe("0");
+  await standAtTheCross(page);
+  await expect(page.locator(".hour-end-mark")).toHaveClass(/is-gilding/);
+  // No fade: the gild's own transition is never declared under reduced motion (its curve
+  // would show here, as the site-wide reduce block shortens durations but sets no curve), and
+  // whatever that block leaves is no motion.
+  const gate = await page.evaluate(() => {
+    const style = getComputedStyle(document.querySelector(".hour-end-mark"), "::after");
+    return { curve: style.transitionTimingFunction, delay: style.transitionDelay };
+  });
+  expect(gate).toEqual({ curve: "ease", delay: "0s" });
+  const now = await endLeaf(page);
+  expect(now.fades.every((f) => f.duration < 1 && f.easing !== "cubic-bezier(0.4, 0, 0.2, 1)")).toBe(true);
+  await expect.poll(async () => (await endLeaf(page)).opacity, { timeout: 500 }).toBe("1");
+});
+
+// The page hidden as a phone locks or another app comes forward.
+async function hidePage(page) {
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
+    document.dispatchEvent(new Event("visibilitychange"));
+    delete document.visibilityState;
+  });
+}
+
+// The page closed by the browser or the system in the background: hidden as the phone locks, then
+// gone with no word to the page (no pagehide, no visibilitychange of an unload), as a discarded tab
+// or an installed app closed by the system is. `lose` takes the page away. Its silence is set up
+// before the page's own script listens (Chromium calls a target's listeners in the order they
+// were added, capturing or not), so the page must be opened after `losable`.
+async function losable(page) {
+  await page.addInitScript(() => {
+    const silence = (e) => { if (window.__lost) e.stopImmediatePropagation(); };
+    window.addEventListener("pagehide", silence, true);
+    document.addEventListener("visibilitychange", silence, true);
+  });
+}
+async function losePage(page, lose) {
+  await hidePage(page);
+  await page.evaluate(() => { window.__lost = true; });
+  await lose();
+}
+
+// The first line of the office below the hairline, and how far below it it begins.
+async function readingLine(page) {
+  return page.evaluate(() => {
+    const edge = document.querySelector(".hour-scroll-progress").getBoundingClientRect().bottom;
+    const line = [...document.querySelectorAll(".office-hour .elements p, .office-hour .elements h3")]
+      .find((l) => l.getClientRects().length && l.getBoundingClientRect().bottom > edge);
+    return `${line.textContent.trim().slice(0, 40)} @${Math.round(line.getBoundingClientRect().top - edge)}`;
+  });
+}
+
+test("an hour the browser closed opens again at the reader's place, already there", async ({ page }) => {
+  await losable(page);
+  const hour = "/vespers/2026-11-13";
+  await page.goto(hour);
+  await page.evaluate(() => document.querySelectorAll(".psalm")[2].querySelectorAll("p")[3].scrollIntoView());
+  const place = await readingLine(page);
+  // The tab discarded, or the installed app closed: opened again from home's link.
+  const context = page.context();
+  await losePage(page, () => page.close());
+  const again = await context.newPage();
+  await again.addInitScript(() => {
+    window.__shown = [];
+    const look = () => {
+      if (document.body && getComputedStyle(document.body).visibility === "visible") window.__shown.push(scrollY);
+      if (window.__shown.length < 5) requestAnimationFrame(look);
+    };
+    requestAnimationFrame(look);
+  });
+  await again.goto("/?date=2026-11-13");
+  await again.evaluate((href) => { const a = document.createElement("a"); a.href = href; document.body.append(a); a.click(); }, hour);
+  await again.waitForURL(hour);
+  await again.waitForLoadState("load");
+  expect(await readingLine(again)).toBe(place);
+  // Shown first at the place: nothing moved to reach it.
+  const shown = await again.evaluate(() => window.__shown);
+  expect(shown[0]).toBeGreaterThan(1000);
+  expect(new Set(shown).size).toBe(1);
+  // Left by the page's own link, the hour opens at its top on a deliberate return.
+  await again.locator(".day-hours-link").evaluate((a) => a.click());
+  await again.waitForURL(/\?date=|\/$/);
+  expect(await again.evaluate(() => localStorage.getItem("office-place"))).toBeNull();
+  await again.goto(hour);
+  expect(await again.evaluate(() => scrollY)).toBe(0);
+});
+
+test("an hour's place is kept only within the limit, and not once prayed", async ({ page }) => {
+  await losable(page);
+  const hour = "/vespers/2026-11-13";
+  const reopened = async (change) => {
+    await page.goto(hour);
+    await page.evaluate(() => document.querySelectorAll(".psalm")[2].scrollIntoView());
+    await losePage(page, () => page.goto("/about"));
+    await page.evaluate(change);
+    await page.goto(hour);
+    return page.evaluate(() => scrollY);
+  };
+  expect(await reopened(() => {})).toBeGreaterThan(1000);
+  expect(await reopened(() => {
+    const kept = JSON.parse(localStorage.getItem("office-place"));
+    kept.at -= 46 * 60 * 1000;
+    localStorage.setItem("office-place", JSON.stringify(kept));
+  })).toBe(0);
+  expect(await reopened(() => localStorage.setItem("office-prayed", JSON.stringify({ "2026-11-13": ["vespers"] })))).toBe(0);
+  await page.evaluate(() => localStorage.removeItem("office-prayed"));
+  // Another day's Vespers, and another hour, open at their tops.
+  await reopened(() => {});
+  await losePage(page, () => page.goto("/vespers/2026-11-14"));
+  expect(await page.evaluate(() => scrollY)).toBe(0);
+  await page.goto("/compline/2026-11-13");
+  expect(await page.evaluate(() => scrollY)).toBe(0);
+});
+
+test("an hour left by Back, a typed address or a closed tab keeps no place; a reload keeps it", async ({ page, browserName }) => {
+  const hour = "/vespers/2026-11-13";
+  const context = page.context();
+  // Safari before 26 first: it tells the page nothing of Back (no Navigation API).
+  for (const navigationApi of [false, true]) {
+    const tab = navigationApi ? page : await context.newPage();
+    if (!navigationApi) await tab.addInitScript(() => { delete Window.prototype.navigation; delete window.navigation; });
+    const scrolled = () => tab.evaluate(() => document.querySelectorAll(".psalm")[2].querySelectorAll("p")[3].scrollIntoView());
+    await tab.goto("/about");
+    await tab.goto(hour);
+    expect(await tab.evaluate(() => "navigation" in window)).toBe(navigationApi);
+    await scrolled();
+    // The phone locked a moment and taken up again; then Back.
+    await hidePage(tab);
+    await tab.goBack();
+    await tab.waitForURL(/\/about/);
+    await tab.goto(hour);
+    expect(await tab.evaluate(() => scrollY), `Back, Navigation API ${navigationApi}`).toBe(0);
+    // A typed address.
+    await scrolled();
+    await hidePage(tab);
+    await tab.goto("/about");
+    await tab.goto(hour);
+    expect(await tab.evaluate(() => scrollY), `typed address, Navigation API ${navigationApi}`).toBe(0);
+    // The browser's own reload opens again at the place.
+    await scrolled();
+    const place = await readingLine(tab);
+    await tab.reload();
+    await tab.waitForLoadState("load");
+    expect(await readingLine(tab), `reload, Navigation API ${navigationApi}`).toBe(place);
+    // The tab closed by the reader. Playwright's WebKit closes a page without the storage its
+    // pagehide writes reaching the other tabs (in a probe, not even a bare pagehide's mark), so
+    // only Chromium shows it here.
+    await scrolled();
+    await hidePage(tab);
+    await tab.close({ runBeforeUnload: true });
+    if (browserName === "chromium") {
+      const again = await context.newPage();
+      await again.goto(hour);
+      expect(await again.evaluate(() => scrollY), `closed tab, Navigation API ${navigationApi}`).toBe(0);
+      await again.close();
+    }
+  }
+});
+
+test("a place in a chant score is found by the words it sets, at another width", async ({ page }) => {
+  await losable(page);
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  await page.setViewportSize({ width: 390, height: 800 });
+  const hour = "/vespers/2026-09-08";
+  await page.goto(hour);
+  await page.waitForLoadState("load");
+  const score = page.locator(".hymn .chant-score").nth(2);
+  await score.evaluate((s) => s.scrollIntoView());
+  const label = await score.locator(".sr-only").textContent();
+  await losePage(page, () => page.goto("/about"));
+  const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("office-place")));
+  expect(kept.words).toBe(label.replace(/\s+/g, " ").trim().slice(0, 60));
+  // Opened again on a wider screen, where the score is laid out anew.
+  await page.setViewportSize({ width: 700, height: 800 });
+  await page.goto(hour);
+  await page.waitForLoadState("load");
+  const top = await page.evaluate(() => {
+    const edge = document.querySelector(".hour-scroll-progress").getBoundingClientRect().bottom;
+    return [...document.querySelectorAll(".office-hour .elements .chant-score")]
+      .find((s) => s.getClientRects().length && s.getBoundingClientRect().bottom > edge)?.querySelector(".sr-only")?.textContent;
+  });
+  expect(top).toBe(label);
+});
+
+test("a place hidden by another prayer form or the Martyrology opens where the way now shown says it", async ({ page }) => {
+  await losable(page);
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("office-prayer-form")) localStorage.setItem("office-prayer-form", "priest");
+    if (!localStorage.getItem("office-martyrology")) localStorage.setItem("office-martyrology", "on");
+  });
+  const hour = "/prime/2026-10-29";
+  const LINES = ".office-hour .elements :is(p, h2, h3, summary, .chant-score)";
+  const said = (l) => l.textContent.replace(/\s+/g, " ").trim().slice(0, 60);
+  // Kept at `pick`'s line, the page lost, and `change` made elsewhere meanwhile: the first line
+  // below the hairline when the hour opens again.
+  const reopened = async (pick, change) => {
+    await page.goto(hour);
+    const index = await page.evaluate(([LINES, pick]) => {
+      const all = [...document.querySelectorAll(LINES)];
+      const line = new Function("all", `return (${pick})(all)`)(all);
+      line.scrollIntoView();
+      return all.indexOf(line);
+    }, [LINES, pick.toString()]);
+    expect(index).toBeGreaterThan(0);
+    await losePage(page, () => page.goto("/about"));
+    const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("office-place")));
+    expect(kept.line).toBe(index);
+    await page.evaluate(change);
+    await page.goto(hour);
+    await page.waitForLoadState("load");
+    return page.evaluate(([LINES, saidSource]) => {
+      const said = new Function(`return ${saidSource}`)();
+      const edge = document.querySelector(".hour-scroll-progress").getBoundingClientRect().bottom;
+      const all = [...document.querySelectorAll(LINES)];
+      const line = all.find((l) => l.getClientRects().length && l.getBoundingClientRect().bottom > edge);
+      return { index: all.indexOf(line), words: said(line), at: Math.abs(Math.round(line.getBoundingClientRect().top - edge)) };
+    }, [LINES, said.toString()]).then((top) => ({ ...top, kept: kept.words }));
+  };
+  // The priest's greeting's answer; in the private form, that passage's own first line, which
+  // stands before it on the page.
+  const greeting = await reopened(
+    (all) => all.find((l) => l.closest('.leader-slot > [data-leaders~="priest"]')?.parentElement.querySelector(':scope > [data-leaders~="private"]') && /with thy spirit/.test(l.textContent)),
+    () => localStorage.setItem("office-prayer-form", "private"),
+  );
+  const privateFirst = await page.evaluate(([LINES]) => {
+    const all = [...document.querySelectorAll(LINES)];
+    const way = all.map((l) => l.closest('.leader-slot > [data-leaders~="priest"]')?.parentElement.querySelector(':scope > [data-leaders~="private"]'))
+      .find((w, i) => w && /with thy spirit/.test(all[i].textContent));
+    return all.indexOf(way.querySelector("p"));
+  }, [LINES]);
+  expect(greeting.index).toBe(privateFirst);
+  expect(greeting.at).toBeLessThanOrEqual(1);
+  // The deacon's second Amen after the Confession; in the private form, the same words where it
+  // says them, its own second Amen.
+  await page.evaluate(() => localStorage.setItem("office-prayer-form", "deacon"));
+  const amen = (form) => `(all) => {
+    const way = document.querySelector('.leader-slot[data-leader-slot="confession"] > [data-leaders~="${form}"]');
+    return all.filter((l) => way.contains(l) && /^℟\\.(?:Response\\.)?\\s*Amen\\.$/.test(l.textContent.replace(/\\s+/g, " ").trim()))[1];
+  }`;
+  const confession = await reopened(amen("deacon"), () => localStorage.setItem("office-prayer-form", "private"));
+  const privateAmen = await page.evaluate(([LINES, pick]) => {
+    const all = [...document.querySelectorAll(LINES)];
+    return all.indexOf(new Function("all", `return (${pick})(all)`)(all));
+  }, [LINES, amen("private")]);
+  expect(confession.index).toBe(privateAmen);
+  expect(confession.at).toBeLessThanOrEqual(1);
+  // A day in the Martyrology; with the Martyrology off, the line said in its place.
+  await page.evaluate(() => localStorage.setItem("office-prayer-form", "priest"));
+  const martyrology = await reopened(
+    (all) => all.filter((l) => l.closest('[data-martyrology-variant="on"]'))[5],
+    () => localStorage.setItem("office-martyrology", "off"),
+  );
+  expect(await page.evaluate(([LINES, i]) => !!document.querySelectorAll(LINES)[i].closest('[data-martyrology-variant="off"]'), [LINES, martyrology.index])).toBe(true);
+  expect(martyrology.at).toBeLessThanOrEqual(1);
+});
+
+test("an hour reopened at its place can still be marked prayed", async ({ page }) => {
+  await losable(page);
+  await page.clock.pauseAt(new Date("2026-10-07T21:00:00"));
+  const hour = "/compline/2026-10-07";
+  const readOn = async (until) => {
+    for (let i = 0; i < 60 && !(await until()); i++) {
+      await page.clock.runFor(20_000);
+      await scrollHourBy(page, 400);
+    }
+  };
+  await page.goto(hour);
+  // Half the hour read at a praying pace; then the phone locks and the page is lost.
+  const half = await page.evaluate(() => {
+    const r = document.querySelector(".office-hour .elements").getBoundingClientRect();
+    return r.top + scrollY + r.height / 2;
+  });
+  await readOn(() => page.evaluate((y) => scrollY > y, half));
+  await losePage(page, async () => {
+    const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("office-place")));
+    expect(kept.read).toBeGreaterThan(0);
+    await page.goto("/about");
+  });
+  await page.goto(hour);
+  expect(await page.evaluate(() => scrollY)).toBeGreaterThan(1000);
+  // The rest read at the place: the whole hour has been prayed.
+  await readOn(() => atHourEnd(page));
+  await page.clock.runFor(2000);
+  await page.goto("/?date=2026-10-07");
+  await expect(page.locator('.home-hour-link[data-hour="compline"]')).toHaveClass(/is-prayed/);
+});
+
+test("returning to the ordo, the month is first shown at the day chosen", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__shown = [];
+    const look = () => {
+      if (document.body && getComputedStyle(document.body).visibility === "visible") window.__shown.push(scrollY);
+      if (window.__shown.length < 5) requestAnimationFrame(look);
+    };
+    requestAnimationFrame(look);
+  });
+  await page.goto("/?date=2026-11-20");
+  await page.locator('[data-nav="calendar"]').first().evaluate((a) => a.click());
+  await page.waitForURL(/\/calendar\/2026\/11#d-2026-11-20$/);
+  await page.waitForLoadState("load");
+  await expect(page.locator("#d-2026-11-20")).toBeInViewport();
+  const shown = await page.evaluate(() => window.__shown);
+  expect(shown[0]).toBeGreaterThan(500);
+});
+
 test("the home invitation catches up when the clock jumps past a sleeping timer", async ({
   page,
 }) => {
@@ -534,12 +1383,12 @@ test("the home invitation catches up when the clock jumps past a sleeping timer"
   // timeout set at the previous hour.
   await page.clock.install({ time: new Date("2026-03-15T12:00:00-04:00") });
   await openDatedPage(page, `/?date=${testDate}`);
-  await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Sext");
 
   await page.clock.setSystemTime(new Date("2026-03-15T18:00:00-04:00"));
   await page.clock.runFor("01:01");
 
-  await expect(page.locator(".pray-now")).toHaveText("Pray Vespers");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Vespers");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "vespers",
@@ -553,7 +1402,7 @@ test("the foreground home keeps previous-day Compline current across midnight", 
   await openDatedPage(page, "/?date=2026-07-29");
 
   const invitation = page.locator(".pray-now");
-  await expect(invitation).toHaveText("Pray Compline");
+  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Compline");
   await expect(invitation).toHaveAttribute("href", "/compline/2026-07-29");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
@@ -562,7 +1411,7 @@ test("the foreground home keeps previous-day Compline current across midnight", 
 
   await page.clock.fastForward("02:00");
 
-  await expect(invitation).toHaveText("Pray Compline");
+  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Compline");
   await expect(invitation).toHaveAttribute("href", "/compline/2026-07-29");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Go to today" })).toBeVisible();
@@ -589,18 +1438,223 @@ test("the niche's cross stands clear under the lining at every desktop width", a
 
 test("an upright tablet's niche fills the page and keeps the hours in view", async ({ page }) => {
   // At a laptop's size it took two-thirds of an iPad's width and left a third
-  // of the screen bare below it.
+  // of the screen bare below it. Upright, the niche is a lancet: narrower
+  // than the screen, but it takes the screen's height down to "Change date".
+  // (With the Night band a 12.9" iPad's lancet takes 58% of its width.)
   for (const [width, height] of [[820, 1180], [834, 1194], [1024, 1366]]) {
     await page.setViewportSize({ width, height });
     await openDatedPage(page, `/?date=${testDate}`);
     const niche = await page.evaluate(() => {
       const hero = document.querySelector(".home-hero").getBoundingClientRect();
       const meta = document.querySelector(".home-date-nav > summary").getBoundingClientRect();
-      return { share: hero.width / innerWidth, metaBottom: meta.bottom, overflow: document.documentElement.scrollWidth - innerWidth };
+      return {
+        share: hero.width / innerWidth,
+        height: hero.height / innerHeight,
+        metaBottom: meta.bottom,
+        overflow: document.documentElement.scrollWidth - innerWidth,
+      };
     });
-    expect(niche.share, `${width}x${height}`).toBeGreaterThan(0.8);
+    expect(niche.share, `${width}x${height}`).toBeGreaterThan(0.55);
+    expect(niche.height, `${width}x${height}: the niche takes the height`).toBeGreaterThan(0.75);
     expect(niche.metaBottom, `${width}x${height}: "Change date" in view`).toBeLessThan(height);
     expect(niche.overflow, `${width}x${height}`).toBeLessThanOrEqual(0);
+  }
+});
+
+// A laptop's 768px keeps "Change date" in view: the Night's band, Matins not
+// yet a target, is one line in the glossed table, not a row.
+test("a 768px laptop keeps Change date above the fold", async ({ page }) => {
+  for (const [width, height] of [[1366, 768], [1024, 768], [1280, 800]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const meta = await page.evaluate(() => document.querySelector(".home-day-meta").getBoundingClientRect().bottom);
+    expect(meta, `${width}x${height}: "Change date" in view`).toBeLessThanOrEqual(height);
+  }
+});
+
+// The wide niche's measures on the glass: the zoom (--niche-zoom) is the
+// hero's drawn width over its own, and a gloss's size is its computed size
+// at that zoom.
+async function nicheOnGlass(page) {
+  return page.evaluate(() => {
+    const hero = document.querySelector(".home-hero");
+    const zoom = hero.getBoundingClientRect().width / hero.offsetWidth;
+    const bottom = (selector) => document.querySelector(selector).getBoundingClientRect().bottom;
+    const notes = [...document.querySelectorAll(".home-hour-link-note")];
+    return {
+      zoom,
+      notes: notes.filter((note) => note.checkVisibility()).length,
+      smallestNote: Math.min(...notes.map((note) => parseFloat(getComputedStyle(note).fontSize) * zoom)),
+      date: bottom("#home-date-heading"),
+      feast: bottom(".feast"),
+      pray: bottom(".pray-now"),
+      hours: Math.max(...[...document.querySelectorAll(".home-hour-link")].map((link) => link.getBoundingClientRect().bottom)),
+      overflow: document.documentElement.scrollWidth - innerWidth,
+    };
+  });
+}
+
+test("the wide niche glosses every hour and keeps the day and the hours above the fold", async ({ page }) => {
+  // A laptop's niche once kept only the hour that is now glossed, and a
+  // short window lost the evening hours under the fold. Every gloss is at
+  // least 12px on the glass, whatever the zoom.
+  for (const [width, height] of [[1280, 800], [1180, 820], [1024, 768], [820, 1180], [768, 1024], [701, 900], [1440, 900], [1920, 1080]]) {
+    await page.setViewportSize({ width, height });
+    for (const date of [testDate, "2026-12-04"]) {
+      await openDatedPage(page, `/?date=${date}`);
+      const niche = await nicheOnGlass(page);
+      const at = `${width}x${height} ${date}`;
+      expect(niche.notes, `${at}: every hour glossed, Matins too`).toBe(8);
+      expect(niche.smallestNote, `${at}: glosses legible`).toBeGreaterThanOrEqual(12);
+      for (const part of ["date", "feast", "pray", "hours"]) {
+        expect(niche[part], `${at}: ${part} above the fold`).toBeLessThanOrEqual(height);
+      }
+      expect(niche.overflow, at).toBeLessThanOrEqual(0);
+    }
+  }
+});
+
+test("in the wide niche, the current Day hour's gloss shares every other hour's size", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T10:00:00-04:00"));
+  for (const [width, height] of [[1024, 768], [1280, 1200]]) {
+    await page.setViewportSize({ width, height });
+    await page.goto(`/?date=${testDate}`);
+    await expect(page.locator('.home-hour-link[data-hour="terce"]')).toHaveClass(/is-current/);
+    const sizes = await page.evaluate(() =>
+      [...document.querySelectorAll(".home-hour-link-note")].map((note) => getComputedStyle(note).fontSize),
+    );
+    expect(new Set(sizes).size, `${width}x${height}: ${sizes.join(", ")}`).toBe(1);
+  }
+});
+
+test("the wide niche scales by one computed zoom, never under its least", async ({ page }) => {
+  // One formula, not a table of steps: the height left under the chrome over
+  // the niche's own, capped by a share of the width; 0.96 at least on its
+  // side (0.9 upright) so a gloss never falls under 12px.
+  const zooms = [];
+  for (const [width, height, least] of [[1024, 700, 0.96], [1280, 800, 0.96], [1440, 900, 0.96], [1920, 1200, 0.96], [768, 900, 0.9], [820, 1180, 0.9]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const { zoom } = await nicheOnGlass(page);
+    expect(zoom, `${width}x${height}`).toBeGreaterThanOrEqual(least - 0.005);
+    expect(zoom, `${width}x${height}`).toBeLessThanOrEqual(1.5);
+    zooms.push(zoom);
+  }
+  // A taller screen of one width never gets a smaller niche.
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  const taller = (await nicheOnGlass(page)).zoom;
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  expect((await nicheOnGlass(page)).zoom).toBeGreaterThanOrEqual(taller);
+  expect(new Set(zooms.map((z) => z.toFixed(2))).size).toBeGreaterThan(2);
+});
+
+test("the wide niche sets the hours one to a line where its heaviest day fits them, a glossed table below", async ({ page }) => {
+  // Upright from 1000px high; on its side from 1203px, where the list's
+  // heaviest day fits at the least zoom (below that it was clamped and ran
+  // under the fold).
+  const rows = async () =>
+    page.evaluate(() => {
+      const top = (hour) => Math.round(document.querySelector(`.home-hour-link[data-hour="${hour}"]`).getBoundingClientRect().top);
+      return { lauds: top("lauds"), prime: top("prime"), terce: top("terce"), none: top("none") };
+    });
+  for (const [width, height, list] of [[1280, 800, false], [1180, 820, false], [1728, 1030, false], [1920, 1080, false], [1920, 1200, false], [1920, 1210, true], [820, 1180, true]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const at = await rows();
+    if (list) {
+      expect(at.prime, `${width}x${height}: Prime under Lauds`).toBeGreaterThan(at.lauds + 20);
+      expect(at.none, `${width}x${height}: None under Terce`).toBeGreaterThan(at.terce + 40);
+    } else {
+      expect(Math.abs(at.prime - at.lauds), `${width}x${height}: Lauds and Prime share a row`).toBeLessThanOrEqual(1);
+      expect(Math.abs(at.none - at.terce), `${width}x${height}: Terce and None share a row`).toBeLessThanOrEqual(1);
+    }
+  }
+});
+
+// Where the zoom was held at its least, the colophon's tailpiece or words were
+// sliced by the fold; where the niche fitted, a pixel or three of scroll
+// remained. The colophon is now wholly in view or wholly below. One test a
+// size: eighteen fresh arrivals in one test, each now rastering home's paint
+// again when the wall first lays it, ran past a test's 30s on a busy runner.
+for (const [width, height] of [[1280, 800], [1180, 820], [1470, 830], [1440, 900], [1728, 1030], [1680, 1050], [1920, 1080], [820, 1180], [1024, 768]]) {
+  test(`the fold never cuts through the wide home's colophon, and a fitted niche never scrolls, at ${width}x${height}`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    for (const date of [testDate, "2026-12-13"]) {
+      await openDatedPage(page, `/?date=${date}`);
+      const at = `${width}x${height} ${date}`;
+      const foot = await page.evaluate(() => {
+        const footer = document.querySelector("footer").getBoundingClientRect();
+        return { top: footer.top, bottom: footer.bottom, scroll: document.documentElement.scrollHeight - innerHeight };
+      });
+      const whole = foot.bottom <= height + 0.5;
+      expect(whole || foot.top >= height - 0.5, `${at}: colophon cut by the fold`).toBe(true);
+      if (whole) expect(foot.scroll, `${at}: no stray scroll`).toBeLessThanOrEqual(0);
+    }
+  });
+}
+
+test("a phone on its side keeps the day and the invitation above the fold", async ({ page }) => {
+  // The niche's least zoom once left only the date and feast in view on a
+  // phone turned sideways; its small words still keep 12px on the glass.
+  for (const [width, height] of [[844, 390], [932, 430]]) {
+    await page.setViewportSize({ width, height });
+    for (const date of [testDate, "2026-12-13"]) {
+      await openDatedPage(page, `/?date=${date}`);
+      const at = `${width}x${height} ${date}`;
+      const view = await page.evaluate(() => {
+        const hero = document.querySelector(".home-hero");
+        const zoom = hero.getBoundingClientRect().width / hero.offsetWidth;
+        const glass = (el) => parseFloat(getComputedStyle(el).fontSize) * zoom * (parseFloat(getComputedStyle(el).zoom) || 1);
+        return {
+          pray: document.querySelector(".pray-now").getBoundingClientRect().bottom,
+          smallest: Math.min(...[...document.querySelectorAll(".home-hour-link-note, .home-hour-group-label, .home-date-weekday")].map(glass)),
+        };
+      });
+      expect(view.pray, `${at}: "Pray" above the fold`).toBeLessThanOrEqual(height);
+      expect(view.smallest, `${at}: small words legible`).toBeGreaterThanOrEqual(11.95);
+    }
+  }
+});
+
+test("the zoomed niche's hand-ruled joints fall between the periods", async ({ page }) => {
+  // The joints were placed from client rects, measured on the glass, in the
+  // zoomed table's own pixels: under zoom they drifted off the joints.
+  for (const [width, height] of [[1280, 800], [820, 1180], [1920, 1080]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    await expect(page.locator(".home-hour-links.is-ruled")).toHaveCount(1);
+    const drift = await page.evaluate(() => {
+      const joints = [...document.querySelectorAll(".home-hour-links > svg.home-rules path.r-inner")];
+      const groups = [...document.querySelectorAll(".home-hour-group")].slice(1);
+      return joints.map((joint, i) => {
+        const box = joint.getBoundingClientRect();
+        return Math.abs((box.top + box.bottom) / 2 - groups[i].getBoundingClientRect().top);
+      });
+    });
+    expect(drift.length, `${width}x${height}`).toBe(3);
+    for (const d of drift) expect(d, `${width}x${height}: joint on the period's edge`).toBeLessThanOrEqual(2);
+  }
+});
+
+test("the wide home by night is one sky inside the niche and a plain wall round it", async ({ page }) => {
+  for (const [width, height] of [[1280, 800], [820, 1180]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`, "dark");
+    // The stars stand in the vault (the sky's own box inside the lining), in
+    // both looks, so the crown's play has them; they show by night.
+    await expect(page.locator(".home-vault-stars svg.home-stars")).toHaveCount(1);
+    const night = await page.evaluate(() => ({
+      wall: getComputedStyle(document.body, "::before").display,
+      sky: getComputedStyle(document.querySelector(".home-sky")).display,
+      shown: getComputedStyle(document.querySelector(".home-vault-stars")).visibility,
+      stars: document.querySelectorAll(".home-vault-stars svg.home-stars path, .home-vault-stars svg.home-stars use").length,
+    }));
+    expect(night.shown, `${width}x${height}: the stars show by night`).toBe("visible");
+    expect(night.wall, `${width}x${height}: the margins' starfield is off`).toBe("none");
+    expect(night.sky, `${width}x${height}`).not.toBe("none");
+    expect(night.stars, `${width}x${height}: the head has its stars`).toBeGreaterThan(5);
   }
 });
 
@@ -669,29 +1723,42 @@ test("a feast's familiar name is set apart in italic and never broken", async ({
   await expect(page.locator(".home .feast-alias")).toHaveCount(0);
 });
 
-test("a tablet's hour header sets the hours as one rank, with no link stranded", async ({ page }) => {
-  // Wide widths hold the same: the prayer's softened field once reached past
-  // the column and, with Large text at the 1000px threshold, past the viewport.
-  for (const size of ["default", "large"]) {
-    for (const width of [701, 820, 999, 1000, 1100, 1280, 1920]) {
+// One test per text size: nine wide pages each. As one test of 27 page loads it
+// ran close to the 30 s budget and timed out on a loaded CI runner.
+for (const size of ["small", "default", "large"]) {
+  test(`a wide hour's header keeps its links on the brand's line, with none stranded (${size} text)`, async ({ page }) => {
+    // The prayer's softened field once reached past the column and, with Large
+    // text at the 1000px threshold, past the viewport. About is reached from
+    // every wide hour (#927), beside the brand with Ordo and Reminders.
+    await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
+    for (const width of [701, 820, 999, 1000, 1030, 1099, 1100, 1280, 1920]) {
       await page.setViewportSize({ width, height: 900 });
-      await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
       await openDatedPage(page, `/vespers/${testDate}`);
       const header = await page.evaluate(() => {
-        const links = [...document.querySelectorAll(".site-menu nav a")];
+        const links = [...document.querySelectorAll(".site-menu nav a")].filter((a) => a.getClientRects().length);
         // Links on one baseline have boxes a pixel or two apart in height
         // (Reminders is set smaller); a new row begins a whole line lower.
         const tops = links.map((a) => a.getBoundingClientRect().top).sort((a, b) => a - b);
+        const about = [...document.querySelectorAll(".site-header [data-nav='about']")].filter((a) => a.getClientRects().length);
+        const shell = document.querySelector(".site-nav-shell").getBoundingClientRect();
+        const brand = document.querySelector(".site-brand").getBoundingClientRect();
         return {
           rows: tops.filter((top, i) => i === 0 || top - tops[i - 1] > 8).length,
           overflow: document.documentElement.scrollWidth - innerWidth,
+          about: about.length,
+          aboutInside: about.every((a) => a.getBoundingClientRect().right <= shell.right),
+          // On the brand's line or the links', never stranded on one of its own.
+          aboutPlaced: about.every((a) => [brand, links[0].getBoundingClientRect()].some((r) => Math.abs(a.getBoundingClientRect().bottom - r.bottom) < 8)),
         };
       });
       expect(header.rows, `${width}px ${size} text`).toBe(1);
       expect(header.overflow, `${width}px ${size} text`).toBe(0);
+      expect(header.about, `${width}px ${size} text`).toBe(1);
+      expect(header.aboutInside, `${width}px ${size} text`).toBe(true);
+      expect(header.aboutPlaced, `${width}px ${size} text`).toBe(true);
     }
-  }
-});
+  });
+}
 
 test("forced colours drop the wall for the system canvas", async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active" });
@@ -703,6 +1770,22 @@ test("forced colours drop the wall for the system canvas", async ({ page }) => {
   }
   const band = await page.evaluate(() => getComputedStyle(document.body, "::before").content);
   expect(band, "hour band").toBe("none");
+});
+
+test("quick theme changes settle on the last choice with the wall restored", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.evaluate(() => {
+    const pick = choice => document.querySelector(`.theme-option[data-theme-choice="${choice}"]`).click();
+    pick("dark");
+    pick("light");
+    setTimeout(() => pick("dark"), 50);
+  });
+  const html = page.locator("html");
+  await expect(html).toHaveAttribute("data-theme", "dark");
+  await expect(html).not.toHaveClass(/vault-hidden|theme-anim/);
+  expect(await page.evaluate(() => localStorage.getItem("office-theme"))).toBe("dark");
+  await expect.poll(() => page.evaluate(() => Number(getComputedStyle(document.documentElement, "::before").opacity))).toBe(1);
 });
 
 test("the wall fades out before a theme swap and respects reduced motion", async ({ page }) => {
@@ -727,6 +1810,465 @@ test("the wall fades out before a theme swap and respects reduced motion", async
   await choosePreference(page, "Nave");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   expect(await opacity()).toBe(1);
+});
+
+// Home's crown: a tap on the consecration cross turns the look over and plays
+// the change in the arch (presentation::crown; app.js mirrors its rule, and
+// these are the rule's cases). The stored choice is set once, before the
+// first load only, so a later load reads what the taps left.
+async function openCrown(page, { stored, date = testDate, hurry = true } = {}) {
+  await page.addInitScript((value) => {
+    if (sessionStorage.getItem("crown-test")) return;
+    sessionStorage.setItem("crown-test", "1");
+    if (value) localStorage.setItem("office-theme", value);
+  }, stored);
+  await page.goto(`/?date=${date}`);
+  await page.evaluate(() => document.fonts.ready);
+  // The play runs to its own clock; a test need not sit through all of it.
+  if (hurry) await page.addStyleTag({ content: ":root { --crown-k: 0.25; }" });
+  const tap = page.locator(".home-crown-tap");
+  // Shown once its play is set up, in idle time after load.
+  await expect(tap).toBeVisible();
+  return tap;
+}
+
+// The cross's middle: while the play's stills are up the browser gives every
+// pointer to the root, so a tap then is made at a point, as a finger's is.
+async function crownPoint(page) {
+  const box = await page.locator(".home-crown-tap").boundingBox();
+  return [box.x + box.width / 2, box.y + box.height / 2];
+}
+
+// The play itself, not one of its fallbacks: a browser that took the plain
+// crossfade, or dropped the stills early, says why on the root.
+async function crownPlayed(page) {
+  expect(await page.evaluate(() => [document.documentElement.getAttribute("data-crown-plain"), document.documentElement.getAttribute("data-crown-early")])).toEqual([null, null]);
+}
+
+async function crownAtRest(page) {
+  await expect(page.locator(".home-hero")).not.toHaveClass(/crown-/, { timeout: 30_000 });
+  await expect(page.locator("html")).not.toHaveClass(/crown-|theme-anim|vault-hidden/, { timeout: 30_000 });
+}
+
+const crownState = (page) => page.evaluate(() => ({
+  look: document.documentElement.getAttribute("data-theme"),
+  stored: localStorage.getItem("office-theme"),
+  label: document.querySelector(".home-crown-tap").getAttribute("aria-label"),
+  pressed: Array.from(document.querySelectorAll(".theme-option[data-theme-choice][aria-pressed='true']"), (b) => b.getAttribute("data-theme-choice")).filter((v, i, all) => all.indexOf(v) === i).join(","),
+}));
+
+test("a tap on home's crown turns the look over, and the tap back restores the reader's choice", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
+  // Default on a light device: the tap turns to Apse and saves it; the tap
+  // back is Default again, not Nave.
+  let tap = await openCrown(page);
+  await expect(tap).toHaveAttribute("aria-label", "Switch to Apse");
+  // The stars come by a fetch and are set in the vault by day too (hidden),
+  // which WebKit may finish after the button shows: the page as it loaded
+  // is the page with them.
+  await expect(page.locator(".home-hero")).toHaveAttribute("data-stars", /^\d+$/);
+  const atRest = await page.evaluate(() => document.body.outerHTML);
+  await tap.click();
+  await expect(page.locator(".home-hero")).toHaveClass(/crown-on/);
+  await crownAtRest(page);
+  await crownPlayed(page);
+  expect(await crownState(page)).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
+  await tap.click();
+  await crownAtRest(page);
+  expect(await crownState(page)).toEqual({ look: null, stored: "default", label: "Switch to Apse", pressed: "default" });
+  // The settled page is the page as it loaded: nothing of the play is left.
+  expect(await page.evaluate(() => document.body.outerHTML)).toBe(atRest);
+  expect(await page.evaluate(() => [document.documentElement.getAttribute("style"), document.getAnimations().length])).toEqual([null, 0]);
+  // And it is a fresh load's page: the same words and boxes in the same look.
+  const boxes = () => page.evaluate(() => Array.from(document.querySelectorAll(".home-hero *"), (el) => {
+    const q = el.getBoundingClientRect();
+    return [el.className, Math.round(q.left), Math.round(q.top), Math.round(q.width), Math.round(q.height), getComputedStyle(el).color].join(" ");
+  }).join("\n"));
+  const settled = await boxes();
+  await page.reload();
+  await expect(page.locator(".home-crown-tap")).toBeVisible();
+  // The reloaded page's stars come by the same fetch, so wait for them as above.
+  await expect(page.locator(".home-hero")).toHaveAttribute("data-stars", /^\d+$/);
+  expect(await boxes()).toBe(settled);
+});
+
+test("the crown keeps Default with the device and gives a chosen Apse back", async ({ page }) => {
+  // Apse chosen on a dark device: the tap turns to Nave; the tap back is the
+  // reader's Apse, not Default.
+  await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "dark" });
+  const tap = await openCrown(page, { stored: "dark" });
+  await expect(tap).toHaveAttribute("aria-label", "Switch to Nave");
+  await tap.click();
+  await crownAtRest(page);
+  expect(await crownState(page)).toEqual({ look: "light", stored: "light", label: "Switch to Apse", pressed: "light" });
+  await tap.click();
+  await crownAtRest(page);
+  expect(await crownState(page)).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
+  // A look that matches the device's is saved as Default: Apse on a light
+  // device turns to Default, never to Nave.
+  await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
+  await expect(tap).toHaveAttribute("aria-label", "Switch to Nave");
+  await tap.click();
+  await crownAtRest(page);
+  expect(await crownState(page)).toEqual({ look: null, stored: "default", label: "Switch to Apse", pressed: "default" });
+  // The Menu's choice in between is the later word: the tap after it turns
+  // from that choice and restores nothing older.
+  await choosePreference(page, "Nave");
+  await tap.click();
+  await crownAtRest(page);
+  expect(await crownState(page)).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
+});
+
+// The play's clock slows through its linger (the sky's coloured light), every
+// part together, and keeps its pace on either side; the page's own timers keep
+// time with it. Measured on the running play, not a held one.
+for (const dir of ["dusk", "dawn"]) {
+  test(`the crown's ${dir} lingers on the coloured light, every part together`, async ({ page }) => {
+    test.setTimeout(60_000);
+    const dark = dir === "dusk";
+    await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
+    await openCrown(page, { stored: dark ? null : "dark", hurry: false });
+    const [x, y] = await crownPoint(page);
+    const [a, len] = LINGER_SPAN[dir];
+    const slow = Math.round(1000 / LINGER) / 1000;
+    // Real ms from the tap to timetable moment t.
+    const real = (t) => CROWN_PACE * (t + Math.max(0, Math.min(t, a + len) - a) * (LINGER - 1));
+    const state = () => page.evaluate(() => {
+      const anims = document.getAnimations()
+        .filter((an) => (an.animationName || "").startsWith("crown-") || String(an.effect?.pseudoElement || "").startsWith("::view-transition"))
+        .filter((an) => an.playState !== "finished");
+      return {
+        vt: anims.some((an) => String(an.effect?.pseudoElement || "").startsWith("::view-transition")),
+        rates: [...new Set(anims.map((an) => Math.round(an.playbackRate * 1000) / 1000))],
+      };
+    });
+    const t0 = Date.now();
+    await page.mouse.click(x, y);
+    const at = async (t) => page.waitForTimeout(Math.max(0, real(t) - (Date.now() - t0)));
+    await crownPlayed(page);
+    // The play's clock stands still while the browser makes its stills at the
+    // turn (650ms), longer in WebKit under load. Dawn's linger starts before
+    // the turn (400ms) and dusk's after it (800ms), so timing the rest of the
+    // linger and the play's end starts once the transition's own parts are up
+    // and every part is running at the linger's rate together.
+    await at(a);
+    const mark = Math.max(a, 650);
+    const postLinger = real(a + len) - real(mark);
+    if (a < 650) {
+      await expect.poll(() => state().then((s) => s.rates), { timeout: real(650) - real(a) + 8000, intervals: [100] }).toEqual([slow]);
+    }
+    await expect.poll(state, { timeout: 20_000, intervals: [100] }).toEqual({ vt: true, rates: [slow] });
+    const lingering = Date.now();
+    await expect.poll(() => state().then((s) => s.rates), { timeout: postLinger + 6000, intervals: [100] }).toEqual([1]);
+    // It held for its post-turn length, not a moment.
+    expect(Date.now() - lingering).toBeGreaterThan(postLinger * 0.75);
+    await crownAtRest(page);
+    // The page's own end kept time with its parts: from the post-turn mark, no
+    // later than the rest of the play and a margin.
+    expect(Date.now() - lingering).toBeLessThan(real(dark ? 4400 + 100 : 4000 + 100) - real(mark) + 4000);
+  });
+}
+
+// The page keeps answering through the whole play. WebKit stalled for
+// seconds (no script, timer or frame) while the new page's still stood at
+// an opacity of exactly 0 waiting for its glow (#923); the glow starts from a
+// thousandth instead. The watch starts once the transition's parts are up:
+// making the stills at the turn holds the page too, for a few hundred ms
+// alone and two or three seconds on a loaded runner, and that is the
+// browser's capture, not the stall.
+for (const dir of ["dusk", "dawn"]) {
+  test(`the page keeps answering through the crown's ${dir}`, async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
+    await openCrown(page, { stored: dir === "dusk" ? null : "dark", hurry: false });
+    const [x, y] = await crownPoint(page);
+    await page.evaluate(() => {
+      window.__gap = 0;
+      window.__watched = false;
+      const up = () => document.getAnimations().some((a) => String(a.effect?.pseudoElement || "").startsWith("::view-transition") && a.playState === "running");
+      let last = performance.now();
+      let watching = false;
+      const ch = new MessageChannel();
+      ch.port1.onmessage = () => {
+        const now = performance.now();
+        if (watching) window.__gap = Math.max(window.__gap, now - last);
+        // Asked only until the parts are up: it is costly in WebKit.
+        else if (up()) watching = window.__watched = true;
+        last = now;
+        setTimeout(() => ch.port2.postMessage(0), 20);
+      };
+      ch.port2.postMessage(0);
+    });
+    await page.mouse.click(x, y);
+    await crownPlayed(page);
+    await crownAtRest(page);
+    const { gap, watched } = await page.evaluate(() => ({ gap: window.__gap, watched: window.__watched }));
+    // The watch saw the transition's parts running …
+    expect(watched).toBe(true);
+    // … and the page never stood still for seconds under them.
+    expect(gap).toBeLessThan(2000);
+  });
+}
+
+test("a second tap while the crown plays is kept and plays the way back", async ({ page }) => {
+  // A whole dusk and a whole dawn, unhurried.
+  test.setTimeout(60_000);
+  await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
+  await openCrown(page, { hurry: false });
+  const [x, y] = await crownPoint(page);
+  await page.mouse.click(x, y);
+  await expect(page.locator("html")).toHaveClass(/crown-new/);
+  await page.waitForTimeout(900);
+  await crownPlayed(page);
+  await page.mouse.click(x, y);
+  // The play carries on: the look has turned and is not cut short.
+  expect((await crownState(page)).stored).toBe("dark");
+  await expect(page.locator(".home-hero")).toHaveClass(/crown-dawn/, { timeout: 15_000 });
+  await crownAtRest(page);
+  expect(await crownState(page)).toEqual({ look: null, stored: "default", label: "Switch to Apse", pressed: "default" });
+});
+
+test("Pray tapped while the crown plays opens the hour at once", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
+  await openCrown(page, { hurry: false });
+  const href = await page.locator(".pray-now").getAttribute("href");
+  const pray = await page.locator(".pray-now").boundingBox();
+  const [x, y] = await crownPoint(page);
+  await page.mouse.click(x, y);
+  await expect(page.locator("html")).toHaveClass(/crown-new/);
+  await page.waitForTimeout(600);
+  await page.mouse.click(pray.x + pray.width / 2, pray.y + pray.height / 2);
+  await page.waitForURL((url) => url.pathname === href);
+  // The choice was saved at the tap: the hour opens in the look it turned to.
+  expect(await page.evaluate(() => [localStorage.getItem("office-theme"), document.documentElement.getAttribute("data-theme")])).toEqual(["dark", "dark"]);
+});
+
+test("the crown plays nothing for a reader who asked for stillness or contrast, on a black day, or under forced colours", async ({ page }) => {
+  for (const [name, media, date] of [
+    ["reduced motion", { reducedMotion: "reduce" }, testDate],
+    ["more contrast", { contrast: "more" }, testDate],
+    ["All Souls", {}, "2026-11-02"],
+  ]) {
+    await page.emulateMedia({ reducedMotion: "no-preference", contrast: "no-preference", forcedColors: "none", colorScheme: "light", ...media });
+    await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch { /* no page yet */ } });
+    const tap = await openCrown(page, { date });
+    await page.evaluate(() => {
+      window.crownClasses = [];
+      const note = () => window.crownClasses.push(document.documentElement.className + " / " + document.querySelector(".home-hero").className);
+      new MutationObserver(note).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+      new MutationObserver(note).observe(document.querySelector(".home-hero"), { attributes: true, attributeFilter: ["class"] });
+    });
+    await tap.click();
+    await expect(page.locator("html"), name).toHaveAttribute("data-theme", "dark");
+    await crownAtRest(page);
+    // The Menu's own change, and none of the play's classes on the way.
+    expect(await page.evaluate(() => window.crownClasses.filter((c) => /crown-/.test(c))), name).toEqual([]);
+    expect(await crownState(page), name).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
+  }
+  // The themes do nothing under forced colours, so neither does the cross:
+  // its button is never shown, at load or when they come on later.
+  await page.emulateMedia({ reducedMotion: "no-preference", contrast: "no-preference", forcedColors: "none", colorScheme: "light" });
+  await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+  const tap = await openCrown(page);
+  await page.emulateMedia({ forcedColors: "active" });
+  await expect(tap).toBeHidden();
+  await page.reload();
+  await page.waitForTimeout(1200);
+  await expect(page.locator(".home-crown-tap")).toBeHidden();
+});
+
+test("the crown makes the Menu's change in an Android app's own browser, whose stills go missing", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({
+    baseURL,
+    userAgent: "Mozilla/5.0 (Linux; Android 10; K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/157.0.0.0 Mobile Safari/537.36",
+  });
+  try {
+    const page = await context.newPage();
+    const tap = await openCrown(page);
+    await page.evaluate(() => {
+      window.crownClasses = [];
+      new MutationObserver(() => window.crownClasses.push(document.documentElement.className)).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    });
+    await tap.click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await crownAtRest(page);
+    expect(await page.evaluate(() => window.crownClasses.filter((c) => /crown-/.test(c)))).toEqual([]);
+    expect(await crownState(page)).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
+  } finally { await context.close(); }
+});
+
+// The play's light, sampled. The play is stopped and set to every twentieth
+// of a second of its timetable (crown-play.js), and at each the picture is
+// read in three places: the head of the arch, the foot of the wall, and the
+// card under the frieze (its ground, and the ink on it). What these hold:
+// the light travels one way (dawn's first light once stepped back at the
+// turn), no place leaps between two neighbouring moments (the arch once
+// jumped), nothing starts with a kick, and the hours' names are readable
+// but for the moment their ink changes hands. The bounds are today's
+// figures and half as much again, or more (in 0-255 levels: `back` the
+// furthest any place steps against its travel, `step` the most between two
+// moments, `kick` the most a step differs from the one before; `faint` the
+// moments, of some sixty, at which the ink stands under 2:1).
+// (The page's act is a sixth shorter since the page began to turn with the
+// front: dusk's stars kindle closer together, and their light lifts the
+// arch a little against the night (5.06); dawn's card takes larger steps
+// (14.0, and a turn of 4.7 between them). The bounds follow, half as much
+// again.)
+const CROWN_LIGHT = {
+  dusk: { arch: { back: 7.5, step: 24, kick: 8 }, wall: { back: 2, step: 12, kick: 4 }, card: { back: 2, step: 12, kick: 4 }, faint: 5, after: 3.5 },
+  dawn: { arch: { back: 5, step: 24, kick: 7 }, wall: { back: 5, step: 22, kick: 7 }, card: { back: 2, step: 21, kick: 7 }, faint: 6, after: 3.5 },
+};
+// WebKit's figures, by the same rule from its own CI crown-light.json
+// attachments (master runs 44796624197 and 44778557572, identical). Its
+// stills and its thinner text read differently: the light takes its steps
+// a little more sharply on the wall and the card, and the hand-over of the
+// ink, measured by the darkest and lightest hundredth of the card, stands
+// under 2:1 for 7 or 8 moments where Chromium's stands for 3.
+// (dusk: arch back 1.18, wall step 15.76 and kick 2.51, card step 15.49 and
+// kick 3.22, faint 7, after 3.64; dawn: arch step 16.05, wall step 24.79 and
+// kick 8.35, card step 18.28 and kick 4.06, faint 8, after 2.94.)
+// WebKit leaves the hours' rows blank from the turn on in this held play,
+// on master too (#986), so its ink is the invitation's alone; since the
+// Night band gave the rows more of the card, that reads 1.93 after dusk
+// and 1.88 after dawn, under 2:1 for 20 and 23 moments. Its ink bounds are
+// those figures with a fifth to spare until #986 is mended.
+const CROWN_LIGHT_WEBKIT = {
+  dusk: { ...CROWN_LIGHT.dusk, wall: { back: 2, step: 24, kick: 4 }, card: { back: 2, step: 23.5, kick: 5 }, faint: 24, after: 1.6 },
+  dawn: { ...CROWN_LIGHT.dawn, wall: { back: 5, step: 37, kick: 12.5 }, card: { back: 2, step: 27.5, kick: 7 }, faint: 27, after: 1.6 },
+};
+for (const dir of ["dusk", "dawn"]) {
+  test(`the crown's ${dir} moves its light one way, without a leap, and keeps the hours readable`, async ({ page }, testInfo) => {
+    test.slow();
+    await holdCrown(page, dir);
+    // Nothing of the arch's outline is a part of the transition: a still of
+    // it sits off the live one and the outline steps as the stills go.
+    expect(
+      await page.evaluate(() => [...document.querySelectorAll(".home-arch, .home-arch *, .home-arch-fill, .home-arch-fill *, .home-lining")].map((el) => getComputedStyle(el).viewTransitionName).filter((name) => name && name !== "none")),
+    ).toEqual([]);
+    const geo = await page.evaluate(() => {
+      const box = (sel) => {
+        const q = document.querySelector(sel).getBoundingClientRect();
+        return { x: q.left, y: q.top, width: q.width, height: q.height };
+      };
+      return { hero: box(".home-hero"), frieze: box(".home-prayer-card > h2"), tap: box(".home-crown-tap"), W: innerWidth, H: innerHeight };
+    });
+    const { hero, frieze, tap, W, H } = geo;
+    const under = frieze.y + frieze.height + 20;
+    const boxes = {
+      arch: { x: hero.x + hero.width * 0.25, y: tap.y + tap.height + 10, width: hero.width * 0.5, height: frieze.y - 40 - (tap.y + tap.height + 10) },
+      wall: { x: 0, y: H - 26, width: W, height: 22 },
+      card: { x: hero.x + hero.width * 0.1, y: under, width: hero.width * 0.8, height: H - 30 - under },
+    };
+    const series = { arch: [], wall: [], card: [] }, ink = [];
+    for (let at = 700; at <= CROWN_LAST[dir]; at += 50) {
+      await seekCrown(page, at);
+      const img = pixels(await page.screenshot());
+      const scale = img.width / W;
+      series.arch.push(mean(lumas(img, boxes.arch, scale)));
+      series.wall.push(mean(lumas(img, boxes.wall, scale)));
+      const card = lumas(img, boxes.card, scale), ground = centile(card, 0.5);
+      series.card.push(ground);
+      // The ink is the darkest or the lightest of the card, whichever
+      // stands further from its ground.
+      ink.push(Math.max(contrast(ground, centile(card, 0.015)), contrast(ground, centile(card, 0.985))));
+    }
+    // (Kept with the run: the same figures every time.)
+    const kept = testInfo.outputPath("crown-light.json");
+    fs.writeFileSync(kept, JSON.stringify({ series, ink }));
+    await testInfo.attach("crown-light.json", { path: kept, contentType: "application/json" });
+    // Every figure is measured before any is judged, and all of them are
+    // named in a failure, so one run says how far each place stands from
+    // its bound in this browser.
+    const sign = dir === "dusk" ? -1 : 1;
+    const bounds = (testInfo.project.name.includes("webkit") ? CROWN_LIGHT_WEBKIT : CROWN_LIGHT)[dir];
+    const figures = {}, over = [];
+    for (const [name, values] of Object.entries(series)) {
+      let far = values[0], back = 0, step = 0, kick = 0;
+      values.forEach((v, i) => {
+        far = sign * v > sign * far ? v : far;
+        back = Math.max(back, sign * (far - v));
+        if (i) step = Math.max(step, Math.abs(v - values[i - 1]));
+        if (i > 1) kick = Math.max(kick, Math.abs(v - 2 * values[i - 1] + values[i - 2]));
+      });
+      // And it has made most of its journey by the last moment asked for.
+      const travel = sign * (values[values.length - 1] - values[0]);
+      const bound = bounds[name];
+      figures[name] = { back: +back.toFixed(2), step: +step.toFixed(2), kick: +kick.toFixed(2), travel: +travel.toFixed(1) };
+      if (back > bound.back) over.push(`${name} steps back`);
+      if (step > bound.step) over.push(`${name} leaps`);
+      if (kick > bound.kick) over.push(`${name} kicks`);
+      if (!(travel > 100)) over.push(`${name} falls short`);
+    }
+    const faint = ink.filter((c) => c < 2).length;
+    figures.ink = { before: +ink[0].toFixed(2), after: +ink[ink.length - 1].toFixed(2), faint };
+    if (!(ink[0] > 3.5)) over.push("the ink before is faint");
+    if (!(ink[ink.length - 1] > bounds.after)) over.push("the ink after is faint");
+    if (faint > bounds.faint) over.push("the ink is faint too long");
+    expect(over, JSON.stringify(figures)).toEqual([]);
+  });
+}
+
+// The first act (the cross, the light on the horizon) is held while the
+// browser makes the transition's stills and goes on from where it was. It
+// must be held where the glass has it, not where the page's thread last saw
+// it: those animations run on the compositor, which draws on while the
+// thread is busy, and held at the thread's stale time the first light
+// stepped back at the turn. Here the thread is kept busy for an eighth of
+// a second just before the hold, and every part must be held no earlier
+// than the clock then stood.
+test("the crown's first act is held at the turn where the glass has it", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.addInitScript(() => {
+    const real = Document.prototype.getAnimations;
+    Document.prototype.getAnimations = function (...args) {
+      if (!document.documentElement.classList.contains("crown-vt")) return real.apply(this, args);
+      Document.prototype.getAnimations = real;
+      const until = performance.now() + 125;
+      while (performance.now() < until) { /* busy */ }
+      const list = real.apply(this, args);
+      const now = performance.now();
+      const seen = list
+        .filter((a) => /^crown-/.test(a.animationName || "") && a.playState === "running" && typeof a.startTime === "number")
+        .map((a) => ({ a, name: a.animationName, due: (now - a.startTime) * (a.playbackRate || 1) }));
+      window.__crownHold = [];
+      // After the hold, which is the rest of this same task.
+      queueMicrotask(() => {
+        window.__crownHold = seen.map((p) => ({ name: p.name, state: p.a.playState, short: p.due - p.a.currentTime }));
+      });
+      return list;
+    };
+  });
+  const tap = await openCrown(page, { stored: "dark", hurry: false });
+  // Half pace keeps over a second of first-act headroom past the turn for the
+  // 125ms busy-wait while keeping the rest of the play well inside crownAtRest
+  // on a busy WebKit runner.
+  await page.addStyleTag({ content: ":root { --crown-k: 0.5; }" });
+  await tap.click();
+  await expect.poll(() => page.evaluate(() => (window.__crownHold || []).length)).toBeGreaterThan(0);
+  const held = await page.evaluate(() => window.__crownHold);
+  for (const part of held) {
+    expect(part.state, part.name).toBe("paused");
+    expect(part.short, `${part.name} held behind the glass`).toBeLessThanOrEqual(1);
+  }
+  await crownAtRest(page);
+});
+
+test("the crown's button is the card's last control, a 44px target clear of the date, named for what it does", async ({ page }) => {
+  for (const [width, height] of [[390, 844], [320, 568], [1280, 800]]) {
+    await page.setViewportSize({ width, height });
+    const tap = await openCrown(page);
+    const box = await tap.boundingBox();
+    expect(Math.min(box.width, box.height), `${width}x${height}`).toBeGreaterThanOrEqual(44);
+    const date = await page.locator(".home-date-link").boundingBox();
+    expect(box.y + box.height, `${width}x${height}: clear of the date's tap box`).toBeLessThanOrEqual(date.y + 0.5);
+    // Over the roundel it stands for.
+    const crown = await page.locator(".home-crown").boundingBox();
+    expect(Math.abs(box.x + box.width / 2 - (crown.x + crown.width / 2)), `${width}x${height}`).toBeLessThan(1);
+    expect(await page.evaluate(() => {
+      const controls = Array.from(document.querySelectorAll(".home-hero a[href], .home-hero button, .home-hero summary")).filter((el) => el.getClientRects().length);
+      return controls[controls.length - 1].className;
+    }), `${width}x${height}`).toBe("home-crown-tap");
+  }
 });
 
 for (const theme of ["light", "dark"]) {
@@ -777,11 +2319,12 @@ test("the frontispiece holds its width whatever the day is called", async ({ pag
     }
     expect(new Set(widths).size).toBe(1);
     // And it is the declared measure, not whatever the content happened to
-    // need: clamp(38rem, 10rem + 38vw, 48rem), scaled by the niche's zoom
-    // step (1.12 from 1700x1000).
-    const zoom = width >= 1700 ? 1.12 : 1;
-    const declared = Math.min(48 * 16, Math.max(38 * 16, 10 * 16 + 0.38 * width)) * zoom;
-    expect(Math.abs(widths[0] - declared)).toBeLessThanOrEqual(1);
+    // need: the landscape lancet's 37.5rem, scaled by the niche's zoom.
+    const zoom = await page.evaluate(() => {
+      const hero = document.querySelector(".home-hero");
+      return hero.getBoundingClientRect().width / hero.offsetWidth;
+    });
+    expect(Math.abs(widths[0] - 37.5 * 16 * zoom)).toBeLessThanOrEqual(1);
   }
 });
 
@@ -839,7 +2382,7 @@ function tileEdgePx(size) {
 test("the mobile home vault is one stable full-page layer without scroll", async ({
   page,
 }) => {
-  const read = async ({ width = 390, height, theme, scheme, asToday = false }) => {
+  const read = async ({ width = 390, height, theme, scheme, asToday = false, date = testDate }) => {
     const context = await page.context().browser().newContext({
       viewport: { width, height },
       isMobile: true,
@@ -848,7 +2391,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     });
     const sheet = await context.newPage();
     if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
-    await sheet.goto(`/?date=${testDate}`);
+    await sheet.goto(`/?date=${date}`);
     const seen = await sheet.evaluate((asToday) => {
       // The fixed test day is historical, so the server adds the recovery
       // line that local today's home never carries; drop it to measure the
@@ -856,7 +2399,6 @@ test("the mobile home vault is one stable full-page layer without scroll", async
       if (asToday) document.querySelectorAll(".not-today-notice").forEach((notice) => notice.remove());
       const field = getComputedStyle(document.body, "::before");
       const footerElement = document.querySelector("footer");
-      const tailpiece = getComputedStyle(footerElement, "::before");
       // The pointed head's halo is a filter on its outer courses.
       const halo = getComputedStyle(document.querySelector(".home-arch"));
       return {
@@ -864,11 +2406,8 @@ test("the mobile home vault is one stable full-page layer without scroll", async
         position: field.position,
         tileSize: field.maskSize || field.webkitMaskSize,
         phase: field.maskPosition || field.webkitMaskPosition,
-        // The footer closes on its painted tailpiece in both themes, with
-        // the same geometry, so the footer never moves when the theme
-        // changes.
-        tailpiece: tailpiece.maskImage || tailpiece.webkitMaskImage,
-        tailpieceShown: tailpiece.display !== "none",
+        // The phone's home carries no colophon; the wide home keeps it.
+        footerShown: getComputedStyle(footerElement).display !== "none",
         // Probe the night token rather than hard-coding #121c28 — the halo must
         // use whatever --bg is, not a particular hex.
         pageBg: getComputedStyle(document.documentElement).backgroundColor,
@@ -886,8 +2425,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
   expect(apse.position).toBe("fixed");
   expect(tileEdgePx(apse.tileSize)).toEqual({ w: 528, h: 528 });
   expect(isTopCenterPhase(apse.phase)).toBe(true);
-  expect(apse.tailpieceShown).toBe(true);
-  expect(apse.tailpiece).toContain("ornaments/tailpiece.svg");
+  expect(apse.footerShown).toBe(false);
   expect(apse.cardHalo).toContain(apse.pageBg);
   expect(apse.scrolls).toBe(false);
   // The night carries no powdering: its field is the vault alone.
@@ -903,15 +2441,18 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     expect(vaultPaints(nave.stars)).toBe(false);
     expect(powderPaints(nave.stars)).toBe(true);
     expect(nave.position).toBe("fixed");
-    expect(nave.tailpieceShown).toBe(true);
+    expect(nave.footerShown).toBe(false);
     expect(nave.scrolls).toBe(false);
     expect(nave.scrollHeight).toBe(apse.scrollHeight);
   }
 
   // On the day itself a phone's home fits its viewport whole, every hour in
-  // reach without scrolling, on a 375x667 screen as well.
-  const small = await read({ width: 375, height: 667, theme: "light", scheme: "light", asToday: true });
-  expect(small.scrolls).toBe(false);
+  // reach without scrolling, on a 375x667 screen as well, even on the year's
+  // longest heading (Gaudete with three commemorations and abstinence).
+  for (const date of [testDate, "2026-12-13"]) {
+    const small = await read({ width: 375, height: 667, theme: "light", scheme: "light", asToday: true, date });
+    expect(small.scrolls).toBe(false);
+  }
 
   // Representative phone corners (short, mid, tall). Tile size and top-centre
   // origin must not depend on viewport; a full width×height matrix is CI cost
@@ -1010,17 +2551,18 @@ test("the inscription band carries the frontispiece heading in both themes", asy
 });
 
 test("the inscription band keeps the season with the rest of the gilding", async ({ page }) => {
-  // Leaf lettering is gilding, so it veils in Passiontide and warms in
-  // Paschaltide like the ✦ and the drop caps. The timber course and the
-  // rubric-red ✠ do not move — the church veils its images, not its rubrics.
-  // Both themes read one pair of leaf colours, because the ground is dark in
-  // each.
+  // Leaf lettering is gilding, so it goes quiet in Lent, veils in Passiontide
+  // and warms in Paschaltide like the ✦ and the drop caps. The timber course
+  // and the rubric-red ✠ do not move — the church veils its images, not its
+  // rubrics. Both themes read one pair of leaf colours, because the ground is
+  // dark in each.
   for (const theme of ["light", "dark"]) {
     const ink = {};
     const ground = {};
     const cross = {};
     for (const [season, date] of [
-      ["ordinary", testDate],
+      ["ordinary", "2026-10-07"],
+      ["quiet", testDate],
       ["passiontide", "2026-04-08"],
       ["eastertide", "2026-04-20"],
     ]) {
@@ -1038,14 +2580,167 @@ test("the inscription band keeps the season with the rest of the gilding", async
       cross[season] = await sheet.locator(".cross").first().evaluate((node) => getComputedStyle(node).color);
       await context.close();
     }
-    expect(ink.passiontide).not.toBe(ink.ordinary);
-    expect(ink.eastertide).not.toBe(ink.ordinary);
-    expect(ink.eastertide).not.toBe(ink.passiontide);
-    expect(ground.passiontide).toBe(ground.ordinary);
-    expect(ground.eastertide).toBe(ground.ordinary);
-    expect(cross.passiontide).toBe(cross.ordinary);
-    expect(cross.eastertide).toBe(cross.ordinary);
+    expect(new Set([ink.ordinary, ink.quiet, ink.passiontide, ink.eastertide]).size).toBe(4);
+    for (const season of ["quiet", "passiontide", "eastertide"]) {
+      expect(ground[season]).toBe(ground.ordinary);
+      expect(cross[season]).toBe(cross.ordinary);
+    }
   }
+});
+
+test("the hours' sun and moon and the Apse's gilt tituli keep the season", async ({ page }) => {
+  // The sun and moon are images, and Apse's tituli are gilt, so they go
+  // quiet, veil and warm with the drop caps. Nave's tituli are painted red
+  // ochre and stay; Apse's moon is silver and keeps its own ink at Eastertide.
+  const ink = {};
+  for (const theme of ["light", "dark"]) {
+    for (const [season, date] of [["ordinary", "2026-10-07"], ["quiet", "2026-03-24"], ["passiontide", "2026-04-08"], ["eastertide", "2026-04-20"]]) {
+      const context = await page.context().browser().newContext();
+      const sheet = await context.newPage();
+      await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
+      const sign = async () => sheet.locator(".hour-header .ornament-headpiece > span[data-sign]")
+        .evaluate((node) => getComputedStyle(node).backgroundColor);
+      await sheet.goto(`/lauds/${date}`);
+      const sun = await sign();
+      const titulus = await sheet.locator(".antiphon em").first().evaluate((node) => getComputedStyle(node).color);
+      await sheet.goto(`/vespers/${date}`);
+      ink[`${theme} ${season}`] = { sun, moon: await sign(), titulus };
+      await context.close();
+    }
+    const [ordinary, quiet, veiled, paschal] = ["ordinary", "quiet", "passiontide", "eastertide"].map((s) => ink[`${theme} ${s}`]);
+    expect(new Set([ordinary.sun, quiet.sun, veiled.sun, paschal.sun]).size).toBe(4);
+    expect(quiet.moon).not.toBe(ordinary.moon);
+    expect(veiled.moon).not.toBe(ordinary.moon);
+    if (theme === "dark") {
+      expect(paschal.moon).toBe(ordinary.moon);
+      expect(new Set([ordinary.titulus, quiet.titulus, veiled.titulus, paschal.titulus]).size).toBe(4);
+    } else {
+      expect(paschal.moon).not.toBe(ordinary.moon);
+      for (const s of [quiet, veiled, paschal]) expect(s.titulus).toBe(ordinary.titulus);
+    }
+  }
+});
+
+test("a bare hour sets its capitals in the muted ink, puts out its sun, and darkens the Apse vault under the veil", async ({ page }) => {
+  // The Triduum's hours and the Office of the Dead are said without hymn or
+  // Gloria Patri, and the page takes off its leaf with them (hour-bare): the
+  // drop caps are set in --muted rather than the gilding, the headpiece
+  // carries no sun or moon and the title's rule closes over its place (the
+  // little hours keep their cross), and on the Apse a veiled bare hour's
+  // vault has no stars — the Triduum's, not All Souls', whose stars stay.
+  const rgb = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`;
+  };
+  const read = async (path, theme) => {
+    await openDatedPage(page, path, theme);
+    return page.evaluate(() => {
+      const body = getComputedStyle(document.body);
+      const head = document.querySelector(".hour-header");
+      const sign = head.querySelector(".ornament-headpiece > span[data-sign]");
+      const cross = head.querySelector(".ornament-headpiece > span:not([data-sign])");
+      return {
+        bare: document.body.classList.contains("hour-bare"),
+        cap: getComputedStyle(document.querySelector(".psalm-verses .verse:first-child"), "::first-letter").color,
+        muted: body.getPropertyValue("--muted").trim(),
+        ornament: body.getPropertyValue("--ornament").trim(),
+        sign: sign && getComputedStyle(sign).display,
+        cross: cross && getComputedStyle(cross).display,
+        rule: getComputedStyle(head).getPropertyValue("--title-rule-break").trim(),
+        vault: body.getPropertyValue("--apse-vault").trim(),
+        // The ending's field: home's sky tile by night, the powdering by day.
+        field: getComputedStyle(document.querySelector(".hour-epilogue"), "::before").maskImage,
+        // What the ending's two fields paint: under the veil by night, nothing at all.
+        fieldInks: [
+          getComputedStyle(document.querySelector(".hour-epilogue"), "::before").backgroundColor,
+          getComputedStyle(document.querySelector("footer"), "::after").backgroundColor,
+        ],
+      };
+    });
+  };
+  for (const theme of ["light", "dark"]) {
+    const goodFriday = await read("/lauds/2026-04-10", theme);
+    expect(goodFriday.bare).toBe(true);
+    expect(goodFriday.cap).toBe(rgb(goodFriday.muted));
+    expect(goodFriday.sign).toBe("none");
+    expect(goodFriday.rule).toBe("0px");
+    expect(goodFriday.vault).toBe("none");
+    expect(goodFriday.field.includes("sky-tile.svg")).toBe(false);
+    const clear = (ink) => ink === "transparent" || /rgba\(.*,\s*0\)$|\/ 0\)$/.test(ink);
+    if (theme === "dark") for (const ink of goodFriday.fieldInks) expect(clear(ink), ink).toBe(true);
+    // Prime keeps its cross, and the rule its break.
+    const prime = await read("/prime/2026-04-10", theme);
+    expect(prime.bare).toBe(true);
+    expect(prime.cross).not.toBe("none");
+    expect(prime.rule).not.toBe("0px");
+    if (theme === "dark") for (const ink of prime.fieldInks) expect(clear(ink), ink).toBe(true);
+    // All Souls is bare without the veil: the Apse's stars stay gold.
+    const allSouls = await read("/lauds/2026-11-02", theme);
+    expect(allSouls.bare).toBe(true);
+    expect(allSouls.cap).toBe(rgb(allSouls.muted));
+    expect(allSouls.sign).toBe("none");
+    expect(allSouls.vault === "none").toBe(theme === "light");
+    // A Lenten feria keeps its leaf, quiet; Holy Saturday's Vespers is Easter's.
+    for (const path of ["/lauds/2026-03-11", "/vespers/2026-04-11"]) {
+      const lit = await read(path, theme);
+      expect(lit.bare).toBe(false);
+      expect(lit.cap).toBe(rgb(lit.ornament));
+      expect(lit.sign).not.toBe("none");
+      expect(lit.rule).toBe("1.25rem");
+      expect(lit.vault === "none").toBe(theme === "light");
+      expect(lit.field.includes(theme === "light" ? "powder.svg" : "sky-tile.svg")).toBe(true);
+    }
+  }
+});
+
+test("Vespers of the Dead on the eve of All Souls goes bare where it begins", async ({ page }) => {
+  // Diurnal pp. 641–642: Vespers of All Saints keep their gilding and frame;
+  // from "Vespers of the Dead" (section-bare) the caps take the muted ink.
+  const rgb = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`;
+  };
+  for (const theme of ["light", "dark"]) {
+    await openDatedPage(page, "/vespers/2026-11-01", theme);
+    const got = await page.evaluate(() => {
+      const body = getComputedStyle(document.body);
+      const heading = document.querySelector(".elements > .section-heading.section-bare");
+      const verses = [...document.querySelectorAll(".psalm-verses .verse:first-child")];
+      const after = (v) => heading.compareDocumentPosition(v) & Node.DOCUMENT_POSITION_FOLLOWING;
+      const cap = (v) => getComputedStyle(v, "::first-letter").color;
+      return {
+        bare: document.body.classList.contains("hour-bare"),
+        heading: heading && heading.textContent,
+        before: verses.filter((v) => !after(v)).map(cap),
+        within: verses.filter(after).map(cap),
+        muted: body.getPropertyValue("--muted").trim(),
+        ornament: body.getPropertyValue("--ornament").trim(),
+      };
+    });
+    expect(got.bare).toBe(false);
+    expect(got.heading).toBe("Vespers of the Dead");
+    expect(got.before.length).toBeGreaterThan(0);
+    expect(got.within.length).toBe(6); // five psalms and the Magnificat
+    expect(got.before.every((c) => c === rgb(got.ornament))).toBe(true);
+    expect(got.within.every((c) => c === rgb(got.muted))).toBe(true);
+  }
+});
+
+test("the Apse lifts the hour's colour band as home lifts its card, and home spaces its fasting badges", async ({ page }) => {
+  const band = async (path, theme) => {
+    await openDatedPage(page, path, theme);
+    return page.locator(".color-band").evaluate((node) => getComputedStyle(node).backgroundColor);
+  };
+  // Violet (an Ember day) and red (an Ember day in Pentecost) sink into the night unlifted.
+  expect(await band("/lauds/2026-09-16", "light")).toBe("rgb(106, 58, 138)");
+  expect(await band("/lauds/2026-09-16", "dark")).toBe("rgb(141, 98, 173)");
+  expect(await band("/lauds/2026-06-03", "light")).toBe("rgb(176, 42, 36)");
+  expect(await band("/lauds/2026-06-03", "dark")).toBe("rgb(201, 80, 63)");
+  // White is the vestment's linen in both themes.
+  expect(await band("/lauds/2026-12-25", "dark")).toBe("rgb(232, 224, 204)");
+  // Ash Wednesday's two badges stand a space apart.
+  await openDatedPage(page, "/?date=2026-02-25");
+  expect(await page.locator(".penitential").evaluate((node) => node.textContent.trim().replace(/\s+/g, " "))).toBe("Fasting Abstinence");
 });
 
 // The lozenge carries the day's liturgical colour; the colour is the same in
@@ -1087,27 +2782,66 @@ test("hour titles stand at one height under the sun, the moon and the cross", as
   expect(Math.abs((await titleTop("vespers")) - lauds)).toBeLessThan(0.5);
 });
 
-// On a phone the date takes its own line above the day's name, so the
-// separator never ends a line; on a wide screen the parts share one line.
+// The date and the season share one muted line, so its separator never ends
+// a line; the day's name stands under them in the text's ink, a size up.
 test("the hour's date line never strands its separator", async ({ page }) => {
   await openDatedPage(page, "/lauds/2026-03-31");
   const parts = page.locator(".hour-meta-part");
   await expect(parts).toHaveCount(3);
+  await expect(page.locator(".hour-meta-sep")).toHaveCount(1);
   const rows = async () => parts.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
-  const phone = await rows();
-  expect(phone[0]).toBeLessThan(phone[1]);
-  expect(phone[1]).toBe(phone[2]);
-  await expect(page.locator(".hour-meta-sep").first()).toBeHidden();
-  await expect(page.locator(".hour-meta-sep").nth(1)).toBeVisible();
-  await page.setViewportSize({ width: 1280, height: 900 });
-  const laptop = await rows();
-  expect(new Set(laptop).size).toBe(1);
-  await expect(page.locator(".hour-meta-sep").first()).toBeVisible();
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    const [date, season, feast] = await rows();
+    expect(date).toBe(season);
+    expect(feast).toBeGreaterThan(date);
+    await expect(page.locator(".hour-meta-sep")).toBeVisible();
+  }
+  const ink = await page.evaluate(() => {
+    const feast = getComputedStyle(document.querySelector(".hour-meta-feast"));
+    const meta = getComputedStyle(document.querySelector(".hour-meta"));
+    return { feast: feast.color, text: getComputedStyle(document.body).color, larger: parseFloat(feast.fontSize) > parseFloat(meta.fontSize) };
+  });
+  expect(ink.feast).toBe(ink.text);
+  expect(ink.larger).toBe(true);
+});
+
+// On a first-class day the frame narrows the measure: each disclosure under
+// the title keeps one line, its caret beside its words, and where the two do
+// not fit side by side they stand one above the other.
+test("the hour's disclosures never break inside themselves", async ({ page }) => {
+  for (const [width, size] of [[390, "default"], [375, "default"], [320, "default"], [375, "large"]]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
+    await openDatedPage(page, "/vespers/2026-12-25");
+    // The fallback face is wider than EB Garamond: measure the face the reader gets.
+    await page.evaluate(() => document.fonts.ready);
+    const boxes = await page.locator(".hour-context-controls > details > summary:visible").evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const tops = [...range.getClientRects()].filter((q) => q.width > 1).map((q) => q.top);
+        // Spans of other faces sit a pixel or two apart on one line; a second line is a line below.
+        const lines = 1 + tops.filter((t) => t - Math.min(...tops) > 8).length;
+        return { left: r.left, right: r.right, height: r.height, lines: Math.min(lines, 2) };
+      }),
+    );
+    for (const box of boxes) {
+      expect(box.lines, `${width} ${size}`).toBe(1);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      expect(box.left).toBeGreaterThanOrEqual(0);
+      expect(box.right).toBeLessThanOrEqual(width);
+    }
+  }
 });
 
 // A psalm's Latin incipit shares the label's line with a dot between them,
 // or stands on its own line beneath without the dot: the dot never ends a
-// line alone. Sunday Lauds has Psalm 93's long title, stacked on a phone.
+// line alone. Sunday Lauds has Psalm 93's long title, stacked on a phone, and
+// the Song of the Three Children, whose name and incipit may outrun even a
+// laptop's measure (Chromium's, not WebKit's): its name stays whole and the
+// incipit goes beneath.
 test("psalm titles stack their Latin incipit without a stranded dot", async ({ page }) => {
   await openDatedPage(page, "/lauds/2026-11-01");
   const labels = page.locator(".item-label:has(.label-sep)");
@@ -1119,15 +2853,16 @@ test("psalm titles stack their Latin incipit without a stranded dot", async ({ p
     const stacked = el.classList.contains("stacked");
     const sepShown = getComputedStyle(sep).display !== "none";
     const lines = Math.round(incipit.getBoundingClientRect().top) > Math.round(el.getBoundingClientRect().top) + 2;
-    return { stacked, ok: stacked ? !sepShown && lines : sepShown && !lines };
+    return { stacked, psalm: Boolean(el.closest(".psalm")), ok: stacked ? !sepShown && lines : sepShown && !lines };
   }));
   const phone = await check();
   expect(phone.every((l) => l.ok)).toBe(true);
   expect(phone.some((l) => l.stacked)).toBe(true);
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.waitForFunction(() => !document.querySelector(".item-label.stacked"));
+  await page.waitForFunction(() => !document.querySelector(".psalm > .item-label.stacked"));
   const laptop = await check();
-  expect(laptop.every((l) => l.ok && !l.stacked)).toBe(true);
+  expect(laptop.every((l) => l.ok)).toBe(true);
+  expect(laptop.filter((l) => l.psalm).every((l) => !l.stacked)).toBe(true);
 });
 
 // Every threshold between the office's parts carries the painted cross,
@@ -1150,6 +2885,78 @@ test("Chapter and Hymn headings carry the section cross", async ({ page }) => {
   expect(marks.chapter.height).toBeGreaterThan(5);
   expect(marks.chapter).toEqual(marks.responsory);
   expect(marks.hymn).toEqual(marks.responsory);
+});
+
+// iOS Safari sends a click only to what it judges tappable; a tap on the
+// page's text or the header's bare bar produces none, so the overlays must not
+// wait on a click to hear a tap outside them. Mimic that here by swallowing
+// every click whose target is not a control before the page's listeners see it.
+test("menus put away on a tap iOS Safari sends no click for", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.addEventListener("click", (e) => {
+      if (!e.target.closest("a, button, input, select, textarea, label, summary")) {
+        e.stopImmediatePropagation();
+      }
+    }, true);
+  });
+  await openDatedPage(page, `/lauds?date=${testDate}`);
+
+  const menu = page.locator(".site-menu");
+  await page.getByText("Menu", { exact: true }).tap();
+  await expect(menu).toHaveAttribute("open", "");
+  // Beside the word, on the header's bar: still outside the menu's summary.
+  // WebKit moves this tap's click onto the summary; it must not reopen it.
+  const shell = await page.locator(".site-nav-shell").boundingBox();
+  await page.touchscreen.tap(shell.x + shell.width - 2, shell.y + shell.height / 2);
+  await expect(menu).not.toHaveAttribute("open", "");
+  await page.getByText("Menu", { exact: true }).tap();
+  await expect(menu).toHaveAttribute("open", "");
+  // The page under the open menu is inert, so the tap lands on the body
+  // beneath the footer's words: tapped where they are, not at the element.
+  const footerLine = await page.locator("footer > p").first().boundingBox();
+  await page.touchscreen.tap(footerLine.x + footerLine.width / 2, footerLine.y + footerLine.height / 2);
+  await expect(menu).not.toHaveAttribute("open", "");
+  // The word itself still closes it as well as opening it.
+  await page.getByText("Menu", { exact: true }).tap();
+  await page.getByText("Menu", { exact: true }).tap();
+  await expect(menu).not.toHaveAttribute("open", "");
+
+  // A wide iPad's Settings is the same kind of overlay.
+  await page.setViewportSize({ width: 1024, height: 768 });
+  const settings = page.locator(".site-settings");
+  await settings.locator("summary").tap();
+  await expect(settings).toHaveAttribute("open", "");
+  await page.locator("footer > p").first().tap();
+  await expect(settings).not.toHaveAttribute("open", "");
+});
+
+// The header's overlays are one state: at most one is open, and crossing the
+// breakpoint puts it away, so a Settings opened wide does not come back after a
+// trip through the phone layout (iOS and Android hold the same Overlay).
+test("crossing the breakpoint puts the header's overlay away", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await openDatedPage(page, `/lauds?date=${testDate}`);
+  const menu = page.locator(".site-menu");
+  const settings = page.locator(".site-settings");
+  await settings.locator("summary").click();
+  await expect(settings).toHaveAttribute("open", "");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(settings).not.toHaveAttribute("open", "");
+  await expect(menu).not.toHaveAttribute("open", "");
+  await page.getByText("Menu", { exact: true }).click();
+  await expect(menu).toHaveAttribute("open", "");
+
+  // Wide again: the menu is the desktop nav, and Settings stays shut.
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await expect(menu).toHaveAttribute("open", "");
+  await expect(settings).not.toHaveAttribute("open", "");
+  await expect(page.locator(".settings-prefs")).toBeHidden();
+  // Escape still finds the overlay open now, whichever it is.
+  await settings.locator("summary").click();
+  await page.keyboard.press("Escape");
+  await expect(settings).not.toHaveAttribute("open", "");
+  await expect(settings.locator("summary")).toBeFocused();
 });
 
 test("desktop navigation and frontispiece remain composed", async ({ page }) => {
@@ -1192,6 +2999,7 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
   await expect(settings.locator("summary")).toBeFocused();
   await expect(page.getByRole("heading", { name: "Morning", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Evening", exact: true })).toBeVisible();
+  await expect(page.locator(".home-hour-links.is-ruled")).toHaveCount(1);
   const rules = await page.evaluate(() => {
     const isVisibleRule = (width, style, color) => {
       const alpha = color.match(/^rgba?\([^,]+,[^,]+,[^,]+(?:,\s*([^)]+))?\)$/)?.[1];
@@ -1203,48 +3011,43 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
         alphaValue > 0
       );
     };
-    const directory = getComputedStyle(document.querySelector(".home-hour-links"));
-    const label = getComputedStyle(document.querySelector(".home-hour-group-label"));
-    const dividedHour = getComputedStyle(
-      document.querySelector(".home-hour-group-morning .home-hour-link + .home-hour-link"),
-    );
-    const finalGroup = getComputedStyle(document.querySelector(".home-hour-group:last-child"));
+    const rule = (el, side) => {
+      const style = getComputedStyle(el);
+      return isVisibleRule(
+        style.getPropertyValue(`border-${side}-width`),
+        style.getPropertyValue(`border-${side}-style`),
+        style.getPropertyValue(`border-${side}-color`),
+      );
+    };
+    const directory = document.querySelector(".home-hour-links");
+    const label = document.querySelector(".home-hour-group-label");
+    const dividedHour = document.querySelector(".home-hour-group-morning .home-hour-link + .home-hour-link");
+    const finalGroup = document.querySelector(".home-hour-group:last-of-type");
+    const point = getComputedStyle(dividedHour, "::before");
     return {
-      directoryLeft: isVisibleRule(
-        directory.borderLeftWidth,
-        directory.borderLeftStyle,
-        directory.borderLeftColor,
-      ),
-      directoryRight: isVisibleRule(
-        directory.borderRightWidth,
-        directory.borderRightStyle,
-        directory.borderRightColor,
-      ),
-      labelRight: isVisibleRule(
-        label.borderRightWidth,
-        label.borderRightStyle,
-        label.borderRightColor,
-      ),
-      // Full-height borders remain absent between the unequal 2/3/2 groups.
-      // Short decorative hairlines separate neighbours within each band.
-      dividedHourLeft: isVisibleRule(
-        dividedHour.borderLeftWidth,
-        dividedHour.borderLeftStyle,
-        dividedHour.borderLeftColor,
-      ),
-      finalGroupBottom: isVisibleRule(
-        finalGroup.borderBottomWidth,
-        finalGroup.borderBottomStyle,
-        finalGroup.borderBottomColor,
-      ),
+      // The table is ruled by hand (app.js), so its CSS borders stand down:
+      // a frame and the joints between bands, drawn as the painter's lines.
+      ruled: directory.classList.contains("is-ruled"),
+      ruledLines: directory.querySelectorAll(":scope > svg.home-rules path").length > 0,
+      directoryLeft: rule(directory, "left"),
+      directoryRight: rule(directory, "right"),
+      finalGroupBottom: rule(finalGroup, "bottom"),
+      // The periods are the margin's index with no cell or upright of their
+      // own, and neighbouring hours are parted by a gilt point, not a rule.
+      labelRight: rule(label, "right"),
+      dividedHourLeft: rule(dividedHour, "left"),
+      giltPoint: point.content !== "none" && parseFloat(point.width) < 5,
     };
   });
   expect(rules).toEqual({
-    directoryLeft: true,
-    directoryRight: true,
-    labelRight: true,
+    ruled: true,
+    ruledLines: true,
+    directoryLeft: false,
+    directoryRight: false,
+    finalGroupBottom: false,
+    labelRight: false,
     dividedHourLeft: false,
-    finalGroupBottom: true,
+    giltPoint: true,
   });
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1),
@@ -1265,7 +3068,7 @@ test("desktop frontispiece fits its breakpoint and reader sizes", async ({ page 
 
       const geometry = await page.evaluate(() => {
         const hero = document.querySelector(".home-hero").getBoundingClientRect();
-        const targetHeights = Array.from(document.querySelectorAll(".home-hour-link")).map(
+        const targetHeights = Array.from(document.querySelectorAll("a.home-hour-link")).map(
           (link) => link.getBoundingClientRect().height,
         );
         return {
@@ -1509,6 +3312,10 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
 test("themes never change layout", async ({ browser }) => {
   // Light and Apse differ only in colour and material. Every element box and
   // every text line must match, so geometry tests need run in one theme.
+  // Eleven pairs of pages, the ordo's loaded twice, and the year's 14,000
+  // boxes: about 12s alone and 29s beside three other workers, which ran
+  // past the default 30s budget in CI. It takes the slow test's budget.
+  test.slow();
   const open = async (theme) => {
     const context = await browser.newContext();
     await context.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
@@ -1518,11 +3325,38 @@ test("themes never change layout", async ({ browser }) => {
     await sheet.setViewportSize({ width, height: 900 });
     await sheet.goto(path);
     await sheet.evaluate(() => document.fonts.ready);
+    // The ordo's faces are font-display: optional, so a face that misses the
+    // first paint is replaced by a fallback for the whole visit. Which visits
+    // miss is a race, separate for each theme's page. The bold face is not
+    // preloaded, and the fasting and abstinence columns are its only use, so
+    // at 1280px one theme sometimes set the column's strut in Georgia and
+    // the other in Garamond (#798). Measure the cached-font visit, as the
+    // visual baselines do.
+    if (path.startsWith("/calendar/")) {
+      await sheet.reload();
+      await sheet.evaluate(() => document.fonts.ready);
+    }
+    // Home's crown button ships hidden and is shown once its set-up is done,
+    // in idle time a little after load: a fingerprint taken on either side
+    // of that moment has or lacks its box, and the two themes' pages do not
+    // reach it together. Measure with it shown.
+    if (await sheet.locator(".home-crown-tap").count()) {
+      await sheet.locator(".home-crown-tap").waitFor({ state: "visible" });
+    }
     return sheet.evaluate(() => {
       const round = (r) => [r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10)).join(",");
       const range = document.createRange();
       return {
-        boxes: [...document.querySelectorAll("body *")].map((el) => round(el.getBoundingClientRect())),
+        // Home's night sky is the Apse's material, as the vault is the
+        // page's, the lining moves out to the sky's edge, and in the wide
+        // niche the panel sits inside the night's slate course where by day
+        // it meets the reveal's fillet: painted layers, absolutely placed and
+        // aria-hidden, that move no other box. So is the crown's vault
+        // (its ground, stars and light), which the play turns over: its
+        // stars come by a fetch, and land on either side of the measure.
+        boxes: [...document.querySelectorAll("body *")]
+          .filter((el) => !el.closest(".home-sky, .home-lining, .home-vault") && !(innerWidth > 700 && el.closest(".home-arch-fill")))
+          .map((el) => round(el.getBoundingClientRect())),
         lines: [...document.querySelectorAll(".verse, .plain-line, .hymn-line, .antiphon")].map((el) => {
           range.selectNodeContents(el);
           return [...range.getClientRects()].map(round).join(";");
@@ -1658,8 +3492,8 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
   const opening = psalms.nth(0).locator(".verse").first();
   const following = psalms.nth(1).locator(".verse").first();
   const original = await opening.textContent();
-  await expect(psalms.nth(0)).toContainText("Psalm 145b");
-  await expect(psalms.nth(1)).toContainText("Psalm 146");
+  await expect(psalms.nth(0)).toContainText("Psalm 144b (145b)");
+  await expect(psalms.nth(1)).toContainText("Psalm 145 (146)");
   // A one-line verse keeps its full-size initial and natural text flow.
   // Returning to wide after narrow also exercises font-size changes.
   for (const width of [1280, 390, 768, 320, 1280]) {
@@ -1693,7 +3527,9 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
         const rect = el.getBoundingClientRect();
         return {
           size: cap.fontSize,
-          initial: cap.initialLetter,
+          // Engines without initial-letter (WebKit, Firefox) take the
+          // stylesheet's float fallback; matching the next psalm's letter size holds the rank there.
+          initial: CSS.supports("initial-letter", "2") ? cap.initialLetter : null,
           height: rect.height,
           leading: parseFloat(getComputedStyle(el).lineHeight),
           halfVerseGap: secondHalf.top - firstWord.top,
@@ -1702,7 +3538,7 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
         };
       });
       expect(geometry.size).toBe(await following.evaluate(el => getComputedStyle(el, "::first-letter").fontSize));
-      expect(geometry.initial).toBe(elevated ? "2 1" : "2");
+      if (geometry.initial !== null) expect(geometry.initial).toBe(elevated ? "2 1" : "2");
       expect(geometry.height).toBeGreaterThanOrEqual(geometry.leading - 1);
       expect(geometry.nextTop).toBeGreaterThanOrEqual(geometry.bottom);
       if (width >= 768) {
@@ -1719,7 +3555,7 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
   // Light only: themes share one geometry, held page-wide by "themes never change layout".
   const theme = "light";
   await openDatedPage(page, "/lauds/2026-09-13", theme);
-  const psalm = page.locator(".psalm").filter({ hasText: "Psalm 63" });
+  const psalm = page.locator(".psalm").filter({ hasText: "Psalm 62 (63)" });
   const opening = psalm.locator(".verse").first();
   const original = await opening.textContent();
   for (const size of ["normal", "large"]) {
@@ -1742,6 +3578,27 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
       expect(lines).toBeCloseTo(elevated ? 1 : 2, 1);
       expect(await opening.evaluate(el => el.classList.contains("initial-elevated"))).toBe(elevated);
       expect(await opening.textContent()).toBe(original);
+      // Divided, the "Sit." cue ends the first line beside its mediant: at the
+      // head of the second, beside the initial, it read as the half-verse's
+      // first word.
+      if (divided) {
+        const bottoms = await opening.evaluate(el => {
+          const cue = el.querySelector(".mediant + .posture");
+          const after = cue.nextSibling;
+          const range = document.createRange();
+          const start = after.textContent.search(/\S/);
+          range.setStart(after, start);
+          range.setEnd(after, start + 1);
+          return {
+            leading: parseFloat(getComputedStyle(el).lineHeight),
+            first: el.querySelector(".initial-word").getBoundingClientRect().bottom,
+            cue: cue.getBoundingClientRect().bottom,
+            after: range.getBoundingClientRect().bottom,
+          };
+        });
+        expect(Math.abs(bottoms.cue - bottoms.first)).toBeLessThan(bottoms.leading / 2);
+        expect(bottoms.after - bottoms.cue).toBeGreaterThan(bottoms.leading / 2);
+      }
       // Repeated measurement (also used for printing/font changes) must not
       // alternate between natural and divided settings at the same measure.
       await page.evaluate(() => {
@@ -1849,16 +3706,18 @@ test("prose openings across the alphabet preserve words and clear their initials
 
 test("Prime hymn initial clears its second metrical line on narrow pages", async ({ page }) => {
   const primeHours = [
-    { date: "2026-03-15", label: "Sunday" },
-    { date: "2026-06-18", label: "feria" },
+    { hour: "prime", date: "2026-03-15", label: "Sunday" },
+    { hour: "prime", date: "2026-06-18", label: "feria" },
+    // "Proclaims the morn's approaching ray:" turns over on a phone.
+    { hour: "lauds", date: "2026-10-13", label: "Lauds" },
   ];
 
-  for (const { date, label: hymn } of primeHours) {
+  for (const { hour, date, label: hymn } of primeHours) {
     // Light only: themes share one geometry, held page-wide by "themes never change layout".
     const theme = "light";
     for (const width of [320, 390]) {
       await page.setViewportSize({ width, height: 844 });
-      await openDatedPage(page, `/prime/${date}`, theme);
+      await openDatedPage(page, `/${hour}/${date}`, theme);
 
       const geometry = await page.evaluate(() => {
         const [opening, secondLine] = document.querySelectorAll(
@@ -1878,14 +3737,19 @@ test("Prime hymn initial clears its second metrical line on narrow pages", async
           cap: firstGlyph(opening),
           secondLine: firstGlyph(secondLine),
           openingLeft: opening.getBoundingClientRect().left,
-          secondLineIndent: parseFloat(getComputedStyle(secondLine).textIndent),
-          secondLinePadding: parseFloat(getComputedStyle(secondLine).paddingLeft),
+          rem: parseFloat(getComputedStyle(document.documentElement).fontSize),
         };
       });
+      // Its rows after the first (rowStartsIn leaves out the line's first letter).
+      const secondRows = await page.locator(".hymn-stanza-opening .hymn-line").nth(1).evaluate(rowStartsIn);
 
       const label = `${hymn}/${theme}/${width}px`;
-      expect(geometry.secondLineIndent, `${label} second-line outdent`).toBe(0);
-      expect(geometry.secondLinePadding, `${label} second-line hang padding`).toBe(0);
+      // Its own turnover steps in from where the line starts, beside the
+      // initial or at the stanza edge; it never falls back under the letter.
+      const rows = [geometry.secondLine.left, ...secondRows.slice(1)];
+      for (const left of rows.slice(1)) {
+        expect(left - rows[0], `${label} second line's turnover steps in`).toBeCloseTo(0.9 * geometry.rem, 0);
+      }
       const yOverlap =
         geometry.secondLine.top < geometry.cap.bottom - 0.5 &&
         geometry.secondLine.bottom > geometry.cap.top + 0.5;
@@ -1930,6 +3794,25 @@ test("posture cues sit in the psalm verses as red rubric runs", async ({ page })
   expect(style.smaller).toBe(true);
 });
 
+test("the Little Hours show posture cues only when a priest or deacon leads", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/prime/2026-10-04?form=private");
+  const psalm = page.locator(".psalm").first();
+  const cues = psalm.locator(".posture");
+  await expect(cues.first()).toBeAttached();
+  for (const cue of await cues.all()) await expect(cue).toBeHidden();
+  for (const form of ["deacon", "priest"]) {
+    await choosePrayerForm(page, form);
+    await expect(psalm.locator(".psalm-verses .verse").first().locator(".mediant + .posture")).toHaveText("Sit.");
+    await expect(psalm.locator(".gloria-patri .source-line > .posture")).toHaveText(["Bow.", "Stand upright."]);
+  }
+  await choosePrayerForm(page, "private");
+  for (const cue of await cues.all()) await expect(cue).toBeHidden();
+  // Lauds keeps its cues under every form.
+  await page.goto("/lauds/2026-10-04?form=private");
+  await expect(page.locator(".psalm").first().locator(".posture").first()).toBeVisible();
+});
+
 test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async ({ page }) => {
   const instruction = "The first stanza of the following hymn is said kneeling.";
   for (const theme of ["light", "dark"]) {
@@ -1939,8 +3822,10 @@ test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async
 
       const hymn = page.locator(".hymn");
       await expect(hymn.locator(".hymn-title")).toHaveText("Ave, maris stella");
-      const rubric = hymn.locator(".hymn-rubric");
+      const rubric = hymn.locator(".hymn-verses .hymn-rubric");
       await expect(rubric).toHaveText(instruction);
+      // The hymn's score, shown with Chant on, says it before the stanza too.
+      await expect(hymn.locator(".chant-hymn .hymn-rubric")).toHaveText(instruction);
       await expect(rubric).not.toContainText("/:");
       await expect(hymn.locator(".hymn-latin")).toHaveCount(0);
       await expect(hymn.locator(".hymn-stanza-opening .hymn-line").first()).toContainText(
@@ -1948,7 +3833,7 @@ test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async
       );
 
       const geometry = await page.evaluate(() => {
-        const rubric = document.querySelector(".hymn .hymn-rubric");
+        const rubric = document.querySelector(".hymn .hymn-verses .hymn-rubric");
         const title = document.querySelector(".hymn .hymn-title");
         const verses = document.querySelector(".hymn .hymn-verses");
         const opening = document.querySelector(".hymn-stanza-opening .hymn-line");
@@ -1993,20 +3878,14 @@ test("Marian antiphon initial clears its second chant line", async ({ page }) =>
       const later = document.querySelector(
         ".marian-antiphon .liturgical-block > .chant-line:not(.chant-line-opening)",
       );
-      // First source line text is before the <br>; second is after it.
-      const br = [...opening.childNodes].find((n) => n.nodeName === "BR");
+      // First source line text is before the <br>; the second is its own
+      // block after it, so its turnover hangs under it.
       const firstText = [...opening.childNodes].find(
         (n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim(),
       );
-      let secondText = null;
-      if (br) {
-        for (let n = br.nextSibling; n; n = n.nextSibling) {
-          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) {
-            secondText = n;
-            break;
-          }
-        }
-      }
+      const secondText = [...(opening.querySelector(":scope > br + .chant-line-second")?.childNodes ?? [])].find(
+        (n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim(),
+      ) ?? null;
       const glyph = (node, start = 0, end = 1) => {
         if (!node) return null;
         const range = document.createRange();
@@ -2021,14 +3900,28 @@ test("Marian antiphon initial clears its second chant line", async ({ page }) =>
         second: glyph(secondText, 0, 1),
         secondSnippet: secondText?.textContent?.slice(0, 24) ?? "",
         openingLeft: opening.getBoundingClientRect().left,
+        // The two line boxes a two-line initial stands in. A range's box for
+        // the cap is its font's em box, which WebKit's float fallback hangs
+        // below the second line although the letter stands on that baseline.
+        // Only the fallback needs the bound; initial-letter's box is the cap's own.
+        capRowsBottom: CSS.supports("initial-letter", "2")
+          ? NaN
+          : opening.getBoundingClientRect().top + 2 * parseFloat(getComputedStyle(opening).lineHeight),
         openingPadding: parseFloat(getComputedStyle(opening).paddingLeft),
         openingIndent: parseFloat(getComputedStyle(opening).textIndent),
         laterPadding: later ? parseFloat(getComputedStyle(later).paddingLeft) : 0,
         laterIndent: later ? parseFloat(getComputedStyle(later).textIndent) : 0,
         label: document.querySelector(".marian-antiphon .item-label")?.textContent ?? "",
         float: getComputedStyle(opening, "::first-letter").float,
+        rem: parseFloat(getComputedStyle(document.documentElement).fontSize),
       };
     });
+    // The second source line's turnover hangs under it, as a later line's
+    // does, rather than returning to the margin under the initial.
+    const secondRows = await page.locator(".marian-antiphon .chant-line-second").evaluate(rowStartsIn);
+    for (const left of secondRows.slice(1)) {
+      expect(left - geometry.second.left, `${width}px second source line's turnover steps in`).toBeCloseTo(1.2 * geometry.rem, 0);
+    }
 
     const label = `${width}px`;
     expect(geometry.label, `${label} seasonal Marian`).toMatch(/Salve Regina/i);
@@ -2049,8 +3942,11 @@ test("Marian antiphon initial clears its second chant line", async ({ page }) =>
     // On a wide measure the second source line sits beside the cap. On a
     // phone the first source line may wrap through both drop-cap line boxes,
     // so the second source line starts below at the opening block's left edge.
+    const capBottom = Number.isFinite(geometry.capRowsBottom)
+      ? Math.min(geometry.cap.bottom, geometry.capRowsBottom)
+      : geometry.cap.bottom;
     const yOverlap =
-      geometry.second.top < geometry.cap.bottom - 0.5 &&
+      geometry.second.top < capBottom - 0.5 &&
       geometry.second.bottom > geometry.cap.top + 0.5;
     if (yOverlap) {
       expect(
@@ -2153,10 +4049,164 @@ test("print keeps the designed 11pt prayer size at a desktop viewport", async ({
   await expect(page.locator(".session-prayers .liturgical-block").first()).toBeVisible();
 });
 
+test("the prayers before and after the Office keep the reader's choice for their hour", async ({ page }) => {
+  const before = (hour, date) => page.goto(`/${hour}/${date}`).then(() => page.locator('details.session-prayers[data-prayers$="/Prayers Before the Office"]'));
+  const after = () => page.locator('details.session-prayers[data-prayers$="/Prayers After the Office"]');
+
+  // Sext's open closed, Lauds's open, until the reader chooses.
+  await expect(await before("sext", testDate)).not.toHaveAttribute("open");
+  await page.locator("details.session-prayers > summary", { hasText: "Prayers Before the Office" }).click();
+  await expect(await before("sext", "2026-03-22")).toHaveAttribute("open");
+  // Another hour keeps its own default.
+  await expect(await before("terce", "2026-03-22")).not.toHaveAttribute("open");
+
+  // Lauds's prayers after the Office closed, then left out in the Triduum,
+  // keep the choice for when they return.
+  await before("lauds", testDate);
+  await page.locator("details.session-prayers > summary", { hasText: "Prayers After the Office" }).click();
+  await before("lauds", "2026-04-10");
+  await expect(after()).toHaveCount(0);
+  await expect(await before("lauds", "2026-04-20")).toHaveAttribute("open");
+  await expect(after()).not.toHaveAttribute("open");
+});
+
+// Where the browser cannot ease a height to auto (WebKit), app.js turns the
+// disclosures' fold in script. A disclosure folding shut is still [open]:
+// pressed again it opens, and that is the choice kept; the ordo's "Show
+// office details" is not undone by a day that was folding; the hour's date
+// in the header turns the picker on the fold too. Reduced motion cuts.
+test("disclosures folded in script turn back when pressed mid-fold", async ({ page, browserName }) => {
+  test.skip(browserName !== "webkit", "Chromium eases the fold in CSS (interpolate-size); the script's fold is for the other engines");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const ready = () => page.waitForFunction(() => document.documentElement.classList.contains("motion-ready"));
+
+  await openDatedPage(page, `/lauds/${testDate}`);
+  await ready();
+  await page.evaluate(() => localStorage.removeItem("office-prayers-open"));
+  const prayers = page.locator('details.session-prayers[data-prayers$="/Prayers Before the Office"]');
+  await expect(prayers).toHaveAttribute("open");
+  await prayers.locator("summary").evaluate((summary) => {
+    summary.click();
+    summary.click();
+  });
+  await expect(prayers).not.toHaveClass(/is-folding/);
+  await expect(prayers).toHaveAttribute("open");
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("office-prayers-open")))).toEqual({ "lauds/Prayers Before the Office": true });
+
+  await openDatedPage(page, "/calendar/2026/03");
+  await ready();
+  const day = page.locator(".day-disclosures details.day-office-details").first();
+  await day.locator("summary").click();
+  await expect(day).toHaveAttribute("open");
+  await page.evaluate(() => {
+    document.querySelector(".day-disclosures details.day-office-details > summary").click();
+    document.querySelector(".calendar-expand").click();
+  });
+  await expect(page.locator(".calendar-expand")).toHaveAttribute("aria-pressed", "true");
+  await page.waitForTimeout(500);
+  await expect(day).toHaveAttribute("open");
+  await expect(page.locator(".day-disclosures details:not([open])")).toHaveCount(0);
+
+  await openDatedPage(page, `/sext/${testDate}`);
+  await ready();
+  const turning = () => page.evaluate(() => [...document.querySelectorAll("#hour-date-nav > :not(summary)")].some((part) => part.getAnimations().length > 0));
+  await page.locator("button.hour-meta-date").click();
+  expect(await turning()).toBe(true);
+  await expect(page.locator("#hour-date-nav")).toHaveAttribute("open");
+  await expect(page.locator("button.hour-meta-date")).toHaveAttribute("aria-expanded", "true");
+  await page.locator("button.hour-meta-date").click();
+  await expect(page.locator("#hour-date-nav")).not.toHaveAttribute("open");
+  await expect(page.locator("button.hour-meta-date")).toHaveAttribute("aria-expanded", "false");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.locator("button.hour-meta-date").click();
+  expect(await turning()).toBe(false);
+  await expect(page.locator("#hour-date-nav")).toHaveAttribute("open");
+});
+
+// "Change date" turns the invitation and the hours into the calendar in
+// their place, under the band. The head gives up only the difference, or,
+// where it has not the height, keeps its own while the page rises with the
+// card's foot; either way the calendar ends wholly in view and the card's
+// foot rests on its gutter. Folding brings the hours back as they were.
+test("home's Change date turns the hours into the calendar in their place", async ({ page }) => {
+  for (const [width, height] of [[412, 915], [375, 667], [320, 568]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const summary = page.locator(".home-hero details.home-date-nav > summary");
+    const hours = page.locator(".home-hours-face");
+    const sizes = () => page.evaluate(() => {
+      const hero = document.querySelector(".home-hero");
+      const chooser = hero.querySelector(".home-chooser").getBoundingClientRect();
+      return {
+        head: hero.querySelector(".home-summary").getBoundingClientRect().height,
+        foot: hero.getBoundingClientRect().bottom,
+        top: chooser.top,
+        bottom: chooser.bottom,
+        scroll: window.scrollY,
+        screen: window.innerHeight,
+        band: hero.querySelector(".home-prayer-card h2").getBoundingClientRect().bottom,
+      };
+    });
+    // The head as the page settles it: app.js's load-time fitting (the arch
+    // in pixels, the versicle) done, and the same over two looks.
+    await page.waitForFunction(() => document.documentElement.classList.contains("motion-ready"));
+    let shut = await sizes();
+    await expect.poll(async () => {
+      const again = await sizes();
+      const same = Math.abs(again.head - shut.head) < 0.5;
+      shut = again;
+      return same;
+    }, { message: `${width}x${height}: the head at rest` }).toBe(true);
+
+    await summary.click();
+    const picker = page.getByRole("group", { name: "Choose a date" });
+    await expect(picker).toBeVisible();
+    await expect(hours).toBeHidden();
+    await expect(hours).toHaveAttribute("inert", "");
+    await expect(page.locator(".home-stage")).not.toHaveClass(/is-turning/);
+    await expect.poll(async () => {
+      const now = await sizes();
+      return now.foot <= now.screen - 15 && now.foot > now.screen - 33;
+    }, { message: `${width}x${height}: the card's foot at rest on its gutter` }).toBe(true);
+    const open = await sizes();
+    expect(Math.abs(open.top - open.band), `${width}x${height}: the calendar under the band`).toBeLessThan(24);
+    expect(open.top, `${width}x${height}: the calendar's head in view`).toBeGreaterThanOrEqual(0);
+    if (open.scroll > 0) {
+      expect(Math.abs(open.head - shut.head), `${width}x${height}: scrolled, the arch keeps its height`).toBeLessThan(1);
+    } else {
+      expect(Math.abs(open.foot - shut.foot), `${width}x${height}: unscrolled, the card keeps its length`).toBeLessThan(1);
+    }
+
+    await summary.click();
+    await expect(hours).toBeVisible();
+    await expect(picker).toBeHidden();
+    await expect(page.locator(".home-hero .home-summary")).not.toHaveAttribute("style", /min-height/);
+    await expect(page.locator(".home-stage")).not.toHaveClass(/is-turning/);
+    const folded = await sizes();
+    expect(Math.abs(folded.head - shut.head), `${width}x${height}: the head as it was`).toBeLessThan(1);
+  }
+});
+
+test("home's Change date brings the card's foot to rest however late its turn ends", async ({ page }) => {
+  // A loaded device can start the turn's transition late, so that it ends after the frames
+  // that follow it were due to stop; a long transition stands in for that here.
+  await page.setViewportSize({ width: 375, height: 667 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.waitForFunction(() => document.documentElement.classList.contains("motion-ready"));
+  await page.addStyleTag({ content: ":root { --tempo-unfold-in: 600ms !important; }" });
+  await page.locator(".home-hero details.home-date-nav > summary").click();
+  await expect(page.locator(".home-stage")).not.toHaveClass(/is-turning/);
+  await expect.poll(() => page.evaluate(() => {
+    const foot = document.querySelector(".home-hero").getBoundingClientRect().bottom;
+    return foot <= innerHeight - 15 && foot > innerHeight - 33;
+  }), { message: "the card's foot at rest on its gutter" }).toBe(true);
+});
+
 test("dated hour navigation keeps the selected liturgical day", async ({ page }) => {
   await openDatedPage(page, `/lauds/${testDate}`);
 
-  await page.getByText("Change date", { exact: true }).click();
+  await page.getByRole("button", { name: "Sunday, March 15, 2026, change date" }).click();
   await page.getByRole("link", { name: "Previous day" }).click();
 
   await expect(page).toHaveURL(/\/lauds\/2026-03-14$/);
@@ -2167,7 +4217,14 @@ test("the date picker is set in the room, not the platform", async ({ page }) =>
   // Today is Wednesday the 18th; the page is Sunday the 15th.
   await page.clock.setFixedTime(new Date("2026-03-18T10:00:00-04:00"));
   await openDatedPage(page, `/lauds/${testDate}`);
-  await page.getByText("Change date", { exact: true }).click();
+  // The header's date is the way in: set as its text, with no "Change date"
+  // label, but a button to assistive tech that says what it does.
+  await expect(page.getByText("Change date", { exact: true })).toBeHidden();
+  const date = page.getByRole("button", { name: "Sunday, March 15, 2026, change date" });
+  await expect(date).toHaveClass(/hour-meta-date/);
+  await expect(date).toHaveAttribute("aria-expanded", "false");
+  await date.click();
+  await expect(date).toHaveAttribute("aria-expanded", "true");
   const picker = page.getByRole("group", { name: "Choose a date" });
   await expect(picker).toBeVisible();
   // The native field stays in the page for no-script visitors only.
@@ -2181,7 +4238,12 @@ test("the date picker is set in the room, not the platform", async ({ page }) =>
   await expect(grid.locator("[aria-current=date]")).toHaveCount(1);
   // Six weeks always, so paging months never moves what lies below.
   await expect(grid.locator("tbody tr")).toHaveCount(6);
-  const height = await picker.evaluate((node) => node.getBoundingClientRect().height);
+  // Measured once the disclosure has unfolded: WebKit, which cannot ease to auto, folds the
+  // picker's own box open (app.js, turnFold), so until it lands its height is partway.
+  const height = await picker.evaluate(async (node) => {
+    await Promise.allSettled(node.closest("details").getAnimations({ subtree: true }).map((turn) => turn.finished));
+    return node.getBoundingClientRect().height;
+  });
   await picker.getByRole("button", { name: "Next month" }).click();
   await expect(picker.getByRole("grid", { name: "April 2026" })).toBeVisible();
   expect(await picker.evaluate((node) => node.getBoundingClientRect().height)).toBe(height);
@@ -2209,39 +4271,49 @@ test("the date picker is set in the room, not the platform", async ({ page }) =>
   const december = picker.getByRole("grid", { name: "December 2026" });
   await expect(december.getByRole("link", { name: "Saturday, December 19, 2026" })).toBeFocused();
 
-  // Escape closes the disclosure back to its label.
+  // Escape closes the disclosure back to the date that opened it.
   await page.keyboard.press("Escape");
   await expect(picker).toBeHidden();
-  await expect(page.locator(".hour-date-nav > summary")).toBeFocused();
+  await expect(date).toBeFocused();
+  await expect(date).toHaveAttribute("aria-expanded", "false");
 
   // Reopening starts from the page's own day, and a day is a link to it.
-  await page.getByText("Change date", { exact: true }).click();
+  await date.click();
   await expect(picker.getByRole("grid", { name: "March 2026" })).toBeVisible();
   await picker.getByRole("link", { name: "Tuesday, March 17, 2026" }).click();
   await expect(page).toHaveURL(/\/lauds\/2026-03-17$/);
 });
 
-test("the date picker keeps to 1950-2150", async ({ page }) => {
+test("the date picker keeps to thirty years back and a hundred ahead", async ({ page }) => {
   const picker = page.getByRole("group", { name: "Choose a date" });
+  const year = Number((await serverTodaySlug(page)).slice(0, 4));
+  // presentation::offered_years: YEARS_BACK and YEARS_AHEAD of this year.
+  const [first, last] = [year - 30, year + 100];
+  const lastDay = new Date(Date.UTC(last, 11, 31)).toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" }) + `, December 31, ${last}`;
   for (const [path, month, closed, open] of [
-    ["/lauds/2150-12-15", "December 2150", "Next month", "Previous month"],
-    ["/lauds/1950-01-10", "January 1950", "Previous month", "Next month"],
-    // Outside the span, the picker opens at the nearer end.
-    ["/lauds/2200-06-01", "December 2150", "Next month", "Previous month"],
+    [`/lauds/${last}-12-15`, `December ${last}`, "Next month", "Previous month"],
+    [`/lauds/${first}-01-10`, `January ${first}`, "Previous month", "Next month"],
   ]) {
     await openDatedPage(page, path);
-    await page.getByText("Change date", { exact: true }).click();
+    await page.locator("button.hour-meta-date").click();
     await expect(picker.getByRole("grid", { name: month })).toBeVisible();
     await expect(picker.getByRole("button", { name: closed })).toBeDisabled();
     await expect(picker.getByRole("button", { name: open })).toBeEnabled();
   }
+  // Outside the span there is no page.
+  expect((await page.goto(`/lauds/${last + 1}-06-01`)).status()).toBe(404);
   // Keys stop at the end rather than leaving the span.
-  await page.goto("/lauds/2150-12-15");
-  await page.getByText("Change date", { exact: true }).click();
-  await picker.getByRole("link", { name: "Thursday, December 31, 2150" }).focus();
+  await page.goto(`/lauds/${last}-12-15`);
+  await page.locator("button.hour-meta-date").click();
+  // Let the opening's toggle run first: it resets the roving focus to the
+  // page's day, as a reader's own keypress always follows it.
+  await expect(picker.getByRole("grid", { name: `December ${last}` })).toBeVisible();
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve))));
+  await picker.getByRole("link", { name: lastDay }).focus();
   await page.keyboard.press("ArrowRight");
-  await expect(picker.getByRole("link", { name: "Thursday, December 31, 2150" })).toBeFocused();
-  await expect(page.locator(".date-jump")).toHaveAttribute("max", "2150-12-31");
+  await expect(picker.getByRole("link", { name: lastDay })).toBeFocused();
+  await expect(page.locator(".date-jump")).toHaveAttribute("max", `${last}-12-31`);
+  await expect(page.locator(".date-jump")).toHaveAttribute("min", `${first}-01-01`);
 });
 
 test("home's date picker opens the chosen day's home", async ({ page }) => {
@@ -2251,6 +4323,43 @@ test("home's date picker opens the chosen day's home", async ({ page }) => {
   await picker.getByRole("button", { name: "Previous month" }).click();
   await picker.getByRole("link", { name: "Saturday, February 14, 2026" }).click();
   await expect(page).toHaveURL(/\/\?date=2026-02-14$/);
+});
+
+// The picker marks each day with a hairline of its colour and gilds the
+// first-class feasts (#953), so the month's shape shows with no words added.
+test("the date picker marks each day's colour and gilds first-class feasts", async ({ page }) => {
+  // The marks are asked for only when the picker opens.
+  const asked = [];
+  page.on("request", req => {
+    if (req.url().includes("/api/day-marks/")) {
+      asked.push(req.url());
+    }
+  });
+  await openDatedPage(page, `/lauds/${testDate}`);
+  expect(asked).toEqual([]);
+  await page.locator("button.hour-meta-date").click();
+  const picker = page.getByRole("group", { name: "Choose a date" });
+  const day = slug => picker.locator(`.date-picker-day[data-date="${slug}"]`);
+  // Laetare in rose, Lent's ferias in violet, the Annunciation gilt on white.
+  await expect(day("2026-03-22")).toHaveAttribute("data-color", "rose");
+  await expect(day("2026-03-16")).toHaveAttribute("data-color", "violet");
+  await expect(day("2026-03-25")).toHaveAttribute("data-color", "white");
+  await expect(day("2026-03-25")).toHaveAttribute("data-first-class", "");
+  await expect(day("2026-03-25")).toHaveAttribute("aria-label", "Wednesday, March 25, 2026, first-class feast");
+  await expect(day("2026-03-16")).not.toHaveAttribute("data-first-class", /.*/);
+  // The hairline is drawn in the day's colour, under the figure.
+  const hairline = await day("2026-03-16").evaluate(link => {
+    const after = getComputedStyle(link, "::after");
+    return { height: after.height, background: after.backgroundColor };
+  });
+  expect(hairline.height).toBe("2px");
+  // Lent's violet, the ordo rails' own (.day-color-violet).
+  expect(hairline.background).toBe("rgb(106, 58, 138)");
+  // Next month: Good Friday black and plain, Pascha gilt.
+  await picker.getByRole("button", { name: "Next month" }).click();
+  await expect(day("2026-04-10")).toHaveAttribute("data-color", "black");
+  await expect(day("2026-04-10")).not.toHaveAttribute("data-first-class", /.*/);
+  await expect(day("2026-04-12")).toHaveAttribute("data-first-class", "");
 });
 
 test("without JavaScript the native date field still jumps", async ({ browser, baseURL }) => {
@@ -2265,6 +4374,21 @@ test("without JavaScript the native date field still jumps", async ({ browser, b
   await context.close();
 });
 
+test("a day's commemorations open its office details, each named once", async ({ page }) => {
+  // Holy Saturday keeps St Leo at no hour, so the details name him on a row of
+  // the day's own; St Paul, kept at Lauds and Vespers on 18 January, is named
+  // only there, with his antiphon.
+  await openDatedPage(page, "/calendar/2026/04");
+  const leo = page.locator("#d-2026-04-11 .day-office-digest .day-office-hour").first();
+  await expect(leo.locator("dt")).toHaveText("Day");
+  await expect(leo.locator(".day-office-comm")).toHaveText(/^Com\. St Leo the Great/);
+  await openDatedPage(page, "/calendar/2026/01");
+  const digest = page.locator("#d-2026-01-18 .day-office-digest");
+  await expect(digest.locator("dt", { hasText: /^Day$/ })).toHaveCount(0);
+  await expect(digest.locator(".day-office-comm", { hasText: "St Paul" })).toHaveCount(2);
+  await expect(digest).not.toContainText("Commemoration of");
+});
+
 test("ordo disclosures are deliberate and survive a change in screen width", async ({ page }) => {
   await openDatedPage(page, "/calendar/2026/03");
   const day = page.locator("#d-2026-03-01");
@@ -2277,20 +4401,15 @@ test("ordo disclosures are deliberate and survive a change in screen width", asy
   await expect(page.locator("#d-2026-03-02 .day-office-details")).not.toHaveAttribute("open", "");
   await page.getByRole("button", { name: "Show office details" }).click();
   await expect(page.locator(".day-disclosures details:not([open])")).toHaveCount(0);
-  await expect(day.locator(".day-commemoration").first()).toBeVisible();
+  await expect(day.locator(".day-office-comm").first()).toBeVisible();
   await page.getByRole("button", { name: "Hide office details" }).click();
   await expect(page.locator(".day-disclosures details[open]")).toHaveCount(0);
 });
 
-// The fasting, abstinence and rank marks each spell themselves out, under a
-// mouse and under a finger alike, without the tap opening the day.
-test("ordo marks name themselves on hover and on a tap", async ({ browser, baseURL }) => {
-  const tipOf = (locator) => locator.evaluate((el) => {
-    const tip = getComputedStyle(el, "::after");
-    if (tip.display === "none") return null;
-    const box = el.getBoundingClientRect();
-    return { text: tip.content.replace(/^"|"$/g, ""), left: box.right - parseFloat(tip.width), width: document.documentElement.clientWidth };
-  });
+// The fasting, abstinence and rank marks each spell themselves out in the
+// hours' own note (the one a glossed word opens), under a mouse and under a
+// finger alike, without the tap opening the day, and never over the mark.
+test("ordo marks name themselves in the note on hover and on a tap", async ({ browser, baseURL }) => {
   // Ash Wednesday 2026 (Julian paschalion) fasts, abstains and ranks first class.
   for (const hasTouch of [true, false]) {
     const viewport = hasTouch ? { width: 320, height: 700 } : { width: 1280, height: 900 };
@@ -2301,18 +4420,221 @@ test("ordo marks name themselves on hover and on a tap", async ({ browser, baseU
     const scope = hasTouch ? row.locator(".day-mobile-flags") : row.locator("td.day-penitential-flag, td.day-rank");
     const marks = scope.locator("abbr");
     await expect(marks).toHaveCount(3);
+    const note = page.locator("#gloss-note");
     const expected = ["Day of Fasting", "Day of Abstinence", "Double of the 1st Class"];
     for (let i = 0; i < 3; i++) {
       const mark = marks.nth(i);
+      const how = `${hasTouch ? "tap" : "hover"} ${expected[i]}`;
+      // A control, and no system tooltip beside the note.
+      await expect(mark, how).toHaveAttribute("role", "button");
+      await expect(mark, how).toHaveAttribute("aria-controls", "gloss-note");
+      await expect(mark, how).not.toHaveAttribute("title", /./);
       if (hasTouch) await mark.tap(); else await mark.hover();
-      const tip = await tipOf(mark);
-      expect(tip?.text, `${hasTouch ? "tap" : "hover"} ${expected[i]}`).toBe(expected[i]);
-      expect(tip.left).toBeGreaterThanOrEqual(0);
+      await expect(mark, how).toHaveAttribute("aria-expanded", "true");
+      await expect(note, how).not.toHaveClass(/closed/);
+      await expect(note, how).toHaveText(expected[i]);
+      await expect.poll(() => note.evaluate((el) => getComputedStyle(el).opacity), how).toBe("1");
+      const [m, n] = [await mark.boundingBox(), await note.boundingBox()];
+      expect(n.x, how).toBeGreaterThanOrEqual(0);
+      expect(n.x + n.width, how).toBeLessThanOrEqual(viewport.width);
+      expect(n.y + n.height <= m.y || n.y >= m.y + m.height, `${how}: the note leaves its mark uncovered`).toBe(true);
+    }
+    if (hasTouch) {
+      // A second tap puts it away.
+      await marks.nth(2).tap();
+      await expect(note).toHaveClass(/closed/);
+      await expect(marks.nth(2)).toHaveAttribute("aria-expanded", "false");
+    } else {
+      // The pointer leaving puts a hovered note away; a click keeps it.
+      await page.mouse.move(5, 5);
+      await expect(note).toHaveClass(/closed/);
+      await marks.nth(2).click();
+      await expect(note).toHaveText(expected[2]);
+      await page.mouse.move(5, 5);
+      await page.waitForTimeout(300);
+      await expect(note).not.toHaveClass(/closed/);
+      await page.keyboard.press("Escape");
+      await expect(note).toHaveClass(/closed/);
+      await expect(marks.nth(2)).toBeFocused();
     }
     await expect(page).toHaveURL(/\/calendar\/2026\/02$/);
     await context.close();
   }
 });
+
+// A keyboard opens a mark's note as it opens a glossed word's: Enter, and
+// Escape gives the focus back.
+test("an ordo mark's note opens from the keyboard and closes on Escape", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openDatedPage(page, "/calendar/2026/02");
+  const rank = page.locator("#d-2026-02-25 td.day-rank abbr");
+  const note = page.locator("#gloss-note");
+  await rank.focus();
+  await expect(note).toHaveClass(/closed/);
+  await page.keyboard.press("Enter");
+  await expect(rank).toHaveAttribute("aria-expanded", "true");
+  await expect(note).toHaveText("Double of the 1st Class");
+  // A live region, so a screen reader hears the name as it is written.
+  await expect(note).toHaveAttribute("role", "status");
+  await page.keyboard.press("Escape");
+  await expect(note).toHaveClass(/closed/);
+  await expect(note).toHaveText("");
+  await expect(rank).toBeFocused();
+});
+
+// The month's heading sticks to the top of the window; a mark's note keeps
+// below it rather than over it, as it keeps clear of the window's top.
+test("an ordo mark's note keeps clear of the sticky month heading", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openDatedPage(page, "/calendar/2026/02");
+  const row = page.locator("#d-2026-02-05");
+  await row.evaluate((el) => {
+    const h = el.closest(".month").querySelector("h2").getBoundingClientRect().height;
+    window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - h - 4);
+  });
+  const rank = row.locator(".day-mobile-rank");
+  await rank.tap();
+  const note = page.locator("#gloss-note");
+  await expect(note).toHaveText("Greater Double");
+  const headBottom = await row.evaluate((el) => el.closest(".month").querySelector("h2").getBoundingClientRect().bottom);
+  const [m, n] = [await rank.boundingBox(), await note.boundingBox()];
+  expect(n.y).toBeGreaterThanOrEqual(headBottom - 1);
+  expect(n.y).toBeGreaterThanOrEqual(m.y + m.height);
+  await expect(note).toHaveClass(/below/);
+});
+
+// A vigil leads into its feast (presentation::rails; needs ruling #838,
+// question 3(d)): a 1px thread on the rail's centre runs from the foot of
+// the vigil's rail across the row's rule into the top of the feast's, on the
+// phone's cards and in the table. Read from the pixels: the thread's column is
+// inked from rail to rail through the rule, with no line of ground where an
+// end meets its rail, and the rail's outer column is not inked across the gap
+// (the vigil is not bound to its feast). Its colour passes from the vigil's
+// into the feast's, with no jump at the rule. Gone in forced colours.
+async function vigilThread(page, vigilId, feastId) {
+  const vigil = page.locator(`#d-${vigilId}`);
+  await vigil.evaluate((el) => el.scrollIntoView({ block: "center" }));
+  const g = await page.evaluate(([vigilId, feastId]) => {
+    const shown = (row, dir) => [...row.querySelectorAll(`.day-thread.${dir}`)].find((t) => t.getClientRects().length && t.getBoundingClientRect().height > 0);
+    const [v, f] = [vigilId, feastId].map((id) => document.getElementById(`d-${id}`));
+    const [to, from] = [shown(v, "to-feast"), shown(f, "from-vigil")];
+    const style = getComputedStyle(to);
+    return {
+      to: to.getBoundingClientRect().toJSON(),
+      from: from.getBoundingClientRect().toJSON(),
+      boundary: f.getBoundingClientRect().top,
+      opacity: style.opacity,
+      image: style.backgroundImage,
+      copies: v.querySelectorAll(".day-thread").length,
+    };
+  }, [vigilId, feastId]);
+  // From inside the vigil's rail, three CSS pixels above the thread, to inside the feast's.
+  const top = Math.floor(g.to.top) - 3;
+  const clip = { x: Math.floor(g.to.left) - 1, y: top, width: 6, height: Math.ceil(g.from.bottom) + 3 - top };
+  // The whole viewport, cut in the page: WebKit drops the 1px thread from a
+  // clipped screenshot at a fractional ratio.
+  const shot = (await page.screenshot()).toString("base64");
+  const ink = await page.evaluate(async ([data, clip, g]) => {
+    const img = new Image();
+    img.src = "data:image/png;base64," + data;
+    await img.decode();
+    const scale = img.width / innerWidth;
+    const [sx, sy] = [Math.round(clip.x * scale), Math.round(clip.y * scale)];
+    const [cw, ch] = [Math.round(clip.width * scale), Math.round(clip.height * scale)];
+    const canvas = Object.assign(document.createElement("canvas"), { width: cw, height: ch });
+    const context = canvas.getContext("2d");
+    context.drawImage(img, sx, sy, cw, ch, 0, 0, cw, ch);
+    const { data: px, width: w, height: h } = context.getImageData(0, 0, cw, ch);
+    const col = (cssX) => Math.min(w - 1, Math.floor((cssX - clip.x) * scale));
+    const row = (cssY) => Math.min(h - 1, Math.max(0, Math.floor((cssY - clip.y) * scale)));
+    const at = (x, y) => [...px.slice((y * w + x) * 4, (y * w + x) * 4 + 3)];
+    // The device columns the thread covers (more than one at a fractional
+    // ratio or position), the rail's outer column, and the ground beyond it.
+    const threadCols = [...new Set([col(g.to.left + 0.1), col(g.to.left + 0.5), col(g.to.left + 0.9)])];
+    const [thread, outer, ground] = [col(g.to.left + 0.5), col(g.to.left - 0.9), col(g.to.left + 3.6)];
+    const apart = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+    // Inked: unlike the ground just right of the rail on the same line.
+    const inked = (x, y) => apart(at(x, y), at(ground, y)) > 20;
+    const rows = [...Array(h).keys()];
+    const colour = (cssY) => at(thread, row(cssY));
+    return {
+      bare: rows.filter((y) => !threadCols.some((x) => inked(x, y))),
+      // Lines of the gap, clear of both rails and the rule, where the rail's outer column is inked.
+      outer: rows.filter((y) => {
+        const css = clip.y + (y + 0.5) / scale;
+        const gap = (css > g.to.top + 2 && css < g.boundary - 1.5) || (css > g.boundary + 1.5 && css < g.from.bottom - 2);
+        return gap && inked(outer, y);
+      }),
+      // The two rails, the thread near each end, and either side of the rule.
+      vigilRail: colour(g.to.top - 2),
+      feastRail: colour(g.from.bottom + 2),
+      head: colour(g.to.top + 3),
+      tail: colour(g.from.bottom - 4),
+      above: colour(g.boundary - 2.5),
+      below: colour(g.boundary + 2),
+    };
+  }, [shot, clip, g]);
+  return { g, ink, vigil };
+}
+
+const apart = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+
+for (const width of [390, 800, 1280]) {
+  test(`a vigil's thread crosses the rule into its feast's rail at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    // Christmas Eve's violet into the Nativity's white; St Laurence's vigil's violet into his red.
+    for (const [month, vigilId, feastId] of [["2026/12", "2026-12-24", "2026-12-25"], ["2027/08", "2027-08-09", "2027-08-10"]]) {
+      await openDatedPage(page, `/calendar/${month}`);
+      const { g, ink, vigil } = await vigilThread(page, vigilId, feastId);
+      expect(g.copies).toBe(2);
+      expect(g.to.width).toBe(1);
+      expect(g.from.left).toBe(g.to.left);
+      expect(g.to.top).toBeLessThan(g.boundary);
+      expect(g.from.bottom).toBeGreaterThan(g.boundary);
+      expect(g.opacity).toBe("0.7");
+      expect(g.image).toMatch(/linear-gradient/);
+      // The thread's column is inked on every line from the vigil's rail to the feast's.
+      expect(ink.bare, vigilId).toEqual([]);
+      // The rail's outer column is bare across the gap: the rails are not joined.
+      expect(ink.outer, vigilId).toEqual([]);
+      // It runs from the vigil's colour toward the feast's (both lightened on the
+      // ground at 70%), and passes between them without a jump at the rule.
+      expect(apart(ink.head, ink.vigilRail), vigilId).toBeLessThan(apart(ink.tail, ink.vigilRail));
+      expect(apart(ink.tail, ink.feastRail), vigilId).toBeLessThan(apart(ink.head, ink.feastRail));
+      // Either side of the rule it is partway between its head and its tail (a
+      // thread that kept each row's own colour would jump by the whole span).
+      const span = apart(ink.head, ink.tail);
+      expect(apart(ink.above, ink.below), vigilId).toBeLessThan(0.75 * span);
+      expect(apart(ink.above, ink.tail), vigilId).toBeLessThan(0.9 * span);
+      expect(apart(ink.below, ink.head), vigilId).toBeLessThan(0.9 * span);
+      await page.emulateMedia({ forcedColors: "active" });
+      expect(await vigil.locator(".day-thread").evaluateAll((ts) => ts.every((t) => getComputedStyle(t).display === "none"))).toBe(true);
+      await page.emulateMedia({ forcedColors: "none" });
+    }
+  });
+}
+
+// At a fractional pixel ratio, or text size, the thread's ends and the rails'
+// edges round apart; each end runs under its rail so no line of ground shows.
+// One test for each ratio and text size, on a short viewport: a whole 3x
+// screenshot of a tall page is slow to take and to decode in the page.
+for (const dpr of [1.25, 1.5, 3]) {
+  for (const size of ["small", "large"]) {
+    for (const width of [320, 850, 1280]) {
+      test(`a vigil's thread meets its rails at ${dpr}x, ${size} text, ${width}px`, async ({ browser }) => {
+        const context = await browser.newContext({ deviceScaleFactor: dpr, viewport: { width, height: 360 } });
+        await context.addInitScript((textSize) => localStorage.setItem("office-text-size", textSize), size);
+        const page = await context.newPage();
+        for (const [month, vigilId, feastId] of [["2026/05", "2026-05-30", "2026-05-31"], ["2027/08", "2027-08-09", "2027-08-10"]]) {
+          await openDatedPage(page, `/calendar/${month}`);
+          const { ink } = await vigilThread(page, vigilId, feastId);
+          expect(ink.bare, vigilId).toEqual([]);
+        }
+        await context.close();
+      });
+    }
+  }
+}
 
 // Delay the font itself: delaying app.js alone misses a late face rewrapping
 // the title and every feast above a deep link. All geometric readings happen
@@ -2345,8 +4667,28 @@ for (const [width, size, hash, path] of [
         scrollY,
         width: document.documentElement.scrollWidth,
       });
+      // The fonts are late only if the page has been painted without them: the ordo's faces
+      // are `optional`, so a release before the first paint (a slow first frame, a render held
+      // up) lays the page out in Garamond from the start, and there is no "before" to keep.
+      // So the release waits for the first paint and two frames after it. WebKit may hold its
+      // first paint (and its frames) for as long as a font is pending, records no paint at
+      // all, and so has nothing a font could be late for: after 5s it is released unpainted.
+      const painted = () => new Promise((resolve) => {
+        const since = performance.now();
+        const check = () => {
+          if (performance.getEntriesByType("paint").length) {
+            requestAnimationFrame(() => requestAnimationFrame(resolve));
+          } else if (performance.now() - since > 5000) {
+            resolve();
+          } else {
+            setTimeout(check, 16);
+          }
+        };
+        check();
+      });
       document.addEventListener("DOMContentLoaded", () => {
         setTimeout(async () => {
+          await painted();
           window.ordoBeforeFonts = geometry();
           await window.releaseOrdoFonts();
           await document.fonts.ready;
@@ -2413,7 +4755,12 @@ test("ordo first layout and day anchors stay put when the deferred app loads", a
     await page.goto("/calendar/2026/09#d-2026-09-14", { waitUntil: "commit" });
     const row = page.locator("#d-2026-09-14");
     await expect(row).toBeAttached();
-    await page.evaluate(() => document.fonts.ready);
+    // Wait for the faces the first layout asked for. Not document.fonts.ready:
+    // WebKit holds it until the document has loaded, which the held app.js forbids.
+    await page.evaluate(() => {
+      void document.body.offsetHeight;
+      return Promise.all([...document.fonts].filter(face => face.status === "loading").map(face => face.loaded.catch(() => {})));
+    });
     await expect(page.locator(".ordo-continuation")).toBeAttached();
     const geometry = () => page.evaluate(() => ({
       height: document.documentElement.scrollHeight,
@@ -2443,7 +4790,7 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
   };
   // The frontispiece's strip leads to the month's own page.
   let page = await open("/calendar/2026");
-  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: "March", exact: true }).click();
+  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: /^March\b/ }).click();
   await expect(page).toHaveURL(/\/calendar\/2026\/03$/);
   page = await open("/calendar/2026/03");
   const day = page.locator("#d-2026-03-01");
@@ -2455,12 +4802,211 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
   await expect(page).toHaveURL(/\/calendar\/2026\/04$/);
   // The whole year jumps within itself.
   page = await open("/calendar/2026/all");
-  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: "November", exact: true }).click();
+  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: /^November\b/ }).click();
   await expect(page.locator("#d-2026-11-01")).toBeInViewport();
   page = await open("/calendar/2026/03");
-  await page.locator("#d-2026-03-01 .day-feast-name").click();
+  await page.locator("#d-2026-03-01 .day-mobile-date").click();
   await expect(page).toHaveURL(/date=2026-03-01/);
   await context.close();
+});
+
+// A phone folds the rank key under "Rank key" (each rank glosses itself at a
+// tap); without script, and on a wide screen, the key stands open. The shown
+// month in the strip wears a gilt point above its name, clear of the year's
+// course under it, and no gold underline.
+test("the ordo's rank key folds on a phone, and the shown month takes a gilt point", async ({ page, browser, baseURL }) => {
+  await openDatedPage(page, "/calendar/2026/03");
+  const toggle = page.getByRole("button", { name: "Rank key" });
+  const key = page.locator("#calendar-ranks");
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(key).toBeHidden();
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await expect(key).toBeVisible();
+  await toggle.click();
+  await expect(key).toBeHidden();
+  const month = await page.locator('.month-jump [aria-current="page"]').evaluate((a) => {
+    const after = getComputedStyle(a, "::before");
+    const style = getComputedStyle(a);
+    return { point: after.content !== "none" && after.content !== "normal", underline: style.borderBottomStyle !== "none" && style.borderBottomColor !== "rgba(0, 0, 0, 0)" };
+  });
+  expect(month).toEqual({ point: true, underline: false });
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await expect(toggle).toBeHidden();
+  await expect(key).toBeVisible();
+
+  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+  const bare = await context.newPage();
+  await bare.goto(`${baseURL}/calendar/2026/03`);
+  await expect(bare.locator("#calendar-ranks")).toBeVisible();
+  await expect(bare.locator(".calendar-ranks-toggle")).toBeHidden();
+  // The key is folded from the first layout (html.js, set before app.js
+  // loads), so its toggle answers on its own: a page whose app.js never runs
+  // still opens it.
+  const blocked = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await blocked.route(/\/static\/app\.js/, (route) => route.abort());
+  await blocked.goto(`${baseURL}/calendar/2026/03`);
+  await expect(blocked.locator("#calendar-ranks")).toBeHidden();
+  await blocked.getByRole("button", { name: "Rank key" }).click();
+  await expect(blocked.locator("#calendar-ranks")).toBeVisible();
+  await blocked.close();
+  await context.close();
+});
+
+test("a tap on an ordo day's row opens its office details; its feast name opens the feast and its date leads to the day", async ({ page }) => {
+  await openDatedPage(page, "/calendar/2026/03");
+  const row = page.locator("#d-2026-03-01");
+  const details = row.locator(".day-office-details");
+  // Tapping the Office details summary opens details in place.
+  await details.locator("summary").click();
+  await expect(details).toHaveAttribute("open", "");
+  await expect(page).toHaveURL(/\/calendar\/2026\/03$/);
+  // Opened, its head leads on to the day, and its abbreviation glosses open notes.
+  await expect(details.locator(".day-office-open")).toHaveAttribute("href", /date=2026-03-01/);
+  await details.locator(".gloss-term").first().click();
+  await expect(page.locator("#gloss-note")).not.toHaveClass(/closed/);
+  await page.keyboard.press("Escape");
+  // Tapping the summary again closes details; the rank's mark answers with its note, not the row.
+  await details.locator("summary").click();
+  await expect(details).not.toHaveAttribute("open", "");
+  await row.locator(".day-mobile-rank").click();
+  await expect(details).not.toHaveAttribute("open", "");
+  await page.keyboard.press("Escape");
+  // A plain feria (no feast link) still toggles details on a tap on its name.
+  const feria = page.locator("#d-2026-03-02");
+  await feria.locator(".day-feast-name").click();
+  await expect(feria.locator(".day-office-details")).toHaveAttribute("open", "");
+  await feria.locator(".day-feast-name").click();
+  await expect(feria.locator(".day-office-details")).not.toHaveAttribute("open", "");
+  // A feast day's inline feast link jumps straight to its feast overview page.
+  await row.locator(".day-feast-name a.feast-link").click();
+  await expect(page).toHaveURL(/\/feast\/lent-sunday-1\?from=ordo-2026-03-01$/);
+  await page.goBack();
+  await row.locator(".day-mobile-date").click();
+  await expect(page).toHaveURL(/date=2026-03-01/);
+});
+
+// The summary's thumb box reaches down over the way on to the day; the link
+// stands over it, so a tap there leads on rather than closing the details.
+test("an open ordo day's Open this day leads to the day", async ({ page }) => {
+  await openDatedPage(page, "/calendar/2026/03");
+  const row = page.locator("#d-2026-03-01");
+  const details = row.locator(".day-office-details");
+  await details.locator("summary").click();
+  await expect(details).toHaveAttribute("open", "");
+  // A click checks that the link, not the summary over it, takes the tap.
+  await details.locator(".day-office-open").click();
+  await expect(page).toHaveURL(/date=2026-03-01/);
+});
+
+// The row's other answers: a tap that puts a mark's note away does only that;
+// the wide table's empty width and its weekday toggle the row too, a second
+// tap beside the open details closes them, and the date's whole cell leads to
+// the day, saying the feast as it does.
+test("an ordo row's tap leaves a mark's note alone, and its date's cell leads to the day", async ({ page }) => {
+  await openDatedPage(page, "/calendar/2026/03");
+  const row = page.locator("#d-2026-03-01");
+  const details = row.locator(".day-office-details");
+  const note = page.locator("#gloss-note");
+  await row.locator(".day-mobile-rank").tap();
+  await expect(note).not.toHaveClass(/closed/);
+  // A tap on the row's blank line beside the feast link (clear of the note,
+  // which hangs below the mark) dismisses the note without opening details.
+  const feastLink = await row.locator(".day-feast-name a.feast-link").boundingBox();
+  await page.touchscreen.tap(feastLink.x + feastLink.width + 16, feastLink.y + feastLink.height / 2);
+  await expect(note).toHaveClass(/closed/);
+  await expect(details).not.toHaveAttribute("open", "");
+  await expect(row.locator(".day-mobile-date")).toHaveAccessibleDescription(/\S/);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  // The row ignores a click for 300ms after a note closes (that tap's own click); a later
+  // click is a new one, however soon a busy machine runs it.
+  await expect.poll(() => note.evaluate((n) => Date.now() - Number(n.dataset.closedAt || 0))).toBeGreaterThanOrEqual(300);
+  const wk = row.locator("td.day-wk");
+  await wk.click();
+  await expect(details).toHaveAttribute("open", "");
+  // Open, the details take the line's width: a tap on their empty right closes them.
+  const box = await details.boundingBox();
+  await page.mouse.click(box.x + box.width - 4, box.y + 6);
+  await expect(details).not.toHaveAttribute("open", "");
+  const cell = await row.locator("td.day-num").boundingBox();
+  const link = await row.locator("td.day-num a").boundingBox();
+  expect(cell.height).toBeGreaterThan(link.height + 10);
+  // Its corner, off the numeral (the row may still be folding shut below).
+  await page.mouse.click(cell.x + 4, cell.y + 4);
+  await expect(page).toHaveURL(/date=2026-03-01/);
+});
+
+test("newcomer reading key, quiet structural glosses, 3-up menu, reminders glosses, and Tabula links", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  // 1A + 1B + 3E on an hour page.
+  await openDatedPage(page, "/lauds/2026-03-25");
+  const key = page.locator("details.reading-key");
+  await expect(key).not.toHaveAttribute("open", "");
+  await key.locator("> summary").click();
+  await expect(key).toHaveAttribute("open", "");
+  await expect(key.locator(".reading-key-foot a")).toHaveAttribute("href", "/about");
+  // Opening Prayer form closes How to read.
+  await page.locator(".leader-selector > summary").click();
+  await expect(key).not.toHaveAttribute("open", "");
+  // Quiet structural glosses carry no underline at rest yet open the gloss note on tap.
+  const quiet = page.locator(".gloss-quiet[data-gloss]").first();
+  await expect(quiet).toHaveCSS("text-decoration-line", "none");
+  await quiet.click();
+  await expect(page.locator("#gloss-note")).not.toHaveClass(/closed/);
+  await page.keyboard.press("Escape");
+  // Hour header feast links straight to the feast page and returns to the hour.
+  await page.locator(".hour-feast-link").click();
+  await expect(page).toHaveURL(/\/feast\/annunciation\?from=lauds-2026-03-25$/);
+  await expect(page.locator(".find-back")).toHaveText(/Lauds/);
+
+  // 3A: Mobile menu places Ordo, Reminders, and About on one 3-up row.
+  await page.locator(".site-menu > summary").click();
+  const rowTops = await page.locator('.site-menu nav a[data-nav="calendar"], .site-menu nav a[data-nav="reminders"], .site-menu nav a[data-nav="about"]').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
+  expect(rowTops.length).toBe(3);
+  expect(Math.max(...rowTops) - Math.min(...rowTops)).toBeLessThanOrEqual(4);
+
+  // 3B: Reminders shows plain-English gloss beneath each hour name.
+  await openDatedPage(page, "/reminders");
+  await expect(page.locator(".reminder-hour-gloss")).toHaveCount(7);
+
+  // 3C + 3E: Tabula figure & Ember glosses, single-line Ember fit at 390px, moveable feast link.
+  await openDatedPage(page, "/calendar/2026");
+  await page.locator('.tabula-figures .gloss-term[data-gloss-title="Golden Number"]').click();
+  await expect(page.locator("#gloss-note")).not.toHaveClass(/closed/);
+  await page.keyboard.press("Escape");
+  const emberRows = await page.locator("#tabula-ember + dl > div").evaluateAll((rows) => rows.map((r) => {
+    const dt = r.querySelector("dt").getBoundingClientRect();
+    const dd = r.querySelector("dd").getBoundingClientRect();
+    return Math.abs(Math.round(dt.top) - Math.round(dd.top));
+  }));
+  expect(emberRows.length).toBe(4);
+  for (const diff of emberRows) expect(diff).toBeLessThanOrEqual(4);
+  await page.locator('.tabula-tables dt a.feast-link', { hasText: "Ash Wednesday" }).click();
+  await expect(page).toHaveURL(/\/feast\/ash-wednesday\?from=ordo-2026$/);
+  await expect(page.locator(".find-back")).toHaveText(/2026 Ordo/);
+
+  // Quiet glosses on Feast, Tabula, and Home pages stay ununderlined at rest, stay keyboard-accessible, and open #gloss-note on tap.
+  await openDatedPage(page, "/feast/st-raphael-of-brooklyn");
+  for (const title of ["Greater Double", "Proper of the feast", "Collect", "From the Common"]) {
+    const el = page.locator(`.gloss-quiet[data-gloss-title="${title}"]`).first();
+    await expect(el).toHaveCSS("text-decoration-line", "none");
+    await expect(el).toHaveAttribute("role", "button");
+    await el.click();
+    await expect(page.locator("#gloss-note")).not.toHaveClass(/closed/);
+    await expect(page.locator("#gloss-note .gloss-title")).toHaveText(title);
+    await page.keyboard.press("Escape");
+  }
+
+  await openDatedPage(page, "/?date=2026-12-26");
+  const octave = page.locator('.octave-note .gloss-quiet[data-gloss-title="Octave"]');
+  await expect(octave).toHaveCSS("text-decoration-line", "none");
+  await expect(octave).toHaveAttribute("role", "button");
+  await octave.click();
+  await expect(page.locator("#gloss-note")).not.toHaveClass(/closed/);
+  await page.keyboard.press("Escape");
 });
 
 // One theme: overflow and touch targets are geometry, which themes share
@@ -2487,8 +5033,11 @@ test("ordo print reveals the office digest without changing screen disclosures",
   const day = page.locator("#d-2026-03-01");
   await expect(day.locator(".day-office-digest")).toBeHidden();
   await page.emulateMedia({ media: "print" });
-  await expect(day.locator(".day-office-digest")).toBeVisible();
-  await expect(day.locator(".day-commemoration").first()).toBeVisible();
+  // Rendered, though its <details> stays closed: Playwright's WebKit counts
+  // anything in a closed <details> as hidden, so ask the engine itself.
+  const rendered = locator => locator.evaluate(el => el.checkVisibility() && el.getBoundingClientRect().height > 0);
+  await expect.poll(() => rendered(day.locator(".day-office-digest"))).toBe(true);
+  await expect.poll(() => rendered(day.locator(".day-office-comm").first())).toBe(true);
   await expect(page.locator(".calendar-tools")).toBeHidden();
   await expect(page.locator(".ordo-continuation")).toBeHidden();
   await page.emulateMedia({ media: "screen" });
@@ -2540,6 +5089,127 @@ test("the strip's month marker moves with the month at midnight", async ({ page 
   await expect(october).toHaveClass(/is-today-month/);
   await expect(october).toHaveAttribute("aria-label", "October, this month");
   await expect(page.locator(".month-jump .is-today-month")).toHaveCount(1);
+  // The lozenge goes with it, to the first of October's 31sts along the course.
+  await expect(october).toHaveAttribute("style", /--today-x: 1\.613%/);
+  await expect(september).not.toHaveAttribute("style", /--today-x/);
+});
+
+test("the year's course runs under the strip, for the eye alone", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-11-13T12:00:00-05:00") });
+  for (const [width, path] of [[390, "/calendar/2026"], [390, "/calendar/2026/11"], [1280, "/calendar/2026"]]) {
+    await page.setViewportSize({ width, height: 844 });
+    await openDatedPage(page, path);
+    const m = await page.evaluate(() => {
+      const nav = document.querySelector(".month-jump").getBoundingClientRect();
+      const links = [...document.querySelectorAll(".month-jump a")];
+      const bands = links.map((a) => {
+        const band = a.querySelector(".month-course");
+        const r = band.getBoundingClientRect();
+        const rects = [...band.querySelectorAll("rect")];
+        return {
+          hidden: band.getAttribute("aria-hidden"),
+          top: r.top - a.getBoundingClientRect().bottom,
+          height: r.height,
+          left: r.left - a.getBoundingClientRect().left,
+          width: r.width - a.getBoundingClientRect().width,
+          days: rects.reduce((n, rect) => n + Number(rect.getAttribute("width")), 0),
+          fills: rects.map((rect) => getComputedStyle(rect).fill),
+          below: r.bottom <= nav.bottom,
+        };
+      });
+      const today = document.querySelector(".month-jump a.is-today-month");
+      const t = today.getBoundingClientRect();
+      const after = getComputedStyle(today, "::after");
+      const band = today.querySelector(".month-course").getBoundingClientRect();
+      return {
+        bands,
+        text: links.map((a) => a.textContent),
+        // The lozenge's centre, from its own left and the translate that centres it.
+        lozengeX: parseFloat(after.left) / t.width,
+        lozengeBelowBand: t.bottom + 9.5 - parseFloat(after.height) * Math.SQRT2 / 2 >= band.bottom,
+        lozengeInNav: t.bottom + 9.5 + parseFloat(after.height) * Math.SQRT2 / 2 <= nav.bottom + 1,
+      };
+    });
+    expect(m.text.join(" "), path).toBe("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec");
+    for (const [i, b] of m.bands.entries()) {
+      expect(b.hidden, `${path} ${i}`).toBe("true");
+      expect(b.height, `${path} ${i}`).toBe(3);
+      expect(Math.abs(b.left) + Math.abs(b.width), `${path} ${i}`).toBeLessThan(0.01);
+      expect(b.top, `${path} ${i}`).toBeGreaterThan(0);
+      expect(b.below, `${path} ${i}`).toBe(true);
+      // Every fill is a pigment, never the default black of an unset --day-color.
+      expect(b.fills.every((f) => f !== "rgb(0, 0, 0)" && f !== "none"), `${path} ${i}`).toBe(true);
+    }
+    expect(m.bands.map((b) => b.days), path).toEqual([31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]);
+    expect(m.lozengeX, path).toBeCloseTo(12.5 / 31, 3);
+    expect(m.lozengeBelowBand, path).toBe(true);
+    expect(m.lozengeInNav, path).toBe(true);
+  }
+  // The band adds nothing to what is read: the strip's links keep their names alone.
+  const tree = await page.locator(".month-jump").ariaSnapshot();
+  expect(tree).not.toMatch(/img|graphics|svg/i);
+  expect(tree).toContain('link "November, this month"');
+});
+
+test("the year's course is laid in once a session, on the frontispiece alone", async ({ browser }) => {
+  // The strokes running on the bands, and each band's clip now.
+  const strokes = (page) => page.evaluate(() => ({
+    held: document.documentElement.hasAttribute("data-course-lay"),
+    running: document.getAnimations().filter((a) => a.effect && a.effect.target && a.effect.target.closest(".month-course")).length,
+  }));
+  // Each stroke is held at its start the moment it begins, so what is read does not depend on
+  // how long the page took to load.
+  const hold = () => {
+    const animate = Element.prototype.animate;
+    Element.prototype.animate = function (...args) {
+      const a = animate.apply(this, args);
+      if (this.closest && this.closest(".month-course")) a.pause();
+      return a;
+    };
+  };
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.addInitScript(hold);
+  const page = await ctx.newPage();
+  // A month page never lays it.
+  await page.goto("/calendar/2026/11");
+  expect(await strokes(page)).toEqual({ held: false, running: 0 });
+  // The first frontispiece of the session does: twelve strokes, one front.
+  await page.goto("/calendar/2026");
+  expect(await strokes(page)).toEqual({ held: false, running: 12 });
+  const front = await page.evaluate(() => {
+    const anims = document.getAnimations().filter((a) => a.effect.target.closest(".month-course"));
+    anims.forEach((a) => a.pause());
+    const at = (t) => anims.map((a) => {
+      a.currentTime = t;
+      return getComputedStyle(a.effect.target).clipPath;
+    });
+    const total = anims[0].effect.getComputedTiming().duration;
+    return { total, start: at(0), mid: at(total / 2), end: at(total) };
+  });
+  expect(front.total).toBe(815);
+  expect(front.start.every((c) => c === "inset(0px 100% 0px 0px)")).toBe(true);
+  expect(front.end.every((c) => c === "inset(0px 0% 0px 0px)")).toBe(true);
+  // Halfway through, the front stands mid-year: January laid, December not begun.
+  expect(front.mid[0]).toMatch(/^inset\(0px 0%/);
+  expect(front.mid[11]).toBe("inset(0px 100% 0px 0px)");
+  // Not again this session, in this year or another.
+  await page.goto("/calendar/2027");
+  expect(await strokes(page)).toEqual({ held: false, running: 0 });
+  // Nor on the way back, even with the session's memory gone.
+  await page.goto("/calendar/2026/11");
+  await page.evaluate(() => sessionStorage.clear());
+  await page.goBack();
+  await expect(page).toHaveURL(/\/calendar\/2027$/);
+  expect(await strokes(page)).toEqual({ held: false, running: 0 });
+  await ctx.close();
+  // Under reduced motion the band is simply there.
+  const still = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
+  await still.addInitScript(hold);
+  const quiet = await still.newPage();
+  await quiet.goto("/calendar/2026");
+  expect(await strokes(quiet)).toEqual({ held: false, running: 0 });
+  expect(await quiet.locator(".month-course svg").first().evaluate((svg) => getComputedStyle(svg).clipPath)).toBe("none");
+  await still.close();
 });
 
 test("Tabula dates stay whole at the narrowest width and largest text", async ({ page }) => {
@@ -2561,10 +5231,12 @@ test("Tabula dates stay whole at the narrowest width and largest text", async ({
 });
 
 test("links into the year from before month pages still reach their day", async ({ page }) => {
-  await page.goto("/calendar/2026#d-2026-09-12");
+  // The year page replaces itself while it parses, so its own load never comes; WebKit has been
+  // seen to leave the goto waiting on it. The URL and viewport checks wait for the month page.
+  await page.goto("/calendar/2026#d-2026-09-12", { waitUntil: "commit" });
   await expect(page).toHaveURL(/\/calendar\/2026\/09#d-2026-09-12$/);
   await expect(page.locator("#d-2026-09-12")).toBeInViewport();
-  await page.goto("/calendar/2026?form=priest#march");
+  await page.goto("/calendar/2026?form=priest#march", { waitUntil: "commit" });
   await expect(page).toHaveURL(/\/calendar\/2026\/03\?form=priest$/);
   // The frontispiece itself, and its own anchors, stay put.
   await page.goto("/calendar/2026#tabula-heading");
@@ -2638,9 +5310,8 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   await expect(subscribe).toHaveAttribute("aria-disabled", "true");
   await expect(subscribe).not.toHaveAttribute("href");
   await expect(subscribe).toHaveAttribute("tabindex", "-1");
-  await expect(page.locator("#reminder-url")).toHaveText("Select at least one hour above.");
-  await expect(page.locator("#reminder-copied")).toHaveText("Select at least one hour above.");
-  await expect(page.locator("#reminder-copied")).toBeVisible();
+  await expect(page.locator("#reminder-url")).toHaveText("No hour is chosen yet.");
+  await expect(page.locator("#reminder-rule")).toHaveText("No hour is chosen yet.");
 
   await page.locator('input[name="hour"][value="lauds"]').check();
   await expect(copy).toBeEnabled();
@@ -2659,10 +5330,8 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   await page.getByLabel("Time for Lauds").press("Tab");
   await expect(copy).toBeDisabled();
   await expect(subscribe).not.toHaveAttribute("href");
-  await expect(feedURL).toHaveText("Choose a time for each selected hour.");
-  await expect(page.locator("#reminder-copied")).toHaveText(
-    "Choose a time for each selected hour.",
-  );
+  await expect(feedURL).toHaveText("Choose a time for each chosen hour.");
+  await expect(page.locator("#reminder-rule")).toHaveText("Choose a time for each chosen hour.");
 
   await page.getByLabel("Time for Lauds").fill("07:30");
   await page.getByLabel("Time for Lauds").press("Tab");
@@ -2673,8 +5342,8 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   }
   await expect(copy).toBeDisabled();
   await expect(subscribe).not.toHaveAttribute("href");
-  await expect(feedURL).toHaveText("Select at least one day above.");
-  await expect(page.locator("#reminder-copied")).toHaveText("Select at least one day above.");
+  await expect(feedURL).toHaveText("No day is chosen yet.");
+  await expect(page.locator("#reminder-rule")).toHaveText("No day is chosen yet.");
 
   await page.locator('input[name="day"][value="sun"]').check();
   await expect(copy).toBeEnabled();
@@ -2693,11 +5362,77 @@ test("reminder copy failure reveals the calendar address", async ({ page }) => {
 
   await page.getByRole("button", { name: "Copy link" }).click();
 
-  await expect(page.locator("#reminder-copied")).toHaveText(
+  await expect(page.locator("#reminder-copy-note")).toHaveText(
     "Copy unavailable. The calendar address is shown below.",
   );
   await expect(page.locator(".reminder-address")).toHaveAttribute("open", "");
   await expect(page.locator("#reminder-url")).toBeVisible();
+});
+
+// The rule, written out: the sentences of presentation::reminders' table tests, from app.js's
+// copy of the grammar and the words the page is sent.
+test("the reminder rule says back the choices", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/reminders");
+  const rule = page.locator("#reminder-rule");
+  const said = async () => (await rule.textContent()).replace(/\u00a0/g, " ");
+  const day = (name) => page.locator(".reminder-day", { hasText: name }).locator("input");
+  await expect.poll(said).toBe(
+    "Lauds at 6:45 AM, Vespers at 6:00 PM, and Compline at 9:00 PM, every day, ten minutes before.",
+  );
+  await page.locator('input[name="hour"][value="compline"]').uncheck();
+  await expect.poll(said).toBe("Lauds at 6:45 AM and Vespers at 6:00 PM, every day, ten minutes before.");
+  await page.locator('input[name="hour"][value="vespers"]').uncheck();
+  await day("Sat").uncheck();
+  await day("Sun").uncheck();
+  await expect.poll(said).toBe("Lauds at 6:45 AM, on weekdays, ten minutes before.");
+  await day("Sat").check();
+  await day("Sun").check();
+  await day("Fri").uncheck();
+  await page.selectOption('select[name="alarm"]', "none");
+  await expect.poll(said).toBe("Lauds at 6:45 AM, except Fridays, with no alert.");
+  for (const name of ["Mon", "Tue", "Thu", "Sat"]) {
+    await day(name).uncheck();
+  }
+  await day("Fri").check();
+  await page.selectOption('select[name="alarm"]', "0");
+  await expect.poll(said).toBe("Lauds at 6:45 AM, on Wednesdays, Fridays, and Sundays, at the hour.");
+  await day("Wed").check();
+  await day("Thu").check();
+  await expect.poll(said).toBe("Lauds at 6:45 AM, except Mondays, Tuesdays, and Saturdays, at the hour.");
+  for (const box of await page.locator('input[name="day"]').all()) {
+    await box.uncheck();
+  }
+  await expect.poll(said).toBe("No day is chosen yet.");
+  await page.locator('input[name="hour"][value="lauds"]').uncheck();
+  await expect.poll(said).toBe("No hour or day is chosen yet.");
+});
+
+test("a tap on an unchosen hour's time chooses the hour", async ({ page }) => {
+  await page.goto("/reminders");
+  await expect(page.getByLabel("Time for Prime")).toBeDisabled();
+  await page.locator('[data-reminder-hour="prime"] .reminder-time').click();
+  await expect(page.locator('input[name="hour"][value="prime"]')).toBeChecked();
+  await expect(page.getByLabel("Time for Prime")).toBeEnabled();
+});
+
+test("copying the link changes its words in place for a moment", async ({ page, context, browserName }) => {
+  test.skip(browserName !== "chromium", "clipboard permissions are Chromium's");
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/reminders");
+  const copy = page.getByRole("button", { name: "Copy link" });
+  // Where the link stands on the page, whatever the scroll.
+  const place = () => copy.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y + window.scrollY, width: r.width, height: r.height };
+  });
+  await copy.scrollIntoViewIfNeeded();
+  const before = await place();
+  await copy.click();
+  await expect(copy).toHaveClass(/is-copied/);
+  await expect(page.locator("#reminder-copied")).toHaveText("Copied.");
+  expect(await place()).toEqual(before);
+  await expect(copy).not.toHaveClass(/is-copied/, { timeout: 4000 });
 });
 
 test("quiet mobile controls retain full thumb targets", async ({ page }) => {
@@ -2710,7 +5445,7 @@ test("quiet mobile controls retain full thumb targets", async ({ page }) => {
       `/lauds/${testDate}`,
       [
         ".site-brand",
-        ".hour-date-nav > summary",
+        ".hour-meta-date",
         ".session-prayers > summary",
         ".report-issue a:visible",
       ],
@@ -2739,7 +5474,18 @@ test("quiet mobile controls retain full thumb targets", async ({ page }) => {
       const count = await targets.count();
       expect(count, `${path} should expose ${selector}`).toBeGreaterThan(0);
       for (let i = 0; i < Math.min(count, 12); i++) {
-        const box = await targets.nth(i).boundingBox();
+        // A target whose thumb box is drawn round it (an absolute ::before, as
+        // the header's links and the ordo's phone rows have) is measured by it.
+        const box = await targets.nth(i).evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          if (r.width === 0 && r.height === 0) return null;
+          const b = getComputedStyle(el, "::before");
+          if (b.content === "none" || b.position !== "absolute") return { width: r.width, height: r.height };
+          const px = (v) => (v.endsWith("px") ? parseFloat(v) : 0);
+          const width = Math.max(r.width, r.width - px(b.left) - px(b.right));
+          const height = Math.max(r.height, r.height - px(b.top) - px(b.bottom));
+          return { width, height };
+        });
         expect(box, `${path} ${selector} should be laid out`).not.toBeNull();
         expect(box.height, `${path} ${selector} target height`).toBeGreaterThanOrEqual(44);
         expect(box.width, `${path} ${selector} target width`).toBeGreaterThanOrEqual(44);
@@ -2765,6 +5511,12 @@ for (const { name, path, theme, knownViolations } of [
     name: "Reminders in the Apse theme",
     path: "/reminders",
     theme: "dark",
+    knownViolations: [],
+  },
+  {
+    name: "About in the Nave theme",
+    path: "/about",
+    theme: "light",
     knownViolations: [],
   },
 ]) {
@@ -2797,16 +5549,34 @@ const scopes = (events) => events.map(body => body.split(" ")[0]);
 // a phone screen) and start a navigation that races the test's next goto.
 const engage = (page) => page.keyboard.press("Shift");
 
+// Collects the page's usage beacons into `bodies` and answers each with `status()`, keeping them
+// off the real usage store. It replaces the page's fetch for /api/usage rather than routing the
+// request: while Playwright intercepts a WebKit page's network (page.route, or setOffline), a
+// request it lets through just as the page navigates can fail that navigation with "WebKit
+// encountered an internal error" (#924), and a route intercepts every request, not only its own.
+async function captureUsage(page, bodies, status = () => 204) {
+  await page.exposeFunction("officeTestUsage", (body) => {
+    bodies.push(body);
+    return status();
+  });
+  await page.addInitScript(() => {
+    const send = window.fetch;
+    window.fetch = function (input, init) {
+      const url = new URL(typeof input === "string" ? input : input.url, location.href);
+      if (url.pathname !== "/api/usage") return send.apply(this, arguments);
+      return window.officeTestUsage(String((init && init.body) || ""))
+        .then((code) => new Response(null, { status: code }));
+    };
+  });
+}
+
 // A person, not the default HeadlessChrome agent the server drops as a bot.
 const HUMAN_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
   "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
 
 test("engaged visits to a current page send an event, passive and background ones do not", async ({ page }) => {
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
 
   // Rendering alone is not use: a scraper that renders and leaves must not count.
   await page.goto(`/lauds/${easternDay()}`);
@@ -2834,16 +5604,36 @@ test("engaged visits to a current page send an event, passive and background one
   // The dashboard itself is never counted.
   await page.goto("/admin/usage?days=7");
   await engage(page);
-  await expect(page.getByRole("heading", { name: "Daily usage", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Usage", exact: true })).toBeVisible();
   expect(events.length).toBe(2);
+});
+
+test("the usage report keeps its explorer shut until it is used", async ({ page }) => {
+  await page.goto("/admin/usage?days=7");
+  const explorer = page.locator(".usage-over-time");
+  const tab = page.locator(".usage-window a").first();
+  await expect(page.locator(".usage-explorer")).toBeAttached();
+  // A period's link is the period alone, so following it does not open the explorer.
+  await expect(tab).toHaveAttribute("href", "?days=7");
+  await expect(explorer).not.toHaveAttribute("open", "");
+  // The daily table fits its panel at any width: no sideways scroll inside it.
+  for (const width of [390, 720, 900]) {
+    await page.setViewportSize({ width, height: 800 });
+    const [scroll, client] = await page.locator(".usage-days").first().evaluate(table => [table.parentElement.scrollWidth, table.parentElement.clientWidth]);
+    expect(scroll, `daily table at ${width}px`).toBeLessThanOrEqual(client);
+  }
+  // Once a control is changed the choice travels with the links, and a link so made opens it.
+  await explorer.locator("> summary").click();
+  await page.locator("#usage-measure label", { hasText: "%" }).click();
+  await expect(tab).toHaveAttribute("href", /days=7&compare=client&interval=day&measure=share/);
+  await tab.click();
+  await expect(explorer).toHaveAttribute("open", "");
+  await expect(page.locator("#usage-measure input[value=share]")).toBeChecked();
 });
 
 test("the dated archive is freely readable but never counted", async ({ page }) => {
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
   // Deep past, far future, and a distant ordo year: all render, none report.
   for (const path of ["/lauds/2019-03-04", "/?date=2045-06-01", "/calendar/2050", "/vespers/2031-12-25"]) {
     await page.goto(path);
@@ -2863,10 +5653,7 @@ test("the dated archive is freely readable but never counted", async ({ page }) 
 
 test("the current ordo page is tracked in its own column, not just the site total", async ({ page }) => {
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
   const year = new Date().getFullYear();
   await page.goto(`/calendar/${year}/01`);
   await engage(page);
@@ -2876,10 +5663,7 @@ test("the current ordo page is tracked in its own column, not just the site tota
 
 test("generating a reminder feed link is tracked separately from viewing the page", async ({ page }) => {
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
   // A stub so the copy actually "succeeds" without a real clipboard permission.
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "clipboard", {
@@ -2899,10 +5683,7 @@ test("generating a reminder feed link is tracked separately from viewing the pag
 // The default project emulates a phone, which is what most readers use.
 test("the beacon reports the appearance the page was read in", async ({ page }) => {
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
   const read = async (label) => {
     events.length = 0;
     await page.goto(`/vespers/${easternDay()}`);
@@ -2911,47 +5692,47 @@ test("the beacon reports the appearance the page was read in", async ({ page }) 
     // Leave for a page that never reports before changing the device: a
     // beacon still settling would otherwise re-report in the new appearance.
     await page.goto("/privacy");
-    return events[0];
+    // Whether today's Vespers has a score, and so reports chant:, is the day's.
+    return events[0].replace(/ chant:\w+/, "").replace(/ timely:\w+/, "");
   };
 
   // Device appearance, no stored choice: what is on screen is what counts.
-  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser");
+  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser week:first month:first version:2 tenure:week");
   await page.emulateMedia({ colorScheme: "dark" });
-  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile prayer-form:private visit:first client:browser");
+  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile prayer-form:private visit:first client:browser week:first month:first version:2 tenure:week");
 
   // An explicit choice overrides the device, so someone reading the Nave on a
   // dark-mode phone counts as Nave.
   await page.evaluate(() => localStorage.setItem("office-theme", "light"));
-  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser");
+  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser week:first month:first version:2 tenure:week");
   await page.evaluate(() => localStorage.removeItem("office-theme"));
 });
 
 test("the installed web app reports itself apart from a browser tab", async ({ page }) => {
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
   // Safari's home-screen app says so on navigator; others match display-mode: standalone.
   await page.addInitScript(() => Object.defineProperty(navigator, "standalone", { configurable: true, value: true }));
   await page.goto(`/?date=${easternDay()}`);
   await engage(page);
   await expect.poll(() => events.length).toBe(1);
-  expect(events[0]).toBe("site appearance:nave screen:mobile visit:first client:pwa");
+  expect(events[0]).toBe("site appearance:nave screen:mobile visit:first client:pwa week:first month:first version:2 tenure:week");
 });
 
 // The device keeps only the day it first opened the Office; the beacon says first or returning.
 test("a browser is new on the day it first opens the Office and returning after", async ({ page }) => {
+  // A fixed day: run across a real midnight, the first day would turn returning between visits.
+  await page.clock.setFixedTime(new Date("2026-03-18T12:00:00-04:00"));
   const events = [];
-  await page.route("**/api/usage", async route => {
-    events.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, events);
   const visit = async () => {
     events.length = 0;
-    await page.goto(`/?date=${easternDay()}`);
+    await page.goto("/?date=2026-03-18");
     await engage(page);
     await expect.poll(() => events.length).toBe(1);
+    // Leave for a page that never reports before the test changes storage: a beacon still
+    // settling would otherwise report again in the words the change gives it.
+    await page.goto("/privacy");
     return events[0].match(/visit:(\w+)/)[1];
   };
   // Any number of pages on the first day are new; an earlier first day is returning.
@@ -2964,15 +5745,276 @@ test("a browser is new on the day it first opens the Office and returning after"
   expect(await visit()).toBe("returning");
 });
 
+// The device keeps the last two days it was counted; the beacon says only whether today opens
+// its week and its month, and every beacon of such a day says so.
+test("a browser opens its week and month on the first day it is counted in them", async ({ page }) => {
+  const events = [];
+  let online = true;
+  // A fixed Wednesday, so the week began earlier in the same month, and no real midnight (or a
+  // Monday's) turns the week between visits.
+  const today = "2026-03-18";
+  await page.clock.setFixedTime(new Date(`${today}T12:00:00-04:00`));
+  await captureUsage(page, events, () => (online ? 204 : 503));
+  const visit = async () => {
+    events.length = 0;
+    await page.goto(`/?date=${today}`);
+    await engage(page);
+    await expect.poll(() => events.length).toBe(1);
+    return events[0].match(/week:\w+ month:\w+/)[0];
+  };
+  const kept = () => page.evaluate(() => [localStorage.getItem("office-counted"), localStorage.getItem("office-counted-before")]);
+  // A beacon the server did not count opens nothing.
+  online = false;
+  expect(await visit()).toBe("week:first month:first");
+  expect(await kept()).toEqual([null, null]);
+  online = true;
+  expect(await visit()).toBe("week:first month:first");
+  await expect.poll(kept).toEqual([today, null]);
+  expect(await visit()).toBe("week:first month:first");
+  // Counted on an earlier day of this week and month: again in both.
+  const monday = new Date(`${today}T12:00:00Z`);
+  monday.setUTCDate(monday.getUTCDate() - (monday.getUTCDay() + 6) % 7);
+  const weekStart = monday.toISOString().slice(0, 10);
+  // Leave for a page that never reports before changing the kept days: the last visit's beacon,
+  // still settling, would otherwise report again in the words the change gives it.
+  const earlier = async (day) => {
+    await page.goto("/privacy");
+    await page.evaluate((d) => { localStorage.setItem("office-counted", d); localStorage.removeItem("office-counted-before"); }, day);
+  };
+  await earlier(weekStart);
+  expect(await visit()).toBe("week:again month:again");
+  await expect.poll(kept).toEqual([today, weekStart]);
+  expect(await visit()).toBe("week:again month:again");
+  // Last counted a year ago: a new week and a new month.
+  await earlier(`${Number(today.slice(0, 4)) - 1}${today.slice(4)}`.replace(/-02-29$/, "-02-28"));
+  expect(await visit()).toBe("week:first month:first");
+});
+
+// How a reader keeps the hours, in buckets: how long ago the Office was first opened here, an
+// hour opened in its time and marked prayed, and an hour whose beacon failed, said next time.
+test("the beacon says how a reader keeps the hours", async ({ page }) => {
+  const events = [];
+  let online = true;
+  await captureUsage(page, events, () => (online ? 204 : 503));
+  // Half past six in the evening in New York (half past seven in summer): Vespers' time.
+  const today = easternDay();
+  await page.clock.setFixedTime(new Date(`${today}T18:30:00-05:00`));
+  await page.goto(`/vespers/${today}`);
+  await engage(page);
+  await expect.poll(() => events.length).toBe(1);
+  expect(events[0]).toMatch(/ version:2 tenure:week timely:vespers(?: |$)/);
+  expect(events[0]).not.toContain("prayed:");
+  // Marked prayed: said at once.
+  await page.evaluate((day) => {
+    localStorage.setItem("office-prayed", JSON.stringify({ [day]: ["vespers"] }));
+    window.dispatchEvent(new Event("officeprayed"));
+  }, today);
+  await expect.poll(() => events.length).toBe(2);
+  expect(events[1]).toMatch(/ timely:vespers prayed:vespers(?: |$)/);
+  // The network lost on an hour already counted: nothing went unreported. The browser says
+  // it is offline without Playwright's emulated outage, which intercepts the page's network
+  // and can fail the next navigation in WebKit (#924).
+  await page.evaluate(() => Object.defineProperty(navigator, "onLine", { configurable: true, get: () => false }));
+  await page.evaluate(() => window.dispatchEvent(new Event("pageshow")));
+  await page.waitForTimeout(200);
+  expect(await page.evaluate(() => localStorage.getItem("office-offline"))).toBe(null);
+  expect(events.length).toBe(2);
+  // Lauds now is out of its time; its beacon fails, and the next that arrives says so, once.
+  online = false;
+  await page.goto(`/lauds/${today}`);
+  await engage(page);
+  await expect.poll(() => events.length).toBe(3);
+  expect(events[2]).not.toContain("timely:");
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("office-offline"))).toBe("1");
+  online = true;
+  await page.goto(`/?date=${today}`);
+  await engage(page);
+  await expect.poll(() => events.length).toBe(4);
+  expect(events[3]).toMatch(/ offline:yes$/);
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("office-offline"))).toBe(null);
+  await page.goto(`/prime/${today}`);
+  await engage(page);
+  await expect.poll(() => events.length).toBe(5);
+  expect(events[4]).not.toContain("offline:");
+});
+
+// Home offers the introduction beside Change date for a reader's first week, in the season's
+// place; after that, and for a reader from before first days were kept, About is in the menu.
+test("home introduces the Office to a reader in their first week", async ({ page }) => {
+  // Kept off the real usage store, which the deduplication test counts from in parallel.
+  await captureUsage(page, []);
+  const introduction = page.locator(".home-introduction");
+  const home = `/?date=${easternDay()}`;
+  await page.goto(home);
+  await expect(introduction).toBeVisible();
+  await expect(introduction).toHaveAttribute("href", "/about");
+  await page.evaluate((day) => localStorage.setItem("office-first-counted", day), easternDay(-6));
+  await page.goto(home);
+  await expect(introduction).toBeVisible();
+  // Seven whole New York days on, the week is over; a first day ahead of today never counts.
+  for (const offset of [-7, 1]) {
+    await page.evaluate((day) => localStorage.setItem("office-first-counted", day), easternDay(offset));
+    await page.goto(home);
+    await expect(introduction).toBeHidden();
+  }
+  await page.evaluate(() => localStorage.setItem("office-first-counted", "before"));
+  await page.goto(home);
+  await expect(introduction).toBeHidden();
+  await page.getByText("Menu", { exact: true }).click();
+  await page.getByRole("link", { name: "About", exact: true }).click();
+  await expect(page).toHaveURL(/\/about$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("About the Office");
+  await expect(page.locator(".about-hour dt a")).toHaveText(["Lauds", "Prime", "Terce", "Sext", "None", "Vespers", "Compline"]);
+});
+
+// About's table marks the hour it is now as home's directory does, and the page ends with
+// home's invitation, words and link alike; both follow the clock across an office boundary.
+test("About lights the hour it is now and ends with home's invitation", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-03-15T16:59:00-04:00") });
+  await openDatedPage(page, "/about");
+  const current = page.locator(".about-hour.is-current");
+  const door = page.locator(".about-door .pray-now");
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveAttribute("data-hour", "none");
+  await expect(current.locator("dt a")).toHaveAttribute("aria-current", "time");
+  await expect(door).toHaveText("Pray None");
+  await expect(door).toHaveAttribute("href", "/none/2026-03-15");
+  // The door comes after the last paragraph, and is home's ruled tablet.
+  await expect(page.locator(".about > :last-child")).toHaveClass(/about-door/);
+  await expect(door).toHaveClass(/is-ruled/);
+  // A Prime gloss on one line: the seven rows stand alike.
+  const heights = await page.locator(".about-hour").evaluateAll(rows => rows.map(r => Math.round(r.getBoundingClientRect().height)));
+  expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
+
+  await page.clock.fastForward("02:00");
+  await expect(current).toHaveAttribute("data-hour", "vespers");
+  await expect(door).toHaveText("Pray Vespers");
+  await expect(page.locator('.about-hour dt a[aria-current="time"]')).toHaveCount(1);
+});
+
+test("About lights no hour from midnight to 2am, as home does", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T01:00:00-04:00"));
+  await openDatedPage(page, "/about");
+  await expect(page.locator(".about-hour.is-current")).toHaveCount(0);
+  await expect(page.locator('.about-hour dt a[aria-current="time"]')).toHaveCount(0);
+  const door = page.locator(".about-door .pray-now");
+  await expect(door).toHaveText("Pray Compline");
+  await expect(door).toHaveAttribute("href", "/compline/2026-03-14");
+});
+
+test("About's Horologium, live specimen leaf, and Ordo ribbon respond to interaction", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T15:00:00-04:00"));
+  await openDatedPage(page, "/about");
+  // Opening paragraph carries the app's painted drop cap with optical profile.
+  await expect(page.locator(".about-intro")).toHaveAttribute("data-initial", "T");
+  await expect(page.locator(".about-intro .initial-word")).toHaveText("he");
+  // Horologium rests on None (sun) in Nave without stars; tapping Compline switches to the moon.
+  const horo = page.locator(".about-horologium");
+  await expect(horo).toHaveAttribute("data-active", "none");
+  await expect(horo).toHaveAttribute("data-night", "false");
+  await expect(page.locator(".about-horologium-stars")).toBeHidden();
+  await page.locator('.about-horologium-stop[data-hour="compline"]').click();
+  await expect(horo).toHaveAttribute("data-active", "compline");
+  await expect(horo).toHaveAttribute("data-night", "true");
+  await expect(page.locator(".about-horologium-orb")).toHaveClass(/is-night/);
+  await expect(page.locator('.about-hour[data-hour="compline"]')).toHaveClass(/is-preview/);
+  // Tapping again settles back to Now.
+  await page.locator('.about-horologium-stop[data-hour="compline"]').click();
+  await expect(horo).toHaveAttribute("data-active", "none");
+
+  // The specimen sets lines as the hour prints them, the ✠ after "O God,"; its switch offers the
+  // hour's three forms, and a deacon greets as a priest does.
+  const specimen = page.locator(".about-specimen");
+  // The cross as printed, and said as the hour says it.
+  await expect(specimen.locator(".about-specimen-opening")).toContainText("O God, ✠");
+  await expect(specimen.locator(".about-specimen-opening")).toContainText("make speed to save me.");
+  await expect(specimen.locator(".about-specimen-cross .sr-only")).toHaveText("sign of the cross,");
+  await expect(specimen.locator(".about-specimen-opt")).toHaveText(["Private", "Deacon", "Priest"]);
+  await expect(specimen.locator(".about-specimen-v-text")).toHaveText("O Lord, hear my prayer.");
+  await specimen.locator('.about-specimen-opt[data-form="deacon"]').click();
+  await expect(specimen.locator(".about-specimen-v-text")).toHaveText("The Lord be with you.");
+  await specimen.locator('.about-specimen-opt[data-form="private"]').click();
+  await expect(specimen.locator(".about-specimen-v-text")).toHaveText("O Lord, hear my prayer.");
+  await specimen.locator('.about-specimen-opt[data-form="priest"]').click();
+  await expect(specimen.locator(".about-specimen-v-text")).toHaveText("The Lord be with you.");
+  await expect(specimen.locator(".about-specimen-r-text")).toHaveText("And with thy spirit.");
+  await page.locator('.about-key-btn[data-key="rubric"]').click();
+  await expect(specimen.locator(".about-specimen-rubric")).toHaveClass(/is-lit/);
+  await page.locator('.about-key-btn[data-key="rubric"]').click();
+  await expect(specimen.locator(".about-specimen-rubric")).not.toHaveClass(/is-lit/);
+
+  // Ordo ribbon highlights matching days and explains the chosen liturgical color.
+  const ribbon = page.locator(".about-ordo-ribbon");
+  // Each month's name stands at its own month's start, and today's lozenge at today (15 March:
+  // two months of 31 days and 3 between, then 14.5 days).
+  const placed = await page.evaluate(() => {
+    const track = document.querySelector(".about-ordo-track").getBoundingClientRect();
+    const at = (el) => (el.getBoundingClientRect().left - track.left) / track.width;
+    return {
+      months: [...document.querySelectorAll(".about-ordo-months span")].map(at),
+      today: parseFloat(document.querySelector(".about-ordo-today").style.left) / 100,
+    };
+  });
+  const total = 12 * 31 + 11 * 3;
+  placed.months.forEach((x, i) => expect(Math.abs(x - (2 * i * 34) / total)).toBeLessThan(0.005));
+  expect(Math.abs(placed.today - (2 * 34 + 14.5) / total)).toBeLessThan(0.001);
+  // A copy kept from last year (the page is served from the cache first) shows no year's band.
+  await page.evaluate(() => {
+    const r = document.querySelector(".about-ordo-ribbon");
+    r._syncToday(new Date(Number(r.dataset.year) + 1, 0, 5));
+  });
+  await expect(ribbon.locator(".about-ordo-track")).toBeHidden();
+  await page.evaluate(() => {
+    const r = document.querySelector(".about-ordo-ribbon");
+    r._syncToday(new Date(Number(r.dataset.year), 2, 15));
+  });
+  await expect(ribbon.locator(".about-ordo-track")).toBeVisible();
+  await ribbon.locator('.about-ordo-swatch[data-color="violet"]').click();
+  await expect(ribbon).toHaveAttribute("data-selected-color", "violet");
+  await expect(ribbon.locator(".about-ordo-meaning")).toContainText("Advent, Lent");
+  await ribbon.locator('.about-ordo-swatch[data-color="violet"]').click();
+  await expect(ribbon).not.toHaveAttribute("data-selected-color");
+  await expect(ribbon.locator(".about-ordo-meaning")).toHaveText("");
+
+  // No horizontal overflow on a 390px phone.
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+});
+
 test.describe("on a screen with a mouse", () => {
   test.use({ isMobile: false, hasTouch: false, viewport: { width: 1280, height: 900 } });
 
+  test("About lays out a two-column folio on desktop and reveals stars in Apse", async ({ page }) => {
+    await page.clock.setFixedTime(new Date("2026-03-15T15:00:00-04:00"));
+    await openDatedPage(page, "/about");
+    const layout = await page.evaluate(() => {
+      const intro = document.querySelector(".about-intro").getBoundingClientRect();
+      const prose = document.querySelector(".about-prose").getBoundingClientRect();
+      const hours = document.querySelector(".about-hours-section").getBoundingClientRect();
+      const door = document.querySelector(".about-door").getBoundingClientRect();
+      return {
+        introRight: intro.right,
+        proseRight: prose.right,
+        hoursLeft: hours.left,
+        doorLeft: door.left,
+        doorTop: door.top,
+        hoursBottom: hours.bottom,
+        overflow: document.documentElement.scrollWidth - window.innerWidth,
+      };
+    });
+    expect(layout.hoursLeft).toBeGreaterThan(layout.introRight);
+    expect(layout.doorLeft).toBeGreaterThan(layout.proseRight);
+    expect(layout.doorTop).toBeGreaterThanOrEqual(layout.hoursBottom - 1);
+    expect(layout.overflow).toBeLessThanOrEqual(1);
+
+    // Apse theme reveals the vaulted stars behind the Horologium arc.
+    await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
+    await expect(page.locator(".about-horologium-stars")).toBeVisible();
+  });
+
   test("the beacon separates a desk from a narrowed window", async ({ page }) => {
     const events = [];
-    await page.route("**/api/usage", async route => {
-      events.push(route.request().postData());
-      await route.fulfill({ status: 204 });
-    });
+    await captureUsage(page, events);
     const read = async (label) => {
       events.length = 0;
       await page.goto(`/vespers/${easternDay()}`);
@@ -2981,14 +6023,14 @@ test.describe("on a screen with a mouse", () => {
       // Leave for a page that never reports before changing the device: a
       // beacon still settling would otherwise re-report in the new appearance.
       await page.goto("/privacy");
-      return events[0];
+      return events[0].replace(/ chant:\w+/, "").replace(/ timely:\w+/, "");
     };
 
-    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop prayer-form:private visit:first client:browser");
+    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop prayer-form:private visit:first client:browser week:first month:first version:2 tenure:week");
     // A desktop window dragged narrow gets the phone layout, and is counted
     // as the layout it is actually being read in.
     await page.setViewportSize({ width: 390, height: 900 });
-    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser");
+    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser week:first month:first version:2 tenure:week");
   });
 });
 
@@ -2997,7 +6039,7 @@ test.describe("on a screen with a mouse", () => {
 test("real events deduplicate per browser and exclude crawlers", async ({ browser, baseURL }) => {
   const today = async (page) => {
     await page.goto("/admin/usage?days=7");
-    const row = page.locator("tbody tr").filter({ has: page.locator(".usage-total") }).first();
+    const row = page.locator(".usage-days tbody tr").first();
     return Number(await row.locator("td.usage-total").innerText());
   };
 
@@ -3054,7 +6096,8 @@ test("service worker does not cache the usage report", async ({ browser, baseURL
   await context.close();
 });
 
-test("the Martyrology at Prime is a Settings choice, off by default, that holds offline", async ({ browser, baseURL }) => {
+test("the Martyrology at Prime is a Settings choice, off by default, that holds offline", async ({ browser, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright's WebKit fails any navigation once context.setOffline(true) is set, even one its service worker would answer; service-worker offline emulation works only in Chromium");
   const context = await browser.newContext({ serviceWorkers: "allow", baseURL });
   try {
     const page = await context.newPage();
@@ -3081,7 +6124,7 @@ test("the Martyrology at Prime is a Settings choice, off by default, that holds 
       await expect(button).toHaveAttribute("aria-pressed", "true");
     }
 
-    await choosePreference(page, "On");
+    await choosePreference(page, "On", ".martyrology-option");
     await expect(reading).toBeVisible();
     await expect(rubric).toBeHidden();
     await expect(page.locator(".elements")).not.toContainText("Thomas of Villanova");
@@ -3090,7 +6133,7 @@ test("the Martyrology at Prime is a Settings choice, off by default, that holds 
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-martyrology", "on");
     await expect(reading).toBeVisible();
-    await choosePreference(page, "Off");
+    await choosePreference(page, "Off", ".martyrology-option");
     await expect(rubric).toBeVisible();
     await expect(reading).toBeHidden();
     expect(await page.evaluate(() => localStorage.getItem("office-martyrology"))).toBe("off");
@@ -3154,6 +6197,45 @@ test("long opening verses return to the numbered text edge below the initial", a
     }
   }
 });
+
+// The print diurnal's rule, as the psalms keep it above: below a dropped
+// initial, a prose opening turns over at the spoken-text edge its ℟ shares,
+// not back at the margin under the letter. 1 Cor. 6:20 is the reported case.
+// One test per width: the twenty-four layouts measured in one test outran its
+// timeout on a loaded CI runner. Each page is opened once per width.
+const proseOpenings = {
+  "/none/2026-10-13": [
+    { block: ".chapter .liturgical-block", opening: ".plain-line:first-child" },
+  ],
+  "/lauds/2026-10-13": [
+    { block: ".chapter .liturgical-block", opening: ".plain-line:first-child" },
+    { block: ".collect .liturgical-block", opening: ".plain-line:first-child" },
+    { block: ".corporate-lord-prayer", opening: ".corporate-lord-prayer-officiant" },
+  ],
+};
+for (const width of [320, 390, 1280]) {
+  test(`prose openings turn over at the response's text edge below the initial at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    for (const [path, openings] of Object.entries(proseOpenings)) {
+      await openDatedPage(page, path);
+      for (const { block, opening } of openings) for (const fallback of [false, true]) {
+        const tag = fallback ? await fallbackInitials(page) : null;
+        await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+        const target = page.locator(block).first();
+        const label = `${path} ${block} ${width}px ${fallback ? "fallback" : "native"}`;
+        await expect(target.locator(opening)).not.toHaveClass(/initial-raised/);
+        const rows = await target.locator(opening).evaluate(rowStartsIn);
+        const edge = await target.locator(".response-line .sigil-text").first().evaluate((el) => el.getBoundingClientRect().left);
+        if (width <= 390) expect(rows.length, `${label} turns over`).toBeGreaterThan(2);
+        // Beside a narrow initial a line meets the same edge; never short of it.
+        for (const left of rows.slice(0, 2)) expect(left, `${label} beside the initial`).toBeGreaterThan(edge - 1);
+        for (const left of rows.slice(2)) expect(Math.abs(left - edge), `${label} turnover at the text edge`).toBeLessThan(1);
+        await expectInitialInkClear(page, target, opening, `${label} ink clears the initial`);
+        if (tag) await tag.evaluate((el) => el.remove());
+      }
+    }
+  });
+}
 
 test("wide and narrow initials clear text in native and fallback layouts", async ({ page }) => {
   for (const width of [320, 390]) {
@@ -3224,7 +6306,8 @@ test('prayer forms switch complete sequences and keep reports and print consiste
   await context.setOffline(true);
   await choosePrayerForm(page, 'deacon');
   expect((await prayers.innerText()).match(/I confess to God Almighty/gi)).toHaveLength(1);
-  expect(await prayers.innerText()).toContain('Lord, grant a blessing');
+  expect(await prayers.innerText()).toContain('Sir, ask a blessing');
+  expect(await prayers.innerText()).not.toContain('Lord, grant a blessing');
   expect(await prayers.innerText()).not.toContain('your sins');
   await expect(page.locator('.prayer-speaker:visible')).toHaveText(['All']);
   await choosePrayerForm(page, 'priest');
@@ -3273,10 +6356,7 @@ test('prayer form persists and explicit review links override it without changin
 
 test('prayer-form metrics record the rendered form and subsequent switches only on office pages', async ({ page }) => {
   const bodies = [];
-  await page.route('**/api/usage', async route => {
-    bodies.push(route.request().postData());
-    await route.fulfill({ status: 204 });
-  });
+  await captureUsage(page, bodies);
   const today = await serverTodaySlug(page);
   bodies.length = 0;
   await page.goto(`/lauds/${today}`);
@@ -3296,7 +6376,29 @@ test('prayer-form metrics record the rendered form and subsequent switches only 
   expect(bodies.filter(body => body.startsWith('site ')).every(body => !body.includes('prayer-form:'))).toBe(true);
 });
 
-test('cached prayer pages include every form and preserve an explicit form through redirects', async ({ browser, baseURL }) => {
+test('an hour with a score reports whether its chant notation is shown, and no other page does', async ({ page }) => {
+  const bodies = [];
+  await captureUsage(page, bodies);
+  const today = await serverTodaySlug(page);
+  // Compline closes with a scored Marian antiphon on every day but the Triduum's.
+  await page.goto(`/compline/${today}`);
+  const scored = await page.locator('[data-chant-variant="on"]').count() > 0;
+  await page.locator('.hour-header h1').click();
+  await expect.poll(() => bodies.some(body => body.startsWith('compline '))).toBe(true);
+  expect(bodies[0].includes(' chant:off ')).toBe(scored);
+  expect(bodies[0]).not.toContain('chant:on');
+  if (scored) {
+    await choosePreference(page, 'On', '.chant-option');
+    await expect.poll(() => bodies.some(body => body.includes(' chant:on '))).toBe(true);
+  }
+  await page.goto('/');
+  await page.locator('.site-brand').click();
+  await expect.poll(() => bodies.some(body => body.startsWith('site '))).toBe(true);
+  expect(bodies.filter(body => body.startsWith('site ')).every(body => !body.includes('chant:'))).toBe(true);
+});
+
+test('cached prayer pages include every form and preserve an explicit form through redirects', async ({ browser, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright's WebKit fails any navigation once context.setOffline(true) is set, even one its service worker would answer; service-worker offline emulation works only in Chromium");
   const context = await browser.newContext({ serviceWorkers: 'allow', baseURL });
   try {
     const page = await context.newPage();
@@ -3316,7 +6418,8 @@ test('cached prayer pages include every form and preserve an explicit form throu
   } finally { await context.close(); }
 });
 
-test("the ordo's current month and frontispiece are saved for offline use", async ({ browser, baseURL }) => {
+test("the ordo's current month and frontispiece are saved for offline use", async ({ browser, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright's WebKit fails any navigation once context.setOffline(true) is set, even one its service worker would answer; service-worker offline emulation works only in Chromium");
   const context = await browser.newContext({ serviceWorkers: 'allow', baseURL });
   try {
     const page = await context.newPage();
@@ -3324,10 +6427,11 @@ test("the ordo's current month and frontispiece are saved for offline use", asyn
     const month = `/calendar/${today.slice(0, 4)}/${today.slice(5, 7)}`;
     const year = `/calendar/${today.slice(0, 4)}`;
     await page.goto(`/lauds/${today}`);
-    await page.evaluate(async () => {
-      await navigator.serviceWorker.ready;
-      if (!navigator.serviceWorker.controller) await new Promise(resolve => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }));
-    });
+    // The navigations below are the worker's once it is active; this page need not be. Home
+    // registered it, so its install can still be running when this page is requested, and
+    // a page requested then is never claimed if the worker activates before the page
+    // exists: its controllerchange never comes.
+    await page.evaluate(() => navigator.serviceWorker.ready);
     // The month is in the install shell; the frontispiece follows in the top-up.
     await expect.poll(() => page.evaluate(async (paths) => {
       for (const path of paths) if (!(await caches.match(path))) return false;
@@ -3339,6 +6443,59 @@ test("the ordo's current month and frontispiece are saved for offline use", asyn
     await expect(page.locator(`#d-${today}`)).toBeVisible();
     await page.goto(year);
     await expect(page.getByRole('heading', { name: 'Tabula Temporaria', exact: true })).toBeVisible();
+  } finally { await context.close(); }
+});
+
+test("a page beyond the saved fortnight waits for a slow server, and offline answers at once", async ({ browser, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright routes a service worker's own fetches only in Chromium, and its WebKit fails any navigation once context.setOffline(true) is set");
+  const context = await browser.newContext({ serviceWorkers: "allow", baseURL });
+  try {
+    const page = await context.newPage();
+    const today = await serverTodaySlug(page);
+    await page.goto(`/lauds/${today}`);
+    await page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+      if (!navigator.serviceWorker.controller) await new Promise(resolve => navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true }));
+    });
+    // A month a year and more ahead is never precached; the server takes longer to
+    // answer it than the worker once waited before calling the reader offline.
+    const year = Number(today.slice(0, 4)) + 1;
+    const far = `/calendar/${year}/07`;
+    const asked = [];
+    await context.route(`**${far}`, async route => {
+      const held = route.request().headers()["if-none-match"];
+      if (asked.length === 0) await new Promise(resolve => setTimeout(resolve, 4000));
+      const answer = await route.fetch();
+      asked.push({ held, status: answer.status() });
+      await route.fulfill({ response: answer });
+    });
+    // The tag names the reader's hour (America/New_York, whole hours from UTC), so a check
+    // made in the next hour is answered with the page.
+    const hour = () => Math.floor(Date.now() / 3600000);
+    const before = hour();
+    const response = await page.goto(far);
+    expect(response.status()).toBe(200);
+    await expect(page.locator("#offline-heading")).toHaveCount(0);
+    await expect(page.locator(`a[href^="/calendar/${year}"]`).first()).toBeAttached();
+    // One fetch for the page, not a second racing it.
+    expect(asked).toHaveLength(1);
+
+    // Opened again, the saved copy shows at once and is checked by its tag: the server,
+    // finding it unchanged, sends nothing.
+    await page.goto(far);
+    await expect.poll(() => asked.length).toBe(2);
+    expect(asked[1].held).toMatch(/^W\/"/);
+    expect(asked[1].status).toBe(hour() === before ? 304 : 200);
+
+    // With no connection, a page the cache does not hold says so without waiting.
+    await context.setOffline(true);
+    const started = Date.now();
+    await page.goto(`/calendar/${year}/08`);
+    await expect(page.locator("#offline-heading")).toBeVisible();
+    expect(Date.now() - started).toBeLessThan(2000);
+    // A page it holds still opens offline.
+    await page.goto(far);
+    await expect(page.locator("#offline-heading")).toHaveCount(0);
   } finally { await context.close(); }
 });
 
@@ -3389,7 +6546,7 @@ test('prayer forms fall back safely with unavailable storage or scripting', asyn
   } finally { await plain.close(); }
 });
 
-test('private greetings are not repeated after preces when switching offline or printing', async ({ page, context }) => {
+test('private greetings are not repeated after preces when switching offline or printing', async ({ context }) => {
   for (const [path, privateCount] of [
     ['/compline/2026-03-10', 2],
     ['/prime/2026-03-10', 2],
@@ -3397,11 +6554,15 @@ test('private greetings are not repeated after preces when switching offline or 
     ['/vespers/2026-11-01', 3],
     ['/compline/2026-11-01', 1],
   ]) {
+    // Each day in a page of its own, opened once the emulated outage is lifted: a page that
+    // navigates while Playwright intercepts its network can fail in WebKit (#924).
     await context.setOffline(false);
+    const page = await context.newPage();
     await page.goto(`${path}?form=private`);
     const prayers = page.locator('.elements');
     const countPrivateResponses = async () => {
-      const text = (await prayers.innerText()).replace(/[℣℟]\./g, '').replace(/\s+/g, ' ');
+      // The sigils and the words a screen reader says for them (Versicle., Response.) left out.
+      const text = (await prayers.innerText()).replace(/[℣℟]\.|\b(?:Versicle|Response)\./g, '').replace(/\s+/g, ' ');
       return (text.match(/O Lord, hear my prayer\. And let my cry come unto thee\./g) || []).length;
     };
     expect(await countPrivateResponses()).toBe(privateCount);
@@ -3421,6 +6582,7 @@ test('private greetings are not repeated after preces when switching offline or 
     expect(await countPrivateResponses()).toBe(privateCount);
     await expect(omittedGreeting).not.toBeVisible();
     await page.emulateMedia({ media: 'screen' });
+    await page.close();
   }
 });
 
@@ -3442,6 +6604,132 @@ test("Triduum distinguishes silent prayers and the collect conclusion", async ({
   }
   await page.goto("/compline/2026-04-11?form=priest");
   await expect(page.locator(".collect .secret-text")).toHaveCount(0);
+});
+
+// A newcomer's word in a rubric opens its note above the word, so the note
+// never covers the prayer it explains, and closes by a second tap, a tap
+// elsewhere, or Escape.
+test("a rubric's secretly opens its note above the word", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const theme of ["light", "dark"]) {
+    await openDatedPage(page, `/lauds/${testDate}`, theme);
+    const rubric = page.locator("p.rubric", { hasText: "are said secretly." }).first();
+    const term = rubric.getByRole("button", { name: "secretly" });
+    await expect(rubric).toHaveText("The Our Father and Hail Mary are said secretly.");
+    await expect(term).toHaveAttribute("aria-expanded", "false");
+    // Closed, the note is an empty live region clipped out of sight.
+    const note = page.locator("#gloss-note");
+    await expect(note).toHaveClass(/closed/);
+
+    await term.scrollIntoViewIfNeeded();
+    await term.click();
+    await expect(term).toHaveAttribute("aria-expanded", "true");
+    await expect(note).not.toHaveClass(/closed/);
+    await expect(note).toContainText("Only the first words are said aloud.");
+    const [t, n] = [await term.boundingBox(), await note.boundingBox()];
+    expect(n.y + n.height).toBeLessThanOrEqual(t.y);
+    expect(n.x).toBeGreaterThanOrEqual(0);
+    expect(n.x + n.width).toBeLessThanOrEqual(390);
+
+    await term.click();
+    await expect(note).toHaveClass(/closed/);
+    await term.click();
+    await page.keyboard.press("Escape");
+    await expect(note).toHaveClass(/closed/);
+    await expect(term).toBeFocused();
+    // A tap on the prayer's plain text, which iOS answers with no click.
+    await term.click();
+    await expect(note).not.toHaveClass(/closed/);
+    const prayer = await page.locator(".secret-text").first().boundingBox();
+    await page.touchscreen.tap(prayer.x + 20, prayer.y + prayer.height / 2);
+    await expect(note).toHaveClass(/closed/);
+    await expect(term).toHaveAttribute("aria-expanded", "false");
+  }
+});
+
+// The term stays inline: as a <button> it laid out as inline-block, and the
+// rubric's closing stop wrapped alone onto the next line.
+test("a glossed term keeps the rubric's stop on its line", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openDatedPage(page, "/lauds/2026-04-09");
+  const rubric = page.locator("p.rubric", { hasText: "are said secretly." }).first();
+  await expect(rubric.getByRole("button", { name: "secretly" })).toBeVisible();
+  const tops = await rubric.evaluate((p) => {
+    const term = p.querySelector(".gloss-term");
+    const stop = term.nextSibling;
+    const range = document.createRange();
+    range.setStart(stop, 0);
+    range.setEnd(stop, 1);
+    const rects = term.getClientRects();
+    return { term: rects[rects.length - 1].top, stop: range.getBoundingClientRect().top, text: stop.data };
+  });
+  expect(tops.text).toBe(".");
+  expect(Math.abs(tops.stop - tops.term)).toBeLessThan(2);
+});
+
+// Compline's Our Father before the Confession has no voiced words, so its
+// rubric takes the whole-prayer note, not the incipit's.
+test("entirely in secret takes its own note", async ({ page }) => {
+  await openDatedPage(page, `/compline/${testDate}`);
+  await page.getByRole("button", { name: "entirely in secret" }).click();
+  await expect(page.locator("#gloss-note")).toContainText("The whole prayer, shown in grey, is said silently.");
+});
+
+// One note answers a glossed word and an ordo mark alike: the same card,
+// fading in and out on Tempo's settle by its ink alone (no rise, no slide),
+// and cut under reduced motion.
+test("the note fades on Tempo's settle for a word and a mark alike, and cuts under reduced motion", async ({ page }) => {
+  const settle = await page.goto("/").then(() => page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement);
+    const ms = (name) => parseFloat(root.getPropertyValue(name)) / 1000 + "s";
+    return { in: ms("--tempo-settle-in"), out: ms("--tempo-settle-out") };
+  }));
+  const card = (note) => note.evaluate((el) => {
+    const s = getComputedStyle(el);
+    return { property: s.transitionProperty, duration: s.transitionDuration, transform: s.transform, background: s.backgroundColor, border: s.borderTopColor, opacity: s.opacity, classes: el.className };
+  });
+  const looks = [];
+  for (const [path, open] of [
+    [`/lauds/${testDate}`, (page) => page.getByRole("button", { name: "secretly" }).first()],
+    ["/calendar/2026/02", (page) => page.locator("#d-2026-02-25 .day-mobile-rank")],
+  ]) {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await openDatedPage(page, path);
+    const note = page.locator("#gloss-note");
+    const trigger = open(page);
+    await trigger.scrollIntoViewIfNeeded();
+    await trigger.click();
+    await expect(note).not.toHaveClass(/closed|faded/);
+    const shown = await card(note);
+    expect(shown.property, path).toBe("opacity");
+    expect(shown.duration, path).toBe(settle.in);
+    expect(shown.transform, `${path}: never moved`).toBe("none");
+    looks.push([shown.background, shown.border]);
+    // Going, it fades with its words still in it, then is put out of sight.
+    // Read in the same task as the key, before the way out has run.
+    const going = await note.evaluate((el) => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      const s = getComputedStyle(el);
+      return { duration: s.transitionDuration, transform: s.transform, classes: el.className, text: el.textContent };
+    });
+    expect(going.classes, path).toMatch(/faded/);
+    expect(going.classes, path).not.toMatch(/closed/);
+    expect(going.duration, path).toBe(settle.out);
+    expect(going.transform, `${path}: never moved`).toBe("none");
+    expect(going.text, path).not.toBe("");
+    await expect(note).toHaveClass(/closed/);
+
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await trigger.click();
+    await expect(note).not.toHaveClass(/closed|faded/);
+    expect(parseFloat((await card(note)).duration), `${path}: a cut`).toBeLessThan(0.001);
+    // Measured at its full size, so it opens clear of what it explains, as with motion.
+    const [n, t] = await Promise.all([note.boundingBox(), trigger.boundingBox()]);
+    expect(n.y + n.height <= t.y || n.y >= t.y + t.height, `${path}: clear of its word`).toBe(true);
+    await page.keyboard.press("Escape");
+    await expect(note).toHaveClass(/closed/);
+  }
+  expect(looks[1], "the same card for a word and a mark").toEqual(looks[0]);
 });
 
 test("home keeps feast and octave above the recovery link, including after midnight", async ({ page }) => {
@@ -3479,10 +6767,13 @@ test("home's versicle takes only the height its head has to spare", async ({ pag
       scrolls: document.documentElement.scrollHeight > innerHeight,
     }));
   };
-  // St Placidus's two lines fit a 412×735 phone without moving the hours.
+  // St Placidus's two lines fit a 412×735 phone without moving the hours, and
+  // so, with no colophon under the arch, do the Holy Angels' four.
   expect(await open("2026-10-05", 412, 735)).toEqual({ shown: true, scrolls: false });
-  // The Holy Angels' four lines do not, so the head goes without them; a taller phone has room.
-  expect(await open("2026-10-02", 412, 735)).toEqual({ shown: false, scrolls: false });
+  expect(await open("2026-10-02", 412, 735)).toEqual({ shown: true, scrolls: false });
+  // On a narrow phone, where the day's lines wrap, they do not, so the head
+  // goes without them; a taller phone has room.
+  expect(await open("2026-10-02", 320, 740)).toEqual({ shown: false, scrolls: false });
   expect(await open("2026-10-02", 430, 932)).toEqual({ shown: true, scrolls: false });
   // A 667px phone has none to spare.
   expect(await open("2026-10-05", 375, 667)).toEqual({ shown: false, scrolls: false });
@@ -3565,14 +6856,16 @@ test("Office prayer instructions retain spacing and Marian collects share initia
   for (const theme of ["light", "dark"]) {
     await openDatedPage(page, "/vespers/2026-09-22", theme);
     const rubric = page.locator(".session-prayers-content > .rubric").last();
-    const gap = await rubric.evaluate(el => el.getBoundingClientRect().top - el.previousElementSibling.getBoundingClientRect().bottom);
-    expect(gap).toBeGreaterThanOrEqual(14);
+    // A stanza's step of the prayer's line (the rhythm's space between elements), on screen and paper.
+    const steps = () => rubric.evaluate(el => (el.getBoundingClientRect().top - el.previousElementSibling.getBoundingClientRect().bottom)
+      / parseFloat(getComputedStyle(el).getPropertyValue("--line")));
+    expect(await steps()).toBeCloseTo(0.45, 1);
     const collect = page.locator(".marian-antiphon .collect .plain-line").first();
     await expect(collect).toHaveAttribute("data-initial", "A");
     await expect(collect.locator(".initial-word")).toHaveText("lmighty");
     await page.emulateMedia({ media: "print" });
     await expect(rubric).toBeVisible();
-    expect(await rubric.evaluate(el => el.getBoundingClientRect().top - el.previousElementSibling.getBoundingClientRect().bottom)).toBeGreaterThanOrEqual(14);
+    expect(await steps()).toBeCloseTo(0.45, 1);
     await page.emulateMedia({ media: "screen" });
   }
 });
@@ -3600,3 +6893,977 @@ test("escaped page links retain navigation and report query values", async ({ pa
   await page.locator(".next-hour").click();
   await expect(page).toHaveURL(/\/prime\/2026-06-07/);
 });
+
+// Find's rank letters name the rank in the ordo marks' note, as the ordo's do,
+// rather than leaving it to a mouse's tooltip.
+test("a found feast's rank names itself in a note when tapped", async ({ page }) => {
+  await page.goto("/calendar/find?q=raphael");
+  const rank = page.locator(".find-rank").first();
+  const note = page.locator("#gloss-note");
+  await expect(rank).toHaveAttribute("role", "button");
+  await expect(rank).not.toHaveAttribute("title", /./);
+  await rank.click();
+  await expect(rank).toHaveAttribute("aria-expanded", "true");
+  await expect(note).not.toHaveText("");
+  await expect(page).toHaveURL(/\/calendar\/find\?q=raphael$/);
+  await page.keyboard.press("Escape");
+  await expect(note).toHaveClass(/closed/);
+});
+
+test("a feast's page leads back to the search that found it", async ({ page }) => {
+  await page.goto("/calendar/find?q=raphael");
+  await page.locator(".find-name").first().click();
+  await expect(page).toHaveURL(/\/feast\//);
+  await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find?q=raphael");
+  await page.locator(".find-back").click();
+  await expect(page).toHaveURL(/\/calendar\/find\?q=raphael$/);
+
+  // Reached otherwise, it leads to the empty search.
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find");
+});
+
+test("a feast's page leads back to the day or the ordo it was opened from", async ({ page }) => {
+  await openDatedPage(page, "/?date=2026-02-27");
+  await page.locator(".home .feast-link").first().click();
+  await expect(page).toHaveURL(/\/feast\/st-raphael-of-brooklyn\?from=2026-02-27$/);
+  await expect(page.locator(".find-back")).toHaveText(/February 27$/);
+  await page.locator(".find-back").click();
+  await expect(page).toHaveURL(/\/\?date=2026-02-27$/);
+
+  await page.goto("/feast/st-raphael-of-brooklyn?from=ordo-2026-02-27");
+  await expect(page.locator(".find-back")).toHaveText(/Ordo, February 2026$/);
+  await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/2026/02#d-2026-02-27");
+});
+
+test("a feast's head is home's day block turned about, ruled with home's pen", async ({ page }) => {
+  await page.goto("/feast/annunciation");
+  const head = page.locator(".feast-head");
+  await expect(head).toHaveClass(/is-first/);
+  // The date is the titulus over the name, read after it.
+  const box = (sel) => page.locator(sel).first().evaluate((n) => n.getBoundingClientRect().top);
+  expect(await box(".feast-titulus")).toBeLessThan(await box(".feast-head h1"));
+  await expect(page.locator(".feast-titulus")).toHaveText("March 25");
+  // Each painted line is a pen stroke once script has run; the CSS borders stand down.
+  for (const host of [".feast-head", ".feast-standing", ".feast-texts > h2", ".feast-years .find-years"]) {
+    await expect(page.locator(host).first()).toHaveClass(/is-ruled/);
+  }
+  expect(await page.locator(".feast-years .find-years > svg.feast-rules path").count()).toBe(9);
+  // A greater double carries the cross in the lining; a monastic observance's head is bare.
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  await expect(page.locator(".feast-head")).toHaveClass(/is-feast/);
+  await page.goto("/feast/solemnity-st-benedict");
+  await expect(page.locator(".feast-head")).toHaveClass(/is-plain/);
+  await expect(page.locator(".feast-head > svg.feast-rules")).toHaveCount(0);
+});
+
+test("a feast's rules follow the reader's text size, and a feast never kept has no empty standing", async ({ page }) => {
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  const frame = () => page.locator(".feast-standing").evaluate((n) => {
+    const ys = [...n.querySelectorAll(":scope > svg.feast-rules path")].map((p) => p.getBBox()).map((b) => b.y + b.height);
+    return { height: n.offsetHeight, bottom: Math.max(...ys) };
+  });
+  await page.evaluate(() => document.documentElement.setAttribute("data-text-size", "large"));
+  await expect.poll(async () => { const f = await frame(); return Math.abs(f.bottom - f.height) < 3; }).toBe(true);
+
+  await page.goto("/feast/comm-12-25-st-anastasia-virgin-and-martyr");
+  await expect(page.locator(".feast-standing")).toHaveCount(0);
+});
+
+test("a feast's rules are never drawn across an unstyled page", async ({ page }) => {
+  // WebKit can run the deferred script before a slow stylesheet applies; the
+  // rules then wait for the page's load rather than measuring bare markup.
+  await page.route(/style\.css/, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await route.continue();
+  });
+  await page.addInitScript(() => {
+    document.addEventListener("DOMContentLoaded", () => {
+      window.__early = {
+        rules: document.querySelectorAll("svg.feast-rules path").length,
+        styled: Boolean(getComputedStyle(document.documentElement).getPropertyValue("--bg")),
+      };
+    });
+  });
+  await page.goto("/feast/christmas");
+  // Chromium holds the script for the stylesheet; WebKit may not, and then
+  // nothing is ruled yet.
+  const early = await page.evaluate(() => window.__early);
+  expect(early.styled || early.rules === 0, JSON.stringify(early)).toBe(true);
+  const fits = () => page.locator(".feast-standing").evaluate((n) => {
+    const ys = [...n.querySelectorAll(":scope > svg.feast-rules path")].map((p) => p.getBBox()).map((b) => b.y + b.height);
+    return ys.length > 0 && Math.abs(Math.max(...ys) - n.offsetHeight) < 3;
+  });
+  await expect.poll(fits).toBe(true);
+});
+
+test("a feast's page leads with its standing, then its texts, then its years, beside them when wide", async ({ page }) => {
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  const top = (sel) => page.locator(sel).first().evaluate((n) => n.getBoundingClientRect().top);
+  const left = (sel) => page.locator(sel).first().evaluate((n) => n.getBoundingClientRect().left);
+  // A phone: one column, the standing, then the texts with the collect first, then the years.
+  const [standing, texts, years] = [await top(".feast-standing"), await top(".feast-texts"), await top(".feast-years")];
+  expect(standing).toBeLessThan(texts);
+  expect(texts).toBeLessThan(years);
+  await expect(page.locator(".feast-text h3").first()).toHaveText(/^Collect/);
+  await expect(page.locator(".feast-standing .feast-next")).toBeVisible();
+  // A year kept as usual says nothing more; one he is only commemorated says so.
+  await expect(page.locator(".feast-years .find-year-status b", { hasText: /^Kept$/ })).toHaveCount(0);
+  expect(await page.locator(".feast-years .find-year-status b", { hasText: "Commemorated" }).count()).toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+
+  // A tablet already has the rail, so the prayer keeps its measure.
+  await page.setViewportSize({ width: 820, height: 1180 });
+  expect(await left(".feast-standing")).toBeGreaterThan(await left(".feast-texts") + 300);
+  // A wide screen: the standing and the years make a rail to the right of the texts.
+  await page.setViewportSize({ width: 1280, height: 900 });
+  expect(await left(".feast-standing")).toBeGreaterThan(await left(".feast-texts") + 300);
+  // (The standing's frame sits 3px in, its outer rule in the margin.)
+  expect(Math.abs(await left(".feast-years") - await left(".feast-standing"))).toBeLessThanOrEqual(4);
+  expect(await top(".feast-standing")).toBeLessThan(await top(".feast-years"));
+  expect(Math.abs(await top(".feast-standing") - await top(".feast-texts"))).toBeLessThan(24);
+});
+
+test("a feast's hymns are folded under their labels and Latin titles, and open on a tap", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/feast/assumption-bvm");
+  const hymns = page.locator("details.feast-hymn");
+  await expect(hymns).toHaveCount(2);
+  await expect(hymns.first().locator("summary h3")).toHaveText("Hymn at I and II Vespers");
+  await expect(hymns.first().locator(".feast-hymn-title")).toHaveText("Ave, maris stella");
+  // Folded, the antiphons and versicles stay near the top: the Benedictus within two screens.
+  await expect(hymns.first().locator(".hymn-stanza").first()).toBeHidden();
+  const benedictus = page.locator(".feast-text h3", { hasText: "At Lauds · Benedictus" });
+  expect(await benedictus.evaluate((n) => n.getBoundingClientRect().top)).toBeLessThan(2 * 844);
+  // Each hymn comes before its hour's antiphon.
+  const lauds = page.locator("details.feast-hymn summary h3", { hasText: "Hymn at Lauds" });
+  expect(await lauds.evaluate((n) => n.getBoundingClientRect().top)).toBeLessThan(await benedictus.evaluate((n) => n.getBoundingClientRect().top));
+  // The summary is one touch target, and a tap opens the hymn's stanzas, without a dropped initial.
+  const summary = hymns.first().locator("summary");
+  expect((await summary.boundingBox()).height).toBeGreaterThanOrEqual(44);
+  await summary.click();
+  await expect(hymns.first()).toHaveAttribute("open", "");
+  await expect(hymns.first().locator(".hymn-stanza").first()).toBeVisible();
+  await expect(hymns.first().locator(".hymn-stanza").first()).toContainText("Star of ocean fairest");
+  await expect(hymns.first().locator(".hymn-stanza-opening")).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  // A commemoration has no hymn.
+  await page.goto("/feast/comm-12-25-st-anastasia-virgin-and-martyr");
+  await expect(page.locator("details.feast-hymn")).toHaveCount(0);
+});
+
+test("Chant On notes every verse of a whole hymn, its mode's figure once over the initial", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await openDatedPage(page, "/lauds/2026-10-28");
+  const scores = page.locator(".hymn .chant-hymn");
+  await expect(scores).toBeHidden();
+
+  // The engine measures the lyrics with the app's own Garamond's metrics, fetched with it.
+  const metrics = page.waitForResponse((r) => r.url().includes("eb-garamond-lyrics.nmet") && r.ok());
+  await choosePreference(page, "On", ".chant-option");
+  await expect(page.locator("html")).toHaveAttribute("data-chant", "on");
+  await metrics;
+  await expect(scores).toBeVisible();
+  expect(await scores.locator(".chant-stanza").count()).toBeGreaterThan(2);
+  // The mode once, as a figure the engine sets over the first verse's initial.
+  await expect(scores.locator("svg [class$='-annotation']")).toHaveCount(1);
+  await expect(scores.locator(".chant-stanza").first().locator("svg [class$='-annotation']")).toHaveText(/^[IVX]+$/);
+
+  await choosePreference(page, "Off", ".chant-option");
+  await expect(scores).toBeHidden();
+});
+
+test("a chant score fills its column at every width and keeps its own when the engine can't load", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  // The hour's last score, off the screen: one on it keeps its first drawing until it leaves.
+  const fit = () => page.evaluate(() => {
+    const score = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).pop();
+    const box = score.querySelector(".chant-width");
+    return {
+      column: score.clientWidth,
+      score: box.getBoundingClientRect().width,
+      laidOut: !box.querySelector("svg").getAttribute("class").endsWith(box.getAttribute("data-chant-prefix")),
+      // Laid out here, or engraved by the server at the column the page last reported.
+      atColumn: !box.querySelector("svg").getAttribute("class").endsWith(box.getAttribute("data-chant-prefix")) ||
+        Math.abs(parseFloat(box.dataset.chantUnits) - (score.clientWidth / parseFloat(getComputedStyle(score).fontSize)) * 2.45 * 6) < 0.5,
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    };
+  });
+  for (const width of [320, 390, 430, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, "/compline/2026-10-27");
+    await expect.poll(async () => (await fit()).atColumn, { message: `${width}px` }).toBe(true);
+    const f = await fit();
+    expect(Math.abs(f.score - f.column), `${width}px: ${JSON.stringify(f)}`).toBeLessThan(1);
+    expect(f.overflow, `${width}px`).toBe(0);
+  }
+  // A narrower window lays it out again.
+  await page.setViewportSize({ width: 360, height: 900 });
+  await expect.poll(async () => { const f = await fit(); return Math.abs(f.score - f.column) < 1; }).toBe(true);
+
+  // Without the engine the page's own score stands, inside the column.
+  await page.route(/\/static\/neuma\.mjs/, (route) => route.abort());
+  await openDatedPage(page, "/compline/2026-10-27");
+  await page.waitForTimeout(300);
+  const fallback = await fit();
+  expect(fallback.laidOut).toBe(false);
+  expect(fallback.score).toBeLessThanOrEqual(fallback.column + 0.5);
+  expect(fallback.overflow).toBe(0);
+  // Back online, the next resize fetches it again and lays the score out.
+  await page.unroute(/\/static\/neuma\.mjs/);
+  await page.setViewportSize({ width: 380, height: 900 });
+  await expect.poll(async () => (await fit()).laidOut).toBe(true);
+
+  // A browser too old for the engine never fetches it.
+  const fetched = [];
+  page.on("request", (r) => { if (r.url().includes("/static/neuma.mjs")) fetched.push(r.url()); });
+  await page.addInitScript(() => { HTMLScriptElement.supports = () => false; });
+  await openDatedPage(page, "/compline/2026-10-27");
+  await page.waitForTimeout(300);
+  expect((await fit()).laidOut).toBe(false);
+  expect(fetched).toEqual([]);
+});
+
+// Every frame's heights of the scores shown, from the page's first frame. A long page may be
+// painted before it is all parsed, so a frame can show fewer scores than the next: each score is
+// compared with itself. While the page is still parsing, its last score may be the one the parser
+// is inside, its notation not yet read (a frame of "422/0", then "422/422"), so it is left out
+// until a later score or the end of parsing closes it.
+async function logScoreHeights(page) {
+  await page.addInitScript(() => {
+    window.__scores = [];
+    const loop = () => {
+      if (document.body) {
+        const shown = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent);
+        if (document.readyState === "loading") shown.pop();
+        const heights = shown.map((e) => Math.round(e.getBoundingClientRect().height));
+        if (heights.length) window.__scores.push(heights.join("/"));
+      }
+      if (performance.now() < 10000) requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  });
+}
+
+test("a chant score is drawn at its final height from the first frame once the column is known", async ({ page, context }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  await logScoreHeights(page);
+  // A first visit lays the score out at the column and keeps the column's width for the server.
+  await openDatedPage(page, "/terce/2026-11-13");
+  await expect.poll(async () => (await context.cookies()).find((c) => c.name === "chant-width")?.value).toMatch(/^\d+\.\d{4}$/);
+  const column = await page.evaluate(() => {
+    const score = [...document.querySelectorAll(".chant-score")].find((e) => e.offsetParent);
+    return (Math.round((score.clientWidth / parseFloat(getComputedStyle(score).fontSize)) * 16) / 16).toFixed(4);
+  });
+  expect((await context.cookies()).find((c) => c.name === "chant-width").value).toBe(column);
+
+  // The next page arrives engraved at it: no score changes its height, and the engine is not fetched.
+  const fetched = [];
+  page.on("request", (r) => { if (r.url().includes("/static/neuma.mjs")) fetched.push(r.url()); });
+  for (const path of ["/compline/2026-11-13", "/terce/2026-11-13"]) {
+    await openDatedPage(page, path);
+    await page.waitForTimeout(800);
+    const frames = await page.evaluate(() => window.__scores);
+    const changed = frames.reduce((seen, frame) => {
+      frame.split("/").forEach((h, i) => (seen[i] ||= new Set()).add(h));
+      return seen;
+    }, []).some((heights) => heights.size > 1);
+    expect(changed, `${path}: ${frames[0]} then ${frames[frames.length - 1]}`).toBe(false);
+    const fit = await page.evaluate(() => [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent)
+      .map((e) => e.clientWidth - e.querySelector(".chant-width").getBoundingClientRect().width));
+    for (const gap of fit) expect(Math.abs(gap), path).toBeLessThan(1);
+  }
+  expect(fetched).toEqual([]);
+});
+
+test("a score laid out anew on arriving never moves the words being read", async ({ page, context }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  // The page's faces fetched beforehand (the engine not), and no column reported: without scroll
+  // anchoring a face arriving moves the text too, and this test is about the scores.
+  await page.route("**/static/neuma.mjs*", (route) => route.abort());
+  await page.goto("/compline/2026-11-13");
+  await page.evaluate(() => document.fonts.ready);
+  await expect.poll(async () => (await context.cookies()).some((c) => c.name === "chant-width")).toBe(true);
+  await page.goto("about:blank");
+  await page.unroute("**/static/neuma.mjs*");
+  await context.clearCookies();
+  await logScoreHeights(page);
+  // A reader brought back below the scores, in a browser that does not anchor scrolling, at a
+  // width the page was not engraved at.
+  await page.addInitScript(() => {
+    document.addEventListener("DOMContentLoaded", () => {
+      document.documentElement.style.overflowAnchor = "none";
+      const last = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).pop();
+      window.scrollTo(0, last.getBoundingClientRect().bottom + scrollY + 300);
+      const probe = [...document.querySelectorAll(".elements p")].find((p) => p.offsetParent && p.getBoundingClientRect().top >= 100);
+      window.__probe = [];
+      // Watched once the faces are in, with the scores' heights beside it.
+      const loop = () => {
+        if (document.fonts.status === "loaded") {
+          const scores = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).map((e) => Math.round(e.getBoundingClientRect().height)).join("/");
+          window.__probe.push({ top: probe.getBoundingClientRect().top, scores });
+        }
+        if (performance.now() < 10000) requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    });
+  });
+  await page.goto("/compline/2026-11-13");
+  // The scores above were laid out again at the column while the line was watched...
+  await expect.poll(() => page.evaluate(() => { const f = window.__probe; return f.length > 0 && f[0].scores !== f[f.length - 1].scores; })).toBe(true);
+  await page.waitForTimeout(300);
+  // ...and the line being read stood still.
+  const probe = await page.evaluate(() => window.__probe.map((f) => f.top));
+  expect(Math.max(...probe) - Math.min(...probe)).toBeLessThan(1);
+
+});
+
+test("a score on the screen keeps its first drawing until it leaves the screen", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  // The first score in the middle of the screen as the page arrives, at a width it was not engraved at.
+  await page.addInitScript(() => {
+    document.addEventListener("DOMContentLoaded", () => {
+      const score = [...document.querySelectorAll(".chant-score")].find((e) => e.offsetParent);
+      scrollTo(0, score.getBoundingClientRect().top + scrollY - 200);
+    });
+  });
+  const metrics = page.waitForResponse((r) => r.url().includes("eb-garamond-lyrics.nmet") && r.ok());
+  await page.goto("/compline/2026-11-13");
+  await metrics;
+  const score = page.locator(".chant-score:visible").first();
+  const height = () => score.evaluate((e) => e.getBoundingClientRect().height);
+  const first = await height();
+  await page.waitForTimeout(1000);
+  expect(await height()).toBe(first);
+  // Scrolled past, it is drawn at its column, and the words on the screen stay where they stand.
+  await page.evaluate(() => scrollBy(0, 1500));
+  await page.evaluate(() => {
+    const probe = [...document.querySelectorAll(".elements p")].find((p) => p.offsetParent && p.getBoundingClientRect().top >= 100);
+    probe.dataset.probe = "1";
+    window.__probeTop = probe.getBoundingClientRect().top;
+  });
+  await expect.poll(height).not.toBe(first);
+  expect(Math.abs(await page.locator("[data-probe]").evaluate((p) => p.getBoundingClientRect().top - window.__probeTop))).toBeLessThan(1);
+});
+
+test("changing the text size keeps the line the reader is at", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.removeItem("office-text-size"));
+  await openDatedPage(page, "/vespers/2026-11-13");
+  await page.evaluate(() => scrollTo(0, 3000));
+  const at = () => page.evaluate(() => {
+    // The first block on the screen, from the same blocks officeHoldPlace holds: a heading above
+    // the first paragraph is the one held, and the paragraph under it may move with the heading.
+    const blocks = ".elements p, .elements h2, .elements h3, .elements summary, .elements .chant-score";
+    const p = [...document.querySelectorAll(blocks)].find((e) => { const r = e.getBoundingClientRect(); return r.height && r.bottom > 0; });
+    p.dataset.held = "1";
+    const r = p.getBoundingClientRect();
+    return { top: r.top, height: r.height };
+  });
+  const before = await at();
+  // The menu's Text row, tapped where the reader is (a click here would scroll to the header).
+  await page.evaluate(() => document.querySelector('.text-size-option[data-text-size-choice="large"]').click());
+  await expect(page.locator("html")).toHaveAttribute("data-text-size", "large");
+  const after = await page.locator("[data-held]").evaluate((p) => { const r = p.getBoundingClientRect(); return { top: r.top, height: r.height }; });
+  expect(after.height).toBeGreaterThan(before.height);
+  // The share of the line's block above the top of the screen is the share it was.
+  const want = before.top < 0 ? (before.top / before.height) * after.height : before.top;
+  expect(Math.abs(after.top - want), JSON.stringify({ before, after })).toBeLessThan(2);
+});
+
+test("closing the prayers after the Office at the page's end leaves its summary where it was", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.removeItem("office-prayers-open"));
+  await openDatedPage(page, "/lauds/2026-11-13");
+  const after = page.locator('details.session-prayers[data-prayers$="/Prayers After the Office"]');
+  await expect(after).toHaveAttribute("open", "");
+  const summary = after.locator(":scope > summary");
+  // The summary near the top of the screen, with less than a screen of page below it.
+  await page.evaluate(() => {
+    const s = [...document.querySelectorAll("details.session-prayers > summary")].pop();
+    scrollTo(0, s.getBoundingClientRect().top + scrollY - 80);
+  });
+  const top = await summary.evaluate((s) => s.getBoundingClientRect().top);
+  await summary.click();
+  await expect(after).not.toHaveAttribute("open", "");
+  await page.waitForTimeout(400);
+  expect(Math.abs((await summary.evaluate((s) => s.getBoundingClientRect().top)) - top)).toBeLessThan(1);
+  // Scrolling back up gives the room back, without moving what is on the screen.
+  await scrollHourBy(page, -2000);
+  await expect.poll(() => page.evaluate(() => document.documentElement.style.minHeight)).toBe("");
+});
+
+// The page settles from a change in real time (faces arriving, ResizeObservers) and on the
+// fake clock's frames (the initials' typesetting), and each step may move the words again. The
+// watch's ticks are held meanwhile, so a step that lands after a tick cannot be counted as a
+// second measure of one change: held, then let go for one tick.
+async function settleUnwatched(page) {
+  await page.evaluate(() => { window.__holdWatch = true; });
+  let moves = -1;
+  for (let i = 0; i < 30; i++) {
+    const now = await page.evaluate(async () => {
+      await document.fonts.ready;
+      // A rendering update: every ResizeObserver has been told.
+      await new Promise((resolve) => {
+        const frame = new ResizeObserver(() => { frame.disconnect(); resolve(); });
+        frame.observe(document.body);
+      });
+      return window.__moves;
+    });
+    if (now === moves) {
+      await page.evaluate(() => { window.__holdWatch = false; });
+      return;
+    }
+    moves = now;
+    await page.clock.runFor(100);
+  }
+  throw new Error("the page kept moving");
+}
+
+test("the prayed watch measures the hour's words again only when they move", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__measured = 0;
+    const rects = Range.prototype.getClientRects;
+    Range.prototype.getClientRects = function () { window.__measured++; return rects.call(this); };
+  });
+  await page.clock.pauseAt(new Date("2026-10-07T21:00:00"));
+  // After the clock, so the watch's one-second tick (app.js) is the fake clock's.
+  await page.addInitScript(() => {
+    window.__holdWatch = true;
+    window.__moves = 0;
+    const every = window.setInterval;
+    window.setInterval = function (callback, ms, ...rest) {
+      if (ms !== 1000) return every.call(this, callback, ms, ...rest);
+      return every.call(this, function () { if (!window.__holdWatch) return callback.apply(this, arguments); }, ms, ...rest);
+    };
+    new MutationObserver((records) => { window.__moves += records.length; })
+      .observe(document, { subtree: true, childList: true, attributes: true, characterData: true });
+    document.fonts.addEventListener("loadingdone", () => { window.__moves++; });
+  });
+  await page.goto("/compline/2026-10-07");
+  await settleUnwatched(page);
+  await page.clock.runFor(1000);
+  const once = await page.evaluate(() => window.__measured);
+  expect(once).toBeGreaterThan(100);
+  for (let i = 0; i < 3; i++) {
+    await scrollHourBy(page, 400);
+    await page.clock.runFor(1000);
+  }
+  expect(await page.evaluate(() => window.__measured)).toBe(once);
+  // A new text size moves every word: they are measured again, once (the page's other
+  // measures made at its load aside).
+  await page.evaluate(() => { window.__holdWatch = true; });
+  await page.evaluate(() => document.documentElement.setAttribute("data-text-size", "large"));
+  await settleUnwatched(page);
+  await page.clock.runFor(2000);
+  const again = (await page.evaluate(() => window.__measured)) - once;
+  expect(again).toBeGreaterThan(0.9 * once);
+  expect(again).toBeLessThanOrEqual(once);
+});
+
+// Home marks the reader's own hour before its first paint, as the theme is
+// set: not the server's hour, corrected once the deferred script runs.
+test("home marks the device's hour before its script runs", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T10:00:00-04:00"));
+  let release;
+  const ready = new Promise((resolve) => { release = resolve; });
+  await page.route("**/static/app.js*", async (route) => { await ready; await route.continue(); });
+  await page.goto(`/?date=${testDate}`, { waitUntil: "commit" });
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Terce");
+  await expect(page.locator(".pray-now")).toHaveAttribute("href", `/terce/${testDate}`);
+  // The gloss is the hour's from the first paint, so the tablet never grows when app.js comes.
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Mid-morning prayer");
+  await expect(page.locator(".pray-now-gloss")).toBeVisible();
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute("data-hour", "terce");
+  await expect(page.locator(".home-hour-link.is-current")).toHaveCount(1);
+  release();
+  await page.waitForLoadState("load");
+  await expect(page.locator(".pray-now-label")).toHaveText("Pray Terce");
+  await page.unroute("**/static/app.js*");
+});
+
+// The wall first's held layers, in style.css's order: the wall's field, the
+// lining, the cross, the stars' host, the invitation's wash, the ruled lines.
+async function heldLayers(page) {
+  return page.evaluate(() => {
+    const opacity = (selector, pseudo) => getComputedStyle(document.querySelector(selector), pseudo).opacity;
+    return [opacity("body", "::before"), opacity(".home-lining"), opacity(".home-crown"), opacity(".home-vault-stars"), opacity(".pray-now", "::before"), opacity(".home-rules")];
+  });
+}
+
+// The wall first (style.css): on a fresh arrival home's paint is held until
+// all of it is to hand and then laid as one coat. The words never wait, the
+// CSS rules the pen replaces stand down meanwhile so no line is seen twice, and
+// a page turn from another of the Office's pages holds nothing.
+test("home's paint is laid as one coat on a fresh arrival, and never held on a page turn", async ({ page }) => {
+  let script, wash;
+  const scriptGoes = new Promise((resolve) => { script = resolve; });
+  const washComes = new Promise((resolve) => { wash = resolve; });
+  await page.route("**/static/app.js*", async (route) => { await scriptGoes; await route.continue(); });
+  await page.route("**/static/tablet.png*", async (route) => { await washComes; await route.continue(); });
+  await page.goto(`/?date=${testDate}`, { waitUntil: "commit" });
+  const root = page.locator("html");
+  await expect(page.locator("#home-date-heading")).toBeVisible();
+  await expect(root).toHaveClass(/\bwall-first\b/);
+  const rules = () => page.evaluate(() => {
+    const prayNow = document.querySelector(".pray-now");
+    return [getComputedStyle(prayNow).borderTopColor, getComputedStyle(prayNow, "::after").content, getComputedStyle(document.querySelector(".home-prayer-card h2")).boxShadow];
+  });
+  expect(await rules()).toEqual(["rgba(0, 0, 0, 0)", "none", "none"]);
+  const paint = () => heldLayers(page);
+  script();
+  await expect(page.locator(".home-hour-links.is-ruled")).toHaveCount(1);
+  expect(await paint()).toEqual(["0", "0", "0", "0", "0", "0"]);
+  await page.waitForTimeout(300);
+  await expect(root).toHaveClass(/\bwall-first\b/);
+  wash();
+  await expect(root).not.toHaveClass(/\bwall-first\b/);
+  await expect.poll(paint).toEqual(["1", "1", "1", "1", "1", "1"]);
+  await expect(root).not.toHaveClass(/\bwall-coat\b/);
+  await page.unroute("**/static/app.js*");
+  await page.unroute("**/static/tablet.png*");
+
+  await page.addInitScript(() => {
+    document.addEventListener("readystatechange", () => {
+      if (document.readyState === "interactive") window.heldOnArrival = document.documentElement.classList.contains("wall-first");
+    });
+  });
+  await page.goto("/about");
+  await page.locator(".site-brand").click();
+  await page.waitForURL((url) => url.pathname === "/");
+  expect(await page.evaluate(() => window.heldOnArrival)).toBe(false);
+});
+
+// The hold wins over every look's own figure for its layers: a black day by
+// night sets the cross at 0,6,0. Each layer comes in on the coat's beat.
+test("home's paint is held whole on a black day by night, and every layer comes in on the coat", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  let wash;
+  const washComes = new Promise((resolve) => { wash = resolve; });
+  await page.route("**/static/tablet.png*", async (route) => { await washComes; await route.continue(); });
+  await page.goto("/?date=2026-11-02", { waitUntil: "domcontentloaded" });
+  await expect(page.locator(".home-hero.day-color-black")).toHaveCount(1);
+  await expect(page.locator("html")).toHaveClass(/\bwall-first\b/);
+  await expect(page.locator(".home-hour-links.is-ruled")).toHaveCount(1);
+  expect(await heldLayers(page)).toEqual(["0", "0", "0", "0", "0", "0"]);
+  // The coat is off only once it is laid: a busy WebKit starts a transition
+  // at its next frame, later than the tempo, and the cross was still at 0
+  // when the class went. Here the cross's coat runs well past its tempo.
+  const late = await page.addStyleTag({ content: ":root.wall-coat body.page-home .home-crown { transition-duration: 1.5s !important; }" });
+  wash();
+  await expect(page.locator("html")).not.toHaveClass(/\bwall-(first|coat)\b/);
+  expect((await heldLayers(page))[2]).toBe("1");
+  await late.evaluate((tag) => tag.remove());
+  await page.unroute("**/static/tablet.png*");
+  const beats = await page.evaluate(() => {
+    document.documentElement.classList.add("wall-coat");
+    const beat = (selector, pseudo) => {
+      const cs = getComputedStyle(document.querySelector(selector), pseudo);
+      return `${cs.transitionProperty} ${cs.transitionDuration}`;
+    };
+    const all = [beat("body", "::before"), beat(".home-lining"), beat(".home-crown"), beat(".home-vault-stars"), beat(".pray-now", "::before"), beat(".home-rules")];
+    document.documentElement.classList.remove("wall-coat");
+    return all;
+  });
+  expect(beats).toEqual(Array(6).fill("opacity 0.24s"));
+});
+
+// A script that never answers holds load, and app.js never takes the paint
+// over: the pre-paint script lets it go by itself.
+test("home's paint is let go when app.js hangs", async ({ page }) => {
+  await page.route("**/static/app.js*", () => {});
+  await page.goto(`/?date=${testDate}`, { waitUntil: "commit" });
+  await expect(page.locator("#home-date-heading")).toBeVisible();
+  await expect(page.locator("html")).toHaveClass(/\bwall-first\b/);
+  await expect(page.locator("html")).not.toHaveClass(/\bwall-first\b/, { timeout: 9000 });
+  // Without app.js nothing is ruled by hand: the CSS rules stand again.
+  expect(await page.locator(".home-crown").evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+  expect(await page.locator(".pray-now").evaluate((el) => getComputedStyle(el).borderTopColor)).not.toBe("rgba(0, 0, 0, 0)");
+});
+
+// A press is seen: a tap marks the control at once, and one that opens a page
+// keeps the mark until the page goes; an ordo row is pressed as one control.
+// Reported from the page, which is leaving when the mark matters.
+test("a tapped ordo row and a tapped hour show their press at once", async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  const page = await context.newPage();
+  const seen = [];
+  await page.exposeFunction("reportPress", (note) => seen.push(note));
+  await page.goto("/calendar/2026/09");
+  await page.evaluate(() => {
+    new MutationObserver((records) => records.forEach((r) => {
+      if (r.target.classList.contains("is-pressed")) window.reportPress(r.target.id || r.target.className);
+    })).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["class"] });
+  });
+  const row = page.locator("#d-2026-09-20");
+  await row.scrollIntoViewIfNeeded();
+  // The row's date leads to the day; the rest of the row opens its details.
+  const box = await row.locator(".day-mobile-date").boundingBox();
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+  await page.waitForURL(/\?date=2026-09-20/);
+  expect(seen).toContain("d-2026-09-20");
+  // After app.js's own listener: keep the page, and say how the hour stood.
+  await page.evaluate(() => document.addEventListener("click", (e) => {
+    const link = e.target.closest(".home-hour-link");
+    if (!link) return;
+    e.preventDefault();
+    window.reportPress((link.classList.contains("is-pressed") ? "pressed " : "plain ") + getComputedStyle(link).transitionDuration);
+  }));
+  seen.length = 0;
+  await page.locator(".home-hour-link[data-hour='vespers']").tap();
+  await expect.poll(() => seen.find((note) => note.startsWith("pressed") || note.startsWith("plain"))).toMatch(/^pressed 0s/);
+  await context.close();
+});
+
+test("a link chosen in the open phone menu puts the menu away before the page goes", async ({ page }) => {
+  await page.goto(`/vespers/${testDate}`);
+  await page.getByText("Menu", { exact: true }).click();
+  await expect(page.locator(".site-menu-panel")).toBeVisible();
+  const seen = [];
+  await page.exposeFunction("reportMenu", (note) => seen.push(note));
+  await page.evaluate(() => document.addEventListener("click", () => {
+    window.reportMenu(getComputedStyle(document.querySelector(".site-menu-panel")).display);
+  }));
+  await page.locator('.site-menu nav a[data-nav="calendar"]').click();
+  await page.waitForURL(/\/calendar/);
+  expect(seen).toEqual(["none"]);
+});
+
+test("the brand on today's home stays put", async ({ page, baseURL }) => {
+  // The server's today is the reader's zone's, as a returning reader's
+  // cookie names it; without it, between midnight in UTC and midnight in
+  // New York the server's home is tomorrow's and not the browser's today.
+  await page.context().addCookies([{ name: "tz", value: "America/New_York", url: baseURL }]);
+  await page.goto("/");
+  await expect(page.locator(".site-brand")).toHaveAttribute("aria-current", "page");
+  let navigations = 0;
+  page.on("framenavigated", () => { navigations += 1; });
+  await page.locator(".site-brand").click();
+  await page.waitForTimeout(300);
+  expect(navigations).toBe(0);
+});
+
+// A day asked for comes to rest with the day before it in view under the
+// pinned month heading, and its gold lets go once the reader scrolls. The
+// second day is asked for in place (the same page, a new #d-…): the browser's
+// own scroll brings it to rest, and it is read there too, at the hashchange
+// (heard before app.js's), so nothing after it may be what puts it right.
+test("the ordo shows the day before a day asked for, and lets the asked day go", async ({ page }) => {
+  await page.addInitScript(() => addEventListener("hashchange", () => {
+    const day = document.getElementById(location.hash.slice(1));
+    window.landed = {
+      heading: day.closest(".month").querySelector("h2").getBoundingClientRect().bottom,
+      before: day.previousElementSibling.getBoundingClientRect().top,
+      ground: getComputedStyle(day.lastElementChild).backgroundColor,
+    };
+  }));
+  for (const [width, day, before] of [[390, "14", "13"], [1280, "22", "21"]]) {
+    await page.setViewportSize({ width, height: 900 });
+    // The new width laid out, as it is long before a reader asks for a day.
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    await page.goto(`/calendar/2026/09#d-2026-09-${day}`);
+    await page.evaluate(() => document.fonts.ready);
+    const place = await page.evaluate(([day, before]) => ({
+      heading: document.getElementById(`d-2026-09-${day}`).closest(".month").querySelector("h2").getBoundingClientRect().bottom,
+      before: document.getElementById(`d-2026-09-${before}`).getBoundingClientRect().top,
+    }), [day, before]);
+    expect(place.before, `${width}px`).toBeGreaterThanOrEqual(place.heading - 2);
+    if (day === "22") {
+      await expect.poll(() => page.evaluate(() => window.landed)).toBeTruthy();
+      const landed = await page.evaluate(() => window.landed);
+      expect(landed.before, `${width}px, as the browser landed`).toBeGreaterThanOrEqual(landed.heading - 2);
+      expect(landed.ground, "gold as the browser landed").not.toBe("rgba(0, 0, 0, 0)");
+    }
+    const ground = () => page.locator(`#d-2026-09-${day} > td`).last().evaluate((td) => getComputedStyle(td).backgroundColor);
+    expect(await ground()).not.toBe("rgba(0, 0, 0, 0)");
+    // The reader's own scroll (mobile WebKit has no wheel to send).
+    await page.evaluate(() => { window.dispatchEvent(new WheelEvent("wheel", { deltaY: 240 })); window.scrollBy(0, 240); });
+    await expect.poll(ground).toBe("rgba(0, 0, 0, 0)");
+  }
+});
+
+// Through the wall: a page turn is Tempo's turn, the old page gone in 90ms
+// before the next comes up in 210ms, so two pages are never seen at once;
+// the beam stands where both pages show it, and goes with its page where the
+// reader had scrolled it away. Reduced motion is a cut.
+test("a page turn goes through the wall, and the beam stands where both pages show it", async ({ page }) => {
+  await page.addInitScript(() => addEventListener("pagereveal", (e) => {
+    if (!e.viewTransition) { sessionStorage.setItem("turn", "none"); return; }
+    e.viewTransition.ready.then(() => {
+      const turn = document.getAnimations().map((a) => {
+        const t = a.effect.getTiming();
+        return `${a.effect.pseudoElement} ${a.animationName} ${t.duration}/${t.delay}`;
+      }).sort();
+      // The last page's beam, under the new one: it must not be drawn (#926).
+      sessionStorage.setItem("old-beam", getComputedStyle(document.documentElement, "::view-transition-old(site-header)").display);
+      sessionStorage.setItem("turn", JSON.stringify(turn));
+    });
+  }));
+  const turn = async () => {
+    await expect.poll(() => page.evaluate(() => sessionStorage.getItem("turn"))).not.toBeNull();
+    const seen = await page.evaluate(() => sessionStorage.getItem("turn"));
+    await page.evaluate(() => sessionStorage.removeItem("turn"));
+    return seen === "none" ? null : JSON.parse(seen);
+  };
+  await page.goto(`/?date=${testDate}`);
+  await page.evaluate(() => sessionStorage.removeItem("turn"));
+  await page.locator(".home-hour-link[data-hour='vespers']").click();
+  await page.waitForURL(/\/vespers\//);
+  const fromHome = await turn();
+  // An engine without cross-document view transitions cuts, as before.
+  test.skip(fromHome === null, "no cross-document view transitions in this engine");
+  expect(fromHome).toContain("::view-transition-old(root) vt-leave 90/0");
+  expect(fromHome).toContain("::view-transition-new(root) vt-arrive 210/90");
+  // The beam was in view on both pages: held, so it neither fades nor moves,
+  // and only the new page's is drawn: the old one, left standing over it,
+  // set every word of the header twice a pixel apart until the turn ended.
+  expect(fromHome.filter((a) => a.includes("(site-header)")), JSON.stringify(fromHome)).toEqual([]);
+  expect(await page.evaluate(() => sessionStorage.getItem("old-beam"))).toBe("none");
+  // At the foot of a long hour the beam is out of sight: it comes up with the next page.
+  await page.locator("a.next-hour").scrollIntoViewIfNeeded();
+  await expect.poll(() => page.locator(".site-header").evaluate((el) => el.getBoundingClientRect().bottom)).toBeLessThanOrEqual(0);
+  await page.locator("a.next-hour").click();
+  await page.waitForURL(/\/compline\//);
+  expect(await turn()).toContain("::view-transition-new(site-header) vt-arrive 210/90");
+});
+
+test("under reduced motion a page turn is a cut", async ({ browser }) => {
+  const context = await browser.newContext({ reducedMotion: "reduce", viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  await page.addInitScript(() => addEventListener("pagereveal", (e) => sessionStorage.setItem("turn", e.viewTransition ? "turn" : "cut")));
+  await page.goto(`/?date=${testDate}`);
+  await page.locator(".home-hour-link[data-hour='vespers']").click();
+  await page.waitForURL(/\/vespers\//);
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem("turn"))).toBe("cut");
+  await context.close();
+});
+
+// Light under the finger: a pressed hour lies under home's pool of light, the
+// hour that is now deepens its pool and its words withdraw; bare words dim; a
+// pressed ordo row is lit, and its rail runs the row's height. No hover pool.
+test("a pressed row takes the pool of light and bare words dim", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T12:30:00-04:00"));
+  await page.goto(`/?date=${testDate}`);
+  const pool = (hour) => page.locator(`.home-hour-link[data-hour='${hour}']`).evaluate((el) => getComputedStyle(el, "::after").opacity);
+  const press = (selector, on) => page.locator(selector).first().evaluate((el, on) => el.classList.toggle("is-pressed", on), on);
+  expect(await pool("vespers")).toBe("0");
+  expect(await pool("sext")).toBe("1");
+  await press(".home-hour-link[data-hour='vespers']", true);
+  expect(await pool("vespers")).toBe("0.7");
+  await press(".home-hour-link[data-hour='vespers']", false);
+  await press(".home-hour-link[data-hour='sext']", true);
+  expect(await page.locator(".home-hour-link[data-hour='sext'] .home-hour-link-name").evaluate((el) => getComputedStyle(el).opacity)).toBe("0.7");
+  await press(".home-hour-link[data-hour='sext']", false);
+  // The tablet's inner rule (the hand-ruled day course, or the CSS rule before it is ruled) takes
+  // the accent, and its wash deepens.
+  const tablet = () => page.locator(".pray-now").evaluate((el) => {
+    const day = el.querySelector(".home-rules .r-day");
+    return {
+      rule: day ? getComputedStyle(day).fill : getComputedStyle(el, "::after").borderTopColor,
+      wash: getComputedStyle(el, "::before").backgroundColor,
+    };
+  });
+  const atRest = await tablet();
+  await press(".pray-now", true);
+  const pressed = await tablet();
+  expect(pressed.rule).not.toBe(atRest.rule);
+  expect(pressed.wash).not.toBe(atRest.wash);
+  await press(".pray-now", false);
+  await press(".home-introduction, .home-date-nav > summary", true);
+  expect(await page.locator(".home-introduction, .home-date-nav > summary").first().evaluate((el) => getComputedStyle(el).opacity)).toBe("0.7");
+  // Released, the light goes over Tempo's touch: 200ms.
+  expect(await page.locator(".home-hour-link[data-hour='vespers']").evaluate((el) => getComputedStyle(el, "::after").transitionDuration.split(",")[0].trim())).toBe("0.2s");
+
+  await page.goto("/calendar/2026/09");
+  const row = page.locator("#d-2026-09-20");
+  await row.scrollIntoViewIfNeeded();
+  await row.evaluate((el) => el.classList.add("is-pressed"));
+  expect(await row.evaluate((el) => getComputedStyle(el, "::after").opacity)).toBe("1");
+  // The rail runs the row's height inside its rule (it grows there over 120ms).
+  await expect.poll(() => row.evaluate((el) => Math.abs(parseFloat(getComputedStyle(el, "::before").height) - el.clientHeight))).toBeLessThan(0.5);
+});
+
+// The native apps (presentation::stores): a phone sees only its own store, and Reminders leads
+// with the app and shuts the calendar's fold before it is painted. Were there no App Store
+// listing (APP_STORE_ID unset), an iPhone would see neither the offer nor the fold's title, and
+// its page would read as the calendar alone. A Fire tablet's Silk calls itself Android but has
+// no Google Play: it is offered no store, and its page is the calendar alone.
+for (const [platform, userAgent] of [
+  ["android", "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"],
+  ["ios", "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1"],
+  ["fire", "Mozilla/5.0 (Linux; Android 11; KFRASWI) AppleWebKit/537.36 (KHTML, like Gecko) Silk/130.4.1 like Chrome/130.0.6723.102 Safari/537.36"],
+]) {
+  test(`Reminders and the colophon offer the ${platform} reader only their own store`, async ({ browser }) => {
+    const context = await browser.newContext({ userAgent, viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, serviceWorkers: "block" });
+    const page = await context.newPage();
+    await page.goto("/reminders");
+    await expect(page.locator("html")).toHaveAttribute("data-platform", platform);
+    const ios = await page.locator(".reminder-calendar.has-ios").count() > 0;
+    const offered = platform === "android" || (platform === "ios" && ios);
+    const fold = page.locator("details.reminder-calendar");
+    expect(await fold.evaluate((d) => d.open)).toBe(!offered);
+    await expect(page.locator(".reminders-app")).toBeVisible({ visible: offered });
+    await expect(page.locator(".reminder-calendar > summary")).toBeVisible({ visible: offered });
+    await expect(page.locator(".reminders-app .app-store[data-store='android']")).toBeVisible({ visible: platform === "android" });
+    await expect(page.locator(".reminders-app .app-store[data-store='ios']")).toBeVisible({ visible: platform === "ios" && ios });
+    await expect(page.locator(".app-stores")).toBeVisible({ visible: offered });
+    // The colophon names every store the apps are in, whatever the reader's phone.
+    if (offered) await expect(page.locator(".app-stores")).toHaveText(ios ? "Also an app for Android, iPhone and iPad" : "Also an app for Android");
+    if (platform === "android") {
+      await page.locator(".reminder-calendar > summary").click();
+      await expect(page.locator("#reminders-form")).toBeVisible();
+    }
+    if (platform === "ios" && ios) {
+      await expect(page.locator(".reminders-app .app-store[data-store='ios']")).toHaveAttribute("href", /^https:\/\/apps\.apple\.com\/app\/id\d+$/);
+    }
+    await context.close();
+  });
+}
+
+test("mobile screen readers hear clean liturgical marks, inert menu backdrop, and chooser focus", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  await page.goto("/vespers/2026-03-15");
+  await page.waitForLoadState("load");
+  // Heading precedes the fixed scroll progress bar in DOM order.
+  const headingBeforeProgress = await page.evaluate(() => {
+    const h1 = document.querySelector("h1");
+    const bar = document.querySelector(".hour-scroll-progress");
+    return Boolean(h1 && bar && (h1.compareDocumentPosition(bar) & Node.DOCUMENT_POSITION_FOLLOWING));
+  });
+  expect(headingBeforeProgress).toBe(true);
+  await expect(page.locator(".mediant").first()).toHaveAttribute("aria-hidden", "true");
+  await expect(page.locator(".verse-num").first()).toHaveAttribute("aria-hidden", "true");
+  await expect(page.locator(".cross .sr-only").first()).toContainText("sign of the cross");
+  // A copied line is the line as printed, without the words said for its marks.
+  const copied = await page.locator(".cross").first().evaluate((cross) => {
+    const range = document.createRange();
+    range.selectNodeContents(cross.closest("p"));
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return selection.toString();
+  });
+  expect(copied).toContain("✠");
+  expect(copied).not.toContain("sign of the cross");
+  const score = page.locator(".chant-score").first();
+  await expect(score).not.toHaveAttribute("role", "img");
+  await expect(score.locator(".sr-only")).not.toHaveText("");
+  await expect(score.locator("svg")).toHaveAttribute("aria-hidden", "true");
+
+  // Opening the mobile menu makes main content inert and closing restores it.
+  await page.locator(".site-menu > summary").click();
+  expect(await page.locator("#main-content").evaluate((el) => el.inert)).toBe(true);
+  await page.keyboard.press("Escape");
+  expect(await page.locator("#main-content").evaluate((el) => el.inert)).toBe(false);
+
+  // Home's Change date chooser focuses its month title on open and returns focus on Escape.
+  await page.goto("/");
+  await page.locator(".home-date-nav > summary").click();
+  await expect(page.locator("#home-chooser .date-picker-title")).toBeFocused();
+  await expect(page.locator("#home-chooser .date-picker th .sr-only").first()).toHaveText("Sunday");
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".home-date-nav > summary")).toBeFocused();
+
+  // Ordo rank marks announce their full rank names and month headings omit the back-to-top link text.
+  await page.goto("/calendar/2026/03");
+  await expect(page.locator(".month-table abbr.day-mobile-rank[role='button']").first()).toHaveAttribute("aria-label", /Double|Class|Feria|Simple/i);
+  await expect(page.locator(".month > h2").first()).toHaveAttribute("aria-label", "March");
+});
+
+test("subtle details: Horologium stars and keys, Specimen clergy note and reverse highlight, Ordo color key and pins, quiet glosses, and Passiontide veiling", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T15:00:00-04:00"));
+  await openDatedPage(page, "/about");
+
+  // 1. Horologium: parish multi-ray star paths (no circle dots), arrow-key nav, and clean SR separators.
+  expect(await page.locator(".about-horologium-stars path").count()).toBe(8);
+  expect(await page.locator(".about-horologium-stars circle").count()).toBe(0);
+  const firstStop = page.locator(".about-horologium-stop").first();
+  // The stops run as the table reads, from Lauds through the day to Compline, then Matins in the night.
+  await firstStop.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "prime");
+  await expect(page.locator(".about-horologium-title em .sr-only")).toHaveText(", ");
+  await page.keyboard.press("End");
+  await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "matins");
+  await page.keyboard.press("ArrowLeft");
+  await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "compline");
+
+  // 2. Specimen leaf: Deacon vs Priest note and bidirectional line -> key illumination.
+  const specimen = page.locator(".about-specimen");
+  const formNote = specimen.locator(".about-specimen-form-note");
+  await expect(formNote).toBeHidden();
+  await specimen.locator('.about-specimen-opt[data-form="deacon"]').click();
+  await expect(formNote).toBeVisible();
+  const deaconNoteText = await formNote.textContent();
+  await specimen.locator('.about-specimen-opt[data-form="priest"]').click();
+  await expect(formNote).toBeVisible();
+  const priestNoteText = await formNote.textContent();
+  expect(deaconNoteText).not.toBe(priestNoteText);
+  await specimen.locator('.about-specimen-opt[data-form="private"]').click();
+  await expect(formNote).toBeHidden();
+
+  await specimen.locator(".about-specimen-rubric").click();
+  await expect(page.locator('.about-key-row[data-key="rubric"]')).toHaveClass(/is-active/);
+  await specimen.locator(".about-specimen-cross").click();
+  await expect(page.locator('.about-key-row[data-key="cross"]')).toHaveClass(/is-active/);
+  await specimen.locator(".about-specimen-cross").click();
+  await expect(page.locator('.about-key-row[data-key="cross"]')).not.toHaveClass(/is-active/);
+
+  // 3. About Ordo ribbon: 12 clickable month hits, rare Rose/Black pins, and year day-count/date note.
+  const ribbon = page.locator(".about-ordo-ribbon");
+  expect(await ribbon.locator(".about-ordo-month-hit").count()).toBe(12);
+  await expect(ribbon.locator(".about-ordo-month-hit").first()).toHaveAttribute("href", /^\/calendar\/\d{4}\/01$/);
+  await ribbon.locator('.about-ordo-swatch[data-color="rose"]').click();
+  await expect(ribbon.locator(".about-ordo-meaning")).toContainText("Mar 22");
+  // The pin fades in, so wait for the transition to settle rather than read it mid-fade.
+  await expect(ribbon.locator('.about-ordo-pin[data-color="rose"]').first()).toHaveCSS("opacity", "1");
+
+  // 4. Ordo year frontispiece interactive color key and rare-color course pins.
+  await page.goto("/calendar/2026");
+  await page.waitForLoadState("load");
+  const cal = page.locator(".calendar");
+  const ordoKey = cal.locator(".ordo-color-key");
+  await expect(ordoKey).toBeVisible();
+  await ordoKey.locator('.about-ordo-swatch[data-color="rose"]').click();
+  await expect(cal).toHaveAttribute("data-selected-color", "rose");
+  await expect(ordoKey.locator(".about-ordo-meaning")).toContainText("Mar 22");
+  await expect(cal.locator('.month-course-pin[data-color="rose"]').first()).toHaveCSS("opacity", "1");
+
+  // 5. Quiet glosses on Feria, named seasons, psalm incipits (non-tabbable), and Marian antiphons.
+  await page.goto("/?date=2026-09-22");
+  await page.waitForLoadState("load");
+  await page.locator(".feast .gloss-quiet").click();
+  await expect(page.locator("#gloss-note")).toContainText("Feria");
+
+  await page.goto("/compline/2026-03-15");
+  await page.waitForLoadState("load");
+  await page.locator(".hour-meta .gloss-quiet").first().click();
+  await expect(page.locator("#gloss-note")).toContainText("Lent");
+  const incipit = page.locator(".psalm-incipit.gloss-quiet").first();
+  await expect(incipit).not.toHaveAttribute("tabindex", "0");
+  await incipit.click();
+  await expect(page.locator("#gloss-note")).toContainText("Latin opening");
+  await page.locator(".marian-antiphon h3 .gloss-quiet").click();
+  await expect(page.locator("#gloss-note")).toContainText("Ave Regina");
+
+  // 6. Scrolling dismisses an open gloss popover on the Ordo month page.
+  await page.goto("/calendar/2026/03");
+  await page.waitForLoadState("load");
+  await page.locator(".calendar-title h1 .gloss-quiet").click();
+  await expect(page.locator("#gloss-note")).not.toHaveClass(/closed/);
+  await page.evaluate(() => window.scrollBy(0, 260));
+  await expect(page.locator("#gloss-note")).toHaveClass(/faded/);
+
+  // 7. Passiontide veiling: matte end-mark (no gild.png foil) and veiled cross-ember token.
+  await page.goto("/lauds/2026-03-30");
+  await page.waitForLoadState("load");
+  await expect(page.locator("body")).toHaveClass(/season-passiontide/);
+  const endBg = await page.locator(".hour-end-mark").evaluate((el) => getComputedStyle(el, "::after").backgroundImage);
+  expect(endBg).not.toContain("gild.png");
+});
+
+

@@ -14,10 +14,9 @@ use crate::hourdef::{HourElement, HourSection, parse_hour_definition, uses_tridu
 use crate::proper::{resolve_proper_collect_text, resolve_proper_text};
 use crate::psalmody::{DOXOLOGY_REF_PER_OFFICE, VESPERS_OF_THE_DEAD_LABEL, psalm_doxology_ref, says_psalm_doxology};
 use crate::texts::{OfficeTexts, load_texts};
-use crate::{compline, lauds_psalmody, major, minor, preces, prime, rubric, vespers, voice};
+use crate::{compline, lauds_psalmody, major, minor, preces, prime, rubric, seasonal, vespers, voice};
 
-/// The seven hours, in canonical order.
-pub const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+pub use liturgy::HOUR_NAMES;
 pub const HOLY_SATURDAY_VESPERS_DEFINITION: &str = "vespers-holy-saturday";
 
 /// Every hour definition file, including exceptional forms.
@@ -103,14 +102,16 @@ impl Engine {
                 "Diurnal pp. 360–361, Vespers apart from Mass",
             ));
         }
+        add_paschal_alleluias(&mut hour, day, hour_name);
         crate::leader::apply_leader(&mut hour, form, t)?;
         drop_empty_sections(&mut hour);
         canonicalize_source_refs(&mut hour, t);
         collapse_uniform_antiphons(&mut hour);
         mark_psalm_doxologies(&mut hour);
-        crate::posture::mark_postures(&mut hour, day, hour_name);
+        crate::posture::mark_postures(&mut hour, day, hour_name, form);
         mark_announced_antiphons(&mut hour, day, hour_name);
         crate::unrepeated::mark_unrepeated_openings(&mut hour);
+        crate::chant::attach_scores(&mut hour, t);
         append_context_decisions(&mut hour, day, hour_name, moveable);
         // A missing corpus entry is a composition failure, never rendered text:
         // the 28-year golden digest then fails before a regression ships.
@@ -118,6 +119,55 @@ impl Engine {
             return Err(format!("composing {hour_name} for {}: unresolved text {marker}", day.date));
         }
         Ok(hour)
+    }
+}
+
+/// Paschaltide's Alleluia on the texts that lack it. General Rubrics XXIV.7:
+/// "at the end of every Antiphon is added Alleluia, when this word is not
+/// found in them"; XXVII.3: "In Paschaltide, Alleluia is always added to
+/// these Versicles" (after the Hymn at Lauds and Vespers, after the Chapter
+/// at the Hours, and in a Commemoration, XXVII.1–2), "but it is not added to
+/// the Versicles in the Preces at Prime and Compline, the Versicle Right dear
+/// at Prime, or to the Verses of the Responsory". The Corpus writes most of
+/// these alleluias already (the Commons' paschal forms, Diurnal p. 6* §3);
+/// this supplies them where a text is borrowed from outside Paschaltide, as
+/// the Apparition of St Michael takes its office from 29 September (2026
+/// ordo, 8 May, "Ppr. Off. (609f)"). Our Lady's antiphon after the Hour has
+/// its own seasonal form (XXIV.11), and the Office of the Dead none.
+fn add_paschal_alleluias(hour: &mut OfficeHour, day: &Day, hour_name: &str) {
+    if !day.is_paschaltide(hour_name) || crate::psalmody::is_office_of_the_dead(day) {
+        return;
+    }
+    let has_alleluia = |s: &str| s.to_lowercase().contains("alleluia");
+    let with_alleluia = |s: &str| {
+        let body = s.trim_end().trim_end_matches(['.', ',', ';', ':']);
+        if body.ends_with(['?', '!']) { format!("{body} Alleluia.") } else { format!("{body}, alleluia.") }
+    };
+    for elem in hour.sections.iter_mut().flat_map(|s| s.elements.iter_mut()) {
+        if corpus::is_omitted(&elem.text) || elem.text.trim().is_empty() {
+            continue;
+        }
+        let slot = elem.slot_ref.as_str();
+        let antiphon = elem.kind == ElementType::Antiphon
+            && (slot.starts_with("psalm-antiphon")
+                || slot.starts_with("benedictus-antiphon")
+                || slot.starts_with("magnificat-antiphon")
+                || slot.starts_with("commemoration-antiphon"));
+        let versicle = elem.kind == ElementType::Versicle
+            && (slot == "versicle" || slot.starts_with("versicle-") || slot.starts_with("commemoration-versicle"));
+        if antiphon && !has_alleluia(&elem.text) {
+            elem.text = with_alleluia(&elem.text);
+        } else if versicle {
+            elem.text = elem
+                .text
+                .split('\n')
+                .map(|line| {
+                    let l = line.trim_start();
+                    if (l.starts_with("V. ") || l.starts_with("R. ")) && !has_alleluia(l) { with_alleluia(line) } else { line.to_string() }
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
+        }
     }
 }
 
@@ -170,7 +220,7 @@ fn append_context_decisions(hour: &mut OfficeHour, day: &Day, hour_name: &str, m
     }
     match hour_name {
         "vespers" => {
-            let owner = match day.vespers.owner {
+            let owner = match day.vespers.owner() {
                 VespersOwner::NotApplicable => "not-applicable",
                 VespersOwner::IIOfPreceding => "second-of-preceding",
                 VespersOwner::IOfFollowing => "first-of-following",
@@ -198,13 +248,8 @@ fn append_context_decisions(hour: &mut OfficeHour, day: &Day, hour_name: &str, m
     add(d, "antiphon:doubling", outcome, "");
 }
 
-pub const MARIAN_BOUNDARY_CIVIL_DAY: &str = "civil-day";
-pub const MARIAN_BOUNDARY_PURIFICATION_VESPERS_OVERRIDE: &str = "purification-vespers-override";
-
 fn add_marian_decisions(d: &mut Vec<Decision>, day: &Day, hour_name: &str) {
-    let (key, boundary) = marian_antiphon_selection(day, hour_name);
-    d.push(Decision::new("marian:selection", key, ""));
-    d.push(Decision::new("marian:boundary", boundary, ""));
+    d.push(Decision::new("marian:selection", marian_antiphon_selection(day, hour_name), ""));
 }
 
 /// Describes the synthetic office day that drove Vespers or Compline.
@@ -225,7 +270,7 @@ fn append_evening_office_context_decisions(d: &mut Vec<Decision>, office_day: &D
         Some(o) => add(d, "office-context:octave", "within", o),
         None => add(d, "office-context:octave", "outside", ""),
     }
-    add(d, "office-context:first-vespers", if office_day.first_vespers { "yes" } else { "no" }, "");
+    add(d, "office-context:first-vespers", if office_day.first_vespers() { "yes" } else { "no" }, "");
 }
 
 /// Psalm groups "under one antiphon": within a run of psalm-bearing
@@ -262,10 +307,9 @@ fn collapse_uniform_antiphons(hour: &mut OfficeHour) {
             lo = hi + 1;
         }
         if !drop.is_empty() {
-            for si in start..=end {
-                let elems = std::mem::take(&mut hour.sections[si].elements);
-                hour.sections[si].elements =
-                    elems.into_iter().enumerate().filter(|(i, _)| !drop.contains(&(si, *i))).map(|(_, e)| e).collect();
+            for (si, section) in (start..).zip(&mut hour.sections[start..=end]) {
+                let elems = std::mem::take(&mut section.elements);
+                section.elements = elems.into_iter().enumerate().filter(|(i, _)| !drop.contains(&(si, *i))).map(|(_, e)| e).collect();
             }
         }
         start = end + 1;
@@ -274,7 +318,7 @@ fn collapse_uniform_antiphons(hour: &mut OfficeHour) {
 
 /// Whether psalm and canticle antiphons are doubled: only Lauds and Vespers
 /// of a Double office (General Rubrics I.4 / XXIV.8).
-pub fn antiphons_doubled(day: &Day, hour_name: &str) -> bool {
+fn antiphons_doubled(day: &Day, hour_name: &str) -> bool {
     if hour_name != "lauds" && hour_name != "vespers" {
         return false;
     }
@@ -320,15 +364,19 @@ pub fn resolve_element(elem: &HourElement, t: &OfficeTexts) -> OfficeElement {
     if text.is_empty() {
         text = format!("[Text not found: {}]", elem.reference);
     }
-    // Only the legacy partly-secret Pater omits its final Amen.
-    if elem.kind == "partly-secret-prayer"
+    // A Pater answered "But deliver us from evil." omits its final Amen
+    // (Diurnal pp. 10, 42, 86, 122, 151; #671).
+    if matches!(elem.kind.as_str(), "partly-secret-prayer" | "corporate-lord-prayer" | "partly-secret-lord-prayer")
         && elem.reference.ends_with("/our-father")
         && let Some(stripped) = text.strip_suffix(" Amen.")
     {
         text = stripped.to_string();
     }
     let kind = map_element_type(&elem.kind);
-    let label = format_label(&elem.kind, &elem.reference);
+    let label = match elem.kind.as_str() {
+        "canticle" => canticle_label(&elem.reference, &text),
+        kind => format_label(kind, &elem.reference),
+    };
     let with_source = |mut e: OfficeElement| {
         e.source_ref = elem.reference.clone();
         e.source_refs = vec![elem.reference.clone()];
@@ -359,24 +407,23 @@ pub fn resolve_element(elem: &HourElement, t: &OfficeTexts) -> OfficeElement {
         // The Triduum's concluding Our Father is entirely silent (p. 313).
         "silent-prayer" => oe.voice = vec![VoiceSpan::new(oe.text.clone(), false, None)],
         "partly-secret-prayer" => oe.voice = voice::build_prayer_voice(&elem.reference, &oe.text, true),
-        "corporate-lord-prayer" => oe.voice = voice::build_corporate_lord_prayer_voice(&elem.reference, &oe.text),
+        "corporate-lord-prayer" => oe.voice = voice::build_corporate_lord_prayer_voice(&elem.reference, &oe.text, false),
+        "partly-secret-lord-prayer" => oe.voice = voice::build_corporate_lord_prayer_voice(&elem.reference, &oe.text, true),
         "rubric" => oe.rubric_spans = rubric::build_rubric_spans(&elem.reference, &oe.text),
         _ => {}
     }
     oe
 }
 
-/// The seasonal Marian antiphon slug and its boundary branch. Alma
-/// Redemptoris continues through II Vespers of the Purification.
-pub fn marian_antiphon_selection<'a>(day: &'a Day, hour_name: &str) -> (&'a str, &'static str) {
-    if hour_name == "vespers" && day.date.month() == 2 && day.date.day() == 2 {
-        return ("alma-redemptoris-christmas", MARIAN_BOUNDARY_PURIFICATION_VESPERS_OVERRIDE);
-    }
-    (&day.marian_antiphon, MARIAN_BOUNDARY_CIVIL_DAY)
+/// The seasonal Marian antiphon slug for this hour. Its boundaries fall at
+/// hours of the civil day the hour is said on, so I Vespers keeps its eve.
+fn marian_antiphon_selection(day: &Day, hour_name: &str) -> &'static str {
+    let civil = day.civil_date();
+    seasonal::marian_antiphon(civil, hour_name, &MoveableDates::compute(civil.year()))
 }
 
 fn resolve_marian_element(day: &Day, hour_name: &str, t: &OfficeTexts) -> OfficeElement {
-    let (key, _) = marian_antiphon_selection(day, hour_name);
+    let key = marian_antiphon_selection(day, hour_name);
     let r = format!("ordinary/marian/{key}");
     let mut text = t.get(&r).to_string();
     if text.is_empty() {
@@ -477,7 +524,7 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
             let mut e = element(ElementType::Collect, text.clone(), "collect", &src);
             e.source_refs = compact_refs(refs.clone());
             if uses_triduum_form(day, hour_name) && refs.len() == 2 {
-                // The body is said in a low voice; the conclusion is silent
+                // The body is said "in a like voice"; the conclusion is silent
                 // with no aloud response (Diurnal p. 313).
                 let conclusion = text.strip_prefix(&format!("{body}\n")).unwrap_or(&text).replace("\nR. Amen.", "\nAmen.");
                 e.text = format!("{body}\n{conclusion}");
@@ -486,20 +533,37 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
             e
         }
         "proper-hymn" => {
-            let (mut text, src) = resolve_proper_text(day, hour_name, r, t);
+            let (mut text, mut src) = resolve_proper_text(day, hour_name, r, t);
             if corpus::is_omitted(&text) {
                 return element(ElementType::Hymn, text, r, &src);
+            }
+            // Diurnal p. 34*: a feast marked m.t.v. sings the Confessor's
+            // hymn with its first stanza's last lines changed, which the
+            // Common keeps beside the hymn as `<hymn>-mtv`.
+            if let Some(c) = day.celebration.as_deref()
+                && c.hymn_mtv.applies(day.first_vespers() && hour_name == "vespers")
+                && let Some(key) = t.canonical_ref(&src).map(|k| format!("{k}-mtv"))
+                && !t.get(&key).is_empty()
+            {
+                text = t.get(&key).to_string();
+                src = key;
             }
             let mut refs = vec![src.clone()];
             // A proper `hymn-doxology` entry is the feast's own ending for
             // hymns of the metre (Our Lady of Sorrows, Diurnal pp. 505, 602);
             // @omit marks a hymn whose ending "is never changed".
             let (own_dox, own_ref) = resolve_proper_text(day, hour_name, "hymn-doxology", t);
+            let is_found = |r: &str| r.starts_with("seasonal/") || r.starts_with("proper/");
             let (dox, dox_ref) = match own_ref.starts_with("proper/") {
                 true => (own_dox, own_ref),
-                false => hymn_doxology(day, hour_name, t),
+                // A season's "never changed" mark (@omit) speaks for the
+                // season's own hymn, not a saint's that falls in it.
+                false => match hymn_doxology(day, hour_name, t) {
+                    seasonal if is_found(&seasonal.1) && (src.starts_with("seasonal/") || !corpus::is_omitted(&seasonal.0)) => seasonal,
+                    seasonal => commemorated_hymn_doxology(day, hour_name, t).unwrap_or(seasonal),
+                },
             };
-            let found = dox_ref.starts_with("seasonal/") || dox_ref.starts_with("proper/");
+            let found = is_found(&dox_ref);
             if found && !corpus::is_omitted(&dox) && has_common_metre_ending(&text) {
                 text = substitute_hymn_doxology(&text, &dox);
                 refs.push(dox_ref);
@@ -598,6 +662,48 @@ fn hymn_doxology(day: &Day, hour_name: &str, t: &OfficeTexts) -> (String, String
     resolve_proper_text(day, hour_name, reference, t)
 }
 
+/// General Rubrics XXIII.10: "if the Office of the day lacks a proper Hymn
+/// ending, the ending is taken from the first commemorated Office from among
+/// the others which has a proper ending. This is observed at I and II Vespers
+/// and at the Compline following them, so that the Hymn ending of any Feast
+/// ... is not used if the Commemoration itself is omitted at Vespers. If
+/// there is no proper Hymn ending, even of a commemorated Office, then it is
+/// taken from an occurring Common Octave or from the Season." The caller asks
+/// only when neither the office nor the season gives an ending, so the
+/// seasonal endings of Christmas, the Epiphany Octave and Paschaltide stand
+/// (XXIII.4–8). Lauds and the Hours through None take the commemorations of
+/// Lauds; Vespers and the Compline after it those of Vespers (Diurnal p. 505:
+/// Our Lady of Sorrows commemorated on the Friday after Passion Sunday ends
+/// the Hymns "at Compline and at the Hours through None"). A commemorated
+/// feast's ending is its own `hymn-doxology`, or Our Lady's (XXIII.4(c)),
+/// which is never used in Advent. A day within an Octave is not counted: a
+/// saint's feast within Our Lady's or Corpus Christi's Octave keeps the
+/// ordinary ending as the ordos print it (St Joachim, 2023–2026; ruling
+/// pending in #635).
+fn commemorated_hymn_doxology(day: &Day, hour_name: &str, t: &OfficeTexts) -> Option<(String, String)> {
+    const NATIVITY: &str = "seasonal/christmas/hymn-doxology";
+    if crate::psalmody::is_office_of_the_dead(day) {
+        return None;
+    }
+    let comms = match hour_name {
+        "vespers" | "compline" => day.commemorations.clone(),
+        _ => calendar::commemoration::lauds_commemorations(&day.cal),
+    };
+    comms.iter().find_map(|c| {
+        if octave_parent_id(c).is_some() || crate::proper::is_synthesized_feria(c) {
+            return None;
+        }
+        for id in crate::proper::feast_proper_ids(c) {
+            let key = format!("proper/{id}/hymn-doxology");
+            let text = t.get(&key);
+            if !text.is_empty() {
+                return (!corpus::is_omitted(text)).then(|| (text.to_string(), key));
+            }
+        }
+        (is_of_our_lady_or_corpus_christi(c) && day.season != Season::Advent).then(|| (t.get(NATIVITY).to_string(), NATIVITY.to_string()))
+    })
+}
+
 /// The Sunday within the Octave of Corpus Christi is always the II Sunday
 /// after Pentecost, whose octave context may name SS Peter and Paul instead.
 fn is_of_our_lady_or_corpus_christi(c: &Feast) -> bool {
@@ -657,7 +763,7 @@ fn map_element_type(kind: &str) -> ElementType {
         "versicle" | "officiant-greeting" | "officiant-opening" | "proper-versicle" => ElementType::Versicle,
         "response" | "proper-responsory" => ElementType::Response,
         "prayer" | "secret-prayer" | "silent-prayer" | "partly-secret-prayer" | "officiant-confession" => ElementType::Prayer,
-        "corporate-lord-prayer" => ElementType::CorporateLordPrayer,
+        "corporate-lord-prayer" | "partly-secret-lord-prayer" => ElementType::CorporateLordPrayer,
         "preces" => ElementType::Preces,
         "gloria-patri" => ElementType::Doxology,
         "chapter" | "proper-chapter" => ElementType::Chapter,
@@ -671,22 +777,78 @@ fn map_element_type(kind: &str) -> ElementType {
     }
 }
 
-/// A label from the ref's last path component: "Psalm 4", or a title-cased
-/// canticle or hymn name.
+/// A label from the ref's last path component: "Psalm 66 (67)", or a
+/// title-cased hymn name. A canticle's label is its name from its text.
 fn format_label(kind: &str, reference: &str) -> String {
     let name = reference.rsplit('/').next().unwrap_or("").replace('-', " ");
     match kind {
-        "psalm" => {
-            let n = name.trim_start_matches('0');
-            format!("Psalm {}", if n.is_empty() { "0" } else { n })
-        }
-        "canticle" | "hymn" => title_case(&name),
+        "psalm" => psalm_label(&name),
+        "canticle" | "hymn" => calendar::builder::title_case(&name),
         _ => String::new(),
     }
 }
 
+/// A canticle's label: the name its title block gives it, as the Diurnal names
+/// it ("The Song of Moses"), else one made from its key. The words are joined
+/// by no-break spaces, so a line too short for the name and its incipit moves
+/// the incipit down rather than breaking the name; a name wider than a phone's
+/// line may break after a "the" within it, as the Diurnal breaks "The Song of
+/// the Three / Children" (p. 35).
+pub fn canticle_label(reference: &str, text: &str) -> String {
+    let title = corpus::lines::parse_psalm(text).title;
+    if title.is_empty() {
+        return format_label("canticle", reference);
+    }
+    let words: Vec<&str> = title.split_whitespace().collect();
+    let mut label = String::with_capacity(title.len() + words.len());
+    for (i, word) in words.iter().enumerate() {
+        if i > 0 {
+            label.push(if words[i - 1] == "the" { ' ' } else { '\u{a0}' });
+        }
+        label.push_str(word);
+    }
+    label
+}
+
+/// A psalm's label from its corpus name ("067", "018a", "119 i"): the
+/// Septuagint (Vulgate) number first, as the Orthodox and Latin books number
+/// the psalms, then the Coverdale psalter's Hebrew number in parentheses when
+/// it differs ("Psalm 66 (67)"; "Psalm 4"). The parentheses keep the part a
+/// split psalm carries in our psalter, so the reader with a Prayer Book finds
+/// it ("Psalm 147 (147b)"). The numbers are joined by no-break spaces. The
+/// joins and splits are those recorded in
+/// data/latin-incipits.txt. Public: a printed book built on the engine names
+/// psalms by its Septuagint number.
+pub fn psalm_label(name: &str) -> String {
+    let name = name.trim_start_matches('0');
+    let digits = name.find(|c: char| !c.is_ascii_digit()).unwrap_or(name.len());
+    let (number, part) = name.split_at(digits);
+    let Ok(n) = number.parse::<u32>() else {
+        return format!("Psalm {}", if name.is_empty() { "0" } else { name });
+    };
+    let hebrew = format!("{n}{part}");
+    let greek = match (n, part) {
+        (10, _) => format!("9{part}"),
+        (11..=113 | 117..=146, _) => format!("{}{part}", n - 1),
+        (114 | 115, _) => format!("113{part}"),
+        // Hebrew 116 and 147 are each two psalms in the Septuagint, which our
+        // halves follow.
+        (116, "a") => "114".to_string(),
+        (116, "b") => "115".to_string(),
+        (116, _) => format!("114–115{part}"),
+        (147, "a") => "146".to_string(),
+        (147, "b") => "147".to_string(),
+        (147, _) => format!("146–147{part}"),
+        _ => hebrew.clone(),
+    };
+    // The numbers hold together, so a narrow column never strands the Hebrew
+    // number, or a section's numeral, at the head of a line of its own.
+    let number = if greek == hebrew { greek } else { format!("{greek} ({hebrew})") };
+    format!("Psalm {}", number.replace(' ', "\u{a0}"))
+}
+
 /// A leading "!" line is the chapter's scripture reference.
-pub fn extract_chapter_ref(text: &str) -> (String, String) {
+fn extract_chapter_ref(text: &str) -> (String, String) {
     if let Some((first, rest)) = text.split_once('\n') {
         let first = first.trim();
         if let Some(r) = first.strip_prefix('!') {
@@ -710,23 +872,9 @@ fn substitute_hymn_doxology(hymn: &str, doxology: &str) -> String {
     }
 }
 
-pub fn title_case(s: &str) -> String {
-    s.split_whitespace()
-        .map(|w| {
-            let mut c = w.chars();
-            match c.next() {
-                Some(f) => f.to_uppercase().chain(c).collect(),
-                None => String::new(),
-            }
-        })
-        .collect::<Vec<String>>()
-        .join(" ")
-}
-
 /// The first "[… not found: …]" marker in rendered text. The composer renders
-/// such a marker instead of failing when no corpus text resolves; callers that
-/// check whole calendars (the golden digest, the audit sweep) treat it as an
-/// error.
+/// such a marker when no corpus text resolves, and `compose_hour_with_options`
+/// turns the first one into an error.
 pub fn unresolved_marker(text: &str) -> Option<&str> {
     let mid = text.find(" not found: ")?;
     let start = text[..mid].rfind('[')?;

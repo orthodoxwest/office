@@ -22,7 +22,10 @@ pub fn apply_leader(hour: &mut OfficeHour, leader: PrayerForm, t: &OfficeTexts) 
         let mut resolved = Vec::new();
         for elem in elements {
             if !elem.leader_slot.is_empty() && recorded.insert(elem.leader_slot.clone()) {
-                let choir = leader == PrayerForm::Priest || (elem.leader_slot == "greeting" && leader == PrayerForm::Deacon);
+                // A priest absolves, so only he takes the choir Confiteor; a deacon may
+                // greet and bless, so he takes the clergy greeting and the blessing.
+                let choir = leader == PrayerForm::Priest
+                    || (matches!(elem.leader_slot.as_str(), "greeting" | "opening") && leader == PrayerForm::Deacon);
                 hour.decisions.push(Decision::new(
                     format!("prayer-form:{}", elem.leader_slot),
                     if choir { "choir" } else { "private" },
@@ -41,7 +44,7 @@ pub fn apply_leader(hour: &mut OfficeHour, leader: PrayerForm, t: &OfficeTexts) 
                         Some(vec![greeting])
                     }
                 }
-                "opening" if leader == PrayerForm::Priest => {
+                "opening" if leader != PrayerForm::Private => {
                     Some(vec![leader_element(ElementType::Versicle, "compline-opening-choir", t)?])
                 }
                 "confession" if leader == PrayerForm::Priest => Some(priest_confession(t)?),

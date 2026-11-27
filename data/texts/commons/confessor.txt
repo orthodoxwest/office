@@ -77,19 +77,19 @@ O God, who gavest blessed N. to thy people as a minister of eternal salvation: g
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 43* (Common of a Confessor not a Bishop, At Lauds)
-!Sir 31:8-9
+!Ecclus. 31:8, 9
 Blessed is the man that is found without blemish, and hath not gone after gold. * Who is he? and we will call him blessed: for wonderful things hath he done among his people.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, pp. 45*–46* (Common of a Confessor not a Bishop, At Sext)
-!Sir 39:5
+!Ecclus. 39:5
 The righteous man will give his heart to resort early to the Lord that made him, * and will pray before the Most High.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 46* (Common of a Confessor not a Bishop, At None)
-!Wis 10:10
+!Wisdom 10:10
 The Lord guided the righteous in right paths, shewed him the kingdom of God, and gave him knowledge of holy things, * made him rich in his travels, and multiplied the fruit of his labours.
 R. Thanks be to God.
 
@@ -189,6 +189,38 @@ This the Confessor of the Lord, whose triumph
 Now through the wide world celebrate the faithful,
 Merited this day joyfully to enter
 Heavenly mansions.
+
+Saintly and prudent, continent and humble,
+Chaste was he ever, peaceable and sober,
+While living vigour, coursing through his body,
+Quickened his being.
+
+When to his honoured sepulchre with members
+Languishing sorely, sufferers resorted,
+Oft unto wholeness did the Lord restore them
+At his petition.
+
+Wherefore our chorus chanteth in his honour
+Here, on his feast day, this most willing anthem;
+That in his merits we may have our portion
+Now and for ever.
+
+His be the glory, power and salvation
+Who, o'er the heavens, dwelling in the highest,
+Earth's mighty fabric ruleth and directeth,
+Only and Trinal.
+
+Amen.
+[hymn-vespers-mtv]
+# SOURCE: Monastic Diurnal.pdf, p. 42* (Common of a Confessor not a Bishop, Hymn: "If it be not the day of the Saint's death
+# (indicated in the Proper by the letters m.t.v.) the last two lines read"); the rest as [hymn-vespers].
+# Sung for a feast whose data sets HymnMtv (crates/office/src/engine.rs).
+Iste Confessor
+
+This the Confessor of the Lord, whose triumph
+Now through the wide world celebrate the faithful,
+On this his feast-day, year by year receiveth
+Merited honours.
 
 Saintly and prudent, continent and humble,
 Chaste was he ever, peaceable and sober,

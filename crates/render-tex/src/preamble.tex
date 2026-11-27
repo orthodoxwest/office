@@ -56,7 +56,7 @@
 % ✠ (U+2720) fallback via Noto Sans Symbols (Dingbats block)
 \newfontface\CrossFont[Path=/usr/share/fonts/truetype/noto/,Scale=MatchLowercase]{NotoSansSymbols-Black.ttf}
 % The small caps an ornamented opening word takes (see \initial).
-\newfontface\InitialWordFont{EB Garamond}[Ligatures=TeX,Letters={SmallCaps,UppercaseSmallCaps},LetterSpace=2.5]
+\newfontface\InitialWordFont{EB Garamond}[Ligatures=TeX,Letters=SmallCaps,LetterSpace=2.5]
 \newcommand{\crux}{{\color{rubricred}{\Large\CrossFont\symbol{"2720}}}}
 
 % Page flow: a paragraph never leaves a single line behind or ahead of a
@@ -131,7 +131,9 @@
 %             that fits one line takes a modest raised initial instead
 %             (chapter, collect, the officiant's Lord's Prayer)
 %   psalm     dropped; when the verse fits one line, the same full-size
-%             initial is elevated onto that line's baseline instead
+%             initial is elevated onto that line's baseline instead. Lines
+%             below the initial turn over at the verses' text edge
+%             (\psalmversewidth), as every other verse's do
 %   response  a modest raised initial at the ℟ text edge (the opening
 %             response of a Short Responsory)
 % #2 names the letter whose optical profile applies, #3 is the gilt initial
@@ -148,6 +150,7 @@
 \dim_new:N \l__initial_hang_dim
 \dim_new:N \l__initial_next_dim
 \dim_new:N \l__initial_first_dim
+\dim_new:N \l__initial_tail_dim
 \box_new:N \l__initial_box
 \box_new:N \l__initial_trial_box
 \int_new:N \g__initial_rows_int
@@ -220,14 +223,16 @@
     \dim_set:Nn \l__initial_hang_dim { \l__initial_hang_tl \l__initial_size_dim }
   }
 
-% The opening word in the font's drawn small caps, capitals included, with
-% the web's light tracking. Small caps are upright, so an italic anthem's
-% opening word is too.
+% The opening word, which the renderer writes in lower case, in the font's
+% drawn small caps (never its capitals-to-small-caps, a heavier design whose
+% W has no width in the 8 pt cut), with the web's light tracking. Small caps
+% are upright, so an italic anthem's opening word is too.
 \cs_new_protected:Npn \__initial_word:n #1
   { { \upshape \InitialWordFont #1 } }
 
 % A dropped initial: a parshape opens the first two lines (three for a tail),
-% and the initial is set, weightless, down on the second line's baseline. A
+% and the initial is set, weightless, down on the second line's baseline; the
+% lines below it start at the tail indent (the margin, but for a psalm). A
 % standalone O's word space falls at the start of the line, where the web's
 % float drops it too: its gap alone divides it from the next word.
 \cs_new_protected:Npn \__initial_drop:nn #1#2
@@ -245,7 +250,7 @@
       \dim_use:N \l__initial_first_dim ~ \dim_eval:n { \linewidth - \l__initial_first_dim } ~
       \prg_replicate:nn { 1 + \l__initial_depth_tl }
         { \dim_use:N \l__initial_next_dim ~ \dim_eval:n { \linewidth - \l__initial_next_dim } ~ }
-      0pt ~ \dim_use:N \linewidth \scan_stop:
+      \dim_use:N \l__initial_tail_dim ~ \dim_eval:n { \linewidth - \l__initial_tail_dim } \scan_stop:
     \hbox_set:Nn \l_tmpa_box { \box_move_down:nn { \baselineskip } { \box_use:N \l__initial_box } }
     \box_set_ht:Nn \l_tmpa_box { 0pt }
     \box_set_dp:Nn \l_tmpa_box { 0pt }
@@ -293,6 +298,7 @@
   {
     \par
     \bool_set:Nn \l__initial_standalone_bool {#1}
+    \dim_zero:N \l__initial_tail_dim
     \__initial_load:n {#3}
     \str_case:nn {#2}
       {
@@ -300,6 +306,7 @@
           { \__initial_full:n {#4} \__initial_drop:nn {#5} {#6} \__initial_clear: }
         { psalm }
           {
+            \dim_set_eq:NN \l__initial_tail_dim \psalmversewidth
             \__initial_full:n {#4}
             \__initial_rows:n { \__initial_drop:nn {#5} {#6} }
             \int_compare:nNnTF { \g__initial_rows_int } > { 1 }
@@ -379,7 +386,14 @@
   \Needspace{4\baselineskip}\smallskip\begin{center}{\small\color{mutedgray}\itshape #1}\end{center}\nopagebreak\smallskip\noindent%
 }
 
-% Psalm/canticle label: the number in body-size small caps, the Latin incipit in italic
+% A psalm's numbers in its label ("66 (67)"): lining figures out of small caps,
+% a little smaller, as the web's .psalm-num. A small-cap "1" is a bare stem that
+% reads as the section numeral "i".
+\newcommand{\psalmnum}[1]{{\normalfont\small\addfontfeatures{Numbers=Lining}#1}}
+% The Hebrew number beside it, "(67)", muted and a little smaller, as .psalm-heb.
+\newcommand{\psalmheb}[1]{{\footnotesize\color{mutedgray}#1}}
+
+% Psalm/canticle label: the word in body-size small caps, the Latin incipit in italic
 % beside it, as a printed diurnal sets them. #2 is empty when no incipit is
 % recorded, in which case the label stands alone. Kept with its first verses.
 \newcommand{\psalmlabel}[2]{%
@@ -403,8 +417,9 @@
 \newenvironment{sourcelines}{\setlength{\parskip}{1pt}}{\par}
 \newcommand{\sourceline}[1]{\noindent\hangindent=1.2em\hangafter=1 #1\par}
 
-% A plain opening in capitals, after its first letter: the font's drawn small
-% caps, as the web sets "I CONFESS" where no ornamented initial stands.
+% A plain opening in capitals, after its first letter and lowercased by the
+% renderer: the font's drawn small caps, as the web sets "I CONFESS" where no
+% ornamented initial stands.
 \newcommand{\capsrun}[1]{{\upshape\InitialWordFont #1}}
 
 % Pointing mediant: muted and raised to the optical middle of the line, as the
@@ -446,12 +461,15 @@
 
 % \psalmverse{num}{text} — num is empty for unnumbered first verse.
 % Numbered verses hang from a muted right-aligned gutter so every spoken line
-% shares one left edge, as verse-num does on the web hour.
+% shares one left edge, as verse-num does on the web hour. \psalmversewidth is that
+% edge; a psalm's \initial turns its opening verse over to it too.
+\newlength{\psalmversewidth}
+\setlength{\psalmversewidth}{2em}
 \newcommand{\psalmverse}[2]{%
   \if\relax\detokenize{#1}\relax%
     \noindent #2\par%
   \else%
-    \noindent\hangindent=2em\hangafter=1\makebox[1.4em][r]{{\small\color{mutedgray}#1}}\hspace{0.6em}#2\par%
+    \noindent\hangindent=\psalmversewidth\hangafter=1\makebox[1.4em][r]{{\small\color{mutedgray}#1}}\hspace{0.6em}#2\par%
   \fi%
 }
 
@@ -459,8 +477,8 @@
 % lines with a wrap hanging beneath, standing a little apart from the verses
 % above as its own stanza. It is sung to the psalm tone, so it keeps the
 % verses' text edge, as the web indents it by the verse gutter.
-\newcommand{\gloriapatri}[2]{\medskip\begin{sourcelines}\leftskip=2em\sourceline{#1}\sourceline{#2}\end{sourcelines}}
-\newcommand{\glorialine}[1]{\medskip\begin{sourcelines}\leftskip=2em\sourceline{#1}\end{sourcelines}}
+\newcommand{\gloriapatri}[2]{\medskip\begin{sourcelines}\leftskip=\psalmversewidth\sourceline{#1}\sourceline{#2}\end{sourcelines}}
+\newcommand{\glorialine}[1]{\medskip\begin{sourcelines}\leftskip=\psalmversewidth\sourceline{#1}\end{sourcelines}}
 
 % Spoken-role sigils set in rubric red, as the web sigil column does.
 % \Vbar/\Rbar come from gregoriotex, which the preamble loads above.

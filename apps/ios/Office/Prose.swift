@@ -55,8 +55,13 @@ struct ProseSpec: Equatable {
     /// The indent of each paragraph's first line, and of the lines that run on (a hanging indent).
     var firstIndent: CGFloat = 0
     var restIndent: CGFloat = 0
+    /// Whether `restIndent` is the text's own edge (a verse, prose), every line after an initial's
+    /// first starting there, rather than a hang beneath a line's own start (a hymn's, a chant's).
+    var restIsEdge = false
     var tabs: [NSTextTab] = []
     var initial: Initial?
+    /// How far the block reaches into the margin before its measure, for a sigil hung there ("All:").
+    var hang: CGFloat = 0
 }
 
 /// A spec laid out at one width: its line fragments, and where the initial stands.
@@ -134,16 +139,21 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
     /// Sets `text` beside a dropped capital: two lines (three past a descending tail), the remainder
     /// running on at the text edge. As beside the web's float, a line never starts short of the text's
     /// own edge, and the first line's opening word moves by the capital's tuck from where its line starts.
+    /// TextKit adds a line's indent to where an exclusion leaves off. Where the rest indent is the
+    /// text's edge, every line after the first (a wrap, or a line after a break) is indented by it, and
+    /// the exclusion beside the capital stops that much short, so they all start at the capital's edge;
+    /// where it is a hang, a line after a break starts at the edge and its wraps hang past it.
     @discardableResult
     private func drop(_ initial: Initial, _ text: NSAttributedString) -> [Row] {
         let second = max(initial.edge, spec.restIndent)
         let first = max(0, second + initial.tuck)
+        let indent = spec.restIsEdge ? spec.restIndent : 0
         container.exclusionPaths = [
             UIBezierPath(rect: CGRect(x: 0, y: 0, width: first, height: spec.line - 0.5)),
-            UIBezierPath(rect: CGRect(x: 0, y: spec.line, width: second, height: spec.line * CGFloat(initial.rows - 1) - 0.5)),
+            UIBezierPath(rect: CGRect(x: 0, y: spec.line, width: second - indent, height: spec.line * CGFloat(initial.rows - 1) - 0.5)),
         ]
         top = 0
-        set(first: 0, rest: spec.restIndent, text: text)
+        set(first: 0, rest: spec.restIndent, later: indent, text: text)
         capOrigin = CGPoint(x: initial.left, y: (lines().first?.minY ?? 0) + baseline + initial.drop)
         capFont = initial.deep
         return rows()
@@ -192,32 +202,49 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
         return rows.map(\.width).min()! / wide
     }
 
-    /// The opening with a break after its mediant (the web's `.initial-divided`), if it has one.
+    /// The opening with a break after its mediant (the web's `.initial-divided`), if it has one. A
+    /// posture cue at the mediant ("Sit.") ends the first line with it rather than opening the
+    /// second beside the initial, where it read as the first word of the half-verse.
     private static func divideAtMediant(_ text: NSAttributedString) -> NSAttributedString? {
         let s = text.string as NSString
         let at = s.range(of: "*")
         guard at.location != NSNotFound else { return nil }
-        let head = at.location + at.length
+        var head = at.location + at.length
+        let space = (String(s.substring(from: head).prefix { $0.isWhitespace }) as NSString).length
+        var cue = NSRange(location: NSNotFound, length: 0)
+        if head + space < text.length, text.attribute(.posture, at: head + space, effectiveRange: &cue) != nil, cue.location == head + space {
+            head = cue.location + cue.length
+        }
         let tail = s.substring(from: head)
         let skip = (String(tail.prefix { $0.isWhitespace }) as NSString).length
         let out = NSMutableAttributedString(attributedString: text.attributedSubstring(from: NSRange(location: 0, length: head)))
-        out.append(NSAttributedString(string: "\n", attributes: text.attributes(at: max(0, head - 1), effectiveRange: nil)))
+        out.append(NSAttributedString(string: "\n", attributes: text.attributes(at: at.location, effectiveRange: nil)))
         out.append(text.attributedSubstring(from: NSRange(location: head + skip, length: text.length - head - skip)))
         return out
     }
 
-    private func set(first: CGFloat, rest: CGFloat, text source: NSAttributedString? = nil) {
+    /// Sets the paragraph style: `first` opens the text, `later` (`first` unless given) each paragraph after it.
+    private func set(first: CGFloat, rest: CGFloat, later: CGFloat? = nil, text source: NSAttributedString? = nil) {
         let text = NSMutableAttributedString(attributedString: source ?? spec.text)
-        let style = NSMutableParagraphStyle()
-        style.alignment = spec.alignment
-        style.firstLineHeadIndent = first
-        style.headIndent = rest
-        style.minimumLineHeight = spec.line
-        style.maximumLineHeight = spec.line
-        style.lineBreakMode = .byWordWrapping
-        style.tabStops = spec.tabs
-        style.defaultTabInterval = 0
-        text.addAttribute(.paragraphStyle, value: style, range: NSRange(location: 0, length: text.length))
+        func style(_ head: CGFloat) -> NSParagraphStyle {
+            let style = NSMutableParagraphStyle()
+            style.alignment = spec.alignment
+            style.firstLineHeadIndent = head
+            style.headIndent = rest
+            style.minimumLineHeight = spec.line
+            style.maximumLineHeight = spec.line
+            style.lineBreakMode = .byWordWrapping
+            style.tabStops = spec.tabs
+            style.defaultTabInterval = 0
+            return style
+        }
+        let whole = NSRange(location: 0, length: text.length)
+        text.addAttribute(.paragraphStyle, value: style(first), range: whole)
+        if let later, later != first {
+            let opening = (text.string as NSString).paragraphRange(for: NSRange(location: 0, length: 0))
+            let after = NSRange(location: opening.upperBound, length: text.length - opening.upperBound)
+            if after.length > 0 { text.addAttribute(.paragraphStyle, value: style(later), range: after) }
+        }
         storage.setAttributedString(text)
     }
 
@@ -236,6 +263,16 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
         let glyphs = manager.glyphRange(for: container)
         manager.enumerateLineFragments(forGlyphRange: glyphs) { _, usedRect, _, _, _ in used = max(used, usedRect.maxX) }
         usedWidth = used.rounded(.up)
+    }
+
+    /// Where each line's first glyph stands, top to bottom.
+    var lineStarts: [CGFloat] {
+        var out: [CGFloat] = []
+        let glyphs = manager.glyphRange(for: container)
+        manager.enumerateLineFragments(forGlyphRange: glyphs) { rect, _, _, range, _ in
+            out.append(rect.minX + self.manager.location(forGlyphAt: range.location).x)
+        }
+        return out
     }
 
     /// The width a string sets in a face.
@@ -259,10 +296,45 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
         return true
     }
 
-    func draw(in ctx: CGContext) {
+    /// A glossed rubric term ("secretly"): its note, its ink, and its box on each line it runs over.
+    struct GlossTerm {
+        let note: GlossNote
+        let color: UIColor
+        let rects: [CGRect]
+    }
+
+    /// The text's glossed terms, in order, their boxes in the view.
+    lazy var glossTerms: [GlossTerm] = {
+        var out: [GlossTerm] = []
+        storage.enumerateAttribute(.gloss, in: NSRange(location: 0, length: storage.length)) { value, range, _ in
+            guard let note = value as? GlossNote else { return }
+            let color = storage.attribute(.foregroundColor, at: range.location, effectiveRange: nil) as? UIColor ?? .label
+            let glyphs = manager.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
+            var rects: [CGRect] = []
+            manager.enumerateEnclosingRects(forGlyphRange: glyphs, withinSelectedGlyphRange: NSRange(location: NSNotFound, length: 0), in: container) { r, _ in
+                rects.append(r.offsetBy(dx: 0, dy: self.top))
+            }
+            out.append(GlossTerm(note: note, color: color, rects: rects))
+        }
+        return out
+    }()
+
+    func draw(in ctx: CGContext, openGloss: Int? = nil) {
         let glyphs = manager.glyphRange(for: container)
         manager.drawBackground(forGlyphRange: glyphs, at: CGPoint(x: 0, y: top))
         manager.drawGlyphs(forGlyphRange: glyphs, at: CGPoint(x: 0, y: top))
+        // Each underlined rubric term's hairline in its own red at 40%, solid while its note is
+        // open, 0.24em under the baseline (the web's `.gloss-term`). Quiet structural glosses
+        // (`Ant.`, `(63)`, `Chapter`, `Preces`, `Suffrage`) carry no underline at rest.
+        let rise = spec.font.pointSize * 0.24
+        for (i, term) in glossTerms.enumerated() {
+            if term.note.quiet { continue }
+            ctx.setFillColor(term.color.withAlphaComponent(i == openGloss ? 1 : 0.4).cgColor)
+            for r in term.rects {
+                let y = r.minY + baseline + rise
+                ctx.fill(CGRect(x: r.minX, y: y - 0.5, width: r.width, height: 1))
+            }
+        }
         guard let initial = spec.initial, let origin = capOrigin, let font = capFont else { return }
         ProseLayout.paint(initial.letter, font, at: origin, color: initial.color, in: ctx)
     }
@@ -304,12 +376,21 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
 }
 
 /// The view that draws a laid-out spec, keeping the last layout for its width.
-final class ProseView: UIView {
+final class ProseView: UIView, UIGestureRecognizerDelegate {
     var spec: ProseSpec? {
         didSet { if spec != oldValue { setNeedsDisplay() } }
     }
 
+    /// The glossed term whose note is open, by its order in the text.
+    var openGloss: Int? {
+        didSet { if openGloss != oldValue { setNeedsDisplay() } }
+    }
+
+    /// A tap on a glossed term, with its box in the view on the line it starts.
+    var onGloss: ((Int, CGRect) -> Void)?
+
     private var cache: ProseLayout?
+    private var glossTap: UITapGestureRecognizer!
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -317,6 +398,53 @@ final class ProseView: UIView {
         backgroundColor = .clear
         contentMode = .redraw
         isAccessibilityElement = true
+        glossTap = UITapGestureRecognizer(target: self, action: #selector(tapped(_:)))
+        glossTap.delegate = self
+        addGestureRecognizer(glossTap)
+    }
+
+    /// The glossed term under `point`, with a finger's slop about one word of rubric type.
+    private func gloss(at point: CGPoint) -> (Int, CGRect)? {
+        guard let spec else { return nil }
+        for (i, term) in layout(spec, width: bounds.width).glossTerms.enumerated() {
+            if let hit = term.rects.first(where: { $0.insetBy(dx: -6, dy: -10).contains(point) }) {
+                return (i, term.rects.first ?? hit)
+            }
+        }
+        return nil
+    }
+
+    // Only a tap on a term is this view's; any other touch goes on to the page. UIKit asks the
+    // touched view about its ancestors' recognizers too (the page's scroll), so those keep the
+    // default answer.
+    override func gestureRecognizerShouldBegin(_ recognizer: UIGestureRecognizer) -> Bool {
+        guard recognizer === glossTap else { return super.gestureRecognizerShouldBegin(recognizer) }
+        return gloss(at: recognizer.location(in: self)) != nil
+    }
+
+    @objc private func tapped(_ recognizer: UITapGestureRecognizer) {
+        guard let hit = gloss(at: recognizer.location(in: self)) else { return }
+        onGloss?(hit.0, hit.1)
+    }
+
+    /// VoiceOver opens a term's note from the block's actions, as the drawn hairline is for the eye.
+    func updateGlossActions() {
+        guard let spec, bounds.width > 0 else {
+            accessibilityCustomActions = nil
+            return
+        }
+        let terms = layout(spec, width: bounds.width).glossTerms
+        accessibilityCustomActions = terms.isEmpty ? nil : terms.enumerated().map { i, term in
+            UIAccessibilityCustomAction(name: "Explain “\(term.note.title)”") { [weak self] _ in
+                self?.onGloss?(i, term.rects.first ?? .zero)
+                return true
+            }
+        }
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        updateGlossActions()
     }
 
     required init?(coder: NSCoder) { fatalError("not used") }
@@ -330,7 +458,7 @@ final class ProseView: UIView {
 
     override func draw(_ rect: CGRect) {
         guard let spec, let ctx = UIGraphicsGetCurrentContext() else { return }
-        layout(spec, width: bounds.width).draw(in: ctx)
+        layout(spec, width: bounds.width).draw(in: ctx, openGloss: openGloss)
     }
 }
 
@@ -339,13 +467,19 @@ struct Prose: UIViewRepresentable {
     let spec: ProseSpec
     var spoken: String?
     var header = false
+    /// A rubric's open glossed term, and what a tap on a term does.
+    var openGloss: Int?
+    var onGloss: ((Int, CGRect) -> Void)?
 
     func makeUIView(context: Context) -> ProseView { ProseView() }
 
     func updateUIView(_ view: ProseView, context: Context) {
         view.spec = spec
+        view.openGloss = openGloss
+        view.onGloss = onGloss
         view.accessibilityLabel = spoken ?? spec.text.string
         view.accessibilityTraits = header ? [.staticText, .header] : .staticText
+        view.updateGlossActions()
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: ProseView, context: Context) -> CGSize? {

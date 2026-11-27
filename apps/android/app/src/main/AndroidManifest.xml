@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Reminders that follow the sun: the town, read while the app is open, never sent anywhere (Sun.kt). -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- The daily usage count (Usage.kt); the Office itself never needs the network. -->
     <uses-permission android:name="android.permission.INTERNET" />
 

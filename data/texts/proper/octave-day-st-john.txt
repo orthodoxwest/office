@@ -84,7 +84,7 @@
 # Vespers-only override for psalm antiphon 3.
 #
 # [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+# Vespers-only override for psalm antiphon 4; without one, Vespers takes Lauds antiphon 5, omitting the fourth.
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.
@@ -97,3 +97,47 @@
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[chapter-lauds]
+# SOURCE: Monastic Diurnal p. 221 (January 3, At Lauds: "The rest as on the Feast, p. 198")
+@use proper/st-john-evangelist/chapter-lauds
+
+[short-responsory-lauds]
+# SOURCE: Monastic Diurnal p. 221 (January 3, At Lauds: "The rest as on the Feast, p. 198")
+@use proper/st-john-evangelist/short-responsory-lauds
+
+[hymn-lauds]
+# SOURCE: Monastic Diurnal p. 221 (January 3, At Lauds: "The rest as on the Feast, p. 198")
+@use proper/st-john-evangelist/hymn-lauds
+
+[versicle-lauds]
+# SOURCE: Monastic Diurnal p. 221 (January 3, At Lauds: "The rest as on the Feast, p. 198")
+@use proper/st-john-evangelist/versicle-lauds
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 221 ("At the Little Hours all as on the Feast")
+@use proper/st-john-evangelist/chapter-terce
+
+[chapter-sext]
+# SOURCE: Monastic Diurnal p. 221 ("At the Little Hours all as on the Feast")
+@use proper/st-john-evangelist/chapter-sext
+
+[chapter-none]
+# SOURCE: Monastic Diurnal p. 221 ("At the Little Hours all as on the Feast")
+@use proper/st-john-evangelist/chapter-none
+
+[chapter-vespers]
+# SOURCE: Monastic Diurnal p. 220 (January 3, At I Vespers: "Chapter, Short R., Hymn and V. as at Vespers of the Feast, p. 200")
+@use proper/st-john-evangelist/chapter-vespers
+
+[short-responsory-vespers]
+# SOURCE: Monastic Diurnal p. 220 (January 3, At I Vespers: "Chapter, Short R., Hymn and V. as at Vespers of the Feast, p. 200")
+@use proper/st-john-evangelist/short-responsory-vespers
+
+[hymn-vespers]
+# SOURCE: Monastic Diurnal p. 220 (January 3, At I Vespers: "Chapter, Short R., Hymn and V. as at Vespers of the Feast, p. 200")
+@use proper/st-john-evangelist/hymn-vespers
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal p. 220 (January 3, At I Vespers: "Chapter, Short R., Hymn and V. as at Vespers of the Feast, p. 200")
+@use proper/st-john-evangelist/versicle-vespers

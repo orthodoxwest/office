@@ -45,7 +45,9 @@ class SpokenTest {
     @Test
     fun aPsalmLabelReadsAsTwoPhrases() {
         val label = blocks.first { it.kind == BlockKind.ITEM_LABEL && "·" in it.runs.joinToString("") { r -> r.text } }
-        assertTrue(spoken(label), Regex("^Psalm \\d+\\. \\S").containsMatchIn(spoken(label)))
+        // "Psalm 66 (67). Deus misereatur nostri": the Septuagint number, then the Hebrew in
+        // parentheses where it differs.
+        assertTrue(spoken(label), Regex("^Psalm \\d+( \\(\\d+\\))?\\. \\S").containsMatchIn(spoken(label)))
     }
 
     @Test
@@ -53,5 +55,22 @@ class SpokenTest {
         val verse = blocks.first { b -> b.kind == BlockKind.VERSE && b.runs.any { it.style == RunStyle.POSTURE } }
         val cue = verse.runs.first { it.style == RunStyle.POSTURE }.text.trim()
         assertTrue(spoken(verse), "($cue)" in spoken(verse))
+    }
+
+    @Test
+    fun chantScoresSpeakCleanWordsAndStanzaNumbers() {
+        val scored = listOf(3 to 15, 4 to 5, 12 to 25).flatMap { (month, day) ->
+            hourNames().flatMap { hour -> Office.core.compose(hour, 2026, month, day, "priest", false, true).sections.flatMap { it.blocks } }
+        }.filter { it.kind == BlockKind.SCORE }
+        assertTrue(scored.isNotEmpty())
+        for (b in scored) {
+            val said = spoken(b)
+            for (mark in listOf("*", "†", "℣", "℟", "✠", "")) assertTrue("$mark in: $said", mark !in said)
+            assertTrue("empty score", said.isNotBlank())
+        }
+        assertTrue(scored.any { b ->
+            val num = b.marker.trim('.', ' ')
+            num.isNotEmpty() && spoken(b).startsWith("Stanza $num.")
+        })
     }
 }

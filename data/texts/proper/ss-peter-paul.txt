@@ -19,9 +19,6 @@ The Lord hath sent his Angel, * and hath delivered me out of the hand of Herod, 
 
 [psalm-antiphon-5]
 @use proper/ss-peter-paul/psalm-antiphon-4-first-vespers
-[psalm-antiphon-4-vespers]
-@use proper/ss-peter-paul/psalm-antiphon-5
-
 [psalm-antiphon-1-first-vespers]
 @use proper/ss-peter-paul/psalm-antiphon-1
 

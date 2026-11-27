@@ -24,10 +24,6 @@ Lo, the winter is past, * the rain is over and gone: rise up, my love, and come 
 # SOURCE: monastic diurnal, p. 65* (Common of Feasts B.V.M., At Lauds)
 Thou art beautiful * and pleasant, O holy Mother of God, in thy felicity.
 
-[psalm-antiphon-4-vespers]
-# SOURCE: monastic diurnal, pp. 61*-63* (Common of Feasts B.V.M., At I Vespers); II Vespers is all as at I Vespers (p. 67*)
-@use commons/blessed-virgin/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 66* (Common of Feasts B.V.M., At Lauds)
 Blessed art thou, * O Mary, for thou hast believed: and there shall be a performance in thee of those things which were told thee from the Lord, alleluia.
@@ -49,19 +45,19 @@ Grant, we beseech thee, O Lord God, that we thy servants may rejoice in continua
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 65* (Common of Feasts B.V.M., At Lauds)
-!Sir 24:9-10
+!Ecclus. 24:9, 10
 He created me from the beginning before the world, and I shall never fail. * In the holy tabernacle I served before him.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 67* (Common of Feasts B.V.M., At Sext)
-!Sir 24:10-12
+!Ecclus. 24:10-12
 So was I established in Sion; likewise in the beloved city he gave me rest, and in Jerusalem was my power; and I took root in an honourable people, even in the portion of the Lord's inheritance, * and my abode is in the assembly of the saints.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 67* (Common of Feasts B.V.M., At None)
-!Sir 24:15
+!Ecclus. 24:15
 I gave a sweet smell like cinnamon and aspalathus, * and I yielded a pleasant odour like the best myrrh.
 R. Thanks be to God.
 
