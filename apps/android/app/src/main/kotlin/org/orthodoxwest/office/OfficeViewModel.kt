@@ -172,8 +172,14 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         private set
     var textSize: TextSize by mutableStateOf(enumValueOrDefault(prefs.getString("text-size", null), TextSize.DEFAULT))
         private set
-    /** Whether Prime reads the next day's Martyrology; off by default. */
-    var martyrology: Boolean by mutableStateOf(prefs.getBoolean("martyrology", false))
+    /**
+     * What follows Prime: the Martyrology's rubric (the default), its reading, or the Capitular
+     * Office. The earlier On/Off setting ("martyrology") stands until the reader chooses again.
+     */
+    var afterPrime: AfterPrime by mutableStateOf(
+        AfterPrime.of(prefs.getString("after-prime", null))
+            ?: if (prefs.getBoolean("martyrology", false)) AfterPrime.MARTYROLOGY else AfterPrime.OFF,
+    )
         private set
     /** Whether a scored hymn or Marian antiphon shows its score in place of its words; off by default. */
     var chant: Boolean by mutableStateOf(prefs.getBoolean("chant", false))
@@ -342,9 +348,9 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         load()
     }
 
-    fun chooseMartyrology(value: Boolean) {
-        martyrology = value
-        prefs.edit().putBoolean("martyrology", value).apply()
+    fun chooseAfterPrime(value: AfterPrime) {
+        afterPrime = value
+        prefs.edit().putString("after-prime", value.value).apply()
         // Prime composed with the old setting is composed again when next shown.
         contents.keys.retainAll(setOf(entry.id))
         load()
@@ -432,7 +438,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     /**
      * Counts the page shown in the day's usage (Usage.kt): whenever it, its theme, its prayer
-     * form, the Martyrology or the Chant setting changes, and on every return to the app. Each is counted
+     * form, the After Prime or the Chant setting changes, and on every return to the app. Each is counted
      * once a day.
      */
     fun countVisit() {
@@ -447,11 +453,11 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
             // The web counts no beacon for its about page.
             Page.About -> return
         }
-        // Prime reports whether its Martyrology was shown, and an hour with a score whether its
+        // Prime reports its After Prime choice, and an hour with a score whether its
         // notation was, once the hour on screen is this page's.
         val hour = shown?.takeIf { it.entry.id == entry.id }?.content as? Content.Hour
         val prayed = (page as? Page.Hour)?.let { Prayed.hours(getApplication(), it.date).contains(it.hour) } ?: false
-        usage.record(event, dark(), form, hour?.view?.martyrology, hour?.view?.chant, prayed, reminders.on)
+        usage.record(event, dark(), form, hour?.view?.afterPrime, hour?.view?.chant, prayed, reminders.on)
     }
 
     /** Whether the Apse is on screen: the reader's choice, or the phone's own dark mode under Default. */
@@ -489,7 +495,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                     )
                     is Page.Hour -> Content.Hour(
                         withContext(Dispatchers.Default) {
-                            office.compose(page.hour, page.date.year, page.date.monthValue, page.date.dayOfMonth, form, martyrology, chant)
+                            office.compose(page.hour, page.date.year, page.date.monthValue, page.date.dayOfMonth, form, afterPrime.value, chant)
                         },
                     )
                     is Page.Ordo -> Content.Ordo(withContext(Dispatchers.Default) { office.ordoMonth(page.year, page.month) })

@@ -14,7 +14,7 @@ use std::sync::{Arc, Mutex};
 use calendar::{CalendarData, Date, MoveableDates, build_calendar};
 use corpus::typography::typeset;
 use liturgy::{OfficeHour, PrayerForm};
-use office::prime::reads_martyrology;
+use office::prime::{AfterPrime, reads_martyrology};
 use office::summary::{CommSummary, HourSummary, ordo_day};
 use office::{ComposeOptions, Day, Engine, HOUR_NAMES, resolve_office_days};
 use presentation::{
@@ -102,11 +102,13 @@ impl OfficeCore {
     }
 
     /// Composes `hour` (a name from `hour_names`) for the civil date in the
-    /// prayer form "private", "deacon", or "priest"; `martyrology` is the
-    /// reader's setting for reading the Martyrology at Prime; `chant` the reader's Chant setting,
+    /// prayer form "private", "deacon", or "priest"; `after_prime` is the
+    /// reader's After Prime setting as the web stores it: "off" (the
+    /// Martyrology's rubric), "on" (the Martyrology read) or "chapter" (the
+    /// Capitular Office), anything else "off"; `chant` the reader's Chant setting,
     /// which shows a scored hymn or Marian antiphon as its score (`BlockKind::Score`) in place of
     /// the words it sets.
-    #[uniffi::method(default(martyrology = false, chant = false))]
+    #[uniffi::method(default(after_prime = "off", chant = false))]
     // The reader's settings stay plain arguments with defaults, so each app passes only its own.
     #[allow(clippy::too_many_arguments)]
     pub fn compose(
@@ -116,7 +118,7 @@ impl OfficeCore {
         month: i32,
         day: i32,
         form: String,
-        martyrology: bool,
+        after_prime: String,
         chant: bool,
     ) -> Result<HourView, OfficeError> {
         let date =
@@ -124,17 +126,22 @@ impl OfficeCore {
         let form = PrayerForm::parse(&form).map_err(failed)?;
         let year = self.year(date.year())?;
         let office_day = year.days.get(date.ordinal() as usize - 1).ok_or_else(|| failed(format!("no office day for {date}")))?;
-        let compose = |martyrology| {
-            self.engine.compose_hour_with_options(&hour, office_day, &year.moveable, &ComposeOptions { form, martyrology }).map_err(failed)
+        let after_prime = AfterPrime::parse(&after_prime);
+        let compose = |after_prime| {
+            self.engine.compose_hour_with_options(&hour, office_day, &year.moveable, &ComposeOptions { form, after_prime }).map_err(failed)
         };
-        let composed = compose(martyrology)?;
+        let composed = compose(after_prime)?;
         let mut view = HourView::new(&hour, &composed, chant);
         if !composed.feast.is_empty() {
             view.feast_id = self.feast_id("", &composed.feast, date);
         }
         // Whether the setting had a reading to show or hide, as the usage beacon reports it.
-        let has_reading = if martyrology { reads_martyrology(&composed) } else { hour == "prime" && reads_martyrology(&compose(true)?) };
-        view.martyrology = has_reading.then_some(martyrology);
+        let has_reading = if after_prime.reads_martyrology() {
+            reads_martyrology(&composed)
+        } else {
+            hour == "prime" && reads_martyrology(&compose(AfterPrime::Martyrology)?)
+        };
+        view.after_prime = has_reading.then(|| after_prime.as_str().to_string());
         Ok(view)
     }
 
@@ -824,11 +831,11 @@ pub enum UsageEvent {
 /// The usage beacon for `event`, or none when it does not count: as on the web, only a page
 /// for today or a day either side (the ordo: this year or either side) is counted, so reading
 /// the archive leaves no trace. `dark` is the appearance on screen; `form` the prayer form;
-/// `martyrology` and `chant` the hour's `HourView::martyrology` and `HourView::chant`; `first`
+/// `after_prime` and `chant` the hour's `HourView::after_prime` and `HourView::chant`; `first`
 /// whether the installation is counted for the first time today; `week` and `month` whether
 /// today is its first counted day of the week and of the month ([`usage_periods`]); `habits` what
 /// else the installation kept and knows ([`UsageHabits`]).
-#[uniffi::export(default(martyrology = None, first = None, chant = None, week = None, month = None, habits = None))]
+#[uniffi::export(default(after_prime = None, first = None, chant = None, week = None, month = None, habits = None))]
 // The page's facts stay plain arguments with defaults, so each app passes only what it knows.
 #[allow(clippy::too_many_arguments)]
 pub fn usage_beacon(
@@ -837,7 +844,7 @@ pub fn usage_beacon(
     dark: bool,
     form: String,
     client: UsageClient,
-    martyrology: Option<bool>,
+    after_prime: Option<String>,
     first: Option<bool>,
     chant: Option<bool>,
     week: Option<bool>,
@@ -879,7 +886,7 @@ pub fn usage_beacon(
             reminders: h.reminders,
         }
     });
-    app_beacon(scope, app, dark, &form, martyrology, chant, first, week, month, habits.as_ref())
+    app_beacon(scope, app, dark, &form, after_prime.as_deref(), chant, first, week, month, habits.as_ref())
 }
 
 /// What an installation kept and knows beside the page, for its beacon ([`usage_beacon`]).
@@ -1870,9 +1877,10 @@ pub struct HourView {
     pub sections: Vec<SectionView>,
     /// A prefilled GitHub issue naming this hour, date, and form, as the web's "Report a problem".
     pub report_url: String,
-    /// Prime's Martyrology: whether the reader's setting shows the day's reading, or none when
-    /// there is no reading to show (another hour, the Triduum, a date not yet transcribed).
-    pub martyrology: Option<bool>,
+    /// Prime's After Prime choice as composed ("off", "on" or "chapter"), for the usage beacon,
+    /// or none when there is no Martyrology reading to show (another hour, the Triduum, a date
+    /// not yet transcribed).
+    pub after_prime: Option<String>,
     /// Whether the reader's Chant setting shows the hour's scores, or none when it has none to
     /// show, as the usage beacon reports it.
     pub chant: Option<bool>,
@@ -1906,7 +1914,7 @@ impl HourView {
             end_bare: presentation::ends_bare(hour.bare, &hour.sections),
             sections: blocks.into_iter().map(SectionView::from).collect(),
             report_url: report_url(hour, hour_name, &date_slug(d)),
-            martyrology: None,
+            after_prime: None,
             chant: scored.then_some(chant),
         }
     }

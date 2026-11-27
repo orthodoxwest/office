@@ -232,7 +232,7 @@ final class SpokenTests: XCTestCase {
         var scored: [BlockView] = []
         for (month, day) in [(3, 15), (4, 5), (12, 25)] {
             for hour in hourNames() {
-                let view = try core.compose(hour: hour, year: 2026, month: Int32(month), day: Int32(day), form: "priest", martyrology: false, chant: true)
+                let view = try core.compose(hour: hour, year: 2026, month: Int32(month), day: Int32(day), form: "priest", afterPrime: "off", chant: true)
                 for section in view.sections {
                     scored += section.blocks.filter { $0.kind == .score }
                 }

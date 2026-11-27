@@ -354,13 +354,15 @@ test("the rhythm reaches into a prayer form's part and the Martyrology", async (
       thanks: above(leaves.findIndex((e, i) => i > heading && e.textContent.includes("Thanks be to God"))),
       // A section's label stands as a part's heading, as the apps' toggle row does.
       label: (() => {
-        const after = [...document.querySelectorAll(".session-prayers")].pop();
+        const after = [...document.querySelectorAll(".session-prayers")].filter(shown).pop();
         const box = after.querySelector("summary").getBoundingClientRect();
-        const before = after.previousElementSibling.getBoundingClientRect();
+        let prior = after.previousElementSibling;
+        while (!shown(prior)) prior = prior.previousElementSibling;
+        const before = prior.getBoundingClientRect();
         return (box.top - before.bottom) / line;
       })(),
       under: (() => {
-        const after = [...document.querySelectorAll(".session-prayers")].pop();
+        const after = [...document.querySelectorAll(".session-prayers")].filter(shown).pop();
         const box = after.querySelector("summary").getBoundingClientRect();
         return (after.querySelector(".session-prayers-content p").getBoundingClientRect().top - box.bottom) / line;
       })(),
@@ -1319,10 +1321,10 @@ test("a place hidden by another prayer form or the Martyrology opens where the w
   // A day in the Martyrology; with the Martyrology off, the line said in its place.
   await page.evaluate(() => localStorage.setItem("office-prayer-form", "priest"));
   const martyrology = await reopened(
-    (all) => all.filter((l) => l.closest('[data-martyrology-variant="on"]'))[5],
+    (all) => all.filter((l) => l.closest('[data-martyrology-variant~="on"]:not([data-martyrology-variant~="off"])'))[5],
     () => localStorage.setItem("office-martyrology", "off"),
   );
-  expect(await page.evaluate(([LINES, i]) => !!document.querySelectorAll(LINES)[i].closest('[data-martyrology-variant="off"]'), [LINES, martyrology.index])).toBe(true);
+  expect(await page.evaluate(([LINES, i]) => !!document.querySelectorAll(LINES)[i].closest('[data-martyrology-variant~="off"]:not([data-martyrology-variant~="on"])'), [LINES, martyrology.index])).toBe(true);
   expect(martyrology.at).toBeLessThanOrEqual(1);
 });
 
@@ -3136,7 +3138,7 @@ test("larger text grows the prayer without breaking the phone layout", async ({ 
       const rects = (sel) =>
         Array.from(document.querySelectorAll(`.menu-prefs ${sel}`)).map((el) => {
           const r = el.getBoundingClientRect();
-          return { left: r.left, width: r.width, height: r.height };
+          return { left: r.left, width: r.width, height: r.height, fits: el.scrollWidth <= el.clientWidth };
         });
       return {
         themes: rects(".theme-option[data-theme-choice]"),
@@ -3154,17 +3156,15 @@ test("larger text grows the prayer without breaking the phone layout", async ({ 
     .toBeGreaterThanOrEqual(44);
   const cells = await measure();
   const all = [...cells.themes, ...cells.sizes, ...cells.martyrology];
-  expect(all).toHaveLength(8);
+  expect(all).toHaveLength(9);
   expect(Math.min(...all.map((r) => r.height))).toBeGreaterThanOrEqual(44);
   cells.themes.forEach((r, i) => {
     expect(Math.abs(r.left - cells.sizes[i].left)).toBeLessThan(1);
     expect(Math.abs(r.width - cells.sizes[i].width)).toBeLessThan(1);
   });
-  // Off and On sit under the last two themes.
-  cells.martyrology.forEach((r, i) => {
-    expect(Math.abs(r.left - cells.themes[i + 1].left)).toBeLessThan(1);
-    expect(Math.abs(r.width - cells.themes[i + 1].width)).toBeLessThan(1);
-  });
+  // After Prime's Nothing, Martyrology and Chapter share their own row, each word whole.
+  expect(cells.martyrology.every((r) => r.fits)).toBe(true);
+  cells.martyrology.slice(1).forEach((r, i) => expect(r.left).toBeGreaterThan(cells.martyrology[i].left));
   expect(await overflows()).toBe(false);
   await page.locator(".site-menu > summary").click();
 
@@ -6096,7 +6096,7 @@ test("service worker does not cache the usage report", async ({ browser, baseURL
   await context.close();
 });
 
-test("the Martyrology at Prime is a Settings choice, off by default, that holds offline", async ({ browser, baseURL, browserName }) => {
+test("what follows Prime is a Settings choice, nothing by default, that holds offline", async ({ browser, baseURL, browserName }) => {
   test.skip(browserName === "webkit", "Playwright's WebKit fails any navigation once context.setOffline(true) is set, even one its service worker would answer; service-worker offline emulation works only in Chromium");
   const context = await browser.newContext({ serviceWorkers: "allow", baseURL });
   try {
@@ -6124,18 +6124,32 @@ test("the Martyrology at Prime is a Settings choice, off by default, that holds 
       await expect(button).toHaveAttribute("aria-pressed", "true");
     }
 
-    await choosePreference(page, "On", ".martyrology-option");
+    const chapter = page.getByRole("heading", { name: "Chapter Office", exact: true });
+    await expect(chapter).toBeHidden();
+
+    await choosePreference(page, "Martyrology", ".martyrology-option");
     await expect(reading).toBeVisible();
     await expect(rubric).toBeHidden();
+    await expect(chapter).toBeHidden();
     await expect(page.locator(".elements")).not.toContainText("Thomas of Villanova");
     // Remembered, and the same page serves both settings, offline too.
     await context.setOffline(true);
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-martyrology", "on");
     await expect(reading).toBeVisible();
-    await choosePreference(page, "Off", ".martyrology-option");
+    // The Chapter Office reads the Martyrology within it, and its Blessing ends
+    // with the faithful departed in place of Prime's own versicle.
+    await choosePreference(page, "Chapter", ".martyrology-option");
+    await expect(page.locator("html")).toHaveAttribute("data-martyrology", "chapter");
+    await expect(reading).toBeVisible();
+    await expect(chapter).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Short Lesson", exact: true })).toBeVisible();
+    await expect(page.locator(".elements").getByText("May the souls of the faithful, through the mercy of God, rest in peace.", { exact: true })).toBeHidden();
+    expect(await page.evaluate(() => localStorage.getItem("office-martyrology"))).toBe("chapter");
+    await choosePreference(page, "Nothing", ".martyrology-option");
     await expect(rubric).toBeVisible();
     await expect(reading).toBeHidden();
+    await expect(chapter).toBeHidden();
     expect(await page.evaluate(() => localStorage.getItem("office-martyrology"))).toBe("off");
   } finally {
     await context.close();
@@ -6566,7 +6580,11 @@ test('private greetings are not repeated after preces when switching offline or 
       return (text.match(/O Lord, hear my prayer\. And let my cry come unto thee\./g) || []).length;
     };
     expect(await countPrivateResponses()).toBe(privateCount);
-    const omittedGreeting = page.locator('.leader-slot[data-leader-slot="greeting"][data-leaders="deacon priest"]');
+    // The Chapter Office after Prime has its own greeting, shown only when chosen.
+    const chapter = '[data-martyrology-variant~="chapter"]';
+    const omittedGreeting = page.locator(
+      `.leader-slot[data-leader-slot="greeting"][data-leaders="deacon priest"]:not(${chapter}):not(${chapter} *)`,
+    );
     await expect(omittedGreeting).toHaveCount(1);
     await expect(omittedGreeting).not.toBeVisible();
     await context.setOffline(true);

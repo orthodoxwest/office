@@ -445,10 +445,25 @@ class Prefs(val theme: ThemeChoice, val onTheme: (ThemeChoice) -> Unit, val text
 
 val LocalPrefs = staticCompositionLocalOf<Prefs?> { null }
 
-/** The reader's setting for reading the Martyrology at Prime (off by default), for the menu's last row. */
-class MartyrologyChoice(val on: Boolean, val onChange: (Boolean) -> Unit)
+/**
+ * What follows Prime, stored as the web stores it: the Martyrology's rubric (`off`, the default),
+ * the next day's Martyrology read (`on`), or the Capitular Office with the Martyrology in it
+ * (`chapter`).
+ */
+enum class AfterPrime(val value: String, val label: String) {
+    OFF("off", "Nothing"),
+    MARTYROLOGY("on", "Martyrology"),
+    CHAPTER("chapter", "Chapter");
 
-val LocalMartyrology = staticCompositionLocalOf { MartyrologyChoice(false) {} }
+    companion object {
+        fun of(value: String?): AfterPrime? = entries.firstOrNull { it.value == value }
+    }
+}
+
+/** The reader's After Prime setting, for the menu's last row. */
+class AfterPrimeChoice(val choice: AfterPrime, val onChange: (AfterPrime) -> Unit)
+
+val LocalAfterPrime = staticCompositionLocalOf { AfterPrimeChoice(AfterPrime.OFF) {} }
 
 /** The reader's Chant setting, offered only once a text has a score. */
 class ChantChoice(val offered: Boolean, val on: Boolean, val onChange: (Boolean) -> Unit)
@@ -580,23 +595,31 @@ private fun MenuRow(content: @Composable RowScope.() -> Unit) {
  * (`--ornament`). `spoken` names a cell drawn as a glyph.
  */
 @Composable
-private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle, page: Boolean = false, spoken: String? = null, onClick: () -> Unit) {
+private fun RowScope.MenuCell(
+    label: String,
+    current: Boolean,
+    style: TextStyle,
+    page: Boolean = false,
+    spoken: String? = null,
+    weight: Float = 1f,
+    onClick: () -> Unit,
+) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val haptics = LocalHapticFeedback.current
     Box(
-        Modifier.weight(1f).heightIn(min = 44.dp).tap(label = spoken, selected = current, lit = Lit(homeInk(p).nowPool)) {
+        Modifier.weight(weight).heightIn(min = 44.dp).tap(label = spoken, selected = current, lit = Lit(homeInk(p).nowPool)) {
             if (!page && !current) haptics.chose()
             onClick()
         }
             .then(if (page) Modifier.goldUnderline(current, p.lining, width = 1.5.dp) else Modifier.goldUnderline(current, o.flat)),
         contentAlignment = Alignment.Center,
-    ) { Text(label, style = style.copy(color = if (!current) p.muted else if (page) p.text else p.accent, textAlign = TextAlign.Center)) }
+    ) { Text(label, style = style.copy(color = if (!current) p.muted else if (page) p.text else p.accent, textAlign = TextAlign.Center), maxLines = 1, softWrap = false) }
 }
 
 /**
  * The site menu's dropdown panel: the Ordo, Reminders and About; then the Theme, Text and
- * Martyrology rows, the current choice in the accent over the ornament's rule. The pages are muted,
+ * After Prime rows, the current choice in the accent over the ornament's rule. The pages are muted,
  * the current one underlined in the lining. `prefsOnly` is the wide header's Settings: the
  * preference rows alone, under the header's end at `end`.
  */
@@ -696,29 +719,30 @@ fun MenuPanel(
                         MenuCell("A", s == textSize, Type.label(size, 0f), spoken = spoken) { onTextSize(s) }
                     }
                 }
-                // The Martyrology at Prime: Off and On under the last two themes, the longer label
-                // taking the first theme's cell, as on the web.
-                val martyrology = LocalMartyrology.current
+                // What follows Prime: the row's name on a line of its own, and Nothing, Martyrology
+                // and Chapter across the whole row, as on the web (Martyrology is wider than a
+                // theme's cell, so its tracking is a little closer and its cell a little wider).
+                val afterPrime = LocalAfterPrime.current
                 Hairline(p.surfaceEdge)
+                Text(
+                    "AFTER PRIME",
+                    // Said as the web's group names the row.
+                    Modifier.semantics { contentDescription = "After Prime" }.padding(start = 10.4.dp, top = 8.8.dp),
+                    style = Type.label(10.56f, 0.08f).copy(color = p.muted),
+                    maxLines = 1,
+                )
                 MenuRow {
-                    Row(Modifier.width(54.dp)) {
-                        Text(
-                            "MARTYROLOGY",
-                            // Said as the web's group names the row.
-                            Modifier.semantics { contentDescription = "Martyrology at Prime" }
-                                .padding(start = 10.4.dp).wrapContentWidth(Alignment.Start, unbounded = true),
-                            style = Type.label(10.56f, 0.08f).copy(color = p.muted),
-                            maxLines = 1,
-                            softWrap = false,
-                        )
-                    }
-                    Spacer(Modifier.weight(1f))
-                    listOf("OFF" to false, "ON" to true).forEach { (label, on) ->
-                        MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f), spoken = "Martyrology ${label.lowercase()}") { martyrology.onChange(on) }
+                    AfterPrime.entries.forEach { a ->
+                        MenuCell(
+                            a.label.uppercase(),
+                            a == afterPrime.choice,
+                            Type.label(12f, 0.02f),
+                            weight = if (a == AfterPrime.MARTYROLOGY) 1.4f else 1f,
+                        ) { afterPrime.onChange(a) }
                     }
                 }
                 PrefHint(AnnotatedString(PREF_HINTS.martyrology))
-                // Chant, laid out as the Martyrology's row, once a hymn or Marian antiphon has a score.
+                // Chant, once a hymn or Marian antiphon has a score.
                 val chant = LocalChant.current
                 if (chant.offered) {
                     Hairline(p.surfaceEdge)
@@ -760,7 +784,7 @@ private fun DrawScope.nightPlaster(plaster: ImageBitmap) {
 private val ShadowRoom: Dp = 16.dp
 private val ShadowRise: Dp = 9.dp
 
-/** The lines under the Martyrology and Chant rows, as the web's (`presentation`). */
+/** The lines under the After Prime and Chant rows, as the web's (`presentation`). */
 private val PREF_HINTS by lazy { preferenceHints() }
 
 /** A quiet italic line under a menu row whose names need saying (the web's `.pref-hint`). */

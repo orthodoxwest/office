@@ -879,8 +879,17 @@ fn breakdowns(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay], year: &s
     setting("Screen", mobile, desktop + mobile, "phone or tablet".into());
     let (on, off) = (sum("chant:on"), sum("chant:off"));
     setting("Chant notation", on, on + off, "turned on, where an hour has a score".into());
-    let (shown, hidden) = (sum("martyrology:shown"), sum("martyrology:hidden"));
-    setting("Martyrology at Prime", shown, shown + hidden, "shown".into());
+    let (shown, hidden, chapter) = (sum("martyrology:shown"), sum("martyrology:hidden"), sum("martyrology:chapter"));
+    setting(
+        "Martyrology at Prime",
+        shown + chapter,
+        shown + hidden + chapter,
+        format!(
+            "read: alone {}, in the Chapter Office {}",
+            percent(shown, shown + hidden + chapter),
+            percent(chapter, shown + hidden + chapter)
+        ),
+    );
     let (private, deacon, priest) = (sum("prayer-form:private"), sum("prayer-form:deacon"), sum("prayer-form:priest"));
     let forms = private + deacon + priest;
     setting(
@@ -979,7 +988,7 @@ pub const TREND_LABELS: [(&str, &str, &[&str]); 17] = [
     ("offices", "Hours opened in a day", &["One", "Two", "Three", "Four or more"]),
     ("prayer-form", "Prayer form", &["Private", "Deacon", "Priest"]),
     ("chant", "Chant notation", &["On", "Off"]),
-    ("martyrology", "Martyrology at Prime", &["Shown", "Hidden"]),
+    ("martyrology", "Martyrology at Prime", &["Shown", "Hidden", "Chapter Office"]),
     ("appearance", "Appearance", &["Nave", "Apse"]),
     ("screen", "Screen", &["Desktop", "Mobile"]),
     ("version", "Clients that report how they keep the hours", &["Reporting"]),

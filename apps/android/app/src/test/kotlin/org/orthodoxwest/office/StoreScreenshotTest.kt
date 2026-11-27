@@ -39,7 +39,7 @@ class StoreScreenshotTest {
         val core = Office.core
         val home = (page as? Page.Home)?.let { core.home(it.date.toCivil(), lent.toCivil(), 18) }
         val hour = (page as? Page.Hour)?.let {
-            core.compose(it.hour, it.date.year, it.date.monthValue, it.date.dayOfMonth, "private", false, chant)
+            core.compose(it.hour, it.date.year, it.date.monthValue, it.date.dayOfMonth, "private", "off", chant)
         }
         val ordo = (page as? Page.Ordo)?.let { core.ordoMonth(it.year, it.month) }
         val course = (page as? Page.Year)?.let { core.ordoCourse(it.year) }

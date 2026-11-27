@@ -721,9 +721,18 @@ summary:focus-visible {
   border-top: 1px solid var(--surface-edge);
 }
 
-/* Off and On sit under the last two themes; the longer label takes the
-   first theme's cell. */
-.site-prefs .martyrology-switch,
+/* After Prime names its row on a line of its own, and Nothing, Martyrology
+   and Chapter share the row's whole width: Martyrology is the panel's
+   longest word, wider than a theme's cell on a phone. */
+.site-prefs .martyrology-switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  border-top: 1px solid var(--surface-edge);
+}
+
+/* Chant's Off and On sit under the last two themes; the longer label takes
+   the first theme's cell. */
 .site-prefs .chant-switch {
   display: grid;
   grid-template-columns: 3.4rem repeat(3, minmax(0, 1fr));
@@ -731,7 +740,20 @@ summary:focus-visible {
   border-top: 1px solid var(--surface-edge);
 }
 
-.site-prefs .martyrology-switch .pref-label,
+.site-prefs .martyrology-switch .pref-label {
+  flex: 1 0 100%;
+  padding-top: 0.55rem;
+}
+
+.site-prefs .martyrology-option {
+  flex: 1 1 auto;
+  padding-inline: 0.3rem;
+}
+
+.site-prefs .martyrology-switch .pref-hint {
+  flex: 1 0 100%;
+}
+
 .site-prefs .chant-switch .pref-label {
   grid-column: 1 / 3;
 }
@@ -14052,11 +14074,14 @@ body.page-home::before {
   .usage-window, .usage-over-time, .usage-days ~ summary, details:has(.usage-days) > summary { display: none; }
 }
 
-/* Prime carries the Martyrology section twice, as the rubric and as the
-   reading; the reader's setting (off by default) shows one, before first
-   paint, as the prayer forms are chosen. */
-:root:not([data-martyrology="on"]) [data-martyrology-variant="on"],
-:root[data-martyrology="on"] [data-martyrology-variant="off"] { display: none !important; }
+/* Prime carries what follows it for each After Prime choice: the
+   Martyrology's rubric (off, the default), its reading (on), and the
+   Capitular Office (chapter). Each variant's elements name the choices that
+   read them; the reader's setting shows one, before first paint, as the
+   prayer forms are chosen. */
+:root:not([data-martyrology]) [data-martyrology-variant]:not([data-martyrology-variant~="off"]),
+:root[data-martyrology="on"] [data-martyrology-variant]:not([data-martyrology-variant~="on"]),
+:root[data-martyrology="chapter"] [data-martyrology-variant]:not([data-martyrology-variant~="chapter"]) { display: none !important; }
 
 /* A hymn or Marian antiphon with a score carries it beside the words it sets;
    the reader's Chant setting (off by default) shows one, before first paint. */

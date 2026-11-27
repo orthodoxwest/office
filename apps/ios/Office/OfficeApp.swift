@@ -94,7 +94,7 @@ struct RootView: View {
         let palette = model.theme.dark(system) ? Palette.apse : Palette.nave
         let visit = Visit(
             page: model.page, form: model.form, dark: palette.dark, today: model.today, active: phase == .active,
-            martyrology: model.martyrologyShown(on: model.page), chant: model.chantShown(on: model.page),
+            afterPrime: model.afterPrimeShown(on: model.page), chant: model.chantShown(on: model.page),
             prayed: model.page.prayed(in: model)
         )
         // The header's measures scale with the reader's text, so the panels under it do too.
@@ -172,12 +172,12 @@ struct RootView: View {
         }
         .onChange(of: model.saved) { _, saved in wayBack = saved }
         // The page shown counts in the day's usage whenever it, how it is read (Prime's
-        // Martyrology and an hour's chant notation included), or the day changes while the app is in front; each once a day
+        // After Prime choice and an hour's chant notation included), or the day changes while the app is in front; each once a day
         // (Usage.swift).
         .onChange(of: visit, initial: true) { _, v in
             guard v.active, let event = v.page.usageEvent else { return }
             Usage.shared.record(
-                event, dark: v.dark, form: v.form, martyrology: v.martyrology, chant: v.chant, prayed: v.prayed,
+                event, dark: v.dark, form: v.form, afterPrime: v.afterPrime, chant: v.chant, prayed: v.prayed,
                 reminders: ReminderStore.load().on
             )
         }
@@ -232,8 +232,8 @@ private struct Visit: Equatable {
     let dark: Bool
     let today: CivilDate
     let active: Bool
-    /// At Prime, whether its Martyrology was shown, once composed.
-    let martyrology: Bool?
+    /// At Prime, its After Prime choice, once composed, on a day with a Martyrology reading.
+    let afterPrime: String?
     /// On an hour with a score, whether its notation was shown, once composed.
     let chant: Bool?
     /// On an hour, whether it is marked prayed: the mark says so in the day's usage.

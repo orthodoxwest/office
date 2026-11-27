@@ -60,7 +60,7 @@ class SpokenTest {
     @Test
     fun chantScoresSpeakCleanWordsAndStanzaNumbers() {
         val scored = listOf(3 to 15, 4 to 5, 12 to 25).flatMap { (month, day) ->
-            hourNames().flatMap { hour -> Office.core.compose(hour, 2026, month, day, "priest", false, true).sections.flatMap { it.blocks } }
+            hourNames().flatMap { hour -> Office.core.compose(hour, 2026, month, day, "priest", "off", true).sections.flatMap { it.blocks } }
         }.filter { it.kind == BlockKind.SCORE }
         assertTrue(scored.isNotEmpty())
         for (b in scored) {

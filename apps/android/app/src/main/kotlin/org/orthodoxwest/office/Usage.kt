@@ -28,11 +28,11 @@ import org.orthodoxwest.office.core.usagePeriods
 import org.orthodoxwest.office.core.usageTally
 
 /**
- * The daily usage counts, reported as the web reports them (DEPLOYMENT.md, "Usage metrics"):
- * the page shown, the appearance and prayer form it is read in, at Prime whether the
- * Martyrology was shown, and on an hour with a score whether its notation was, once a day. The
- * beacon's words come from the Rust core, so the server reads the app's as it reads the web's,
- * and only today's pages (a day either side) count.
+ * The daily usage counts, reported as the web reports them (DEPLOYMENT.md, "Usage metrics"): the
+ * page shown, the appearance and prayer form it is read in, and at Prime the reader's After Prime
+ * choice on a day with a Martyrology reading, once a day. The beacon's words come from
+ * the Rust core, so the server reads the app's as it reads the web's, and only today's pages
+ * (a day either side) count.
  *
  * The server knows a reader only by an identifier it hashes with the day. The app makes a fresh
  * random one each reporting day (America/New_York, as the server reckons days), so nothing it
@@ -73,7 +73,7 @@ class Usage(
     private val sent = mutableSetOf<String>()
 
     /**
-     * `martyrology` is Prime's `HourView.martyrology`: whether its reading was shown, if it had one;
+     * `afterPrime` is Prime's `HourView.afterPrime`: the reader's After Prime choice, if it had a reading;
      * `chant` an hour's `HourView.chant`: whether its scores were shown, if it had any; `prayed`
      * whether the hour shown is marked prayed; `reminders` whether the app's reminders are on.
      */
@@ -81,7 +81,7 @@ class Usage(
         event: UsageEvent,
         dark: Boolean,
         form: String,
-        martyrology: Boolean? = null,
+        afterPrime: String? = null,
         chant: Boolean? = null,
         prayed: Boolean = false,
         reminders: Boolean? = null,
@@ -103,7 +103,7 @@ class Usage(
             )
         }
         val body = usageBeacon(
-            event, LocalDate.now(clock).toCivil(), dark, form, UsageClient.ANDROID, martyrology, first, chant, periods?.week, periods?.month,
+            event, LocalDate.now(clock).toCivil(), dark, form, UsageClient.ANDROID, afterPrime, first, chant, periods?.week, periods?.month,
             habits,
         ) ?: return
         // Saying a failed hour is not a new page: it neither sends again nor counts apart.

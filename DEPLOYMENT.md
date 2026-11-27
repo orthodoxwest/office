@@ -157,9 +157,9 @@ Each is one bucket, never a date or a count that would link one day to another. 
 its-time and prayed shares of the reports; under 20 reports, an hour gives its counts ("6 of 10")
 instead, as a share of a handful reads as a finding.
 Prime, on a day
-with a Martyrology reading, also reports `martyrology:shown|hidden`: whether the
-reader's Settings choice (off by default) read it or left the rubric, which
-measures the reading's exposure (see MARTYROLOGY.md). An hour with a scored hymn or Marian
+with a Martyrology reading, also reports `martyrology:shown|hidden|chapter`: whether the
+reader's After Prime choice (Nothing by default) read it, left the rubric, or said the
+Capitular Office (which reads it), which measures the reading's exposure (see MARTYROLOGY.md). An hour with a scored hymn or Marian
 antiphon reports `chant:on|off`: whether the reader's Chant setting (off by default) showed the
 notation or the words alone. Each counts once per browser per day, so a reader who
 switches mid-day counts on both sides and a pair can exceed the daily total;

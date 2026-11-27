@@ -33,7 +33,7 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   `about()` words, the hours as home's table of periods, Matins first under Night, coming
   soon; home offers it as "Introduction" beside Change date in a reader's first week). The site menu carries the Ordo, Reminders and About
   (the hours are on home and at each hour's end, as on the web), and the Theme
-  (Default / Nave / Apse), Text (A A A) and Martyrology (Off / On) rows, and Chant (Off / On)
+  (Default / Nave / Apse), Text (A A A) and After Prime (Nothing / Martyrology / Chapter) rows, and Chant (Off / On)
   once a hymn or Marian antiphon has a score: neuma (its bindings in `org.orthodoxwest.neuma`,
   from the same library) engraves the score and `Score.kt` draws it. The date picker's title
   turns its

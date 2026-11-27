@@ -121,9 +121,10 @@
   </div>
   <div class="elements">
     {% if leader_forms %}
-    {#- A section the Martyrology changes carries both readings; the reader's
-         Settings choice (data-martyrology on the root) shows one. #}
-    {%- macro leader_section_html(section) %}{% if section.martyrology_html %}<div data-martyrology-variant="off">{{ section.html|safe }}</div><div data-martyrology-variant="on">{{ section.martyrology_html|safe }}</div>{% else %}{{ section.html|safe }}{% endif %}{% endmacro %}
+    {#- At Prime, a section the After Prime setting changes carries each reading, and the
+         Capitular Office's sections are carried for it alone, each reading in a
+         data-martyrology-variant wrapper; the reader's choice (data-martyrology on the root) shows one. #}
+    {%- macro leader_section_html(section) %}{{ section.html|safe }}{% endmacro %}
     {% for section in leader_sections %}
       {% if section.collapsible %}
       <details class="session-prayers" data-prayers="{{ hour_name }}/{{ section.label }}"{% if prayers_open %} open{% endif %}>
@@ -275,6 +276,8 @@
           var along = other;
           while (along.parentElement !== way.parentElement) along = along.parentElement;
           if (!along.matches(WAYS)) continue;
+          // At Prime, only the same passage read under another After Prime choice.
+          if (way.hasAttribute("data-martyrology-passage") && along.getAttribute("data-martyrology-passage") !== way.getAttribute("data-martyrology-passage")) continue;
           if (first < 0) first = j;
           if (words(other) === said) same.push(j);
         }

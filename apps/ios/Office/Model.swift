@@ -224,14 +224,14 @@ final class AppModel: ObservableObject {
     @Published private(set) var form: String
     @Published private(set) var theme: ThemeChoice
     @Published private(set) var textSize: TextSize
-    /// Whether Prime reads the next day's Martyrology; off by default.
-    @Published private(set) var martyrology: Bool
+    /// What follows Prime: the Martyrology's rubric (the default), its reading, or the Capitular Office.
+    @Published private(set) var afterPrime: AfterPrime
     /// Whether a scored hymn or Marian antiphon shows its score in place of its words; off by default.
     @Published private(set) var chant: Bool
     /// Whether any text has a score, so the menu offers the Chant setting (as the web's `chant` global).
     let offersChant: Bool = (try? Office.core.get().offersChant()) ?? false
-    /// What each hour composed on the way back shows, for the usage beacon: whether its Martyrology
-    /// was shown and whether its scores were (nil: it had none to show).
+    /// What each hour composed on the way back shows, for the usage beacon: its After Prime
+    /// choice and whether its scores were (nil: it had none to show).
     @Published private(set) var hourShows: [Page: HourShows] = [:]
     /// The ornament season of each home or hour composed on the way back, which retints the
     /// gilding of the chrome over it (the menu's painted line), as the page's own.
@@ -261,7 +261,9 @@ final class AppModel: ObservableObject {
         form = UserDefaults.standard.string(forKey: "form").flatMap { f in prayerForms.contains { $0.value == f } ? f : nil } ?? "private"
         theme = UserDefaults.standard.string(forKey: "theme").flatMap(ThemeChoice.init(rawValue:)) ?? .system
         textSize = UserDefaults.standard.string(forKey: "text-size").flatMap(TextSize.init(rawValue:)) ?? .standard
-        martyrology = UserDefaults.standard.bool(forKey: "martyrology")
+        // The earlier On/Off setting ("martyrology") stands until the reader chooses again.
+        afterPrime = UserDefaults.standard.string(forKey: "after-prime").flatMap(AfterPrime.init(rawValue:))
+            ?? (UserDefaults.standard.bool(forKey: "martyrology") ? .martyrology : .off)
         chant = UserDefaults.standard.bool(forKey: "chant")
         prayed = Set(UserDefaults.standard.stringArray(forKey: "prayed") ?? [])
     }
@@ -408,10 +410,10 @@ final class AppModel: ObservableObject {
         defaults.set(value.rawValue, forKey: "text-size")
     }
 
-    func chooseMartyrology(_ value: Bool) {
+    func chooseAfterPrime(_ value: AfterPrime) {
         step = nil
-        martyrology = value
-        defaults.set(value, forKey: "martyrology")
+        afterPrime = value
+        defaults.set(value.rawValue, forKey: "after-prime")
     }
 
     func chooseChant(_ value: Bool) {
@@ -420,12 +422,12 @@ final class AppModel: ObservableObject {
         defaults.set(value, forKey: "chant")
     }
 
-    /// Notes what an hour page shows, once composed: at Prime, whether its Martyrology was shown,
+    /// Notes what an hour page shows, once composed: at Prime, the After Prime choice it was read in,
     /// and whether its scores were.
     func composed(_ view: HourView, page: Page) {
         let kept = Set(pages)
         var now = hourShows.filter { kept.contains($0.key) }
-        now[page] = HourShows(martyrology: view.martyrology, chant: view.chant)
+        now[page] = HourShows(afterPrime: view.afterPrime, chant: view.chant)
         if now != hourShows { hourShows = now }
     }
 
@@ -440,8 +442,8 @@ final class AppModel: ObservableObject {
         if now != seasons { seasons = now }
     }
 
-    /// Whether `page` showed its Martyrology: nil unless it is a Prime composed, with a reading.
-    func martyrologyShown(on page: Page) -> Bool? { hourShows[page]?.martyrology }
+    /// `page`'s After Prime choice: nil unless it is a Prime composed, with a Martyrology reading.
+    func afterPrimeShown(on page: Page) -> String? { hourShows[page]?.afterPrime }
 
     /// Whether `page` showed its scores: nil unless it is an hour composed, with a score.
     func chantShown(on page: Page) -> Bool? { hourShows[page]?.chant }
@@ -522,6 +524,6 @@ final class AppModel: ObservableObject {
 
 /// What a composed hour shows that the usage beacon reports (nil: nothing of the kind to show).
 struct HourShows: Equatable {
-    let martyrology: Bool?
+    let afterPrime: String?
     let chant: Bool?
 }

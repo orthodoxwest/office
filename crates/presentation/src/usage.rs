@@ -77,7 +77,8 @@ pub const DIMENSIONS: [Dimension<'static>; 20] = [
     // A browser tab, the installed web app, or a native app.
     Dimension { key: "client", values: CLIENTS },
     // Prime only, on a day with a Martyrology reading: whether the reader's
-    // setting showed it or left the rubric in its place.
+    // After Prime setting showed it, left the rubric in its place, or said the
+    // Capitular Office (which reads it).
     Dimension { key: "martyrology", values: MARTYROLOGY },
     // An hour with a scored hymn or Marian antiphon: whether the reader's Chant setting showed
     // the notation or the words alone.
@@ -302,14 +303,21 @@ pub fn new_client(dimensions: &[String]) -> Option<String> {
 pub const VISITS: &[&str] = &["first", "returning"];
 
 /// The `martyrology` family's values, shown first.
-pub const MARTYROLOGY: &[&str] = &["shown", "hidden"];
+pub const MARTYROLOGY: &[&str] = &["shown", "hidden", "chapter"];
 
 /// The `chant` family's values, notation first.
 pub const CHANT: &[&str] = &["on", "off"];
 
-/// Prime's `martyrology` token: whether the reading was shown.
-fn martyrology_token(shown: bool) -> String {
-    format!("martyrology:{}", MARTYROLOGY[usize::from(!shown)])
+/// Prime's `martyrology` token for the reader's After Prime choice as the setting stores it
+/// (`on`, `off` or `chapter`), or `None` for any other value.
+pub fn martyrology_token(after_prime: &str) -> Option<String> {
+    let value = match after_prime {
+        "on" => "shown",
+        "off" => "hidden",
+        "chapter" => "chapter",
+        _ => return None,
+    };
+    Some(format!("martyrology:{value}"))
 }
 
 /// The family a stored dimension scope belongs to.
@@ -380,8 +388,8 @@ impl App {
 
 /// A native app's beacon for `scope`, or `None` for a scope the server would refuse. The apps
 /// run on phones and tablets, which the web's screen family counts as mobile (a touch-primary
-/// pointer); an office page adds the prayer form it was read in, and Prime whether the reader's
-/// setting showed its Martyrology (`None` on a day without one), and an hour with a score whether
+/// pointer); an office page adds the prayer form it was read in, and Prime the reader's After
+/// Prime choice (`off`, `on` or `chapter`; `None` on a day without a Martyrology reading), and an hour with a score whether
 /// the Chant setting showed it (`None` on an hour without one). `first` is whether the
 /// installation is counted for the first time today (`None` when it cannot tell); `week` and
 /// `month` whether today is its first counted day of the week and of the month ([`periods`]);
@@ -392,7 +400,7 @@ pub fn app_beacon(
     app: App,
     dark: bool,
     form: &str,
-    martyrology: Option<bool>,
+    after_prime: Option<&str>,
     chant: Option<bool>,
     first: Option<bool>,
     week: Option<bool>,
@@ -407,9 +415,9 @@ pub fn app_beacon(
     if HOURS.contains(&scope) && PRAYER_FORMS.contains(&form) {
         body.push_str(&format!(" prayer-form:{form}"));
     }
-    if let Some(shown) = martyrology.filter(|_| scope == "prime") {
+    if let Some(token) = after_prime.filter(|_| scope == "prime").and_then(martyrology_token) {
         body.push(' ');
-        body.push_str(&martyrology_token(shown));
+        body.push_str(&token);
     }
     if let Some(on) = chant.filter(|_| HOURS.contains(&scope)) {
         body.push_str(&format!(" chant:{}", CHANT[usize::from(!on)]));
@@ -586,10 +594,13 @@ mod tests {
                 for dark in [false, true] {
                     for form in PRAYER_FORMS {
                         let options = [None, Some(true), Some(false)];
+                        let after_prime = [None, Some("on"), Some("off"), Some("chapter")];
                         for (martyrology, chant, first) in
-                            options.into_iter().flat_map(|m| options.into_iter().flat_map(move |c| options.map(|f| (m, c, f))))
+                            after_prime.into_iter().flat_map(|m| options.into_iter().flat_map(move |c| options.map(|f| (m, c, f))))
                         {
-                            let body = app_beacon(scope, app, dark, form, martyrology, chant, first, first, martyrology, None).unwrap();
+                            let body =
+                                app_beacon(scope, app, dark, form, martyrology, chant, first, first, martyrology.map(|m| m == "on"), None)
+                                    .unwrap();
                             assert!(body.len() <= MAX_BEACON, "{body:?} is too long");
                             let event = parse_event(&body).unwrap();
                             assert_eq!(event.scope, *scope);
@@ -610,7 +621,7 @@ mod tests {
             Some("compline appearance:nave screen:mobile prayer-form:priest client:android")
         );
         assert_eq!(
-            app_beacon("site", App::Ios, true, "priest", Some(true), Some(true), Some(true), None, None, None).as_deref(),
+            app_beacon("site", App::Ios, true, "priest", Some("on"), Some(true), Some(true), None, None, None).as_deref(),
             Some("site appearance:apse screen:mobile visit:first client:ios")
         );
         assert_eq!(
@@ -623,7 +634,7 @@ mod tests {
                 App::Android,
                 true,
                 "private",
-                Some(false),
+                Some("off"),
                 Some(false),
                 Some(false),
                 Some(false),
@@ -634,6 +645,10 @@ mod tests {
             Some(
                 "prime appearance:apse screen:mobile prayer-form:private martyrology:hidden chant:off visit:returning client:android week:again month:again version:2 prayed:prime offline:yes"
             )
+        );
+        assert_eq!(
+            app_beacon("prime", App::Ios, false, "private", Some("chapter"), None, None, None, None, None).as_deref(),
+            Some("prime appearance:nave screen:mobile prayer-form:private martyrology:chapter client:ios")
         );
         assert!(app_beacon("matins", App::Android, false, "private", None, None, None, None, None, None).is_none());
     }

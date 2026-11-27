@@ -7,7 +7,7 @@ use calendar::{Date, MoveableDates};
 use jiff::tz::TimeZone;
 use liturgy::{OfficeHour, PrayerForm};
 use office::day::Day;
-use office::prime::reads_martyrology;
+use office::prime::{AfterPrime, reads_martyrology, says_chapter_office};
 use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine, HOUR_NAMES};
 use presentation::feast::{FeastIndex, is_feast_id};
@@ -490,31 +490,39 @@ impl Server {
         let Some(day) = entry.days.get(date.ordinal() as usize - 1) else {
             return self.error_page(req, StatusCode::BAD_REQUEST, "That date is outside the supported range.");
         };
-        let compose = |form, martyrology| {
-            self.engine.compose_hour_with_options(hour_name, day, &entry.moveable, &ComposeOptions { form, martyrology })
+        let compose = |form, after_prime| {
+            self.engine.compose_hour_with_options(hour_name, day, &entry.moveable, &ComposeOptions { form, after_prime })
         };
-        let hour = match compose(PrayerForm::Private, false) {
+        let hour = match compose(PrayerForm::Private, AfterPrime::Rubric) {
             Ok(h) => h,
             Err(e) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, &format!("error composing hour: {e}")),
         };
         let mut composed = vec![(PrayerForm::Private, hour.clone())];
         for form in [PrayerForm::Deacon, PrayerForm::Priest] {
-            match compose(form, false) {
+            match compose(form, AfterPrime::Rubric) {
                 Ok(h) => composed.push((form, h)),
                 Err(_) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, "Unable to compose the selected office form."),
             }
         }
-        // Prime also carries the Martyrology for readers who turned it on in
-        // Settings, so the page (and the offline copy) is the same for everyone.
-        let mut martyrology = Vec::new();
+        // Prime also carries the Martyrology and the Capitular Office for readers who chose
+        // them in Settings, so the page (and the offline copy) is the same for everyone.
+        let mut after_prime = Vec::new();
         if hour_name == "prime" {
-            for form in PrayerForm::ALL {
-                match compose(form, true) {
-                    Ok(h) if reads_martyrology(&h) => martyrology.push((form, h)),
-                    Ok(_) => break,
-                    Err(_) => {
-                        return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, "Unable to compose the selected office form.");
+            for (choice, says) in
+                [(AfterPrime::Martyrology, reads_martyrology as fn(&OfficeHour) -> bool), (AfterPrime::ChapterOffice, says_chapter_office)]
+            {
+                let mut hours = Vec::new();
+                for form in PrayerForm::ALL {
+                    match compose(form, choice) {
+                        Ok(h) if says(&h) => hours.push((form, h)),
+                        Ok(_) => break,
+                        Err(_) => {
+                            return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, "Unable to compose the selected office form.");
+                        }
                     }
+                }
+                if hours.len() == PrayerForm::ALL.len() {
+                    after_prime.push((choice.as_str(), hours));
                 }
             }
         }
@@ -577,9 +585,10 @@ impl Server {
             ..HourData::default()
         };
         let forms: Vec<(PrayerForm, &OfficeHour)> = composed.iter().map(|(f, h)| (*f, h)).collect();
-        let martyrology: Vec<(PrayerForm, &OfficeHour)> =
-            if martyrology.len() == forms.len() { martyrology.iter().map(|(f, h)| (*f, h)).collect() } else { Vec::new() };
-        match self.pages.hour(&mut data, &forms, &martyrology) {
+        let after_prime: Vec<(&str, Vec<(PrayerForm, &OfficeHour)>)> =
+            after_prime.iter().map(|(choice, hours)| (*choice, hours.iter().map(|(f, h)| (*f, h)).collect())).collect();
+        let after_prime: Vec<(&str, &[(PrayerForm, &OfficeHour)])> = after_prime.iter().map(|(c, h)| (*c, h.as_slice())).collect();
+        match self.pages.hour(&mut data, &forms, &after_prime) {
             // Scores engraved at the reader's own column, as chant.js last measured it, so that
             // none is laid out again under them (render_html::chant::at_width). The page differs
             // with that cookie, so a cache keeps one reader's copy from another.
@@ -1096,21 +1105,29 @@ mod tests {
         }
     }
 
-    // Prime carries both the rubric and tomorrow's reading for the reader's
-    // setting to choose between; nothing in the URL changes the page.
+    // Prime carries the rubric, tomorrow's reading and the Capitular Office for the reader's
+    // After Prime setting to choose between; nothing in the URL changes the page.
     #[test]
-    fn prime_carries_the_martyrology_for_the_setting() {
+    fn prime_carries_what_follows_it_for_the_setting() {
         let (status, _, body) = get("/prime/2026-09-07");
         assert_eq!(status, StatusCode::OK);
-        let off = body
-            .find("<div data-martyrology-variant=\"off\"><p class=\"rubric\">Then the <span class=\"gloss-term\"")
-            .expect("rubric variant");
-        assert!(body[off..off + 400].contains(">Martyrology</span> is read"));
-        let on = body
-            .find("<div data-martyrology-variant=\"on\"><h2 class=\"section-heading\">Martyrology for tomorrow, September 8</h2>")
-            .expect("reading");
-        assert!(off < on);
-        assert_eq!(body.matches("data-martyrology-variant=").count(), 2, "only the Martyrology section varies");
+        // Where a passage read under `choices` opens with `inner`.
+        let wrapped = |choices: &str, inner: &str| -> Option<usize> {
+            let open = format!("<div data-martyrology-variant=\"{choices}\" data-martyrology-passage=\"");
+            body.match_indices(&open).map(|(i, _)| i).find(|&i| {
+                let rest = &body[i + open.len()..];
+                rest.find("\">").is_some_and(|q| rest[..q].bytes().all(|b| b.is_ascii_digit()) && rest[q + 2..].starts_with(inner))
+            })
+        };
+        let off = wrapped("off", "<p class=\"rubric\">Then the <span class=\"gloss-term\"").expect("rubric variant");
+        assert!(body[off..off + 500].contains(">Martyrology</span> is read"));
+        let on = wrapped("on chapter", "<h2 class=\"section-heading\">Martyrology for tomorrow, September 8</h2>").expect("reading");
+        let chapter = wrapped("chapter", "<h2 class=\"section-heading\">Chapter Office</h2>").expect("Chapter Office");
+        assert!(off < on && on < chapter);
+        // The Capitular Office ends with the faithful departed, so Prime's own closing differs.
+        let faithful = "May the souls of the faithful, through the mercy of God, rest in peace.";
+        let closing = &body[..off];
+        assert!(closing.contains("data-martyrology-variant=\"off on\"") && closing.contains(faithful));
         assert_eq!(get("/prime/2026-09-07?preview=martyrology").2, body, "the retired preview flag is ignored");
         // Other hours, and a Prime without the Martyrology (Good Friday), carry no choice.
         for path in ["/lauds/2026-09-07", "/prime/2026-04-10"] {

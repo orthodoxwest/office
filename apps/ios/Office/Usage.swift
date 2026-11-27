@@ -1,11 +1,11 @@
 import Foundation
 
 /**
- * The daily usage counts, reported as the web reports them (DEPLOYMENT.md, "Usage metrics"):
- * the page shown, the appearance and prayer form it is read in, at Prime whether the
- * Martyrology was shown, and on an hour with a score whether its notation was, once a day. The
- * beacon's words come from the Rust core, so the server reads the app's as it reads the web's,
- * and only today's pages (a day either side) count.
+ * The daily usage counts, reported as the web reports them (DEPLOYMENT.md, "Usage metrics"): the
+ * page shown, the appearance and prayer form it is read in, and at Prime the reader's After Prime
+ * choice on a day with a Martyrology reading, once a day. The beacon's words come from
+ * the Rust core, so the server reads the app's as it reads the web's, and only today's pages
+ * (a day either side) count.
  *
  * The server knows a reader only by an identifier it hashes with the day. The app makes a fresh
  * random one each reporting day (America/New_York, as the server reckons days), so nothing it
@@ -91,11 +91,11 @@ final class Usage {
         self.post = post
     }
 
-    /// `martyrology` is Prime's `HourView.martyrology`: whether its reading was shown, if it had one;
+    /// `afterPrime` is Prime's `HourView.afterPrime`: the reader's After Prime choice, if it had a reading;
     /// `chant` an hour's `HourView.chant`: whether its scores were shown, if it had any; `prayed`
     /// whether the hour shown is marked prayed; `reminders` whether the app's reminders are on.
     func record(
-        _ event: UsageEvent, dark: Bool, form: String, martyrology: Bool? = nil, chant: Bool? = nil,
+        _ event: UsageEvent, dark: Bool, form: String, afterPrime: String? = nil, chant: Bool? = nil,
         prayed: Bool = false, reminders: Bool? = nil
     ) {
         guard enabled else { return }
@@ -111,7 +111,7 @@ final class Usage {
             offline: defaults.bool(forKey: "usage-offline"), reminders: reminders
         )
         guard let body = usageBeacon(
-            event: event, today: .of(date), dark: dark, form: form, client: .ios, martyrology: martyrology, first: first, chant: chant,
+            event: event, today: .of(date), dark: dark, form: form, client: .ios, afterPrime: afterPrime, first: first, chant: chant,
             week: periods?.week, month: periods?.month, habits: habits
         ) else { return }
         // Saying a failed hour is not a new page: it neither sends again nor counts apart.

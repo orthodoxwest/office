@@ -37,8 +37,8 @@ native text, screen for screen:
   Disclosures unfold; home's "Change date" turns the invitation and the hours under the band
   into the calendar in their place, in one motion, as the web's and Android's: where the head's
   spare height holds the difference the head gives it up in step, and otherwise the arch keeps
-  its height and the page rises with the turn to the card's foot. Another prayer form, or the
-  Martyrology turned on or off, changes the hour where it stands, keeping the reader's place and
+  its height and the page rises with the turn to the card's foot. Another prayer form, or another
+  After Prime choice, changes the hour where it stands, keeping the reader's place and
   open sections. The menu drops in, the picker's months slide and follow a swipe, and a
   new theme or text size eases in. Reduce Motion turns the slides to fades. A pressed control
   dims; a choice (a setting, a prayer form, a day) gives a selection tick, a checkbox a light

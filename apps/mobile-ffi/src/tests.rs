@@ -59,7 +59,7 @@ fn composes_what_the_web_composes() {
     let moveable = MoveableDates::compute(2026);
     for (month, day) in [(1, 6), (4, 3), (4, 5), (9, 30), (12, 25)] {
         for hour in hour_names() {
-            let view = core.compose(hour.clone(), 2026, month, day, "private".into(), false, false).unwrap();
+            let view = core.compose(hour.clone(), 2026, month, day, "private".into(), "off".into(), false).unwrap();
             let date = Date::new(2026, month, day);
             let want = engine.compose_hour(&hour, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
             // With the Chant setting off, the apps leave out each score the web hides.
@@ -78,7 +78,7 @@ fn composes_what_the_web_composes() {
 fn the_little_hours_show_posture_cues_when_a_priest_or_deacon_leads() {
     let core = OfficeCore::new().unwrap();
     let cues = |hour: &str, form: &str| {
-        let view = core.compose(hour.into(), 2026, 10, 4, form.into(), false, false).unwrap();
+        let view = core.compose(hour.into(), 2026, 10, 4, form.into(), "off".into(), false).unwrap();
         format!("{:?}", view.sections).matches("style: Posture").count()
     };
     for hour in ["prime", "terce", "sext", "none"] {
@@ -92,24 +92,31 @@ fn the_little_hours_show_posture_cues_when_a_priest_or_deacon_leads() {
 }
 
 #[test]
-fn the_martyrology_setting_reads_tomorrows_entry_at_prime() {
+fn the_after_prime_setting_reads_the_martyrology_or_the_chapter_office() {
     let core = OfficeCore::new().unwrap();
     let text = |v: &HourView| format!("{:?}", v.sections);
-    let off = core.compose("prime".into(), 2026, 9, 7, "private".into(), false, false).unwrap();
-    let on = core.compose("prime".into(), 2026, 9, 7, "private".into(), true, false).unwrap();
-    assert_eq!((off.martyrology, on.martyrology), (Some(false), Some(true)));
+    let prime = |setting: &str| core.compose("prime".into(), 2026, 9, 7, "private".into(), setting.into(), false).unwrap();
+    let (off, on, chapter) = (prime("off"), prime("on"), prime("chapter"));
+    assert_eq!(
+        (off.after_prime.as_deref(), on.after_prime.as_deref(), chapter.after_prime.as_deref()),
+        (Some("off"), Some("on"), Some("chapter"))
+    );
     assert!(!text(&off).contains("Martyrology for tomorrow, September 8") && text(&on).contains("Martyrology for tomorrow, September 8"));
+    assert!(text(&chapter).contains("Martyrology for tomorrow, September 8") && text(&chapter).contains("Right dear in the sight"));
+    assert!(!text(&on).contains("Right dear in the sight"));
     // Another hour, and a Prime without the Martyrology (Good Friday), have nothing to show.
-    assert_eq!(core.compose("lauds".into(), 2026, 9, 7, "private".into(), true, false).unwrap().martyrology, None);
-    for setting in [false, true] {
-        assert_eq!(core.compose("prime".into(), 2026, 4, 10, "private".into(), setting, false).unwrap().martyrology, None);
+    assert_eq!(core.compose("lauds".into(), 2026, 9, 7, "private".into(), "on".into(), false).unwrap().after_prime, None);
+    for setting in ["off", "on", "chapter"] {
+        let good_friday = core.compose("prime".into(), 2026, 4, 10, "private".into(), setting.into(), false).unwrap();
+        assert_eq!(good_friday.after_prime, None);
+        assert!(!text(&good_friday).contains("Right dear in the sight"));
     }
 }
 
 #[test]
 fn an_hour_of_a_first_class_day_is_framed() {
     let core = OfficeCore::new().unwrap();
-    let hour = |h: &str, m, d| core.compose(h.into(), 2026, m, d, "private".into(), false, false).unwrap().first_class;
+    let hour = |h: &str, m, d| core.compose(h.into(), 2026, m, d, "private".into(), "off".into(), false).unwrap().first_class;
     assert!(hour("lauds", 12, 25));
     // I Vespers takes the feast's rank; the Vigil's own Lauds is first class but violet.
     assert!(hour("vespers", 12, 24));
@@ -129,7 +136,7 @@ fn an_hour_of_a_first_class_day_is_framed() {
 #[test]
 fn the_gilding_keeps_the_season_and_a_bare_hour_takes_off_its_leaf() {
     let core = OfficeCore::new().unwrap();
-    let hour = |h: &str, m, d| core.compose(h.into(), 2026, m, d, "private".into(), false, false).unwrap();
+    let hour = |h: &str, m, d| core.compose(h.into(), 2026, m, d, "private".into(), "off".into(), false).unwrap();
     let home = |m, d| core.home(civil(2026, m, d), civil(2026, m, d), 9).unwrap().ornament;
     // Quiet through Lent and Advent and on a violet day; rose lifts it; Passiontide veils; an
     // ordinary day keeps the gold.
@@ -155,9 +162,9 @@ fn the_gilding_keeps_the_season_and_a_bare_hour_takes_off_its_leaf() {
 #[test]
 fn rejects_bad_requests() {
     let core = OfficeCore::new().unwrap();
-    assert!(core.compose("matins".into(), 2026, 1, 1, "private".into(), false, false).is_err());
-    assert!(core.compose("lauds".into(), 2026, 2, 30, "private".into(), false, false).is_err());
-    assert!(core.compose("lauds".into(), 2026, 1, 1, "bishop".into(), false, false).is_err());
+    assert!(core.compose("matins".into(), 2026, 1, 1, "private".into(), "off".into(), false).is_err());
+    assert!(core.compose("lauds".into(), 2026, 2, 30, "private".into(), "off".into(), false).is_err());
+    assert!(core.compose("lauds".into(), 2026, 1, 1, "bishop".into(), "off".into(), false).is_err());
 }
 
 fn civil(year: i32, month: i32, day: i32) -> CivilDate {
@@ -259,7 +266,7 @@ fn abouts_specimen_is_lines_the_hour_prints() {
     let core = OfficeCore::new().unwrap();
     let s = crate::about().specimen;
     let lines = |form: &str| -> Vec<String> {
-        let hour = core.compose("lauds".into(), 2026, 11, 19, form.into(), false, false).unwrap();
+        let hour = core.compose("lauds".into(), 2026, 11, 19, form.into(), "off".into(), false).unwrap();
         hour.sections.iter().flat_map(|sec| &sec.blocks).map(|b| b.runs.iter().map(|r| r.text.as_str()).collect::<String>()).collect()
     };
     let has = |lines: &[String], want: &str| lines.iter().any(|l| l.trim() == want);
@@ -581,7 +588,7 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
             false,
             "private".into(),
             UsageClient::Android,
-            Some(true),
+            Some("on".into()),
             Some(false),
             Some(true),
             Some(true),
@@ -680,7 +687,7 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
 #[test]
 fn a_quick_scroll_does_not_pray_an_hour() {
     let core = OfficeCore::new().unwrap();
-    let hour = core.compose("compline".into(), 2026, 10, 7, "private".into(), false, false).unwrap();
+    let hour = core.compose("compline".into(), 2026, 10, 7, "private".into(), "off".into(), false).unwrap();
     let words: Vec<f64> = hour.sections.iter().flat_map(|s| &s.blocks).map(|b| f64::from(block_words(b.clone()))).collect();
     let total: f64 = words.iter().sum();
     assert!(total > 300.0, "{total}");
@@ -714,7 +721,7 @@ fn chant_sets_the_hymn_and_marian_antiphon_where_scores_are_in_hand() {
     let core = OfficeCore::new().unwrap();
     assert!(core.offers_chant());
     let blocks = |chant| {
-        let sections = core.compose("compline".into(), 2026, 10, 7, "private".into(), false, chant).unwrap().sections;
+        let sections = core.compose("compline".into(), 2026, 10, 7, "private".into(), "off".into(), chant).unwrap().sections;
         sections.into_iter().flat_map(|s| s.blocks).collect::<Vec<_>>()
     };
     let scores = |b: &[BlockView]| b.iter().filter(|b| b.kind == BlockKind::Score).map(|b| b.score.clone()).collect::<Vec<_>>();
@@ -730,10 +737,10 @@ fn chant_sets_the_hymn_and_marian_antiphon_where_scores_are_in_hand() {
     let said = |b: &[BlockView]| b.iter().any(|b| b.kind != BlockKind::Score && b.runs.iter().any(|r| r.text.contains("Mary our comfort")));
     assert!(said(&off) && !said(&on));
     // The usage beacon's chant: the setting, on an hour with a score to show; none on one without.
-    let reported = |hour: &str, chant| core.compose(hour.into(), 2026, 10, 7, "private".into(), false, chant).unwrap().chant;
+    let reported = |hour: &str, chant| core.compose(hour.into(), 2026, 10, 7, "private".into(), "off".into(), chant).unwrap().chant;
     assert_eq!((reported("compline", false), reported("compline", true)), (Some(false), Some(true)));
     let reported_on =
-        |hour: &str, month, day, chant| core.compose(hour.into(), 2026, month, day, "private".into(), false, chant).unwrap().chant;
+        |hour: &str, month, day, chant| core.compose(hour.into(), 2026, month, day, "private".into(), "off".into(), chant).unwrap().chant;
     assert_eq!((reported("terce", false), reported("terce", true)), (Some(false), Some(true)));
     // Good Friday's Terce sings no hymn.
     assert_eq!((reported_on("terce", 4, 10, false), reported_on("terce", 4, 10, true)), (None, None));
@@ -942,7 +949,7 @@ fn the_apps_gild_the_end_cross_by_the_shared_rule() {
 #[test]
 fn the_apps_read_whether_an_hour_ends_bare() {
     let core = OfficeCore::new().unwrap();
-    let hour = |name: &str, month, day| core.compose(name.into(), 2026, month, day, "private".into(), false, false).unwrap();
+    let hour = |name: &str, month, day| core.compose(name.into(), 2026, month, day, "private".into(), "off".into(), false).unwrap();
     // Vespers of All Saints, then Vespers of the Dead: not a bare hour, but it ends bare.
     let eve = hour("vespers", 11, 1);
     assert!(!eve.bare && eve.end_bare);

@@ -15,9 +15,6 @@ pub struct LeaderSection {
     pub bare: bool,
     /// Trusted markup.
     pub html: String,
-    /// The section as read with the Martyrology at Prime, when that differs; empty otherwise.
-    /// Trusted markup.
-    pub martyrology_html: String,
 }
 
 /// Aligns the private, deacon, and priest compositions of one hour. A
@@ -114,13 +111,7 @@ pub fn leader_sections(forms: &[(PrayerForm, &OfficeHour)]) -> Result<Vec<Leader
                 return Err("unmatched leader elements".into());
             }
         }
-        sections.push(LeaderSection {
-            label: section.label.clone(),
-            collapsible: section.collapsible,
-            bare: section.bare,
-            html,
-            martyrology_html: String::new(),
-        });
+        sections.push(LeaderSection { label: section.label.clone(), collapsible: section.collapsible, bare: section.bare, html });
     }
     Ok(sections)
 }

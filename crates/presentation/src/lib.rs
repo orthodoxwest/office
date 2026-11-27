@@ -201,8 +201,8 @@ pub fn prayers_open_by_default(hour: &str) -> bool {
     matches!(hour, "lauds" | "prime" | "vespers")
 }
 
-/// The line under the menu's Martyrology setting, on every front.
-pub const MARTYROLOGY_HINT: &str = "Includes a reading of the following day’s saints at Prime.";
+/// The line under the menu's After Prime setting (Nothing, Martyrology, Chapter), on every front.
+pub const MARTYROLOGY_HINT: &str = "Martyrology reads the following day’s saints at Prime. Chapter adds the Chapter Office of religious houses, said alone, with the Martyrology in it.";
 
 /// Change date's day links, worded on every front: beside the month's own arrows, "Previous"
 /// and "Next" alone did not say that they turn the day.
