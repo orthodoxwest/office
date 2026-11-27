@@ -5,13 +5,14 @@ import android.net.Uri
 import android.os.Build
 import android.view.RoundedCorner
 import android.view.View
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -62,6 +63,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
@@ -69,6 +71,7 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
@@ -77,6 +80,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.util.WeakHashMap
@@ -84,9 +89,16 @@ import kotlin.math.max
 import kotlin.math.sqrt
 import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
+import org.orthodoxwest.office.core.EndLeaf
 import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.HourView
+import org.orthodoxwest.office.core.PrayedReading
+import org.orthodoxwest.office.core.ReadingKeyView
 import org.orthodoxwest.office.core.blockWords
+import org.orthodoxwest.office.core.dayNameGloss
+import org.orthodoxwest.office.core.readingKey
+import org.orthodoxwest.office.core.reopensAtPlace
+import org.orthodoxwest.office.core.seasonGloss
 
 /** How many hours hold each window awake. */
 private val hoursAwake = WeakHashMap<View, Int>()
@@ -105,6 +117,8 @@ fun HourScreen(
     onForm: (String) -> Unit,
     onHour: (LocalDate, String) -> Unit,
     onAllHours: () -> Unit,
+    onFeast: (String) -> Unit = {},
+    onAbout: () -> Unit = {},
 ) {
     val p = LocalPalette.current
     // Like the web's wake lock: the screen stays on while an hour is open.
@@ -126,17 +140,43 @@ fun HourScreen(
             view.sections.forEachIndexed { i, s -> if (s.collapsible) put(i, SessionPrayers.opens(context, view.hour, s.label)) }
         }
     }
-    val listState = rememberSaveable(view.hour, view.dateLabel, saver = LazyListState.Saver) { LazyListState() }
+    // The ribbon (the core's reopensAtPlace, as the web's office-place and the iOS app's scene
+    // storage): the visit's place is saved with it, for Back and for a return after Android has
+    // closed the app. Saved while the app went into the background (not in front, and not being
+    // recreated for a rotation or a theme), it is the place the reader was taken away from, and
+    // the hour opens there only within the core's limit and before it is prayed; after that, at
+    // its top. A visit the reader left by the app's own ways keeps its place for Back, as before.
+    val activity = LocalActivity.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    // How far it has been prayed goes with the place, so a reopened hour can still earn its mark.
+    val progress = remember(date, view.hour) { PrayedProgress() }
+    val ribbon = remember(date, view.hour) {
+        placeSaver(
+            leftAt = {
+                val away = activity?.isChangingConfigurations != true && !lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
+                if (away) System.currentTimeMillis() else 0L
+            },
+            reopens = { at ->
+                reopensAtPlace(Prayed.hours(context, date).contains(view.hour), (System.currentTimeMillis() - at) / 1000.0)
+            },
+            reading = { progress.reading },
+            carry = { progress.reading = it },
+        )
+    }
+    val listState = rememberSaveable(view.hour, view.dateLabel, saver = ribbon) { LazyListState() }
     // The office below a section moves to make room only while the section opens or closes,
     // not when a new text size or prayer form sets it again.
     var unfolding by remember { mutableStateOf(false) }
+    // Which way the section last turned: it opens over UNFOLD_MS and closes over FOLD_MS, on the
+    // standard curve, as Unfold, iOS's unfolding and folding and the web's session prayers.
+    var opening by remember { mutableStateOf(true) }
     LaunchedEffect(unfolding) {
         if (unfolding) {
             delay(600)
             unfolding = false
         }
     }
-    val placement = if (unfolding) spring(stiffness = Spring.StiffnessMediumLow, visibilityThreshold = IntOffset.VisibilityThreshold) else null
+    val placement = if (unfolding) tween<IntOffset>(if (opening) UNFOLD_MS else FOLD_MS, easing = FastOutSlowInEasing) else null
     val index = hours.indexOf(view.hour)
     // Each shown block's words, from and to, for home's mark of the hours prayed.
     val wordsOf = remember(view) { view.sections.map { s -> s.blocks.map { blockWords(it).toDouble() } } }
@@ -147,7 +187,15 @@ fun HourScreen(
             shown.forEach { i -> wordsOf[i].forEachIndexed { j, w -> put("$i-$j", at to at + w); at += w } }
         }
     }
-    PrayedWatch(date, view.hour, listState, spans, spans.values.maxOfOrNull { it.second } ?: 0.0, end = "epilogue")
+    PrayedWatch(date, view.hour, listState, spans, spans.values.maxOfOrNull { it.second } ?: 0.0, end = "epilogue", state = progress)
+    // The cross under the last Amen takes its gold once the hour is marked and the cross stands
+    // wholly on the screen; an hour ending bare (the core's `endBare`) takes none.
+    val crossAt = with(LocalDensity.current) { EndCrossTop.roundToPx() to EndCrossSize.roundToPx() }
+    val leaf = rememberEndLeaf(
+        date, view.hour, listState,
+        bare = view.endBare,
+        end = "epilogue", top = crossAt.first, size = crossAt.second,
+    )
     // A bare hour (the Triduum, the Office of the Dead) takes off its leaf, as the web's
     // `hour-bare`: its capitals are set in the muted ink, as lettering the painter left ungilt.
     val gilding = LocalOrnament.current
@@ -177,7 +225,7 @@ fun HourScreen(
         ) {
             item(key = "band") { Box(Modifier.fillMaxWidth().height(3.dp).background(bandColor(view.color, p))) }
             item(key = "chrome") { chrome() }
-            item(key = "title") { Box(Modifier.padding(horizontal = inset)) { HourTitle(view, date, today, form, onDate, onForm) } }
+            item(key = "title") { Box(Modifier.padding(horizontal = inset)) { HourTitle(view, date, today, form, onDate, onForm, onFeast, onAbout) } }
             // Each block's space depends on the one before it, across sections.
             var prev: BlockView? = null
             var afterClosed = false
@@ -195,6 +243,7 @@ fun HourScreen(
                             Modifier.animateItem(placementSpec = placement).measure().padding(horizontal = inset).padding(top = if (atTop) 0.dp else Space.SECTION.of(line), bottom = if (expanded) Space.BIND.of(line) else 0.dp).heightIn(min = 44.dp)
                                 .semantics { heading() }.tap {
                                     unfolding = true
+                                    opening = !expanded
                                     open[i] = !expanded
                                     SessionPrayers.choose(context, view.hour, section.label, !expanded)
                                 }.disclosed(expanded),
@@ -245,6 +294,7 @@ fun HourScreen(
                 val next = if (morrow) hours.firstOrNull() else hours.getOrNull(index + 1)
                 val nextDate = if (morrow) date.plusDays(1) else date
                 Epilogue(
+                    leaf = leaf,
                     previous = hours.getOrNull(index - 1),
                     next = next,
                     nextLabel = if (morrow) "Tomorrow" else "Next hour",
@@ -403,10 +453,21 @@ private fun officeRead(info: LazyListLayoutInfo, heights: Map<Int, Int>): Float 
 }
 
 @Composable
-private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: String, onDate: (LocalDate) -> Unit, onForm: (String) -> Unit) {
+private fun HourTitle(
+    view: HourView,
+    date: LocalDate,
+    today: LocalDate,
+    form: String,
+    onDate: (LocalDate) -> Unit,
+    onForm: (String) -> Unit,
+    onFeast: (String) -> Unit,
+    onAbout: () -> Unit,
+) {
     val p = LocalPalette.current
+    val key = remember { readingKey() }
     var picking by remember { mutableStateOf(false) }
     var choosing by remember { mutableStateOf(false) }
+    var reading by remember { mutableStateOf(false) }
     // What a screen reader hears when the form changes (the web's `#leader-status`).
     var status by remember { mutableStateOf("") }
     // Once said, the words are taken down, so a later swipe does not find them lingering.
@@ -442,18 +503,44 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
         // The date and the season share one muted line; the day's name stands under them in the
         // text's ink, a size up, as home titles the day (the web's `.hour-meta-line` and
         // `.hour-meta-feast`). The dot is tied to the date by a no-break space.
-        val line = listOf(view.dateLabel, view.seasonLabel).filter { it.isNotEmpty() }.joinToString("\u00A0· ")
-        val said = listOf(line, view.feast).filter { it.isNotEmpty() }.joinToString(". ")
-        Column(Modifier.padding(top = 2.dp).semantics(mergeDescendants = true) { contentDescription = said }, horizontalAlignment = Alignment.CenterHorizontally) {
+        // The date opens the date picker (the web's `button.hour-meta-date`), so the header carries
+        // no "Change date" label: it stays set as the line's text, dims under the finger and takes
+        // the accent while the picker is open, and a screen reader hears a button that changes
+        // the date. The season and the day's name are read after it, as the web reads them.
+        Column(Modifier.padding(top = 2.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             // Each part whole; at the reader's largest sizes the season goes under the date.
             val parts = listOf(view.dateLabel, view.seasonLabel).filter { it.isNotEmpty() }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(3.6.dp, Alignment.CenterHorizontally)) {
                 parts.forEachIndexed { j, part ->
-                    Text(if (j < parts.lastIndex) "$part\u00A0·" else part, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
+                    val text = if (j < parts.lastIndex) "$part\u00A0·" else part
+                    if (part == view.dateLabel && j == 0) {
+                        Text(
+                            text,
+                            Modifier.tap(label = part, action = "change date") { picking = !picking; choosing = false; reading = false }.disclosed(picking),
+                            style = Type.meta.copy(color = if (picking) p.accent else p.muted, textAlign = TextAlign.Center),
+                        )
+                    } else {
+                        val sg = seasonGloss(part)
+                        if (sg != null) {
+                            GlossMark(sg, part, reaches = false) { Text(text, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center)) }
+                        } else {
+                            Text(text, Modifier.semantics { contentDescription = part }, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
+                        }
+                    }
                 }
             }
             if (view.feast.isNotEmpty()) {
-                Text(view.feast, Modifier.padding(top = 1.9.dp), style = Type.dayName.copy(color = p.text))
+                val dg = if (view.feastId.isEmpty()) dayNameGloss(view.feast) else null
+                if (dg != null) {
+                    GlossMark(dg, view.feast, Modifier.padding(top = 1.9.dp), reaches = false) {
+                        Text(view.feast, style = Type.dayName.copy(color = p.text))
+                    }
+                } else {
+                    val feastMod = Modifier.padding(top = 1.9.dp).then(
+                        if (view.feastId.isNotEmpty()) Modifier.tap(label = view.feast, action = "about this feast") { onFeast(view.feastId) } else Modifier,
+                    )
+                    Text(view.feast, feastMod, style = Type.dayName.copy(color = p.text))
+                }
             }
         }
         if (date != today) {
@@ -463,13 +550,14 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
                 style = Type.label(16f, 0.08f).copy(color = p.accent, fontFeatureSettings = ALL_SMALL_CAPS),
             )
         }
-        // Side by side, or one above the other when the reader's font size leaves no room.
-        FlowRow(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.CenterHorizontally)) {
-            // In home's foot letter, each kept to one line: on a first-class day the frame narrows the
-            // measure and "Prayer form: Private" lost its caret to a line of its own. Where the two
-            // do not fit side by side, they stand one above the other, never broken inside one.
-            Disclosure("Change date", picking, { picking = !picking; choosing = false }, style = Type.smallCapsControl, upper = false)
-            Disclosure("Prayer form:", choosing, { choosing = !choosing; picking = false }, value = PRAYER_FORMS.first { it.first == form }.second, style = Type.smallCapsControl, upper = false)
+        // In home's foot letter, kept to one line each: Prayer form and How to read sit side by side
+        // and stack cleanly when a narrow screen or large text leaves no room.
+        FlowRow(
+            Modifier.padding(top = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+        ) {
+            Disclosure("Prayer form:", choosing, { choosing = !choosing; picking = false; reading = false }, value = PRAYER_FORMS.first { it.first == form }.second, style = Type.smallCapsControl, upper = false)
+            Disclosure(key.label, reading, { reading = !reading; choosing = false; picking = false }, style = Type.smallCapsControl, upper = false)
         }
         // Previous · Today · Next keep to the edges up to 540dp, and gather in the middle above it.
         Unfold(picking) { DatePicker(date, today, centred = LocalConfiguration.current.screenWidthDp > 540) { picking = false; onDate(it) } }
@@ -480,8 +568,65 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
                 onForm(it)
             }
         }
+        Unfold(reading) { ReadingKeyPanel(key) { reading = false; onAbout() } }
         Spacer(Modifier.fillMaxWidth().height(7.2.dp).semantics { liveRegion = LiveRegionMode.Polite; if (status.isNotEmpty()) contentDescription = status })
         Hairline(p.lining.copy(alpha = 0.3f))
+    }
+}
+
+/** In-hour "How to read" legend panel (matches web's `.reading-key-panel`). */
+@Composable
+private fun ReadingKeyPanel(key: ReadingKeyView, onAbout: () -> Unit) {
+    val p = LocalPalette.current
+    Column(Modifier.padding(top = 10.dp, bottom = 8.dp).widthIn(max = 384.dp).fillMaxWidth()) {
+        Text(
+            key.title.uppercase(),
+            Modifier.padding(bottom = 8.8.dp).semantics { heading(); contentDescription = key.title },
+            style = Type.label(11.2f, 0.1f).copy(color = p.muted),
+        )
+        Hairline(p.border)
+        key.items.forEachIndexed { i, item ->
+            if (i > 0) Hairline(p.surfaceEdge)
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 8.3.dp, horizontal = 3.2.dp)
+                    .clearAndSetSemantics { contentDescription = "${item.spoken}: ${item.text}" },
+                verticalAlignment = Alignment.Top,
+            ) {
+                val markMod = Modifier.width(82.dp).padding(end = 12.dp)
+                when (item.style) {
+                    "rubric" -> Text(item.mark, markMod, style = Type.small.copy(fontSize = 14.1.sp, lineHeight = 20.4.sp, color = p.rubric, fontStyle = FontStyle.Italic), softWrap = false)
+                    "titulus" -> Text(item.mark, markMod, style = Type.small.copy(fontSize = 14.1.sp, lineHeight = 20.4.sp, color = p.titulus, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 1.1.sp), softWrap = false)
+                    "unsaid" -> Text(item.mark, markMod, style = Type.small.copy(fontSize = 14.1.sp, lineHeight = 20.4.sp, color = p.unsaid), softWrap = false)
+                    "psalm" -> {
+                        val parts = item.mark.split(" ", limit = 2)
+                        Text(
+                            buildAnnotatedString {
+                                withStyle(SpanStyle(color = p.titulus)) { append(parts[0]) }
+                                if (parts.size == 2) {
+                                    append(" ")
+                                    withStyle(SpanStyle(color = p.muted, fontSize = 11.8.sp)) { append(parts[1]) }
+                                }
+                            },
+                            markMod,
+                            style = Type.small.copy(fontSize = 14.1.sp, lineHeight = 20.4.sp, fontFeatureSettings = "lnum"),
+                            softWrap = false,
+                        )
+                    }
+                    else -> Text(item.mark, markMod, style = Type.small.copy(fontSize = 14.1.sp, lineHeight = 20.4.sp, color = p.text), softWrap = false)
+                }
+                Text(item.text, Modifier.weight(1f), style = Type.small.copy(fontSize = 14.1.sp, lineHeight = 20.4.sp, color = p.text))
+            }
+        }
+        Hairline(p.border)
+        Text(
+            buildAnnotatedString {
+                append(key.footBefore)
+                withStyle(SpanStyle(color = p.accent, textDecoration = TextDecoration.Underline)) { append(key.footLink) }
+                append(key.footAfter)
+            },
+            Modifier.padding(top = 10.4.dp).heightIn(min = 44.dp).tap(label = "${key.footBefore}${key.footLink}${key.footAfter}", action = "open About the Office", onClick = onAbout),
+            style = Type.small.copy(fontSize = 12.8.sp, lineHeight = 19.2.sp, color = p.muted),
+        )
     }
 }
 
@@ -492,6 +637,7 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
  */
 @Composable
 private fun Epilogue(
+    leaf: EndLeaf,
     previous: String?,
     next: String?,
     nextLabel: String,
@@ -506,7 +652,7 @@ private fun Epilogue(
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
         // The hour ends on one mark, as painted where the bishop anointed the walls; the way on
         // below is parted by home's gilt points and ruled under where the wall's field begins.
-        ConsecrationCross(Modifier.padding(top = 26.4.dp).size(40.dp))
+        EndCross(leaf, Modifier.padding(top = EndCrossTop).size(EndCrossSize))
         Continuation(
             previousLabel = "Previous hour",
             previous = previous?.let(::hourLabel),
@@ -546,15 +692,83 @@ private fun Epilogue(
     }
 }
 
+/** Where the cross that ends the hour stands in the epilogue, and its size. */
+private val EndCrossTop = 26.4.dp
+private val EndCrossSize = 40.dp
+
+/**
+ * The consecration cross that ends the hour, in the lining, and its leaf over it ([rememberEndLeaf]):
+ * gilt from the first paint, or coming up evenly by its alpha alone over [Tempo.gild] in the visit
+ * that marks the hour prayed, and laid at once when the system removes animations. By day the leaf
+ * is [leafBrush] in the season's gilding, by night flat gilt.
+ */
+@Composable
+private fun EndCross(leaf: EndLeaf, modifier: Modifier) {
+    val p = LocalPalette.current
+    val o = LocalOrnament.current
+    val context = LocalContext.current
+    // A cross laid out again (scrolled away and back) after it has gilded stands gilt.
+    val gold = remember { Animatable(if (leaf == EndLeaf.PAINT) 0f else 1f) }
+    LaunchedEffect(leaf) {
+        when (leaf) {
+            EndLeaf.GILDING -> {
+                val animates = android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
+                if (animates) gold.animateTo(1f, Tempo.gild.spec()) else gold.snapTo(1f)
+            }
+            EndLeaf.GILT -> gold.snapTo(1f)
+            EndLeaf.PAINT -> gold.snapTo(0f)
+        }
+    }
+    val brush = if (p.dark) null else leafBrush(o)
+    Canvas(modifier) {
+        consecrationCross(p.lining)
+        val a = gold.value
+        if (a > 0f) consecrationCross(o.flat, brush = brush, alpha = a)
+    }
+}
+
 /** Air below the hour navigation (`.hour-epilogue`'s bottom padding), where the wall's field begins. */
 private val EndingAir = 52.dp
 
-/** A section's blocks fade in as it opens, the office below moving down to make room, and out as it closes. */
-private val UNFOLD_FADE = tween<Float>(220, delayMillis = 60, easing = LinearOutSlowInEasing)
-private val FOLD_FADE = tween<Float>(120, easing = FastOutLinearInEasing)
+/**
+ * A section's blocks fade in as it opens, the office below moving down to make room, and out as it
+ * closes: Unfold's fades, so a section turns as every other disclosure does.
+ */
+private val UNFOLD_FADE = tween<Float>(UNFOLD_MS - 60, delayMillis = 60, easing = LinearOutSlowInEasing)
+private val FOLD_FADE = tween<Float>(FOLD_MS / 2, easing = FastOutLinearInEasing)
 
-/** Which collapsible sections are open, as saved state can hold it. */
-private val OpenSections = listSaver<SnapshotStateMap<Int, Boolean>, Int>(
+/**
+ * An hour's list state as its visit saves it: the place, when the app went into the background
+ * with it (`leftAt`, 0 while in front), and the prayed watch's `reading` then. Restored from the
+ * background, it opens at the place only if `reopens` says so, and hands the reading on to
+ * `carry`; otherwise at the top, with nothing moving, and the reading begins again. A state saved
+ * before the reading was carried restores as before.
+ */
+internal fun placeSaver(
+    leftAt: () -> Long,
+    reopens: (Long) -> Boolean,
+    reading: () -> PrayedReading = { PrayedReading(0.0, 0.0) },
+    carry: (PrayedReading) -> Unit = {},
+) = listSaver<LazyListState, Long>(
+    save = {
+        val r = reading()
+        listOf(it.firstVisibleItemIndex.toLong(), it.firstVisibleItemScrollOffset.toLong(), leftAt(), r.cursor.toRawBits(), r.read.toRawBits())
+    },
+    restore = { saved ->
+        val at = saved.getOrElse(2) { 0L }
+        if (at == 0L || reopens(at)) {
+            val cursor = Double.fromBits(saved.getOrElse(3) { 0L })
+            val read = Double.fromBits(saved.getOrElse(4) { 0L })
+            if (cursor.isFinite() && read.isFinite()) carry(PrayedReading(maxOf(0.0, cursor), maxOf(0.0, read)))
+            LazyListState(saved[0].toInt(), saved[1].toInt())
+        } else {
+            LazyListState()
+        }
+    },
+)
+
+/** Which collapsible sections (or a feast page's hymns) are open, as saved state can hold it. */
+internal val OpenSections = listSaver<SnapshotStateMap<Int, Boolean>, Int>(
     save = { m -> m.flatMap { (i, open) -> listOf(i, if (open) 1 else 0) } },
     restore = { l -> mutableStateMapOf<Int, Boolean>().apply { l.chunked(2).forEach { (i, open) -> put(i, open == 1) } } },
 )

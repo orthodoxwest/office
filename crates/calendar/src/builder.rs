@@ -307,6 +307,16 @@ fn octave_ceases(feast: &Feast, date: Date, m: &MoveableDates) -> bool {
     feast.id != "easter-sunday" && date >= m.ash_wednesday && date <= m.low_sunday
 }
 
+/// The days of an octave kept by an entry of their own rather than generated: (the octave, its
+/// day, the entry). The Circumcision is the Nativity's eighth day ("THE CIRCUMCISION … (Octave
+/// Day of the Nativity)", 2026 ordo); Easter Monday and Tuesday and Low Sunday are Easter's.
+pub const OCTAVE_DAYS_KEPT_BY_OWN_ENTRY: [(&str, i32, &str); 4] = [
+    ("christmas", 8, "circumcision"),
+    ("easter-sunday", 2, "easter-monday"),
+    ("easter-sunday", 3, "easter-tuesday"),
+    ("easter-sunday", 8, "low-sunday"),
+];
+
 /// Days 2–8 of every octave.
 fn octave_feasts(feasts: &[FeastRef], year: i32, m: &MoveableDates) -> Vec<Feast> {
     use crate::model::OctaveClass;
@@ -318,19 +328,14 @@ fn octave_feasts(feasts: &[FeastRef], year: i32, m: &MoveableDates) -> Vec<Feast
         let is_christmas = feast.id == "christmas";
         for day_num in 2..=8 {
             let date = parent.add_days(day_num - 1);
-            if is_christmas && day_num == 8 {
-                continue; // Jan 1 has its own feast
+            if OCTAVE_DAYS_KEPT_BY_OWN_ENTRY.iter().any(|&(octave, n, _)| octave == feast.id && n == day_num) {
+                continue;
             }
             if octave_ceases(feast, date, m) {
                 continue;
             }
-            if is_privileged {
-                if feast.id == "easter-sunday" && matches!(day_num, 2 | 3 | 8) {
-                    continue; // explicit entries for Monday, Tuesday, Low Sunday
-                }
-                if feast.id == "pentecost" && day_num == 8 {
-                    continue; // no separate octave day on Trinity Sunday
-                }
+            if is_privileged && feast.id == "pentecost" && day_num == 8 {
+                continue; // no separate octave day on Trinity Sunday
             }
             let is_octave_day = day_num == 8;
             let rank = if is_christmas {
@@ -595,19 +600,22 @@ fn saturday_office_bvm_feast(date: Date, season: Season) -> Feast {
 }
 
 /// A civil year of resolved days plus the following Jan 1, which Vespers
-/// concurrence needs to resolve Dec 31's evening.
+/// concurrence needs to resolve Dec 31's evening, and the preceding Dec 31,
+/// which tells the ordo whether an octave runs on into January.
 #[derive(Clone, Debug)]
 pub struct YearCalendar {
     pub year: i32,
     pub days: Vec<CalendarDay>,
     pub following_jan1: CalendarDay,
+    pub preceding_dec31: CalendarDay,
 }
 
 /// Builds the calendar for a year. Adjacent years are computed as padding so
 /// transfers can cross Jan 1 and Dec 31 can see the following day.
 pub fn build_calendar(year: i32, data: &CalendarData) -> Result<YearCalendar, String> {
-    let (_, incoming) = build_calendar_year(year - 1, &data.feasts, &data.penitential_rules, &[])
+    let (previous, incoming) = build_calendar_year(year - 1, &data.feasts, &data.penitential_rules, &[])
         .map_err(|e| format!("building previous-year padding: {e}"))?;
+    let preceding_dec31 = previous.into_iter().last().ok_or_else(|| format!("previous-year padding for {} is empty", year - 1))?;
     let (mut days, outgoing) = build_calendar_year(year, &data.feasts, &data.penitential_rules, &incoming)?;
     let (next, _) = build_calendar_year(year + 1, &data.feasts, &data.penitential_rules, &outgoing)
         .map_err(|e| format!("building following-year padding: {e}"))?;
@@ -616,7 +624,7 @@ pub fn build_calendar(year: i32, data: &CalendarData) -> Result<YearCalendar, St
         let on = MonthDay { month: day.date.month(), day: day.date.day() };
         day.monastic = data.monastic.iter().filter(|o| o.fixed == on).cloned().collect();
     }
-    Ok(YearCalendar { year, days, following_jan1 })
+    Ok(YearCalendar { year, days, following_jan1, preceding_dec31 })
 }
 
 fn push_candidate(candidates: &mut HashMap<Date, Vec<FeastRef>>, feast: &FeastRef, year: i32, m: &MoveableDates) {
@@ -666,12 +674,20 @@ fn build_calendar_year(
         }
     }
 
-    // Days 1–8 of each octave, counted from the feast's own day; two octaves can overlap.
+    // Days 1–8 of each octave, counted from the feast's own day; two octaves can overlap. An
+    // octave begun late in the previous year runs on into this one (the Nativity's eighth day is
+    // 1 January, which the 2026 ordo prints "Octave Day of the Nativity"; #833), and one begun
+    // late in this year stops at 31 December, the next year taking up the rest.
+    let previous = MoveableDates::compute(year - 1);
     let mut octave_ranges: HashMap<Date, Vec<(Date, FeastRef)>> = HashMap::new();
     for f in all_base.iter().filter(|f| f.has_octave) {
-        if let Some(parent) = resolve_feast_date(f, year, &m) {
+        let begun = [resolve_feast_date(f, year - 1, &previous), resolve_feast_date(f, year, &m)];
+        for parent in begun.into_iter().flatten() {
             for n in 0..8 {
                 let date = parent.add_days(n);
+                if date.year() != year {
+                    continue;
+                }
                 // Pentecost's octave ends with None of its Saturday (Rubrics VII.2): Trinity
                 // Sunday is not within it (2021 and 2024 ordos commemorate the Baptist's octave
                 // there, not Pentecost's).

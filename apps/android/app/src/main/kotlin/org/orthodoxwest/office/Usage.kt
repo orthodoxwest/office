@@ -10,6 +10,7 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -17,10 +18,14 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import org.orthodoxwest.office.core.UsageClient
 import org.orthodoxwest.office.core.UsageEvent
+import org.orthodoxwest.office.core.UsageHabits
 import org.orthodoxwest.office.core.usageAdvertisedEndpoint
 import org.orthodoxwest.office.core.usageBeacon
+import org.orthodoxwest.office.core.usageBuildHeader
 import org.orthodoxwest.office.core.usageEndpoint
 import org.orthodoxwest.office.core.usageEndpointHeader
+import org.orthodoxwest.office.core.usagePeriods
+import org.orthodoxwest.office.core.usageTally
 
 /**
  * The daily usage counts, reported as the web reports them (DEPLOYMENT.md, "Usage metrics"):
@@ -32,13 +37,22 @@ import org.orthodoxwest.office.core.usageEndpointHeader
  * The server knows a reader only by an identifier it hashes with the day. The app makes a fresh
  * random one each reporting day (America/New_York, as the server reckons days), so nothing it
  * sends ties one day to the next. The app also keeps the day it was first counted, and says
- * only whether today is that day (new) or not (returning). Best effort: nothing is queued while
+ * only whether today is that day (new) or not (returning); and the last two days a beacon of
+ * its own was counted, and says only whether today is the first in its week and in its month,
+ * so the server can add up a week's readers. Beside those it says, in buckets and yes-or-no words
+ * the core writes (`UsageHabits`): how long ago it was first counted, on the week's first day how
+ * many days it was counted the week before (it keeps a tally of the week's days), an hour opened
+ * at its own time by the phone's clock, an hour prayed (home's mark), an hour opened that could
+ * not report since a beacon last arrived, and whether reminders are on. Best effort: nothing is queued while
  * offline, retried, or shown to the reader. Only release and preview builds report
  * (`BuildConfig.COUNT_USAGE`); debug builds, and so the tests, never do. Nor does a phone in
  * Play's pre-launch report, which installs every uploaded build fresh on several test devices and
  * crawls it; each would count as a new reader. Nothing on those phones reliably says so (not all
  * carry Test Lab's setting, and the Play Store installs the build), but each is wiped within
  * minutes of the install, so an installation reports only once it is [SETTLING] old.
+ *
+ * Each beacon also carries the build's number on a header of its own (`usageBuildHeader`), which
+ * every reader of the build shares, so the report can tell how many readers have a correction.
  *
  * Beacons go to the production server until a reply names the site's new address
  * (`usageEndpointHeader`); the app keeps that and posts there from then on.
@@ -60,15 +74,40 @@ class Usage(
 
     /**
      * `martyrology` is Prime's `HourView.martyrology`: whether its reading was shown, if it had one;
-     * `chant` an hour's `HourView.chant`: whether its scores were shown, if it had any.
+     * `chant` an hour's `HourView.chant`: whether its scores were shown, if it had any; `prayed`
+     * whether the hour shown is marked prayed; `reminders` whether the app's reminders are on.
      */
-    fun record(event: UsageEvent, dark: Boolean, form: String, martyrology: Boolean? = null, chant: Boolean? = null) {
+    fun record(
+        event: UsageEvent,
+        dark: Boolean,
+        form: String,
+        martyrology: Boolean? = null,
+        chant: Boolean? = null,
+        prayed: Boolean = false,
+        reminders: Boolean? = null,
+    ) {
         if (!enabled) return
         if (installed != null && Duration.between(installed, clock.instant()) < SETTLING) return
         val day = LocalDate.now(clock.withZone(REPORTING)).toString()
-        val first = firstDay(day) == day
-        val body = usageBeacon(event, LocalDate.now(clock).toCivil(), dark, form, UsageClient.ANDROID, martyrology, first, chant) ?: return
-        val key = "$day $body"
+        val firstDay = firstDay(day)
+        val first = firstDay == day
+        val (periods, habits) = synchronized(prefs) {
+            usagePeriods(day, prefs.getString(LAST, null), prefs.getString(PREVIOUS, null)) to UsageHabits(
+                reportingDay = day,
+                firstDay = firstDay,
+                tally = prefs.getString(TALLY, null),
+                clockHour = LocalTime.now(clock).hour,
+                prayed = prayed,
+                offline = prefs.getBoolean(OFFLINE, false),
+                reminders = reminders,
+            )
+        }
+        val body = usageBeacon(
+            event, LocalDate.now(clock).toCivil(), dark, form, UsageClient.ANDROID, martyrology, first, chant, periods?.week, periods?.month,
+            habits,
+        ) ?: return
+        // Saying a failed hour is not a new page: it neither sends again nor counts apart.
+        val key = "$day ${body.replace(" offline:yes", "")}"
         synchronized(sent) {
             if (!sent.add(key)) return
         }
@@ -76,12 +115,27 @@ class Usage(
         val endpoint = synchronized(prefs) { prefs.getString(ENDPOINT, null) } ?: usageEndpoint()
         executor.execute {
             val reply = runCatching { post(endpoint, id, body) }.getOrDefault(Reply(false))
-            // A failure is forgotten, so the next visit tries again.
-            if (!reply.ok) synchronized(sent) { sent.remove(key) }
+            // A failure is forgotten, so the next visit tries again. An hour whose beacon did not
+            // arrive is said on the next that does.
+            if (reply.ok) counted(day, body) else synchronized(sent) { sent.remove(key) }
+            if (!reply.ok && event is UsageEvent.Hour) synchronized(prefs) { prefs.edit().putBoolean(OFFLINE, true).apply() }
             reply.endpoint?.let(::usageAdvertisedEndpoint)?.let { next ->
                 synchronized(prefs) { prefs.edit().putString(ENDPOINT, next).apply() }
             }
         }
+    }
+
+    /**
+     * Keeps `day` as the latest reporting day a beacon was counted, and the one before it: what
+     * `usagePeriods` reads to say whether a day opens the week and the month. Kept only once a
+     * beacon has arrived, so a day that never reported opens nothing.
+     */
+    private fun counted(day: String, body: String) = synchronized(prefs) {
+        val edit = prefs.edit()
+        if (" offline:yes" in body) edit.remove(OFFLINE)
+        val last = prefs.getString(LAST, null)
+        if (last != day) edit.putString(PREVIOUS, last).putString(LAST, day).putString(TALLY, usageTally(prefs.getString(TALLY, null), day))
+        edit.apply()
     }
 
     /**
@@ -120,6 +174,10 @@ class Usage(
         private const val DAY = "usage-day"
         private const val ID = "usage-id"
         private const val FIRST = "usage-first"
+        private const val LAST = "usage-counted"
+        private const val PREVIOUS = "usage-counted-before"
+        private const val TALLY = "usage-week-days"
+        private const val OFFLINE = "usage-offline"
         private const val BEFORE = "before"
         private const val OPENED = "about-first"
         private const val ENDPOINT = "usage-endpoint"
@@ -163,7 +221,10 @@ class Usage(
 
         /**
          * Posts one beacon as the web's page does: the header that marks it as a beacon, and the
-         * day's identifier as the cookie the server would otherwise have set.
+         * day's identifier as the cookie the server would otherwise have set. Beside them, the
+         * build's number (its version code, master's commit count, as iOS's build number is), which
+         * the server counts apart from the beacon's words, so the report can say how soon a
+         * correction reaches readers.
          */
         private fun send(endpoint: String, id: String, body: String): Reply {
             val connection = URL(endpoint).openConnection() as HttpURLConnection
@@ -178,6 +239,7 @@ class Usage(
                 connection.setRequestProperty("Content-Type", "text/plain")
                 connection.setRequestProperty("Cookie", "office-usage=$id")
                 connection.setRequestProperty("User-Agent", agent)
+                connection.setRequestProperty(usageBuildHeader(), BuildConfig.VERSION_CODE.toString())
                 connection.outputStream.use { it.write(body.toByteArray()) }
                 Reply(connection.responseCode in 200..299, connection.getHeaderField(usageEndpointHeader()))
             } finally {

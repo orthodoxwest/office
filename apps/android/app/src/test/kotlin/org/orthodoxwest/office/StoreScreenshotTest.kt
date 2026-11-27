@@ -42,6 +42,7 @@ class StoreScreenshotTest {
             core.compose(it.hour, it.date.year, it.date.monthValue, it.date.dayOfMonth, "private", false, chant)
         }
         val ordo = (page as? Page.Ordo)?.let { core.ordoMonth(it.year, it.month) }
+        val course = (page as? Page.Year)?.let { core.ordoCourse(it.year) }
         val feast = (page as? Page.Feast)?.let { core.feastPage(it.id, lent.toCivil()) }
         val reminders = ReminderStore(ApplicationProvider.getApplicationContext()).load().copy(on = true)
         compose.setContent {
@@ -51,6 +52,7 @@ class StoreScreenshotTest {
                     onOpen = {}, onHome = {}, onForm = {}, onTheme = {}, onTextSize = {},
                     reminders = reminders, reminderStatus = ReminderStatus(notificationsAllowed = true, exactAllowed = true),
                     onReminders = {}, onTurnOn = {}, onTurnOff = {}, onAllowNotifications = {}, onAllowExact = {},
+                    course = course,
                     feast = feast,
                 )
             }

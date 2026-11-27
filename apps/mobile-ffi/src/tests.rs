@@ -75,6 +75,23 @@ fn composes_what_the_web_composes() {
 }
 
 #[test]
+fn the_little_hours_show_posture_cues_when_a_priest_or_deacon_leads() {
+    let core = OfficeCore::new().unwrap();
+    let cues = |hour: &str, form: &str| {
+        let view = core.compose(hour.into(), 2026, 10, 4, form.into(), false, false).unwrap();
+        format!("{:?}", view.sections).matches("style: Posture").count()
+    };
+    for hour in ["prime", "terce", "sext", "none"] {
+        assert_eq!(cues(hour, "private"), 0, "{hour}");
+        assert!(cues(hour, "priest") > 0 && cues(hour, "deacon") == cues(hour, "priest"), "{hour}");
+    }
+    for hour in ["lauds", "vespers"] {
+        assert!(cues(hour, "private") > 0 && cues(hour, "priest") == cues(hour, "private"), "{hour}");
+    }
+    assert_eq!(cues("compline", "priest"), 0);
+}
+
+#[test]
 fn the_martyrology_setting_reads_tomorrows_entry_at_prime() {
     let core = OfficeCore::new().unwrap();
     let text = |v: &HourView| format!("{:?}", v.sections);
@@ -158,16 +175,106 @@ fn home_invites_to_the_current_office_only_today() {
     assert_eq!(home.season, "");
     assert_eq!(home.color, "violet");
     assert_eq!((home.pray_now_label.as_str(), home.current_hour.as_str()), ("Pray Vespers", "vespers"));
-    assert_eq!(home.current_hour_note, "Evening prayer");
+    assert_eq!(home.pray_now_gloss, "Evening prayer");
     assert_eq!(crate::hour_note("prime".into()), "Prayer as work begins");
-    assert_eq!(crate::hour_note("matins".into()), "");
+    assert_eq!(crate::hour_note("matins".into()), "The night office");
     // Compline after midnight belongs to yesterday, and marks no hour today.
     let late = core.home(today, today, 1).unwrap();
     assert_eq!((late.pray_now_hour.as_str(), late.pray_now_date, late.current_hour.as_str()), ("compline", civil(2026, 3, 14), ""));
-    assert_eq!(late.current_hour_note, "");
+    // Its invitation still says what Compline is.
+    assert_eq!(late.pray_now_gloss, "Prayer before sleep");
     let other = core.home(civil(2026, 3, 16), today, 18).unwrap();
-    assert_eq!((other.pray_now_label.as_str(), other.is_today), ("Open Lauds", false));
+    assert_eq!((other.pray_now_label.as_str(), other.is_today, other.pray_now_gloss.as_str()), ("Open Lauds", false, ""));
     assert_eq!(core.home(civil(2026, 3, 30), today, 9).unwrap().ornament, "passiontide");
+}
+
+/// On an evening that keeps the morrow, the invitation to Vespers says so (#951).
+#[test]
+fn home_says_first_vespers_on_the_eve_of_a_feast() {
+    let core = OfficeCore::new().unwrap();
+    let eve = civil(2026, 12, 24);
+    // The flag the wide niche reads to keep the gloss under its invitation (#959).
+    let vespers = core.home(eve, eve, 18).unwrap();
+    assert_eq!((vespers.pray_now_gloss.as_str(), vespers.pray_now_eve), ("First Vespers of the Nativity of Our Lord", true));
+    let compline = core.home(eve, eve, 21).unwrap();
+    assert_eq!((compline.pray_now_gloss.as_str(), compline.pray_now_eve), ("Prayer before sleep", false));
+    let saturday = civil(2026, 11, 28);
+    assert_eq!(core.home(saturday, saturday, 18).unwrap().pray_now_gloss, "First Vespers of I Sunday of Advent");
+    let plain = civil(2026, 12, 23);
+    let evening = core.home(plain, plain, 18).unwrap();
+    assert_eq!((evening.pray_now_gloss.as_str(), evening.pray_now_eve), ("Evening prayer", false));
+}
+
+#[test]
+fn about_lights_and_invites_to_the_hour_home_does() {
+    let core = OfficeCore::new().unwrap();
+    let today = civil(2026, 3, 15);
+    for hour in 0..24 {
+        let home = core.home(today, today, hour).unwrap();
+        let about = crate::about_now(today, hour).unwrap();
+        assert_eq!(
+            (about.current.as_str(), about.pray_now_label.as_str(), about.pray_now_hour.as_str(), about.pray_now_date),
+            (home.current_hour.as_str(), home.pray_now_label.as_str(), home.pray_now_hour.as_str(), home.pray_now_date),
+            "{hour}"
+        );
+    }
+    let blocks = crate::about().blocks;
+    assert_eq!(blocks.last().map(|b| b.kind.as_str()), Some("invitation"));
+    // Before it, the apps name the website, for a reader who found the app first.
+    let web = &blocks[blocks.len() - 2];
+    assert_eq!(web.kind, "paragraph");
+    assert!(web.runs.iter().any(|r| r.link == "https://orthodoxwestbreviary.com"));
+}
+
+/// Matins closes About's table and home's hours under Night, after the evening, coming soon: no link and no part in
+/// the hour now, nor in reminders, until the app prays it.
+#[test]
+fn matins_is_shown_coming_soon_under_night() {
+    let about = crate::about();
+    let labels: Vec<&str> = about.periods.iter().map(|p| p.label.as_str()).collect();
+    assert_eq!(labels, ["Morning", "Day", "Evening", "Night"]);
+    let night = about.periods.last().unwrap();
+    assert_eq!(night.label, "Night");
+    let matins = &night.hours[0];
+    assert_eq!((matins.hour.as_str(), matins.name.as_str(), matins.gloss.as_str()), ("matins", "Matins", "The night office"));
+    assert!(matins.coming_soon && matins.sign == "star" && matins.angle == 270.0);
+    assert!(about.periods[..3].iter().flat_map(|p| &p.hours).all(|h| !h.coming_soon && h.sign != "star"));
+    assert_eq!(about.coming_soon, "coming soon");
+    assert_eq!((about.horologium_height, about.horologium_night_depth), (160.0, 22.0));
+    let home = crate::home_night();
+    assert_eq!((home.label.as_str(), home.hour.as_str(), home.name.as_str()), ("Night", "matins", "Matins"));
+    assert_eq!((home.gloss.as_str(), home.coming_soon.as_str()), ("The night office", "coming soon"));
+    assert!(crate::reminder_periods().iter().all(|p| !p.hours.iter().any(|h| h == "matins")));
+    let core = OfficeCore::new().unwrap();
+    let today = civil(2026, 3, 15);
+    for hour in 0..24 {
+        assert_ne!(core.home(today, today, hour).unwrap().current_hour, "matins", "{hour}");
+    }
+}
+
+/// About's specimen sets lines an hour prints, as it prints them (the ✠ where it falls, the
+/// rubric's own words), and each form's greeting is the one that form's hour gives.
+#[test]
+fn abouts_specimen_is_lines_the_hour_prints() {
+    let core = OfficeCore::new().unwrap();
+    let s = crate::about().specimen;
+    let lines = |form: &str| -> Vec<String> {
+        let hour = core.compose("lauds".into(), 2026, 11, 19, form.into(), false, false).unwrap();
+        hour.sections.iter().flat_map(|sec| &sec.blocks).map(|b| b.runs.iter().map(|r| r.text.as_str()).collect::<String>()).collect()
+    };
+    let has = |lines: &[String], want: &str| lines.iter().any(|l| l.trim() == want);
+    for form in ["private", "deacon", "priest"] {
+        let l = lines(form);
+        assert!(has(&l, &s.rubric), "{form}: {}", s.rubric);
+        assert!(has(&l, &s.opening_versicle), "{form}: {}", s.opening_versicle);
+        assert!(has(&l, &s.opening_response), "{form}: {}", s.opening_response);
+        let secret = format!("{} {}", s.secret_voiced, s.secret_silent.trim_end_matches('…'));
+        assert!(l.iter().any(|line| line.starts_with(&secret)), "{form}: {secret}");
+        let (v, r) = if form == "private" { (&s.alone_versicle, &s.alone_response) } else { (&s.priest_versicle, &s.priest_response) };
+        assert!(has(&l, v) && has(&l, r), "{form}: {v} / {r}");
+    }
+    let labels = [&s.alone_label, &s.deacon_label, &s.priest_label];
+    assert_eq!(labels.map(|l| l.as_str()), liturgy::PrayerForm::ALL.map(|f| f.label()));
 }
 
 #[test]
@@ -210,6 +317,166 @@ fn the_ordo_month_matches_the_web_rows() {
     assert!(first.lauds_suffrage);
     assert_eq!(first.vespers_note, "II Vespers of preceding");
     assert!(core.ordo_month(2026, 13).is_err());
+}
+
+/// A course's runs laid out a day at a time, `None` past a month's end.
+fn course_days(course: &[CourseMonthView]) -> Vec<Vec<Option<String>>> {
+    course
+        .iter()
+        .map(|m| {
+            let mut days = vec![None; course_span() as usize];
+            let mut next = 0;
+            for r in &m.runs {
+                assert_eq!(r.start, next, "runs abut, in order");
+                assert!(r.days > 0);
+                for d in r.start..r.start + r.days {
+                    days[d as usize] = Some(r.color.clone());
+                }
+                next = r.start + r.days;
+            }
+            days
+        })
+        .collect()
+}
+
+#[test]
+fn the_year_course_matches_the_web_strip() {
+    let core = OfficeCore::new().unwrap();
+    let fs = repo_data();
+    for year in [2026, 2027, 2028] {
+        // The web lays its band from the server's own office days (tools::year::office_days),
+        // the days its rows' colour rails are set from; the apps' must spell the same, day by day.
+        let web = tools::year::load_office_days(&fs, year).unwrap();
+        let mut want = vec![vec![None; course_span() as usize]; 12];
+        for d in &web {
+            want[d.date.month() as usize - 1][d.date.day() as usize - 1] = Some(d.color.as_str().to_string());
+        }
+        let course = core.ordo_course(year).unwrap();
+        assert_eq!(course.len(), 12);
+        assert_eq!(course_days(&course), want, "{year}");
+        // Runs are maximal: no two neighbours share a colour.
+        for m in &course {
+            assert!(m.runs.windows(2).all(|w| w[0].color != w[1].color), "{year}");
+        }
+        // February is short: its band ends at day 28 or 29, the hairline showing in its tail.
+        let feb = course[1].runs.last().unwrap();
+        assert_eq!(feb.start + feb.days, if year % 4 == 0 { 29 } else { 28 });
+    }
+    // A month page carries the same course, and its rows the same colours.
+    let march = core.ordo_month(2026, 3).unwrap();
+    assert_eq!(march.course, core.ordo_course(2026).unwrap());
+    let rows: Vec<_> = march.days.iter().map(|d| Some(d.color.clone())).collect();
+    assert_eq!(course_days(&march.course)[2][..31], rows[..]);
+    // Today's lozenge hangs at the middle of its day's 31st, as app.js places it.
+    assert!((course_place(13) - 12.5 / 31.0).abs() < 1e-12);
+}
+
+/// Home names the Nativity's octave under the Circumcision, its eighth day (#833), as the web does.
+#[test]
+fn home_names_the_nativity_octave_on_the_first_of_january() {
+    let core = OfficeCore::new().unwrap();
+    let note = |y, m, d| core.home(civil(y, m, d), civil(y, m, d), 9).unwrap().octave_note;
+    assert_eq!(note(2026, 12, 31), "Octave of Christmas");
+    assert_eq!(note(2027, 1, 1), "Octave of Christmas");
+    assert_eq!(note(2027, 1, 2), "");
+}
+
+/// The apps bind the octaves as the web's month rows do: both read `presentation::rails` over the
+/// whole year, so 1 January takes up the previous December's octave (#833, needs ruling #838).
+#[test]
+fn the_ordo_binds_the_octaves_as_the_web_does() {
+    let core = OfficeCore::new().unwrap();
+    let data = CalendarData::load(&repo_data()).unwrap();
+    for (year, month) in [(2026, 12), (2027, 1), (2027, 5), (2027, 6), (2027, 7)] {
+        let cal = build_calendar(year, &data).unwrap();
+        let want: Vec<_> = cal
+            .days
+            .iter()
+            .zip(presentation::rails::octave_rails(&cal, &data.feasts))
+            .filter(|(d, _)| d.date.month() as i32 == month)
+            .map(|(_, r)| (r.color.as_str().to_string(), r.inset.map(|c| c.as_str().to_string()).unwrap_or_default(), r.above, r.below))
+            .collect();
+        let got: Vec<_> = core
+            .ordo_month(year, month)
+            .unwrap()
+            .days
+            .into_iter()
+            .map(|d| (d.rail_color, d.rail_inset, d.bound_above, d.bound_below))
+            .collect();
+        assert_eq!(got, want, "{year}-{month}");
+    }
+    let december = core.ordo_month(2026, 12).unwrap();
+    let stephen = &december.days[25];
+    assert_eq!((stephen.color.as_str(), stephen.rail_color.as_str(), stephen.rail_inset.as_str()), ("red", "white", "red"));
+    assert!(stephen.bound_above && stephen.bound_below);
+    let first = &core.ordo_month(2027, 1).unwrap().days[0];
+    assert_eq!((first.rail_color.as_str(), first.rail_inset.as_str(), first.bound_above, first.bound_below), ("white", "", true, false));
+}
+
+/// The apps lead a vigil into its feast as the web's month rows do (needs ruling #838, question
+/// 3(d)): both read `presentation::rails`, so the thread runs where the web draws it, across a
+/// month's page as across a row, and nowhere else.
+#[test]
+fn the_ordo_leads_a_vigil_into_its_feast_as_the_web_does() {
+    let core = OfficeCore::new().unwrap();
+    let data = CalendarData::load(&repo_data()).unwrap();
+    for year in [2026, 2027] {
+        let cal = build_calendar(year, &data).unwrap();
+        let rails = presentation::rails::octave_rails(&cal, &data.feasts);
+        let colour = |c: Option<calendar::Color>| c.map(|c| c.as_str().to_string()).unwrap_or_default();
+        for month in 1..=12 {
+            let want: Vec<_> = cal
+                .days
+                .iter()
+                .zip(&rails)
+                .filter(|(d, _)| d.date.month() as i32 == month)
+                .map(|(_, r)| (colour(r.lead_to), colour(r.lead_from)))
+                .collect();
+            let got: Vec<_> = core.ordo_month(year, month).unwrap().days.into_iter().map(|d| (d.rail_lead_to, d.rail_lead_from)).collect();
+            assert_eq!(got, want, "{year}-{month}");
+        }
+    }
+    let lead = |y, m, d: usize| {
+        let day = core.ordo_month(y, m).unwrap().days.swap_remove(d - 1);
+        (day.rail_lead_to, day.rail_lead_from)
+    };
+    assert_eq!(lead(2026, 12, 24), ("white".to_string(), String::new()));
+    assert_eq!(lead(2026, 12, 25), (String::new(), "violet".to_string()));
+    assert_eq!(lead(2027, 8, 9), ("red".to_string(), String::new()));
+    assert_eq!(lead(2027, 8, 10), (String::new(), "violet".to_string()));
+    // The Vigil of All Saints runs off October's page and into November's.
+    assert_eq!(lead(2026, 10, 31), ("white".to_string(), String::new()));
+    assert_eq!(lead(2026, 11, 1), (String::new(), "violet".to_string()));
+    // St Andrew's vigil, anticipated over Advent Sunday, leads nowhere.
+    assert_eq!(lead(2026, 11, 28), (String::new(), String::new()));
+}
+
+/// The bells are silent through the Triduum: Maundy Thursday's Vespers through Holy Saturday's
+/// None come without the bell, and Holy Saturday's Vespers rings again (#950).
+#[test]
+fn reminders_keep_the_triduum_without_the_bell() {
+    let core = OfficeCore::new().unwrap();
+    let choose = |hour: &str, h: i32, m: i32| ReminderChoice { hour: hour.into(), hour_of_day: h, minute: m };
+    let hours = vec![choose("lauds", 6, 45), choose("none", 15, 0), choose("vespers", 18, 0)];
+    let got = core.reminders(civil(2026, 4, 9), 4, hours, vec![true; 7], None).unwrap();
+    let silent: Vec<_> = got.iter().map(|r| (r.date.day, r.hour.as_str(), r.silent)).collect();
+    assert_eq!(
+        silent,
+        [
+            (9, "lauds", false),
+            (9, "none", false),
+            (9, "vespers", true),
+            (10, "lauds", true),
+            (10, "none", true),
+            (10, "vespers", true),
+            (11, "lauds", true),
+            (11, "none", true),
+            (11, "vespers", false),
+            (12, "lauds", false),
+            (12, "none", false),
+            (12, "vespers", false),
+        ]
+    );
 }
 
 #[test]
@@ -273,9 +540,32 @@ fn reminders_can_follow_the_sun() {
 }
 
 #[test]
+fn the_reminder_rule_is_written_out_from_the_apps_choices() {
+    let at = |hour: &str, time: &str| RuleHourChoice { hour: hour.into(), time: time.into(), by_sun: false };
+    let text = |p: Vec<RulePhraseView>| p.into_iter().map(|p| p.text).collect::<String>();
+    // Sunday first, as the engine counts the week: Monday to Friday.
+    let weekdays = vec![false, true, true, true, true, true, false];
+    assert_eq!(
+        text(reminder_rule(vec![at("lauds", "6:45 AM"), at("vespers", "6:00 PM")], weekdays, 10)),
+        "Lauds at 6:45 AM and Vespers at 6:00 PM, on weekdays, ten minutes before."
+    );
+    let sunny =
+        vec![RuleHourChoice { by_sun: true, ..at("vespers", "6:00 PM") }, RuleHourChoice { by_sun: true, ..at("compline", "9:00 PM") }];
+    assert_eq!(text(reminder_rule(sunny, vec![true; 7], 0)), "Vespers at sunset and Compline at 9:00 PM, every day, at the hour.");
+    assert_eq!(text(reminder_rule(vec![], vec![true; 7], 10)), "No hour is chosen yet.");
+    assert_eq!(
+        reminder_next("vespers".into(), civil(2026, 11, 13), civil(2026, 11, 14), "5:50 PM".into()),
+        "Next: Vespers, tomorrow at 5:50 PM."
+    );
+    let periods: Vec<(String, usize)> = reminder_periods().into_iter().map(|p| (p.label, p.hours.len())).collect();
+    assert_eq!(periods, [("Morning".to_string(), 2), ("Day".to_string(), 3), ("Evening".to_string(), 2)]);
+}
+
+#[test]
 fn usage_beacons_count_current_pages_as_the_web_does() {
     let today = civil(2026, 3, 15);
-    let beacon = |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android, None, None, None);
+    let beacon =
+        |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android, None, None, None, None, None, None);
     assert_eq!(
         beacon(UsageEvent::Hour { date: civil(2026, 3, 14), hour: "vespers".into() }).as_deref(),
         Some("vespers appearance:nave screen:mobile prayer-form:deacon client:android")
@@ -293,16 +583,76 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
             UsageClient::Android,
             Some(true),
             Some(false),
-            Some(true)
+            Some(true),
+            Some(true),
+            Some(false),
+            None
         )
         .as_deref(),
-        Some("prime appearance:nave screen:mobile prayer-form:private martyrology:shown chant:on visit:returning client:android")
+        Some(
+            "prime appearance:nave screen:mobile prayer-form:private martyrology:shown chant:on visit:returning client:android week:first month:again"
+        )
     );
     assert_eq!(
-        usage_beacon(UsageEvent::Home { date: today }, today, true, "private".into(), UsageClient::Ios, None, Some(true), Some(false))
-            .as_deref(),
+        usage_beacon(
+            UsageEvent::Home { date: today },
+            today,
+            true,
+            "private".into(),
+            UsageClient::Ios,
+            None,
+            Some(true),
+            Some(false),
+            None,
+            None,
+            None
+        )
+        .as_deref(),
         Some("site appearance:apse screen:mobile visit:first client:ios")
     );
+    // What the installation kept and knows: how long it has been counted, last week's days on the
+    // week's first day, an hour opened at its own time and prayed, offline, and its reminders.
+    let habits = |first: &str, clock: i32| UsageHabits {
+        reporting_day: "2026-03-16".into(),
+        first_day: Some(first.into()),
+        tally: Some("2026-03-09 5".into()),
+        clock_hour: Some(clock),
+        prayed: true,
+        offline: true,
+        reminders: Some(false),
+    };
+    let monday = civil(2026, 3, 16);
+    let lauds = |habits: UsageHabits, week: bool| {
+        usage_beacon(
+            UsageEvent::Hour { date: monday, hour: "lauds".into() },
+            monday,
+            false,
+            "private".into(),
+            UsageClient::Ios,
+            None,
+            Some(false),
+            None,
+            Some(week),
+            Some(false),
+            Some(habits),
+        )
+    };
+    assert_eq!(
+        lauds(habits("2026-03-01", 6), true).as_deref(),
+        Some(
+            "lauds appearance:nave screen:mobile prayer-form:private visit:returning client:ios week:first month:again version:2 tenure:month last-week:4-6 timely:lauds prayed:lauds offline:yes reminder:off"
+        )
+    );
+    // Later in the week, at another hour, from before first days were kept: none of those.
+    assert_eq!(
+        lauds(UsageHabits { prayed: false, offline: false, reminders: None, ..habits("before", 9) }, false).as_deref(),
+        Some("lauds appearance:nave screen:mobile prayer-form:private visit:returning client:ios week:again month:again version:2")
+    );
+    // The tally moves on as a beacon is counted on a new day.
+    assert_eq!(usage_tally(Some("2026-03-16 2".into()), "2026-03-18".into()).as_deref(), Some("2026-03-16 3"));
+    assert_eq!(usage_tally(Some("2026-03-09 7".into()), "2026-03-16".into()).as_deref(), Some("2026-03-16 1"));
+    assert_eq!(usage_tally(Some("garbled".into()), "2026-03-16".into()).as_deref(), Some("2026-03-16 1"));
+    assert_eq!(usage_tally(None, "not a day".into()), None);
     // The archive, and anything the server would refuse, are not counted.
     for event in [
         UsageEvent::Hour { date: civil(2026, 3, 17), hour: "lauds".into() },
@@ -313,6 +663,15 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
     ] {
         assert_eq!(beacon(event.clone()), None, "{event:?}");
     }
+    // The week and the month open on the first counted day, and every beacon of that day says so.
+    let periods = |last: Option<&str>, previous: Option<&str>| {
+        usage_periods("2026-11-18".into(), last.map(String::from), previous.map(String::from)).map(|p| (p.week, p.month))
+    };
+    assert_eq!(periods(None, None), Some((true, true)));
+    assert_eq!(periods(Some("2026-11-16"), None), Some((false, false)));
+    assert_eq!(periods(Some("2026-11-18"), Some("2026-11-15")), Some((true, false)));
+    assert_eq!(periods(Some("garbled"), None), Some((true, true)));
+    assert_eq!(usage_periods("soon".into(), None, None), None);
     assert!(usage_endpoint().starts_with("https://") && usage_endpoint().ends_with("/api/usage"));
     assert_eq!(usage_advertised_endpoint(usage_endpoint()), Some(usage_endpoint()));
     assert_eq!(usage_advertised_endpoint("http://example.org/api/usage".into()), None);
@@ -338,6 +697,16 @@ fn a_quick_scroll_does_not_pray_an_hour() {
         at += w;
     }
     assert!(prayed_reading_done(slow, total, true) && !prayed_reading_done(slow, total, false));
+}
+
+#[test]
+fn the_apps_keep_an_interrupted_hours_place_by_the_shared_rule() {
+    let limit = f64::from(presentation::PLACE_KEPT_MINUTES) * 60.0;
+    assert!(reopens_at_place(false, 600.0));
+    assert!(reopens_at_place(false, limit));
+    assert!(!reopens_at_place(false, limit + 1.0));
+    assert!(!reopens_at_place(true, 600.0));
+    assert!(!reopens_at_place(false, -1.0));
 }
 
 #[test]
@@ -386,6 +755,13 @@ fn the_apps_give_the_webs_setting_hints() {
 }
 
 #[test]
+fn the_apps_name_the_ordos_marks_as_the_web() {
+    let words = ordo_mark_words();
+    assert_eq!(words.fasting, "Day of Fasting");
+    assert_eq!(words.abstinence, "Day of Abstinence");
+}
+
+#[test]
 fn the_apps_word_change_dates_day_links_as_the_web() {
     let words = day_nav_words();
     assert_eq!(words.previous, "Previous day");
@@ -423,6 +799,11 @@ fn finds_a_feast_and_gives_its_page() {
     assert!(words.contains("blessed Raphael") && words.contains("world without end"), "{words}");
     assert!(page.whole_office.is_some());
     assert_eq!(page.texts[0].label, "Collect", "the collect leads the texts, as on the web");
+    assert_eq!(collect.hymn_title, None, "only a hymn is folded under a title");
+    let hymn = page.texts.iter().find(|t| t.label == "Hymn at I Vespers").unwrap();
+    assert_eq!(hymn.hymn_title.as_deref(), Some("Iste Confessor"));
+    assert!(hymn.common);
+    assert!(hymn.blocks.iter().all(|b| b.kind == BlockKind::Stanza && !b.drop_cap), "its stanzas alone, the title in the fold");
     assert!(!found.results[0].years.iter().any(|y| y.usual), "the search says every year's status");
     for y in &page.years {
         assert_eq!(y.usual, y.kind == "kept", "{} {}: a year kept as usual leaves its status unsaid", y.year, y.kind);
@@ -445,6 +826,7 @@ fn a_feast_page_names_its_way_back() {
     let no_day = CivilDate { year: 2026, month: 2, day: 30 };
     assert_eq!(feast_back_to_day(no_day, today), "Find a feast");
     assert_eq!(feast_back_to_ordo(no_day), "Find a feast");
+    assert_eq!(feast_back_to_ordo_year(2026), "2026 Ordo");
 }
 
 #[test]
@@ -460,4 +842,157 @@ fn days_name_their_feasts_pages() {
     let day = &month.days[26];
     assert_eq!(day.commemoration_ids.len(), day.commemorations.len());
     assert!(day.lauds_comms.iter().chain(&day.vespers_comms).any(|c| c.feast_id == "st-raphael-of-brooklyn"));
+}
+
+#[test]
+fn crown_tap_turns_the_look_and_back() {
+    let there = crate::after_crown_tap("apse".into(), true, None);
+    assert_eq!(there, crate::CrownTap { choice: "nave".into(), restore: Some("apse".into()) });
+    let back = crate::after_crown_tap(there.choice, true, there.restore);
+    assert_eq!(back, crate::CrownTap { choice: "apse".into(), restore: None });
+    assert_eq!(crate::after_crown_tap("bogus".into(), false, None).choice, "apse");
+}
+
+#[test]
+fn crown_plan_carries_presentations_figures() {
+    use presentation::crown as c;
+    for to_dark in [true, false] {
+        let plan = crate::crown_plan(to_dark);
+        let play = c::crown_play(to_dark);
+        assert_eq!(plan.to_dark, to_dark);
+        assert_eq!((plan.turn, plan.end), (play.turn, play.end));
+        assert_eq!((plan.front.at, plan.front.len), (play.front.at, play.front.len));
+        assert_eq!((plan.spread.at, plan.spread.len), (play.spread.at, play.spread.len));
+        assert_eq!((plan.veil_from, plan.veil_to), play.veil);
+        assert_eq!((plan.frieze.at, plan.frieze.len), (play.frieze.at, play.frieze.len));
+        assert_eq!((plan.veil_top, plan.veil_gone, plan.veil_far), (play.veil_top, play.veil_gone, c::VEIL_FAR));
+        assert_eq!([plan.veil_in.x1, plan.veil_in.y1, plan.veil_in.x2, plan.veil_in.y2], play.veil_in);
+        assert_eq!([plan.veil_out.x1, plan.veil_out.y1, plan.veil_out.x2, plan.veil_out.y2], play.veil_out);
+        assert_eq!(
+            (plan.star_kindle, plan.star_snuff, plan.evening_star_alone, plan.stars_bright, plan.stars_bright_apart),
+            (c::STAR_KINDLE, c::STAR_SNUFF, c::EVENING_STAR_ALONE, c::STARS_BRIGHT, c::STARS_BRIGHT_APART)
+        );
+        assert_eq!((plan.dawn_field_out, plan.dawn_star_linger, plan.star_over), (c::DAWN_FIELD_OUT, c::DAWN_STAR_LINGER, c::STAR_OVER));
+        assert_eq!((plan.beat_hold, plan.beat_len), (c::BEAT_HOLD, c::BEAT_LEN));
+        assert_eq!([plan.cross_ember.r, plan.cross_ember.g, plan.cross_ember.b], c::CROSS_EMBER);
+        assert_eq!([plan.cross_ember_veiled.r, plan.cross_ember_veiled.g, plan.cross_ember_veiled.b], c::CROSS_EMBER_VEILED);
+        assert_eq!([plan.veil_ink.r, plan.veil_ink.g, plan.veil_ink.b], play.veil_ink);
+        assert_eq!((plan.veil_peak, plan.ink_at), (play.veil_peak, play.ink_at));
+        let g = plan.glow_ease;
+        assert_eq!([g.x1, g.y1, g.x2, g.y2], play.glow_ease);
+        let f = plan.front_ease;
+        assert_eq!([f.x1, f.y1, f.x2, f.y2], c::FRONT_EASE);
+        let s = plan.spread_ease;
+        assert_eq!([s.x1, s.y1, s.x2, s.y2], c::SPREAD_EASE);
+        assert_eq!(
+            (plan.spread_wide, plan.ink_handover, plan.tap_apart, plan.rush),
+            (c::SPREAD_WIDE, c::INK_HANDOVER, c::TAP_APART, c::RUSH)
+        );
+        assert_eq!(
+            [
+                plan.spread_feather,
+                plan.spread_shape_part,
+                plan.spread_bend,
+                plan.spread_glow_part,
+                plan.veil_lead,
+                plan.veil_part,
+                plan.cross_press,
+                plan.cross_catch_peak
+            ],
+            [
+                c::SPREAD_FEATHER,
+                c::SPREAD_SHAPE_PART,
+                c::SPREAD_BEND,
+                c::SPREAD_GLOW_PART,
+                c::VEIL_LEAD,
+                c::VEIL_PART,
+                c::CROSS_PRESS,
+                c::CROSS_CATCH_PEAK
+            ]
+        );
+        assert_eq!(
+            (plan.cross_press_len, plan.cross_catch_len, plan.cross_ember_at, plan.cross_ember_in),
+            (c::CROSS_PRESS_LEN, c::CROSS_CATCH_LEN, c::CROSS_EMBER_AT, c::CROSS_EMBER_IN)
+        );
+        let rgb = |p: crate::CrownRgb| [p.r, p.g, p.b];
+        assert_eq!(rgb(plan.veil_warm), play.veil_warm);
+        assert_eq!(plan.pace, c::PACE);
+        assert_eq!((plan.linger_span.at, plan.linger_span.len, plan.linger), (play.linger.at, play.linger.len, c::LINGER));
+        assert_eq!(
+            [rgb(plan.sky_ochre), rgb(plan.sky_red_ochre), rgb(plan.sky_ember), rgb(plan.sky_lime), rgb(plan.sky_rose_lilac)],
+            [c::SKY_OCHRE, c::SKY_RED_OCHRE, c::SKY_EMBER, c::SKY_LIME, c::SKY_ROSE_LILAC]
+        );
+    }
+    // Light arrives faster than it leaves.
+    assert!(crate::crown_plan(false).end < crate::crown_plan(true).end);
+}
+
+#[test]
+fn the_apps_gild_the_end_cross_by_the_shared_rule() {
+    let open = end_leaf_opens(false, false);
+    assert_eq!(open, EndLeaf::Paint);
+    assert_eq!(end_leaf_next(open, false, true, false), EndLeaf::Paint);
+    assert_eq!(end_leaf_next(open, false, true, true), EndLeaf::Gilding);
+    assert_eq!(end_leaf_next(EndLeaf::Gilding, false, true, false), EndLeaf::Gilding);
+    assert_eq!(end_leaf_opens(false, true), EndLeaf::Gilt);
+    assert_eq!(end_leaf_opens(true, true), EndLeaf::Paint);
+    assert_eq!(end_leaf_next(EndLeaf::Paint, true, true, true), EndLeaf::Paint);
+}
+
+#[test]
+fn the_apps_read_whether_an_hour_ends_bare() {
+    let core = OfficeCore::new().unwrap();
+    let hour = |name: &str, month, day| core.compose(name.into(), 2026, month, day, "private".into(), false, false).unwrap();
+    // Vespers of All Saints, then Vespers of the Dead: not a bare hour, but it ends bare.
+    let eve = hour("vespers", 11, 1);
+    assert!(!eve.bare && eve.end_bare);
+    let souls = hour("lauds", 11, 2);
+    assert!(souls.bare && souls.end_bare);
+    let plain = hour("vespers", 10, 31);
+    assert!(!plain.bare && !plain.end_bare);
+}
+
+#[test]
+fn subtle_details_exports_match_presentation() {
+    let core = OfficeCore::new().unwrap();
+    assert_eq!(crate::day_name_gloss("Feria".into()).unwrap().term, "Feria");
+    assert_eq!(crate::day_name_gloss("Advent feria".into()).unwrap().term, "Feria");
+    assert_eq!(crate::day_name_gloss("Vigil of the Nativity".into()).unwrap().term, "Vigil");
+    assert!(crate::day_name_gloss("The Nativity of Our Lord".into()).is_none());
+
+    let about = crate::about();
+    assert!(!about.specimen.deacon_note.is_empty());
+    assert!(!about.specimen.priest_note.is_empty());
+    assert_ne!(about.specimen.deacon_note, about.specimen.priest_note);
+    assert_eq!(about.ordo_colors.len(), 6);
+    assert_eq!(crate::ordo_colors().len(), 6);
+
+    let course = core.ordo_course(2026).unwrap();
+    let rose_note = crate::color_days_note(course.clone(), "rose".into(), 2026);
+    assert!(rose_note.contains("Mar") && rose_note.contains("Dec"), "expected Rose dates, got: {rose_note}");
+    let green_note = crate::color_days_note(course, "green".into(), 2026);
+    assert!(green_note.contains("days in 2026"), "expected day count in 2026, got: {green_note}");
+    assert_eq!(crate::rare_color_max_days(), presentation::course::RARE_COLOR_MAX_DAYS);
+}
+
+/// The picker's marks spell, month by month, the web's letters for the year (#953).
+#[test]
+fn day_marks_match_the_webs_year() {
+    let core = OfficeCore::new().unwrap();
+    let fs = repo_data();
+    let cal = calendar::build_calendar(2026, &calendar::CalendarData::load(&fs).unwrap()).unwrap();
+    let want = presentation::course::day_marks_code(&presentation::course::day_marks(&cal.days, &MoveableDates::compute(2026)));
+    let got: String = (1..=12)
+        .flat_map(|m| core.day_marks(2026, m).unwrap())
+        .map(|d| {
+            let letter = calendar::Color::parse(&d.color).unwrap().abbrev();
+            if d.first_class { letter.to_ascii_uppercase() } else { letter.to_string() }
+        })
+        .collect();
+    assert_eq!(got, want);
+    let december = core.day_marks(2026, 12).unwrap();
+    assert_eq!(december.len(), 31);
+    assert!(december[24].first_class && december[24].color == "white");
+    assert!(core.day_marks(2026, 13).is_err());
+    assert_eq!(first_class_spoken(), "first-class feast");
 }

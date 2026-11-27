@@ -8,13 +8,13 @@ use corpus::typography::typeset;
 use office::feast::{DayOf, FeastTexts, feast_texts};
 use presentation::feast::{
     FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearIndex, YearKeeping, back_to_day, back_to_ordo,
-    feast_date, feast_register, feast_subtitle, feast_titulus, is_entry, is_feast_id, is_usual, keeping_class, keeping_label, keeping_note,
-    kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count, row_date, search_years,
-    texts_keeping, texts_source, whole_office_label,
+    back_to_ordo_year, feast_date, feast_register, feast_subtitle, feast_titulus, is_entry, is_feast_id, is_usual, keeping_class,
+    keeping_label, keeping_note, kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count,
+    row_date, search_years, texts_keeping, texts_source, whole_office_label,
 };
 use presentation::long_date;
 
-use crate::{BlockView, CivilDate, OfficeCore, OfficeError, failed};
+use crate::{BlockView, CivilDate, GlossView, OfficeCore, OfficeError, failed};
 
 /// The search's results: the feasts whose names hold the query, each kept this year and next.
 #[derive(Clone, Debug, uniffi::Record)]
@@ -91,7 +91,14 @@ pub struct FeastTextView {
     pub common: bool,
     /// A prayer (the collect), set flowing: the first opens on the hours' dropped initial.
     pub prayer: bool,
+    /// Set for a hymn, to its Latin title (empty where the hymn has none); `None` for any other
+    /// text. A hymn is folded under its label and title, and opens on a tap to its stanzas (the
+    /// web's `details.feast-hymn`).
+    pub hymn_title: Option<String>,
+    /// Laid out as the hours lay them out; a hymn's are its stanzas.
     pub blocks: Vec<BlockView>,
+    /// Quiet gloss for a non-collapsible text heading ("Collect", "At Lauds · Benedictus", …).
+    pub label_gloss: Option<GlossView>,
 }
 
 /// The day whose hours say the feast's texts in full.
@@ -109,6 +116,8 @@ pub struct FeastPageView {
     pub name: String,
     /// "Greater Double · White · Bishop & Confessor".
     pub subtitle: String,
+    /// Quiet gloss explaining the feast's rank, if any.
+    pub rank_gloss: Option<GlossView>,
     /// "February 27", or "A moveable feast".
     pub date: String,
     /// The titulus over the name: "February 27", or "Its date moves".
@@ -130,6 +139,24 @@ pub struct FeastPageView {
     pub texts_source: String,
     pub texts: Vec<FeastTextView>,
     pub whole_office: Option<WholeOfficeView>,
+}
+
+/// Quiet glosses shared by the Feast page's fixed headings and badges.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct FeastGlosses {
+    pub proper: GlossView,
+    pub common: GlossView,
+    pub monastic: GlossView,
+}
+
+#[uniffi::export]
+pub fn feast_glosses() -> FeastGlosses {
+    let quiet = |g: &presentation::gloss::Gloss| GlossView::of(g, true);
+    FeastGlosses {
+        proper: quiet(&presentation::gloss::PROPER_GLOSS),
+        common: quiet(&presentation::gloss::COMMON_GLOSS),
+        monastic: quiet(&presentation::gloss::MONASTIC_OBSERVANCE_GLOSS),
+    }
 }
 
 /// The fixed words of the search and the feast page.
@@ -182,6 +209,12 @@ pub fn feast_back_to_day(date: CivilDate, today: CivilDate) -> String {
 #[uniffi::export]
 pub fn feast_back_to_ordo(date: CivilDate) -> String {
     date.parse().map(back_to_ordo).unwrap_or_else(|_| FEAST_WORDS.find_title.into())
+}
+
+/// The feast page's way back to the ordo's year it was opened from, as the web's: "2026 Ordo".
+#[uniffi::export]
+pub fn feast_back_to_ordo_year(year: i32) -> String {
+    back_to_ordo_year(year)
 }
 
 /// `usual` leaves its status unsaid, as the feast page does for a year kept as the feast usually is.
@@ -244,6 +277,7 @@ impl OfficeCore {
             id: entry.id.clone(),
             name: typeset(&entry.name),
             subtitle: typeset(&feast_subtitle(entry)),
+            rank_gloss: presentation::gloss::rank_gloss(entry.rank.display_name()).map(|g| GlossView::of(g, true)),
             date: feast_date(entry),
             titulus: feast_titulus(entry),
             register: feast_register(entry).into(),
@@ -267,11 +301,24 @@ impl OfficeCore {
             texts: texts
                 .texts
                 .into_iter()
-                .map(|t| FeastTextView {
-                    label: t.label,
-                    common: t.common,
-                    prayer: t.prayer,
-                    blocks: render_blocks::text_blocks(&t.text, t.prayer).into_iter().map(BlockView::from).collect(),
+                .map(|t| {
+                    let blocks = match &t.hymn {
+                        Some(_) => render_blocks::feast_hymn_blocks(&t.text),
+                        None => render_blocks::text_blocks(&t.text, t.prayer),
+                    };
+                    let label_gloss = if t.hymn.is_none() {
+                        presentation::gloss::feast_text_gloss(&t.label).map(|g| GlossView::of(g, true))
+                    } else {
+                        None
+                    };
+                    FeastTextView {
+                        label: t.label,
+                        common: t.common,
+                        prayer: t.prayer,
+                        hymn_title: t.hymn,
+                        blocks: blocks.into_iter().map(BlockView::from).collect(),
+                        label_gloss,
+                    }
                 })
                 .collect(),
             whole_office: next

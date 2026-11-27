@@ -3,7 +3,9 @@ package org.orthodoxwest.office
 import android.app.Application
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsOff
@@ -13,7 +15,9 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -61,6 +65,7 @@ class AccessibilityTest {
 
     private fun role(r: Role) = SemanticsMatcher.expectValue(SemanticsProperties.Role, r)
     private fun state(s: String) = SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, s)
+    private val changesDate = SemanticsMatcher("clicks to change date") { it.config.getOrNull(SemanticsActions.OnClick)?.label == "change date" }
 
     @Test
     @Config(qualifiers = "w390dp-h2400dp-xxhdpi")
@@ -76,8 +81,10 @@ class AccessibilityTest {
     @Test
     fun theDatePickerNamesEachDay() {
         show(Page.Hour(lent, "vespers"))
-        compose.onNodeWithText("Change date", substring = true).assert(state("Collapsed")).performClick()
-        compose.onNodeWithText("Change date", substring = true).assert(state("Expanded"))
+        // The header's date is the way in: no "Change date" label, but a button that says so.
+        assertTrue(compose.onAllNodesWithText("Change date", substring = true).fetchSemanticsNodes().isEmpty())
+        compose.onNode(changesDate).assert(role(Role.Button)).assert(state("Collapsed")).performClick()
+        compose.onNode(changesDate).assert(state("Expanded"))
         compose.onNodeWithContentDescription("Sunday, March 15, today").assertIsSelected()
         compose.onNodeWithContentDescription("Previous month").assert(role(Role.Button))
         // The prayer form's legend is set in capitals, as the web's `.leader-selector legend`.
@@ -91,6 +98,8 @@ class AccessibilityTest {
         compose.onNodeWithText("Prime").assertIsOff()
         compose.onNodeWithContentDescription("Sunday").assert(role(Role.Checkbox)).assertIsOn()
         compose.onNodeWithText("Set prayer reminders").assert(isHeading())
+        // The rule, written out under the choices (presentation::reminders).
+        compose.onNodeWithText("Lauds at 6:45 AM, Vespers at 6:00 PM, and Compline at 9:00 PM, every day, ten minutes before.").assertExists()
     }
 
     @Test
@@ -99,14 +108,48 @@ class AccessibilityTest {
         compose.onNode(hasContentDescription("Sunday, March 1. I Sunday in Lent. liturgical color: violet", substring = true)).assert(role(Role.Button))
     }
 
+    /** An ordo mark names itself in the note a glossed word opens, as the web's `.month-table abbr`. */
+    @Test
+    fun anOrdoMarkOpensItsNote() {
+        show(Page.Ordo(2026, 3))
+        val rank = compose.onAllNodesWithContentDescription("Double of the 1st Class").onFirst()
+        rank.assert(role(Role.Button)).assert(state("Collapsed"))
+        rank.performClick()
+        compose.waitForIdle()
+        rank.assert(state("Expanded"))
+        compose.onNodeWithText("Double of the 1st Class").assertExists()
+        compose.onAllNodesWithContentDescription("Fasting").onFirst().assert(role(Role.Button))
+    }
+
+    @Test
+    fun homeDateButtonSpeaksFullDateAndHeadpieceCrossIsSilent() {
+        show(Page.Home(lent))
+        compose.onNodeWithContentDescription("Sunday, March 15, 2026").assert(role(Role.Button)).assert(isHeading())
+        assertTrue(compose.onAllNodesWithText("✠").fetchSemanticsNodes().isEmpty())
+    }
+
     @Test
     @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
     fun aboutHasHeadingsAndOpensEachHour() {
         show(Page.About)
         compose.onNodeWithText("About the Office").assert(isHeading())
-        compose.onNodeWithText("The seven hours").assert(isHeading())
+        compose.onNodeWithText("The hours").assert(isHeading())
+        compose.onNode(hasContentDescription("The Divine Office is the Church", substring = true)).assertExists()
         compose.onNodeWithText("Lauds").assert(role(Role.Button))
         compose.onNodeWithText("Compline").assert(role(Role.Button))
+        // Matins is shown, coming soon, and opens nothing; its station on the figure is reached
+        // like the others.
+        compose.onNodeWithText("Matins").assert(SemanticsMatcher.keyNotDefined(SemanticsActions.OnClick))
+        compose.onNodeWithContentDescription("Matins: The night office, before dawn, coming soon").assert(role(Role.Button))
+    }
+
+    /** Home's Night band: its heading, and Matins one stop that says it is coming and opens nothing. */
+    @Test
+    fun homesMatinsIsComingSoonAndNoLink() {
+        show(Page.Home(lent))
+        compose.onNodeWithText("Night").assert(isHeading())
+        compose.onNode(hasContentDescription("Matins", substring = true)).assert(hasContentDescription("coming soon", substring = true))
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.OnClick))
     }
 
     @Test

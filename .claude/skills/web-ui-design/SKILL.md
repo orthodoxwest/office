@@ -79,12 +79,52 @@ or impose a redesign on an unrelated change.
   across the unequal 2/3/2 groups. Nothing is appended after the groups
   that a `:first-child`/`:last-child` rule would miss: the ruled layer is an
   SVG, so the group rules use `:first-of-type`/`:last-of-type`.
+- A tap on the consecration cross at the head of home's card turns the
+  look over (Nave to Apse and back) as a dusk or a dawn: a same-document
+  view transition, in app.js's "Home: the crown's play" and style.css's
+  block of the same name. `presentation::crown` holds the rule
+  (`after_crown_tap`) and the timetable; a test in office-web's
+  handlers.rs holds app.js and style.css to it. At rest the page is
+  exactly the page without it: every class, name and custom property the
+  play sets is `crown-` prefixed and removed at its end. A reader who
+  asked for stillness or contrast, a black day, and a browser that cannot
+  drive the transition's parts get the Menu's plain crossfade; forced
+  colours hide the button. Its timings are written at the pace it was
+  composed at and performed `PACE` (`--crown-pace`) times slower; slow or
+  hurry it for a test with `--crown-k` on `:root`. The arch's lining is
+  never a named part of the transition (a still of it sits off the live
+  one at a fractional pixel ratio and the outline steps), and a fallback
+  says why on the root (`data-crown-plain`, `data-crown-early`). The wall
+  is never crossed cream to navy straight: a veil multiplied over both
+  pictures shades it first. When
+  capturing it, take no screenshot while the browser makes its stills
+  (the turn): one in flight there loses the old page's still. Do not undo
+  (each has a `KEEP` comment beside it and a test):
+  - the `; wv)` gate: Android's WebView loses the leaving page's still even
+    in a bare transition, so there the tap makes the Menu's change;
+  - the lining, and every other part of the arch's outline, is never given
+    a `view-transition-name`;
+  - the first act is held at the turn at `(now - startTime) * rate`, never
+    at the stale `currentTime` (first light stepped back);
+  - nothing newer than Safari 18.0: no `view-transition-class`, nested
+    groups, `@starting-style`, animated mask images or scroll timelines;
+  - nothing reads the frame back between `startViewTransition` and its
+    `ready`;
+  - stillness, contrast, a black day, an open panel and forced colours take
+    the plain path and set no `crown-` class.
+  Its tests never watch it play: `.web-tools/tests/crown-play.js` pauses
+  every animation after the first frame, clears the play's timers and
+  writes each `currentTime` for the moment asked, so a frame is a function
+  of that moment alone (the visual baselines `crown-dusk-*`/`crown-dawn-*`
+  and the light's smoothness checks in ux.spec.js). The ending beat runs
+  from script after the stills go and is not held this way.
 - On a phone home's frontispiece is a painted panel with a pointed head:
   a steep four-centred arch rising 0.44 of the card's width, its haunches
   leaving the jambs without a kink. The head is drawn by
   `tools/genarch.py`, which writes clip-path polygons into style.css's
   `genarch` block, and the same shapes' arcs into the native apps'
-  `Arch.kt` and `Arch.swift`; never edit them by hand. A box-shadow or border-radius
+  `Arch.kt` and `Arch.swift`, and their figures into app.js's `ARCHES`
+  for the crown's play; never edit them by hand. A box-shadow or border-radius
   cannot follow a pointed head, so each course is its own layer clipped
   to the same arch offset by its own distance (`--arch-d`): the day's
   ring (`.home-arch::before`, the halo's source), the frame
@@ -186,7 +226,15 @@ or impose a redesign on an unrelated change.
   feast and invitation grow, the hours' rows get a fixed taller minimum
   (never stretched), and the card stands down to the screen's foot,
   the spare height going to the head, two parts above the day block to
-  three below so the title reads with the cross. The larger type waits
+  three below so the title reads with the cross. Home's "Change date"
+  turns the stage under the band (the invitation and the hours) into the
+  calendar in their place, cross-fading the two while the stage eases
+  between their heights; the season and Change date stay under it. The
+  head gives up the difference only where its spare height holds it;
+  otherwise the arch keeps its shape and the page rises with the turn,
+  frame by frame, to the card's foot and its gutter (app.js; Android's
+  `Follow`, iOS's `Reveal.alongside`). Never press the arch and then
+  scroll. The larger type waits
   for 375px wide and 830px high; narrower or shorter phones need the
   height for wrapped lines. On a past date "Go to today" follows the
   day's facts (feast, fasts, commemorations) rather than parting them.
@@ -257,9 +305,8 @@ or impose a redesign on an unrelated change.
   tried and read as stickers or sunbursts: keep the day's head plaster. The
   mosaic belongs to the app icon (`tools/genicons.py`), an object seen at
   one scale.
-- From 701px to 999px the hours' header sets its link list as a centred
-  rank of its own under the brand and Settings; left to wrap, it stranded
-  the last link on a line. Under a coarse pointer the header's links and
+- The menu holds Ordo, Reminders and About, not the hours: the hours are
+  reached from home and from the end of each hour. Under a coarse pointer the header's links and
   the ordo's day links answer to a touch-target box drawn by a
   pseudo-element, so type and header height stay as the mouse has them.
 - The footer's colophon and report line stand on a reserve: a feathered
@@ -303,7 +350,7 @@ or impose a redesign on an unrelated change.
   and the years are a rail beside the texts. Its back link names the day or
   the ordo's month it was opened from (`?from=`).
 - Filled actions are home's tablet, not slabs (`.reminder-subscribe`,
-  `/beta`'s steps, the apps' "Turn on reminders"); a second action is a
+  the apps' "Turn on reminders"); a second action is a
   worded link with the gold underline. Reminders is ruled as home's hours
   (titulus over a lining rule, hairlines, a closing rule); a chosen time
   is the accent's figures on the gold rule with the caret, the platform's
@@ -313,9 +360,12 @@ or impose a redesign on an unrelated change.
   1.06rem, gilt points between the three, and one rule struck under them
   with home's pen (`rule()` in app.js, seed 51; a border without script).
 - Hours keep date switching secondary, wake lock scoped to `.office-hour`,
-  and issue reporting after the prayer. "Change date" unfolds the
-  hand-set month grid from `app.js` (days are links, the grid pattern's
-  keys); the native date field is only the no-script fallback, since its
+  and issue reporting after the prayer. The header's date, set as plain
+  text with no "Change date" label (home keeps the labelled control),
+  unfolds the hand-set month grid from `app.js` (days are links, the grid
+  pattern's keys): a button to assistive tech, found by the thumb through a
+  pressed wash and the accent while open. Without script the disclosure
+  keeps its summary; the native date field is only the no-script fallback, since its
   popup is the platform's and belongs to no theme here. Print expands session prayers and
   hides navigation/progress controls. Don't add persistent mobile chrome
   without checking how much prayer remains visible.
@@ -325,6 +375,13 @@ or impose a redesign on an unrelated change.
   the year was ~14,000); `/calendar/YYYY` is the frontispiece (Tabula
   Temporaria and the month strip) and `/calendar/YYYY/all` the whole year
   for print and find-in-page. Links to a day go to its month's page.
+  Under the month strip, on every ordo page, runs the year's course: a 3px
+  band of each day's rail colour (`presentation::course`, a day to a 31st of
+  the month, so February is short; aria-hidden), today's lozenge hung under
+  it at today's place. On the frontispiece alone it is laid in once a
+  session by one stroke across the year (Tempo's `COURSE_LAY_*`); never on
+  Back or under reduced motion. July to November reads as flecks, not
+  bands: that is the ordo's feasts, drawn as they are.
 - Lay broad surface washes once, sized to the viewport, rather than repeating
   texture tiles on long pages. Keep liturgical text on a quiet field.
 - The limewash wall is the parish nave photograph, high-passed to grey

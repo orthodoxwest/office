@@ -1,4 +1,12 @@
 import SwiftUI
+import UIKit
+
+private let homeGlossesShared = homeGlosses()
+
+/// Home's Night row, set after the day's three periods: Matins, which the app does not yet pray,
+/// so it is no link, never the hour that is now, and takes no part in the light or the marks of
+/// hours prayed (the web's `.home-hour-group-night`). Its words are the core's (`home_night`).
+private let homeNightShared = homeNight()
 
 private let periods: [(period: Period, label: String, hours: [String])] = [
     (.morning, "Morning", ["lauds", "prime"]),
@@ -14,11 +22,14 @@ struct HomePage: View {
     var body: some View {
         let today = model.today
         let clock = model.clockHour
-        Loaded(key: "\(date.iso) \(today.iso) \(clock)", motion: model.motion(to: .home(date))) {
+        // A new clock hour composes home again in place, its light moving if the turn was seen
+        // (`HourLightPass`), rather than replacing the page.
+        Loaded(key: "\(date.iso) \(today.iso) \(clock)", place: "\(date.iso) \(today.iso)", motion: model.motion(to: .home(date)), arrival: model.homeArrival) {
             try Office.core.get().home(date: date, today: today, clockHour: Int32(clock))
         } content: { view in
             HomeScreen(view: view, date: date)
                 .onChange(of: view.ornament, initial: true) { _, season in model.composed(season: season, page: .home(date)) }
+                .screenshotReady(.home(date))
         }
         .background(PlasterWall())
         .toolbar(.hidden, for: .navigationBar)
@@ -33,6 +44,9 @@ struct HomeScreen: View {
     @Environment(\.wide) private var wide
     /// Where the niche stands on the screen, which the chapel light follows.
     @State private var nicheFrame: CGRect?
+    /// Where the crown's play finds home's parts; kept apart from the view's state, so a scroll
+    /// that moves them does not lay home out again.
+    @State private var crownFrames = CrownFrames()
 
     var body: some View {
         let p = self.p.seasoned(view.ornament)
@@ -77,16 +91,20 @@ struct HomeScreen: View {
                         // fold, rather than being cut through by it.
                         VStack(spacing: 0) {
                             VStack(spacing: 0) {
-                                SiteHeader()
+                                SiteHeader().crownInk("r-header")
                                 Spacer(minLength: 0)
-                                Frontispiece(view: view, date: date, tier: HomeTier(screen: screen / m.layout, tall: tall / m.layout, card: layout.card, dyn: m.type / m.layout, wide: layout, heavy: heavy), niche: niche)
+                                Frontispiece(view: view, date: date, tier: HomeTier(screen: screen / m.layout, tall: tall / m.layout, card: layout.card, dyn: m.type / m.layout, wide: layout, heavy: heavy), niche: niche, frames: crownFrames)
                                     .background(GeometryReader { card in
                                         Color.clear.preference(key: NicheFrameKey.self, value: card.frame(in: .global))
                                     })
                                     .frame(maxWidth: zoomed.px(layout.card))
+                                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                                        ScreenshotGeometry.note("home.card", "\($0) of \(zoomed.px(layout.card)) at zoom \(layout.zoom) in \(geo.size)")
+                                    }
                                     .environment(\.metrics, zoomed)
                                     .padding(.horizontal, 24)
                                     .padding(.top, zoomed.px(layout.air))
+                                    .id(homeCard)
                                 Spacer(minLength: 0)
                             }
                             .frame(minHeight: layout.fits ? nil : tall)
@@ -99,23 +117,37 @@ struct HomeScreen: View {
                         // above the band. The phone's home has no colophon; the wide home keeps it.
                         let card = min(m.px(576), screen - 2 * m.px(gutter))
                         PhoneHome(height: tall, foot: m.px(gutter)) {
-                            SiteHeader()
-                            Frontispiece(view: view, date: date, tier: HomeTier(screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout, dyn: m.type / m.layout), niche: nil)
+                            SiteHeader().crownInk("r-header")
+                            Frontispiece(view: view, date: date, tier: HomeTier(screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout, dyn: m.type / m.layout), niche: nil, frames: crownFrames)
                                 .frame(maxWidth: m.px(576))
                                 .padding(.horizontal, m.px(gutter))
                                 .padding(.top, m.px(13.6))
                         }
+                        // The card and the gutter under it, which "Change date" brings into view.
+                        .id(homeCard)
                     }
                 }
                 .revealing(scroll)
                 }
             }
         }
-        .onPreferenceChange(NicheFrameKey.self) { nicheFrame = $0 }
+        .onPreferenceChange(NicheFrameKey.self) { frame in
+            nicheFrame = frame
+            ScreenshotGeometry.note("home.niche", "\(frame.map { "\($0)" } ?? "none")")
+        }
+        .onPreferenceChange(CrownFrameKey.self) { frames in
+            crownFrames.value = frames
+            // A scroll or a new layout ends the crown's play: its photographs cannot move.
+            CrownPlayer.shared.moved(crownFrames)
+        }
+        .onDisappear { CrownPlayer.shared.cut(owner: crownFrames) }
         .environment(\.ornament, o)
         .environment(\.palette, p)
     }
 }
+
+/// The scroll id of home's card, whose foot "Change date" brings into view as the picker unfolds.
+private let homeCard = "home-card"
 
 /// The niche's frame on the screen.
 private struct NicheFrameKey: PreferenceKey {
@@ -178,6 +210,13 @@ struct HomeTier {
     let listMiddle: CGFloat
     /// A short screen's niche (a phone on its side), fitted down to the invitation.
     let shortScreen: Bool
+    /// A phone to 760 high (the web's `max-height: 760px`) at up to 130% type: Matins' band is one line, its mark
+    /// after its name, as tall as the line.
+    let soonInline: Bool
+    /// A phone to 760 high, at any type size (the web's `max-width: 700px` and `max-height: 760px`): the
+    /// joints below the frieze close up there on every day, and the Night's star stands beside its label,
+    /// so its fourth band costs as little height as it can.
+    let shortPhone: Bool
     private let step: Int
     private let type: Int
     private let short: Bool
@@ -194,6 +233,8 @@ struct HomeTier {
         zoom = wide?.zoom ?? 1
         listMiddle = wide?.listMiddle ?? 0
         shortScreen = wide?.short ?? false
+        soonInline = !desk && tall <= 760 && dyn <= 1.3
+        shortPhone = !desk && tall <= 760
         self.heavy = heavy
         step = desk ? 0 : tall >= 880 ? 2 : tall >= 800 ? 1 : 0
         type = desk || screen < 375 ? 0 : tall >= 880 ? 2 : tall >= 830 ? 1 : 0
@@ -329,20 +370,27 @@ struct HomeTier {
     var band: CGFloat { pick(legible(14.4), 12.8, 12.8, 13.6) }
     var bandTracking: CGFloat { desk ? 0.2 : 0.15 }
     var bandPad: CGFloat { pick(2.56, 3.2, 3.2, 3.84) }
-    var bandGap: CGFloat { pick(17.6, 12, 16, 20) }
+    /// Under the band, to the invitation: 0.75rem on a phone, 0.5rem on a short one (`shortPhone`).
+    var bandGap: CGFloat { shortPhone ? 8 : pick(17.6, 12, 16, 20) }
     var pray: TextStyle { pick(Scale.body.sized(25.6, line: 33.28), Scale.body.sized(19.2, line: 24.96), Scale.body.sized(22.4, line: 29.12), Scale.body.sized(24, line: 31.2)).tracked(0.38) }
-    var prayPad: CGFloat { pick(15, 11.9, 13.5, 15.9) }
-    var prayGap: CGFloat { pick(14.4, 11.2, 20, 24) }
+    /// The invitation's padding over and under its words, its 1pt line included; a short phone
+    /// (`shortPhone`) closes it to 0.45rem 0.5rem and the space under it to 0.45rem, as the web's
+    /// does there on every day: the joints below the frieze give the Night's band its height.
+    var prayPad: CGFloat { shortPhone ? 8.2 : pick(15, 11.9, 13.5, 15.9) }
+    var prayPadBottom: CGFloat { shortPhone ? 9 : prayPad }
+    var prayGap: CGFloat { shortPhone ? 7.2 : pick(14.4, 11.2, 20, 24) }
     /// An hour's row: the niche's table 3.5rem, its list 3.1rem (a thumb's height at its least zoom).
     var row: CGFloat { desk ? max(list ? 49.6 : 56, 44 / zoom) : pick(56, 44, 54.4, 62.4) }
     var hour: CGFloat { desk ? legible(list ? 19.84 : 18.56) : 15.68 }
     /// The hour that is now is larger in the niche, as well as lit and rubricated.
     var hourNow: CGFloat { desk ? legible(list ? 22.72 : 21.12) : hour }
-    /// Every hour's gloss in the niche; a phone's only under the hour that is now.
-    var gloss: CGFloat { desk ? legible(list ? 16 : 13.76) : 12.48 }
+    /// Every hour's gloss in the niche; a phone's, the hour that is now's, under the invitation's words.
+    var gloss: CGFloat { desk ? legible(list ? 16 : 13.76) : 13.76 }
     /// The periods' labels: larger in the niche, where they stand beside the list.
     var period: CGFloat { desk ? legible(list ? 15.2 : 13.76) : 11.52 }
     var periodTracking: CGFloat { list ? 0.16 : desk ? 0.14 : 0.12 }
+    /// "coming soon" under an hour not yet prayed in the app: 0.72rem on a phone, 0.8rem wider.
+    var soon: CGFloat { desk ? legible(12.8) : 11.52 }
     var metaGap: CGFloat { pick(8.8, 8.8, 16, 19.2) }
     /// The season and "Change date" at the foot, in small caps.
     var meta: CGFloat { desk ? legible(15.2) : 13.44 }
@@ -375,34 +423,40 @@ private struct FrontispieceLayout: Layout {
     }
 
     /// The head's height, the day's parts (its facts, the versicle when it fits, and "Go to
-    /// today"), the hours, the picker as far as it has unfolded, and the whole. The versicle takes
-    /// only the height the head has to spare: where it would make the card taller, the head goes
-    /// without it. It is fitted to the card with the picker shut, as the web's is, so opening the
-    /// picker never takes it away.
-    private func measure(_ width: CGFloat, _ proposal: ProposedViewSize, _ subviews: Subviews) -> (summary: CGFloat, facts: CGFloat, versicle: CGFloat?, back: CGFloat, after: CGFloat, picker: CGFloat, height: CGFloat) {
+    /// today"), the band, the stage as far as it has turned from the hours to the calendar, the
+    /// hours' height, and the whole. The versicle takes only the height the head has to spare:
+    /// where it would make the card taller, the head goes without it. It is fitted to the card
+    /// with the hours shown, as the web's is, so turning to the calendar never takes it away.
+    private func measure(_ width: CGFloat, _ proposal: ProposedViewSize, _ subviews: Subviews) -> (summary: CGFloat, facts: CGFloat, versicle: CGFloat?, back: CGFloat, band: CGFloat, stage: CGFloat, hours: CGFloat, height: CGFloat) {
         let free = ProposedViewSize(width: width, height: nil)
         let facts = subviews[2].sizeThatFits(free).height
         let versicle = subviews[3].sizeThatFits(free).height
         let back = subviews[4].sizeThatFits(free).height
-        let after = subviews[5].sizeThatFits(free).height
-        // The picker's full height; none once it has folded away.
-        let full = subviews[6].sizeThatFits(free).height
-        let unfolded = min(max(open, 0), 1)
+        let band = subviews[5].sizeThatFits(free).height
+        let hours = subviews[6].sizeThatFits(free).height
+        // The calendar's full height; none once it has turned back and been let go.
+        let full = subviews[7].sizeThatFits(free).height
+        let meta = subviews[8].sizeThatFits(free).height
+        let turned = full > 0 ? min(max(open, 0), 1) : 0
         let foot = m.px(tier.bottom)
         let pad = m.px(tier.headPad)
         let day = facts + back + m.px(tier.dayGap)
         let rise = tier.arch.rise * width
         let least = proposal.height.map { $0.isFinite ? $0 : 0 } ?? 0
-        let shut = max(pad + day, rise, least - after - foot)
+        let shut = max(pad + day, rise, least - band - hours - meta - foot)
         let fits = versicle > 0 && pad + day + versicle <= shut
-        // The picker takes the head's spare height before it lengthens the card. Taken as it
-        // unfolded, that height went in the first frames: the day leapt up, then stood while the
-        // card grew under the picker. Instead the head gives it up in step with the unfolding, so
-        // the day rises as the picker opens and settles with it.
-        let opened = max(pad + day + (fits ? versicle : 0), rise, least - after - full - foot)
-        let summary = full > 0 ? shut - (shut - opened) * unfolded : shut
-        let picker = full * unfolded
-        return (summary, facts, fits ? versicle : nil, back, after, picker, summary + after + picker + foot)
+        // "Change date" turns the stage from the hours to the calendar, which is taller. Where the
+        // head's spare height holds the difference, it gives it up in step with the turn, so the
+        // day rises as the calendar opens and nothing scrolls; where it does not, the head keeps
+        // its height, the card lengthens, and the page rises with its foot in the same
+        // transaction (`Reveal.alongside`), the arch never pressed down for a scroll that comes
+        // anyway (the web's and Android's alike).
+        let floor = max(pad + day + (fits ? versicle : 0), rise)
+        let room = least - band - full - meta - foot
+        let opened = room >= floor ? room : shut
+        let summary = shut - (shut - opened) * turned
+        let stage = hours + (full - hours) * turned
+        return (summary, facts, fits ? versicle : nil, back, band, stage, hours, summary + band + stage + meta + foot)
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
@@ -411,7 +465,7 @@ private struct FrontispieceLayout: Layout {
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let (summary, facts, versicle, back, after, picker, _) = measure(bounds.width, proposal, subviews)
+        let (summary, facts, versicle, back, band, stage, hours, _) = measure(bounds.width, proposal, subviews)
         let free = ProposedViewSize(width: bounds.width, height: nil)
         let pad = m.px(tier.headPad)
         let spare = summary - pad - facts - (versicle ?? 0) - back - m.px(tier.dayGap)
@@ -425,9 +479,13 @@ private struct FrontispieceLayout: Layout {
         subviews[3].place(at: CGPoint(x: bounds.minX, y: y), proposal: ProposedViewSize(width: bounds.width, height: versicle.map { $0 + 1 } ?? 0))
         y += versicle ?? 0
         subviews[4].place(at: CGPoint(x: bounds.minX, y: y), proposal: free)
-        subviews[5].place(at: CGPoint(x: bounds.minX, y: bounds.minY + summary), proposal: free)
-        // Revealed from its top as far as it has unfolded.
-        subviews[6].place(at: CGPoint(x: bounds.minX, y: bounds.minY + summary + after), proposal: ProposedViewSize(width: bounds.width, height: picker))
+        let top = bounds.minY + summary
+        subviews[5].place(at: CGPoint(x: bounds.minX, y: top), proposal: free)
+        // Both faces of the stage stand at its head: the hours at their own height, the calendar
+        // revealed from its top as far as the turn has opened the stage.
+        subviews[6].place(at: CGPoint(x: bounds.minX, y: top + band), proposal: ProposedViewSize(width: bounds.width, height: hours))
+        subviews[7].place(at: CGPoint(x: bounds.minX, y: top + band), proposal: ProposedViewSize(width: bounds.width, height: stage))
+        subviews[8].place(at: CGPoint(x: bounds.minX, y: top + band + stage), proposal: free)
     }
 }
 
@@ -444,11 +502,17 @@ private struct Frontispiece: View {
     let date: CivilDate
     let tier: HomeTier
     let niche: NicheTokens?
+    /// Where home's parts stand, for the crown's play.
+    let frames: CrownFrames
     @EnvironmentObject private var model: AppModel
+    @ObservedObject private var crownPlayer = CrownPlayer.shared
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
     @State private var picking = false
+    /// The light moving from one hour to the next, while it moves.
+    @State private var light: HourLightPass?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Whether the picker is laid out: from its opening until it has folded away.
     @State private var unfolded = false
     /// The painter's reserve round the day's words, which the sky's stars keep clear of.
@@ -486,36 +550,51 @@ private struct Frontispiece: View {
             // on a phone 0.75rem inside the panel's edge, in a niche 26pt inside the moulding. By
             // night on a phone, the apse's sky with its stars, ringed by a leaf fillet and the
             // day's hairline.
-            if night {
-                let crown = m.px(tier.crownSize)
-                let top = m.px(tier.crownTop)
-                GeometryReader { g in
-                    let w = g.size.width
-                    let clear = reserve.values.map { $0.insetBy(dx: -14, dy: -6) }
-                        + [CGRect(x: (w - crown) / 2 - 11, y: top - 11, width: crown + 22, height: crown + 22)]
-                    Sky(arch: tier.arch, ink: home, leaf: leaf, lit: catchLight, stars: !black, first: first, hairline: black ? nil : view.color == "white" ? home.limeWhite : day, reserve: clear)
-                }
-            } else {
-                ZStack {
-                    // A first-class niche by day gilds one fillet round its head, to the frieze.
-                    if desk && first { GiltHead(arch: tier.arch) }
-                    Lining(arch: tier.arch, inset: m.px(tier.lining), hairline: liningDay, pigmented: true)
+            Group {
+                if night {
+                    let crown = m.px(tier.crownSize)
+                    let top = m.px(tier.crownTop)
+                    GeometryReader { g in
+                        let clear = Sky.starReserve(Array(reserve.values), width: g.size.width, crown: crown, top: top)
+                        // While the crown plays, its stars are the play's to kindle or put out.
+                        Sky(arch: tier.arch, ink: home, leaf: leaf, lit: catchLight, stars: !black && crownPlayer.run == nil, first: first, hairline: black ? nil : view.color == "white" ? home.limeWhite : day, reserve: clear)
+                    }
+                } else {
+                    ZStack {
+                        // A first-class niche by day gilds one fillet round its head, to the frieze.
+                        if desk && first { GiltHead(arch: tier.arch) }
+                        Lining(arch: tier.arch, inset: m.px(tier.lining), hairline: liningDay, pigmented: true)
+                    }
                 }
             }
+            .crownFrame("head")
             // The consecration cross in the point of the head, with clear air round it: painted
             // through the pigment, gilt on a first-class feast by day, leaf by night on the sky.
-            Group {
-                let size = m.px(tier.crownSize)
-                if night && black {
-                    Crown(size: size, ink: muted.opacity(0.7), shading: .color(muted.opacity(0.7)))
-                } else if night {
-                    Crown(size: size, ink: leaf.mid, shading: .linearGradient(Gradient(stops: [.init(color: leaf.hi, location: 0), .init(color: leaf.mid, location: 0.55), .init(color: leaf.lo, location: 1)]), startPoint: .zero, endPoint: CGPoint(x: size, y: size)), alpha: 0.35 + 0.65 * catchLight)
-                } else if first {
-                    Crown(size: size, ink: o.flat, shading: .linearGradient(Gradient(stops: [.init(color: o.hi, location: 0.08), .init(color: mix(o.hi, .white, 0.55), location: 0.3), .init(color: o.flat, location: 0.52), .init(color: o.lo, location: 0.92)]), startPoint: .zero, endPoint: CGPoint(x: size, y: size)))
-                } else {
-                    Crown(size: size, ink: p.lining)
+            // It is also, unannounced, a button: a tap turns the look over (CrownPlay.swift).
+            let crownSize = m.px(tier.crownSize)
+            crownMark(dark: night, season: view.ornament, first: first, black: black, size: crownSize)
+                // While the crown plays, its looks are the play's.
+                .opacity(crownPlayer.run == nil ? 1 : 0)
+                .crownFrame("crown")
+                .overlay(alignment: .bottom) {
+                    // At least a thumb's width, standing on the roundel's foot and growing up
+                    // into the point, clear of the date's own tap box below.
+                    let tap = max(m.px(44), 46)
+                    Button {
+                        // A light tick under the finger, as a choice gives (Android does the same).
+                        chose()
+                        let head = CrownHead(arch: tier.arch, first: first, black: black, season: view.ornament, crownSize: crownSize,
+                                             crownTop: m.px(tier.crownTop), reserve: Array(reserve.values))
+                        CrownPlayer.shared.tap(model: model, head: head, frames: frames)
+                    } label: {
+                        Color.clear.frame(width: tap, height: tap)
+                    }
+                    .buttonStyle(Unmarked())
+                    .crownFrame("tap")
+                    .offset(y: m.px(2.4))
+                    // In the menu's own words, following the look.
+                    .accessibilityLabel(night ? "Switch to Nave" : "Switch to Apse")
                 }
-            }
             // The day.
             VStack(spacing: 0) {
                 Button { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) } label: {
@@ -549,10 +628,17 @@ private struct Frontispiece: View {
                 .buttonStyle(Quiet())
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityHint("Opens the ordo")
+                .crownInk("w-date")
                 // The day's feast leads to its page, underlined as the web's `.feast-link`.
                 Group {
                     if view.feastId.isEmpty {
-                        FeastName(name: view.feastName, alias: view.feastAlias, style: tier.feast)
+                        if let dg = dayNameGloss(name: view.feastName) {
+                            GlossMark(gloss: dg, label: view.feastName, reaches: false) {
+                                FeastName(name: view.feastName, alias: view.feastAlias, style: tier.feast)
+                            }
+                        } else {
+                            FeastName(name: view.feastName, alias: view.feastAlias, style: tier.feast)
+                        }
                     } else {
                         Button { model.open(.feast(view.feastId)) } label: {
                             FeastName(name: view.feastName, alias: view.feastAlias, style: tier.feast, linked: true)
@@ -563,17 +649,29 @@ private struct Frontispiece: View {
                 }
                 .foregroundStyle(p.accent)
                 .reserved("feast")
+                .crownInk("w-feast")
                 .frame(maxWidth: tier.feastMeasure.map { m.px($0) })
                 .padding(.top, m.px(2))
                 if !view.octaveNote.isEmpty {
-                    Text(view.octaveNote).type(Scale.small).foregroundStyle(muted).multilineTextAlignment(.center).reserved("octave")
+                    GlossMark(gloss: homeGlossesShared.octave, label: view.octaveNote, reaches: false) {
+                        Text(view.octaveNote).type(Scale.small).foregroundStyle(muted).multilineTextAlignment(.center).reserved("octave")
+                    }
+                    .crownInk("w-octave")
                 }
                 if !view.penitential.isEmpty {
                     HStack(spacing: m.px(9.6)) {
                         ForEach(view.penitential, id: \.self) { t in
-                            Text(t).type(tier.fast).foregroundStyle(rubric).reserved("fast " + t)
+                            let pg = penitentialGloss(label: t)
+                            if let pg {
+                                GlossMark(gloss: pg, label: t, reaches: false) {
+                                    Text(t).type(tier.fast).foregroundStyle(rubric).reserved("fast " + t)
+                                }
+                            } else {
+                                Text(t).type(tier.fast).foregroundStyle(rubric).reserved("fast " + t)
+                            }
                         }
                     }
+                    .crownInk("w-fast")
                     .padding(.top, m.px(desk && tier.heavy ? 0 : 12))
                 }
                 if !view.commemorations.isEmpty {
@@ -596,6 +694,7 @@ private struct Frontispiece: View {
                             }
                         }
                     }
+                    .crownInk("w-also")
                     .padding(.top, m.px(8))
                 }
             }
@@ -610,6 +709,7 @@ private struct Frontispiece: View {
                         versicleLine("℟.", view.response, style).reserved("response")
                     }
                     .frame(maxWidth: m.px(tier.versicleMeasure))
+                    .crownInk("w-versicle")
                     .padding(.top, m.px(12))
                 }
                 Color.clear.frame(height: 0)
@@ -625,63 +725,57 @@ private struct Frontispiece: View {
                             .padding(.vertical, m.px(12))
                     }
                     .buttonStyle(Quiet())
+                    .accessibilityLabel("Go to today")
+                    .crownInk("w-today")
                 }
             }
             .frame(maxWidth: .infinity)
-            // The invitation and the hours, from the inscription band.
-            VStack(spacing: 0) {
-                inscription(side: side)
-                PrayNow(label: view.prayNowLabel, tier: tier, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil) {
-                    model.open(.hour(view.prayNowDate, view.prayNowHour))
+            // The inscription band, at the head of the stage.
+            inscription(side: side)
+                .padding(.horizontal, side)
+                .frame(maxWidth: .infinity)
+            // The stage's first face: the invitation and the hours, which "Change date" turns into
+            // the calendar in their place (the web's `.home-hours-face`), fading out as it turns.
+            // The light moves with the hours: drawn each frame of a pass from the shared figures
+            // (`hourLightAt`), and at rest from the view.
+            TimelineView(.animation(paused: light == nil)) { tick in
+                let now = light.map { HourLightNow(pass: $0, frame: hourLightAt(ms: Float(tick.date.timeIntervalSince($0.start) * 1000))) }
+                let lit = now?.lit ?? HourLit(view)
+                VStack(spacing: 0) {
+                    // A phone says what the hour is under the invitation's words, so the hours' table
+                    // keeps one shape whichever hour is now; the niche glosses every hour in its table,
+                    // and under the invitation only an eve's "First Vespers of …" (#959), at the phone's size as on the web.
+                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, padBottom: tier.prayPadBottom, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil, gloss: tier.desk && !lit.eve ? "" : lit.note, glossSize: 13.76, glossInk: home.nowGloss,
+                             // The hour now, once prayed, on its own day (Compline after midnight is
+                             // yesterday's), as the web's `.pray-now.is-prayed`.
+                             prayed: view.isToday && lit.label == view.prayNowLabel && model.hoursPrayed(on: view.prayNowDate).contains(view.prayNowHour)) {
+                        model.open(.hour(view.prayNowDate, view.prayNowHour))
+                    }
+                    .crownInk("r-pray")
+                    .padding(.top, m.px(tier.bandGap))
+                    HourDirectory(current: lit.hour, light: now, prayed: model.hoursPrayed(on: date), tier: tier, now: titulusNow(p, season: view.ornament), home: home) { h in model.open(.hour(date, h)) }
+                        .padding(.top, m.px(tier.prayGap))
                 }
-                .padding(.top, m.px(tier.bandGap))
-                HourDirectory(current: view.currentHour, note: view.currentHourNote, prayed: model.hoursPrayed(on: date), tier: tier, now: titulusNow(p, season: view.ornament), home: home) { h in model.open(.hour(date, h)) }
-                    .padding(.top, m.px(tier.prayGap))
-                // The season and "Change date" share one line after the hours, centred (the web's
-                // `.home-day-meta`), in small caps, a gilt point between them. Open, the date
-                // control takes a line of its own beneath the season, and the picker the card's width.
-                let foot = TextStyle(size: tier.meta, line: tier.meta * 1.5, tracking: tier.meta * 0.09, smallCaps: true)
-                let change = Disclosure(label: "Change date", open: picking, style: foot, upper: false) { togglePicker() }
-                // In a reader's first week the introduction to About stands in the season's place
-                // (each hour's header still names it), in the same small caps and gilt point, as
-                // on the web.
-                let newcomer = aboutNewcomer(daysSinceFirst: Usage.daysSinceFirst())
-                if view.season.isEmpty && !newcomer {
-                    change.padding(.top, m.px(tier.metaGap + 1))
-                } else {
-                    let lead = HStack(spacing: 0) {
-                        Text(newcomer ? aboutPage.introduction : view.season).type(foot).foregroundStyle(p.muted)
-                            .multilineTextAlignment(.center)
-                        if !picking {
-                            Canvas { ctx, s in ctx.fill(lozenge(CGPoint(x: s.width / 2, y: s.height / 2), 2.5), with: .color(o.flat.opacity(0.7))) }
-                                .frame(width: 5, height: 5)
-                                .padding(.leading, m.px(14.4))
-                                .accessibilityHidden(true)
-                        }
-                    }
-                    let season = Group {
-                        if newcomer {
-                            Button { model.open(.about) } label: { lead.frame(minHeight: 44).contentShape(Rectangle()) }
-                                .buttonStyle(Quiet())
-                                .accessibilityLabel(aboutPage.introduction)
-                                .accessibilityHint("Opens About the Office")
-                        } else {
-                            lead
-                        }
-                    }
-                    // One layout either way, so "Change date" stays the control VoiceOver is on
-                    // as it opens.
-                    SeasonLine(spacing: m.px(8.8), above: m.px(3.2), stacked: picking) {
-                        season
-                        change
-                    }
-                    .padding(.top, m.px(tier.metaGap + 1))
-                }
+            }
+            // Only a turn of the hour seen while home is in front moves the light; a return, or
+            // less motion asked for, shows the new hour at once. A second turn during a pass
+            // starts from where the first was going.
+            .onChange(of: HourLit(view)) { old, new in
+                light = model.hourSeenTurning && !reduceMotion ? HourLightPass(from: old, to: new, start: .now) : nil
+            }
+            .task(id: light) {
+                guard let pass = light else { return }
+                try? await Task.sleep(for: .milliseconds(Int(hourLightTotalMs())))
+                if light == pass { light = nil }
             }
             .padding(.horizontal, side)
             .frame(maxWidth: .infinity)
-            // "Change date"'s picker, revealed from its top as the layout gives it its height
-            // (the disclosure's own unfolding, Android's `Unfold`), and laid out only while shown.
+            .opacity(picking ? 0 : 1)
+            .animation(reduceMotion ? nil : .easeIn(duration: 0.12), value: picking)
+            .allowsHitTesting(!picking)
+            .accessibilityHidden(picking)
+            // The stage's second face: the day's turn and the calendar, laid out only while shown,
+            // and revealed from its top as far as the turn has opened the stage.
             VStack(spacing: 0) {
                 if unfolded {
                     DayPicker(shown: date, today: model.today, centred: true) { d in
@@ -696,12 +790,64 @@ private struct Frontispiece: View {
             .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
             .clipped()
             .opacity(picking ? 1 : 0)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.2).delay(0.06), value: picking)
             .accessibilityHidden(!picking)
+            .accessibilityAction(.escape) { if picking { togglePicker() } }
             .padding(.horizontal, side)
             .frame(maxWidth: .infinity)
-            .id("disclosed")
+            // The season and "Change date" under the stage, sharing one line, centred (the web's
+            // `.home-day-meta`), in small caps, a gilt point between them, open or shut.
+            VStack(spacing: 0) {
+                let foot = TextStyle(size: tier.meta, line: tier.meta * 1.5, tracking: tier.meta * 0.09, smallCaps: true)
+                let change = Disclosure(label: "Change date", open: picking, style: foot, upper: false) { togglePicker() }
+                // In a reader's first week the introduction to About stands in the season's place
+                // (each hour's header still names it), in the same small caps and gilt point, as
+                // on the web.
+                let newcomer = aboutNewcomer(daysSinceFirst: Usage.daysSinceFirst())
+                if view.season.isEmpty && !newcomer {
+                    change.padding(.top, m.px(tier.metaGap + 1))
+                } else {
+                    let sg = newcomer ? nil : seasonGloss(label: view.season)
+                    let lead = HStack(spacing: 0) {
+                        if let sg {
+                            GlossMark(gloss: sg, label: view.season, reaches: false) {
+                                Text(view.season).type(foot).foregroundStyle(p.muted)
+                                    .multilineTextAlignment(.center)
+                            }
+                        } else {
+                            Text(newcomer ? aboutPage.introduction : view.season).type(foot).foregroundStyle(p.muted)
+                                .multilineTextAlignment(.center)
+                        }
+                        Canvas { ctx, s in ctx.fill(lozenge(CGPoint(x: s.width / 2, y: s.height / 2), 2.5), with: .color(o.flat.opacity(0.7))) }
+                            .frame(width: 5, height: 5)
+                            .padding(.leading, m.px(14.4))
+                            .accessibilityHidden(true)
+                    }
+                    let season = Group {
+                        if newcomer {
+                            Button { model.open(.about) } label: { lead.frame(minHeight: 44).contentShape(Rectangle()) }
+                                .buttonStyle(Quiet())
+                                .accessibilityLabel(aboutPage.introduction)
+                                .accessibilityHint("Opens About the Office")
+                        } else {
+                            lead
+                        }
+                    }
+                    // One layout either way, so "Change date" stays the control VoiceOver is on
+                    // as it opens.
+                    SeasonLine(spacing: m.px(8.8), above: m.px(3.2), stacked: false) {
+                        season
+                        change
+                    }
+                    .padding(.top, m.px(tier.metaGap + 1))
+                }
+            }
+            .crownInk("r-meta")
+            .padding(.horizontal, side)
+            .frame(maxWidth: .infinity)
         }
         .coordinateSpace(name: "frontispiece")
+        .crownFrame("card")
         .onPreferenceChange(ReserveKey.self) { reserve = $0 }
         .background {
             if let niche, !p.dark {
@@ -718,28 +864,46 @@ private struct Frontispiece: View {
         }
     }
 
-    /// Opens "Change date"'s picker, or folds it away and then lets it go, on the disclosures' curves.
+    /// Opens "Change date"'s picker, or folds it away and then lets it go, on the disclosures' curves;
+    /// under Reduce Motion the stage turns at once, as the web's and Android's then do.
     private func togglePicker() {
-        if picking {
+        let opening = !picking
+        if reduceMotion {
+            unfolded = opening
+            picking.toggle()
+            if picking { reveal.alongside(homeCard) }
+        } else if picking {
             withAnimation(folding) { picking = false } completion: {
                 // Opened again while it folded, it stays.
                 if !picking { unfolded = false }
             }
         } else {
             unfolded = true
-            withAnimation(unfolding) { picking = true }
-            reveal("disclosed")
+            // The page scrolls to the card's foot in the same transaction, so the stage turning to
+            // the calendar and the page rising to show it are one motion on one curve.
+            withAnimation(unfolding) {
+                picking = true
+                reveal.alongside(homeCard)
+            }
+        }
+        if UIAccessibility.isVoiceOverRunning {
+            UIAccessibility.post(notification: .announcement, argument: opening ? "Date picker opened above" : "Date picker closed")
         }
     }
 
     /// A line of the versicle: its ℣ or ℟ upright in the rubrics' red, the words in italic, the
     /// text's ink a little withdrawn.
     private func versicleLine(_ sigil: String, _ words: String, _ style: TextStyle) -> some View {
-        (Text(sigil).font(Font(garamond(style.size * m.type))).foregroundColor(rubric) + Text(" " + words))
-            .type(style)
-            .foregroundStyle(p.text.opacity(0.84))
-            .multilineTextAlignment(.center)
-            .fixedSize(horizontal: false, vertical: true)
+        let spokenSigil = sigil
+            .replacingOccurrences(of: "℣.", with: "Versicle.")
+            .replacingOccurrences(of: "℟.", with: "Response.")
+        return GlossMark(gloss: homeGlossesShared.versicle, label: "\(spokenSigil) \(words)", reaches: false) {
+            (Text(sigil).font(Font(garamond(style.size * m.type))).foregroundColor(rubric) + Text(" " + words))
+                .type(style)
+                .foregroundStyle(p.text.opacity(0.84))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
     /// The inscription band: flat green earth between oxblood edges and leaf fillets, ruled by
@@ -769,6 +933,8 @@ private struct Frontispiece: View {
             .allowsHitTesting(false)
         }
         .padding(.horizontal, -side)
+        // The land under the sky: the crown's play turns it on its own span.
+        .crownFrame("frieze")
         .accessibilityAddTraits(.isHeader)
     }
 }
@@ -864,39 +1030,105 @@ private struct FeastName: View {
  * The invitation: a thin wash (`tablet.png`, feathered so no edge of it lies on a rule) in a frame
  * ruled by hand twice, the lining and inside it the day's colour (`frontal`) stopping short of
  * the corners; neither veils with the season, and a bare black day has no wash. Its words are the
- * tituli's red ochre, or by night the lining, lifted on a phone (`lifted`).
+ * tituli's red ochre, or by night the lining, lifted on a phone (`lifted`). About's foot sets
+ * the same tablet (`style` and `pad` are the tier's on home). On a phone's home a quiet italic
+ * line under the words says what the hour is (`gloss`, the web's `.pray-now-gloss`).
  */
-private struct PrayNow: View {
+struct PrayNow: View {
     let label: String
-    let tier: HomeTier
+    /// The words' opacity: they (and the gloss) go out and come back as the light moves to another hour.
+    var words: Double = 1
+    let style: TextStyle
+    let pad: CGFloat
+    /// The padding under the words, where it differs from `pad` over them (a short phone's home).
+    var padBottom: CGFloat? = nil
     let frontal: Color
     let wash: Color
     let lifted: Color?
+    /// What the hour is ("Evening prayer"), under the words; empty for none.
+    var gloss: String = ""
+    var glossSize: CGFloat = 13.76
+    var glossInk: Color = .secondary
+    /// The hour now, already prayed: a small gilt cross at the words' shoulder, as the directory's.
+    var prayed: Bool = false
     let action: () -> Void
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
         Button(action: action) {
-            Text(label).type(tier.pray.tracked(tier.pray.size * 0.012))
-                .foregroundStyle(lifted ?? (p.dark ? p.lining : p.titulus))
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity, minHeight: 44)
-                .padding(.vertical, m.px(tier.prayPad))
-                .padding(.horizontal, m.px(13.8))
-                .background {
-                    if let tablet = UIImage(named: "tablet.png") {
-                        Image(uiImage: tablet).renderingMode(.template).resizable()
-                            .foregroundStyle(wash)
-                            .padding(1)
+            VStack(spacing: m.px(1.3)) {
+                Text(label).type(style.tracked(style.size * 0.012))
+                    .foregroundStyle(lifted ?? (p.dark ? p.lining : p.titulus))
+                    // Taking no room, so the tablet keeps its height and still opens the hour.
+                    .overlay(alignment: .topTrailing) {
+                        if prayed {
+                            PaintedMark(.cross, size: m.px(style.size * 0.42), color: p.gold)
+                                .offset(x: m.px(style.size * 0.6), y: m.px(style.size * 0.18))
+                                .accessibilityHidden(true)
+                        }
                     }
+                if !gloss.isEmpty {
+                    // One line: a long "First Vespers of …" is cut short rather than growing the tablet.
+                    Text(gloss)
+                        .type(TextStyle(size: glossSize, line: glossSize * 1.2, italic: true))
+                        .foregroundStyle(glossInk)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                 }
-                .overlay {
-                    Canvas { ctx, size in invitationRules(ctx, size, lining: p.lining, frontal: frontal) }
-                        .allowsHitTesting(false)
-                }
+            }
+            .opacity(words)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .padding(.top, m.px(pad))
+            .padding(.bottom, m.px(padBottom ?? pad))
+            .padding(.horizontal, m.px(13.8))
         }
-        .buttonStyle(Quiet())
+        .accessibilityValue(prayed ? "prayed" : "")
+        .buttonStyle(Tablet(
+            frontal: frontal, wash: wash, lining: p.lining, accent: p.accent,
+            // The wash half as deep again (`--tablet-wash-pressed`): ochre by day, moonlit blue by night.
+            deeper: p.dark ? Color(rgb: 132, 160, 204, 0.2) : ochre.opacity(0.29)
+        ))
+    }
+}
+
+/**
+ * The invitation's tablet, and its answer to the finger as a thing rather than a dimmed word (the
+ * web's `.pray-now:active`): its inner rule takes the accent and its wash deepens, at once, and both
+ * go back over Tempo's touch; the outer lining stands, and nothing scales.
+ */
+private struct Tablet: ButtonStyle {
+    let frontal: Color
+    let wash: Color
+    let lining: Color
+    let accent: Color
+    let deeper: Color
+
+    func makeBody(configuration: Configuration) -> some View {
+        let held = configuration.isPressed
+        return configuration.label
+            .background {
+                if let tablet = UIImage(named: "tablet.png") {
+                    ZStack {
+                        Image(uiImage: tablet).renderingMode(.template).resizable().foregroundStyle(wash).opacity(held ? 0 : 1)
+                        Image(uiImage: tablet).renderingMode(.template).resizable().foregroundStyle(deeper).opacity(held ? 1 : 0)
+                    }
+                    .padding(1)
+                    .accessibilityHidden(true)
+                }
+            }
+            .overlay {
+                ZStack {
+                    Canvas { ctx, size in invitationRules(ctx, size, lining: lining, frontal: frontal) }
+                    // The inner rule in the accent, over the day's.
+                    Canvas { ctx, size in invitationRules(ctx, size, lining: .clear, frontal: accent, share: 1) }
+                        .opacity(held ? 1 : 0)
+                }
+                .allowsHitTesting(false)
+            }
+            .contentShape(Rectangle())
+            .animation(held ? nil : Tempo.touchOut.animation, value: held)
     }
 }
 
@@ -905,14 +1137,15 @@ private struct PrayNow: View {
  * `.home-hour-links`): a firmer rule above and below and finer ones between the periods, by hand,
  * in the lining, and none upright. The periods are the margin's index in the quiet ink, with no
  * cell of their own; gilt points part the hours in a band. The hour that is now lies under a pool
- * of light with no edge, its name rubricated (`now`) and its gloss under it. In the wide niche
- * every hour carries its gloss and the hour that is now is set larger as well, so it is not told by
- * colour alone; from 1000 high the hours stand one to a line there (`HourList`).
+ * of light with no edge, its name rubricated (`now`). On a phone no hour carries a gloss, so the
+ * table keeps one shape whichever hour is now: the invitation says what the hour is (`PrayNow`).
+ * In the wide niche every hour carries its gloss and the hour that is now is set larger as well,
+ * so it is not told by colour alone; from 1000 high the hours stand one to a line there (`HourList`).
  */
 private struct HourDirectory: View {
     let current: String
-    /// What the current hour is, set under its name for a newcomer.
-    let note: String
+    /// The light moving from one hour to the next, at this frame; nil at rest.
+    let light: HourLightNow?
     /// The hours prayed on this day.
     let prayed: Set<String>
     let tier: HomeTier
@@ -927,30 +1160,20 @@ private struct HourDirectory: View {
         let desk = tier.desk
         let label = TextStyle(size: tier.period, line: tier.period * 1.6, tracking: tier.period * tier.periodTracking, smallCaps: true)
         let labelInk = mix(p.accent, p.muted, desk ? 0.7 : 0.45)
-        // One width for the three period labels, widened past the web's 83pt only when the
+        // One width for the four period labels, widened past the web's 83pt only when the
         // reader's font size needs it, so the hours still line up in columns.
         let font = label.uiFont(m)
-        let widest = periods.map { ProseLayout.advance($0.label, font) + label.tracking * m.type * CGFloat($0.label.count) }.max() ?? 0
+        let night = homeNightShared
+        let widest = ([night.label] + periods.map(\.label)).map { ProseLayout.advance($0, font) + label.tracking * m.type * CGFloat($0.count) }.max() ?? 0
         let labelWidth = max(widest + m.px(8), m.px(desk ? 80 : 83))
         VStack(spacing: 0) {
             ForEach(Array(periods.enumerated()), id: \.offset) { i, row in
                 Group {
                     if tier.list {
-                        HourList(period: row.period, label: row.label, hours: row.hours, current: current, prayed: prayed, tier: tier, now: now, home: home, labelStyle: label, labelInk: labelInk, open: open)
+                        HourList(period: row.period, label: row.label, hours: row.hours, current: current, light: light, prayed: prayed, tier: tier, now: now, home: home, labelStyle: label, labelInk: labelInk, open: open)
                     } else {
                         HStack(spacing: 0) {
-                            VStack(spacing: m.px(2)) {
-                                PeriodIcon(period: row.period, color: o.flat, alpha: 0.9)
-                                    .scaleEffect(desk ? 1.12 : 1)
-                                Text(row.label).type(label).foregroundStyle(labelInk).lineLimit(1).fixedSize()
-                            }
-                            .padding(.vertical, m.px(6))
-                            .padding(.leading, m.px(1.4))
-                            .frame(width: labelWidth)
-                            .frame(maxHeight: .infinity)
-                            .accessibilityElement(children: .ignore)
-                            .accessibilityLabel(row.label)
-                            .accessibilityAddTraits(.isHeader)
+                            periodHead(row.period, row.label, row.hours, label: label, labelInk: labelInk, width: labelWidth)
                             Color.clear.frame(width: 1)
                             HStack(spacing: 0) {
                                 ForEach(Array(row.hours.enumerated()), id: \.offset) { j, h in
@@ -961,20 +1184,22 @@ private struct HourDirectory: View {
                         }
                     }
                 }
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 1)
-                // The rule above each band: the frame's above the first, finer ones between.
-                .overlay(alignment: .top) {
-                    Canvas { ctx, size in
-                        let rule = i == 0
-                            ? ruledLine(0, 0.5, size.width, 0.5, 1.3, seed: 31)
-                            : ruledLine(0, 0.5, size.width, 0.5, 0.9, seed: UInt32(41 + i - 1))
-                        ctx.fill(rule, with: .color(p.lining.opacity(i == 0 ? 0.78 : 0.36)))
+                .modifier(HourBand(i: i))
+            }
+            // The Night last, after the evening: Matins alone and centred in its band, coming soon.
+            Group {
+                if tier.list {
+                    HourList(period: .night, label: night.label, hours: [night.hour], current: current, light: light, prayed: prayed, tier: tier, now: now, home: home, labelStyle: label, labelInk: labelInk, night: night, open: open)
+                } else {
+                    HStack(spacing: 0) {
+                        periodHead(.night, night.label, [night.hour], label: label, labelInk: labelInk, width: labelWidth, night: true)
+                        Color.clear.frame(width: 1)
+                        soonCell(night)
+                            .frame(minHeight: tier.soonInline || tier.desk ? 0 : m.px(tier.row))
                     }
-                    .frame(height: 2)
-                    .allowsHitTesting(false)
                 }
             }
+            .modifier(HourBand(i: periods.count))
         }
         .padding(.bottom, 1)
         .overlay(alignment: .bottom) {
@@ -986,22 +1211,100 @@ private struct HourDirectory: View {
         }
     }
 
-    /// One hour of a band: its name, its gloss (in the niche every hour's, on a phone the hour
-    /// that is now's), the pool of light on the hour that is now, a gilt point before it.
+    /// A band's period in the margin: its sign over its label, the sign dimmed while another
+    /// period's hour is now. The Night's (`night`) gives its band only a line's height where its
+    /// one hour takes no more: on a short phone its star stands beside "Night", not over it (the
+    /// web's row, 0.3rem apart, 0.25rem over and under), and in the niche's table it has no padding
+    /// of its own; either way its label's line is 1.2, as the web's.
+    private func periodHead(_ period: Period, _ text: String, _ hours: [String], label: TextStyle, labelInk: Color, width: CGFloat, night: Bool = false) -> some View {
+        let beside = night && tier.shortPhone
+        let tight = night && (tier.shortPhone || tier.desk)
+        let stack = beside ? AnyLayout(HStackLayout(spacing: m.px(4.8))) : AnyLayout(VStackLayout(spacing: m.px(2)))
+        return stack {
+            PeriodIcon(period: period, color: o.flat, alpha: periodSignAlpha(hours, current))
+                .scaleEffect(tier.desk ? 1.12 : 1)
+            Text(text).type(tight ? label.sized(label.size, line: label.size * 1.2) : label).foregroundStyle(labelInk).lineLimit(1).fixedSize()
+        }
+        .padding(.vertical, m.px(beside ? 4 : tight ? 0 : 6))
+        .padding(.leading, m.px(1.4))
+        .frame(width: width)
+        .frame(maxHeight: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(text)
+        .accessibilityAddTraits(.isHeader)
+    }
+
+    /**
+     * The Night's one hour, alone and centred in its band (the web's `.home-hour-soon`): Matins,
+     * not yet prayed in the app, so no button, no pool and no gilt point. Its name stands in the
+     * quiet ink, and "coming soon" in small capitals: in the niche's table on the name's line after
+     * its gloss ("Matins  The night office · coming soon"), on a phone under the name, and on a
+     * phone to 760 high after the name on one line, the band no taller than that line.
+     */
+    private func soonCell(_ night: HomeNightView) -> some View {
+        let gloss = tier.desk ? night.gloss : ""
+        let name = Text(night.name)
+            .type(TextStyle(size: tier.hour, line: tier.hour * 1.2, tracking: 0.31))
+            .foregroundStyle(soonNameInk(p))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+        return Group {
+            if tier.soonInline {
+                HStack(alignment: .firstTextBaseline, spacing: m.px(9.6)) {
+                    name
+                    SoonMark(text: night.comingSoon, size: tier.soon)
+                }
+                .padding(.vertical, m.px(1.6))
+            } else if !gloss.isEmpty {
+                // The niche's table: one line, centred, on one baseline, with no thumb's height,
+                // only 0.35rem over it and 0.3rem under (the band 2.156rem, as `NicheFigures`' fit
+                // counts it): the name, 0.75em (of the link's 1.1875rem), the gloss, a point, the mark.
+                HStack(alignment: .firstTextBaseline, spacing: m.px(14.25)) {
+                    name
+                    HStack(alignment: .firstTextBaseline, spacing: m.px(5.1)) {
+                        Text(gloss)
+                            .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
+                            .foregroundStyle(p.muted)
+                            .lineLimit(1)
+                            .fixedSize()
+                        Text("·").type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15)).foregroundStyle(p.muted)
+                        SoonMark(text: night.comingSoon, size: tier.soon)
+                    }
+                }
+                .padding(.top, m.px(5.6))
+                .padding(.bottom, m.px(4.8))
+            } else {
+                // A taller phone: "coming soon" under the name, wrapping centred at a large type size.
+                VStack(spacing: 0) {
+                    name
+                    SoonMark(text: night.comingSoon, size: tier.soon, wraps: true)
+                }
+            }
+        }
+        .padding(.horizontal, m.px(2))
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel([night.name, gloss.isEmpty ? nil : gloss, night.comingSoon].compactMap { $0 }.joined(separator: ", "))
+    }
+
+    /// One hour of a band: its name, its gloss (in the niche every hour's, on a phone none), the
+    /// pool of light on the hour that is now, a gilt point before it.
     private func cell(_ h: String, _ j: Int) -> some View {
         let desk = tier.desk
         let done = prayed.contains(h)
         let isNow = h == current
-        let gloss = desk ? hourNote(slug: h) : isNow ? note : ""
+        let gloss = desk ? hourNote(slug: h) : ""
         let size = isNow ? tier.hourNow : tier.hour
+        let pool = light?.pool(h) ?? (isNow ? 1 : 0)
         return Button { open(h) } label: {
             VStack(spacing: 0) {
                 // Never broken mid-word: at the largest sizes a name steps down to fit its cell.
                 Text(hourLabel(h))
                     .type(TextStyle(size: size, line: size * 1.2, tracking: 0.31))
-                    .foregroundStyle(done ? p.muted : isNow ? now : p.text)
+                    .foregroundStyle(light?.ink(h, now: done ? p.muted : now, plain: done ? p.muted : p.text) ?? (done ? p.muted : isNow ? now : p.text))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
+                    .opacity(light?.name(h) ?? 1)
                     // An hour prayed today withdraws to the muted ink, a small gilt cross
                     // at its shoulder, as the web's `.is-prayed`; the cross takes no width.
                     .overlay(alignment: .topTrailing) {
@@ -1010,22 +1313,21 @@ private struct HourDirectory: View {
                                 .offset(x: m.px(9), y: m.px(2))
                         }
                     }
-                // What the hour is, for a newcomer, as the web's `.home-hour-link-note`; one
-                // line, which may overhang its cell a little.
+                // What the hour is, for a newcomer, as the web's `.home-hour-link-note`.
                 if !gloss.isEmpty {
                     if tier.shortScreen {
                         // Held at 12 in so small a niche, a gloss takes a second line rather than
                         // running into its neighbour.
                         Text(gloss)
                             .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
-                            .foregroundStyle(isNow ? home.nowGloss : p.muted)
+                            .foregroundStyle(glossInk(h, isNow))
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
                     } else {
                         Text(gloss)
                             .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
-                            .foregroundStyle(isNow ? home.nowGloss : p.muted)
+                            .foregroundStyle(glossInk(h, isNow))
                             .lineLimit(1)
                             .fixedSize()
                             .frame(width: 0)
@@ -1034,26 +1336,6 @@ private struct HourDirectory: View {
             }
             .padding(.horizontal, m.px(2))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            // The light rests on the hour that is now: a pool with no edge, at most 9.5rem across
-            // (11rem in the niche).
-            .background {
-                if isNow {
-                    Canvas { ctx, size in
-                        let r = min(size.width + (desk ? 12 : 8), desk ? 176 : 152) / 2
-                        let ry = (size.height + (desk ? 8 : 4)) / 2
-                        var pool = ctx
-                        pool.translateBy(x: size.width / 2, y: size.height / 2)
-                        pool.scaleBy(x: 1, y: ry / r)
-                        pool.fill(
-                            Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
-                            with: .radialGradient(Gradient(stops: [.init(color: home.nowPool, location: 0), .init(color: home.nowPool.opacity(0.55), location: 0.52), .init(color: home.nowPool.opacity(0), location: 1)]), center: .zero, startRadius: 0, endRadius: r)
-                        )
-                    }
-                    .padding(.horizontal, desk ? -12 : -8)
-                    .padding(.vertical, desk ? -8 : -4)
-                    .allowsHitTesting(false)
-                }
-            }
             // A gilt point before every hour but the first of its band.
             .overlay(alignment: .leading) {
                 if j > 0 {
@@ -1064,13 +1346,35 @@ private struct HourDirectory: View {
                 }
             }
         }
-        .buttonStyle(Quiet())
+        // The light rests on the hour that is now: a pool with no edge, at most 9.5rem across
+        // (11rem in the niche). A finger lights any hour's pool (`Lit`).
+        .buttonStyle(Lit(strength: p.dark ? 1 : 0.7, current: isNow, resting: pool) {
+            Canvas { ctx, size in
+                let r = min(size.width + (desk ? 12 : 8), desk ? 176 : 152) / 2
+                let ry = (size.height + (desk ? 8 : 4)) / 2
+                var pool = ctx
+                pool.translateBy(x: size.width / 2, y: size.height / 2)
+                pool.scaleBy(x: 1, y: ry / r)
+                pool.fill(
+                    Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
+                    with: .radialGradient(poolGradient(home.nowPool), center: .zero, startRadius: 0, endRadius: r)
+                )
+            }
+            .padding(.horizontal, desk ? -12 : -8)
+            .padding(.vertical, desk ? -8 : -4)
+        })
         .accessibilityLabel([hourLabel(h), gloss.isEmpty ? nil : gloss, isNow ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
     }
+
+    /// A gloss's ink: the hour that is now's, or in the niche another's, turning with the light.
+    private func glossInk(_ h: String, _ isNow: Bool) -> Color {
+        light?.ink(h, now: home.nowGloss, plain: p.muted) ?? (isNow ? home.nowGloss : p.muted)
+    }
+
 }
 
 /**
- * One period of the niche's list of seven (the web's from 1000px high upright, 1146px on its
+ * One period of the niche's list of seven (the web's from 1000px high upright, 1203px on its
  * side): its label in the margin beside its hours, and each hour on a line of its own, its name and
  * its gloss on one baseline parted by a gilt point; the label and the hours, read as one block,
  * stand centred in the niche (`NicheLayout.listMiddle`).
@@ -1080,12 +1384,15 @@ private struct HourList: View {
     let label: String
     let hours: [String]
     let current: String
+    let light: HourLightNow?
     let prayed: Set<String>
     let tier: HomeTier
     let now: Color
     let home: HomeInk
     let labelStyle: TextStyle
     let labelInk: Color
+    /// The Night's band: its one hour, Matins, coming soon, in place of `hours`' lines.
+    var night: HomeNightView? = nil
     let open: (String) -> Void
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
@@ -1094,7 +1401,7 @@ private struct HourList: View {
     var body: some View {
         HourListLayout(middle: m.px(tier.listMiddle)) {
             VStack(spacing: m.px(4)) {
-                PeriodIcon(period: period, color: o.flat, alpha: 0.9).scaleEffect(1.25)
+                PeriodIcon(period: period, color: o.flat, alpha: periodSignAlpha(hours, current)).scaleEffect(1.25)
                 Text(label).type(labelStyle).foregroundStyle(labelInk).lineLimit(1).fixedSize()
             }
             .padding(.trailing, m.px(22.4))
@@ -1102,10 +1409,47 @@ private struct HourList: View {
             .accessibilityLabel(label)
             .accessibilityAddTraits(.isHeader)
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(hours, id: \.self) { h in line(h) }
+                if let night {
+                    soonLine(night)
+                } else {
+                    ForEach(hours, id: \.self) { h in line(h) }
+                }
             }
             .padding(.vertical, m.px(4.8))
         }
+    }
+
+    /**
+     * Matins on its line, not yet prayed in the app: no button and no pool, its name in the quiet
+     * ink with its gloss beside it as the others', and "coming soon" under the gloss.
+     */
+    private func soonLine(_ night: HomeNightView) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 0) {
+            Text(night.name)
+                .type(TextStyle(size: tier.hour, line: tier.hour * 1.2, tracking: 0.31))
+                .foregroundStyle(soonNameInk(p))
+                .lineLimit(1)
+                .fixedSize()
+                .frame(width: m.px(100.8), alignment: .leading)
+            // The gilt point stands at the gloss's middle, as on the hours' lines.
+            Canvas { ctx, s in ctx.fill(lozenge(CGPoint(x: s.width / 2, y: s.height / 2), 1.75), with: .color(o.flat.opacity(0.7))) }
+                .frame(width: 5, height: 5)
+                .alignmentGuide(.firstTextBaseline) { d in d[VerticalAlignment.center] + m.px(tier.gloss * 0.3) }
+                .padding(.trailing, m.px(13.6))
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: m.px(1.6)) {
+                Text(night.gloss)
+                    .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
+                    .foregroundStyle(p.muted)
+                    .lineLimit(1)
+                    .fixedSize()
+                SoonMark(text: night.comingSoon, size: tier.soon)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(minHeight: m.px(tier.row))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel([night.name, night.gloss, night.comingSoon].joined(separator: ", "))
     }
 
     private func line(_ h: String) -> some View {
@@ -1113,13 +1457,15 @@ private struct HourList: View {
         let isNow = h == current
         let gloss = hourNote(slug: h)
         let size = isNow ? tier.hourNow : tier.hour
+        let pool = light?.pool(h) ?? (isNow ? 1 : 0)
         return Button { open(h) } label: {
             HStack(spacing: 0) {
                 Text(hourLabel(h))
                     .type(TextStyle(size: size, line: size * 1.2, tracking: 0.31))
-                    .foregroundStyle(done ? p.muted : isNow ? now : p.text)
+                    .foregroundStyle(light?.ink(h, now: done ? p.muted : now, plain: done ? p.muted : p.text) ?? (done ? p.muted : isNow ? now : p.text))
                     .lineLimit(1)
                     .fixedSize()
+                    .opacity(light?.name(h) ?? 1)
                     .overlay(alignment: .topTrailing) {
                         if done {
                             PaintedMark(.cross, size: m.px(7), color: p.gold).offset(x: m.px(9), y: m.px(2))
@@ -1132,34 +1478,32 @@ private struct HourList: View {
                     .accessibilityHidden(true)
                 Text(gloss)
                     .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
-                    .foregroundStyle(isNow ? home.nowGloss : p.muted)
+                    .foregroundStyle(light?.ink(h, now: home.nowGloss, plain: p.muted) ?? (isNow ? home.nowGloss : p.muted))
                     .lineLimit(1)
                     .fixedSize()
                 Spacer(minLength: 0)
             }
             .frame(minHeight: m.px(tier.row))
-            // The pool of light under the hour that is now, from a little before its name.
-            .background(alignment: .leading) {
-                if isNow {
-                    Canvas { ctx, size in
-                        let r = m.px(136)
-                        let ry = size.height / 2
-                        var pool = ctx
-                        pool.translateBy(x: r - m.px(19.2), y: size.height / 2)
-                        pool.scaleBy(x: 1, y: ry / r)
-                        pool.fill(
-                            Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
-                            with: .radialGradient(Gradient(stops: [.init(color: home.nowPool, location: 0), .init(color: home.nowPool.opacity(0.55), location: 0.52), .init(color: home.nowPool.opacity(0), location: 1)]), center: .zero, startRadius: 0, endRadius: r)
-                        )
-                    }
-                    .frame(width: m.px(272))
-                    .padding(.vertical, -3)
-                    .allowsHitTesting(false)
-                }
-            }
             .contentShape(Rectangle())
         }
-        .buttonStyle(Quiet())
+        // The pool of light under the hour that is now, from a little before its name; a finger
+        // lights any hour's (`Lit`).
+        .buttonStyle(Lit(strength: p.dark ? 1 : 0.7, current: isNow, resting: pool) {
+            Canvas { ctx, size in
+                let r = m.px(136)
+                let ry = size.height / 2
+                var pool = ctx
+                pool.translateBy(x: r - m.px(19.2), y: size.height / 2)
+                pool.scaleBy(x: 1, y: ry / r)
+                pool.fill(
+                    Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
+                    with: .radialGradient(poolGradient(home.nowPool), center: .zero, startRadius: 0, endRadius: r)
+                )
+            }
+            .frame(width: m.px(272))
+            .padding(.vertical, -3)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        })
         .accessibilityLabel([hourLabel(h), gloss, isNow ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
     }
 }
@@ -1185,5 +1529,127 @@ private struct HourListLayout: Layout {
         let label = subviews[0].sizeThatFits(ProposedViewSize(width: side, height: nil))
         subviews[0].place(at: CGPoint(x: bounds.minX + side, y: bounds.midY), anchor: .trailing, proposal: ProposedViewSize(width: side, height: label.height))
         subviews[1].place(at: CGPoint(x: bounds.minX + side, y: bounds.minY), proposal: ProposedViewSize(width: bounds.width - side, height: nil))
+    }
+}
+
+/// The ruled band of one period in home's table, `i` from the top: the rule above it (the frame's
+/// above the first, finer ones between), and its ink handed over in one move under the crown's play.
+private struct HourBand: ViewModifier {
+    let i: Int
+    @Environment(\.palette) private var p
+
+    func body(content: Content) -> some View {
+        content
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, 1)
+            .overlay(alignment: .top) {
+                Canvas { ctx, size in
+                    let rule = i == 0
+                        ? ruledLine(0, 0.5, size.width, 0.5, 1.3, seed: 31)
+                        : ruledLine(0, 0.5, size.width, 0.5, 0.9, seed: UInt32(41 + i - 1))
+                    ctx.fill(rule, with: .color(p.lining.opacity(i == 0 ? 0.78 : 0.36)))
+                }
+                .frame(height: 2)
+                .allowsHitTesting(false)
+            }
+            .crownInk("r-band\(i)")
+    }
+}
+
+/// An hour not yet prayed in the app (Matins): its name in the quiet ink, the text's mixed 55%
+/// with the muted (the web's `.home-hour-soon .home-hour-link-name`).
+func soonNameInk(_ p: Palette) -> Color { mix(p.text, p.muted, 0.55) }
+
+/// "coming soon" under an hour not yet prayed in the app, in letter-spaced small capitals in the
+/// accent mixed half with the muted ink (the web's `.home-hour-soon-mark` and `.about-hour-soon`).
+struct SoonMark: View {
+    let text: String
+    let size: CGFloat
+    /// Its spacing and leading, in ems.
+    var tracking: CGFloat = 0.16
+    var leading: CGFloat = 1.2
+    /// Free to take a second line, centred, where a large type size needs it (home's taller
+    /// phone, where it stands alone under the name); otherwise one line at its own width.
+    var wraps = false
+    @Environment(\.palette) private var p
+
+    var body: some View {
+        let mark = Text(text)
+            .type(TextStyle(size: size, line: size * leading, tracking: size * tracking, smallCaps: true))
+            .foregroundStyle(mix(p.accent, p.muted, 0.5))
+        if wraps {
+            mark
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        } else {
+            mark
+                .lineLimit(1)
+                .fixedSize()
+        }
+    }
+}
+
+/// A period's sign in home's table: lit while one of its hours is now, the others standing back,
+/// and all alike when no hour is (the web's `.home-hour-group:has(.is-current)`). The Night's
+/// Matins is never now, so its star only ever stands back or stands with the rest.
+func periodSignAlpha(_ hours: [String], _ current: String) -> Double {
+    if current.isEmpty { return 0.9 }
+    return hours.contains(current) ? 1 : 0.52
+}
+
+/// What home's light rests on: the hour that is now (none in the small hours, when Compline is the
+/// day before's), and the invitation's words and gloss (the hour it opens), and whether that gloss
+/// is the eve's "First Vespers of …" (`eve`).
+struct HourLit: Equatable {
+    let hour: String
+    let note: String
+    let label: String
+    let eve: Bool
+
+    init(_ view: HomeView) {
+        hour = view.currentHour
+        note = view.prayNowGloss
+        label = view.prayNowLabel
+        eve = view.prayNowEve
+    }
+}
+
+/// The light moving with the hours (the web's `HOUR_LIGHT`, `render_blocks::hour_light`): begun at
+/// `start` when the hour that is now turned from `from` to `to` while home was in front.
+struct HourLightPass: Equatable {
+    let from: HourLit
+    let to: HourLit
+    let start: Date
+}
+
+/**
+ * One frame of a pass. The pool under the old hour dies as the new one's gathers, the names' ink
+ * turns, and a name whose seat changes, along with the invitation's words (and a phone's gloss
+ * under them), go out where they stood and come back where they belong (`lit` changes while they
+ * are out), never sliding.
+ */
+struct HourLightNow {
+    let pass: HourLightPass
+    let frame: LightFrame
+
+    /// What the page is laid out for: the old hour's until the words are out, then the new's.
+    var lit: HourLit { frame.seated ? pass.to : pass.from }
+    private var moves: Bool { pass.from.hour != pass.to.hour }
+    private func touched(_ h: String) -> Bool { moves && (h == pass.from.hour || h == pass.to.hour) }
+
+    /// The invitation's words, and on a phone the gloss under them.
+    var words: Double { pass.from.label == pass.to.label && pass.from.note == pass.to.note ? 1 : Double(frame.words) }
+    /// The pool under `h`, or nil where the pass leaves it as it is.
+    func pool(_ h: String) -> Double? {
+        guard touched(h) else { return nil }
+        return Double(h == pass.from.hour ? frame.leavingPool : frame.comingPool)
+    }
+    /// A name's opacity: out and back as its seat changes.
+    func name(_ h: String) -> Double { touched(h) ? Double(frame.words) : 1 }
+    /// The ink of `h`'s name or gloss, between its ink as the hour that is now and its plain ink.
+    func ink(_ h: String, now: Color, plain: Color) -> Color? {
+        guard touched(h) else { return nil }
+        let share = CGFloat(h == pass.from.hour ? 1 - frame.ink : frame.ink)
+        return mix(now, plain, share)
     }
 }

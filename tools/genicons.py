@@ -13,8 +13,9 @@ One scene feeds every platform. It is rendered on a 1536 canvas that is an
 Android adaptive layer (108dp); the central 1024 is the 72dp a launcher shows
 and is the iOS, web and Play Store tile. Small one-colour uses (favicon,
 Android's themed icon and notification) are flat vectors of the same ring and
-cross. The web's link-preview card sets the apse tile on the site's light plaster
-wall beside the app's name in its own EB Garamond.
+cross. The web's link-preview card is the night home's sky edge to edge, its
+stars (genstars), the same cross in leaf over the app's name in its own EB
+Garamond, and the home's "Pray the hours" frieze at the foot.
 
 Requires tools/requirements.txt. Seeded, so it regenerates byte for byte.
 Run from the repository root; it checks its own output (ring width, contrast
@@ -471,57 +472,175 @@ def font(name, size):
     return ImageFont.truetype(ttf, size)
 
 
-def nave_wall(w, h):
-    """The site's light wall at w x h: plaster-wide.jpg cover-fitted and composed as style.css composes
-    it (min(texture, knee) / knee, screened with --plaster-tint, multiplied by --plaster-base, under a
-    veil of --bg at 100% - --plaster-strength)."""
-    tex = Image.open(WEB / "plaster-wide.jpg").convert("L")
-    s = max(w / tex.width, h / tex.height)
-    tex = tex.resize((round(tex.width * s), round(tex.height * s)), Image.LANCZOS)
-    x0, y0 = (tex.width - w) // 2, (tex.height - h) // 2
-    t = np.asarray(tex.crop((x0, y0, x0 + w, y0 + h)), np.float32) / 255
-    knee, strength = 166 / 255, 0.70
-    t = (np.minimum(t, knee) / knee)[..., None]
-    wash = (1 - (1 - t) * (1 - rgb("#e9d3c0"))) * rgb("#fffdf7")
-    return np.clip(rgb("#faf3e9") * (1 - strength) + wash * strength, 0, 1)
+# ---------------------------------------------------------------- the link-preview card
+# The apse's sky, edge to edge, as the night home paints it: its gold-leaf stars at the vault's own
+# small size, the consecration cross in leaf, the name in lime white, and the home's green-and-gold
+# frieze as the card's foot. Painted at CARD_SS times the card and brought down at the end.
+CARD_W, CARD_H, CARD_SS = 1200, 630, 2
+CARD_SKY = ("#172231", "#233440", "#2f474d")      # style.css, Apse: --sky-deep, --sky, the low glow
+CARD_LEAF, CARD_LEAF_HI = "#d0b079", "#e2c892"    # the icon's leaf, matted toward the photographs'
+CARD_NAME, CARD_SUB = "#efe9d8", "#d9bd84"        # lime white; leaf ink for the italic
+FRIEZE_GROUND, FRIEZE_RULE, FRIEZE_INK = "#263431", "#4b2927", "#ecd9a0"   # the frieze by night
 
 
-def tailpiece(draw, x, y, w, colour, scale):
-    """genornaments' tailpiece at any width: two rules thinning as the brush lifts, meeting a quatrefoil."""
-    c, r = x + w / 2, 6.2 * scale
-    lobes = [(c, y)] + [(c + 0.46 * r * math.cos(k * math.pi / 2), y + 0.46 * r * math.sin(k * math.pi / 2)) for k in range(4)]
-    for cx, cy in lobes:
-        draw.ellipse((cx - r / 2, cy - r / 2, cx + r / 2, cy + r / 2), fill=colour)
+def card_font(name, px):
+    return font(name, round(px * CARD_SS))
+
+
+def card_over(base, colour, alpha):
+    a = alpha[..., None] if alpha.ndim == 2 else alpha
+    return base * (1 - a) + colour * a
+
+
+def card_arr(img):
+    return np.asarray(img, np.float32) / 255
+
+
+def card_sky(w, h):
+    """sky-deep to sky, lighter and greener toward the foot, the vault's brushwork (sky-wash.jpg) in
+    soft light; the wash tiles down, not across, so it is mirrored to run the card's width."""
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    deep, sky, low = (rgb(c) for c in CARD_SKY)
+    t = (0.3 + 0.7 * np.clip((yy / h - 0.1) / 0.8, 0, 1))[..., None]
+    col = deep * (1 - t) + sky * t
+    r = np.hypot((xx - w / 2) / (0.85 * w / 2 * 1.2), (yy - h) / (0.6 * h * 1.2))
+    glow = np.clip(1 - r, 0, 1)[..., None] * 0.85
+    col = col * (1 - glow) + low * glow
+    wash = Image.open(WEB / "sky-wash.jpg").convert("L")
+    k = w / wash.width * 0.75
+    wash = card_arr(wash.resize((round(wash.width * k), round(wash.height * k)), Image.LANCZOS))
+    wash = np.concatenate([wash, wash[:, ::-1]], axis=1)
+    b = np.tile(wash, (h // wash.shape[0] + 2, w // wash.shape[1] + 2))[60 * CARD_SS:60 * CARD_SS + h, :w][..., None]
+    b = 0.5 + (b - 0.5) * 0.85
+    soft = np.where(b < 0.5, 2 * col * b + col * col * (1 - 2 * b), 2 * col * (1 - b) + np.sqrt(col) * (2 * b - 1))
+    return np.clip(soft, 0, 1)
+
+
+def leaf_sheet(w, h, seed, amount=1.0):
+    """Hand-laid leaf's unevenness (gold_leaf), as a multiplier about 1."""
+    y = gold_leaf(seed=seed, cell=70, angle=4).mean(axis=2)
+    y = y / y.mean()
+    return (1 + (np.tile(y, (h // y.shape[0] + 1, w // y.shape[1] + 1))[:h, :w] - 1) * amount)[..., None]
+
+
+def card_text(w, h, items):
+    """items: (x, y, text, font, anchor[, tracking em]) in card px, as an L mask."""
+    im = Image.new("L", (w, h), 0)
+    d = ImageDraw.Draw(im)
+    for x, y, s, f, anchor, *rest in items:
+        track = rest[0] if rest else 0
+        if not track:
+            d.text((x * CARD_SS, y * CARD_SS), s, font=f, fill=255, anchor=anchor)
+            continue
+        adv = [d.textlength(c, font=f) + track * f.size for c in s]
+        cx = x * CARD_SS - (sum(adv) - track * f.size) / 2
+        for c, a in zip(s, adv):
+            d.text((cx, y * CARD_SS), c, font=f, fill=255, anchor="l" + anchor[1])
+            cx += a
+    return card_arr(im)
+
+
+def card_mark(base, cx, cy, d, seed=3):
+    """The icon's chipped ring and cross, d card px across, in leaf with the gesso's low relief."""
+    ring, cross = marks()
+    m = np.clip(chipped(ring, 81, 0.04, 5) + chipped(cross, 82, 0.035, 5, rmin=0.6 * REACH), 0, 1)
+    n = round(N * d * CARD_SS / (2 * RING_OUT))
+    m = card_arr(Image.fromarray((m * 255).astype(np.uint8)).resize((n, n), Image.LANCZOS))
+    h, w = base.shape[:2]
+    full = np.zeros((h, w), np.float32)
+    x0, y0 = round(cx * CARD_SS - n / 2), round(cy * CARD_SS - n / 2)
+    sx, sy = max(0, -x0), max(0, -y0)                # the canvas's empty margin may run off the card
+    x1, y1 = min(w, x0 + n), min(h, y0 + n)
+    full[max(y0, 0):y1, max(x0, 0):x1] = m[sy:sy + y1 - max(y0, 0), sx:sx + x1 - max(x0, 0)]
+    ys = np.nonzero((full > 0.05).any(axis=1))[0]
+    t = np.clip((np.arange(h, dtype=np.float32) - ys.min()) / max(ys.max() - ys.min(), 1), 0, 1)[:, None, None]
+    t = np.clip((t - 0.15) / 0.55, 0, 1)
+    col = (rgb(CARD_LEAF_HI) * (1 - t) + rgb(CARD_LEAF) * t) * leaf_sheet(w, h, seed)
+    shade = ndi.gaussian_filter(full, 5 * CARD_SS) * 0.28
+    base = base * (1 - np.roll(shade, 2 * CARD_SS, axis=0))[..., None]
+    out = card_over(base, np.clip(col, 0, 1), full)
+    lit = relief(full, soft=CARD_SS, strength=1.2, amount=0.07)
+    lit = np.clip(out * lit[..., None], 0, 1)
+    return np.where(full[..., None] > 0.02, lit * full[..., None] + out * (1 - full[..., None]), out)
+
+
+def card_stars(base, seed, count, scale, reserves, gap):
+    """genstars' stars (its two kinds, sizes, tilt and leaf) at a floor on closeness, kept out of the
+    painter's reserves round the mark, the words and the frieze."""
+    import genstars
+    h, w = base.shape[:2]
+    rng = np.random.default_rng(seed)
+    pts, tries = [], 0
+    while len(pts) < count and tries < 20000:
+        tries += 1
+        x, y = rng.uniform(-10, w / CARD_SS + 10), rng.uniform(-10, h / CARD_SS + 10)
+        if any(a <= x <= b and c <= y <= e for a, c, b, e in reserves):
+            continue
+        if all((x - px) ** 2 + (y - py) ** 2 > gap * gap for px, py in pts):
+            pts.append((x, y))
+    layer = Image.new("L", (w * 2, h * 2), 0)          # stars are thin: painted at twice again
+    d = ImageDraw.Draw(layer)
+    k = CARD_SS * 2
+    for x, y in pts:
+        _, _, _, leaf, poly = genstars.star(rng, 0, 0)
+        d.polygon([((x + poly[i] * scale) * k, (y + poly[i + 1] * scale) * k) for i in range(0, len(poly), 2)],
+                  fill=round(255 * min(1, leaf * 0.9 + 0.08)))
+    m = card_arr(layer.resize((w, h), Image.LANCZOS))
+    return card_over(base, np.clip(rgb(CARD_LEAF) * leaf_sheet(w, h, seed + 1, 1.6), 0, 1), m)
+
+
+def card_frieze(base, y0, y1, seed=9):
+    """The home's frieze across the card: green earth with the plaster faintly through it, an oxblood
+    rule at each edge and a fillet of leaf inside, each with a hand's slight wander."""
+    h, w = base.shape[:2]
+    tex = Image.open(WEB / "plaster-panel.jpg").convert("L").resize((w, round(w * 2126 / 800)), Image.LANCZOS)
+    t = card_arr(tex)[600:600 + h, :w]
+    t = ((t - t.mean()) / (t.std() + 1e-6))[..., None]
+    yy = np.arange(h, dtype=np.float32)[:, None] / CARD_SS
+    wander = ndi.gaussian_filter(np.random.default_rng(seed).standard_normal((2, w)), (0, 90 * CARD_SS)) * 28
+    out = base.copy()
+
+    def band(a, b, colour, alpha, wa, wb):
+        m = (np.clip((yy - (a + wander[wa][None, :] / CARD_SS * 0.5)) * CARD_SS + 0.5, 0, 1)
+             * np.clip(((b + wander[wb][None, :] / CARD_SS * 0.5) - yy) * CARD_SS + 0.5, 0, 1))
+        out[:] = card_over(out, colour, m * alpha)
+
+    sh = np.clip(1 - np.abs(yy - (y0 + y1) / 2) / ((y1 - y0) / 2 + 7), 0, 1) ** 0.5
+    out *= (1 - 0.10 * ndi.gaussian_filter(np.repeat(sh, w, axis=1), 3 * CARD_SS))[..., None]
+    band(y0, y1, np.clip(rgb(FRIEZE_GROUND) * (1 + 0.035 * t), 0, 1), 1.0, 0, 1)
+    band(y0, y0 + 5, rgb(FRIEZE_RULE), 0.95, 0, 0)
+    band(y1 - 5, y1, rgb(FRIEZE_RULE), 0.95, 1, 1)
+    band(y0 + 8.5, y0 + 10.5, rgb(FRIEZE_INK) * 0.86, 0.55, 0, 0)
+    band(y1 - 10.5, y1 - 8.5, rgb(FRIEZE_INK) * 0.86, 0.55, 1, 1)
+    return out
+
+
+def share_card():
+    """The 1200x630 picture a shared link previews with (og:image): the night home's sky edge to edge,
+    the consecration cross in leaf above the name, what the app is in leaf italic, and "Pray the
+    hours" in the frieze at the foot. Name, words and mark sit in the centre square, which chat apps
+    crop to."""
+    w, h = CARD_W * CARD_SS, CARD_H * CARD_SS
+    y0, y1 = 556, 612
+    reserves = [(505, 20, 695, 178), (250, 170, 950, 345), (290, 345, 910, 480), (-20, y0 - 22, CARD_W + 20, CARD_H + 20)]
+    a = card_stars(card_sky(w, h), 1117, 46, 1.55, reserves, gap=62)
+    a = card_mark(a, 600, 100, 118)
+    a = card_over(a, rgb(CARD_NAME), card_text(w, h, [(600, 288, "Daily Office", card_font("eb-garamond-regular", 120), "ms")]))
+    italic = card_font("eb-garamond-italic", 46)
+    a = card_over(a, rgb(CARD_SUB), card_text(w, h, [(600, 380, "The Benedictine Divine Office", italic, "ms"),
+                                                    (600, 436, "of the Western Rite", italic, "ms")]))
+    a = card_frieze(a, y0, y1)
+    f, track, label = card_font("eb-garamond-regular", 24), 0.24, "PRAY THE HOURS"
+    m = card_text(w, h, [(600, 593, label, f, "ms", track)])
+    d = ImageDraw.Draw(Image.new("L", (4, 4)))
+    half = (sum(d.textlength(c, font=f) + track * f.size for c in label) - track * f.size) / CARD_SS / 2
+    loz = Image.new("L", (w, h), 0)
     for side in (-1, 1):
-        inner, outer = c + side * 9.5 * scale, c + side * w / 2
-        draw.polygon([(outer, y - 0.3 * scale), (inner, y - 0.75 * scale), (inner, y + 0.75 * scale), (outer, y + 0.3 * scale)], fill=colour)
-
-
-def share_card(icon_tile):
-    """The 1200x630 picture a shared link previews with (og:image): the app icon as a launcher shows it,
-    on the site's light plaster wall, beside the name, a tailpiece and what the app is, in the site's
-    EB Garamond and its light theme's gold and ink."""
-    w, h, d, left = 1200, 630, 380, 100
-    top = (h - d) // 2
-    ss = 4
-    corners = Image.new("L", (d * ss, d * ss), 0)
-    ImageDraw.Draw(corners).rounded_rectangle((0, 0, d * ss - 1, d * ss - 1), radius=round(d * ss * 0.2237), fill=255)
-    corners = corners.resize((d, d), Image.LANCZOS)
-    shadow = Image.new("L", (w, h), 0)
-    shadow.paste(corners, (left + 6, top + 14))
-    shadow = np.asarray(shadow.filter(ImageFilter.GaussianBlur(18)), np.float32)[..., None] / 255
-    card = to_image(nave_wall(w, h) * (1 - 0.28 * shadow))
-    card.paste(to_image(icon_tile).resize((d, d), Image.LANCZOS), (left, top), corners)
-    draw = ImageDraw.Draw(card)
-    x = left + d + 72
-    gold, gold_line, ink, muted = (154, 115, 40), (201, 172, 114), (36, 28, 23), (122, 106, 88)
-    draw.text((x, 268), "Daily Office", font=font("eb-garamond-regular", 112), fill=gold, anchor="ls")
-    tailpiece(draw, x + 4, 306, 500, gold_line, 2.2)
-    italic = font("eb-garamond-italic", 42)
-    draw.text((x, 372), "The Benedictine Divine Office", font=italic, fill=ink, anchor="ls")
-    draw.text((x, 424), "of the Western Rite", font=italic, fill=ink, anchor="ls")
-    draw.text((x, 500), "orthodoxwestbreviary.com", font=font("eb-garamond-regular", 30), fill=muted, anchor="ls")
-    return card
+        cx, cy, r = 600 + side * (half + 30), 584, 6
+        ImageDraw.Draw(loz).polygon([(cx * CARD_SS, (cy - r) * CARD_SS), ((cx + r) * CARD_SS, cy * CARD_SS),
+                                     (cx * CARD_SS, (cy + r) * CARD_SS), ((cx - r) * CARD_SS, cy * CARD_SS)], fill=255)
+    a = card_over(a, rgb(FRIEZE_INK), np.maximum(m, card_arr(loz)))
+    return to_image(a).resize((CARD_W, CARD_H), Image.LANCZOS)
 
 
 def main():
@@ -542,7 +661,7 @@ def main():
         save_rgb(night_tile, WEB / f"icons/icon-{size}.png", size)
         save_rgb(night_tile, WEB / f"icons/icon-maskable-{size}.png", size)
     save_rgb(night_tile, WEB / "icons/apple-touch-icon.png", 180)
-    save(share_card(night_tile), WEB / "icons/share-card.png", palette=True)
+    save(share_card(), WEB / "icons/share-card.png", palette=True)
     (WEB / "favicon.svg").write_text(favicon())
     print("wrote", (WEB / "favicon.svg").relative_to(ROOT))
 

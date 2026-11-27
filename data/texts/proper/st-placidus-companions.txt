@@ -11,7 +11,7 @@
 # --- core ---
 #
 [collect]
-# SOURCE: monastic-diurnal p. 661 (DI-6912d65ec4cd-Cplacidus-P661-22333171e234; collect) — agent-proposed, not attested
+# SOURCE: diurnal p. 617
 Almighty everlasting God, who makest us glad by the manifold festivity of thy Saints: grant that we may be shielded by the protection of those in whose commemoration we rejoice.
 
 # [benedictus-antiphon]

@@ -1,6 +1,6 @@
 //! A feast's own texts for its page, read from the office as it is said on a day the feast is kept
-//! or commemorated: the collect, then the Gospel-canticle antiphons and the versicles, each from the
-//! feast's proper or its Common, with the saint's name put in. Reading them from the composed hours
+//! or commemorated: the collect, then each hour's hymn, versicle and Gospel-canticle antiphon, each
+//! from the feast's proper or its Common, with the saint's name put in. Reading them from the composed hours
 //! keeps the page to what the office says, in that day's season.
 
 use calendar::{Category, MoveableDates};
@@ -20,6 +20,8 @@ pub struct FeastText {
     pub common: bool,
     /// A prayer, set as flowing prose; an antiphon or versicle keeps its lines.
     pub prayer: bool,
+    /// A hymn, set in stanzas under its Latin title.
+    pub hymn: Option<String>,
 }
 
 /// The feast's texts and where they came from.
@@ -60,11 +62,13 @@ impl Place {
 /// A text and the corpus entry it came from.
 type Sourced = (String, String);
 
-/// What one hour says of the feast: its antiphon, versicle and collect.
+/// What one hour says of the feast: its hymn, antiphon, versicle and collect.
 #[derive(Default)]
 struct Said {
     /// The hour is the feast's own, not one it is commemorated in.
     own: bool,
+    /// The hymn and its Latin title: an hour's own, never a commemoration's, which has none.
+    hymn: Option<(Sourced, String)>,
     antiphon: Option<Sourced>,
     versicle: Option<Sourced>,
     collect: Option<Sourced>,
@@ -85,6 +89,7 @@ pub fn feast_texts(engine: &Engine, is_it: &dyn Fn(&str, &str) -> bool, eve: Opt
     let second = read_hour("vespers", on);
 
     let mut own = Vec::new();
+    let mut hymns = Vec::new();
     let mut antiphons = Vec::new();
     let mut versicles = Vec::new();
     let mut collects = Vec::new();
@@ -93,33 +98,42 @@ pub fn feast_texts(engine: &Engine, is_it: &dyn Fn(&str, &str) -> bool, eve: Opt
         if said.own {
             own.push(place);
         }
+        hymns.extend(said.hymn.map(|h| (place, h)));
         antiphons.extend(said.antiphon.map(|a| (place, a)));
         versicles.extend(said.versicle.map(|v| (place, v)));
         collects.extend(said.collect.map(|c| (place, c)));
     }
     let mut out = FeastTexts::default();
-    let mut push = |label: String, (text, src): Sourced, prayer: bool| {
+    let mut push = |label: String, (text, src): Sourced, prayer: bool, hymn: Option<String>| {
         let common = src.starts_with("commons/");
         if common {
             out.common = out.common.or_else(|| common_of(&src));
         } else {
             out.proper = true;
         }
-        out.texts.push(FeastText { label, text, common, prayer });
+        out.texts.push(FeastText { label, text, common, prayer, hymn });
     };
     // With no I Vespers read, the day's Vespers are simply its Vespers.
-    let first_read = antiphons.iter().chain(&versicles).any(|(p, _)| *p == Place::FirstVespers);
+    let first_read =
+        antiphons.iter().chain(&versicles).any(|(p, _)| *p == Place::FirstVespers) || hymns.iter().any(|(p, _)| *p == Place::FirstVespers);
     let name = |places: &[Place]| places_name(places, first_read);
     let antiphons = grouped(antiphons, &own);
+    // A hymn is said only in the feast's own hours, so its hours need no keeping apart either.
+    let titles: Vec<(String, String)> = hymns.iter().map(|(_, ((text, _), title))| (text.clone(), title.clone())).collect();
+    let hymns = grouped(hymns.into_iter().map(|(p, (text, _))| (p, text)).collect(), &[]);
+    let title_of = |text: &str| titles.iter().find(|(t, _)| t == text).map(|(_, title)| title.clone()).unwrap_or_default();
     // A versicle's label is the same in a commemoration, so its hours are not kept apart.
     let versicles = grouped(versicles, &[]);
     // The collect first: it is the day's, said at every hour, and it names the feast. Then the
     // texts of single hours. The collect as Lauds says it, else as Vespers does.
     if let Some((_, collect)) = collects.iter().find(|(p, _)| *p == Place::Lauds).or_else(|| collects.first()) {
-        push("Collect".to_string(), collect.clone(), true);
+        push("Collect".to_string(), collect.clone(), true, None);
     }
-    // Each hour's antiphon, then its versicle, in the order they are said.
+    // Each hour's hymn, then its antiphon and versicle.
     for place in [Place::FirstVespers, Place::Lauds, Place::SecondVespers] {
+        for (places, text) in hymns.iter().filter(|(p, _)| p[0] == place) {
+            push(format!("Hymn at {}", name(places)), text.clone(), false, Some(title_of(&text.0)));
+        }
         for (places, text) in antiphons.iter().filter(|(p, _)| p[0] == place) {
             // In the feast's own hour the antiphon is the canticle's; in a commemoration, its own.
             let what = match places.as_slice() {
@@ -128,17 +142,17 @@ pub fn feast_texts(engine: &Engine, is_it: &dyn Fn(&str, &str) -> bool, eve: Opt
                 p if !p.contains(&Place::Lauds) => " · Magnificat",
                 _ => "",
             };
-            push(format!("At {}{what}", name(places)), text.clone(), false);
+            push(format!("At {}{what}", name(places)), text.clone(), false, None);
         }
         for (places, text) in versicles.iter().filter(|(p, _)| p[0] == place) {
-            push(format!("Versicle at {}", name(places)), text.clone(), false);
+            push(format!("Versicle at {}", name(places)), text.clone(), false, None);
         }
     }
     out
 }
 
-/// What `hour` says of the feast: its own antiphon, versicle and collect when the hour is the
-/// feast's (`own`), else those of its commemoration. A collect comes with its conclusion.
+/// What `hour` says of the feast: its own hymn, antiphon, versicle and collect when the hour is the
+/// feast's (`own`), else the antiphon, versicle and collect of its commemoration. A collect comes with its conclusion.
 fn read(hour: &OfficeHour, own: bool, is_it: &dyn Fn(&str, &str) -> bool, t: &OfficeTexts) -> Said {
     let mut said = Said { own, ..Said::default() };
     let mut in_commemoration = false;
@@ -154,6 +168,9 @@ fn read(hour: &OfficeHour, own: bool, is_it: &dyn Fn(&str, &str) -> bool, t: &Of
         }
         let found = (e.text.clone(), e.source_ref.clone());
         match (own, e.slot_ref.as_str()) {
+            (true, "hymn") if e.kind == ElementType::Hymn => {
+                said.hymn.get_or_insert((found, e.label.clone()));
+            }
             (true, "benedictus-antiphon" | "magnificat-antiphon") | (false, "commemoration-antiphon") => {
                 said.antiphon.get_or_insert(found);
             }
@@ -195,11 +212,12 @@ fn grouped(said: Vec<(Place, Sourced)>, own: &[Place]) -> Vec<(Vec<Place>, Sourc
     out
 }
 
-/// "Lauds", "I Vespers", "Lauds and II Vespers", named in the order they are said. I and II Vespers
-/// together are simply Vespers, as II Vespers are when no I Vespers were read (`first_read`).
+/// "Lauds", "I Vespers", "Lauds and II Vespers", "I and II Vespers", named in the order they are
+/// said. II Vespers are simply Vespers when no I Vespers were read (`first_read`), so a plain
+/// "Vespers" always means the day's one Vespers, never both.
 fn places_name(places: &[Place], first_read: bool) -> String {
     if places.contains(&Place::FirstVespers) && places.contains(&Place::SecondVespers) {
-        return if places.contains(&Place::Lauds) { "Vespers and Lauds" } else { "Vespers" }.to_string();
+        return if places.contains(&Place::Lauds) { "I Vespers, Lauds and II Vespers" } else { "I and II Vespers" }.to_string();
     }
     let name = |p: &Place| if *p == Place::SecondVespers && !first_read { "Vespers" } else { p.name() };
     places.iter().map(name).collect::<Vec<_>>().join(" and ")
@@ -265,8 +283,10 @@ mod tests {
             labels(&texts),
             [
                 "Collect",
+                "Hymn at I Vespers",
                 "At I Vespers · Magnificat",
                 "Versicle at I Vespers",
+                "Hymn at Lauds",
                 "At Lauds · Benedictus",
                 "Versicle at Lauds and II Vespers",
                 "At II Vespers · Antiphon"
@@ -278,6 +298,33 @@ mod tests {
         assert!(collect.contains("world without end"), "the collect ends with its conclusion: {collect}");
         assert!(text(&texts, "At Lauds · Benedictus").starts_with("Well done"));
         assert!(text(&texts, "Versicle at I Vespers").contains("The Lord loved him and adorned him"));
+        let hymn = texts.texts.iter().find(|t| t.label == "Hymn at I Vespers").unwrap();
+        assert_eq!(hymn.hymn.as_deref(), Some("Iste Confessor"));
+        assert!(hymn.common && !hymn.prayer, "{hymn:?}");
+    }
+
+    #[test]
+    fn a_feast_shows_its_own_hymns_in_full() {
+        let texts = Years::load().texts("assumption-bvm", "2027-08-15");
+        let at =
+            |label: &str| texts.texts.iter().find(|t| t.label == label).unwrap_or_else(|| panic!("no {label} in {:?}", labels(&texts)));
+        let vespers = at("Hymn at I and II Vespers");
+        assert_eq!(vespers.hymn.as_deref(), Some("Ave, maris stella"), "I and II Vespers say the same hymn, shown once");
+        assert!(vespers.text.contains("Star of ocean fairest") && vespers.text.contains("Amen"), "{}", vespers.text);
+        assert!(!vespers.common);
+        let lauds = at("Hymn at Lauds");
+        assert_eq!(lauds.hymn.as_deref(), Some("O gloriosa Domina"));
+        assert!(lauds.text.contains("O Jesu, Virgin-born"), "the hymn ends as the office says it: {}", lauds.text);
+        let order = labels(&texts);
+        let pos = |l: &str| order.iter().position(|x| *x == l).unwrap();
+        assert!(pos("Hymn at Lauds") < pos("At Lauds · Benedictus"), "{order:?}");
+        assert!(pos("Hymn at I and II Vespers") < pos("Hymn at Lauds"), "{order:?}");
+    }
+
+    #[test]
+    fn a_commemoration_has_no_hymn() {
+        let texts = Years::load().texts("comm-01-04-st-titus-bishop-and-confessor", "2027-01-04");
+        assert!(texts.texts.iter().all(|t| t.hymn.is_none()), "{:?}", labels(&texts));
     }
 
     #[test]
@@ -298,7 +345,7 @@ mod tests {
     #[test]
     fn i_vespers_take_the_feasts_own_versicle_before_the_commons() {
         let texts = Years::load().texts("chains-st-peter", "2026-08-01");
-        assert!(text(&texts, "Versicle at Vespers and Lauds").contains("Thou art Peter"), "{:?}", texts.texts);
+        assert!(text(&texts, "Versicle at I Vespers, Lauds and II Vespers").contains("Thou art Peter"), "{:?}", texts.texts);
         assert!(text(&texts, "At I Vespers · Magnificat").starts_with("Thou art the shepherd"));
     }
 

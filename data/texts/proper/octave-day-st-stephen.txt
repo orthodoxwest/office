@@ -99,3 +99,43 @@ Almighty, everlasting God, who didst consecrate the first-fruits of the Martyrs 
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[chapter-lauds]
+# SOURCE: Monastic Diurnal p. 220 (January 2, At Lauds: "The Chapter and the rest as on the Feast, p. 194, except Collect")
+@use proper/st-stephen/chapter-lauds
+
+[short-responsory-lauds]
+# SOURCE: Monastic Diurnal p. 220 (January 2, At Lauds: "The Chapter and the rest as on the Feast, p. 194, except Collect")
+@use proper/st-stephen/short-responsory-lauds
+
+[hymn-lauds]
+# SOURCE: Monastic Diurnal p. 220 (January 2, At Lauds: "The Chapter and the rest as on the Feast, p. 194, except Collect")
+@use proper/st-stephen/hymn-lauds
+
+[versicle-lauds]
+# SOURCE: Monastic Diurnal p. 220 (January 2, At Lauds: "The Chapter and the rest as on the Feast, p. 194, except Collect")
+@use proper/st-stephen/versicle-lauds
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 220 ("At the Little Hours all as on the Feast")
+@use proper/st-stephen/chapter-terce
+
+[chapter-sext]
+# SOURCE: Monastic Diurnal p. 220 ("At the Little Hours all as on the Feast")
+@use proper/st-stephen/chapter-sext
+
+[chapter-none]
+# SOURCE: Monastic Diurnal p. 220 ("At the Little Hours all as on the Feast")
+@use proper/st-stephen/chapter-none
+
+[versicle-terce]
+# SOURCE: Monastic Diurnal p. 220 ("At the Little Hours all as on the Feast")
+@use proper/st-stephen/versicle-terce
+
+[versicle-sext]
+# SOURCE: Monastic Diurnal p. 220 ("At the Little Hours all as on the Feast")
+@use proper/st-stephen/versicle-sext
+
+[versicle-none]
+# SOURCE: Monastic Diurnal p. 220 ("At the Little Hours all as on the Feast")
+@use proper/st-stephen/versicle-none

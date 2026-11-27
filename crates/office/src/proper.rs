@@ -258,6 +258,49 @@ pub fn lookup_commons_text(
     lookup_section_text(&format!("commons/{cat}/"), Some(season), hour_name, reference, t)
 }
 
+/// Diurnal p. 6* §3: "in Paschaltide there is a special Common of Apostles,
+/// Evangelists, and Martyrs", while the other Commons are said "as out of
+/// Paschaltide" with Alleluia added. So a Martyr's Proper antiphon that is
+/// written for the rest of the year (it has no Alleluia) yields in
+/// Paschaltide to the Paschal Common of Martyrs' antiphon for the same place:
+/// Ss John and Paul, commemorated in the Octave of Pentecost, take "Light
+/// perpetual" at Vespers and "Daughters of Jerusalem" at Lauds (2021 and 2024
+/// ordos, 25-26 June), not their own "The righteous" and "These are the holy
+/// ones" (pp. 542-543). The Apostles' own antiphons are not displaced so (St
+/// Paul's "O holy Apostle Paul" is no Common's): no ordo shows one in
+/// Paschaltide, and they take Paschaltide's Alleluia instead (XXIV.7).
+/// Nor does a feast with an office of its own, whose Proper gives its psalm
+/// antiphons: St John Baptist's Nativity (Category martyr) keeps "When
+/// Zacharias" and "The mouth of Zacharias" for its octave in the Octave of
+/// Pentecost (2051, 30 June to 1 July).
+pub fn paschal_common_antiphon(
+    feast: &Feast,
+    season: Season,
+    hour_name: &str,
+    reference: &str,
+    found: (String, String),
+    t: &OfficeTexts,
+) -> (String, String) {
+    let special_common = matches!(feast.category, Some(Category::Martyr | Category::Martyrs | Category::BishopMartyr));
+    if season != Season::Easter
+        || !special_common
+        || !base_proper_ref(reference).contains("antiphon")
+        || !found.1.starts_with("proper/")
+        || found.0.to_lowercase().contains("alleluia")
+    {
+        return found;
+    }
+    let own_office = found
+        .1
+        .rsplit_once('/')
+        .is_some_and(|(dir, _)| ["psalm-antiphon", "psalm-antiphon-1"].iter().any(|k| !t.get(&format!("{dir}/{k}")).trim().is_empty()));
+    if own_office {
+        return found;
+    }
+    let common = lookup_commons_text(feast.category, season, hour_name, reference, t);
+    if !common.0.is_empty() && common.1.contains("-paschal/") { common } else { found }
+}
+
 /// The collect of the Little Hours is the collect of Lauds.
 pub fn resolve_proper_collect_text(day: &Day, hour_name: &str, t: &OfficeTexts) -> (String, String) {
     match hour_name {
@@ -320,8 +363,9 @@ pub fn lookup_feast_proper_text(day: &Day, hour_name: &str, reference: &str, t: 
                 }
             }
         }
-        let (text, resolved) = lookup_section_text(&format!("proper/{feast_id}/"), Some(season), hour_name, reference, t);
-        if !text.is_empty() {
+        let found = lookup_section_text(&format!("proper/{feast_id}/"), Some(season), hour_name, reference, t);
+        if !found.0.is_empty() {
+            let (text, resolved) = paschal_common_antiphon(celebration, season, hour_name, reference, found, t);
             return (substitute_proper_name(&text, &proper_name), resolved);
         }
     }

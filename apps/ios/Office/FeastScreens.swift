@@ -2,6 +2,7 @@ import SwiftUI
 
 /// The search and feast page's fixed words, as every front sets them.
 let feastWordsShared = feastWords()
+private let feastGlossesShared = feastGlosses()
 
 /// The search for a feast or saint, as the web's /calendar/find.
 struct FindPage: View {
@@ -35,6 +36,7 @@ struct FeastPage: View {
             return view
         } content: { view in
             FeastScreen(view: view, entry: entry)
+                .screenshotReady(.feast(id))
         }
         .background(PlasterWall())
         .toolbar(.hidden, for: .navigationBar)
@@ -96,19 +98,23 @@ struct FindScreen: View {
         }
     }
 
+    private func rankLetters(_ r: FeastResultView, _ ink: Color) -> some View {
+        Text(r.rank).type(Scale.small.sized(15.2, line: 20)).foregroundStyle(ink)
+            .padding(.leading, m.px(12)).padding(.top, m.px(4))
+    }
+
     private func result(_ r: FeastResultView) -> some View {
         let ink = rankTone(r.rankTone, p)
         return VStack(alignment: .leading, spacing: 0) {
+            let heading = [r.name, r.rankFull].filter { !$0.isEmpty }.joined(separator: ", ")
             Button { model.open(.feast(r.id)) } label: {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(alignment: .top, spacing: 0) {
                         Text(r.name).type(Scale.body.sized(21.6, line: 27)).foregroundStyle(ink)
                             .multilineTextAlignment(.leading)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        if !r.rank.isEmpty {
-                            Text(r.rank).type(Scale.small.sized(15.2, line: 20)).foregroundStyle(ink)
-                                .padding(.leading, m.px(12)).padding(.top, m.px(4))
-                        }
+                        // The rank's room: its letters lie over the button (below), not in it.
+                        if !r.rank.isEmpty { rankLetters(r, ink).hidden() }
                     }
                     (Text(r.meta + " · ") + Text(feastWordsShared.everyYear).foregroundColor(p.accent))
                         .type(Scale.small.sized(14.7, line: 21)).foregroundStyle(p.muted)
@@ -118,9 +124,22 @@ struct FindScreen: View {
             }
             .buttonStyle(Quiet())
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(r.name), \(r.rankFull). \(r.meta)")
-            .accessibilityAddTraits(.isHeader)
+            .accessibilityLabel("\(heading). \(r.meta)")
+            .accessibilityAddTraits([.isButton, .isHeader])
             .accessibilityHint("Opens the feast's page")
+            // Over the feast's button, so a tap on the rank names it in a note (as the ordo's marks
+            // do) rather than opening the feast.
+            .overlay(alignment: .topTrailing) {
+                if !r.rank.isEmpty {
+                    Group {
+                        if r.rankFull.isEmpty {
+                            rankLetters(r, ink).accessibilityHidden(true)
+                        } else {
+                            NoteMark(name: r.rankFull, label: r.rankFull) { rankLetters(r, ink) }
+                        }
+                    }
+                }
+            }
             ForEach(Array(r.years.enumerated()), id: \.offset) { i, y in YearRow(y: y, first: i == 0) }
             Hairline(color: p.border).padding(.top, m.px(12))
         }
@@ -179,6 +198,10 @@ struct FeastScreen: View {
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
+    /// The hymns opened, by their place among the texts: each folded until tapped, and nothing
+    /// kept between visits (the web's `details.feast-hymn`).
+    @State private var openHymns: Set<Int> = []
+    @State private var openHymnsOf = ""
 
     private var note: TextStyle { Scale.small.sized(14.7, line: 21) }
 
@@ -251,14 +274,16 @@ struct FeastScreen: View {
     /// goes (the web's `back_link`); else the search.
     private var back: some View {
         let to = entry.flatMap(model.feastBack)
+        let label = to ?? feastWordsShared.findTitle
         return Button {
             if let entry, to != nil { model.back(from: entry) } else { model.findAgain() }
         } label: {
-            Text("‹ \(to ?? feastWordsShared.findTitle)").type(TextStyle(size: 15.2, line: 20, tracking: 1.37, smallCaps: true)).foregroundStyle(p.muted)
+            Text("‹ \(label)").type(TextStyle(size: 15.2, line: 20, tracking: 1.37, smallCaps: true)).foregroundStyle(p.muted)
                 .padding(.vertical, m.px(12))
                 .frame(minHeight: 44)
         }
         .buttonStyle(Quiet())
+        .accessibilityLabel("Back to \(label)")
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
@@ -288,19 +313,60 @@ struct FeastScreen: View {
 
     private var texts: some View {
         let w = feastWordsShared
+        // A hymn's stanzas stand in a column as wide as its longest line, centred, as the hours
+        // set them (the web's `.feast-hymn .hymn-verses`).
+        let opened = openHymnsOf == view.id ? openHymns : []
+        let columns = hymnColumns(view.texts.map { SectionView(label: "", collapsible: false, bare: false, blocks: $0.blocks) }, p, o, m)
         return VStack(alignment: .leading, spacing: 0) {
-            SectionHeading(text: w.textsHeading, seed: 71).padding(.bottom, m.px(4.8))
+            SectionHeading(text: w.textsHeading, seed: 71, gloss: feastGlossesShared.proper).padding(.bottom, m.px(4.8))
             Text(view.textsSource).type(TextStyle(size: 14.4, line: 21, italic: true)).foregroundStyle(p.muted).padding(.top, m.px(6.4))
             ForEach(Array(view.texts.enumerated()), id: \.offset) { n, t in
-                TextLabel(label: t.label, common: t.common ? w.commonMark : "")
-                    .padding(.top, m.px(n == 0 ? 20.8 : 16)).padding(.bottom, m.px(2.4))
-                // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.
-                ForEach(Array(blocks(t, first: n == 0).enumerated()), id: \.offset) { i, b in
-                    BlockRow(block: b).padding(.top, i == 0 ? 0 : m.space(b.space))
+                if let title = t.hymnTitle {
+                    // The hymn's fold: its label and caret, its Latin title beneath, one touch target.
+                    let expanded = opened.contains(n)
+                    Button {
+                        withAnimation(disclosing(!expanded)) {
+                            var now = opened
+                            if expanded { now.remove(n) } else { now.insert(n) }
+                            openHymns = now
+                            openHymnsOf = view.id
+                        }
+                    } label: {
+                        VStack(alignment: .leading, spacing: 0) {
+                            TextLabel(label: t.label, common: t.common ? w.commonMark : "", caret: expanded)
+                            if !title.isEmpty {
+                                Text(title).type(TextStyle(size: 16.3, line: 22, italic: true)).foregroundStyle(p.muted)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                        .padding(.vertical, m.px(3.2))
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(Quiet())
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityValue(expanded ? "Expanded" : "Collapsed")
+                    .padding(.top, m.px(n == 0 ? 17.6 : 12.8))
+                    if expanded {
+                        VStack(alignment: .leading, spacing: 0) {
+                            ForEach(Array(t.blocks.enumerated()), id: \.offset) { i, b in
+                                BlockRow(block: b, column: columns[BlockAt(section: n, block: i)])
+                                    .padding(.top, i == 0 ? m.space(.bind) : m.space(b.space))
+                            }
+                        }
+                        .transition(.unfold)
+                    }
+                } else {
+                    TextLabel(label: t.label, common: t.common ? w.commonMark : "", labelGloss: t.labelGloss, commonGloss: t.common ? feastGlossesShared.common : nil)
+                        .padding(.top, m.px(n == 0 ? 20.8 : 16)).padding(.bottom, m.px(2.4))
+                    // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.
+                    ForEach(Array(blocks(t, first: n == 0).enumerated()), id: \.offset) { i, b in
+                        BlockRow(block: b, column: columns[BlockAt(section: n, block: i)]).padding(.top, i == 0 ? 0 : m.space(b.space))
+                    }
+                    // A black day's initial is left ungilt, in the muted ink, as a bare hour's (the
+                    // web's `--cap-ink` under `.feast-head.day-color-black`).
+                    .environment(\.ornament, capInk)
                 }
-                // A black day's initial is left ungilt, in the muted ink, as a bare hour's (the
-                // web's `--cap-ink` under `.feast-head.day-color-black`).
-                .environment(\.ornament, capInk)
             }
             if let whole = view.wholeOffice {
                 Button { model.open(.home(whole.date)) } label: {
@@ -382,13 +448,18 @@ private struct FeastHead: View {
                         Rectangle().fill(frontal).frame(width: 5.5, height: 5.5)
                             .rotationEffect(.degrees(45))
                             .frame(height: rank.uiFont(m).lineHeight)
+                            .accessibilityHidden(true)
                     }
-                    Text(part).type(rank).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                    if i == 0, let rg = view.rankGloss {
+                        GlossMark(gloss: rg, label: part, reaches: false) {
+                            Text(part).type(rank).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                        }
+                    } else {
+                        Text(part).type(rank).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                    }
                 }
             }
             .padding(.top, m.px(8.8))
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(view.subtitle)
         }
         .accessibilityElement(children: .contain)
         .padding(.horizontal, m.px(8))
@@ -475,14 +546,16 @@ private struct StandingBox: View {
         let wash = view.next?.color == "black" ? Color.clear : HomeInk.of(p).tabletWash
         VStack(spacing: m.px(8)) {
             if monastic {
-                Text(w.monasticHeading).type(TextStyle(size: 15.2, line: 22, tracking: 2.28, smallCaps: true)).foregroundStyle(p.titulus)
-                    .multilineTextAlignment(.center)
-                    .accessibilityAddTraits(.isHeader)
+                GlossMark(gloss: feastGlossesShared.monastic, label: w.monasticHeading, reaches: false) {
+                    Text(w.monasticHeading).type(TextStyle(size: 15.2, line: 22, tracking: 2.28, smallCaps: true)).foregroundStyle(p.titulus)
+                        .multilineTextAlignment(.center)
+                }
+                .accessibilityAddTraits(.isHeader)
                 if let all = view.keptByAll {
                     Button { model.open(.feast(all.id)) } label: {
                         (Text(w.everyoneKeeps + " ") + Text(all.name).foregroundColor(p.accent) + Text(" " + view.keptByAllNote))
                             .type(Scale.body.sized(16.8, line: 24)).foregroundStyle(p.text).multilineTextAlignment(.leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     }
                     .buttonStyle(Quiet())
                     .accessibilityHint("Opens the feast's page")
@@ -496,6 +569,7 @@ private struct StandingBox: View {
                     .buttonStyle(Quiet())
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel("\(next.label): \(next.dateLabel). \(go)")
+                    .accessibilityAddTraits(.isButton)
                     .accessibilityHint("Opens the day")
             }
         }
@@ -505,6 +579,7 @@ private struct StandingBox: View {
         .background {
             if let tablet = UIImage(named: "tablet.png") {
                 Image(uiImage: tablet).renderingMode(.template).resizable().foregroundStyle(wash).padding(1)
+                    .accessibilityHidden(true)
             }
         }
         .overlay {
@@ -541,17 +616,68 @@ private struct StandingBox: View {
 private struct TextLabel: View {
     let label: String
     let common: String
+    /// A hymn's fold: its caret, open or not, after the label (the web's `summary h3::after`).
+    var caret: Bool? = nil
+    var labelGloss: GlossView? = nil
+    var commonGloss: GlossView? = nil
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
         let caps = TextStyle(size: 16, line: 22, tracking: 0.8, smallCaps: true)
-        let name = Text(label).font(Font(caps.uiFont(m))).foregroundColor(p.titulus).tracking(0.8 * m.type)
-        let mark = Text(common.isEmpty ? "" : "  " + common).font(Font(TextStyle(size: 13.6, line: 22, italic: true).uiFont(m))).foregroundColor(p.muted)
-        return (name + mark)
-            .lineSpacing(max(0, caps.line * m.type - caps.uiFont(m).lineHeight))
+        let commonStyle = TextStyle(size: 13.6, line: 22, italic: true)
+        if caret == nil && (labelGloss != nil || commonGloss != nil) {
+            // Beside the label where the line holds both; a long label takes its line and "Common"
+            // goes under it, as Android's FlowRow and the web's wrapping heading do.
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: m.px(8)) {
+                    labelMark(caps)
+                    commonMark(commonStyle)
+                }
+                VStack(alignment: .leading, spacing: 0) {
+                    labelMark(caps)
+                    commonMark(commonStyle)
+                }
+            }
             .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            let name = Text(label).font(Font(caps.uiFont(m))).foregroundColor(p.titulus).tracking(0.8 * m.type)
+            let mark = Text(common.isEmpty ? "" : "  " + common).font(Font(commonStyle.uiFont(m))).foregroundColor(p.muted)
+            HStack(spacing: 0) {
+                (name + mark)
+                    .lineSpacing(max(0, caps.line * m.type - caps.uiFont(m).lineHeight))
+                if let caret { Caret(open: caret, color: p.titulus) }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isHeader)
+        }
+    }
+
+    @ViewBuilder
+    private func labelMark(_ caps: TextStyle) -> some View {
+        if let labelGloss {
+            GlossMark(gloss: labelGloss, label: label, reaches: false) {
+                Text(label).type(caps).foregroundStyle(p.titulus)
+            }
+            .accessibilityAddTraits(.isHeader)
+        } else {
+            Text(label).type(caps).foregroundStyle(p.titulus)
+                .accessibilityAddTraits(.isHeader)
+        }
+    }
+
+    @ViewBuilder
+    private func commonMark(_ style: TextStyle) -> some View {
+        if !common.isEmpty {
+            if let commonGloss {
+                GlossMark(gloss: commonGloss, label: common, reaches: false) {
+                    Text(common).type(style).foregroundStyle(p.muted)
+                }
+            } else {
+                Text(common).type(style).foregroundStyle(p.muted)
+            }
+        }
     }
 }
 
@@ -583,15 +709,23 @@ private struct FeastHeader: View {
 private struct SectionHeading: View {
     let text: String
     let seed: UInt32
+    var gloss: GlossView? = nil
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
-        Text(text).type(TextStyle(size: 17.28, line: 24, tracking: 2.6, smallCaps: true)).foregroundStyle(p.titulus)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.bottom, m.px(6.4))
-            .overlay(alignment: .bottom) { Stroke(weight: 1.3, seed: seed, color: p.lining.opacity(0.78), foot: true) }
-            .accessibilityAddTraits(.isHeader)
+        let heading = Text(text).type(TextStyle(size: 17.28, line: 24, tracking: 2.6, smallCaps: true)).foregroundStyle(p.titulus)
+        Group {
+            if let gloss {
+                GlossMark(gloss: gloss, label: text, reaches: false) { heading }
+            } else {
+                heading
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.bottom, m.px(6.4))
+        .overlay(alignment: .bottom) { Stroke(weight: 1.3, seed: seed, color: p.lining.opacity(0.78), foot: true) }
+        .accessibilityAddTraits(.isHeader)
     }
 }
 
@@ -631,6 +765,7 @@ private struct FeastYears: View {
                 .buttonStyle(Pooled(pool: HomeInk.of(p).nowPool))
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(spoken)
+                .accessibilityAddTraits(.isButton)
                 .accessibilityHint("Opens the day")
         } else {
             row(y)
@@ -712,6 +847,7 @@ private struct YearRow: View {
                     .buttonStyle(Quiet())
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(spoken)
+                    .accessibilityAddTraits(.isButton)
                     .accessibilityHint("Opens the day")
             } else {
                 row(open: false)

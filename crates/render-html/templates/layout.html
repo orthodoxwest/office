@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  {%- set description %}{% block description %}The Benedictine Divine Office of the Antiochian Western Rite Vicariate: Lauds through Compline for each day, with the ordo and liturgical calendar.{% endblock %}{% endset %}
+  {%- set description %}{% block description %}Pray the Benedictine Divine Office of the Orthodox Western Rite: Lauds through Compline for each day, with the ordo and calendar of the Antiochian Western Rite Vicariate.{% endblock %}{% endset %}
   <meta name="description" content="{{ description }}">
   <title>{% block title %}Daily Office{% endblock %}</title>
   {# Search engines and link previews (Messages, WhatsApp, Facebook, Slack) read these. A dated
@@ -18,17 +18,29 @@
   <meta property="og:title" content="{% if canonical == "/" %}Daily Office{% else %}{{ self.title() }}{% endif %}">
   <meta property="og:description" content="{{ description }}">
   <meta property="og:url" content="{{ (site ~ canonical)|url }}">
-  {# tools/genicons.py paints the card from the app icon's scene. #}
+  {# tools/genicons.py paints the card: the night home's sky, its cross and its frieze. #}
   <meta property="og:image" content="{{ (site ~ static("icons/share-card.png"))|url }}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="The Daily Office app icon, a gold cross in its ring, beside the words Daily Office">
+  <meta property="og:image:alt" content="Daily Office, the Benedictine Divine Office of the Western Rite: a gold cross in its ring over the name, on a night sky of gold-leaf stars, above a band reading Pray the hours">
   <meta name="twitter:card" content="summary_large_image">
+  {# Home names the site for search results (Google's site names read WebSite data on the
+       home page); the address's own wording is its other name. #}
+  {% if canonical == "/" %}<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Daily Office","alternateName":["Orthodox West Breviary","Benedictine Divine Office of the Western Rite"],"url":{{ (site ~ "/")|script_string }},"inLanguage":"en"}</script>{% endif %}
   {% endif %}
+  {# The system's edge (Chromium's toolbar, an installed app's status bar) takes the wall's
+       colour, style.css's --bg in each theme. Here, before the pre-paint script, so a stored
+       Nave or Apse sets both before the first paint: an Apse reader on a light phone gets a
+       dark toolbar. app.js (syncThemeColorMeta) keeps them in step after a change. #}
+  <meta name="theme-color" content="#faf3e9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121c28" media="(prefers-color-scheme: dark)">
   {# Apply stored appearance before CSS to avoid a flash.
        Keys: office-theme, office-text-size, office-prayer-form, office-martyrology, office-chant. #}
   <script>
     (function () {
+      {# app.js marks scripted pages too, but only once it runs: marked here, an hour's header
+           never shows "Change date" for a moment before its date takes the picker over. #}
+      document.documentElement.classList.add("js");
       {# Settings carried from the site's previous address (office-web moved.rs); a choice already made here wins. #}
       try {
         var carry = /^#office-carry=(.*)$/.exec(location.hash);
@@ -38,6 +50,17 @@
           });
           history.replaceState(null, "", location.pathname + location.search);
         }
+      } catch (e) {}
+      {# The reader's phone, if it is one, so the colophon names only its own app (style.css's
+           "The apps"). iPadOS calls itself a Mac, but a Mac has no touch screen. A Fire tablet
+           (Silk, or a KF model) calls itself Android but has no Google Play, so it is offered no
+           store until the app is on Amazon's. #}
+      try {
+        var ua = navigator.userAgent || "";
+        var platform = /Silk\/|; KF[A-Z]{2,6}[;)]/.test(ua) ? "fire"
+          : /Android/.test(ua) ? "android"
+          : (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) ? "ios" : "";
+        if (platform) document.documentElement.setAttribute("data-platform", platform);
       } catch (e) {}
       try {
         var leaders = ["private", "deacon", "priest"];
@@ -49,6 +72,7 @@
         var t = localStorage.getItem("office-theme");
         if (t === "light" || t === "dark") {
           document.documentElement.setAttribute("data-theme", t);
+          document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.setAttribute("content", t === "dark" ? "#121c28" : "#faf3e9"); });
         } else if (t === "default") {
           document.documentElement.removeAttribute("data-theme");
         }
@@ -61,6 +85,41 @@
         if (localStorage.getItem("office-martyrology") === "on") document.documentElement.setAttribute("data-martyrology", "on");
         if (localStorage.getItem("office-chant") === "on") document.documentElement.setAttribute("data-chant", "on");
       } catch (e) {}
+      {%- if page == "home" %}
+      {# Apse's home shows its gold-leaf stars from the first frames: their field (app.js) is
+           fetched with the page, not after it, when the night theme is the one to be painted.
+           app.js takes this fetch's answer rather than asking again: WebKit does not reuse a
+           `preload as=fetch` for a later fetch(), and fetched the field twice (#850). #}
+      try {
+        var night = document.documentElement.getAttribute("data-theme");
+        if (window.fetch && (night === "dark" || (night === null && matchMedia("(prefers-color-scheme: dark)").matches))) {
+          window.officeStars = fetch("{{ static("ornaments/stars.json")|url|safe }}").then(function (resp) {
+            return resp.ok ? resp.json() : null;
+          });
+          window.officeStars.catch(function () {});
+        }
+      } catch (e) {}
+      {# The wall first (style.css): on a fresh arrival at home (from outside the Office, a
+           bookmark, the installed app or a reload; never a page turn from another of its pages,
+           which the turn already brings in), the painted layer is held until all of it is to
+           hand, and app.js (wallFirst) lays it as one coat. #}
+      try {
+        var entry = performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
+        var kind = entry ? entry.type : "navigate";
+        var turned = kind === "back_forward" || (kind !== "reload" && document.referrer && new URL(document.referrer).origin === location.origin);
+        if (!turned) {
+          var root = document.documentElement;
+          root.classList.add("wall-first");
+          {# Whether a frame has been shown: paint ready before it is simply there. #}
+          requestAnimationFrame(function () { root.setAttribute("data-wall-seen", ""); });
+          {# Without app.js the paint is let go: a second after load, or after six seconds
+               whatever has come, so a script that hangs (and holds load) never keeps it back. #}
+          var unhold = function () { if (!window.officeWallFirst) root.classList.remove("wall-first"); };
+          addEventListener("load", function () { setTimeout(unhold, 1000); });
+          setTimeout(unhold, 6000);
+        }
+      } catch (e) {}
+      {%- endif %}
       {# A reader's first week (presentation::about::ABOUT_NEWCOMER_DAYS; app.js records the first day in office-first-counted; a browser
            that used the Office before that was recorded holds "before"): home offers the
            introduction beside Change date. Before the first record, any stored setting or an
@@ -80,22 +139,57 @@
         }
         if (newcomer) document.documentElement.setAttribute("data-newcomer", "");
       } catch (e) {}
+      {# Through the wall (style.css): the header and colour band stand through a page turn where both
+           pages show them. They are named only as a page is captured, the old page at pageswap, the
+           new at pagereveal (here, since it comes before the deferred scripts); a header scrolled out
+           of sight stays unnamed, so it goes or comes with its page instead of standing over the
+           other's prayers. Named all the time, the header would trap Settings' panel under the page. #}
+      var held = function () {
+        return [document.querySelector(".site-header"), document.querySelector(".color-band")];
+      };
+      var letGo = function () {
+        held().forEach(function (el) { if (el) el.style.viewTransitionName = ""; });
+      };
+      var holdHeader = function (e) {
+        if (!e.viewTransition) return;
+        var els = held(), header = els[0], band = els[1];
+        if (band) band.style.viewTransitionName = "color-band";
+        if (header) {
+          var box = header.getBoundingClientRect();
+          if (box.height > 0 && box.bottom > 0) header.style.viewTransitionName = "site-header";
+        }
+        e.viewTransition.finished.then(letGo, letGo);
+      };
+      addEventListener("pageswap", holdHeader);
+      addEventListener("pagereveal", holdHeader);
+      {# A page kept for Back comes back with its names let go. #}
+      addEventListener("pageshow", function (e) { if (e.persisted) letGo(); });
     })();
   </script>
+  {# What a page must decide before it is first painted (an hour's place, hour.html). #}
+  {% block head %}{% endblock %}
   {# static stamps ?v=build so HTML and CSS/JS never desync across deploys. #}
-  {# Start the ordo font fetch early to reduce reflow in the long year table. #}
+  {# Start the text face's fetch early: it reflows the ordo's long year table, and re-sets home's
+       date and day when it swaps in. #}
   {# The preload must name the stylesheet's stamped URL exactly, or the face downloads twice. #}
-  {% if page == "calendar" %}<link rel="preload" href="{{ static("fonts/eb-garamond-regular.woff2")|url }}" as="font" type="font/woff2" crossorigin>{% endif %}
+  {% if page in ["calendar", "home"] %}<link rel="preload" href="{{ static("fonts/eb-garamond-regular.woff2")|url }}" as="font" type="font/woff2" crossorigin>{% endif %}
+  {# The header's ✠ is set in a face that blocks (style.css's "Office Cross"), and the brand's words
+       wait with it: fetched with the stylesheet, they stand from the first frame. #}
+  <link rel="preload" href="{{ static("fonts/noto-sans-symbols-cross.woff2")|url }}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ static("style.css")|url }}">
+  {# An hour's first frame waits for its colour band (it opens the page), so a page turn holds the band
+       rather than revealing the hour before the band is parsed. #}
+  {% if page in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %}<link rel="expect" href="#hour-band" blocking="render">{% endif %}
   {# Report filters should refresh immediately. A cross-document snapshot
        can hold a dense report's controls while its new view is rendering. #}
   {% if page == "usage" %}<style>@view-transition { navigation: none; }</style>{% endif %}
   <link rel="icon" type="image/svg+xml" href="{{ static("favicon.svg")|url }}">
   <link rel="manifest" href="{{ static("manifest.webmanifest")|url }}">
+  {# Safari's own Smart App Banner, dismissed with a tap and never shown elsewhere; only once the
+       App Store listing exists (presentation::stores::APP_STORE_ID), and never over an hour. #}
+  {% if app_store_id and page not in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %}<meta name="apple-itunes-app" content="app-id={{ app_store_id }}">{% endif %}
   <link rel="apple-touch-icon" href="{{ static("icons/apple-touch-icon.png")|url }}">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#fdf1e6" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#121c28" media="(prefers-color-scheme: dark)">
   <script src="{{ static("leader.js")|url }}" defer></script>
   <script src="{{ static("app.js")|url }}" defer></script>
   {# chant.js lays chant scores out with neuma's engine, fetched only once one is shown. #}
@@ -127,24 +221,10 @@
       {# Closed by default: desktop CSS shows the menu panel regardless of
            [open], and the native <details>/<summary> toggle lets no-JS mobile
            visitors expand it with a tap — no script needed either way. #}
-      {# Hour links appear only on hour pages, where hopping between hours is
-           the task. Home's prayer card already lists all seven, so repeating
-           them in the header there (and on ordo/reminders) was just noise. #}
-      {%- set on_hour = p in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %}
       <details class="site-menu">
         <summary>Menu</summary>
         <div class="site-menu-panel">
         <nav aria-label="Primary">
-          {%- if on_hour %}
-          <a href="{{ nav_link("/lauds", d)|url }}" data-nav="hour" data-hour="lauds"{% if p == "lauds" %} class="active" aria-current="page"{% endif %}>Lauds</a>
-          <a href="{{ nav_link("/prime", d)|url }}" data-nav="hour" data-hour="prime"{% if p == "prime" %} class="active" aria-current="page"{% endif %}>Prime</a>
-          <a href="{{ nav_link("/terce", d)|url }}" data-nav="hour" data-hour="terce"{% if p == "terce" %} class="active" aria-current="page"{% endif %}>Terce</a>
-          <a href="{{ nav_link("/sext", d)|url }}" data-nav="hour" data-hour="sext"{% if p == "sext" %} class="active" aria-current="page"{% endif %}>Sext</a>
-          <a href="{{ nav_link("/none", d)|url }}" data-nav="hour" data-hour="none"{% if p == "none" %} class="active" aria-current="page"{% endif %}>None</a>
-          <a href="{{ nav_link("/vespers", d)|url }}" data-nav="hour" data-hour="vespers"{% if p == "vespers" %} class="active" aria-current="page"{% endif %}>Vespers</a>
-          <a href="{{ nav_link("/compline", d)|url }}" data-nav="hour" data-hour="compline"{% if p == "compline" %} class="active" aria-current="page"{% endif %}>Compline</a>
-          <span class="nav-divider" aria-hidden="true"></span>
-          {%- endif %}
           <a href="{{ nav_link("/calendar", d)|url }}" data-nav="calendar"{% if p in ["calendar", "find", "feast"] %} class="active"{% endif %}{% if p == "calendar" %} aria-current="page"{% endif %}>Ordo</a>
           <a class="nav-secondary{% if p == "reminders" %} active{% endif %}" href="{{ nav_link("/reminders", d)|url }}" data-nav="reminders"{% if p == "reminders" %} aria-current="page"{% endif %}>Reminders</a>
           <a class="nav-secondary{% if p == "about" %} active{% endif %}" href="/about" data-nav="about"{% if p == "about" %} aria-current="page"{% endif %}>{{ about_menu }}</a>
@@ -168,13 +248,17 @@
       </details>
     </div>
   </header>
-  <main id="main-content">
+  <main id="main-content" tabindex="-1">
     {% block content %}{% endblock %}
   </main>
   <footer>
     <p>Benedictine Divine Office</p>
     {# Footer matter a page adds under the tailpiece (the hours' report link). #}
     {% block footer_matter %}{% endblock %}
+    {# The native apps, in one quiet line (presentation::stores). A reader on a phone sees only
+         their own platform's, by the pre-paint script's data-platform; one on an iPhone or iPad
+         sees nothing until the App Store listing is set, and one on a Fire tablet nothing yet. #}
+    <p class="app-stores{% if app_store_url %} has-ios{% endif %}">{{ apps_lead }} <span class="app-store" data-store="android"><a href="{{ play_url|url }}">Android</a></span>{% if app_store_url %}<span class="app-store-and">, </span><span class="app-store" data-store="ios"><a href="{{ app_store_url|url }}">{{ apps_apple }}</a></span>{% endif %}</p>
   </footer>
 </body>
 </html>

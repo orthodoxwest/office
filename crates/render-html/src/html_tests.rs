@@ -95,8 +95,8 @@ fn psalm_softens_drop_cap_after_section_break() {
         &[],
         0,
     );
-    has(&html, r#"<p class="verse numbered"><span class="verse-num">2</span>"#);
-    has(&html, r#"<span class="verse-num">10</span>"#);
+    has(&html, r#"<p class="verse numbered"><span class="verse-num" aria-hidden="true">2</span> <span class="verse-body">"#);
+    has(&html, r#"<span class="verse-num" aria-hidden="true">10</span>"#);
     lacks(&html, ">2 O ye Angels");
 
     let html = render_psalm_verses(
@@ -136,11 +136,15 @@ fn posture_cues_follow_their_mediants_and_precede_the_doxology_lines() {
         PostureCue::new(Posture::StandUpright, PostureAnchor::BeforeVerse(1)),
     ];
     let html = render_section_elements(&[psalm, gloria]);
-    has(&html, r#"<span class="mediant">*</span> <span class="posture">Sit.</span> and hath put on"#);
-    has(&html, r#"<span class="verse-body"><span class="posture">Bow.</span> He hath made"#);
-    has(&html, r#"Without a mediant <span class="posture">Stand.</span></span>"#);
-    has(&html, r#"<span class="source-line"><span class="posture">Bow.</span> Glory be"#);
-    has(&html, r#"<span class="source-line"><span class="posture">Stand upright.</span> As it was"#);
+    has(&html, r#"<span class="mediant" aria-hidden="true">*</span> <span class="posture gloss-quiet""#);
+    has(&html, r#">Sit.</span> and hath put on"#);
+    has(&html, r#"<span class="verse-body"><span class="posture gloss-quiet""#);
+    has(&html, r#">Bow.</span> He hath made"#);
+    has(&html, r#"Without a mediant <span class="posture gloss-quiet""#);
+    has(&html, r#">Stand.</span></span>"#);
+    has(&html, r#"<span class="source-line"><span class="posture gloss-quiet""#);
+    has(&html, r#">Bow.</span> Glory be"#);
+    has(&html, r#">Stand upright.</span> As it was"#);
     // Without cues nothing is added.
     lacks(&render_psalm_verses("Psalm 93\n\nTHE Lord is King * and hath put on glorious apparel.\n", &[], 0), "posture");
 }
@@ -156,8 +160,8 @@ fn collect_reflows_prose_and_preserves_semantic_lines() {
         r#"<div class="collect"><div class="liturgical-block"><p class="plain-line">Almighty God, who hast brought us to the beginning of this day.</p>"#,
     );
     lacks(&html, "brought us<br>to");
-    has(&html, r#"<span class="sigil">℣.</span>"#);
-    has(&html, r#"<span class="sigil">℟.</span>"#);
+    has(&html, r#"<span class="sigil"><span aria-hidden="true">℣.</span><span class="sr-only">Versicle.</span></span> "#);
+    has(&html, r#"<span class="sigil"><span aria-hidden="true">℟.</span><span class="sr-only">Response.</span></span> "#);
     has(&html, r#"<div class="liturgical-gap"></div>"#);
     let html = render(&elem(ElementType::Prayer, "Thy kingdom come.\nThy will be done."));
     has(&html, "Thy kingdom come. Thy will be done.");
@@ -298,19 +302,22 @@ fn rubric_marks_its_glossed_term_with_the_note() {
 fn short_responsory_drops_only_first_response_sigil() {
     let html = short_responsory("R. The Lord hath set his love upon me.\nV. He shall deliver me.\nR. The Lord hath set his love upon me.");
     has(&html, r#"class="response-line short-responsory-opening"><span class="sigil-text">The Lord"#);
-    assert_eq!(html.matches(">℟.</span>").count(), 1, "{html}");
+    assert_eq!(html.matches("<span aria-hidden=\"true\">℟.</span>").count(), 1, "{html}");
     // Compline's slot holds a versicle and its response, not a responsory.
     let html = short_responsory("V. Keep us, O Lord, as the apple of an eye.\nR. Hide us under the shadow of thy wings.");
     lacks(&html, "short-responsory-opening");
-    has(&html, r#"<span class="sigil">℟.</span><span class="sigil-text">Hide us"#);
+    has(
+        &html,
+        r#"<span class="sigil"><span aria-hidden="true">℟.</span><span class="sr-only">Response.</span></span> <span class="sigil-text">Hide us"#,
+    );
 }
 
 #[test]
 fn dialogue_and_corporate_lord_prayer_roles() {
     let dialogue = render_liturgical_block("V. Kyrie, eleison.\nR. Christe, eleison.\nAll: Kyrie, eleison.");
-    has(&dialogue, ">℣.</span>");
-    has(&dialogue, ">℟.</span>");
-    has(&dialogue, ">All:</span>");
+    has(&dialogue, r#"<span aria-hidden="true">℣.</span><span class="sr-only">Versicle.</span>"#);
+    has(&dialogue, r#"<span aria-hidden="true">℟.</span><span class="sr-only">Response.</span>"#);
+    has(&dialogue, ">All:</span> ");
     let mut prayer = elem(
         ElementType::CorporateLordPrayer,
         "Our Father, who art in heaven.\nAnd lead us not into temptation,\nBut deliver us from evil.",
@@ -321,7 +328,10 @@ fn dialogue_and_corporate_lord_prayer_roles() {
     ];
     let html = render(&prayer);
     has(&html, r#"corporate-lord-prayer-officiant">Our Father"#);
-    has(&html, r#">℟.</span><span class="sigil-text">But deliver us from evil.</span>"#);
+    has(
+        &html,
+        r#"<span aria-hidden="true">℟.</span><span class="sr-only">Response.</span></span> <span class="sigil-text">But deliver us from evil.</span>"#,
+    );
     // Said in secret until its ℣ at the little Hours (Diurnal p. 10; #671):
     // no initial, the middle muted.
     prayer.voice = vec![
@@ -333,8 +343,14 @@ fn dialogue_and_corporate_lord_prayer_roles() {
     let secret = render(&prayer);
     lacks(&secret, "corporate-lord-prayer-officiant");
     has(&secret, r#"<span class="spoken-text">Our Father</span><span class="secret-text">, who art in heaven.</span>"#);
-    has(&secret, r#">℣.</span><span class="sigil-text"><span class="spoken-text">And lead us not into temptation.</span>"#);
-    has(&secret, r#">℟.</span><span class="sigil-text"><span class="spoken-text">But deliver us from evil.</span>"#);
+    has(
+        &secret,
+        r#"<span aria-hidden="true">℣.</span><span class="sr-only">Versicle.</span></span> <span class="sigil-text"><span class="spoken-text">And lead us not into temptation.</span>"#,
+    );
+    has(
+        &secret,
+        r#"<span aria-hidden="true">℟.</span><span class="sr-only">Response.</span></span> <span class="sigil-text"><span class="spoken-text">But deliver us from evil.</span>"#,
+    );
     let fallback = render(&elem(ElementType::CorporateLordPrayer, "Our Father, who art in heaven."));
     lacks(&fallback, "corporate-lord-prayer-officiant");
     has(&fallback, r#"<p class="plain-line">Our Father, who art in heaven.</p>"#);
@@ -343,16 +359,19 @@ fn dialogue_and_corporate_lord_prayer_roles() {
 #[test]
 fn hymn_joins_amen_coda_to_final_line() {
     let html = render_hymn_stanzas("Title\n\nFirst line,\nSecond line.\n\nAmen.");
-    has(&html, r#"<span class="hymn-line">Second line.<span class="hymn-amen">Amen.</span></span>"#);
+    has(&html, r#"<span class="hymn-line">Second line.<span class="sr-only"> </span><span class="hymn-amen">Amen.</span></span>"#);
     lacks(&html, r#"<p class="hymn-stanza hymn-amen">"#);
     has(
         &html,
-        r#"<p class="hymn-stanza hymn-stanza-opening"><span class="hymn-line">First line,</span><span class="hymn-line">Second line.<span class="hymn-amen">Amen.</span></span></p>"#,
+        r#"<p class="hymn-stanza hymn-stanza-opening"><span class="hymn-line">First line,</span><span class="hymn-line">Second line.<span class="sr-only"> </span><span class="hymn-amen">Amen.</span></span></p>"#,
     );
     // An opening Amen stays a stanza; only a later coda is attached.
     let html = render_hymn_stanzas("Title\n\nAmen.\n\nSecond stanza.\n\nAmen.");
     has(&html, r#"<p class="hymn-stanza hymn-stanza-opening"><span class="hymn-line">Amen.</span></p>"#);
-    has(&html, r#"<p class="hymn-stanza"><span class="hymn-line">Second stanza.<span class="hymn-amen">Amen.</span></span></p>"#);
+    has(
+        &html,
+        r#"<p class="hymn-stanza"><span class="hymn-line">Second stanza.<span class="sr-only"> </span><span class="hymn-amen">Amen.</span></span></p>"#,
+    );
     assert_eq!(html.matches(r#"class="hymn-amen""#).count(), 1, "{html}");
     // Amen glued to the last verse line is a corpus problem; the renderer
     // must not invent the class.
@@ -404,9 +423,19 @@ fn hymn_rubric_is_instruction_not_latin_title() {
 #[test]
 fn commemoration_heading_preserves_name_and_escapes_markup() {
     let got = render_section_heading("Commemoration of St A & St B <test>");
-    has(&got, r#"class="commemoration-kicker">Commemoration of</span> "#);
+    has(&got, r#"class="commemoration-kicker gloss-quiet""#);
+    has(&got, r#">Commemoration of</span> "#);
     has(&got, "St A &amp; St B &lt;test&gt;");
     assert_eq!(render_section_heading("Lauds"), r#"<h2 class="section-heading">Lauds</h2>"#);
+}
+
+#[test]
+fn the_cross_commemoration_kicker_carries_the_cross_note() {
+    let cross = presentation::gloss::COMMEMORATION_OF_CROSS_GLOSS;
+    has(&render_section_heading("Commemoration of the Cross"), &format!(r#"data-gloss-title="{}""#, cross.title));
+    let other = render_section_heading("Commemoration of St Mark");
+    has(&other, &format!(r#"data-gloss-title="{}""#, presentation::gloss::ORDO_COMMEMORATION_GLOSS.title));
+    lacks(&other, cross.title);
 }
 
 fn psalm_67(incipit: &str) -> OfficeElement {
@@ -422,9 +451,10 @@ fn psalm_label_carries_latin_incipit() {
     has(
         &html,
         concat!(
-            "<h3 class=\"item-label\">Psalm <span class=\"psalm-num\">66\u{a0}<span class=\"psalm-heb\">(67)</span></span>",
-            "<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}· </span>",
-            r#"<span class="psalm-incipit" lang="la">Deus misereatur nostri</span></h3>"#
+            "<h3 class=\"item-label\">Psalm <span class=\"psalm-num\">66\u{a0}",
+            "<span class=\"psalm-heb gloss-quiet\" data-gloss-title=\"Psalm numbering\" data-gloss=\"The first number follows the traditional Septuagint and Vulgate psalter; the number in parentheses follows the Hebrew and King James numbering.\">(67)</span></span>",
+            "<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}·</span> ",
+            "<span class=\"psalm-incipit gloss-quiet\" lang=\"la\" data-gloss-title=\"Latin incipit\" data-gloss=\"The traditional Latin opening words by which this psalm or canticle is known in the Western Office.\">Deus misereatur nostri</span></h3>"
         ),
     );
     // Canticles are labeled by their incipit too.
@@ -433,10 +463,19 @@ fn psalm_label_carries_latin_incipit() {
     e.incipit = "Magnificat anima mea Dominum".into();
     let html = render_section_elements(&[e]);
     has(&html, r#"<div class="canticle">"#);
-    has(&html, r#"<span class="psalm-incipit" lang="la">Magnificat anima mea Dominum</span>"#);
+    has(
+        &html,
+        "<span class=\"psalm-incipit gloss-quiet\" lang=\"la\" data-gloss-title=\"Latin incipit\" data-gloss=\"The traditional Latin opening words by which this psalm or canticle is known in the Western Office.\">Magnificat anima mea Dominum</span>",
+    );
     // Without a recorded incipit there is no empty span or orphaned separator.
     let html = render_section_elements(&[psalm_67("")]);
-    has(&html, "<h3 class=\"item-label\">Psalm <span class=\"psalm-num\">66\u{a0}<span class=\"psalm-heb\">(67)</span></span></h3>");
+    has(
+        &html,
+        concat!(
+            "<h3 class=\"item-label\">Psalm <span class=\"psalm-num\">66\u{a0}",
+            "<span class=\"psalm-heb gloss-quiet\" data-gloss-title=\"Psalm numbering\" data-gloss=\"The first number follows the traditional Septuagint and Vulgate psalter; the number in parentheses follows the Hebrew and King James numbering.\">(67)</span></span></h3>",
+        ),
+    );
     lacks(&html, "label-sep");
     lacks(&html, "psalm-incipit");
     let html = render_section_elements(&[psalm_67("Deus <b>misereatur</b> & nostri")]);
@@ -566,5 +605,27 @@ fn psalm_flex_is_printed_in_the_first_half() {
         &[],
         0,
     );
-    has(&html, "of the ungodly, † nor stood in the way of sinners\u{a0}<span class=\"mediant\">*</span> and hath not sat");
+    has(
+        &html,
+        "of the ungodly, <span class=\"flex\" aria-hidden=\"true\">†</span> nor stood in the way of sinners\u{a0}<span class=\"mediant\" aria-hidden=\"true\">*</span> and hath not sat",
+    );
+}
+
+#[test]
+fn screen_reader_liturgical_marks_are_clean() {
+    let ant = render(&elem(ElementType::Antiphon, "The Lord said * to my Lord."));
+    has(&ant, r#"<span aria-hidden="true">Ant.</span><span class="sr-only">Antiphon.</span></em> "#);
+    has(&ant, r#"<span class="mediant" aria-hidden="true">*</span> "#);
+
+    let v = render_liturgical_block("V. O God, ✠ make speed to save me.\nR. Our help ✠ is in the Name of the Lord.");
+    has(&v, r#"<span aria-hidden="true">℣.</span><span class="sr-only">Versicle.</span></span> "#);
+    has(
+        &v,
+        r#"O God, <span class="cross"><span aria-hidden="true">✠</span><span class="sr-only">sign of the cross,</span></span> make speed"#,
+    );
+    has(&v, r#"<span aria-hidden="true">℟.</span><span class="sr-only">Response.</span></span> "#);
+    has(
+        &v,
+        r#"Our help <span class="cross"><span aria-hidden="true">✠</span><span class="sr-only">, sign of the cross,</span></span> is in the Name"#,
+    );
 }

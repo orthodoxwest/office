@@ -115,6 +115,8 @@ Amen.
 
 [hymn-vespers]
 # SOURCE: Monastic Diurnal.pdf, p. 395, 396
+# Stanza 6 from Vespers for Saturdays & Major Feasts (2026), p. 190, whose wording does not say
+# the Spirit proceeds from the Son (the Diurnal's "That thou dost from them both proceed").
 Veni, Creator Spiritus
 
 Come, Holy Ghost, Creator blest,
@@ -142,10 +144,10 @@ And thine abiding peace bestow;
 If thou be our preventing Guide,
 No evil can our steps betide.
 
-Make thou to us the Father known,
-Teach us the eternal Son to own,
-Be this our never-changing creed,
-That thou dost from them both proceed.
+O let thy grace on us bestow
+The Father and the Son to know,
+And thee, through endless time confessed,
+Of both th'eternal Spirit blest.
 
 To thee who, dead, again dost live,
 All glory, Lord, thy people give;

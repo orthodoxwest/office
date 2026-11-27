@@ -19,13 +19,23 @@ crates/
   render-blocks/           Platform-neutral blocks of styled runs for the native apps; tested
                            word-for-word against render-html. Holds the hour's vertical rhythm
                            (Space: steps of the body line), which the apps and style.css's
-                           --space-* follow
+                           --space-* follow, its motion (Tempo: five motions, three curves),
+                           which style.css's --tempo-*/--curve-*, Tempo.swift and Tempo.kt follow,
+                           home's light moving with the hours (hour_light: the pass's timings,
+                           which app.js's HOUR_LIGHT and the apps play), and the wall (wall: the
+                           colour every front's launch and first frame shows)
   presentation/            Words every front shares: day, season and date names, the current-hour
                            schedule (app.js mirrors it), home's invitation, the report-issue link,
-                           the usage beacon's vocabulary (server, app.js and native apps)
+                           the usage beacon's vocabulary (server, app.js and native apps),
+                           the ordo's year's course (course.rs: each month's runs of day colours
+                           under the month strip, which the web and the apps draw, and the
+                           date picker's day marks, which app.js fetches from /api/day-marks),
+                           the crown's tap (crown.rs: which look it turns to, and the play's
+                           timetable and pigments; app.js and style.css mirror them, the
+                           apps read them through mobile-ffi's crown_plan)
   tools/                   Filesystem access, validation, audit, review, corpus edits and scaffolds
 apps/
-  cli/                     office command dispatch, dump stream, diff and digest
+  cli/                     office command dispatch, dump stream and digest
   office-web/              Axum routes, usage SQLite store, reminders, embedded static/ assets
                            http.rs holds saved-link query/cookie parsing; web_time.rs handles
                            civil dates, time zones and reminder instants
@@ -34,7 +44,10 @@ apps/
                            (see apps/android/README.md; `make android`, `make android-screenshots`)
   ios/                     SwiftUI app; build-core.sh builds the XCFramework and Swift bindings,
                            XcodeGen the project (see apps/ios/README.md; `make ios`, macOS only)
-tests/fixtures/            Rendered-hour, ordo, audit, assurance and 28-year snapshots;
+release-notes/             The apps' "What's new": one short .txt per notable reader-facing change
+                           (most PRs add none); each platform's release carries the notes added
+                           since its last (scripts/release_notes.py, release-notes/README.md)
+tests/fixtures/            Rendered-hour, ordo, audit and 28-year parity snapshots;
                            broken corpora for validation boundary tests
 tools/
   genicons.py              App icon (web, iOS, Android) and link-preview card generator; requires
@@ -43,7 +56,8 @@ tools/
                            Apse vault tile and the Nave powdering cell) for the web
   genplaster.py            Texture generator; source photograph stays in ../resources/
   genarch.py               Home frontispiece's pointed head: clip-path polygons in style.css, and
-                           the arcs' figures for the native apps (Arch.kt, Arch.swift)
+                           the arcs' figures for the native apps (Arch.kt, Arch.swift) and
+                           for the crown's play (app.js's ARCHES)
   gencross.py              Subsets the ✠ glyph from Noto Sans Symbols for the web and apps
   gengaramond.py           Builds the apps' heavier EB Garamond text faces from the variable fonts
 data/
@@ -56,10 +70,11 @@ data/
                            one behind — the file header records the join/split mapping, which the
                            psalm labels follow (Septuagint first, Hebrew in parentheses). Sits outside
                            data/texts/ (like collect-conclusions.txt) so it stays out of the corpus
-                           provenance, zero-occurrence and Latin-lint sweeps.
+                           provenance and Latin-lint sweeps.
   review/provenance.csv    Source/page attestations; citations only, never book contents
-  review/prescreen.csv     Read-through suspicion flags bound to text versions (see REVIEWING.md)
-  review/assurance-baseline.json  Intentional verified-text floor
+  review/composition-requirements.json  Executable source-backed appointment regression cases
+  review/ordo-triage.csv   Ordo discrepancy classifications (see /ordo-verify)
+  review/repair-backlog.csv Curated open issues included in project-status reports
   texts/chant/             GABC scores. The booklet's sit one level under psalms/, canticles/ and
                            hymns/ by slug; the apps' sit at chant/<corpus key>/<tune>.gabc for a
                            hymn or Marian antiphon (crates/office/src/chant.rs), and attach only
@@ -70,16 +85,15 @@ data/
   chant-doxologies.txt     The seasonal and proper hymn endings cut into syllables, so a whole
                            hymn's score sings the day's ending to the notes of its own last stanza
 scripts/
-  DIURNAL-PIPELINE.md      Supported scanned-diurnal ingestion workflow and attestation semantics
   diurnal-pages.py         Render/index page images; OCR only locates pages
-  diurnal-transcribe.py    Read provenance-queue entries from pages and apply agreed wording
-  diurnal-discover.py      Find printed propers behind runtime fallbacks
-  diurnal-conform.py       Re-apply section conventions to pipeline-written texts and re-attest
   golden.py                Check/regenerate snapshots using the Rust CLI
   update_golden.py         The update-golden workflow's merge-and-publish step
   project-status.py        Clergy-facing status report (`make project-status`)
   sweep-targets.py         Delete target/ in idle checkouts (`make sweep-targets`)
-  pua-digits.py            Recover old-style digits from the 2025 AWRV cycle draft PDFs
+  play-promote.py          Promote a Closed testing build to Play production (play-promote.yml)
+  release_notes.py         Gathers release-notes/ for a platform's release; tags what each store has out
+  appstore.py              iOS version numbers (testflight.yml) and daily App Review submission
+                           (appstore-promote.yml)
   verify-psalms.py         Read-only comparison with the official BCP Psalter
   ordo-compare.py          Diff app output against a parish ordo PDF (see /ordo-verify skill)
 ```
@@ -91,6 +105,9 @@ can see or use on one front lands on the others in the same PR. Shared words go 
 `presentation`, shared structure in `render-blocks` (its tests hold the apps to the web's
 words), and each front draws them in its own idiom. When a front truly cannot follow yet, the
 PR says so and an issue tracks the rest.
+
+A notable change a reader will see also adds a release note, `release-notes/<slug>.txt`, a sentence
+or two in plain words (release-notes/README.md). Fixes, text corrections and internal work add none.
 
 ## Reference materials & verification
 
@@ -120,9 +137,9 @@ Use the `/ordo-verify` skill (`.claude/skills/ordo-verify/`) to machine-diff the
 an ordo PDF: `office rubrics YEAR` emits per-day composition flags, `office ordo YEAR` emits
 the Tabula Temporaria (computus figures, moveable feasts, Ember days) plus per-hour stanzas,
 and `scripts/ordo-compare.py` diffs headlines, preces/suffrage/commemorations, Ben/Mag antiphon
-incipits, colors, Vespers precedence, and moveable dates. Open divergences are tracked as GitHub
-issues: search the open `needs ruling`, `bug` and `data validation` issues rather than relying on a
-list here.
+incipits, commemoration collects against the ordo's "Col." pages, colors, Vespers precedence,
+and moveable dates. Open divergences are tracked as GitHub issues: search the open
+`needs ruling`, `bug` and `data validation` issues rather than relying on a list here.
 
 ## Standing rules
 
@@ -150,25 +167,24 @@ otherwise.
 - **The app shows the assembled hour.** No rubric that only explains an omission; rubrics that
   make sense only in print belong in the diurnal repo, not this corpus. No settings toggles,
   exports or QR codes unless asked.
-- **Checked-in baselines.** Browser snapshots live in `.web-tools/visual.spec.js-snapshots/` and
-  the composed 28-year outputs in `tests/fixtures/golden/`. Read them before rebuilding an answer by hand. The
-  `update-ux-snapshots` label regenerates the browser snapshots as `update-golden` does the goldens;
-  a PR that renames visible text or changes fonts runs `make test-ux` and refreshes both.
+- **Checked-in baselines.** Browser snapshots live in `.web-tools/visual.spec.js-snapshots/`, the
+  iOS simulator's in `apps/ios/snapshots/`, and the composed 28-year outputs in
+  `tests/fixtures/golden/`. Read them before rebuilding an answer by hand. The
+  `update-ux-snapshots` label regenerates the browser snapshots and `update-ios-snapshots` the
+  iOS ones (on macOS, in CI) as `update-golden` does the goldens; a PR that renames visible text
+  or changes fonts runs `make test-ux` and refreshes the browser's and, when the iOS job runs, the
+  iOS ones too.
 
 ## Composition checks
 
 Use the source-requirement checklist in REVIEWING.md. Record the cited rubric,
 expected behavior, representative/boundary dates and prayer forms, and linked
-tests or open questions. `review plan` provides sample dates from observed
-engine behavior; it does not measure correctness or completion. Whole-page
-signoffs and their coverage ledger are retired. Keep known incomplete Triduum
-work separate from an assessment of the rest of the year.
+tests or open questions. Keep known incomplete Triduum work separate from an
+assessment of the rest of the year.
 
 ## Text provenance
 
-Texts seeded from Divinum Officium carry a `# SOURCE: divinum-officium <file> [<section>] — check against diurnal` comment inside the section. Grep for `SOURCE: divinum-officium` to find texts awaiting verification against the printed diurnal; delete the comment once verified. Comment lines (`#`) inside INI text sections are stripped by the corpus loader and never render. `# TODO(diurnal):` comments mark refs that DO could not supply at all.
-
-Every corpus entry must have a current `verified` attestation in `data/review/provenance.csv`; `make validate` fails otherwise (a stale hash counts as unverified). Adding or editing a text means attesting it (`./office review attest`, `--replace` for an edit) in the same PR. The web server does not load provenance.
+Every corpus entry must have a current `verified` attestation in `data/review/provenance.csv`; `make validate` fails otherwise (a stale hash counts as unverified). Adding or editing a text means attesting it (`./office review attest`, `--replace` for an edit) in the same PR. Comment lines (`#`) inside INI text sections are stripped by the corpus loader and never render. Keep source PDFs, page images, and extracted text out of Git and under ignored `output/`. The web server does not load provenance.
 
 ## Git workflow
 
@@ -186,21 +202,19 @@ verify the merged tree (`cargo test --workspace --locked` + `make validate`), an
 when an intentional data/logic change moved the golden files and when the PR is blocked on
 merge conflicts.
 
-Conflicts are auto-settled **only** inside `tests/fixtures/golden/`. Those files are
-whole-corpus rollups — `parity-snapshot.json` digests an entire year per row and
-`assurance-report.md` is a table of global counts — so two PRs fixing unrelated corpus entries
-always collide there, and the correct merged value is neither side's: it has to be recomputed.
-A conflict anywhere else aborts the merge untouched and the job comments with the paths that
-need a human. In particular `data/review/provenance.csv` (sorted by key, so it usually
-auto-merges) and `data/review/assurance-baseline.json` (the intentional coverage floor) are
-never resolved automatically.
+Conflicts are auto-settled **only** inside `tests/fixtures/golden/`. Those files include
+whole-corpus rollups — `parity-snapshot.json` digests an entire year per row — so two PRs
+fixing unrelated corpus entries always collide there, and the correct merged value is neither
+side's: it has to be recomputed. A conflict anywhere else aborts the merge untouched and the
+job comments with the paths that need a human. In particular `data/review/provenance.csv`
+(sorted by key, so it usually auto-merges) is never resolved automatically.
 
 ## Issue labeling
 
 Repo labels `bug`, `needs ruling`, and `data validation` together cover nearly every issue worth filing here. Apply based on where the defect actually lives, not the symptom:
 
 - **`bug`** — the Rust code (composers, resolvers, formatters) produces output that contradicts a rubric or spec we already agree on. The fix is a code change. E.g. `concurrence_winner` picking the wrong feast per XIII.10, Preces firing on the wrong days.
-- **`data validation`** — the code is correct but a text/data file is missing, wrong, or a placeholder (missing propers, wrong antiphon corpus, `SOURCE: divinum-officium` text never checked against the diurnal). The fix is editing `data/`, not the Rust engine.
+- **`data validation`** — the code is correct but a text/data file is missing, wrong, or a placeholder (missing propers, wrong antiphon corpus, wording mismatch against the printed Diurnal). The fix is editing `data/`, not the Rust engine.
 - **`needs ruling`** — the ordo/rubrics are ambiguous, contradictory, or silent, and only clergy can settle it. File the question, then make the app give the most likely answer and keep the issue open until clergy rule. The newest ordo breaks ties between ordos unless its line is a carried-over template (copied from another year or from the neighbouring days) or it contradicts itself; then the rubric or Diurnal decides. Keep each guess easy to flip: name the issue in the code or data comment beside the rule and in one test, and add a `data/review/ordo-triage.csv` row wherever the guess contradicts an ordo line.
 
 These aren't mutually exclusive — an issue can need a ruling *and* turn into a bug/data-validation fix once the ruling lands (see #13, #15). Use the other labels (`enhancement`, `question`, `documentation`, `duplicate`, `invalid`, `wontfix`, `good first issue`, `help wanted`, `update-golden`) only when none of the three above fit.
@@ -217,24 +231,15 @@ make check       # Formatting, Clippy, JS lint, tests, data validation and text 
 make serve       # Start web server on :8080
 make neuma-web   # Rebuild static/neuma.mjs (the web's chant engine) after moving the neuma pin
 make ordo        # Print text ordo (Tabula Temporaria header + per-hour stanzas) for YEAR (default 2026)
-./office rubrics YEAR  # Per-day TSV of composed rubric flags + Ben/Mag antiphons (for ordo cross-checks)
+./office rubrics YEAR  # Per-day TSV of composed rubric flags, Ben/Mag antiphons and commemoration collects (for ordo cross-checks)
 make validate    # Validate data files (fails on any unverified or stale corpus entry)
 make audit       # Report placeholder texts, missing propers + composition sweep (./office audit -year N)
 make scaffold-propers  # Ensure proper files exist with commented key catalogs (never overwrites live sections)
 make lint-texts  # Lint text corpus: mechanical findings fail, advisory printed
 make pages       # Render and index diurnal/supplement pages under ignored output/
-make transcribe  # Prepare page-reading prompts; APPLY=1 enables readers and gated application
-make discover    # Prepare proper-discovery dossiers; APPLY=1 enables readers and gated application
-make review-manifest  # Inventory distinct rendered compositions as CSV for current year (START=2026 YEARS=1)
 make review-provenance # Report generated corpus source coverage
-make review-provenance-queue # Rank atomic text review by dependency fan-out (suspect tier first)
-make review-zero-occurrences # List unrendered corpus entries with classification heuristics
-make review-suspects  # Only pre-flagged/lint-flagged texts — the findings-sprint list
-make review-plan      # Sample observed engine behavior (default 28y); no completion score
-make review-assurance # Check text-provenance floor and print summary
 ./office review explain HOUR DATE # JSON dependencies and rule decisions
 ./office review attest --source SOURCE --page PAGE KEY REVIEWER # Record verified text
-./office review flag --severity high --reason WHY KEY # Record a prescreen suspicion
 make tex         # Emit .tex booklet (HOUR=lauds DATE=2026-03-11; DATE defaults to today)
 make pdf         # Generate PDF via lualatex (HOUR=compline; DATE defaults to today)
 make mutate      # Mutation-test a Rust crate (MUTATE_PKG=calendar) — see MUTATION-TESTING.md
@@ -286,7 +291,7 @@ Month = 12
 Day = 25
 ```
 
-Keys: Name, Rank, Color, Category, DateRule (moveable), Month/Day (fixed), HasOctave, OctaveClass (Rubrics VII.3 groups; inherited by generated days), OctaveDays/OctaveDay2–8 (ordo names for generated octave days), PrimaryOfOurLord (Diurnal rank table; §X Double exception), Secondary (Diurnal rank table; X.1(c) primary before secondary), CommemorationClass (named XIV.14 ferial exceptions), HasVigil, IsVigil with VigilOf, OctaveOf (octave continued by a day whose ID does not name it), CompanionOf, Source, Notes.
+Keys: Name, Rank, Color, Category, DateRule (moveable), Month/Day (fixed), HasOctave, OctaveClass (Rubrics VII.3 groups; inherited by generated days), OctaveDays/OctaveDay2–8 (ordo names for generated octave days), PrimaryOfOurLord (Diurnal rank table; §X Double exception), Secondary (Diurnal rank table; X.1(c) primary before secondary), CommemorationClass (named XIV.14 ferial exceptions), HasVigil, IsVigil with VigilOf, OctaveOf (octave continued by a day whose ID does not name it), CompanionOf, HymnMtv (`true` or `unless-first-vespers`: the Proper's "m.t.v.", Iste Confessor's changed lines from the Common's `hymn-vespers-mtv`, Diurnal p. 34*), Source, Notes.
 
 `data/feasts/monastic.txt` holds observances the ordo brackets "(Monastics & Oblates Only)". They
 are notation, not feasts: the ordo page, the text ordo and the apps' ordo print each as a bracketed

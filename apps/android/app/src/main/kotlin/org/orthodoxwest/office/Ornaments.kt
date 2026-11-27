@@ -41,6 +41,7 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -78,7 +79,7 @@ private val CrossArms = svg(
 )
 
 // The Lauds sun and the Vespers and Compline moon, viewBox 24×24.
-private val Sun = svg(
+internal val Sun = svg(
     "M17.20,12.00A5.2,5.2 0 1,0 6.80,12.00A5.2,5.2 0 1,0 17.20,12.00Z" +
         "M13.45,5.60 12.00,0.40 10.55,5.60Z" +
         "M16.46,7.18 16.70,3.86 13.94,5.73Z" +
@@ -93,10 +94,28 @@ private val Sun = svg(
         "M7.18,7.54 1.95,6.20 5.73,10.06Z" +
         "M10.06,5.73 7.30,3.86 7.54,7.18Z",
 )
-private val Moon = svg("M14.00 2.61A9.6 9.6 0 1 0 20.18 17.02A7.9 7.9 0 0 1 14.00 2.61Z")
+internal val Moon = svg("M14.00 2.61A9.6 9.6 0 1 0 20.18 17.02A7.9 7.9 0 0 1 14.00 2.61Z")
 
-/** Home's period glyphs (home.html), viewBox 24×16, filled: the rising sun, the sun, the moon. */
+/**
+ * The Horologium's sign at Matins (about.html's `.about-horologium-star`): the apse's eight-rayed
+ * star about its centre, 8.4 across, which the figure scales by 2.05.
+ */
+internal val HorologiumStar = svg(
+    "M0,-4.2 L0.8,-1.05 L1.9,-1.9 L1.05,-0.8 L4.2,0 L1.05,0.8 L1.9,1.9 L0.8,1.05 L0,4.2 L-0.8,1.05 " +
+        "L-1.9,1.9 L-1.05,0.8 L-4.2,0 L-1.05,-0.8 L-1.9,-1.9 L-0.8,-1.05 Z",
+)
+
+/**
+ * Home's period glyphs (home.html), viewBox 24×16, filled: the star of the night (four long rays,
+ * four short), the rising sun, the sun, the moon.
+ */
 enum class Period(val path: Path) {
+    NIGHT(
+        svg(
+            "M12.00,0.10L12.84,5.97L15.11,4.89L14.03,7.16L19.90,8.00L14.03,8.84L15.11,11.11L12.84,10.03" +
+                "L12.00,15.90L11.16,10.03L8.89,11.11L9.97,8.84L4.10,8.00L9.97,7.16L8.89,4.89L11.16,5.97Z",
+        ),
+    ),
     MORNING(
         svg(
             "M7.60,13.20A4.4,4.4 0 0,1 16.40,13.20ZM1.5,13.40h21v1.1h-21ZM7.36,10.03L3.32,9.60L6.48,12.16ZM8.92,8.50L3.66,4.86L7.30,10.12Z" +
@@ -222,7 +241,7 @@ private fun Sprig() {
 fun Headpiece(modifier: Modifier = Modifier) {
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
         Sprig()
-        Text("✠", style = TextStyle(fontFamily = CrossFont, fontSize = 11.sp, color = LocalPalette.current.lining))
+        Text("✠", Modifier.clearAndSetSemantics {}, style = TextStyle(fontFamily = CrossFont, fontSize = 11.sp, color = LocalPalette.current.lining))
         Sprig()
     }
 }
@@ -241,7 +260,7 @@ fun HourSign(hour: String) {
         "vespers", "compline" -> Canvas(Modifier.size(16.64.dp)) { fitted(24f, 24f) { drawPath(Moon, p.moonInk) } }
         // A step larger than the shared headpiece's cross (the web's 1rem against 0.8rem), nearer
         // the sun's and moon's weight in the rule's break.
-        else -> Text("✠", style = TextStyle(fontFamily = CrossFont, fontSize = 13.75.sp, color = p.lining))
+        else -> Text("✠", Modifier.clearAndSetSemantics {}, style = TextStyle(fontFamily = CrossFont, fontSize = 13.75.sp, color = p.lining))
     }
 }
 
@@ -326,14 +345,20 @@ fun DrawScope.quatrefoil(topLeft: Offset, side: Float, color: Color) {
  */
 @Composable
 fun ConsecrationCross(modifier: Modifier, ink: Color = LocalPalette.current.lining, brush: Brush? = null, alpha: Float = 1f, pigment: androidx.compose.ui.graphics.ImageBitmap? = null) {
-    Canvas(modifier) {
-        // Home's painted cross lies unevenly, through the pigment; a gilt or leaf one is a brush.
-        val paint = brush ?: pigment?.let { pigmentBrush(it, 96f * 40f / size.width) }
-        val tint = if (brush == null && paint != null) androidx.compose.ui.graphics.ColorFilter.tint(ink, BlendMode.SrcIn) else null
-        fitted(40f, 40f) {
-            for (part in listOf(ConsecrationRing, ConsecrationArms)) {
-                if (paint != null) drawPath(part, paint, alpha = alpha, colorFilter = tint) else drawPath(part, ink, alpha = alpha)
-            }
+    Canvas(modifier) { consecrationCross(ink, brush, alpha, pigment) }
+}
+
+/**
+ * The consecration cross drawn to this scope's size: home's crown draws it so, in the look the
+ * crown's play turns to (Crown.kt), before that look is the screen's.
+ */
+fun DrawScope.consecrationCross(ink: Color, brush: Brush? = null, alpha: Float = 1f, pigment: androidx.compose.ui.graphics.ImageBitmap? = null) {
+    // Home's painted cross lies unevenly, through the pigment; a gilt or leaf one is a brush.
+    val paint = brush ?: pigment?.let { pigmentBrush(it, 96f * 40f / size.width) }
+    val tint = if (brush == null && paint != null) androidx.compose.ui.graphics.ColorFilter.tint(ink, BlendMode.SrcIn) else null
+    fitted(40f, 40f) {
+        for (part in listOf(ConsecrationRing, ConsecrationArms)) {
+            if (paint != null) drawPath(part, paint, alpha = alpha, colorFilter = tint) else drawPath(part, ink, alpha = alpha)
         }
     }
 }

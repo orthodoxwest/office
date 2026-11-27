@@ -5,6 +5,7 @@ import java.io.File
 import kotlin.math.abs
 import kotlin.math.hypot
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -64,6 +65,14 @@ class TokensTest {
     }
 
     private val root get() = rule(":root").takeIf { it.contains("--text:") } ?: error(":root tokens")
+
+    /** The system's font scale reaches the type no further than iOS lets Dynamic Type (Theme.swift). */
+    @Test
+    fun fontScaleStopsWhereIosDoes() {
+        val swift = File("../../ios/Office/Theme.swift").readText()
+        val cap = Regex("""return min\(body / 17, ([0-9.]+)\)""").find(swift)?.groupValues?.get(1)?.toFloat() ?: error("no cap in Theme.swift")
+        assertEquals(cap, MaxFontScale, 0f)
+    }
 
     @Test
     fun naveIsTheRoot() {
@@ -254,5 +263,88 @@ class TokensTest {
             val want = parse(value(block, token)!!)
             for (i in 0..3) assertEquals("Niche.swift $swiftName vs --$token", want[i], got[i], 0.01f)
         }
+    }
+
+    /**
+     * A disclosure unfolds and folds alike on every front: UNFOLD_MS and FOLD_MS on the standard
+     * curve are style.css's disclosures, app.js's fallback for browsers without interpolate-size,
+     * and iOS's `unfolding` and `folding`; the ordo's "Show office details" fades the month by
+     * MONTH_OUT_MS and MONTH_IN_MS in app.js and OrdoScreen.swift.
+     */
+    @Test
+    fun oneUnfoldEverywhere() {
+        // The figures themselves are Tempo's, which render-blocks holds style.css, Tempo.kt and
+        // Tempo.swift to; here, that each front's disclosures take them.
+        val standard = "cubic-bezier(0.4, 0, 0.2, 1)"
+        assertEquals(260, UNFOLD_MS)
+        assertEquals(200, FOLD_MS)
+        val at = css.indexOf("@supports (interpolate-size: allow-keywords)").also { assertTrue("no disclosure rules", it >= 0) }
+        val folds = css.substring(at, css.indexOf("is-settling", at))
+        assertTrue(folds.contains("block-size var(--tempo-unfold-in) var(--tempo-unfold-in-curve)"))
+        assertTrue(folds.contains("block-size var(--tempo-unfold-out) var(--tempo-unfold-out-curve)"))
+        assertTrue(folds.contains("opacity calc(var(--tempo-unfold-in) - 60ms) var(--curve-arrive) 60ms"))
+        assertTrue(folds.contains("opacity calc(var(--tempo-unfold-out) / 2) var(--curve-leave)"))
+        val js = File("../../office-web/static/app.js").readText()
+        // app.js's fallback reads style.css's figures rather than keeping its own.
+        assertTrue(js.contains("var beat = opening ? \"tempo-unfold-in\" : \"tempo-unfold-out\";"))
+        assertTrue(js.contains("{ duration: duration, easing: curve }"))
+        assertTrue(js.contains("stage.style.transition = \"height var(--tempo-unfold-in) var(--tempo-unfold-in-curve)\";"))
+        assertFalse("app.js keeps the standard curve's own figures", js.contains(standard))
+        assertTrue(js.contains("{ duration: $MONTH_OUT_MS, easing: \"cubic-bezier(0.4, 0, 1, 1)\", fill: \"forwards\" }"))
+        assertTrue(js.contains("{ duration: $MONTH_IN_MS, easing: \"cubic-bezier(0, 0, 0.2, 1)\" }"))
+        val chrome = File("../../ios/Office/Chrome.swift").readText()
+        assertTrue(chrome.contains("let unfolding = Tempo.unfoldIn.animation"))
+        assertTrue(chrome.contains("let folding = Tempo.unfoldOut.animation"))
+        val ordo = File("../../ios/Office/OrdoScreen.swift").readText()
+        assertTrue(ordo.contains("withAnimation(.timingCurve(0.4, 0, 1, 1, duration: ${MONTH_OUT_MS / 1000.0}))"))
+        assertTrue(ordo.contains("withAnimation(.timingCurve(0, 0, 0.2, 1, duration: ${MONTH_IN_MS / 1000.0}))"))
+    }
+
+    /**
+     * A press and a panel move by Tempo on every front: bare words dim to Tempo's quiet (the web's
+     * `--tempo-touch-quiet`, iOS's `Quiet`, Android's [Dim]), the ordo day's rail runs the row's
+     * height over Tempo's reach and back over its touch, and the menu and Settings panels and the
+     * note settle in and leave on Tempo's settle. render-blocks holds the figures themselves.
+     */
+    @Test
+    fun pressAndPanelKeepTempo() {
+        assertEquals(0.7f, Tempo.TOUCH_QUIET)
+        assertTrue(css.contains("):is(:active, .is-pressed) {\n  opacity: var(--tempo-touch-quiet);\n}"))
+        assertEquals(2, Regex("transition-duration: var\\(--tempo-touch-reach\\);").findAll(css).count())
+        for (way in listOf("in", "out")) {
+            assertEquals(3, Regex("opacity var\\(--tempo-settle-$way\\) var\\(--tempo-settle-$way-curve\\)").findAll(css).count())
+        }
+        val chrome = File("src/main/kotlin/org/orthodoxwest/office/Chrome.kt").readText()
+        assertTrue(chrome.contains("alpha.snapTo(Tempo.TOUCH_QUIET)"))
+        assertTrue(chrome.contains("enter = fadeIn(Tempo.settleIn.spec())"))
+        assertTrue(chrome.contains("exit = fadeOut(Tempo.settleOut.spec())"))
+        val ordo = File("src/main/kotlin/org/orthodoxwest/office/OrdoScreen.kt").readText()
+        assertTrue(ordo.contains("if (pressed) Tempo.touchReach.spec() else Tempo.touchOut.spec()"))
+        assertEquals(2, Regex("\\.drawBehind \\{ dayRail\\(").findAll(ordo).count())
+        val swift = File("../../ios/Office/Chrome.swift").readText()
+        assertTrue(swift.contains(".opacity(configuration.isPressed ? Tempo.touchQuiet : 1)"))
+        assertTrue(swift.contains(".opacity(current && held ? Tempo.touchQuiet : 1)"))
+        val app = File("../../ios/Office/OfficeApp.swift").readText()
+        assertTrue(app.contains(".animation(model.overlay == .none ? Tempo.settleOut.animation : Tempo.settleIn.animation, value: model.overlay)"))
+        val swiftOrdo = File("../../ios/Office/OrdoScreen.swift").readText()
+        assertTrue(swiftOrdo.contains(".animation(held ? Tempo.touchReach.animation : Tempo.touchOut.animation, value: held)"))
+        assertEquals(2, Regex("\\.overlay\\(alignment: \\.topLeading\\) \\{ DayRail\\(").findAll(swiftOrdo).count())
+    }
+
+    /**
+     * The cross under the last Amen gilds by Tempo's gild on every front, by opacity alone: the
+     * web's `.hour-end-mark.is-gilding::after`, Android's [Tempo.gild] and iOS's `Tempo.gild`.
+     * render-blocks holds the figures themselves.
+     */
+    @Test
+    fun theEndCrossGildsByTempo() {
+        val gilding = css.substringAfter("  .hour-end-mark.is-gilding::after {\n").substringBefore("}")
+        assertTrue(gilding.contains("transition-duration: var(--tempo-gild);"))
+        assertTrue(gilding.contains("transition-timing-function: var(--tempo-gild-curve);"))
+        assertTrue(rule(".hour-end-mark::after").contains("transition-property: opacity;"))
+        val hour = File("src/main/kotlin/org/orthodoxwest/office/HourScreen.kt").readText()
+        assertTrue(hour.contains("gold.animateTo(1f, Tempo.gild.spec())"))
+        val swift = File("../../ios/Office/HourScreen.swift").readText()
+        assertTrue(swift.contains("withAnimation(reduceMotion ? nil : Tempo.gild.animation) { gold = 1 }"))
     }
 }

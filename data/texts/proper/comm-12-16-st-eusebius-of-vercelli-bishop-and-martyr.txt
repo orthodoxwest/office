@@ -1,0 +1,3 @@
+[commemoration-collect]
+# SOURCE: ordo 'Col. "O God" 22*' (Diurnal p. 22*, Another Collect)
+@use commons/bishop-martyr/collect-alternate

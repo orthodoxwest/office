@@ -183,10 +183,15 @@ Amen.
 V. His kingdom shall be increased.
 R. And of his peace there shall be no end.
 
-[versicle-vespers]
+[versicle-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 521 (Christ the King)
 V. All power is given unto me.
 R. In heaven and in earth.
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 631 (At II Vespers: "All as at I Vespers, except the following")
+V. His kingdom shall be increased.
+R. And of his peace there shall be no end.
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 588 (Christ the King)

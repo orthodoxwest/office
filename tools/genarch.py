@@ -36,8 +36,10 @@ The native apps draw the same heads with true arcs rather than polygons, so
 they take each shape's figures (its arcs' centres and radii, in card widths)
 and offset the arcs themselves: Arch.kt for Android, Arch.swift for iOS.
 
+The web's script takes them too (app.js's ARCHES), for the crown's play.
+
 Plain Python, no dependencies; rewrites the marked blocks in style.css,
-Arch.kt and Arch.swift. Run from the repository root.
+Arch.kt, Arch.swift and app.js. Run from the repository root.
 """
 import math
 import re
@@ -50,6 +52,11 @@ KOTLIN = Path("apps/android/app/src/main/kotlin/org/orthodoxwest/office/Arch.kt"
 SWIFT = Path("apps/ios/Office/Arch.swift")
 NATIVE_BEGIN = "// genarch:begin"
 NATIVE_END = "// genarch:end"
+# The web's script takes the same figures, for the crown's play: its spread
+# opens out of the arch in the head's own shape (a feathered mask app.js
+# draws from the arcs; the foot below the springing depends on the page's
+# layout and is summed there).
+JS = Path("apps/office-web/static/app.js")
 
 # rise, haunch radius and the upper arc's centre across, all in card widths
 # from the left springing. The haunches are generous (an upper arc no more
@@ -194,7 +201,10 @@ def rules(name, shape):
         f".page-home .home-hero {{\n  --arch-rise: {num(shape['rise'])};\n}}\n\n"
         ".page-home .home-arch::before,\n.page-home .home-arch::after,\n"
         ".page-home .home-arch-edge,\n.page-home .home-hero::before,\n"
-        ".page-home .home-hero::after,\n.page-home .home-arch-fill,\n.page-home .home-sky {\n"
+        ".page-home .home-hero::after,\n.page-home .home-arch-fill,\n.page-home .home-sky,\n"
+        # The crown's play: the old ground's stand-in, the vault and the
+        # light on the horizon are the head inside the lining.
+        ".page-home .home-back,\n.page-home .home-vault,\n.page-home .home-glow {\n"
         f"  clip-path: polygon(\n    {silhouette});\n}}\n\n"
         ".page-home .home-arch-shade::before {\n"
         f"  clip-path: polygon(evenodd,\n    {outside});\n}}\n\n"
@@ -258,6 +268,21 @@ def swift():
     return "\n".join(lines) + "\n"
 
 
+def javascript():
+    """The heads for app.js, keyed by the rise style.css sets (--arch-rise):
+    haunch radius, the upper arc's centre across, its depth below the
+    springing and its radius, in card widths."""
+    lines = ["    var ARCHES = {"]
+    for name, shape in SHAPES.items():
+        f = {k: num(v, 6) for k, v in figures(shape).items()}
+        lines.append(
+            f"      \"{num(shape['rise'])}\": {{ haunch: {f['haunch']}, centre: {f['centre']}, "
+            f"depth: {f['depth']}, radius: {f['radius']} }}, // {name}"
+        )
+    lines.append("    };")
+    return "\n".join(lines) + "\n"
+
+
 def rewrite(path, begin, end, generated):
     text = path.read_text()
     pattern = re.compile(re.escape(begin) + r".*?" + re.escape(end), re.S)
@@ -280,6 +305,7 @@ def main():
     native = f"{NATIVE_BEGIN}: tools/genarch.py writes this block; edit the script, not the figures.\n"
     rewrite(KOTLIN, NATIVE_BEGIN, NATIVE_END, native + kotlin() + NATIVE_END)
     rewrite(SWIFT, NATIVE_BEGIN, NATIVE_END, native + swift() + NATIVE_END)
+    rewrite(JS, "    " + NATIVE_BEGIN, "    " + NATIVE_END, "    " + native + javascript() + "    " + NATIVE_END)
     for name, shape in SHAPES.items():
         cy, radius = solve(**shape)
         print(f"{name}: point {point_angle(shape):.0f}°, upper radius {radius:.3f}, centre {cy:.3f} below")

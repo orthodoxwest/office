@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: Monastic Diurnal pp. 533–534 (June 5, St Boniface, B.M., Collect); ordo "Col. 533"
+O God, who by the zeal of blessed Boniface, thy Martyr and Bishop, didst vouchsafe to call a multitude of peoples to the knowledge of thy Name: mercifully grant that as we honour his feast day, we may also experience his protection.
+
 # Proper scaffold for [st-boniface]
 # Name: St Boniface, Bishop & Martyr
 # Rank: double  Category: bishop-martyr

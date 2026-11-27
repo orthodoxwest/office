@@ -6,15 +6,16 @@ use axum::http::{Response, StatusCode};
 use std::sync::Arc;
 
 use calendar::Date;
+use office::HOUR_NAMES;
 use office::feast::{DayOf, FeastTexts, feast_texts};
 use presentation::feast::{
-    FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearKeeping, back_to_day, back_to_ordo, feast_date,
-    feast_register, feast_subtitle, feast_titulus, is_entry, is_feast_id, is_usual, keeping_class, keeping_label, keeping_note,
-    kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count, row_date, search_years,
-    texts_keeping, texts_source, whole_office_label,
+    FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearKeeping, back_to_day, back_to_ordo,
+    back_to_ordo_year, feast_date, feast_register, feast_subtitle, feast_titulus, is_entry, is_feast_id, is_usual, keeping_class,
+    keeping_label, keeping_note, kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count,
+    row_date, search_years, texts_keeping, texts_source, whole_office_label,
 };
-use presentation::{date_slug, long_date};
-use render_html::links::{calendar_link, feast_link, find_link, home_from_feast, home_link};
+use presentation::{date_slug, long_date, title_case};
+use render_html::links::{calendar_link, calendar_year_link, feast_link, find_link, home_from_feast, home_link, hour_link};
 use render_html::view::{Chrome, FeastPageData, FeastResult, FeastTextRow, FeastYearRow, FindData, LinkRow, NextKeeping};
 
 use crate::Server;
@@ -39,16 +40,29 @@ fn year_row(id: &str, k: &YearKeeping, usual: bool) -> FeastYearRow {
     }
 }
 
-/// The feast page's way back: to the day (`from` "2026-11-10") or the ordo's row
-/// ("ordo-2026-11-10") it was opened from, else to the search.
+/// The feast page's way back: to the day (`2026-11-10`), the ordo's row (`ordo-2026-11-10`),
+/// the ordo's year (`ordo-2026`), or an hour (`lauds-2026-11-10`) it was opened from, else to
+/// the search.
 fn back_link(from: &str, today: Date) -> LinkRow {
-    let (ordo, slug) = match from.strip_prefix("ordo-") {
-        Some(slug) => (true, slug),
-        None => (false, from),
-    };
-    match Date::parse(slug) {
-        Some(d) if ordo => LinkRow { label: back_to_ordo(d), href: calendar_link(&date_slug(d)) },
-        Some(d) => LinkRow { label: back_to_day(d, today), href: home_link(if d == today { "" } else { slug }) },
+    if let Some(rest) = from.strip_prefix("ordo-") {
+        if let Some(d) = Date::parse(rest) {
+            return LinkRow { label: back_to_ordo(d), href: calendar_link(&date_slug(d)) };
+        }
+        if rest.len() == 4
+            && let Ok(year) = rest.parse::<i32>()
+            && crate::cache::offered_year(year)
+        {
+            return LinkRow { label: back_to_ordo_year(year), href: calendar_year_link(year) };
+        }
+    }
+    if let Some((hour, slug)) = from.split_once('-')
+        && HOUR_NAMES.contains(&hour)
+        && Date::parse(slug).is_some()
+    {
+        return LinkRow { label: title_case(hour), href: hour_link(hour, slug) };
+    }
+    match Date::parse(from) {
+        Some(d) => LinkRow { label: back_to_day(d, today), href: home_link(if d == today { "" } else { from }) },
         None => LinkRow { label: FEAST_WORDS.find_title.into(), href: find_link("") },
     }
 }
@@ -181,7 +195,14 @@ impl Server {
             texts: texts
                 .texts
                 .into_iter()
-                .map(|t| FeastTextRow { label: t.label, text: t.text, common: t.common, prayer: t.prayer })
+                .map(|t| FeastTextRow {
+                    label: t.label,
+                    text: t.text,
+                    common: t.common,
+                    prayer: t.prayer,
+                    hymn: t.hymn.is_some(),
+                    hymn_title: t.hymn.unwrap_or_default(),
+                })
                 .collect(),
             whole_office,
         };
@@ -259,20 +280,20 @@ mod tests {
         // The head: the date as the titulus over the name, the rank and colour parted by a point.
         assert!(body.contains(r#"<header class="feast-head is-feast day-color-white""#));
         assert!(body.contains(r#"<p class="feast-titulus">February 27</p>"#));
-        assert!(body.contains("<span>Greater Double</span>") && body.contains("<span>White</span>"));
+        assert!(body.contains(">Greater Double</span>") && body.contains("<span>White</span>"));
         // Opened from nowhere in particular, it leads back to the search.
-        assert!(body.contains(r#"<a class="find-back" href="/calendar/find">&lsaquo; Find a feast</a>"#));
+        assert!(body.contains(r#"<a class="find-back" href="/calendar/find"><span aria-hidden="true">&lsaquo; </span>Find a feast</a>"#));
         assert!(body.contains(">The next eight years</h2>"));
         assert_eq!(body.matches(r#"class="find-year "#).count(), FEAST_PAGE_YEARS as usize);
         assert!(body.contains("From the Common of a Confessor and Bishop."));
         // Septuagesima's I Vespers take his evening, where he is commemorated.
         for label in ["At I Vespers · Magnificat", "At Lauds · Benedictus", "At II Vespers · Antiphon", "Collect"] {
-            assert!(body.contains(&format!("<h3>{label} <span")), "{label}");
+            assert!(body.contains(&format!(">{label}</span> <span")), "{label}");
         }
         assert!(body.contains("blessed Raphael, thy Confessor and Bishop") && body.contains("world without end"));
         assert!(body.contains(r#"class="feast-next""#), "a feast kept every few years has a next keeping");
-        let collect = body.find("<h3>Collect").unwrap();
-        assert!(collect < body.find("<h3>At I Vespers").unwrap(), "the collect, the day's, comes before the texts of single hours");
+        let collect = body.find(">Collect</span>").unwrap();
+        assert!(collect < body.find(">At I Vespers").unwrap(), "the collect, the day's, comes before the texts of single hours");
         assert!(collect < body.find(">The next eight years</h2>").unwrap(), "the texts come before the years");
         // A year kept as usual leaves "Kept" unsaid; a year he is only commemorated says so.
         assert!(!body.contains("<b>Kept</b>") && body.contains("<b>Commemorated</b>"));
@@ -304,7 +325,7 @@ mod tests {
     #[test]
     fn days_lead_to_their_feasts_and_back() {
         let home = page("/?date=2026-02-27&from=st-raphael-of-brooklyn");
-        assert!(home.contains(r#"<a class="from-feast" href="/feast/st-raphael-of-brooklyn">&lsaquo; St Raphael of Brooklyn</a>"#));
+        assert!(home.contains(r#"<a class="from-feast" href="/feast/st-raphael-of-brooklyn"><span aria-hidden="true">&lsaquo; </span>St Raphael of Brooklyn</a>"#));
         assert!(!page("/?date=2026-02-27&from=..%2Fnope").contains("from-feast"));
         // A day's feast leads to its page, which leads back to that day; the ordo's, to the ordo.
         assert!(
@@ -319,10 +340,21 @@ mod tests {
         assert!(ordo.contains(r#"action="/calendar/find""#));
         assert!(ordo.contains(r#"<a class="feast-link" href="/feast/st-raphael-of-brooklyn?from=ordo-2026-02-27">"#));
         let from_day = page("/feast/st-raphael-of-brooklyn?from=2027-02-27");
-        assert!(from_day.contains(r#"<a class="find-back" href="/?date=2027-02-27">&lsaquo; February 27</a>"#));
+        assert!(
+            from_day.contains(r#"<a class="find-back" href="/?date=2027-02-27"><span aria-hidden="true">&lsaquo; </span>February 27</a>"#)
+        );
         let from_ordo = page("/feast/st-raphael-of-brooklyn?from=ordo-2026-02-27");
-        assert!(from_ordo.contains(r#"<a class="find-back" href="/calendar/2026/02#d-2026-02-27">&lsaquo; Ordo, February 2026</a>"#));
-        assert!(page("/feast/st-raphael-of-brooklyn?from=nonsense").contains(r#"href="/calendar/find">&lsaquo; Find a feast"#));
+        assert!(from_ordo.contains(
+            r#"<a class="find-back" href="/calendar/2026/02#d-2026-02-27"><span aria-hidden="true">&lsaquo; </span>Ordo, February 2026</a>"#
+        ));
+        let from_year = page("/feast/ash-wednesday?from=ordo-2026");
+        assert!(from_year.contains(r#"<a class="find-back" href="/calendar/2026"><span aria-hidden="true">&lsaquo; </span>2026 Ordo</a>"#));
+        let from_hour = page("/feast/st-raphael-of-brooklyn?from=lauds-2027-02-27");
+        assert!(from_hour.contains(r#"<a class="find-back" href="/lauds/2027-02-27"><span aria-hidden="true">&lsaquo; </span>Lauds</a>"#));
+        assert!(
+            page("/feast/st-raphael-of-brooklyn?from=nonsense")
+                .contains(r#"href="/calendar/find"><span aria-hidden="true">&lsaquo; </span>Find a feast"#)
+        );
     }
 
     #[test]

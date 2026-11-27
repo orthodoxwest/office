@@ -11,6 +11,7 @@ struct HourReminder: Equatable {
     var chosen: Bool
     var hourOfDay: Int
     var minute: Int
+    var gloss: String = ""
 }
 
 /// Minutes before the hour, as the web's "Remind me" offers them (without its alert-less option).
@@ -90,9 +91,9 @@ enum ReminderStore {
         let hours = reminderDefaults().map { d -> HourReminder in
             let saved = defaults.string(forKey: "reminders.hour.\(d.hour)")?.split(separator: ",").compactMap { Int($0) }
             if let saved, saved.count == 3 {
-                return HourReminder(hour: d.hour, name: d.name, chosen: saved[0] == 1, hourOfDay: saved[1], minute: saved[2])
+                return HourReminder(hour: d.hour, name: d.name, chosen: saved[0] == 1, hourOfDay: saved[1], minute: saved[2], gloss: d.gloss)
             }
-            return HourReminder(hour: d.hour, name: d.name, chosen: d.chosen, hourOfDay: Int(d.hourOfDay), minute: Int(d.minute))
+            return HourReminder(hour: d.hour, name: d.name, chosen: d.chosen, hourOfDay: Int(d.hourOfDay), minute: Int(d.minute), gloss: d.gloss)
         }
         let days = defaults.string(forKey: "reminders.days").map { Set($0.split(separator: ",").compactMap { Int($0) }) }
         return ReminderSettings(
@@ -141,6 +142,8 @@ struct PlannedReminder: Equatable {
     let office: Date
     let title: String
     let feast: String
+    /// Through the Triduum, when the bells are silent: posted without the bell.
+    var silent = false
 }
 
 /**
@@ -158,6 +161,14 @@ enum ReminderScheduler {
     /// iOS's pending limit, less room for a snoozed reminder or two.
     static let capacity = 60
 
+    /// When the page's "Next:" line goes stale: as the reminder it names comes (`next`, the plan's
+    /// first fire date), or at the next midnight, when its "today" and "tomorrow" move; whichever is first.
+    static func nextLineStale(now: Date, next: Date?, calendar: Calendar = .current) -> Date {
+        let midnight = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) ?? now.addingTimeInterval(24 * 60 * 60)
+        guard let next, next < midnight else { return midnight }
+        return next
+    }
+
     /// The reminders due from `now`, earliest first, no more than fit.
     static func plan(_ settings: ReminderSettings, now: Date, core: OfficeCore, calendar: Calendar = .current) throws -> [PlannedReminder] {
         guard settings.on else { return [] }
@@ -173,7 +184,7 @@ enum ReminderScheduler {
                   let fire = calendar.date(byAdding: .minute, value: -settings.lead, to: officeDate),
                   fire > now else { continue }
             let at = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: fire)
-            out.append(PlannedReminder(id: "reminder.\(r.date.iso).\(r.hour)", hour: r.hour, date: r.date, at: at, fireDate: fire, office: officeDate, title: r.title, feast: r.feast))
+            out.append(PlannedReminder(id: "reminder.\(r.date.iso).\(r.hour)", hour: r.hour, date: r.date, at: at, fireDate: fire, office: officeDate, title: r.title, feast: r.feast, silent: r.silent))
             if out.count == capacity { break }
         }
         return out
@@ -187,12 +198,14 @@ enum ReminderScheduler {
         "\(name) · \(office.formatted(date: .omitted, time: .shortened))"
     }
 
-    /// The notification a reminder posts: "Vespers · 6:00 PM", then the day it keeps, with the bell.
+    /// The notification a reminder posts: "Vespers · 6:00 PM", then the day it keeps, with the bell;
+    /// without it from Vespers of Maundy Thursday through None of Holy Saturday, while the church's
+    /// bells are silent (`presentation::reminders::reminder_silent`).
     static func content(_ r: PlannedReminder) -> UNMutableNotificationContent {
         let c = UNMutableNotificationContent()
         c.title = title(r.title, office: r.office)
         c.body = r.feast
-        c.sound = UNNotificationSound(named: UNNotificationSoundName("bell.caf"))
+        c.sound = r.silent ? nil : UNNotificationSound(named: UNNotificationSoundName("bell.caf"))
         c.categoryIdentifier = category
         c.threadIdentifier = "hours"
         c.userInfo = ["hour": r.hour, "date": r.date.iso, "office": r.office.timeIntervalSince1970]

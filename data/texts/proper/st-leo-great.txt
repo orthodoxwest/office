@@ -107,3 +107,7 @@
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[collect]
+# SOURCE: Monastic Diurnal p. 510 (April 11, St Leo the Great, Collect)
+O Lord, we beseech thee, hear the prayers which we offer thee on the solemnity of blessed Leo, thy Bishop and Confessor: and by the interceding merits of him who worthily attained to serve thee, absolve us from all our sins.

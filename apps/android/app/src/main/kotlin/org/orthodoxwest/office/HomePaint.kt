@@ -82,6 +82,14 @@ fun homeInk(p: Palette): HomeInk = if (p.dark) {
 }
 
 /**
+ * The pool of light on the hour that is now: no edge, its stops the web's
+ * (`radial-gradient(var(--now-pool), 55% at 52%, transparent)`), about `center` out to `radius`.
+ * Home's directory and About's table both lay it.
+ */
+fun poolBrush(pool: Color, center: Offset, radius: Float): Brush =
+    Brush.radialGradient(0f to pool, 0.52f to pool.copy(alpha = pool.alpha * 0.55f), 1f to Color.Transparent, center = center, radius = radius)
+
+/**
  * The current hour's name on its pool: the tituli's ink, lifted by night in the quiet seasons and
  * Passiontide (`--titulus-now`).
  */
@@ -172,6 +180,13 @@ fun DrawScope.invitationRules(lining: Color, frontal: Color, seed: Int = 21, day
  */
 fun giltBrush(o: Ornament): Brush = Brush.linearGradient(0.08f to o.hi, 0.3f to mix(o.hi, Color.White, 0.55f), 0.52f to o.flat, 0.92f to o.lo)
 
+/**
+ * The leaf the cross that ends a prayed hour takes by day (the web's `.hour-end-mark::after`):
+ * [giltBrush] without its near-white stop, which loses an arm on plaster at 40dp. By night it is
+ * flat gilt, as the Apse's tituli.
+ */
+fun leafBrush(o: Ornament): Brush = Brush.linearGradient(0.08f to o.hi, 0.52f to o.flat, 0.92f to o.lo)
+
 /** The wash under the invitation, `tablet.png` stretched to it and tinted. */
 fun DrawScope.tabletWash(tablet: ImageBitmap, wash: Color) {
     if (wash.alpha == 0f) return
@@ -256,7 +271,7 @@ fun skyStars(arch: Arch): List<SkyStar> = Fields[arch] ?: emptyList()
  * `first` sets them a size larger and fully lit. The fillet and hairline round it are the
  * lining's (`skyLining`).
  */
-fun DrawScope.sky(arch: Arch, band: Float, wash: ImageBitmap, ink: HomeInk, leaf: Leaf, catch: Float, stars: Boolean, first: Boolean, reserve: List<Rect>) {
+fun DrawScope.sky(arch: Arch, band: Float, wash: ImageBitmap, ink: HomeInk, leaf: Leaf, catch: Float, stars: Boolean, first: Boolean, reserve: List<Rect>, crown: CrownSky? = null) {
     val u = density
     val w = size.width
     val head = archPath(arch, w, -5f * u, band + 2f * u)
@@ -281,12 +296,16 @@ fun DrawScope.sky(arch: Arch, band: Float, wash: ImageBitmap, ink: HomeInk, leaf
         if (!stars) return@clipPath
         val scale = if (first) 1.14f else 1f
         val light = Brush.radialGradient(0f to leaf.hi, 0.6f to leaf.mid, 1f to leaf.lo, center = Offset(w / 2f, band * 0.62f), radius = w * 0.72f)
-        for (s in skyStars(arch)) {
+        // While home's crown plays, it keeps the stars as drawn and, from the change of look, draws
+        // them itself, above the head's front, each at its own turn (Crown.kt).
+        val playing = crown?.active == true
+        val drawn = if (playing) ArrayList<SkyStarPaint>() else null
+        skyStars(arch).forEachIndexed { index, s ->
             val cx = s.x * w
             val cy = s.y * w
             val r = s.r * scale * u
-            if (cy + r > band - 9f * u) continue
-            if (reserve.any { cx + r > it.left && cx - r < it.right && cy + r > it.top && cy - r < it.bottom }) continue
+            if (cy + r > band - 9f * u) return@forEachIndexed
+            if (reserve.any { cx + r > it.left && cx - r < it.right && cy + r > it.top && cy - r < it.bottom }) return@forEachIndexed
             val path = Path().apply {
                 fillType = PathFillType.NonZero
                 for (i in s.outline.indices step 2) {
@@ -296,8 +315,12 @@ fun DrawScope.sky(arch: Arch, band: Float, wash: ImageBitmap, ink: HomeInk, leaf
                 }
                 close()
             }
-            drawPath(path, light, alpha = catch * if (first) min(1f, s.leaf + 0.25f) else s.leaf)
+            val alpha = catch * if (first) min(1f, s.leaf + 0.25f) else s.leaf
+            drawn?.add(SkyStarPaint(index, path, light, alpha, Offset(cx, cy), s.r))
+            val lit = if (playing) crown.lit else 1f
+            if (lit > 0f) drawPath(path, light, alpha = alpha * lit)
         }
+        if (drawn != null) crown!!.record(drawn)
     }
 }
 
@@ -317,15 +340,16 @@ fun DrawScope.skyLining(arch: Arch, leaf: Leaf, catch: Float, hairline: Color, f
 /**
  * An action set as home's invitation, not a filled slab (the web's `.reminder-subscribe`): the
  * tablet's thin wash inside the lining's rule with a finer one 4dp inside it, its words in the
- * lining, lifted by night. Reminders' "Turn on reminders".
+ * lining, lifted by night. Reminders' "Turn on reminders". Not `enabled`, it is a plain statement
+ * in the same tablet ("Reminders are on"), its words changing in place by a cross-fade.
  */
 @androidx.compose.runtime.Composable
-fun TabletButton(label: String, modifier: androidx.compose.ui.Modifier, onClick: () -> Unit) {
+fun TabletButton(label: String, modifier: androidx.compose.ui.Modifier, enabled: Boolean = true, onClick: () -> Unit) {
     val p = LocalPalette.current
     val home = homeInk(p)
     val tablet = androidx.compose.ui.graphics.ImageBitmap.imageResource(R.drawable.tablet)
     androidx.compose.foundation.layout.Box(
-        modifier.fillMaxWidth().heightIn(min = 46.dp).tap(onClick = onClick).drawBehind {
+        modifier.fillMaxWidth().heightIn(min = 46.dp).then(if (enabled) androidx.compose.ui.Modifier.tap(onClick = onClick) else androidx.compose.ui.Modifier).drawBehind {
             tabletWash(tablet, home.tabletWash)
             val u = 1.dp.toPx()
             drawRect(p.lining.copy(alpha = 0.78f), Offset(u / 2f, u / 2f), Size(size.width - u, size.height - u), style = Stroke(u))
@@ -334,6 +358,8 @@ fun TabletButton(label: String, modifier: androidx.compose.ui.Modifier, onClick:
         }.padding(horizontal = 17.6.dp, vertical = 10.dp),
         contentAlignment = androidx.compose.ui.Alignment.Center,
     ) {
-        androidx.compose.material3.Text(label, style = Type.body.copy(fontSize = 17.92.sp, lineHeight = 24.sp, letterSpacing = 0.21.sp, color = if (p.dark) home.liningLifted else p.lining))
+        androidx.compose.animation.Crossfade(label, animationSpec = androidx.compose.animation.core.tween(180), label = "tablet") { words ->
+            androidx.compose.material3.Text(words, style = Type.body.copy(fontSize = 17.92.sp, lineHeight = 24.sp, letterSpacing = 0.21.sp, color = if (p.dark) home.liningLifted else p.lining))
+        }
     }
 }

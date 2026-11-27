@@ -146,3 +146,7 @@ The Lord said * unto Adam, Of the tree which is in the midst of the garden thou 
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 236 (At Terce: "Chapter as above at Lauds")
+@use proper/septuagesima/chapter-lauds

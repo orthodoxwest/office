@@ -3,14 +3,17 @@ name: Publish to Play
 # Builds the signed store bundle from master and uploads it to a Google Play track. Setup and the
 # secrets it reads are in apps/android/README.md ("Publishing from CI").
 #
-# Every merge to master that changes the app goes to Internal testing and Closed testing (the
-# `alpha` track) at once: Internal reaches the maintainers within minutes, unreviewed, so a bad build
-# shows there first; Closed testing reaches testers once Google's review passes, and a newer merge
-# replaces a release still in review.
+# Every merge to master that changes the app goes to Internal testing once all of its checks (CI,
+# iOS, Android) have passed, which reaches the maintainers unreviewed, so a bad build shows there
+# first. A commit with a red check is never uploaded, so nothing promotes it either; a manual run
+# waits on master's checks the same way. Once a day play-promote.yml moves
+# Internal's newest build up to Closed testing (the `alpha` track), where testers get it once
+# Google's review passes, and production gets it after its day there.
 # Those runs use the `play-internal` environment, with no reviewer, and skip quietly until
-# PLAY_SERVICE_ACCOUNT_JSON is set. The public gets a build only when it is promoted in Play
-# Console, or uploaded by a manual run from the Actions tab; manual runs use the `play`
-# environment, so give it a required reviewer.
+# PLAY_SERVICE_ACCOUNT_JSON is set. The public gets a build when play-promote.yml promotes it
+# (daily, after a day on Closed testing), when it is promoted in Play Console, or
+# when a manual run from the Actions tab uploads it; manual runs use the `play` environment, so
+# give it a required reviewer.
 #
 # Google's API can't create the app or take its very first bundle: upload one by hand in Play
 # Console first (a manual run of the Android workflow builds it).
@@ -26,8 +29,8 @@ on:
       - "Cargo.toml"
       - "Cargo.lock"
       - ".github/workflows/play.yml"
-      # Editing the notes alone uploads nothing; the next app change carries them.
-      - "!apps/android/whatsnew.txt"
+      # Release notes (release-notes/) are outside these paths: a note alone uploads nothing, and
+      # the next app change carries it.
   workflow_dispatch:
     inputs:
       track:
@@ -40,7 +43,7 @@ on:
         type: string
         default: "1"
       notes:
-        description: "Release notes (what's new); empty uses apps/android/whatsnew.txt"
+        description: "Release notes (what's new); empty uses the notes in release-notes/ since the last Android release"
         type: string
         default: ""
 
@@ -54,6 +57,31 @@ env:
   NDK_VERSION: 28.2.13676358
 
 jobs:
+  checks:
+    name: Wait for the commit's checks
+    needs: ready
+    if: github.event_name == 'workflow_dispatch' || needs.ready.outputs.play == 'true'
+    runs-on: ubuntu-latest
+    # Long enough for iOS's build, tests and screenshots, queued macOS runners included.
+    timeout-minutes: 180
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts
+      # Nothing reaches readers from a commit whose CI, iOS or Android checks are red or still
+      # running (scripts/ci_gate.py). The publishers (play.yml, testflight.yml, and Android's own
+      # gate and preview release) are not waited on: they wait on the checks themselves. A run
+      # cancelled for a newer push is judged by the run that took its place. After a red check
+      # is mended by a re-run, re-run this workflow's failed jobs to publish.
+      - name: Wait for every check on this commit to pass
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_gate.py --require ci.yml --exclude play.yml --exclude testflight.yml --exclude-job "Wait for the commit's checks" --exclude-job "Publish android-preview"
+
   ready:
     name: Check for the Play credentials
     runs-on: ubuntu-latest
@@ -67,8 +95,8 @@ jobs:
         run: echo "play=$HAS_PLAY" >> "$GITHUB_OUTPUT"
 
   publish:
-    name: Build and upload to ${{ inputs.track || 'internal and closed testing' }}
-    needs: ready
+    name: Build and upload to ${{ inputs.track || 'internal testing' }}
+    needs: [checks, ready]
     # A manual run without the credentials still fails, at the upload, so the missing secret shows.
     if: github.event_name == 'workflow_dispatch' || needs.ready.outputs.play == 'true'
     runs-on: ubuntu-latest
@@ -77,7 +105,7 @@ jobs:
       contents: read
     env:
       # One upload, released on each comma-separated track in the same edit.
-      TRACKS: ${{ inputs.track || 'internal,alpha' }}
+      TRACKS: ${{ inputs.track || 'internal' }}
 
     steps:
       - name: Release from master only
@@ -108,16 +136,17 @@ jobs:
           # The version code counts commits, so the bundle needs full history.
           fetch-depth: 0
 
-      # The notes are apps/android/whatsnew.txt as checked in (a manual run's input replaces it),
-      # never anything taken from the merge. Empty means no notes. Checked before the build, so
-      # a text Play would refuse stops the run early.
+      # The notes are the files under release-notes/ added since the last Android release (its
+      # android/ tag; scripts/release_notes.py), so testers see everything production has yet to
+      # get. A manual run's input replaces them. Checked before the build, so a text Play would
+      # refuse stops the run early.
       - name: Write the release notes
         id: notes
         env:
           NOTES: ${{ inputs.notes }}
         run: |
           if [ -z "$NOTES" ]; then
-            NOTES=$(grep -v '^#' apps/android/whatsnew.txt | sed '/./,$!d')
+            NOTES=$(python3 scripts/release_notes.py show --platform android)
           fi
           if [ -n "$NOTES" ]; then
             LENGTH=$(printf '%s' "$NOTES" | python3 -c 'import sys; print(len(sys.stdin.read()))')
@@ -126,15 +155,15 @@ jobs:
               exit 1
             fi
             mkdir -p "$RUNNER_TEMP/whatsnew"
-            printf '%s\n' "$NOTES" > "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
+            printf '%s' "$NOTES" > "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
             echo "dir=$RUNNER_TEMP/whatsnew" >> "$GITHUB_OUTPUT"
-            echo "Release notes:"; cat "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
+            echo "Release notes:"; cat "$RUNNER_TEMP/whatsnew/whatsnew-en-US"; echo
           else
             echo "No release notes"
           fi
 
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@1.99.1
+        uses: dtolnay/rust-toolchain@1.100.0
         with:
           targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
 
@@ -147,7 +176,7 @@ jobs:
           tool: cargo-ndk
 
       - name: Set up Java
-        uses: actions/setup-java@v6.1.0
+        uses: actions/setup-java@v6.2.0
         with:
           distribution: temurin
           java-version: 21

@@ -145,3 +145,7 @@ R. And the Saviour of the world shall reign over us.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[lauds-psalmody]
+# SOURCE: Monastic Diurnal p. 182 ("Ps. 93 Dominus regnavit and the rest, p. 34"); p. 33 rubric (Vigils of Christmas, Epiphany and Pentecost)
+@use psalmody/lauds/festal

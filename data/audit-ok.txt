@@ -93,9 +93,8 @@ st-venantius *
 st-callistus *
 finding-st-stephen *
 st-placidus-companions *
-st-perpetua-felicitas *
-octave-day-st-stephen *
-octave-day-holy-innocents *
+# Perpetua & Felicitas: Common of Holy Women (Diurnal p. 482), psalm antiphons from it.
+st-perpetua-felicitas psalm-antiphon
 st-gorazde-prague *
 st-ignatius-antioch *
 st-irenaeus *
@@ -123,7 +122,6 @@ motherhood-bvm *
 seven-sorrows-bvm *
 dedication-our-lady-snows *
 expectation-bvm *
-our-lady-of-sorrows-passion *
 our-lady-walsingham *
 holy-rosary-bvm *
 
@@ -135,9 +133,13 @@ dedication-basilica-holy-apostles *
 chains-st-peter psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
 # Chair of St Peter in Rome: the Antioch office, through ProperID.
 chair-peter-rome *
-commemoration-st-paul-apostle psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+commemoration-st-paul-apostle magnificat-antiphon
 st-john-latin-gate psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
-octave-day-st-john psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+# Octave days of St Stephen, St John and the Holy Innocents: the occurring feria's psalm
+# antiphons, the rest as on the Feast (Diurnal pp. 220-221).
+octave-day-st-stephen psalm-antiphon
+octave-day-st-john psalm-antiphon
+octave-day-holy-innocents psalm-antiphon
 
 # Vigils — ferial offices with proper collect (and sometimes a proper
 # Benedictus antiphon). Psalm antiphons come from the seasonal/ordinary
@@ -160,7 +162,9 @@ presentation-bvm psalm-antiphon
 
 # Ferias: psalm antiphons come from the weekday psalter tables in
 # data/texts/ordinary/ (Benedictine ferial scheme), as in Divinum Officium.
-ash-wednesday psalm-antiphon
+# Ash Wednesday: "all is said as in the Psalter throughout the Year except that which is
+# appointed as proper" (Diurnal p. 243), and no chapter is appointed at Lauds.
+ash-wednesday psalm-antiphon chapter
 lent-ember-wednesday psalm-antiphon
 lent-ember-friday psalm-antiphon
 # Saturday Vespers is always the Sunday's I Vespers, so an Ember Saturday has no
@@ -261,3 +265,11 @@ holy-name-mary *
 #   John 16:5 "none of you asketh me, Whither goest thou?"
 #   John 14:9 "so long time with you, and yet hast thou not known me, Philip?"
 register-ok proper/easter-sunday-4/benedictus-antiphon proper/ss-philip-james/psalm-antiphon-3
+
+# Holy Week ferias say the weekday's own Vespers antiphons and psalms (Diurnal
+# p. 282, "Ants. and Psalms of Monday, p. 117"; 2026 ordo "Mon. Ps."), and
+# Laetare's Vespers take the Saturday and Sunday psalter antiphons (pp. 264, 266).
+holy-monday psalm-antiphon-1 psalm-antiphon-2 psalm-antiphon-3 psalm-antiphon-4
+holy-tuesday psalm-antiphon-1 psalm-antiphon-2 psalm-antiphon-3 psalm-antiphon-4
+holy-wednesday psalm-antiphon-1 psalm-antiphon-2 psalm-antiphon-3 psalm-antiphon-4
+laetare-sunday psalm-antiphon-1 psalm-antiphon-2 psalm-antiphon-3 psalm-antiphon-4

@@ -26,6 +26,13 @@ bishop = otherwise
 doctor = doctor
 confessor = otherwise
 
+# The same, its first stanza ending in the m.t.v. form (Monastic Diurnal p. 42*).
+# Every Confessor and Bishop marked m.t.v. in the Proper is a Doctor (or, Ss Cyril and Methodius,
+# has a hymn of their own), so commons/confessor-bishop/hymn-vespers-mtv has the Doctor's tune alone.
+[commons/confessor/hymn-vespers-mtv]
+doctor = doctor
+confessor = otherwise
+
 # Jesu corona celsior for a Confessor not a Bishop (Lauds p. 677), and the tune for a Doctor
 # (p. 679).
 [commons/confessor/hymn-lauds]

@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -86,9 +87,16 @@ import kotlinx.coroutines.delay
 import org.orthodoxwest.office.core.FeastPageView
 import org.orthodoxwest.office.core.FeastYearView
 import org.orthodoxwest.office.core.FindView
+import org.orthodoxwest.office.core.GlossView
+import org.orthodoxwest.office.core.SectionView
+import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.feastBackToDay
 import org.orthodoxwest.office.core.feastBackToOrdo
+import org.orthodoxwest.office.core.feastBackToOrdoYear
+import org.orthodoxwest.office.core.feastGlosses
 import org.orthodoxwest.office.core.feastWords
+
+private val FEAST_GLOSSES by lazy { feastGlosses() }
 
 /** The search and feast page's fixed words, as every front sets them. */
 val FEAST_WORDS by lazy { feastWords() }
@@ -136,15 +144,14 @@ fun FindScreen(
                 Row(verticalAlignment = Alignment.Top) {
                     Text(
                         r.name,
-                        Modifier.weight(1f).tap(action = "open the feast's page") { onFeast(r.id) }.semantics { heading() },
+                        Modifier.weight(1f).tap(label = listOf(r.name, r.rankFull).filter { it.isNotEmpty() }.joinToString(", "), action = "open the feast's page") { onFeast(r.id) }.semantics { heading() },
                         style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 27.sp, color = rankTone(r.rankTone, p)),
                     )
                     if (r.rank.isNotEmpty()) {
-                        Text(
-                            r.rank,
-                            Modifier.padding(start = 12.dp, top = 4.dp).semantics { contentDescription = r.rankFull },
-                            style = Type.small.copy(fontSize = 15.2.sp, lineHeight = 20.sp, color = rankTone(r.rankTone, p)),
-                        )
+                        // The rank's letters name the rank in a note when tapped, as the ordo's marks do.
+                        val letters = @Composable { Text(r.rank, style = Type.small.copy(fontSize = 15.2.sp, lineHeight = 20.sp, color = rankTone(r.rankTone, p))) }
+                        val at = Modifier.padding(start = 12.dp, top = 4.dp)
+                        if (r.rankFull.isNotEmpty()) NoteMark(r.rankFull, r.rankFull, at) { letters() } else Box(at) { letters() }
                     }
                 }
                 Text(
@@ -153,7 +160,7 @@ fun FindScreen(
                         append(" · ")
                         withStyle(SpanStyle(color = p.accent)) { append(FEAST_WORDS.everyYear) }
                     },
-                    Modifier.padding(top = 3.dp, bottom = 6.dp).tap(action = "open the feast's page") { onFeast(r.id) },
+                    Modifier.padding(top = 3.dp, bottom = 6.dp).tap(label = "${r.meta}, ${FEAST_WORDS.everyYear} for ${r.name}", action = "open the feast's page") { onFeast(r.id) },
                     style = Type.small.copy(fontSize = 14.7.sp, lineHeight = 21.sp, color = p.muted),
                 )
                 r.years.forEachIndexed { i, y -> YearRow(y, first = i == 0, onDay = onDay) }
@@ -172,6 +179,8 @@ fun FindScreen(
 fun feastBack(under: Page?, today: LocalDate): String? = when (under) {
     is Page.Home -> feastBackToDay(under.date.toCivil(), today.toCivil())
     is Page.Ordo -> feastBackToOrdo(CivilDate(under.year, under.month, 1))
+    is Page.Year -> feastBackToOrdoYear(under.year)
+    is Page.Hour -> hourLabel(under.hour)
     else -> null
 }
 
@@ -217,9 +226,10 @@ fun FeastScreen(
         item(key = "chrome") { chrome() }
         item(key = "back") {
             Box(column) {
+                val target = back ?: w.findTitle
                 Text(
-                    "‹ ${back ?: w.findTitle}",
-                    Modifier.heightIn(min = 44.dp).tap(onClick = if (back != null) onBack else onFind).padding(vertical = 12.dp),
+                    "‹ $target",
+                    Modifier.heightIn(min = 44.dp).tap(label = "Back to $target", onClick = if (back != null) onBack else onFind).padding(vertical = 12.dp),
                     style = Type.small.copy(fontSize = 15.2.sp, lineHeight = 20.sp, color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 1.37.sp),
                 )
             }
@@ -373,13 +383,18 @@ private fun FeastHead(view: FeastPageView, frontal: Color, size: Int, modifier: 
             )
             val rank = Type.small.copy(fontSize = 15.68.sp, lineHeight = 23.5.sp, color = p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center)
             FlowRow(
-                Modifier.padding(top = 8.8.dp).clearAndSetSemantics { contentDescription = view.subtitle; traversalIndex = 2f },
+                Modifier.padding(top = 8.8.dp).semantics { isTraversalGroup = true; traversalIndex = 2f },
                 horizontalArrangement = Arrangement.spacedBy(9.6.dp, Alignment.CenterHorizontally),
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) {
                 view.subtitle.split(" · ").forEachIndexed { i, part ->
                     if (i > 0) PaintPoint(5.5.dp, frontal)
-                    Text(part, style = rank)
+                    val rg = if (i == 0) view.rankGloss else null
+                    if (rg != null) {
+                        GlossMark(rg, part, reaches = false) { Text(part, style = rank) }
+                    } else {
+                        Text(part, style = rank)
+                    }
                 }
             }
         }
@@ -392,16 +407,20 @@ private fun FeastHead(view: FeastPageView, frontal: Color, size: Int, modifier: 
 
 /** A section's heading: a titulus over one stroke of the pen (`.feast-section h2`). */
 @Composable
-private fun SectionHeading(text: String, seed: Int, gap: Dp = 4.8.dp) {
+private fun SectionHeading(text: String, seed: Int, gap: Dp = 4.8.dp, gloss: GlossView? = null) {
     val p = LocalPalette.current
-    Text(
-        text,
-        Modifier.padding(bottom = gap).fillMaxWidth().semantics { heading() }.drawBehind {
-            val u = 1.dp.toPx()
-            drawPath(ruledLine(0f, size.height - 0.5f * u, size.width, size.height - 0.5f * u, 1.3f * u, seed, u), p.lining.copy(alpha = 0.78f))
-        }.padding(bottom = 6.4.dp),
-        style = titulusType(17.28f).copy(textAlign = TextAlign.Start),
-    )
+    val lineModifier = Modifier.padding(bottom = gap).fillMaxWidth().drawBehind {
+        val u = 1.dp.toPx()
+        drawPath(ruledLine(0f, size.height - 0.5f * u, size.width, size.height - 0.5f * u, 1.3f * u, seed, u), p.lining.copy(alpha = 0.78f))
+    }.padding(bottom = 6.4.dp)
+    val style = titulusType(17.28f).copy(textAlign = TextAlign.Start)
+    if (gloss != null) {
+        Box(lineModifier) {
+            GlossMark(gloss, text, isHeading = true, reaches = false) { Text(text, style = style) }
+        }
+    } else {
+        Text(text, lineModifier.semantics { heading() }, style = style)
+    }
 }
 
 /** The width from which the feast page sets its standing and years as a rail beside its texts. */
@@ -444,7 +463,9 @@ private fun Standing(view: FeastPageView, narrow: Boolean, onFeast: (String) -> 
         verticalArrangement = Arrangement.spacedBy(if (monastic) 8.dp else 5.6.dp),
     ) {
         if (monastic) {
-            Text(w.monasticHeading, Modifier.fillMaxWidth().semantics { heading() }, style = titulusType(15.2f))
+            GlossMark(FEAST_GLOSSES.monastic, w.monasticHeading, Modifier.fillMaxWidth(), isHeading = true, reaches = false) {
+                Text(w.monasticHeading, Modifier.fillMaxWidth(), style = titulusType(15.2f))
+            }
             view.keptByAll?.let { all ->
                 Text(
                     buildAnnotatedString {
@@ -490,40 +511,80 @@ private fun Standing(view: FeastPageView, narrow: Boolean, onFeast: (String) -> 
 /**
  * The feast's texts under their heading and source, the collect first, then the day it is said in
  * full (`.feast-texts`). Each text's label is in the tituli's ink, and the collect opens on the
- * hours' dropped initial.
+ * hours' dropped initial. A hymn is folded under its label and Latin title, and a tap opens it
+ * (`details.feast-hymn`), nothing kept between visits; its stanzas stand in a column as wide as
+ * its longest line, centred, as the hours set them (`.feast-hymn .hymn-verses`).
  */
 @Composable
 private fun FeastTexts(view: FeastPageView, onDay: (LocalDate) -> Unit, modifier: Modifier) {
     val p = LocalPalette.current
     val w = FEAST_WORDS
     val note = noteType()
+    val columns = hymnColumns(view.texts.map { SectionView(label = "", collapsible = false, bare = false, blocks = it.blocks) })
+    // Saved with the list: the texts are one item of it, disposed when scrolled away or turned.
+    val open = rememberSaveable(view.id, saver = OpenSections) { mutableStateMapOf<Int, Boolean>() }
     Column(modifier) {
-        SectionHeading(w.textsHeading, seed = 71)
+        SectionHeading(w.textsHeading, seed = 71, gloss = FEAST_GLOSSES.proper)
         Text(view.textsSource, Modifier.padding(top = 1.6.dp, bottom = 4.8.dp), style = note.copy(fontSize = 14.4.sp, fontStyle = FontStyle.Italic))
         view.texts.forEachIndexed { n, t ->
-            Text(
-                buildAnnotatedString {
-                    append(t.label)
-                    if (t.common) {
-                        withStyle(SpanStyle(color = p.muted, fontStyle = FontStyle.Italic, fontFeatureSettings = "", letterSpacing = 0.sp, fontSize = 13.6.sp)) {
-                            append("  " + w.commonMark)
-                        }
+            val label = buildAnnotatedString {
+                append(t.label)
+                if (t.common) {
+                    withStyle(SpanStyle(color = p.muted, fontStyle = FontStyle.Italic, fontFeatureSettings = "", letterSpacing = 0.sp, fontSize = 13.6.sp)) {
+                        append("  " + w.commonMark)
                     }
-                },
-                Modifier.padding(top = 16.dp, bottom = 2.4.dp).semantics { heading() },
-                style = Type.body.copy(fontSize = 16.sp, lineHeight = 22.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 0.8.sp),
-            )
-            // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.
-            // The collect, the first text when a feast has one, opens as a collect does in the hours.
+                }
+            }
+            val labelStyle = Type.body.copy(fontSize = 16.sp, lineHeight = 22.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 0.8.sp)
+            val commonStyle = Type.body.copy(fontSize = 13.6.sp, lineHeight = 22.sp, color = p.muted, fontStyle = FontStyle.Italic)
             val line = LocalDensity.current.bodyLine()
-            val collect = n == 0 && t.prayer
-            // A black day's initial is left ungilt, in the muted ink, as a bare hour's (the web's
-            // `--cap-ink` under `.feast-head.day-color-black`).
-            val gilding = LocalOrnament.current
-            CompositionLocalProvider(LocalOrnament provides if (view.color == "black") gilding.copy(cap = p.muted) else gilding) {
-                t.blocks.forEachIndexed { i, b ->
-                    val block = if (collect && i == 0 && b.kind == BlockKind.PARAGRAPH) b.copy(dropCap = true) else b
-                    Block(block, Modifier.padding(top = if (i == 0) 0.dp else b.space.of(line)))
+            val title = t.hymnTitle
+            if (title != null) {
+                // The hymn's fold: its label and caret, its Latin title beneath, one touch target.
+                val expanded = open[n] == true
+                Column(
+                    Modifier.padding(top = 12.8.dp).fillMaxWidth().heightIn(min = 44.dp).semantics { heading() }
+                        .tap { open[n] = !expanded }.disclosed(expanded).padding(vertical = 3.2.dp),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(label, style = labelStyle)
+                        Caret(expanded, p.titulus)
+                    }
+                    if (title.isNotEmpty()) Text(title, style = Type.body.copy(fontSize = 16.3.sp, lineHeight = 22.sp, color = p.muted, fontStyle = FontStyle.Italic))
+                }
+                Unfold(expanded) {
+                    t.blocks.forEachIndexed { i, b ->
+                        Block(b, Modifier.padding(top = if (i == 0) Space.BIND.of(line) else b.space.of(line)), column = columns[n to i])
+                    }
+                }
+            } else {
+                val lg = t.labelGloss
+                // A long label takes its line and "Common" goes under it, rather than being squeezed beside it.
+                FlowRow(
+                    Modifier.padding(top = 16.dp, bottom = 2.4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (lg != null) {
+                        GlossMark(lg, t.label, isHeading = true, reaches = false) { Text(t.label, style = labelStyle) }
+                    } else {
+                        Text(t.label, Modifier.semantics { heading() }, style = labelStyle)
+                    }
+                    if (t.common) {
+                        GlossMark(FEAST_GLOSSES.common, w.commonMark, reaches = false) { Text(w.commonMark, style = commonStyle) }
+                    }
+                }
+                // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.
+                // The collect, the first text when a feast has one, opens as a collect does in the hours.
+                val collect = n == 0 && t.prayer
+                // A black day's initial is left ungilt, in the muted ink, as a bare hour's (the web's
+                // `--cap-ink` under `.feast-head.day-color-black`).
+                val gilding = LocalOrnament.current
+                CompositionLocalProvider(LocalOrnament provides if (view.color == "black") gilding.copy(cap = p.muted) else gilding) {
+                    t.blocks.forEachIndexed { i, b ->
+                        val block = if (collect && i == 0 && b.kind == BlockKind.PARAGRAPH) b.copy(dropCap = true) else b
+                        Block(block, Modifier.padding(top = if (i == 0) 0.dp else b.space.of(line)), column = columns[n to i])
+                    }
                 }
             }
         }

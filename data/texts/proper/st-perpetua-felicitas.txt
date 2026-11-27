@@ -1,11 +1,12 @@
 # Proper scaffold for [st-perpetua-felicitas]
 # Name: St Perpetua & Felicitas, Martyrs
-# Rank: double  Category: martyrs
+# Rank: double  Category: holy-woman (Diurnal p. 482: "Office of the Common of Holy Women, p. 51*",
+# with the Common's forms for a Martyr not a Virgin and for Many Martyrs not Virgins)
 #
 # Uncomment a section header and put text (or @use …) beneath it to activate.
 # Commented sections are not loaded. Do not leave an empty uncommented [key] —
 # that silences make audit without providing text.
-# Commons fallback: commons/martyrs/{ref}
+# Commons fallback: commons/holy-woman/{ref}
 # Intentional commons-only: add this feast id to data/audit-ok.txt
 #
 # --- core ---
@@ -46,7 +47,7 @@
 # [commemoration-versicle]
 # Versicle pair (V. … / R. …) for the commemoration of this feast.
 #
-[commemoration-collect]
+[collect]
 # SOURCE: diurnal p. 483
 Grant us, we beseech thee, O Lord our God, to venerate with unceasing devotion the triumphs of Perpetua and Felicitas, thy holy Martyrs: that we who are not able to celebrate their victories worthily in thought, at least may often recall them in humble obedience.
 
@@ -184,3 +185,50 @@ Grant us, we beseech thee, O Lord our God, to venerate with unceasing devotion t
 #
 # [psalm-antiphon-5-first-vespers]
 # I Vespers override for psalm antiphon 5.
+
+[benedictus-antiphon]
+# SOURCE: Monastic Diurnal p. 482 (March 6, "At both Vespers on Magnificat, and at Lauds on Benedictus"; also p. 54*)
+For theirs is the kingdom of heaven, * who despised worldly living: who have won the rewards of the kingdom, and have washed their robes in the blood of the Lamb.
+
+[magnificat-antiphon]
+# SOURCE: Monastic Diurnal p. 482 (at both Vespers)
+@use proper/st-perpetua-felicitas/benedictus-antiphon
+
+[magnificat-antiphon-first]
+# SOURCE: Monastic Diurnal p. 482 (at both Vespers; also p. 51*)
+@use proper/st-perpetua-felicitas/benedictus-antiphon
+
+[versicle-lauds]
+# SOURCE: Monastic Diurnal p. 483 (March 6); pp. 51*, 53* (For Many Martyrs not Virgins)
+V. Thou hast crowned them with glory and honour, O Lord.
+R. And madest them to have dominion of the works of thy hands.
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal p. 55* (several Holy Women: the versicles for Many Martyrs not Virgins)
+@use proper/st-perpetua-felicitas/versicle-lauds
+
+[versicle-first-vespers]
+# SOURCE: Monastic Diurnal p. 51* (For Many Martyrs not Virgins)
+@use proper/st-perpetua-felicitas/versicle-lauds
+
+[chapter-lauds]
+# SOURCE: Monastic Diurnal p. 52* (Common of Holy Women, For a Martyr not a Virgin, Ecclus. 51:1, 2)
+@use proper/st-agatha/chapter-lauds
+
+[chapter-vespers]
+# SOURCE: Monastic Diurnal p. 51* ("Chapter as below at Lauds"; II Vespers as at I Vespers, p. 55*)
+@use proper/st-perpetua-felicitas/chapter-lauds
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 54* ("Chapter as above at Lauds")
+@use proper/st-perpetua-felicitas/chapter-lauds
+
+[chapter-sext]
+# SOURCE: Monastic Diurnal p. 54* (For a Martyr not a Virgin, Ecclus. 51:3)
+@use proper/st-agatha/chapter-sext
+
+[chapter-none]
+# SOURCE: Monastic Diurnal p. 55* (Common of Holy Women, At None, For a Martyr not a Virgin)
+!Ecclus. 51:8-12
+My soul shall praise the Lord even unto death: for thou deliverest such as wait for thee, and savest them out of the hands of the enemies, * O Lord our God.
+R. Thanks be to God.

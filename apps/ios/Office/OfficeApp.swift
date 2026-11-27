@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 import UIKit
 import UserNotifications
@@ -77,6 +78,7 @@ struct RootView: View {
     @Environment(\.colorScheme) private var system
     @Environment(\.dynamicTypeSize) private var dynamicType
     @Environment(\.scenePhase) private var phase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// The way back, kept for a return after iOS has closed the app in the background.
     @SceneStorage("way-back") private var wayBack = ""
     @State private var started = false
@@ -84,11 +86,16 @@ struct RootView: View {
     /// counting while the phone sleeps, so home could still highlight Sext at Vespers.
     private let minute = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
+    /// The menu and Settings panels drop a little as they fade in; under Reduce Motion they only
+    /// fade, as the web's and Android's lose their travel.
+    private var panel: AnyTransition { reduceMotion ? .opacity : .opacity.combined(with: .offset(y: -8)) }
+
     var body: some View {
         let palette = model.theme.dark(system) ? Palette.apse : Palette.nave
         let visit = Visit(
             page: model.page, form: model.form, dark: palette.dark, today: model.today, active: phase == .active,
-            martyrology: model.martyrologyShown(on: model.page), chant: model.chantShown(on: model.page)
+            martyrology: model.martyrologyShown(on: model.page), chant: model.chantShown(on: model.page),
+            prayed: model.page.prayed(in: model)
         )
         // The header's measures scale with the reader's text, so the panels under it do too.
         let m = Metrics(textSize: model.textSize, dynamicType: dynamicType)
@@ -100,35 +107,46 @@ struct RootView: View {
             .overlay(alignment: .topTrailing) {
                 if model.overlay == .menu && geo.size.width < wideFrom {
                     ZStack(alignment: .topTrailing) {
-                        // A tap anywhere else closes the menu.
-                        Color.black.opacity(0.001).ignoresSafeArea().onTapGesture { model.closeOverlay() }
-                            .accessibilityHidden(true)
+                        // A tap anywhere else closes the menu; exposed to VoiceOver as a Close
+                        // button inside the modal so users are never trapped without Z-scrub.
+                        Color.black.opacity(0.001).ignoresSafeArea()
+                            .onTapGesture { model.closeOverlay() }
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("Close menu")
+                            .accessibilityAddTraits(.isButton)
+                            .accessibilitySortPriority(0)
                         MenuPanel()
                             .padding(.top, m.px(52))
                             .padding(.horizontal, m.px(gutter))
-                            // Modal to VoiceOver, as Android's popup is to TalkBack; the scrub closes it.
-                            .accessibilityElement(children: .contain)
-                            .accessibilityAddTraits(.isModal)
-                            .accessibilityAction(.escape) { model.closeOverlay() }
+                            .accessibilitySortPriority(1)
                     }
-                    .transition(.opacity.combined(with: .offset(y: -8)))
+                    .accessibilityElement(children: .contain)
+                    .accessibilityAddTraits(.isModal)
+                    .accessibilityAction(.escape) { model.closeOverlay() }
+                    .transition(panel)
                 }
                 if model.overlay == .settings && geo.size.width >= wideFrom {
                     ZStack(alignment: .topTrailing) {
-                        Color.black.opacity(0.001).ignoresSafeArea().onTapGesture { model.closeOverlay() }
-                            .accessibilityHidden(true)
+                        Color.black.opacity(0.001).ignoresSafeArea()
+                            .onTapGesture { model.closeOverlay() }
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("Close settings")
+                            .accessibilityAddTraits(.isButton)
+                            .accessibilitySortPriority(0)
                         // Under the header's end: the nav shell is held to 68rem and centred.
                         MenuPanel(prefsOnly: true)
                             .padding(.top, m.px(52))
                             .padding(.trailing, max(0, (geo.size.width - m.px(1088)) / 2) + m.px(gutter))
-                            .accessibilityElement(children: .contain)
-                            .accessibilityAddTraits(.isModal)
-                            .accessibilityAction(.escape) { model.closeOverlay() }
+                            .accessibilitySortPriority(1)
                     }
-                    .transition(.opacity.combined(with: .offset(y: -8)))
+                    .accessibilityElement(children: .contain)
+                    .accessibilityAddTraits(.isModal)
+                    .accessibilityAction(.escape) { model.closeOverlay() }
+                    .transition(panel)
                 }
             }
-            .animation(.easeOut(duration: 0.15), value: model.overlay)
+            // Tempo's settle: a panel comes in 160ms and leaves faster, in 120.
+            .animation(model.overlay == .none ? Tempo.settleOut.animation : Tempo.settleIn.animation, value: model.overlay)
             // The menu belongs to the narrow screen and Settings to the wide one: neither survives
             // a rotation or resize across the breakpoint, to come back later unasked.
             // (A width of zero is the geometry before its first layout, not a side.)
@@ -136,7 +154,9 @@ struct RootView: View {
                 if was != nil { model.closeOverlay() }
             }
             .environment(\.wide, geo.size.width >= wideFrom)
-            .environment(\.ranked, geo.size.width >= wideFrom && geo.size.width < rankedBelow)
+            // Ranked below 1000 of the page's own measure, which Larger text makes 1100pt, as the
+            // Android app's scaled dp do: the header's words grow with it (#927).
+            .environment(\.ranked, geo.size.width >= wideFrom && geo.size.width < rankedBelow * m.layout)
         }
         .environment(\.palette, palette)
         // The page's season for the chrome over it (the menu); a home or an hour sets its own within.
@@ -156,10 +176,13 @@ struct RootView: View {
         // (Usage.swift).
         .onChange(of: visit, initial: true) { _, v in
             guard v.active, let event = v.page.usageEvent else { return }
-            Usage.shared.record(event, dark: v.dark, form: v.form, martyrology: v.martyrology, chant: v.chant)
+            Usage.shared.record(
+                event, dark: v.dark, form: v.form, martyrology: v.martyrology, chant: v.chant, prayed: v.prayed,
+                reminders: ReminderStore.load().on
+            )
         }
         .onReceive(minute) { _ in
-            if phase == .active { model.refreshToday() }
+            if phase == .active { model.refreshToday(seen: true) }
         }
         .onChange(of: phase) { _, now in
             guard now == .active else { return }
@@ -182,17 +205,22 @@ private struct EntryPage: View {
     @EnvironmentObject private var model: AppModel
 
     var body: some View {
-        switch model.page(of: entry) {
-        case let .home(d)?: HomePage(date: d)
-        case let .hour(d, h)?: HourPage(date: d, hour: h)
-        case let .ordo(y, m, d)?: OrdoPage(year: y, month: m, day: d)
-        case let .year(y)?: YearPage(year: y)
-        case .reminders?: RemindersPage()
-        case .about?: AboutPage()
-        case let .find(q)?: FindPage(query: q)
-        case let .feast(id)?: FeastPage(id: id, entry: entry)
-        // Gone from the way back, while the stack lets it go.
-        case nil: Color.clear
+        Group {
+            switch model.page(of: entry) {
+            case let .home(d)?: HomePage(date: d)
+            case let .hour(d, h)?: HourPage(date: d, hour: h)
+            case let .ordo(y, m, d)?: OrdoPage(year: y, month: m, day: d)
+            case let .year(y)?: YearPage(year: y)
+            case .reminders?: RemindersPage()
+            case .about?: AboutPage()
+            case let .find(q)?: FindPage(query: q)
+            case let .feast(id)?: FeastPage(id: id, entry: entry)
+            // Gone from the way back, while the stack lets it go.
+            case nil: Color.clear
+            }
+        }
+        .accessibilityAction(.escape) {
+            if !model.path.isEmpty { model.path.removeLast() }
         }
     }
 }
@@ -208,6 +236,15 @@ private struct Visit: Equatable {
     let martyrology: Bool?
     /// On an hour with a score, whether its notation was shown, once composed.
     let chant: Bool?
+    /// On an hour, whether it is marked prayed: the mark says so in the day's usage.
+    let prayed: Bool
+}
+
+private extension Page {
+    func prayed(in model: AppModel) -> Bool {
+        if case let .hour(date, hour) = self { return model.hoursPrayed(on: date).contains(hour) }
+        return false
+    }
 }
 
 /// The pages hide the navigation bar, as the web has none; the edge swipe back stays.

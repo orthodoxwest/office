@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -20,9 +21,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.orthodoxwest.office.core.CivilDate
+import org.orthodoxwest.office.core.CourseMonthView
 import org.orthodoxwest.office.core.FeastPageView
 import org.orthodoxwest.office.core.FindView
 import org.orthodoxwest.office.core.HomeView
@@ -93,13 +96,17 @@ data class Entry(val id: Long, val page: Page)
 
 /** A page's composed content, ready to draw. */
 sealed interface Content {
-    data class Home(val view: HomeView) : Content
+    /** `seen`: composed for a turn of the hour seen while home was in front, so its light moves. */
+    data class Home(val view: HomeView, val seen: Boolean = false) : Content
     data class Hour(val view: HourView) : Content
     data class Ordo(val view: OrdoMonthView) : Content
     data class Find(val view: FindView) : Content
     data class Feast(val view: FeastPageView) : Content
 
-    /** The year's frontispiece, the reminders and About, drawn from the page itself. */
+    /** The year's frontispiece: the year's course under its month strip; the rest is arithmetic. */
+    data class Year(val course: List<CourseMonthView>) : Content
+
+    /** The reminders and About, drawn from the page itself. */
     data object Drawn : Content
     data class Failed(val message: String) : Content
 }
@@ -210,17 +217,32 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     /** The day and clock hour home was last composed at: its highlighted hour and invitation are theirs. */
     private var homeClock: Pair<LocalDate, Int>? = null
 
+    /** Whether the app is in front (MainActivity's resume to its pause). */
+    var inFront = false
+
+    /** Whether the home being composed is for a turn of the hour seen happening (`Content.Home.seen`). */
+    private var hourSeenTurning = false
+
+    /**
+     * The clock hour (0–23) at the last minute's check: About's table lights it and its foot invites
+     * to it, as home does, and both move on when it turns.
+     */
+    var clockHour: Int by mutableStateOf(LocalDateTime.now().hour)
+        private set
+
     /** The day the search or a feast page was last made on: their years and next keeping follow it. */
     private var feastDay: LocalDate? = null
 
     init {
         load()
+        // An hour marked prayed says so in the day's usage.
+        viewModelScope.launch { snapshotFlow { Prayed.version }.drop(1).collect { countVisit() } }
         // Checked in steps of a minute rather than awaited as one delay to the next hour: a delay
         // stops counting while the phone sleeps, and a return is not always announced.
         viewModelScope.launch {
             while (true) {
                 delay(60_000)
-                refreshClock()
+                refreshClock(seen = inFront)
             }
         }
     }
@@ -228,10 +250,12 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     /**
      * Home composed again once the clock has passed into another hour or day, so a home opened at
      * Sext doesn't still highlight Sext at Vespers; today's home moves on to the new day. The search
-     * and a feast page are made again on a new day, whose years and next keeping follow it. Called
-     * every minute and on every return to the app.
+     * and a feast page are made again on a new day, whose years and next keeping follow it. About
+     * follows [clockHour]. Called every minute (`seen` while the app is in front, when home's light
+     * may move with the hour) and on every return to the app, which shows the new hour at once.
      */
-    fun refreshClock() {
+    fun refreshClock(seen: Boolean = false) {
+        LocalDateTime.now().hour.let { if (it != clockHour) clockHour = it }
         feastDay?.let { if (it != today) return load() }
         val shownAt = homeClock ?: return
         val home = page as? Page.Home ?: return
@@ -241,6 +265,9 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
             stack[stack.lastIndex] = Entry(entry.id, Page.Home(now.toLocalDate()))
             saved[STACK] = ArrayList(stack.map { "${it.id}|${it.page.encode()}" })
         }
+        // A home moved on to a new day is a new page, not the same one's light moving.
+        // A tick a minute apart finds the turn within its first minute; a later one found it.
+        hourSeenTurning = seen && now.toLocalDate() == shownAt.first && now.minute == 0
         load()
     }
 
@@ -331,6 +358,14 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         load()
     }
 
+    /**
+     * Saves a choice without showing it yet: home's crown writes the choice at the tap and turns
+     * the look later, under its play ([chooseTheme] then).
+     */
+    fun keepTheme(value: ThemeChoice) {
+        prefs.edit().putString("theme", value.name).apply()
+    }
+
     fun chooseTheme(value: ThemeChoice) {
         theme = value
         prefs.edit().putString("theme", value.name).apply()
@@ -415,7 +450,8 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         // Prime reports whether its Martyrology was shown, and an hour with a score whether its
         // notation was, once the hour on screen is this page's.
         val hour = shown?.takeIf { it.entry.id == entry.id }?.content as? Content.Hour
-        usage.record(event, dark(), form, hour?.view?.martyrology, hour?.view?.chant)
+        val prayed = (page as? Page.Hour)?.let { Prayed.hours(getApplication(), it.date).contains(it.hour) } ?: false
+        usage.record(event, dark(), form, hour?.view?.martyrology, hour?.view?.chant, prayed, reminders.on)
     }
 
     /** Whether the Apse is on screen: the reader's choice, or the phone's own dark mode under Default. */
@@ -435,6 +471,8 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         val visit = entry
         val now = LocalDateTime.now()
         homeClock = if (visit.page is Page.Home) now.toLocalDate() to now.hour else null
+        val seen = hourSeenTurning
+        hourSeenTurning = false
         if (visit.page is Page.Home) newcomer = aboutNewcomer(usage.daysSinceFirst())
         feastDay = if (visit.page is Page.Find || visit.page is Page.Feast) now.toLocalDate() else null
         loading?.cancel()
@@ -447,6 +485,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                         withContext(Dispatchers.Default) {
                             office.home(page.date.toCivil(), now.toLocalDate().toCivil(), now.hour)
                         },
+                        seen,
                     )
                     is Page.Hour -> Content.Hour(
                         withContext(Dispatchers.Default) {
@@ -459,13 +498,17 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                         withContext(Dispatchers.Default) { office.feastPage(page.id, now.toLocalDate().toCivil()) }
                             ?: throw IllegalArgumentException("No feast by that name."),
                     )
-                    // The frontispiece is arithmetic, drawn at once from the page itself.
-                    is Page.Year -> Content.Drawn
+                    // The frontispiece is arithmetic but for the year's course, which the engine
+                    // keeps per year once built.
+                    is Page.Year -> Content.Year(withContext(Dispatchers.Default) { office.ordoCourse(page.year) })
                     Page.Reminders -> {
                         refreshReminderStatus()
                         Content.Drawn
                     }
-                    Page.About -> Content.Drawn
+                    // About's words are fixed: should the year's colors fail, it shows without its ribbon.
+                    Page.About -> Content.Year(
+                        withContext(Dispatchers.Default) { runCatching { office.ordoCourse(now.year) }.getOrDefault(emptyList()) },
+                    )
                 }
             } catch (e: CancellationException) {
                 throw e

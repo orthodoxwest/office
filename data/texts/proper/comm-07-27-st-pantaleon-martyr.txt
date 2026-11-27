@@ -1,0 +1,3 @@
+[commemoration-collect]
+# SOURCE: ordo 'Col. "Grant" 23*' (Diurnal p. 23*, Another Collect)
+@use commons/martyr/collect-alternate

@@ -50,8 +50,34 @@ final class CoreTests: XCTestCase {
     func testTheAboutPageHasTheSevenHoursAndLinksOnlyWhereTheAppCanGo() {
         let page = about()
         XCTAssertFalse(page.title.isEmpty)
-        XCTAssertEqual(page.periods.flatMap(\.hours).map(\.hour), hourNames())
-        XCTAssertEqual(page.periods.flatMap(\.hours).count, 7)
+        XCTAssertFalse(page.kicker.isEmpty)
+        // The seven the app prays, then Matins under the Night, coming soon, after the evening.
+        XCTAssertEqual(page.periods.map(\.label), ["Morning", "Day", "Evening", "Night"])
+        let hours = page.periods.flatMap(\.hours)
+        XCTAssertEqual(hours.map(\.hour), hourNames() + ["matins"])
+        XCTAssertEqual(hours.filter { !$0.comingSoon }.map(\.hour), hourNames())
+        XCTAssertEqual(hours.count, 8)
+        XCTAssertEqual(hours.last?.sign, "star")
+        XCTAssertEqual(hours.last?.angle, 270)
+        XCTAssertEqual(hours.first?.night, false)
+        XCTAssertEqual(hours.dropLast().last?.night, true)
+        XCTAssertEqual(hours.map(\.sign), ["sun", "sun", "sun", "sun", "sun", "moon", "moon", "star"])
+        let seven = hours.dropLast()
+        XCTAssertTrue(zip(seven, seven.dropFirst()).allSatisfy { $0.angle > $1.angle })
+        XCTAssertEqual(page.comingSoon, "coming soon")
+        XCTAssertEqual(page.horologiumHeight, 160)
+        XCTAssertEqual(page.horologiumNightDepth, 22)
+        // The epigraph is two verses, one to a line, and no note follows the hours.
+        let verse = page.blocks.first { $0.kind == "verse" }
+        XCTAssertEqual(verse?.text.split(separator: "\n").count, 2)
+        XCTAssertFalse(page.blocks.contains { $0.kind == "note" && $0.text.contains("Matins") })
+        XCTAssertFalse(page.specimen.aloneVersicle.isEmpty)
+        XCTAssertFalse(page.specimen.priestVersicle.isEmpty)
+        XCTAssertFalse(page.specimen.deaconNote.isEmpty)
+        XCTAssertFalse(page.specimen.priestNote.isEmpty)
+        XCTAssertEqual(page.ordoColors.count, 6)
+        XCTAssertEqual(ordoColors().count, 6)
+        XCTAssertEqual(dayNameGloss(name: "Feria")?.term, "Feria")
         let links = page.blocks.flatMap(\.runs).map(\.link).filter { !$0.isEmpty }
         XCTAssertFalse(links.isEmpty)
         for link in links {
@@ -64,6 +90,93 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(aboutLink("/privacy", defaults: defaults), .web(URL(string: "https://orthodoxwestbreviary.com/privacy")!))
         defaults.set("https://example.org/api/usage", forKey: "usage-endpoint")
         XCTAssertEqual(aboutLink("/privacy", defaults: defaults), .web(URL(string: "https://example.org/privacy")!))
+    }
+
+    /// While the hours follow the sun, About gives today's sun's times, and Compline keeps its words.
+    func testAboutGivesTheSunsTimesButCompline() {
+        let periods = about().periods
+        XCTAssertEqual(aboutSunPeriods(periods, sun: nil), periods)
+        let sun: [String: (hour: Int, minute: Int)] = ["lauds": (6, 48), "sext": (12, 14), "vespers": (17, 19), "compline": (21, 0)]
+        let hours = aboutSunPeriods(periods, sun: sun).flatMap(\.hours)
+        let time = { (slug: String) in hours.first { $0.hour == slug }?.time ?? "" }
+        XCTAssertTrue(time("lauds").hasPrefix("sunrise · "), time("lauds"))
+        XCTAssertTrue(time("sext").hasPrefix("solar noon · "), time("sext"))
+        XCTAssertTrue(time("vespers").hasPrefix("sunset · "), time("vespers"))
+        XCTAssertEqual(time("compline"), periods.flatMap(\.hours).first(where: { $0.hour == "compline" })?.time)
+        XCTAssertEqual(time("prime"), periods.flatMap(\.hours).first { $0.hour == "prime" }?.time)
+        // Matins is not timed by the sun: it keeps its words, and that it is coming soon.
+        XCTAssertEqual(hours.last, periods.last?.hours.last)
+        XCTAssertEqual(aboutSunTime(hour: "lauds", clock: "6:48 AM"), "sunrise · 6:48 am")
+        XCTAssertEqual(aboutTimeSpoken(time: "sunrise · 6:48 am"), "sunrise, 6:48 am")
+    }
+
+    /// Home's Night row is Matins, coming soon, in the core's words; its sign is the night's star,
+    /// and dims with the others' when another hour is now, as it is never the hour that is now.
+    func testHomeSetsMatinsUnderTheNightComingSoon() throws {
+        let night = homeNight()
+        XCTAssertEqual(night.label, "Night")
+        XCTAssertEqual(night.hour, "matins")
+        XCTAssertEqual(night.name, "Matins")
+        XCTAssertEqual(night.gloss, "The night office")
+        XCTAssertEqual(night.comingSoon, "coming soon")
+        XCTAssertEqual(Period.named(night.label), .night)
+        XCTAssertEqual(Period.named("Evening"), .evening)
+        XCTAssertFalse(hourNames().contains(night.hour))
+        XCTAssertEqual(periodSignAlpha([night.hour], "terce"), 0.52)
+        XCTAssertEqual(periodSignAlpha([night.hour], ""), 0.9)
+        let core = try Office.core.get()
+        let today = CivilDate(year: 2026, month: 3, day: 15)
+        for hour in 0..<24 {
+            XCTAssertNotEqual(try core.home(date: today, today: today, clockHour: Int32(hour)).currentHour, "matins", "\(hour)")
+        }
+    }
+
+    /// The Horologium's sign goes under the horizon to Matins by the nearer foot, and comes back
+    /// up by the foot nearer the hour it goes to, never across the sky; a long move is said so.
+    func testTheHorologiumGoesUnderToMatinsByTheNearerFoot() {
+        // From Compline (10°) through Night to −90°; from Lauds (168°) through Dawn to 270°.
+        XCTAssertEqual(horologiumGlide(from: 10, to: 270).end, -90)
+        XCTAssertEqual(horologiumGlide(from: 168, to: 270).end, 270)
+        XCTAssertEqual(horologiumGlide(from: 90, to: 270).end, -90)
+        // Back up: to Lauds by Dawn, to Compline by Night, wherever it went under.
+        XCTAssertEqual(horologiumGlide(from: -90, to: 168).end, -192)
+        XCTAssertEqual(horologiumGlide(from: 270, to: 168).end, 168)
+        XCTAssertEqual(horologiumGlide(from: -90, to: 10).end, 10)
+        XCTAssertEqual(horologiumGlide(from: 270, to: 10).end, 370)
+        // On the day's arc a move is as it was; a whole turn on is the same place.
+        XCTAssertEqual(horologiumGlide(from: 168, to: 90).end, 90)
+        XCTAssertEqual(horologiumGlide(from: 370, to: 34).end, 394)
+        XCTAssertEqual(horologiumGlide(from: 168, to: 156).span, 12)
+        XCTAssertEqual(horologiumGlide(from: 10, to: 270).span, 100)
+        XCTAssertEqual(horologiumGlide(from: 156, to: 270).span, 114)
+        XCTAssertEqual(horologiumGlide(from: 270, to: 168).span, 102)
+        XCTAssertEqual(horologiumGlide(from: 0, to: 0).span, 0)
+        // The gilt day: so far on the day's arc; none between Lauds and Matins; past Night the
+        // whole day, fading in on the way down to Matins and dark on the way back up.
+        XCTAssertEqual(horologiumLit(angle: 90).to, 90)
+        XCTAssertEqual(horologiumLit(angle: 90).k, 1)
+        XCTAssertEqual(horologiumLit(angle: 90, rising: true).k, 1)
+        XCTAssertEqual(horologiumLit(angle: 200).k, 0)
+        XCTAssertEqual(horologiumLit(angle: 270).k, 0)
+        XCTAssertEqual(horologiumLit(angle: -90).k, 0)
+        XCTAssertEqual(horologiumLit(angle: -10).k, 0.75, accuracy: 1e-9)
+        XCTAssertEqual(horologiumLit(angle: -10).to, 0)
+        XCTAssertEqual(horologiumLit(angle: -10, rising: true).k, 0)
+        XCTAssertEqual(horologiumLit(angle: 350, rising: true).k, 0)
+    }
+
+    /// About lights the hour home lights, none from midnight to 2 am, and ends with home's invitation.
+    func testAboutLightsAndInvitesToTheHourHomeDoes() throws {
+        let today = CivilDate(year: 2026, month: 11, day: 13)
+        let afternoon = try aboutNow(today: today, clockHour: 15)
+        XCTAssertEqual(afternoon.current, "none")
+        XCTAssertEqual(afternoon.prayNowLabel, "Pray None")
+        XCTAssertEqual(afternoon.prayNowDate, today)
+        let late = try aboutNow(today: today, clockHour: 1)
+        XCTAssertEqual(late.current, "")
+        XCTAssertEqual(late.prayNowHour, "compline")
+        XCTAssertEqual(late.prayNowDate, CivilDate(year: 2026, month: 11, day: 12))
+        XCTAssertEqual(about().blocks.last?.kind, "invitation")
     }
 
     /// A rubric's "secretly" carries its note, as the web's `.gloss-term`, and the typesetter finds
@@ -112,6 +225,30 @@ final class SpokenTests: XCTestCase {
         let cue = try XCTUnwrap(verse.runs.first { $0.style == .posture }).text.trimmingCharacters(in: .whitespaces)
         XCTAssertTrue(spoken(verse).contains("(\(cue))"), spoken(verse))
     }
+
+    func testChantScoresSpeakCleanWordsAndStanzaNumbers() throws {
+        let core = try Office.core.get()
+        // (Plain loops: the nested flatMaps took the type checker past its limit.)
+        var scored: [BlockView] = []
+        for (month, day) in [(3, 15), (4, 5), (12, 25)] {
+            for hour in hourNames() {
+                let view = try core.compose(hour: hour, year: 2026, month: Int32(month), day: Int32(day), form: "priest", martyrology: false, chant: true)
+                for section in view.sections {
+                    scored += section.blocks.filter { $0.kind == .score }
+                }
+            }
+        }
+        XCTAssertFalse(scored.isEmpty)
+        for b in scored {
+            let said = spoken(b)
+            for mark in ["*", "†", "℣", "℟", "✠", "\u{E000}"] { XCTAssertFalse(said.contains(mark), "\(mark) in: \(said)") }
+            XCTAssertFalse(said.trimmingCharacters(in: .whitespaces).isEmpty)
+        }
+        XCTAssertTrue(scored.contains { b in
+            let num = b.marker.trimmingCharacters(in: CharacterSet(charactersIn: ". "))
+            return !num.isEmpty && spoken(b).hasPrefix("Stanza \(num).")
+        })
+    }
 }
 
 /// The typesetter keeps the web's line boxes and seats the initial as the web does.
@@ -143,6 +280,31 @@ final class ProseTests: XCTestCase {
         // Two lines stand beside the capital, so the text takes at least as many lines, and no raised space above.
         XCTAssertGreaterThanOrEqual(opened.height, plain.height)
         XCTAssertEqual(opened.height.truncatingRemainder(dividingBy: 32), 0)
+    }
+
+    func testEveryLineBesideADeepInitialStartsAtItsEdge() {
+        let words = String(repeating: "ord, open thou our lips, and our mouth shall shew forth thy praise. ", count: 3)
+        // A verse's or prose's rest indent is the text's edge: beside the capital its wraps and the
+        // line after a break start where the first line does, and below it at the edge.
+        for text in [words, "ord, open thou our lips.\n" + words] {
+            var s = spec(text, initial: true, adapt: .dropped)
+            s.restIndent = 28.8
+            s.restIsEdge = true
+            let starts = ProseLayout(spec: s, width: 320).lineStarts
+            XCTAssertGreaterThan(starts.count, 2)
+            XCTAssertEqual(starts[0], 50, accuracy: 0.5)
+            XCTAssertEqual(starts[1], 50, accuracy: 0.5)
+            XCTAssertEqual(starts[2], 28.8, accuracy: 0.5)
+        }
+        // A hymn's rest indent hangs a wrap beneath its own line: its next line starts at the
+        // capital's edge, and a wrap beside the capital hangs past it.
+        var hymn = spec("ord of all, we pray.\n" + words, initial: true, adapt: .dropped)
+        hymn.restIndent = 17.6
+        let lines = ProseLayout(spec: hymn, width: 320).lineStarts
+        XCTAssertEqual(lines[1], 50, accuracy: 0.5)
+        var wrapped = spec(words, initial: true, adapt: .dropped)
+        wrapped.restIndent = 17.6
+        XCTAssertEqual(ProseLayout(spec: wrapped, width: 320).lineStarts[1], 50 + 17.6, accuracy: 0.5)
     }
 
     func testAShortOpeningRaisesItsInitial() {
@@ -183,6 +345,37 @@ final class ProseTests: XCTestCase {
 }
 
 /// The web's ornaments, drawn from their SVG paths.
+/// The chrome's panels keep the heights their rows give them, whatever the screen offers.
+@MainActor
+final class ChromeLayoutTests: XCTestCase {
+    private func height<V: View>(_ view: V, width: CGFloat = 390, offered: CGFloat) -> CGFloat {
+        UIHostingController(rootView: view).sizeThatFits(in: CGSize(width: width, height: offered)).height
+    }
+
+    func testTheMenuKeepsItsOwnHeight() {
+        let model = AppModel()
+        model.path = []
+        model.open(.hour(CivilDate(year: 2026, month: 3, day: 15), "prime"))
+        for wide in [false, true] {
+            let menu = MenuPanel(prefsOnly: wide).environmentObject(model)
+            // A tall screen leaves the panel as a short one does: no row takes up the room below it.
+            XCTAssertEqual(height(menu, offered: 2400), height(menu, offered: 700), accuracy: 0.5)
+        }
+    }
+
+    func testThePickersWeeksKeepADaysHeightAtAnySize() {
+        // February 2026 fills four weeks and leaves two blank; August 2026 fills all six.
+        for size in [DynamicTypeSize.large, .accessibility3] {
+            let m = Metrics(textSize: .large, dynamicType: size)
+            func picker(_ month: Int32) -> some View {
+                DayPicker(shown: CivilDate(year: 2026, month: month, day: 1), today: CivilDate(year: 2026, month: 3, day: 15), centred: true) { _ in }
+                    .environment(\.metrics, m)
+            }
+            XCTAssertEqual(height(picker(2), offered: 2400), height(picker(8), offered: 2400), accuracy: 0.5)
+        }
+    }
+}
+
 final class SVGTests: XCTestCase {
     func testArcsAndRelativeCommands() {
         // The morning engraving's sun: a half circle of radius 5 standing on y = 13.
@@ -259,6 +452,63 @@ final class PlaceTests: XCTestCase {
         XCTAssertEqual(again.root, model.root)
         model.goHome()
         XCTAssertTrue(model.path.isEmpty)
+    }
+
+    /// A day chosen in the ordo's month brings the month's visit to that day, so a return to it,
+    /// Back or the way back restored, opens at the day chosen; the same visit, nothing composed.
+    func testTheOrdoOpensAgainAtTheDayChosen() {
+        let model = AppModel()
+        model.path = []
+        model.open(.ordo(year: 2026, month: 11, day: 0))
+        let visit = model.path[0].id
+        let chosen = CivilDate(year: 2026, month: 11, day: 20)
+        model.choseInOrdo(chosen)
+        model.open(.home(chosen))
+        XCTAssertEqual(model.path[0].id, visit)
+        XCTAssertEqual(model.pages, [.ordo(year: 2026, month: 11, day: 20), .home(chosen)])
+        let again = AppModel()
+        again.restore(model.saved)
+        XCTAssertEqual(again.pages.first, .ordo(year: 2026, month: 11, day: 20))
+        // Only the month shown takes it.
+        model.choseInOrdo(CivilDate(year: 2026, month: 12, day: 1))
+        XCTAssertEqual(model.pages.first, .ordo(year: 2026, month: 11, day: 20))
+    }
+
+    /// The ribbon's rule is the core's: within its limit, and not once prayed.
+    func testAnInterruptedHourOpensAtItsPlaceOnlyWithinTheLimit() {
+        XCTAssertTrue(reopensAtPlace(prayed: false, secondsAway: 600))
+        XCTAssertFalse(reopensAtPlace(prayed: true, secondsAway: 600))
+        XCTAssertFalse(reopensAtPlace(prayed: false, secondsAway: 3 * 3600))
+        XCTAssertFalse(reopensAtPlace(prayed: false, secondsAway: -60))
+    }
+
+    /// The cross under the last Amen takes its gold by the core's rule: once the hour is marked
+    /// and the cross stands wholly on the screen, not as its top first peeps in; once; gilt from
+    /// the first paint when prayed before; never on a bare hour.
+    func testTheEndCrossGildsOnceMarkedAndWhollyShown() {
+        XCTAssertTrue(Reading.whollyShown(from: 760, size: 40, foot: 800))
+        XCTAssertFalse(Reading.whollyShown(from: 792, size: 40, foot: 800))
+        XCTAssertFalse(Reading.whollyShown(from: -1, size: 40, foot: 800))
+        let open = endLeafOpens(bare: false, prayed: false)
+        XCTAssertEqual(open, .paint)
+        XCTAssertEqual(endLeafNext(leaf: open, bare: false, prayed: true, whollyShown: false), .paint)
+        XCTAssertEqual(endLeafNext(leaf: open, bare: false, prayed: true, whollyShown: true), .gilding)
+        XCTAssertEqual(endLeafNext(leaf: .gilding, bare: false, prayed: true, whollyShown: false), .gilding)
+        XCTAssertEqual(endLeafOpens(bare: false, prayed: true), .gilt)
+        XCTAssertEqual(endLeafOpens(bare: true, prayed: true), .paint)
+    }
+
+    /// The kept place carries the prayed watch's reading, so an hour reopened mid-psalm can still
+    /// earn its mark; a place kept before the reading was carried begins the reading again.
+    func testTheKeptPlaceCarriesTheReading() {
+        let place = HourPlace(page: "2026-11-13 vespers", row: "b-3-1", anchor: 0.2, at: 1_000, cursor: 640, read: 512)
+        let again = HourPlace.decode(place.encoded)
+        XCTAssertEqual(again?.page, "2026-11-13 vespers")
+        XCTAssertEqual(again?.reading.cursor, 640)
+        XCTAssertEqual(again?.reading.read, 512)
+        let older = HourPlace.decode(#"{"page":"2026-11-13 vespers","row":"b-3-1","anchor":0.2,"at":1000}"#)
+        XCTAssertEqual(older?.row, "b-3-1")
+        XCTAssertEqual(older?.reading.read, 0)
     }
 
     /// The search takes its words in place: the same visit, with no move between pages.
@@ -359,6 +609,36 @@ final class ReminderTests: XCTestCase {
         XCTAssertNotNil(Bundle.main.url(forResource: "bell", withExtension: "caf"))
     }
 
+    /// The page's "Next:" line is read again as its reminder comes, or at midnight when none comes first (#808).
+    func testTheNextLineIsReadAgainAsItsReminderComesOrTheDayTurns() throws {
+        let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 15, hour: 17, minute: 0)))
+        let compline = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 15, hour: 20, minute: 50)))
+        let midnight = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 16, hour: 0, minute: 0)))
+        let lauds = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 16, hour: 5, minute: 50)))
+        XCTAssertEqual(ReminderScheduler.nextLineStale(now: now, next: compline, calendar: calendar), compline)
+        XCTAssertEqual(ReminderScheduler.nextLineStale(now: now, next: lauds, calendar: calendar), midnight)
+        XCTAssertEqual(ReminderScheduler.nextLineStale(now: now, next: nil, calendar: calendar), midnight)
+        // The first plan once a reminder comes names the one after it: the line moves on.
+        let s = settings(["vespers": (17, 30), "compline": (21, 0)])
+        let first = try XCTUnwrap(ReminderScheduler.plan(s, now: now, core: Office.core.get(), calendar: calendar).first)
+        let after = try XCTUnwrap(ReminderScheduler.plan(s, now: first.fireDate, core: Office.core.get(), calendar: calendar).first)
+        XCTAssertGreaterThan(after.fireDate, first.fireDate)
+    }
+
+    /// The bells are silent from Vespers of Maundy Thursday through None of Holy Saturday (#950).
+    func testTheTriduumsRemindersComeWithoutTheBell() throws {
+        let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 4, day: 9, hour: 0, minute: 0)))
+        let plan = try ReminderScheduler.plan(settings(["lauds": (7, 0), "vespers": (18, 0)]), now: now, core: Office.core.get(), calendar: calendar)
+        let silent = plan.prefix(6).map { "\($0.date.iso) \($0.hour) \($0.silent)" }
+        XCTAssertEqual(silent, [
+            "2026-04-09 lauds false", "2026-04-09 vespers true",
+            "2026-04-10 lauds true", "2026-04-10 vespers true",
+            "2026-04-11 lauds true", "2026-04-11 vespers false",
+        ])
+        XCTAssertNil(ReminderScheduler.content(plan[1]).sound)
+        XCTAssertNotNil(ReminderScheduler.content(plan[0]).sound)
+    }
+
     func testTheScheduleStopsAtIOSsLimit() throws {
         let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 15, hour: 0, minute: 0)))
         let all = Dictionary(uniqueKeysWithValues: hourNames().enumerated().map { ($0.element, (6 + 2 * $0.offset, 0)) })
@@ -393,6 +673,21 @@ final class ReminderTests: XCTestCase {
         let plan = try ReminderScheduler.plan(bySun(philadelphia), now: now, core: Office.core.get(), calendar: calendar)
         let first = plan.prefix(3).map { "\($0.hour) \($0.at.hour ?? -1):\($0.at.minute ?? -1)" }
         XCTAssertEqual(first, ["lauds 5:22", "vespers 20:23", "compline 21:23"])
+    }
+
+    /// About gives the same day's sun as the reminders: Philadelphia at midsummer.
+    func testAboutGivesTheSunsTimesAtThePlaceKept() throws {
+        let day = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 6, day: 21, hour: 12)))
+        let core = try Office.core.get()
+        XCTAssertNil(settings(["lauds": (6, 45)]).sunTimes(on: day, core: core, calendar: calendar))
+        let sun = bySun(philadelphia).sunTimes(on: day, core: core, calendar: calendar)
+        let hours = aboutSunPeriods(about().periods, sun: sun).flatMap(\.hours)
+        let time = { (slug: String) in hours.first { $0.hour == slug }?.time ?? "" }
+        XCTAssertTrue(time("lauds").hasPrefix("sunrise · 5:32"), time("lauds"))
+        XCTAssertTrue(time("vespers").hasPrefix("sunset · ") && time("vespers").contains(":33"), time("vespers"))
+        XCTAssertTrue(time("prime").hasPrefix("first hour · "), time("prime"))
+        // Compline keeps its own time. Night (Matins) now follows it in About.
+        XCTAssertEqual(time("compline"), about().periods.flatMap(\.hours).first(where: { $0.hour == "compline" })?.time)
     }
 
     func testEachDayTakesItsOwnOffsetAcrossAClockChange() throws {
@@ -476,9 +771,9 @@ final class UsageTests: XCTestCase {
         usage.record(.hour(date: today, hour: "vespers"), dark: true, form: "priest")
         usage.record(.remindersOn, dark: true, form: "priest")
         XCTAssertEqual(posted.map { $0.body }, [
-            "site appearance:nave screen:mobile visit:first client:ios",
-            "vespers appearance:apse screen:mobile prayer-form:priest visit:first client:ios",
-            "reminders appearance:apse screen:mobile visit:first client:ios",
+            "site appearance:nave screen:mobile visit:first client:ios week:first month:first version:2 tenure:week",
+            "vespers appearance:apse screen:mobile prayer-form:priest visit:first client:ios week:first month:first version:2 tenure:week",
+            "reminders appearance:apse screen:mobile visit:first client:ios week:first month:first version:2 tenure:week",
         ])
         XCTAssertEqual(Set(posted.map { $0.id }).count, 1)
         XCTAssertNotNil(posted[0].id.range(of: "^[0-9a-f]{32}$", options: .regularExpression))
@@ -490,9 +785,9 @@ final class UsageTests: XCTestCase {
         usage.record(.hour(date: today, hour: "compline"), dark: false, form: "private", chant: true)
         usage.record(.home(date: today), dark: false, form: "private", chant: true)
         XCTAssertEqual(posted.map { $0.body }, [
-            "compline appearance:nave screen:mobile prayer-form:private chant:off visit:first client:ios",
-            "compline appearance:nave screen:mobile prayer-form:private chant:on visit:first client:ios",
-            "site appearance:nave screen:mobile visit:first client:ios",
+            "compline appearance:nave screen:mobile prayer-form:private chant:off visit:first client:ios week:first month:first version:2 tenure:week",
+            "compline appearance:nave screen:mobile prayer-form:private chant:on visit:first client:ios week:first month:first version:2 tenure:week",
+            "site appearance:nave screen:mobile visit:first client:ios week:first month:first version:2 tenure:week",
         ])
     }
 
@@ -505,7 +800,7 @@ final class UsageTests: XCTestCase {
         // The search and the feast pages are not counted, as on the web.
         XCTAssertNil(Page.find("benedict").usageEvent)
         XCTAssertNil(Page.feast("st-benedict").usageEvent)
-        XCTAssertEqual(posted.map { $0.body }, ["ordo appearance:nave screen:mobile visit:first client:ios"])
+        XCTAssertEqual(posted.map { $0.body }, ["ordo appearance:nave screen:mobile visit:first client:ios week:first month:first version:2 tenure:week"])
     }
 
     func testTheIdentifierLastsOneReportingDay() {
@@ -536,6 +831,65 @@ final class UsageTests: XCTestCase {
         usage().record(.home(date: CivilDate(year: 2026, month: 3, day: 16)), dark: false, form: "private")
         XCTAssertEqual(posted.map { $0.body.contains("visit:first") }, [true, false])
         XCTAssertTrue(posted[1].body.contains("visit:returning"))
+    }
+
+    // Sunday 15 March 2026 closes a week; Monday opens the next in the same month.
+    func testAWeekAndAMonthOpenOnTheirFirstCountedDay() {
+        let start = now
+        for (days, date) in [(0, today), (1, CivilDate(year: 2026, month: 3, day: 16)), (3, CivilDate(year: 2026, month: 3, day: 18)), (17, CivilDate(year: 2026, month: 4, day: 1))] {
+            now = start.addingTimeInterval(Double(days) * 86_400)
+            let usage = usage()
+            usage.record(.home(date: date), dark: false, form: "private")
+            usage.record(.hour(date: date, hour: "lauds"), dark: false, form: "private")
+        }
+        let periods = ["week:first month:first", "week:first month:again", "week:again month:again", "week:first month:first"]
+        XCTAssertEqual(posted.map { periodWords($0.body) }, periods.flatMap { [$0, $0] })
+    }
+
+    // A beacon that never arrived leaves the week unopened: the next day's is still its first.
+    func testAWeekOpensOnlyWhenABeaconIsCounted() {
+        let start = now
+        online = false
+        usage().record(.home(date: today), dark: false, form: "private")
+        online = true
+        for days in [2, 3] {
+            now = start.addingTimeInterval(Double(days) * 86_400)
+            usage().record(.home(date: CivilDate(year: 2026, month: 3, day: Int32(15 + days))), dark: false, form: "private")
+        }
+        XCTAssertEqual(posted.map { periodWords($0.body) }, ["week:first month:first", "week:again month:again"])
+    }
+
+    private func periodWords(_ body: String) -> String {
+        body.range(of: #"week:\w+ month:\w+"#, options: .regularExpression).map { String(body[$0]) } ?? ""
+    }
+
+    // How long it has been counted, last week's days on the new week's first, an hour at its own
+    // time by the phone's clock and prayed, and the reminders: as the core writes them.
+    func testAnInstallationSaysHowItKeepsTheHours() {
+        usage().record(.home(date: today), dark: false, form: "private")
+        // Monday: whichever hour the phone's clock is in then is opened at its time.
+        now = now.addingTimeInterval(86_400)
+        let office = currentOffice(clockHour: Int32(Calendar.current.component(.hour, from: now)))
+        let local = CivilDate.of(now).adding(days: Int(office.dayOffset))
+        let other = office.hour == "vespers" ? "lauds" : "vespers"
+        let usage = usage()
+        usage.record(.hour(date: local, hour: office.hour), dark: false, form: "private", prayed: true, reminders: true)
+        usage.record(.hour(date: local, hour: other), dark: false, form: "private", reminders: false)
+        XCTAssertEqual(posted.dropFirst().map { $0.body.components(separatedBy: "client:ios ").last ?? "" }, [
+            "week:first month:again version:2 tenure:week last-week:1 timely:\(office.hour) prayed:\(office.hour) reminder:on",
+            "week:first month:again version:2 tenure:week reminder:off",
+        ])
+    }
+
+    // An hour whose beacon did not arrive is said on the next that does, and then no more.
+    func testAnHourThatCouldNotReportIsSaidNextTime() {
+        let usage = usage()
+        online = false
+        usage.record(.hour(date: today, hour: "prime"), dark: false, form: "private")
+        online = true
+        usage.record(.home(date: today), dark: false, form: "private")
+        usage.record(.hour(date: today, hour: "vespers"), dark: false, form: "private")
+        XCTAssertEqual(posted.map { $0.body.contains(" offline:yes") }, [true, false])
     }
 
     func testAnInstallationThatReportedBeforeIsReturning() {
@@ -591,7 +945,7 @@ final class UsageTests: XCTestCase {
         XCTAssertTrue(posted.isEmpty)
         now = now.addingTimeInterval(Usage.settling)
         usage.record(.home(date: today), dark: false, form: "private")
-        XCTAssertEqual(posted.map { $0.body }, ["site appearance:nave screen:mobile visit:first client:ios"])
+        XCTAssertEqual(posted.map { $0.body }, ["site appearance:nave screen:mobile visit:first client:ios week:first month:first version:2 tenure:week"])
     }
 
     // Home's introduction counts days from the first opening; the count waits for the install to
@@ -601,11 +955,144 @@ final class UsageTests: XCTestCase {
         XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), 0)
         now = now.addingTimeInterval(86_400)
         usage().record(.home(date: CivilDate(year: 2026, month: 3, day: 16)), dark: false, form: "private")
-        XCTAssertEqual(posted.map { $0.body }, ["site appearance:nave screen:mobile visit:first client:ios"])
+        XCTAssertEqual(posted.map { $0.body }, ["site appearance:nave screen:mobile visit:first client:ios week:first month:first version:2 tenure:week"])
         XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), 1)
     }
 
     func testDebugBuildsNeverReport() {
         XCTAssertNotEqual(Bundle.main.object(forInfoDictionaryKey: "OfficeCountsUsage") as? String, "YES")
+    }
+}
+
+/// Home's crown: the tap rule's wiring, the plain change, and the play's sums.
+final class CrownTests: XCTestCase {
+    private var savedTheme: String?
+
+    override func setUp() {
+        savedTheme = UserDefaults.standard.string(forKey: "theme")
+    }
+
+    override func tearDown() {
+        CrownPlayer.shared.teardown(.cut)
+        UserDefaults.standard.set(savedTheme, forKey: "theme")
+    }
+
+    // The look always turns over, a look matching the device's is saved as Default, and the tap
+    // back restores the choice the last tap turned from (presentation::crown).
+    func testTheTapTurnsTheLookAndTheTapBackRestoresTheChoice() {
+        var light = CrownMemory()
+        XCTAssertEqual(light.next(stored: .system, deviceDark: false), .apse)
+        XCTAssertEqual(light.next(stored: .apse, deviceDark: false), .system)
+        var dark = CrownMemory()
+        XCTAssertEqual(dark.next(stored: .apse, deviceDark: true), .nave)
+        XCTAssertEqual(dark.next(stored: .nave, deviceDark: true), .apse, "Apse chosen on a dark phone comes back as Apse")
+        // The menu chose meanwhile: the memory is of another choice and is let go.
+        var changed = CrownMemory()
+        XCTAssertEqual(changed.next(stored: .apse, deviceDark: true), .nave)
+        XCTAssertEqual(changed.next(stored: .system, deviceDark: true), .nave)
+    }
+
+    // A tap that takes the menu's own change (a black day here) saves the turned theme as the
+    // Theme row does, starts no play, and the next tap turns it back.
+    func testAPlainTapSettlesOnTheTurnedThemeAndSavesIt() {
+        let model = AppModel()
+        model.turnTheme(.nave)
+        let deviceDark = CrownPlayer.deviceDark(CrownPlayer.keyWindow())
+        let head = CrownHead(arch: .phone, first: false, black: true, season: "", crownSize: 40, crownTop: 20, reserve: [])
+        CrownPlayer.shared.tap(model: model, head: head, frames: CrownFrames())
+        XCTAssertNil(CrownPlayer.shared.run)
+        XCTAssertEqual(model.theme, deviceDark ? .system : .apse)
+        XCTAssertEqual(UserDefaults.standard.string(forKey: "theme"), model.theme.rawValue)
+        CrownPlayer.shared.tap(model: model, head: head, frames: CrownFrames(), plain: true)
+        XCTAssertEqual(model.theme, .nave)
+        // The menu's choice is the later word, and there is no play to end.
+        model.chooseTheme(.apse)
+        XCTAssertEqual(model.theme, .apse)
+    }
+
+    // The play's sums on a phone's home: in their order, and every line's ink handed over.
+    func testThePlayKeepsItsOrder() throws {
+        let card = CGRect(x: 16, y: 60, width: 358, height: 760)
+        let band: CGFloat = 330
+        let placed = SkyStar.placed(.phone, width: card.width, band: band, first: false, reserve: [])
+        let stars = placed.enumerated().map {
+            CrownStar(index: $0.offset, center: CGPoint(x: card.minX + $0.element.center.x, y: card.minY + $0.element.center.y), size: Double($0.element.size))
+        }
+        let words = ["w-date": CGRect(x: 60, y: 240, width: 270, height: 60), "w-feast": CGRect(x: 80, y: 300, width: 230, height: 28)]
+        let rows = [
+            "r-header": CGRect(x: 0, y: 0, width: 390, height: 48), "r-pray": CGRect(x: 30, y: 420, width: 330, height: 50),
+            "r-band0": CGRect(x: 30, y: 480, width: 330, height: 60), "r-band1": CGRect(x: 30, y: 540, width: 330, height: 60),
+            "r-band2": CGRect(x: 30, y: 600, width: 330, height: 60), "r-meta": CGRect(x: 30, y: 680, width: 330, height: 40),
+        ]
+        for dusk in [true, false] {
+            let fig = CrownFigures.of(dusk: dusk)
+            let s = CrownScene(dusk: dusk, fig: fig, arch: .phone, card: card, headHeight: band, screen: CGSize(width: 390, height: 844),
+                               words: words, rows: rows, crown: CGRect(x: 175, y: 80, width: 40, height: 40), stars: stars)
+            XCTAssertNotNil(s.maskImage())
+            XCTAssertGreaterThan(s.s1, s.s0)
+            XCTAssertLessThan(fig.turn, fig.front.at)
+            XCTAssertGreaterThan(s.covered, fig.spread.at)
+            XCTAssertGreaterThanOrEqual(s.end, fig.end)
+            XCTAssertLessThan(s.settle, s.end)
+            // The ending beat: the page still for a held breath, then one thing, then the end.
+            XCTAssertEqual(s.beat, s.settle + fig.beatHold)
+            XCTAssertEqual(s.end, max(fig.end, s.beat + fig.beatLen + 30))
+            // Light arrives faster than it leaves.
+            if !dusk { XCTAssertLessThan(fig.end, CrownFigures.of(dusk: true).end) }
+            // The page's own light rises from nothing to the whole; the veil begins with the
+            // spread from rest, is at its height at `veilTop` of its span, and is gone by its end.
+            XCTAssertEqual(s.glow(fig.spread.at), 0)
+            XCTAssertEqual(s.glow(fig.spread.at + s.dur), 1, accuracy: 1e-6)
+            XCTAssertEqual(fig.veilFrom, fig.spread.at)
+            XCTAssertEqual(s.veilOpacity(fig.veilFrom), 0, accuracy: 1e-6)
+            XCTAssertEqual(s.veilOpacity(fig.veilFrom + fig.veilTop * s.veilSpan), fig.veilPeak, accuracy: 1e-6)
+            XCTAssertEqual(s.veilOpacity(fig.veilTo), 0, accuracy: 1e-6)
+            // The veil's shape is over the page's ahead of it, done by `veilPart` of the spread.
+            XCTAssertGreaterThan(s.veilScale(fig.spread.at + s.veilDur), s.spreadScale(fig.spread.at + s.veilDur))
+            // The frieze turns on its own span: dark first at dusk, light last at dawn.
+            XCTAssertEqual(s.friezeTurn(fig.frieze.at), 0)
+            XCTAssertEqual(s.friezeTurn(fig.frieze.end), 1)
+            XCTAssertLessThanOrEqual(fig.frieze.end, s.settle)
+            // The front has turned the whole head by its end.
+            XCTAssertEqual(s.frontAlpha(CGPoint(x: card.midX, y: card.minY + 40), fig.front.end), 1)
+            XCTAssertEqual(s.frontAlpha(CGPoint(x: card.midX, y: card.minY + band - 4), fig.front.end), 1)
+            // Each of the day's lines hands over while the front crosses the head, and the rows
+            // one after another, no two within 10ms; by the settle every line has its new ink.
+            XCTAssertEqual(Set(s.words.keys), Set(words.keys))
+            for t in s.words.values { XCTAssertTrue((fig.front.at...fig.front.end).contains(t)) }
+            let dealt = s.rows.values.sorted()
+            XCTAssertEqual(dealt.count, rows.count)
+            for (a, b) in zip(dealt, dealt.dropFirst()) { XCTAssertGreaterThanOrEqual(b - a, 10 - 1e-9) }
+            for key in Array(rows.keys) + Array(words.keys) {
+                XCTAssertEqual(s.inkIn(key, s.settle), 1)
+                XCTAssertEqual(s.inkOut(key, s.settle), 1)
+            }
+            // The stars come by magnitude from the change of look, and every one has its turn by
+            // the ending beat. Dusk: the evening star (the one nearest the cross) first and
+            // alone, and the faintest at the beat, kindled before the play is over. Dawn: the
+            // field and the brightest go out before the page is still, and the morning star at
+            // the beat.
+            XCTAssertEqual(s.starTurns.count, stars.count)
+            for t in s.starTurns {
+                // (Each turn is a whole ms, as the web's are.)
+                XCTAssertTrue((fig.turn...s.beat + 0.5).contains(t))
+                if dusk { XCTAssertLessThanOrEqual(t + fig.starKindle, s.end) }
+            }
+            XCTAssertGreaterThan(stars.count, fig.starsBright + 2)
+            let evening = try XCTUnwrap(s.evening)
+            let latest = try XCTUnwrap(s.starTurns.max())
+            XCTAssertEqual(latest, s.beat, accuracy: 0.5)
+            if dusk {
+                XCTAssertGreaterThanOrEqual(s.starTurns[evening], fig.turn + 150)
+                XCTAssertNil(s.morningAt)
+                for (i, t) in s.starTurns.enumerated() where i != evening {
+                    XCTAssertGreaterThanOrEqual(t, s.starTurns[evening] + fig.eveningStarAlone)
+                }
+            } else {
+                XCTAssertEqual(s.starTurns[evening], s.beat, accuracy: 0.5)
+                XCTAssertNotNil(s.morningAt)
+                for (i, t) in s.starTurns.enumerated() where i != evening { XCTAssertLessThan(t, s.settle) }
+            }
+        }
     }
 }

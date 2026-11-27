@@ -5,13 +5,30 @@
 //! and the composed hour: no templates, no platform, and nothing that composes an hour.
 
 pub mod about;
+pub mod course;
+pub mod crown;
 pub mod feast;
 pub mod gloss;
+pub mod rails;
+pub mod reminders;
+pub mod stores;
 pub mod sun;
 pub mod usage;
 
 use calendar::{CalendarDay, Color, Date, MoveableDates, Rank, Season};
-use liturgy::{ElementType, OfficeHour};
+use liturgy::{ElementType, OfficeHour, OfficeSection};
+
+/// How far back and ahead of this year every front offers: the date pickers (app.js's
+/// YEARS_BACK and YEARS_AHEAD, as Chrome.kt and Chrome.swift name them, and the templates'
+/// date fields) and the ordo's year links stop at the ends, and the web server builds no year
+/// beyond them, so that a crawler walking the ordo cannot keep it building years.
+pub const YEARS_BACK: i32 = 30;
+pub const YEARS_AHEAD: i32 = 100;
+
+/// The years offered when it is `this_year` ([`YEARS_BACK`] before it to [`YEARS_AHEAD`] after).
+pub fn offered_years(this_year: i32) -> std::ops::RangeInclusive<i32> {
+    this_year - YEARS_BACK..=this_year + YEARS_AHEAD
+}
 
 /// Capitalizes the first letter ("advent" → "Advent").
 pub fn title_case(s: &str) -> String {
@@ -192,6 +209,15 @@ pub const MARTYROLOGY_HINT: &str = "Includes a reading of the following day’s 
 pub const PREVIOUS_DAY: &str = "Previous day";
 pub const NEXT_DAY: &str = "Next day";
 
+/// What the ordo's fasting and abstinence marks (§ and the fish) say when tapped, on every front:
+/// the note a rank's letters open with the rank's name.
+pub const FAST_DAY: &str = "Day of Fasting";
+pub const ABSTINENCE_DAY: &str = "Day of Abstinence";
+
+/// The link at the head of an ordo day's opened details, on every front: a tap on the row opens
+/// the details in place, and this leads on to the day (each front adds its own "›").
+pub const OPEN_THIS_DAY: &str = "Open this day";
+
 /// The line under the menu's Chant setting, on every front.
 pub const CHANT_HINT: &str = "Shows the hymn and the Marian antiphon in chant notation, where notation is available.";
 
@@ -253,6 +279,86 @@ pub struct Invitation {
     /// The hour home's directory marks as now; empty when the invitation is
     /// not to this day's office.
     pub current: &'static str,
+    /// What the hour it opens is, for a newcomer ("Evening prayer"), which a
+    /// phone sets in the invitation under its words; empty for "Open Lauds". On an
+    /// evening whose Vespers already keeps the morrow, [`Invitation::on_eve`] makes it
+    /// "First Vespers of …".
+    pub gloss: String,
+    /// Whether the gloss is the eve's "First Vespers of …", which the wide niche sets under the
+    /// invitation too, though its table glosses every hour (#959).
+    pub eve: bool,
+}
+
+impl Invitation {
+    /// The invitation on an evening whose Vespers is the First Vespers of `first_vespers_of`
+    /// (the feast or Sunday that owns the evening, as `office::VespersOwner::IOfFollowing`
+    /// names it): while it invites to this day's Vespers, its gloss says so
+    /// ([`first_vespers_gloss`]) instead of "Evening prayer". Any other invitation is unchanged.
+    pub fn on_eve(mut self, first_vespers_of: Option<&str>) -> Invitation {
+        if let Some(feast) = first_vespers_of.filter(|f| !f.trim().is_empty())
+            && self.current == "vespers"
+        {
+            self.gloss = first_vespers_gloss(feast);
+            self.eve = true;
+        }
+        self
+    }
+}
+
+/// Home's quiet word under "Pray Vespers" when the evening already belongs to the morrow:
+/// "First Vespers of the Nativity of Our Lord", "First Vespers of I Sunday of Advent". It is a
+/// gloss of one line under the invitation (cut short with an ellipsis on a narrow phone, as every
+/// front sets it), so the name is its short form, read in the run of the
+/// sentence: only up to its first comma ("St Cyril of Alexandria", not his titles), without a
+/// "(Resumed)" or "(Gaudete)" after it, "The Feast of" going by its familiar name ("Corpus
+/// Christi") or else dropped ("Our Lord Jesus Christ the King"), an anticipated Sunday's "Office
+/// of" dropped, "B.V.M." spelled out, and "the" before a mystery or a day that takes one ("the
+/// Epiphany of Our Lord", "the Octave Day of All Saints", "the Sunday of the Resurrection"). Each
+/// front sets it as the hour's gloss, so it is typeset where that is.
+pub fn first_vespers_gloss(feast: &str) -> String {
+    // Mysteries, octaves and days whose name reads with "the" before it.
+    const TAKES_THE: &[&str] = &[
+        "Annunciation",
+        "Ascension",
+        "Assumption",
+        "Circumcision",
+        "Conception",
+        "Dedication",
+        "Epiphany",
+        "Exaltation",
+        "Expectation",
+        "Finding",
+        "Holy",
+        "Most",
+        "Motherhood",
+        "Nativity",
+        "Octave",
+        "Presentation",
+        "Purification",
+        "Saturday",
+        "Seven",
+        "Solemnity",
+        "Sunday",
+        "Transfiguration",
+        "Vigil",
+        "Visitation",
+    ];
+    let (name, alias) = split_alias(feast);
+    let alias = alias.trim_start_matches('(').trim_end_matches(')').trim();
+    let name = name.trim();
+    let name = match name.strip_prefix("The Feast of ").or_else(|| name.strip_prefix("Feast of ")) {
+        Some(_) if !alias.is_empty() => alias,
+        Some(rest) => rest,
+        None => name,
+    };
+    let name = name.strip_prefix("Office of the ").or_else(|| name.strip_prefix("Office of ")).unwrap_or(name);
+    let name = name.split(',').next().unwrap_or(name).trim().replace("B.V.M.", "Blessed Virgin Mary");
+    let name = match name.strip_prefix("The ").or_else(|| name.strip_prefix("the ")) {
+        Some(rest) => format!("the {rest}"),
+        None if TAKES_THE.contains(&name.split(' ').next().unwrap_or("")) => format!("the {name}"),
+        None => name,
+    };
+    format!("First Vespers of {name}")
 }
 
 /// What an hour is, for a newcomer reading home's invitation: "Evening prayer".
@@ -265,8 +371,18 @@ pub fn hour_gloss(slug: &str) -> &'static str {
         "none" => "Afternoon prayer",
         "vespers" => "Evening prayer",
         "compline" => "Prayer before sleep",
+        "matins" => "The night office",
         _ => "",
     }
+}
+
+/// What an hour the app does not yet pray says in its place on home and About: Matins, until
+/// its texts are in. Set in small capitals under the hour's name, which is not a link.
+pub const COMING_SOON: &str = "coming soon";
+
+/// Whether an hour is shown but not yet prayed in the app ([`COMING_SOON`]).
+pub fn hour_coming_soon(slug: &str) -> bool {
+    slug == "matins"
 }
 
 /// How fast home's mark of an hour prayed lets a reader go: words a second, a quick silent
@@ -305,13 +421,90 @@ impl Reading {
     }
 }
 
+/// How long an hour keeps the reader's place, like the ribbon a breviary keeps in it: an hour
+/// left in the middle when the reader was taken away (the phone locked, the door answered) and
+/// the page then lost (a tab discarded, an installed web app or a native app closed by the
+/// system in the background) opens again where it was, if it is opened again within this time.
+/// Long enough for an interruption, short enough that a later return to the same hour is a new
+/// beginning. The web renders it into the hour page; the apps ask [`reopens_at_place`].
+pub const PLACE_KEPT_MINUTES: u32 = 45;
+
+/// Whether an hour opens at the place the reader was taken away from, rather than at its top:
+/// only that same hour of that same day (`same_hour`: the page's hour and date, Compline after
+/// midnight still yesterday's), opened again within [`PLACE_KEPT_MINUTES`] of being left
+/// (`seconds_away`; a clock set back counts as too long), and not yet prayed (home's mark).
+///
+/// A place is kept only while the system, not the reader, closed the page: an hour the reader
+/// left by a link or a control of the app (home, another hour, the ordo, another day) keeps
+/// none, so a deliberate return opens at the top. Each front keeps the place in its own way
+/// (the web's `office-place`, iOS's scene storage, Android's saved state of the visit) and asks
+/// this when the hour opens. Nothing moves: the page appears at the place, and scrolling up is
+/// the way back to the start.
+pub fn reopens_at_place(same_hour: bool, prayed: bool, seconds_away: f64) -> bool {
+    same_hour && !prayed && (0.0..=f64::from(PLACE_KEPT_MINUTES) * 60.0).contains(&seconds_away)
+}
+
+/// The leaf on the consecration cross that ends an hour, under its last Amen. The hour is marked
+/// prayed by [`Reading`] as ever, and home shows that mark as ever; the cross takes its gold only
+/// once the hour has been marked and the cross then stands wholly on the screen (that mark is
+/// made as the top of the cross first comes into sight, often while the Our Father is still being
+/// said, and gold at the foot of the screen then would be a glint during the prayer). The gold
+/// then comes up evenly over `render_blocks::Tempo::GILD`, once; reopened, an hour already
+/// prayed is gilt from the first paint, with nothing moving. A bare hour (the Triduum, the Office
+/// of the Dead, an hour whose last section is said bare) takes no leaf, as its capitals take none.
+///
+/// Whether an hour ends bare is [`ends_bare`], which every front reads (the web's `end_bare`,
+/// the apps' `HourView::end_bare`). The apps ask [`EndLeaf::opens`] and [`EndLeaf::next`];
+/// app.js mirrors them.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EndLeaf {
+    /// The cross in its paint, as every hour ends.
+    Paint,
+    /// The gold coming up, in this visit: the one time it moves.
+    Gilding,
+    /// Gilt from the first paint: the hour was prayed before this visit.
+    Gilt,
+}
+
+/// Whether an hour ends bare, so that the cross under its last Amen takes no leaf: a bare hour
+/// (`OfficeHour::bare`), or one whose last section is said bare (Vespers of All Saints followed by
+/// Vespers of the Dead on the eve of All Souls, Diurnal pp. 641–642: the bare sections close the
+/// hour, so the cross follows them).
+pub fn ends_bare(bare: bool, sections: &[OfficeSection]) -> bool {
+    bare || sections.last().is_some_and(|s| s.bare)
+}
+
+impl EndLeaf {
+    /// The cross as the hour opens: gilt at once if home already marks the hour `prayed`, unless
+    /// the hour is `bare`.
+    pub fn opens(bare: bool, prayed: bool) -> EndLeaf {
+        if prayed && !bare { EndLeaf::Gilt } else { EndLeaf::Paint }
+    }
+
+    /// The cross after a look at the page: it starts gilding once the hour is marked `prayed` and
+    /// the cross is `wholly_shown`, and never goes back.
+    pub fn next(self, bare: bool, prayed: bool, wholly_shown: bool) -> EndLeaf {
+        match self {
+            EndLeaf::Paint if !bare && prayed && wholly_shown => EndLeaf::Gilding,
+            leaf @ (EndLeaf::Paint | EndLeaf::Gilding | EndLeaf::Gilt) => leaf,
+        }
+    }
+}
+
 /// The invitation on home for `shown`, given the reader's own day and clock hour.
 pub fn invitation(shown: Date, now: Date, now_hour: i8) -> Invitation {
     if shown != now {
-        return Invitation { hour: "lauds", label: "Open Lauds".to_string(), date: shown, current: "" };
+        return Invitation { hour: "lauds", label: "Open Lauds".to_string(), date: shown, current: "", gloss: String::new(), eve: false };
     }
     let (hour, name, offset) = current_hour_entry(now_hour);
-    Invitation { hour, label: format!("Pray {name}"), date: now.add_days(offset), current: if offset == 0 { hour } else { "" } }
+    Invitation {
+        hour,
+        label: format!("Pray {name}"),
+        date: now.add_days(offset),
+        current: if offset == 0 { hour } else { "" },
+        gloss: hour_gloss(hour).to_string(),
+        eve: false,
+    }
 }
 
 /// The reminder page's hours, as the web offers them and the apps start from: slug, name, the
@@ -406,6 +599,8 @@ pub struct TabulaRow {
     pub label: &'static str,
     pub value: String,
     pub date: Option<Date>,
+    /// Feast identifier in `FeastIndex` when the row names a moveable feast, else empty.
+    pub feast_id: &'static str,
 }
 
 /// The Tabula Temporaria as the printed ordo opens: the year's figures, its moveable feasts, and
@@ -420,12 +615,13 @@ pub struct TabulaRows {
 pub fn tabula(year: i32) -> TabulaRows {
     let t = calendar::Tabula::compute(year);
     let moveable = calendar::MoveableDates::compute(year);
-    let figure = |label, value| TabulaRow { label, value, date: None };
-    let date = |label, d: Date| TabulaRow { label, value: format!("{} {}", month_name(d), d.day()), date: Some(d) };
+    let figure = |label, value| TabulaRow { label, value, date: None, feast_id: "" };
+    let date = |label, d: Date, feast_id| TabulaRow { label, value: format!("{} {}", month_name(d), d.day()), date: Some(d), feast_id };
     let ember = |label, e: &calendar::computus::EmberSet| TabulaRow {
         label,
         value: format!("{} {}, {}, {}", month_name(e.wed), e.wed.day(), e.fri.day(), e.sat.day()),
         date: Some(e.wed),
+        feast_id: "",
     };
     TabulaRows {
         figures: vec![
@@ -435,13 +631,13 @@ pub fn tabula(year: i32) -> TabulaRows {
             figure("Sundays after Pentecost", t.sundays_after_pentecost.to_string()),
         ],
         moveable: vec![
-            date("Septuagesima Sunday", moveable.septuagesima),
-            date("Ash Wednesday", moveable.ash_wednesday),
-            date("Easter (Pascha) Day", moveable.easter),
-            date("Ascension Day", moveable.ascension),
-            date("Pentecost", moveable.pentecost),
-            date("Corpus Christi", moveable.corpus_christi),
-            date("Advent Sunday", moveable.advent1),
+            date("Septuagesima Sunday", moveable.septuagesima, "septuagesima"),
+            date("Ash Wednesday", moveable.ash_wednesday, "ash-wednesday"),
+            date("Easter (Pascha) Day", moveable.easter, "easter-sunday"),
+            date("Ascension Day", moveable.ascension, "ascension"),
+            date("Pentecost", moveable.pentecost, "pentecost"),
+            date("Corpus Christi", moveable.corpus_christi, "corpus-christi"),
+            date("Advent Sunday", moveable.advent1, ""),
         ],
         ember: vec![
             ember("Spring (Lent)", &t.spring),
@@ -460,6 +656,28 @@ pub fn year_roman(year: i32) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Every front's date picker and the templates' date fields keep to the offered years.
+    #[test]
+    fn every_front_offers_the_same_years() {
+        let read =
+            |path: &str| std::fs::read_to_string(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").join(path)).expect(path);
+        assert_eq!(offered_years(2026), 1996..=2126);
+        let (back, ahead) = (YEARS_BACK, YEARS_AHEAD);
+        let js = read("apps/office-web/static/app.js");
+        assert!(js.contains(&format!("var YEARS_BACK = {back};")) && js.contains(&format!("var YEARS_AHEAD = {ahead};")), "app.js");
+        for template in ["home", "hour"] {
+            let html = read(&format!("crates/render-html/templates/{template}.html"));
+            assert!(html.contains(r#"min="{{ first_year }}-01-01" max="{{ last_year }}-12-31""#), "{template}.html's date field");
+        }
+        let kotlin = read("apps/android/app/src/main/kotlin/org/orthodoxwest/office/Chrome.kt");
+        assert!(
+            kotlin.contains(&format!("const val YEARS_BACK = {back}")) && kotlin.contains(&format!("const val YEARS_AHEAD = {ahead}")),
+            "Chrome.kt"
+        );
+        let swift = read("apps/ios/Office/Chrome.swift");
+        assert!(swift.contains(&format!("let yearsBack = {back}")) && swift.contains(&format!("let yearsAhead = {ahead}")), "Chrome.swift");
+    }
 
     #[test]
     fn lauds_prime_and_vespers_open_their_prayers() {
@@ -673,6 +891,58 @@ mod tests {
     }
 
     #[test]
+    fn an_hour_ends_bare_when_it_is_bare_or_its_last_section_is() {
+        let section = |bare| OfficeSection { label: String::new(), collapsible: false, bare, elements: Vec::new() };
+        assert!(!ends_bare(false, &[]));
+        assert!(!ends_bare(false, &[section(false), section(false)]));
+        assert!(ends_bare(true, &[section(false)]));
+        // Vespers of the Dead said after the day's Vespers: the hour ends bare.
+        assert!(ends_bare(false, &[section(false), section(true)]));
+        // A bare section that does not close the hour does not make its end bare.
+        assert!(!ends_bare(false, &[section(true), section(false)]));
+    }
+
+    #[test]
+    fn the_end_cross_takes_its_gold_once_prayed_and_wholly_shown() {
+        use EndLeaf::*;
+        // A first visit: paint until the hour is marked and the cross stands wholly on screen.
+        let open = EndLeaf::opens(false, false);
+        assert_eq!(open, Paint);
+        assert_eq!(open.next(false, false, true), Paint, "not yet prayed");
+        assert_eq!(open.next(false, true, false), Paint, "marked as the cross peeps in: no gold yet");
+        assert_eq!(open.next(false, true, true), Gilding);
+        // Once gilding it stays so, wherever the reader scrolls: it happens once.
+        assert_eq!(Gilding.next(false, true, false), Gilding);
+        // An hour prayed before is gilt from the first paint, and never gilds again.
+        assert_eq!(EndLeaf::opens(false, true), Gilt);
+        assert_eq!(Gilt.next(false, true, true), Gilt);
+        // A bare hour takes no leaf, prayed or not.
+        assert_eq!(EndLeaf::opens(true, true), Paint);
+        assert_eq!(EndLeaf::opens(true, false).next(true, true, true), Paint);
+    }
+
+    #[test]
+    fn an_interrupted_hour_reopens_at_its_place_only_within_the_limit() {
+        let limit = f64::from(PLACE_KEPT_MINUTES) * 60.0;
+        // The door answered at the third psalm, back ten minutes later: the place.
+        assert!(reopens_at_place(true, false, 600.0));
+        assert!(reopens_at_place(true, false, 0.0));
+        assert!(reopens_at_place(true, false, limit));
+        // Past the limit, the hour begins again.
+        assert!(!reopens_at_place(true, false, limit + 1.0));
+        assert!(!reopens_at_place(true, false, 6.0 * 3600.0));
+        // Another hour, or the same hour of another day: its own top.
+        assert!(!reopens_at_place(false, false, 600.0));
+        // Prayed to its end: the next opening is a new office.
+        assert!(!reopens_at_place(true, true, 600.0));
+        // A clock set back, or no time at all, is no evidence of a short absence.
+        assert!(!reopens_at_place(true, false, -60.0));
+        assert!(!reopens_at_place(true, false, f64::NAN));
+        // Long enough to answer the door; shorter than the two hours between Terce and Sext.
+        const { assert!(PLACE_KEPT_MINUTES >= 15 && PLACE_KEPT_MINUTES < 120) };
+    }
+
+    #[test]
     fn every_hour_has_a_gloss_for_newcomers() {
         assert_eq!(hour_gloss("vespers"), "Evening prayer");
         assert!(["lauds", "prime", "terce", "sext", "none", "vespers", "compline"].iter().all(|h| !hour_gloss(h).is_empty()));
@@ -683,9 +953,51 @@ mod tests {
         let today = Date::new(2026, 3, 15);
         let evening = invitation(today, today, 18);
         assert_eq!((evening.hour, evening.label.as_str(), evening.date, evening.current), ("vespers", "Pray Vespers", today, "vespers"));
+        assert_eq!(evening.gloss, "Evening prayer");
+        // Compline after midnight marks no hour today, but the invitation still says what it is.
         let late = invitation(today, today, 1);
-        assert_eq!((late.hour, late.date, late.current), ("compline", Date::new(2026, 3, 14), ""));
+        assert_eq!(
+            (late.hour, late.date, late.current, late.gloss.as_str()),
+            ("compline", Date::new(2026, 3, 14), "", "Prayer before sleep")
+        );
         let other = invitation(today.add_days(1), today, 18);
-        assert_eq!((other.hour, other.label.as_str(), other.date, other.current), ("lauds", "Open Lauds", today.add_days(1), ""));
+        assert_eq!(
+            (other.hour, other.label.as_str(), other.date, other.current, other.gloss.as_str()),
+            ("lauds", "Open Lauds", today.add_days(1), "", "")
+        );
+    }
+
+    #[test]
+    fn an_evening_that_keeps_the_morrow_says_so_under_pray_vespers() {
+        let eve = Date::new(2026, 12, 24);
+        let vespers = invitation(eve, eve, 18).on_eve(Some("The Nativity of Our Lord"));
+        assert_eq!((vespers.label.as_str(), vespers.gloss.as_str()), ("Pray Vespers", "First Vespers of the Nativity of Our Lord"));
+        assert!(vespers.eve);
+        assert!(!invitation(eve, eve, 21).on_eve(Some("The Nativity of Our Lord")).eve);
+        assert!(!invitation(eve, eve, 18).on_eve(None).eve);
+        // Only Vespers says it: Compline that evening, None that afternoon and another day's
+        // "Open Lauds" keep their own words, and an evening of the day's own Vespers is unchanged.
+        assert_eq!(invitation(eve, eve, 21).on_eve(Some("The Nativity of Our Lord")).gloss, "Prayer before sleep");
+        assert_eq!(invitation(eve, eve, 14).on_eve(Some("The Nativity of Our Lord")).gloss, "Afternoon prayer");
+        assert_eq!(invitation(eve.add_days(1), eve, 18).on_eve(Some("The Nativity of Our Lord")).gloss, "");
+        assert_eq!(invitation(eve, eve, 18).on_eve(None).gloss, "Evening prayer");
+        let gloss = |name| first_vespers_gloss(name);
+        assert_eq!(gloss("I Sunday of Advent"), "First Vespers of I Sunday of Advent");
+        assert_eq!(gloss("III Sunday of Advent (Gaudete)"), "First Vespers of III Sunday of Advent");
+        assert_eq!(gloss("VI Sunday after Epiphany (Resumed)"), "First Vespers of VI Sunday after Epiphany");
+        assert_eq!(gloss("The Feast of the Most Holy Body of Christ (Corpus Christi)"), "First Vespers of Corpus Christi");
+        assert_eq!(gloss("The Feast of Our Lord Jesus Christ the King"), "First Vespers of Our Lord Jesus Christ the King");
+        assert_eq!(gloss("Office of the XXII Sunday after Pentecost"), "First Vespers of XXII Sunday after Pentecost");
+        // A saint's titles stay in the hour; the gloss names the saint.
+        assert_eq!(gloss("St Cyril of Alexandria, Confessor, Bishop & Doctor"), "First Vespers of St Cyril of Alexandria");
+        assert_eq!(gloss("Ss Fabian (Bishop) & Sebastian, Martyrs"), "First Vespers of Ss Fabian (Bishop) & Sebastian");
+        assert_eq!(gloss("Solemnity of St Joseph, Spouse of the Blessed Virgin Mary"), "First Vespers of the Solemnity of St Joseph");
+        // A mystery or a day takes "the"; a feast named for itself does not.
+        assert_eq!(gloss("Epiphany of Our Lord"), "First Vespers of the Epiphany of Our Lord");
+        assert_eq!(gloss("Sunday of the Resurrection"), "First Vespers of the Sunday of the Resurrection");
+        assert_eq!(gloss("Saturday Office of the B.V.M."), "First Vespers of the Saturday Office of the Blessed Virgin Mary");
+        assert_eq!(gloss("All Saints"), "First Vespers of All Saints");
+        assert_eq!(gloss("Palm Sunday"), "First Vespers of Palm Sunday");
+        assert_eq!(gloss("Our Lady of Walsingham"), "First Vespers of Our Lady of Walsingham");
     }
 }

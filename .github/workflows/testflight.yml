@@ -3,15 +3,22 @@ name: iOS TestFlight
 # Builds the iOS app for release with the current Xcode. Pushes to master (and manual runs)
 # also sign it and upload it to TestFlight, where it goes to the external group named below:
 # anyone who joined through the group's public link gets each new build in the TestFlight app,
-# as the Android preview's link always serves the newest APK.
+# as the Android preview's link always serves the newest APK. They wait until every check on the
+# commit (CI, iOS, Android) has passed, so a red commit never reaches testers or the daily App
+# Store promotion.
 #
 # Pull requests, and master until the signing secrets exist, build the archive unsigned, so a
 # change that breaks the release build is caught before it reaches master. Setting the secrets
 # up from a Linux machine is in apps/ios/README.md ("TestFlight").
 #
-# The version stays MARKETING_VERSION (project.yml); the build number counts commits, as the
-# Android version code does. Apple reviews the first build of each version before external
-# testers can install it, so only a release raises MARKETING_VERSION.
+# The build number counts commits, as the Android version code does. The version is
+# MARKETING_VERSION (project.yml) until App Store Connect has that version submitted or on sale;
+# then an upload takes one patch above the highest such version, which scripts/appstore.py
+# reads from the API before archiving, so nobody raises it by hand after a release. Raising
+# MARKETING_VERSION's minor or major in project.yml still starts a new line. Apple reviews the
+# first build of each version before external testers can install it. The daily App Store
+# promotion (appstore-promote.yml) submits a build from here for App Review a day after its
+# upload, whether or not beta review has passed it or the group has it.
 on:
   push:
     branches: [master]
@@ -46,10 +53,41 @@ env:
   TESTFLIGHT_GROUP: Testers
 
 jobs:
+  checks:
+    name: Wait for the commit's checks
+    # Only an upload waits: a pull request's archive is a check of its own.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    # Long enough for iOS's build, tests and screenshots, queued macOS runners included.
+    timeout-minutes: 180
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts
+      # Nothing reaches readers from a commit whose CI, iOS or Android checks are red or still
+      # running (scripts/ci_gate.py). The publishers (play.yml, testflight.yml, and Android's own
+      # gate and preview release) are not waited on: they wait on the checks themselves. A run
+      # cancelled for a newer push is judged by the run that took its place. After a red check
+      # is mended by a re-run, re-run this workflow's failed jobs to publish.
+      - name: Wait for every check on this commit to pass
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_gate.py --require ci.yml --exclude play.yml --exclude testflight.yml --exclude-job "Wait for the commit's checks" --exclude-job "Publish android-preview"
+
   build:
     name: Archive and upload to TestFlight
-    # App Store Connect takes only builds from a current Xcode; this image's default is one.
-    runs-on: macos-26
+    # App Store Connect takes only builds from a current Xcode; from April 2027 that means the
+    # iOS 27 SDK (Xcode 27 or later). The xcode-27 image (macOS 27) carries only Xcode 27, and its
+    # default is a released one.
+    needs: checks
+    # Skipped checks (a pull request, or a branch, neither of which uploads) leave the unsigned
+    # archive to build at once.
+    if: ${{ !cancelled() && (needs.checks.result == 'success' || needs.checks.result == 'skipped') }}
+    runs-on: xcode-27
     timeout-minutes: 90
     permissions:
       contents: read
@@ -84,8 +122,27 @@ jobs:
             echo "upload=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # App Store Connect closes a version to uploads once it is submitted or on sale; the
+      # script picks the version this upload can take (apps/ios/README.md, "TestFlight").
+      - name: Choose the version
+        id: version
+        if: steps.mode.outputs.upload == 'true'
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY: ${{ secrets.ASC_KEY }}
+        run: |
+          # The script retries slow or busy answers; if App Store Connect still cannot be read,
+          # the upload goes ahead under project.yml's version rather than not at all.
+          if version="$(python3 scripts/appstore.py version)"; then
+            echo "Version $version"
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Could not read App Store Connect's versions; building project.yml's MARKETING_VERSION, which App Store Connect refuses if that version is closed."
+          fi
+
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@1.99.1
+        uses: dtolnay/rust-toolchain@1.100.0
         with:
           targets: aarch64-apple-ios, aarch64-apple-ios-sim
 
@@ -140,9 +197,13 @@ jobs:
         env:
           UPLOAD: ${{ steps.mode.outputs.upload }}
           BUILD: ${{ steps.mode.outputs.build }}
+          VERSION: ${{ steps.version.outputs.version }}
           TEAM: ${{ steps.signing.outputs.team }}
           PROFILE: ${{ steps.signing.outputs.profile }}
         run: |
+          # Without the API (pull requests, unsigned builds), project.yml's MARKETING_VERSION.
+          version=()
+          if [ -n "$VERSION" ]; then version=("MARKETING_VERSION=$VERSION"); fi
           if [ "$UPLOAD" = true ]; then
             signing=(CODE_SIGN_STYLE=Manual "DEVELOPMENT_TEAM=$TEAM" "CODE_SIGN_IDENTITY=Apple Distribution"
                      "OFFICE_PROFILE=$PROFILE")
@@ -152,7 +213,7 @@ jobs:
           mkdir -p build/release
           if ! xcodebuild archive -project Office.xcodeproj -scheme Office -configuration Release \
             -destination generic/platform=iOS -archivePath build/release/Office.xcarchive \
-            -derivedDataPath build/dd-release "CURRENT_PROJECT_VERSION=$BUILD" "${signing[@]}" \
+            -derivedDataPath build/dd-release "CURRENT_PROJECT_VERSION=$BUILD" "${version[@]}" "${signing[@]}" \
             > build/release/archive.log 2>&1; then
             grep -E "error:|: error|FAILED|failed|Undefined symbol|No profile|No signing" build/release/archive.log | head -n 120
             tail -n 40 build/release/archive.log
