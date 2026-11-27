@@ -1,0 +1,3 @@
+home.niche: none
+hour.reading: ratio 0.46146822303693846, rows 150, frames 151, heights 151, viewport (402.0, 778.0) (first ratio 0.0, rows 0, frames 0, heights 0, viewport (402.0, 778.0), changed 152 times)
+hour.rows: content top -7290.000000; #2|heading||Hymn#0 -0.139990+76.480000, #2|latinTitle||Audi benigne Conditor#0 76.340010+36.800000, #2|score||O Maker of the world, give ear; Accept the prayer and own the tear Towards thy seat of mercy sent In this most holy fast of Lent.#0 113.140010+424.304651, #2|score|2.|Each heart is manifest to thee; Thou knowest our infirmity. Forgive thou then each soul that fain Would seek to thee, and turn again.#0 537.444662+448.222260 (first content top 0.000000; , changed 17 times)
