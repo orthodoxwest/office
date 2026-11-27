@@ -21,9 +21,6 @@ Maximilla, beloved of Jesus Christ, * took the Apostle's body: and in a place of
 # SOURCE: draft archdiocesan Lauds book, p. 354 (St Andrew)
 Thou hast overwhelmed in hell, O Lord, * them that did persecute the righteous: and thou wast his leader on the wood of the Cross.
 
-[psalm-antiphon-4-vespers]
-@use proper/st-andrew/psalm-antiphon-5
-
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book, p. 241 (II Vespers for St Andrew)
 When blessed Andrew * came to the place where the Cross had been prepared, he cried out and said: O goodly Cross, so long desired, and now made ready for my eager spirit; fearless and joyful do I come to thee: therefore do thou also receive me gladly, as his disciple, who did hang upon thee.

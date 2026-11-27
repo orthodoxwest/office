@@ -21,9 +21,6 @@ But as for us, * it behoveth us to glory in the Cross of our Lord Jesus Christ, 
 # SOURCE: draft archdiocesan Lauds book, p. 457 (Finding of the Holy Cross)
 By the sign of the Cross, * deliver us from our enemies, O our God, alleluia.
 
-[psalm-antiphon-4-vespers]
-@use proper/finding-holy-cross/psalm-antiphon-5
-
 [vespers-psalmody]
 @use ordinary/vespers/festal-psalmody
 

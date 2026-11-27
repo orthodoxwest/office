@@ -21,7 +21,7 @@
 @use commons/martyr-paschal/psalm-antiphon-5
 
 [psalm-antiphon-4-vespers]
-@use commons/martyr-paschal/psalm-antiphon-4-vespers
+@use commons/martyr-paschal/psalm-antiphon-5
 
 [chapter-lauds]
 @use commons/martyr-paschal/chapter-lauds

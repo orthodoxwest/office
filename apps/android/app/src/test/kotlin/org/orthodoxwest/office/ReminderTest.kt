@@ -14,6 +14,8 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.TimeZone
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -23,6 +25,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.orthodoxwest.office.core.about
+import org.orthodoxwest.office.core.reminderNext
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
@@ -58,6 +62,22 @@ class ReminderTest {
         store.save(store.load().copy(on = on))
     }
 
+    /** The page's "Next:" line is read again as its reminder comes, or at midnight when none comes first (#808). */
+    @Test
+    fun theNextLineIsReadAgainAsItsReminderComesOrTheDayTurns() {
+        val now = ZonedDateTime.of(2026, 3, 15, 17, 0, 0, 0, zone)
+        val compline = ZonedDateTime.of(2026, 3, 15, 20, 50, 0, 0, zone)
+        assertEquals(compline, ReminderScheduler.nextLineStale(now, compline))
+        val midnight = ZonedDateTime.of(2026, 3, 16, 0, 0, 0, 0, zone)
+        assertEquals(midnight, ReminderScheduler.nextLineStale(now, ZonedDateTime.of(2026, 3, 16, 5, 50, 0, 0, zone)))
+        assertEquals(midnight, ReminderScheduler.nextLineStale(now, null))
+        // The first plan after a reminder comes names the one after it: the line moves on.
+        turn(on = true)
+        val settings = ReminderStore(app).load()
+        val first = ReminderScheduler.plan(settings, now).minOf { it.at }
+        assertTrue(ReminderScheduler.plan(settings, first).minOf { it.at }.isAfter(first))
+    }
+
     @Test
     fun nothingIsScheduledUntilRemindersAreOn() {
         ReminderScheduler.sync(app, ZonedDateTime.of(2026, 3, 15, 5, 0, 0, 0, zone))
@@ -76,6 +96,18 @@ class ReminderTest {
         assertEquals("2026-03-15T06:35", times.first())
         assertTrue(times.contains("2026-03-15T17:50"))
         assertEquals("2026-03-22T20:50", times.last())
+    }
+
+    @Test
+    fun thePlanGivesThePagesNextLine() {
+        turn(on = true)
+        val now = ZonedDateTime.of(2026, 3, 15, 7, 0, 0, 0, zone)
+        val first = ReminderScheduler.plan(ReminderStore(app).load(), now).minBy { it.at }
+        assertEquals("vespers", first.hour)
+        assertEquals("2026-03-15T17:50", first.at.toLocalDateTime().toString())
+        assertEquals("Next: Vespers, today at 5:50 PM.", reminderNext(first.hour, now.toLocalDate().toCivil(), first.at.toLocalDate().toCivil(), "5:50 PM"))
+        turn(on = false)
+        assertTrue(ReminderScheduler.plan(ReminderStore(app).load(), now).isEmpty())
     }
 
     @Test
@@ -118,6 +150,27 @@ class ReminderTest {
         assertEquals(Notifications.bell(app), manager.getNotificationChannel(Notifications.CHANNEL).sound)
         // The first channel, which rang the phone's default sound, is gone.
         assertNull(manager.getNotificationChannel("hours"))
+    }
+
+    @Test
+    fun theTriduumsRemindersComeWithoutTheBell() {
+        turn(on = true)
+        // Maundy Thursday 2026 (Julian Pascha, 12 April): its Lauds rings, its Vespers is silent.
+        ReminderScheduler.sync(app, ZonedDateTime.of(2026, 4, 9, 5, 0, 0, 0, zone))
+        val byTime = alarms.scheduledAlarms.sortedBy { it.triggerAtMs }
+        val notifications = shadowOf(app.getSystemService(NotificationManager::class.java))
+        fun channelOf(at: String): String {
+            val alarm = byTime.single { Instant.ofEpochMilli(it.triggerAtMs).atZone(zone).toLocalDateTime().toString() == at }
+            app.getSystemService(NotificationManager::class.java).cancelAll()
+            Notifications.post(app, alarm.intent)
+            return notifications.allNotifications.single().channelId
+        }
+        assertEquals(Notifications.CHANNEL, channelOf("2026-04-09T06:35"))
+        assertEquals(Notifications.SILENT_CHANNEL, channelOf("2026-04-09T17:50"))
+        assertEquals(Notifications.SILENT_CHANNEL, channelOf("2026-04-11T06:35"))
+        assertEquals(Notifications.CHANNEL, channelOf("2026-04-11T17:50"))
+        val silent = app.getSystemService(NotificationManager::class.java).getNotificationChannel(Notifications.SILENT_CHANNEL)
+        assertNull(silent.sound)
     }
 
     @Test
@@ -173,6 +226,22 @@ class ReminderTest {
     private fun followSun(latitude: Double, longitude: Double) {
         val store = ReminderStore(app)
         store.save(store.load().copy(on = true, followSun = true, place = StoredPlace(latitude, longitude, Instant.parse("2026-06-20T16:00:00Z"))))
+    }
+
+    /** About gives the same day's sun as the reminders, from the settings the page is handed. */
+    @Test
+    fun aboutGivesTheSunsTimesAtThePlaceKept() {
+        val clock = DateTimeFormatter.ofPattern("h:mm a", Locale.US)
+        val midsummer = LocalDate.of(2026, 6, 21)
+        assertEquals(about().periods, sunPeriods(about().periods, ReminderStore(app).load().sunTimes(midsummer, zone), clock))
+        followSun(39.9526, -75.1652)
+        val periods = sunPeriods(about().periods, ReminderStore(app).load().sunTimes(midsummer, zone), clock)
+        val times = periods.flatMap { it.hours }.associate { it.hour to it.time }
+        assertEquals("sunrise · 5:32 am", times["lauds"])
+        assertEquals("sunset · 8:33 pm", times["vespers"])
+        assertTrue(times["prime"]!!.startsWith("first hour · 6:"))
+        assertTrue(times["sext"]!!.startsWith("solar noon · 1:0"))
+        assertEquals(about().periods.flatMap { it.hours }.first { it.hour == "compline" }.time, times["compline"])
     }
 
     @Test

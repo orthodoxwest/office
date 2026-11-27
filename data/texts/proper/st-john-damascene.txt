@@ -1,5 +1,6 @@
 [collect]
-@use commons/confessor/collect-doctor
+# SOURCE: Monastic Diurnal p. 504 (March 27, St John Damascene, C.D., Collect); ordo "Col. 504"
+Almighty everlasting God, who didst imbue blessed John with heavenly doctrine and wonderful fortitude of spirit for defending the veneration of sacred images: grant that through his intercession and example, we may imitate the virtues, and experience the protection of those whose images we honour.
 
 [magnificat-antiphon]
 @use commons/confessor/magnificat-antiphon-doctor

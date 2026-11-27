@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Android 12 and later show a launch splash: here it is the wall and nothing on it, in the
+        window's colour (render_blocks::Wall), so a cold start is the wall and then home comes
+        into the light on it. Android 13 and later dress the next start in the reader's chosen
+        look (MainActivity.dress); Android 12 cannot, and follows the phone's light or dark.
+    -->
+    <style name="Theme.Office" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/page</item>
+        <item name="android:windowSplashScreenBackground">@color/page</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/wall</item>
+    </style>
+
+    <style name="Theme.Office.Nave" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/nave_page</item>
+        <item name="android:windowSplashScreenBackground">@color/nave_page</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/wall</item>
+    </style>
+
+    <style name="Theme.Office.Apse" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/apse_page</item>
+        <item name="android:windowSplashScreenBackground">@color/apse_page</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/wall</item>
+    </style>
+</resources>

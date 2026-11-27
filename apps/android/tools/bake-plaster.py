@@ -32,7 +32,7 @@ OUT = ROOT / "apps/android/app/src/main/res/drawable-nodpi"
 # The --plaster-* tokens and --bg of each theme (style.css :root and Apse).
 THEMES = {
     "nave": dict(bg="#faf3e9", base="#fffdf7", tint="#e9d3c0", knee=(166, 166, 166), dodge=(89, 89, 89), strength=0.70),
-    "apse": dict(bg="#121c28", base="#182332", tint="#7d949c", knee=(255, 255, 255), dodge=(0, 0, 0), strength=0.52),
+    "apse": dict(bg="#121c28", base="#243850", tint="#000000", knee=(255, 255, 255), dodge=(0, 0, 0), strength=0.65),
 }
 
 # The phone panel's ground (--arch-ground) and veil (--panel-plaster-veil) of each theme.

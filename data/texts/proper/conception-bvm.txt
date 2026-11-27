@@ -21,9 +21,6 @@ Blessed art thou, * O Virgin Mary, of the Most High God, above all the women upo
 # SOURCE: draft archdiocesan Lauds book, p. 363 (The Conception of the B.V.M.)
 Draw us, O Maiden undefiled, * we will run after thee in the goodly fragrance of thine ointments.
 
-[psalm-antiphon-4-vespers]
-@use proper/conception-bvm/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 367 (The Conception of the B.V.M.)
 The Lord God said * unto the serpent, I will put enmity between thee and the woman, and between thy seed and her seed; it shall bruise thy head, alleluia.

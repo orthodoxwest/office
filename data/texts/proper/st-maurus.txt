@@ -139,11 +139,6 @@ Amen.
 # [psalm-antiphon-3-vespers]
 # Vespers-only override for psalm antiphon 3.
 #
-[psalm-antiphon-4-vespers]
-# Diurnal p. 455: I Vespers takes the "Ants. of Lauds, omitting 4th"; II Vespers is
-# "All as at I Vespers" except the versicle and Magnificat antiphon (p. 458).
-@use proper/st-maurus/psalm-antiphon-5
-
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.

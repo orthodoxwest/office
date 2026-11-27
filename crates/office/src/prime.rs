@@ -186,7 +186,13 @@ fn resolve_prime_psalm_antiphon(day: &Day, t: &OfficeTexts, moveable: Option<&Mo
     if !text.is_empty() && is_prime_antiphon_ref(&key, day.season) {
         return prime_element(SLOT, &key, text);
     }
-    let ferial = day.celebration.as_deref().is_none_or(|c| c.is_category(Category::Feria));
+    // A feria that resumes another office (ProperID) says its Hours from
+    // that office, Prime's antiphon included: the days after the Octave of
+    // the Ascension take the Sunday's, as Terce, Sext and None do ("Hours Of
+    // Sun.", 2026 ordo, 29 May; Diurnal pp. 392, 394) (#873).
+    let ferial = day.celebration.as_deref().is_none_or(|c| {
+        c.is_category(Category::Feria) && !(c.proper_id.as_ref().is_some_and(|p| *p != c.id) && resumes_lauds_antiphons(day, t))
+    });
     // The Saturday Office of Our Lady takes the Common of Feasts B.V.M.'s
     // Prime antiphon, "While the King" (Diurnal p. 67*; p. 69*) (#652).
     if !ferial {
@@ -235,6 +241,11 @@ fn resolve_prime_psalm_antiphon(day: &Day, t: &OfficeTexts, moveable: Option<&Mo
     }
     let text = t.get(&key).to_string();
     prime_element(SLOT, &key, text)
+}
+
+/// Whether the day's resumed office prints its own first Lauds antiphon.
+fn resumes_lauds_antiphons(day: &Day, t: &OfficeTexts) -> bool {
+    !lookup_feast_proper_text(day, "lauds", "psalm-antiphon-1", t).0.is_empty()
 }
 
 pub(crate) fn is_prime_antiphon_ref(reference: &str, season: Season) -> bool {

@@ -101,3 +101,25 @@ fn common_redirects_take_the_paschal_form_in_paschaltide() {
         assert_eq!(resolve(&d, hour, "versicle", &t).0, "V. Plain.", "{when} {hour}");
     }
 }
+
+#[test]
+fn vespers_fourth_takes_lauds_fifth_omitting_the_fourth() {
+    let d = celebrating(date(2026, 11, 11), Season::Pentecost, feast("test-omit", Some(Category::ConfessorBishop)));
+    let five = [
+        ("proper/test-omit/psalm-antiphon", "Generic."),
+        ("proper/test-omit/psalm-antiphon-4", "Benedicite."),
+        ("proper/test-omit/psalm-antiphon-5", "Fifth."),
+    ];
+    let t = texts(&five);
+    assert_eq!(resolve(&d, "vespers", "psalm-antiphon-4", &t), ("Fifth.".into(), "proper/test-omit/psalm-antiphon-5".into()));
+    // Lauds and the Little Hours keep the fourth.
+    assert_eq!(resolve(&d, "lauds", "psalm-antiphon-4", &t).0, "Benedicite.");
+    assert_eq!(resolve(&d, "terce", "psalm-antiphon-4", &t).0, "Benedicite.");
+    // A Vespers antiphon of the feast's own wins.
+    let mut own = five.to_vec();
+    own.push(("proper/test-omit/psalm-antiphon-4-vespers", "Own Vespers."));
+    assert_eq!(resolve(&d, "vespers", "psalm-antiphon-4", &texts(&own)).0, "Own Vespers.");
+    // With no fifth, the fourth stands, never the generic antiphon.
+    let four = [("proper/test-omit/psalm-antiphon", "Generic."), ("proper/test-omit/psalm-antiphon-4", "Benedicite.")];
+    assert_eq!(resolve(&d, "vespers", "psalm-antiphon-4", &texts(&four)).0, "Benedicite.");
+}

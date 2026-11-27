@@ -2705,7 +2705,7 @@ In Sardinia, St. Sallustian, confessor.
 At Camerino, St. Victorinus, confessor.
 
 [06-09]
-# SOURCE: Roman Martyrology (1916), January-June, pp. 42-43; complete entry
+# SOURCE: Roman Martyrology (1916), January-June, pp. 42-43; selected notices; deaths after 1200 omitted
 At Rome, on Mount Cælius, the birthday of the holy martyrs Primus and Felician, under the emperors Diocletian and Maximian. These glorious martyrs lived long in the service of the Lord, and endured sometimes together, sometimes separately, various cruel torments. They were finally beheaded by Promotus, governor of Nomentum, and thus happily ended their combat.
 
 At Agen, in France, St. Vincent, deacon and martyr.
@@ -2713,8 +2713,6 @@ At Agen, in France, St. Vincent, deacon and martyr.
 At Antioch, St. Pelagia, virgin and martyr, whose eulogy has been made by St. Ambrose and St. John Chrysostom.
 
 At Syracuse, the bishop St. Maximian, who is frequently mentioned by pope St. Gregory.
-
-At Andria, in Terra-di-Bari, St. Richard, first bishop of that city, who is renowned for miracles.
 
 In Scotland, St. Columba, priest and confessor.
 
@@ -5005,7 +5003,7 @@ At Tours, St. Venantius, abbot, and confessor.
 At Subiaco, in Italy, St. Chelidonia, virgin.
 
 [10-14]
-# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 35; complete entry
+# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 35; selected notices; deaths after 1200 omitted
 At Rome, on the Aurelian road, the birthday of blessed Callistus, pope and martyr. By order of the emperor Alexander, after being a long time kept in prison without food, and daily scourged with rods, he was finally hurled from the window of the house in which he had been shut up, and cast into a well, and thus merited the triumph awarded to conquerors.
 
 At Cæsarea, in Palestine, St. Fortunata, virgin and martyr, during the persecution of Diocletian. After having been subjected to the rack, to fire, to the teeth of beasts and other torments, she gave up her soul to God. Her body was afterwards conveyed to Naples, in Campania.
@@ -5025,8 +5023,6 @@ At Bruges, in Belgium, St. Donatian, bishop of Rheims.
 At Treves, St. Rusticus, bishop.
 
 The same day, the departure out of this world of St. Dominic Loricatus.
-
-In Italy, St. Bernard, confessor.
 
 [10-15]
 # SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 35; selected notices; deaths after 1200 omitted

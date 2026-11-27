@@ -154,6 +154,8 @@ Amen.
 
 [hymn-vespers]
 # SOURCE: Monastic Diurnal.pdf, p. 413, 414
+# Last line from Vespers for Saturdays & Major Feasts (2026), p. 210, in place of the Diurnal's
+# "Who from Both with Both is One", which confesses the Spirit's procession from the Son.
 Pange lingua gloriosi
 
 Now, my tongue, the Mystery telling,
@@ -196,7 +198,7 @@ To the Father, and the Son,
 Honour, might, and praise addressing,
 While unending ages run;
 Ever too his love confessing
-Who from Both with Both is One.
+Who from One with both is One.
 
 Amen.
 

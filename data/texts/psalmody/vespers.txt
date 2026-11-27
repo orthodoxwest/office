@@ -42,6 +42,15 @@ psalm-antiphon-2 = psalms/113
 psalm-antiphon-3 = psalms/122
 psalm-antiphon-4 = psalms/132
 
+# Both Vespers of the Compassion B.V.M., Friday after Passion Sunday: "Ants. of
+# Lauds, omitting the fourth. Psalms Credidi, Ad Dominum, Eripe me, and Voce mea"
+# (Diurnal pp. 505, 509).
+[compassion-bvm]
+psalm-antiphon-1 = psalms/116b
+psalm-antiphon-2 = psalms/120
+psalm-antiphon-3 = psalms/140
+psalm-antiphon-5 = psalms/142
+
 [dedication]
 psalm-antiphon-1 = psalms/110
 psalm-antiphon-2 = psalms/111

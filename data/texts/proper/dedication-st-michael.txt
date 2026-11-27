@@ -27,9 +27,6 @@ O ye Angels of the Lord, * bless ye the Lord for ever.
 # SOURCE: draft archdiocesan Lauds book, p. 565 (Dedication of St Michael)
 Angels and Archangels, * Thrones and Dominions, Principalities and Powers, Virtues of the heavens, O praise the Lord of heaven, alleluia.
 
-[psalm-antiphon-4-vespers]
-@use proper/dedication-st-michael/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 569 (Dedication of St Michael)
 There was silence in heaven * while the dragon waged war: and Michael fought against him, and had the victory, alleluia.

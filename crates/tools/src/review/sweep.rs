@@ -28,25 +28,14 @@ pub fn compose_review_forms(engine: &Engine, hour_name: &str, day: &Day, moveabl
     Ok(out)
 }
 
-/// Which compositions a sweep visits.
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum Forms {
-    /// Every distinct form (`compose_review_forms`).
-    All,
-    /// Private prayer only.
-    Private,
-}
-
 /// Maps every composition in `[start, start+years)` and folds the records in sweep order, each year
 /// as soon as the years before it are folded. `calendar_error` formats a failure to build a year;
 /// the first failure in sweep order is returned.
-#[allow(clippy::too_many_arguments)]
 pub fn sweep<T: Send>(
     engine: &Engine,
     cal: &CalendarData,
     start: i32,
     years: i32,
-    forms: Forms,
     calendar_error: &(dyn Fn(i32, String) -> String + Sync),
     map: &(dyn Fn(&Day, &'static str, &OfficeHour) -> T + Sync),
     fold: &mut dyn FnMut(T),
@@ -65,7 +54,7 @@ pub fn sweep<T: Send>(
                     if i >= count {
                         return;
                     }
-                    let result = sweep_year(engine, cal, start + i as i32, forms, calendar_error, map);
+                    let result = sweep_year(engine, cal, start + i as i32, calendar_error, map);
                     let failed = result.is_err();
                     if tx.send((i, result)).is_err() || failed {
                         // Later years are moot once one fails.
@@ -101,7 +90,6 @@ fn sweep_year<T>(
     engine: &Engine,
     cal: &CalendarData,
     year: i32,
-    forms: Forms,
     calendar_error: &(dyn Fn(i32, String) -> String + Sync),
     map: &(dyn Fn(&Day, &'static str, &OfficeHour) -> T + Sync),
 ) -> Result<Vec<T>, String> {
@@ -110,11 +98,8 @@ fn sweep_year<T>(
     let mut out = Vec::new();
     for day in &days {
         for hour_name in HOUR_NAMES {
-            let composed = match forms {
-                Forms::All => compose_review_forms(engine, hour_name, day, &moveable),
-                Forms::Private => engine.compose_hour(hour_name, day, &moveable, PrayerForm::Private).map(|h| vec![h]),
-            }
-            .map_err(|e| format!("composing {hour_name} for {}: {e}", day.date))?;
+            let composed = compose_review_forms(engine, hour_name, day, &moveable)
+                .map_err(|e| format!("composing {hour_name} for {}: {e}", day.date))?;
             for hour in &composed {
                 out.push(map(day, hour_name, hour));
             }

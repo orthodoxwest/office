@@ -57,6 +57,12 @@ pub fn feast_link(id: &str) -> String {
     format!("/feast/{id}")
 }
 
+/// A feast's page opened from a day's page (`from` is its date, "2026-11-10") or from the ordo
+/// ("ordo-2026-11-10"), which it offers a way back to. Empty `from` is the plain page.
+pub fn feast_from(id: &str, from: &str) -> String {
+    if from.is_empty() { feast_link(id) } else { format!("/feast/{id}?from={from}") }
+}
+
 /// A day's landing page reached from a feast's page, which it offers a way back to.
 pub fn home_from_feast(date: &str, id: &str) -> String {
     format!("/?date={date}&from={id}")

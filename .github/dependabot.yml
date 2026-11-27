@@ -32,6 +32,10 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    # A release must be a week old before Dependabot proposes it, so a
+    # hijacked tag is usually caught upstream first.
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns: ["*"]

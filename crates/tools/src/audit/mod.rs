@@ -64,6 +64,9 @@ pub struct Report {
     pub flat_common_antiphons: Vec<&'static str>,
     pub mixed_register: Vec<String>,
     pub modern_collects: Vec<String>,
+    /// Commemorations whose collect falls to their Common, unless acknowledged in
+    /// `data/audit-ok.txt` (`<id> commemoration-collect`).
+    pub common_commemoration_collects: Vec<FeastRef>,
 }
 
 // Word boundaries are ASCII.
@@ -135,8 +138,26 @@ pub fn run(src: &dyn DataSource) -> Result<Report, String> {
 
     let mut gaps = Vec::new();
     let mut suppressed = Vec::new();
+    let mut common_commemoration_collects = Vec::new();
     for feast in &feasts {
         if feast.rank == Rank::Commemoration {
+            // A commemoration says only its antiphon, versicle and collect, and the antiphon
+            // and versicle commonly come from the Common; the collect is where a proper text
+            // most often stands in the Diurnal and the ordo's "Col. NNN".
+            let supp = suppress.get(&feast.id).unwrap_or(&none);
+            let proper = [
+                "commemoration-collect",
+                "commemoration-collect-lauds",
+                "commemoration-collect-vespers",
+                "collect",
+                "collect-lauds",
+                "collect-vespers",
+            ]
+            .iter()
+            .any(|r| corpus.has(&format!("proper/{}/{r}", feast.id)));
+            if !proper && !supp.contains("*") && !supp.contains("commemoration-collect") {
+                common_commemoration_collects.push(feast.clone());
+            }
             continue;
         }
         let supp = suppress.get(&feast.id).unwrap_or(&none);
@@ -199,6 +220,7 @@ pub fn run(src: &dyn DataSource) -> Result<Report, String> {
         flat_common_antiphons: find_flat_common_antiphons(corpus),
         mixed_register,
         modern_collects,
+        common_commemoration_collects,
     })
 }
 
@@ -340,6 +362,16 @@ pub fn format_report(r: &Report) -> String {
                 g.commons_fallback_refs.join(", ")
             )
         });
+    }
+    w.push('\n');
+
+    let _ = writeln!(w, "=== Commemorations on a Common collect: {} ===", r.common_commemoration_collects.len());
+    if !r.common_commemoration_collects.is_empty() {
+        w.push_str("Check each against the ordo's \"Col.\" citation (scripts/ordo-compare.py collects). Once the\n");
+        w.push_str("ordo confirms the Common, add `<id> commemoration-collect` to data/audit-ok.txt.\n");
+        for feast in &r.common_commemoration_collects {
+            let _ = writeln!(w, "  {} ({})", feast.name, feast.id);
+        }
     }
     w.push('\n');
 

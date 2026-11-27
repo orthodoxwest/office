@@ -1,9 +1,9 @@
 //! What search engines read before the pages: `robots.txt` and the sitemap.
 //!
 //! The sitemap lists the pages worth finding, all of them undated but the ordo: today's day and
-//! hours, this year's ordo, the feast search and each feast's page, reminders and privacy. Each
-//! dated day and hour is one link from those and carries `noindex` (see `Chrome::noindex`), so
-//! the endless run of dates stays out of search results.
+//! hours, this year's ordo, the feast search and each feast's page, reminders, privacy and
+//! about. Each dated day and hour is one link from those and carries `noindex` (see
+//! `Chrome::noindex`), so the endless run of dates stays out of search results.
 
 use axum::body::Body;
 use axum::http::{Response, StatusCode, header};
@@ -14,11 +14,19 @@ use render_html::links::{calendar_year_link, feast_link, find_link};
 use crate::http::{response, set};
 
 /// The undated pages; the ordo's year is added per request.
-const PAGES: [&str; 10] = ["/", "/lauds", "/prime", "/terce", "/sext", "/none", "/vespers", "/compline", "/reminders", "/privacy"];
+const PAGES: [&str; 11] =
+    ["/", "/lauds", "/prime", "/terce", "/sext", "/none", "/vespers", "/compline", "/reminders", "/privacy", "/about"];
 
-/// Crawl everything a reader sees; skip the usage report, the beacon and the reminder feed.
+/// Crawl everything a reader sees but the dated days and hours; skip the usage report, the
+/// beacon and the reminder feed. A dated day or hour carries `noindex`, and there is one for
+/// every day of the years offered, each composed for the asking, so a crawler is kept off them
+/// rather than left to fetch them only to drop them: the undated `/lauds` and home stay open.
 pub fn robots(site: &str) -> Response<Body> {
-    let body = format!("User-agent: *\nDisallow: /admin/\nDisallow: /api/\nDisallow: /office.ics\n\nSitemap: {site}/sitemap.xml\n");
+    let mut body = String::from("User-agent: *\nDisallow: /admin/\nDisallow: /api/\nDisallow: /office.ics\nDisallow: /?date=\n");
+    for hour in liturgy::HOUR_NAMES {
+        body.push_str(&format!("Disallow: /{hour}/\nDisallow: /{hour}?date=\n"));
+    }
+    body.push_str(&format!("\nSitemap: {site}/sitemap.xml\n"));
     text(body, "text/plain; charset=utf-8")
 }
 

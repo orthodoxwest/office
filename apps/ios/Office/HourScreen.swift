@@ -32,17 +32,23 @@ struct Loaded<Value, Content: View>: View {
     let key: String
     let place: String
     let motion: Motion
+    /// Asked as the first content arrives whether it comes into the light (home, once a launch)
+    /// rather than simply appearing.
+    let arrival: Arrival?
     let load: () throws -> Value
     let content: (Value) -> Content
     @State private var shown: (place: String, value: Value)?
     @State private var failure: String?
+    /// The first content coming into the light, as it is inserted.
+    @State private var lighting = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// `key` names what is composed; `place`, the page it is (by default the same).
-    init(key: String, place: String? = nil, motion: Motion = .fade, load: @escaping () throws -> Value, @ViewBuilder content: @escaping (Value) -> Content) {
+    init(key: String, place: String? = nil, motion: Motion = .fade, arrival: Arrival? = nil, load: @escaping () throws -> Value, @ViewBuilder content: @escaping (Value) -> Content) {
         self.key = key
         self.place = place ?? key
         self.motion = motion
+        self.arrival = arrival
         self.load = load
         self.content = content
     }
@@ -50,11 +56,11 @@ struct Loaded<Value, Content: View>: View {
     var body: some View {
         ZStack {
             if let shown {
-                content(shown.value).id(shown.place).transition(transition)
+                content(shown.value).id(shown.place).transition(lighting ? AnyTransition.opacity.animation(Tempo.dimIn.animation) : transition)
             } else if let failure {
                 Message(text: failure)
             } else {
-                Message(text: "Preparing the office…")
+                Preparing()
             }
         }
         .task(id: key) {
@@ -65,11 +71,26 @@ struct Loaded<Value, Content: View>: View {
             switch result {
             case let .success(v):
                 failure = nil
-                // The first content simply appears (the stack's push brings it), and the same
-                // page composed again changes in place; another page replaces it in motion.
-                if shown == nil || shown?.place == place {
+                // The first content simply appears (the stack's push brings it), unless it comes
+                // into the light on the wall the launch screen showed (home, once a launch: the
+                // wall first, over Tempo's dim, opacity only); the same page composed again
+                // changes in place; another page replaces it in motion.
+                // The arrival's dim belongs to its coming in only: once it has come, the page
+                // carries the ordinary transition again, so it leaves as any page does and two
+                // pages are never seen over each other.
+                if shown == nil, arrival?.take() == true, !reduceMotion {
+                    lighting = true
+                    withAnimation(Tempo.dimIn.animation) { shown = (place, v) } completion: { lighting = false }
+                } else if shown == nil || shown?.place == place {
                     shown = (place, v)
                 } else {
+                    if lighting {
+                        // Replaced while still coming into the light: put the dim away in an
+                        // update of its own, a frame before the page goes.
+                        lighting = false
+                        try? await Task.sleep(for: .milliseconds(20))
+                        guard !Task.isCancelled else { return }
+                    }
                     withAnimation(.easeInOut(duration: 0.3)) { shown = (place, v) }
                 }
             case let .failure(e):
@@ -83,13 +104,28 @@ struct Loaded<Value, Content: View>: View {
 }
 
 /**
+ * The wall first: a page's first content that comes into the light on the wall the launch screen
+ * showed, over Tempo's dim, once (`AppModel.homeArrival`: home, once a launch). Taken, it is spent,
+ * so a return to the page within the session has no entrance.
+ */
+final class Arrival {
+    private var spent = false
+
+    /// True the first time it is asked.
+    func take() -> Bool {
+        defer { spent = true }
+        return !spent
+    }
+}
+
+/**
  * How a page replaced in place moves, as the Android app's do along Material's shared axis:
  * later from the trailing side, earlier from the leading, the leaving page gone before the
  * coming one settles; a fade where there is no order, or the reader has asked for less motion.
  */
 func inPlace(_ motion: Motion, reduceMotion: Bool) -> AnyTransition {
-    let fadeIn = AnyTransition.opacity.animation(.easeOut(duration: 0.21).delay(0.09))
-    let fadeOut = AnyTransition.opacity.animation(.easeIn(duration: 0.09))
+    let fadeIn = AnyTransition.opacity.animation(Tempo.turnIn.animation)
+    let fadeOut = AnyTransition.opacity.animation(Tempo.turnOut.animation)
     guard motion != .fade, !reduceMotion else { return .asymmetric(insertion: fadeIn, removal: fadeOut) }
     let on: CGFloat = motion == .next ? 1 : -1
     return .asymmetric(
@@ -186,6 +222,36 @@ private struct Held {
     let ids: [String]
 }
 
+/**
+ * The ribbon: where the reader was in an hour when the app went into the background, kept with
+ * the scene, so that an hour iOS closes in the background and brings back (the way back
+ * restores it) opens again at that place (the core's `reopensAtPlace`, as the web's
+ * `office-place` and the Android app's saved visit): the row then top-most on screen and the
+ * anchor that stands it where it stood, and when. An hour the reader leaves by the app's own
+ * ways (home, another hour, Back) keeps none, so a deliberate return opens at its top. It
+ * carries how far the hour had been prayed, so an hour reopened mid-psalm can still earn its mark.
+ */
+struct HourPlace: Codable {
+    /// The hour's day and name: "2026-11-13 vespers".
+    let page: String
+    let row: String
+    let anchor: Double
+    /// When it was kept, in seconds since 1970.
+    let at: Double
+    /// The prayed watch's reading then (`PrayedReading`); absent from a place kept before it was carried.
+    var cursor: Double?
+    var read: Double?
+
+    /// The reading the hour's prayed watch takes up again at the place.
+    var reading: PrayedReading { PrayedReading(cursor: max(0, cursor ?? 0), read: max(0, read ?? 0)) }
+
+    var encoded: String { (try? JSONEncoder().encode(self)).flatMap { String(data: $0, encoding: .utf8) } ?? "" }
+
+    static func decode(_ s: String) -> HourPlace? {
+        s.isEmpty ? nil : try? JSONDecoder().decode(HourPlace.self, from: Data(s.utf8))
+    }
+}
+
 /// How far the hour has been prayed. Another prayer form is the same hour, so it carries over, as
 /// the Android app's does; another hour or day begins again (`page`, the one it was prayed on).
 private final class PrayedSoFar {
@@ -216,6 +282,17 @@ struct HourScreen: View {
     /// composed again.
     @State private var held: Held?
     @State private var prayed = PrayedSoFar()
+    /// The leaf on the cross that ends the hour (`presentation::EndLeaf`), as the page it was found
+    /// on opened, and since.
+    @State private var endLeaf: (page: String, leaf: EndLeaf)?
+    /// The ribbon's place, kept with the scene; and whether the page is held unseen while it is
+    /// set, so it appears at the place with nothing moving.
+    @SceneStorage("hour-place") private var kept = ""
+    @State private var placing = false
+    /// Whether this hour is the page on screen: an hour under another page in the way back is
+    /// kept alive and hears the scene go into the background too, but keeps no place.
+    @State private var onScreen = false
+    @Environment(\.scenePhase) private var phase
 
     init(view: HourView, date: CivilDate, composition: String) {
         self.view = view
@@ -257,9 +334,11 @@ struct HourScreen: View {
         // A first-class day's frame takes a little of a phone's measure (the web's 12px side
         // columns under 920px); where the lines stand outside the measure, the text keeps it.
         let inset: CGFloat = view.firstClass && width < m.px(frameClear) ? m.px(12) : 0
+        // A block's column: the measure inside the page's gutters and the frame's inset.
+        let scoreColumn = min(m.px(measure), width - 2 * (inset + m.px(gutter)))
         ScrollViewReader { scroll in
             ScrollView {
-                LazyVStack(spacing: 0) {
+                HourStack(eager: anchoredShot) {
                     Rectangle().fill(bandColor(view.color, p)).frame(height: 3).accessibilityHidden(true)
                     SiteHeader()
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
@@ -270,7 +349,7 @@ struct HourScreen: View {
                             switch row {
                             case let .toggle(key, label, expanded, atTop):
                                 Button {
-                                    withAnimation(unfolding) { open[key] = !expanded }
+                                    withAnimation(disclosing(!expanded)) { open[key] = !expanded }
                                     SessionPrayers.choose(view.hour, label, open: !expanded)
                                 } label: {
                                     HStack(spacing: 0) {
@@ -297,6 +376,7 @@ struct HourScreen: View {
                                     }
                                     BlockRow(block: block, column: columns[at])
                                         .environment(\.ornament, view.sections[at.section].bare ? bareO : o)
+                                        .environment(\.scoreColumn, scoreColumn)
                                 }
                                 .padding(.top, prayer.space(space))
                                 .measured(m)
@@ -307,6 +387,7 @@ struct HourScreen: View {
                         .read(row.id, at: n, into: reading)
                     }
                     Epilogue(
+                        leaf: leaf,
                         previous: index > 0 ? model.hours[index - 1] : nil,
                         next: index >= 0 && index + 1 < model.hours.count ? model.hours[index + 1] : nil,
                         // Compline's next is the morrow's Lauds, as on the web.
@@ -319,29 +400,85 @@ struct HourScreen: View {
                     .read(Reading.ending, at: rows.count, into: reading)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { epilogueHeight = $0 }
                 }
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named(Reading.space)).minY } action: { reading.contentTop = $0 }
                 .background(alignment: .top) {
                     if view.firstClass {
                         FirstClassFrame(top: 3 + headerHeight, bottom: epilogueHeight + m.px(20))
                     }
                 }
             }
+            // Held unseen for the moment the kept place is set.
+            .opacity(placing ? 0 : 1)
             .coordinateSpace(name: Reading.space)
             .onGeometryChange(for: CGSize.self) { $0.size } action: { reading.viewport = $0; width = $0.width }
+            // The cross's place in the ending moves with the text size (the menu's Text row).
+            .onChange(of: m, initial: true) { reading.endMark = (top: m.px(endCrossTop), size: m.px(endCrossSize)) }
             .onChange(of: rows.count, initial: true) { reading.rows = rows.count }
             .overlay(alignment: .top) { ProgressHairline(reading: reading).ignoresSafeArea(edges: .top) }
             .revealing(scroll)
             // Begun again on the hour composed in another form, so it reads the rows now shown.
             .task(id: "\(date.iso)/\(view.hour)/\(composition)") { await watchPrayed() }
+            // The cross takes its gold once the hour is marked and it stands wholly on the screen.
+            .onChange(of: page, initial: true) {
+                endLeaf = (page: page, leaf: endLeafOpens(bare: endBare, prayed: model.hoursPrayed(on: date).contains(view.hour)))
+            }
+            .onChange(of: reading.endMarkShown) { lookAtLeaf() }
+            .onChange(of: model.prayed) { lookAtLeaf() }
             // The row the reader is at stays where it stood while the office changes around it, as
             // the web's prayer form keeps the first element on screen in its place.
             .onChange(of: model.form) { hold() }
             .onChange(of: model.martyrology) { hold() }
             .onChange(of: model.chant) { hold() }
             .onChange(of: composition) { restore(scroll) }
+            .onChange(of: phase) { _, now in
+                if now == .background, onScreen { keep() }
+            }
+            // Left by the app's own ways (home, another hour, Back, a page over it): no place.
+            .onDisappear {
+                onScreen = false
+                forget()
+            }
+            // A new text size sets every row again; the row the reader is at stands where it stood,
+            // as the web holds the line at the top of the screen.
+            .onChange(of: model.textSize) {
+                // At the hour's head the page stays at its top.
+                if let top = reading.shownRows().first, top.id == rows.first?.id, top.frame.minY >= 0 { return }
+                hold()
+                guard let mark = held?.marks.first else { held = nil; return }
+                held = nil
+                DispatchQueue.main.async { scroll.scrollTo(mark.id, anchor: mark.anchor) }
+            }
             .onAppear {
+                onScreen = true
+                if let place = keptHere {
+                    placing = true
+                    // The prayed watch takes up the reading where it was (watchPrayed keeps it for this page).
+                    prayed.page = page
+                    prayed.reading = place.reading
+                    prayed.done = false
+                    // Once the rows are laid out, and again once those the first move brought in are.
+                    DispatchQueue.main.async {
+                        scroll.scrollTo(place.row, anchor: UnitPoint(x: 0.5, y: place.anchor))
+                        DispatchQueue.main.async {
+                            scroll.scrollTo(place.row, anchor: UnitPoint(x: 0.5, y: place.anchor))
+                            placing = false
+                            ScreenshotReady.mark(.hour(date, view.hour), in: model)
+                        }
+                    }
+                    return
+                }
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.
-                guard let id = anchor(rows) else { return }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { scroll.scrollTo(id, anchor: .top) }
+                guard let id = anchor(rows) else { return ScreenshotReady.mark(.hour(date, view.hour), in: model) }
+                // Again once the rows the first move brought in are laid out, as a kept place is:
+                // the first lands on rows taken at a guessed height, a fraction of a point off (#891).
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    scroll.scrollTo(id, anchor: .top)
+                    DispatchQueue.main.async {
+                        scroll.scrollTo(id, anchor: .top)
+                        // The screenshot waits for the scroll, not a guess at its time.
+                        ScreenshotReady.mark(.hour(date, view.hour), in: model)
+                    }
+                }
             }
         }
         .environment(\.ornament, o)
@@ -389,6 +526,27 @@ struct HourScreen: View {
         }
     }
 
+    /// An hour ending bare (the core's `endBare`) takes no leaf.
+    private var endBare: Bool { view.endBare }
+
+    /// The leaf on the cross that ends the hour now; before the page has looked, as it opens.
+    private var leaf: EndLeaf {
+        if let endLeaf, endLeaf.page == page { return endLeaf.leaf }
+        return endLeafOpens(bare: endBare, prayed: model.hoursPrayed(on: date).contains(view.hour))
+    }
+
+    /**
+     * The cross under the last Amen takes its gold (`presentation::EndLeaf`): not as the hour is
+     * marked, which is as the ending first comes into sight, but once it has been marked and the
+     * cross stands wholly on the screen.
+     */
+    private func lookAtLeaf() {
+        let now = leaf
+        guard now == .paint, reading.endMarkShown else { return }
+        let next = endLeafNext(leaf: now, bare: endBare, prayed: model.hoursPrayed(on: date).contains(view.hour), whollyShown: true)
+        if next != now { endLeaf = (page: page, leaf: next) }
+    }
+
     private func anchor(_ rows: [Row]) -> String? {
         let asked = UserDefaults.standard.string(forKey: "anchor")
         let at = rows.firstIndex { row in
@@ -404,20 +562,46 @@ struct HourScreen: View {
         return at.map { rows[max(0, $0 - 2)].id }
     }
 
-    /**
-     * Notes the rows on screen as the prayer form or the Martyrology changes, while the hour shown
-     * is still the one composed before.
-     */
-    private func hold() {
+    /// The office's rows on screen, top-most first, each with the anchor that would stand it where it stands.
+    private func marks() -> [(id: String, anchor: UnitPoint)] {
         let height = reading.viewport.height
-        let marks = reading.shownRows().compactMap { shown -> (id: String, anchor: UnitPoint)? in
+        return reading.shownRows().compactMap { shown -> (id: String, anchor: UnitPoint)? in
             // `scrollTo` stands the row's point at the anchor's height on the screen's: for its top
             // to stay where it is, that height is its top over the room the screen has beside it.
             let room = height - shown.frame.height
             guard room > 0, shown.frame.minY >= 0, shown.frame.minY <= room else { return nil }
             return (id: shown.id, anchor: UnitPoint(x: 0.5, y: shown.frame.minY / room))
         }
-        held = Held(marks: marks, ids: rows.map(\.id))
+    }
+
+    /**
+     * Notes the rows on screen as the prayer form or the Martyrology changes, while the hour shown
+     * is still the one composed before.
+     */
+    private func hold() {
+        held = Held(marks: marks(), ids: rows.map(\.id))
+    }
+
+    /// This hour's day and name, as its kept place names it.
+    private var page: String { "\(date.iso) \(view.hour)" }
+
+    /// The place kept for this hour, if it opens there: left within the core's limit, and not yet prayed.
+    private var keptHere: HourPlace? {
+        guard let place = HourPlace.decode(kept), place.page == page else { return nil }
+        let away = Date().timeIntervalSince1970 - place.at
+        return reopensAtPlace(prayed: model.hoursPrayed(on: date).contains(view.hour), secondsAway: away) ? place : nil
+    }
+
+    /// Keeps the reader's place as the app goes into the background; none while still at the hour's head.
+    private func keep() {
+        guard reading.ratio > 0, let mark = marks().first else { return forget() }
+        let sofar = prayed.page == page ? prayed.reading : PrayedReading(cursor: 0, read: 0)
+        kept = HourPlace(page: page, row: mark.id, anchor: Double(mark.anchor.y), at: Date().timeIntervalSince1970, cursor: sofar.cursor, read: sofar.read).encoded
+    }
+
+    /// Lets this hour's place go.
+    private func forget() {
+        if HourPlace.decode(kept)?.page == page { kept = "" }
     }
 
     /// Once the hour is composed again, stands the top-most row held that is still in it where it stood.
@@ -495,6 +679,8 @@ final class Reading {
     static let space = "hour"
     /// The hour's ending's id among the rows' (theirs hold a `|`, or begin "toggle ").
     static let ending = "ending"
+    /// How far below the screen's top a row may stand and still be the one at the top: under a point.
+    static let atTop: CGFloat = 0.5
     /// How much of the office has passed, from 0 to 1; the only thing the hairline watches.
     private(set) var ratio: CGFloat = 0
     /// The office's rows in number; the ending stands at this index. A section opened or closed
@@ -508,7 +694,17 @@ final class Reading {
     /// Each row's height as last laid out, by index; and where those on screen now stand, by the
     /// row's id, so a row leaving never clears the place of one that has taken its index.
     @ObservationIgnored private var heights: [Int: CGFloat] = [:]
+    /// Where the list's top stands on screen: minus how far it has scrolled.
+    @ObservationIgnored var contentTop: CGFloat = 0 {
+        didSet { if contentTop != oldValue { update() } }
+    }
     @ObservationIgnored private var frames: [String: (row: Int, frame: CGRect)] = [:]
+    /// Where the cross that ends the hour stands in the ending, from its top, and its size; and
+    /// whether it stands wholly on the screen now, for its leaf.
+    @ObservationIgnored var endMark: (top: CGFloat, size: CGFloat) = (top: 0, size: .infinity) {
+        didSet { update() }
+    }
+    private(set) var endMarkShown = false
 
     func place(_ id: String, at row: Int, _ frame: CGRect?) {
         if let frame {
@@ -533,9 +729,24 @@ final class Reading {
         return (shown.filter { $0 < rows }, shown.contains(rows))
     }
 
+    /// Whether a mark from `from`, `size` tall, lies wholly between the screen's top (0) and `foot`.
+    static func whollyShown(from: CGFloat, size: CGFloat, foot: CGFloat) -> Bool {
+        from >= 0 && from + size <= foot
+    }
+
     private func update() {
         let now = read()
+        ScreenshotGeometry.note("hour.reading", "ratio \(now), rows \(rows), frames \(frames.count), heights \(heights.count), viewport \(viewport)")
+        // Where the rows on screen stand, to the bit, and the list's own top (minus the scroll
+        // offset): two launches whose shots differ by a hair say which moved (#948).
+        if ScreenshotGeometry.on {
+            let shown = shownRows().map { "\($0.id) \(exact($0.frame.minY))+\(exact($0.frame.height))" }
+            ScreenshotGeometry.note("hour.rows", "content top \(exact(contentTop)); " + shown.joined(separator: ", "))
+        }
         if abs(now - ratio) > 0.0005 || (now != ratio && (now == 0 || now == 1)) { ratio = now }
+        let mark = frames[Reading.ending].map { $0.frame.minY + endMark.top }
+        let shown = mark.map { Reading.whollyShown(from: $0, size: endMark.size, foot: viewport.height) } ?? false
+        if shown != endMarkShown { endMarkShown = shown }
     }
 
     private func read() -> CGFloat {
@@ -544,7 +755,9 @@ final class Reading {
         let bottom = viewport.height
         let ending = frames[Reading.ending]?.frame
         if let ending, ending.minY <= bottom { return 1 }
-        guard let top = frames.values.filter({ $0.frame.minY <= 0 }).max(by: { $0.row < $1.row }), top.row < end else { return 0 }
+        // The row at the screen's top: a row stood there by `scrollTo` can land a fraction of a
+        // point below it, which is still at the top (#891).
+        guard let top = frames.values.filter({ $0.frame.minY <= Reading.atTop }).max(by: { $0.row < $1.row }), top.row < end else { return 0 }
         let known = (0..<end).compactMap { heights[$0] }
         let average = known.isEmpty ? 1 : known.reduce(0, +) / CGFloat(known.count)
         func height(_ i: Int) -> CGFloat { heights[i] ?? average }
@@ -554,6 +767,34 @@ final class Reading {
         return passed + left <= 0 ? 1 : min(1, max(0, passed / (passed + left)))
     }
 }
+
+/**
+ * The hour's rows: lazily, as a reader has them, or all laid out at once for a screenshot opened
+ * at an anchor (`-anchor`). A lazy list scrolled straight to a row far down stands it where the
+ * heights guessed for the rows above leave it, a fraction of a pixel that changes from launch to
+ * launch with how many of them were laid out, and its text draws a hair apart from one launch to
+ * the next (#948: the probe, ios.yml probe=N, found the list's top at -6350 or -6386.333 points
+ * and the Hymn heading 0.029 or 0.092 points below the screen's top). With every row laid out the
+ * rows above have their real heights, and the row lands on the same fraction every time.
+ */
+private struct HourStack<Content: View>: View {
+    let eager: Bool
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        if eager {
+            VStack(spacing: 0) { content }
+        } else {
+            LazyVStack(spacing: 0) { content }
+        }
+    }
+}
+
+/// Whether this launch is a screenshot opened at an anchor (apps/ios/screenshots.sh's -anchor).
+private let anchoredShot = UserDefaults.standard.string(forKey: "anchor") != nil
+
+/// Every digit a CGFloat holds, for the screenshots' geometry notes.
+private func exact(_ v: CGFloat) -> String { String(format: "%.6f", Double(v)) }
 
 private extension View {
     /// Reports the place on screen of this row, `id`, the `row`th, to `reading`, and its leaving.
@@ -589,6 +830,39 @@ private struct FirstClassFrame: View {
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+}
+
+/// Where the cross that ends the hour stands in the epilogue, and its size.
+private let endCrossTop: CGFloat = 26.4
+private let endCrossSize: CGFloat = 40
+
+/**
+ * The consecration cross that ends the hour, in the lining, and its leaf over it: gilt from the
+ * first paint, or coming up evenly by its opacity alone over `Tempo.gild` in the visit that marks
+ * the hour prayed, and laid at once under Reduce Motion.
+ */
+private struct EndCross: View {
+    let leaf: EndLeaf
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+    @Environment(\.ornament) private var o
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// The leaf's opacity once it has gilded in front of the reader.
+    @State private var gold: Double?
+
+    var body: some View {
+        let size = m.px(endCrossSize)
+        ZStack {
+            PaintedMark(.consecration, size: size, color: p.lining)
+            Crown(size: size, ink: o.flat, shading: endLeafShading(o, dark: p.dark, size: size))
+                .opacity(gold ?? (leaf == .gilt ? 1 : 0))
+        }
+        .onChange(of: leaf) { _, now in
+            if now == .gilding { withAnimation(reduceMotion ? nil : Tempo.gild.animation) { gold = 1 } }
+        }
+        // Laid out again (scrolled away and back) after it has gilded, it stands gilt.
+        .onAppear { if leaf == .gilding { gold = 1 } }
     }
 }
 
@@ -653,6 +927,9 @@ private struct HourTitle: View {
     @State private var picking = false
     @Environment(\.reveal) private var reveal
     @State private var choosing = false
+    @State private var reading = false
+
+    private static let key = readingKey()
 
     var body: some View {
         let title = view.title.uppercased()
@@ -660,7 +937,7 @@ private struct HourTitle: View {
         let font = style.uiFont(m)
         // The rules take the title's width, at least 24rem (the measure, on a phone), as the web's h1.
         let titleWidth = ProseLayout.advance(title, font) + style.tracking * m.type * CGFloat(title.count) + 2 * m.px(20.8)
-        let meta = [view.dateLabel, view.feast, view.seasonLabel].filter { !$0.isEmpty }
+        let meta = [view.dateLabel, view.seasonLabel].filter { !$0.isEmpty }
         VStack(spacing: 0) {
             VStack(spacing: 0) {
                 // The hour's sign is set into the title's upper rule, the rule itself its line; the
@@ -685,38 +962,89 @@ private struct HourTitle: View {
                 DoubleRule(lozengeColor: titleColor(view.color, p))
             }
             .frame(maxWidth: max(m.px(384), titleWidth))
-            // On a phone the date stands on its own line above the day's name, so a line never
-            // ends on the separator (the web's `.hour-meta-part:first-child` to 700px); a wide
-            // screen keeps one line. Each part is kept whole (`.hour-meta-part`), its separator
-            // bound to it by the no-break space, so a line breaks between parts, not inside one.
-            let metaLines: [[String]] = wide || meta.count < 2 ? [meta] : [[meta[0]], Array(meta.dropFirst())]
+            // The date and the season share one muted line, each kept whole (`.hour-meta-part`),
+            // its dot bound to the date by the no-break space; the day's name stands under them
+            // in the text's ink, a size up, as home titles the day (`.hour-meta-feast`).
+            // The date opens the date picker (the web's `button.hour-meta-date`), so the header
+            // carries no "Change date" label: it stays set as the line's text, dims under the finger
+            // and takes the accent while the picker is open, and VoiceOver hears a button that
+            // changes the date. The season and the day's name are read after it, as the web reads them.
             let space = ProseLayout.advance(" ", Scale.meta.uiFont(m))
             VStack(spacing: 0) {
-                ForEach(Array(metaLines.enumerated()), id: \.offset) { _, parts in
-                    MetaLine(space: space) {
-                        ForEach(Array(parts.enumerated()), id: \.offset) { i, part in
-                            Text(i < parts.count - 1 ? part + "\u{00a0}·" : part)
-                                .type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                MetaLine(space: space) {
+                    ForEach(Array(meta.enumerated()), id: \.offset) { i, part in
+                        let text = i < meta.count - 1 ? part + "\u{00a0}·" : part
+                        if i == 0 && part == view.dateLabel {
+                            Button(action: togglePicker) {
+                                Text(text).type(Scale.meta).foregroundStyle(picking ? p.accent : p.muted).multilineTextAlignment(.center)
+                            }
+                            .buttonStyle(Quiet())
+                            .accessibilityLabel(part)
+                            .accessibilityHint("Changes the date")
+                            .accessibilityValue(picking ? "Expanded" : "Collapsed")
+                        } else if let sg = seasonGloss(label: part) {
+                            GlossMark(gloss: sg, label: part, reaches: false) {
+                                Text(text).type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                            }
+                        } else {
+                            Text(text).type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                                .accessibilityLabel(part)
                         }
+                    }
+                }
+                if !view.feast.isEmpty {
+                    if !view.feastId.isEmpty {
+                        Button { model.open(.feast(view.feastId)) } label: {
+                            Text(view.feast).type(Scale.dayName).foregroundStyle(p.text)
+                                .multilineTextAlignment(.center)
+                        }
+                        .buttonStyle(Quiet())
+                        .padding(.top, m.px(1.9))
+                        .accessibilityHint("About this feast")
+                    } else if let dg = dayNameGloss(name: view.feast) {
+                        GlossMark(gloss: dg, label: view.feast, reaches: false) {
+                            Text(view.feast).type(Scale.dayName).foregroundStyle(p.text)
+                                .multilineTextAlignment(.center)
+                        }
+                        .padding(.top, m.px(1.9))
+                    } else {
+                        Text(view.feast).type(Scale.dayName).foregroundStyle(p.text)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, m.px(1.9))
                     }
                 }
             }
             .padding(.top, m.px(2))
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(meta.joined(separator: ". "))
             if date != model.today {
                 Button { model.open(.hour(model.today, view.hour)) } label: {
-                    Text("GO TO TODAY").type(Scale.menu).foregroundStyle(p.accent)
+                    Text("Go to today").type(TextStyle(size: 16, line: 25.6, tracking: 1.28, smallCaps: true)).foregroundStyle(p.accent)
                         .goldUnderline(true, p.goldLine)
                         .padding(.vertical, m.px(12))
                 }
                 .buttonStyle(Quiet())
                 .padding(.top, m.px(5.6))
             }
-            // Side by side, or one above the other when the reader's font size leaves no room.
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: m.px(12)) { disclosures }
-                VStack(spacing: 0) { disclosures }
+            // In home's foot letter, kept to one line each: Prayer form and How to read sit side by
+            // side and wrap cleanly onto two centred lines when narrow or at large Dynamic Type.
+            MetaLine(space: m.px(4)) {
+                Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label, style: Scale.smallCapsControl, upper: false) {
+                    withAnimation(disclosing(!choosing)) {
+                        choosing.toggle()
+                        picking = false
+                        reading = false
+                    } completion: {
+                        if choosing { reveal("disclosed") }
+                    }
+                }
+                Disclosure(label: Self.key.label, open: reading, style: Scale.smallCapsControl, upper: false) {
+                    withAnimation(disclosing(!reading)) {
+                        reading.toggle()
+                        choosing = false
+                        picking = false
+                    } completion: {
+                        if reading { reveal("disclosed") }
+                    }
+                }
             }
             .padding(.top, m.px(4))
             if picking {
@@ -732,7 +1060,7 @@ private struct HourTitle: View {
                     let changed = f != model.form
                     // The prayers change once the chooser has folded away, so the reader's place is
                     // held where the rows then stand, not where they stood below the open chooser.
-                    withAnimation(unfolding) { choosing = false } completion: { model.chooseForm(f) }
+                    withAnimation(disclosing(false)) { choosing = false } completion: { model.chooseForm(f) }
                     // VoiceOver hears that the prayers changed, as the web's status line says it;
                     // a moment later, so the chooser folding away does not cut it short.
                     if changed, let phrase = prayerForms.first(where: { $0.value == f })?.phrase {
@@ -744,6 +1072,14 @@ private struct HourTitle: View {
                 .id("disclosed")
                 .transition(.unfold)
             }
+            if reading {
+                ReadingKeyPanel(key: Self.key) {
+                    reading = false
+                    model.open(.about)
+                }
+                .id("disclosed")
+                .transition(.unfold)
+            }
             Hairline(color: p.lining.opacity(0.3)).padding(.top, m.px(7.2))
         }
         .padding(.top, m.px(17.6))
@@ -751,20 +1087,89 @@ private struct HourTitle: View {
         .accessibilityElement(children: .contain)
     }
 
-    @ViewBuilder private var disclosures: some View {
-        Disclosure(label: "Change date", open: picking) {
-            withAnimation(unfolding) {
-                picking.toggle()
-                choosing = false
-            }
+    /// The header's date opens and closes the date picker, closing the other header disclosures.
+    private func togglePicker() {
+        withAnimation(disclosing(!picking)) {
+            picking.toggle()
+            choosing = false
+            reading = false
+        } completion: {
+            // Once unfolded, as Android waits on the transition rather than a clock.
             if picking { reveal("disclosed") }
         }
-        Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label) {
-            withAnimation(unfolding) {
-                choosing.toggle()
-                picking = false
+    }
+}
+
+/// In-hour "How to read" legend panel (matches web's `.reading-key-panel`).
+private struct ReadingKeyPanel: View {
+    let key: ReadingKeyView
+    let onAbout: () -> Void
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        let desc = TextStyle(size: 14.1, line: 20.4)
+        VStack(alignment: .leading, spacing: 0) {
+            Text(key.title.uppercased())
+                .type(.label(11.2, 0.1))
+                .foregroundStyle(p.muted)
+                .padding(.bottom, m.px(8.8))
+                .accessibilityLabel(key.title)
+                .accessibilityAddTraits(.isHeader)
+            Hairline(color: p.border)
+            ForEach(Array(key.items.enumerated()), id: \.offset) { i, item in
+                if i > 0 { Hairline(color: p.surfaceEdge) }
+                HStack(alignment: .firstTextBaseline, spacing: m.px(12)) {
+                    markView(item)
+                        .frame(width: m.px(82), alignment: .leading)
+                    Text(item.text)
+                        .type(desc)
+                        .foregroundStyle(p.text)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.vertical, m.px(8.3))
+                .padding(.horizontal, m.px(3.2))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(item.spoken): \(item.text)")
             }
-            if choosing { reveal("disclosed") }
+            Hairline(color: p.border)
+            Button(action: onAbout) {
+                (Text(key.footBefore).foregroundColor(p.muted)
+                    + Text(key.footLink).foregroundColor(p.accent).underline(true, color: p.goldLine)
+                    + Text(key.footAfter).foregroundColor(p.muted))
+                    .type(TextStyle(size: 12.8, line: 19.2))
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            }
+            .buttonStyle(Quiet())
+            .padding(.top, m.px(10.4))
+            .accessibilityLabel("\(key.footBefore)\(key.footLink)\(key.footAfter)")
+            .accessibilityHint("Opens About the Office")
+        }
+        .frame(maxWidth: m.px(384))
+        .padding(.top, m.px(10))
+        .padding(.bottom, m.px(8))
+    }
+
+    @ViewBuilder
+    private func markView(_ item: ReadingKeyItemView) -> some View {
+        switch item.style {
+        case "rubric":
+            Text(item.mark).type(TextStyle(size: 14.1, line: 20.4, italic: true)).foregroundStyle(p.rubric).fixedSize()
+        case "titulus":
+            Text(item.mark).type(TextStyle(size: 14.1, line: 20.4, tracking: 1.1, smallCaps: true)).foregroundStyle(p.titulus).fixedSize()
+        case "unsaid":
+            Text(item.mark).type(TextStyle(size: 14.1, line: 20.4)).foregroundStyle(p.unsaid).fixedSize()
+        case "psalm":
+            let parts = item.mark.split(separator: " ", maxSplits: 1)
+            let primary = String(parts.first ?? "")
+            let secondary = parts.count > 1 ? " " + String(parts[1]) : ""
+            (Text(primary).foregroundColor(p.titulus)
+                + Text(secondary).font(Font(garamond(11.8 * m.type, lining: true))).foregroundColor(p.muted))
+                .type(TextStyle(size: 14.1, line: 20.4, lining: true))
+                .fixedSize()
+        default:
+            Text(item.mark).type(TextStyle(size: 14.1, line: 20.4)).foregroundStyle(p.text).fixedSize()
         }
     }
 }
@@ -772,9 +1177,10 @@ private struct HourTitle: View {
 /**
  * A line of the hour's date, day and season (`.hour-meta-part`), each kept whole: as many to a line
  * as fit, centred, so a line breaks between parts and never inside one, unless a part alone is
- * wider than the line, which then wraps within itself. `space` follows each part's separator.
+ * wider than the line, which then wraps within itself. `space` follows each part's separator. The feast
+ * page's rank line is set the same.
  */
-private struct MetaLine: Layout {
+struct MetaLine: Layout {
     let space: CGFloat
 
     private typealias Row = (items: [(index: Int, size: CGSize)], width: CGFloat, height: CGFloat)
@@ -822,6 +1228,7 @@ private struct MetaLine: Layout {
  * Apse vault by night, the Nave's powdering by day.
  */
 private struct Epilogue: View {
+    let leaf: EndLeaf
     let previous: String?
     let next: String?
     let morrow: String?
@@ -837,9 +1244,10 @@ private struct Epilogue: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // One mark, as painted where the bishop anointed the walls: the links and foot below carry none.
-            PaintedMark(.consecration, size: m.px(40), color: p.lining)
-                .padding(.top, m.px(26.4))
+            // One mark, as painted where the bishop anointed the walls; the way on below is parted by
+            // home's gilt points and ruled under where the wall's field begins.
+            EndCross(leaf: leaf)
+                .padding(.top, m.px(endCrossTop))
             Continuation(
                 previousLabel: "Previous hour",
                 previous: previous.map(hourLabel),
@@ -850,7 +1258,8 @@ private struct Epilogue: View {
                 next: (next ?? morrow).map(hourLabel),
                 onNext: {
                     if let next { model.open(.hour(date, next)) } else if let morrow { model.open(.hour(date.adding(days: 1), morrow)) }
-                }
+                },
+                ruled: true
             )
             .measured(m)
             .padding(.top, m.px(83.2))
@@ -877,7 +1286,7 @@ private struct Epilogue: View {
                 .padding(.top, m.px(4.8))
             }
             .background(
-                WallField(seam: air, lit: lit) { h, dark in
+                WallField(seam: air, lit: lit, sky: true) { h, dark in
                     let seam = air / h
                     return dark
                         ? [(0, 0), (m.px(16) / h, 1), (seam + 0.45 * (1 - seam), 1), (seam + 0.8 * (1 - seam), 0.5), (1, 0.25)]

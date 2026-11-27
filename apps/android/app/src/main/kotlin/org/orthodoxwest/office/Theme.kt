@@ -80,7 +80,7 @@ val Nave = Palette(
     pressedWash = Color(107, 58, 31).copy(alpha = 0.09f),
     oak = Color(0xFF3F372F),
     materialHighlight = Color.White.copy(alpha = 0.38f),
-    inscriptionGround = Color(0xFF545F54),
+    inscriptionGround = Color(0xFF4C574D),
     inscriptionEdge = Color(0xFF5E2A27),
     inscriptionWash = Color(87, 94, 65).copy(alpha = 0.055f),
     lining = Color(0xFFA85A48),
@@ -268,8 +268,18 @@ object Type {
     val brand = label(14.4f, 0.08f)
     val menu = label(12.48f, 0.08f)
     val control = label(11.52f, 0.1f)
+    /**
+     * Home's foot letter, true small capitals: the season and "Change date" at home's foot, and an
+     * hour's Prayer form under its title (`.page-hour .leader-selector > summary`).
+     */
+    val smallCapsControl = label(14.4f, 0.08f).copy(fontFeatureSettings = ALL_SMALL_CAPS)
+    /** The day's name under an hour's title, in the text's ink (`.hour-meta-feast`). */
+    val dayName = face(17.28f, 22.46f).copy(textAlign = TextAlign.Center, lineBreak = androidx.compose.ui.text.style.LineBreak.Heading)
     val small = face(12.48f, 19.97f)
 }
+
+/** The largest system font scale the type follows, as iOS caps Dynamic Type (Theme.swift). */
+const val MaxFontScale = 2f
 
 @Composable
 fun OfficeTheme(
@@ -290,9 +300,11 @@ fun OfficeTheme(
         onSurfaceVariant = palette.muted,
         outline = palette.border,
     )
-    // Text size scales every measure together, as the web scales its root.
+    // Text size scales every measure together, as the web scales its root. The system's font scale
+    // reaches the type up to twice its default, as on iOS (Theme.swift `Metrics.factor`): past that
+    // the measure breaks every line.
     val density = LocalDensity.current
-    val scaled = Density(density.density * textSize.scale, density.fontScale)
+    val scaled = Density(density.density * textSize.scale, density.fontScale.coerceAtMost(MaxFontScale))
     CompositionLocalProvider(
         LocalPalette provides palette,
         LocalOrnament provides ornament(base, season),
