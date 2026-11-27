@@ -1723,14 +1723,16 @@ test("a feast's familiar name is set apart in italic and never broken", async ({
   await expect(page.locator(".home .feast-alias")).toHaveCount(0);
 });
 
-test("a wide hour's header keeps its links on the brand's line, with none stranded", async ({ page }) => {
-  // The prayer's softened field once reached past the column and, with Large
-  // text at the 1000px threshold, past the viewport. About is reached from
-  // every wide hour (#927), beside the brand with Ordo and Reminders.
-  for (const size of ["small", "default", "large"]) {
+// One test per text size: nine wide pages each. As one test of 27 page loads it
+// ran close to the 30 s budget and timed out on a loaded CI runner.
+for (const size of ["small", "default", "large"]) {
+  test(`a wide hour's header keeps its links on the brand's line, with none stranded (${size} text)`, async ({ page }) => {
+    // The prayer's softened field once reached past the column and, with Large
+    // text at the 1000px threshold, past the viewport. About is reached from
+    // every wide hour (#927), beside the brand with Ordo and Reminders.
+    await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
     for (const width of [701, 820, 999, 1000, 1030, 1099, 1100, 1280, 1920]) {
       await page.setViewportSize({ width, height: 900 });
-      await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
       await openDatedPage(page, `/vespers/${testDate}`);
       const header = await page.evaluate(() => {
         const links = [...document.querySelectorAll(".site-menu nav a")].filter((a) => a.getClientRects().length);
@@ -1755,8 +1757,8 @@ test("a wide hour's header keeps its links on the brand's line, with none strand
       expect(header.aboutInside, `${width}px ${size} text`).toBe(true);
       expect(header.aboutPlaced, `${width}px ${size} text`).toBe(true);
     }
-  }
-});
+  });
+}
 
 test("forced colours drop the wall for the system canvas", async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active" });
