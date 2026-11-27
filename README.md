@@ -113,3 +113,9 @@ HOUR` emits the TeX alone.
 
 The site runs on Fly.io; maintainers deploy with `make deploy`, which waits for master's checks to pass. Hosting, the canonical host,
 search, and the usage metrics with their privacy rules are in [DEPLOYMENT.md](DEPLOYMENT.md).
+
+### Public API
+
+`/api/v1/…` serves days and months of the ordo as JSON for other sites to lay
+out themselves; [API.md](API.md) is the reference. It answers on every host
+without forwarding, and any origin may read it.
