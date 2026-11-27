@@ -69,13 +69,16 @@ check: fmt-check lint lint-js test validate lint-texts ## Run all formatting, st
 serve: build ## Start the web server
 	./office serve
 
-# fly deploy sends this checkout, so it must be master's newest commit, unchanged, and every check
-# GitHub ran on that commit (CI, iOS, Android) must have passed; scripts/ci_gate.py waits for them.
+# fly deploy sends this checkout, so it must be master's newest commit with nothing uncommitted, and
+# every check GitHub ran on that commit (CI, iOS, Android) must have passed; scripts/ci_gate.py waits
+# for them, with gh's token when gh is signed in (without one GitHub allows 60 requests an hour).
 deploy: ## Deploy master to Fly once every check on it has passed
 	@git fetch --quiet origin master
 	@test -z "$$(git status --porcelain)" || { echo "Commit or stash your changes first: fly deploy sends the working tree."; exit 1; }
 	@test "$$(git rev-parse HEAD)" = "$$(git rev-parse origin/master)" || { echo "Check out origin/master first: only master's checked commit is deployed."; exit 1; }
-	python3 scripts/ci_gate.py --sha "$$(git rev-parse HEAD)" --require ci.yml --exclude play.yml --exclude testflight.yml
+	GH_TOKEN="$${GH_TOKEN:-$$(gh auth token 2>/dev/null)}" python3 scripts/ci_gate.py --sha "$$(git rev-parse HEAD)" \
+		--require ci.yml --exclude play.yml --exclude testflight.yml \
+		--exclude-job "Wait for the commit's checks" --exclude-job "Publish android-preview"
 	fly deploy
 
 ordo: build ## Print text ordo for YEAR (default 2026)

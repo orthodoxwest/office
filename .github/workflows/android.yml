@@ -164,12 +164,14 @@ jobs:
           persist-credentials: false
           sparse-checkout: scripts
       # Nothing reaches readers from a commit whose CI, iOS or Android checks are red or still
-      # running (scripts/ci_gate.py). The publishers (play.yml, testflight.yml) are not waited
-      # on: they wait on the checks themselves.
+      # running (scripts/ci_gate.py). The publishers (play.yml, testflight.yml, and Android's own
+      # gate and preview release) are not waited on: they wait on the checks themselves. A run
+      # cancelled for a newer push is judged by the run that took its place. After a red check
+      # is mended by a re-run, re-run this workflow's failed jobs to publish.
       - name: Wait for every check on this commit to pass
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python3 scripts/ci_gate.py --require ci.yml --exclude play.yml --exclude testflight.yml
+        run: python3 scripts/ci_gate.py --require ci.yml --exclude play.yml --exclude testflight.yml --exclude-job "Wait for the commit's checks" --exclude-job "Publish android-preview"
 
   publish:
     name: Publish android-preview
