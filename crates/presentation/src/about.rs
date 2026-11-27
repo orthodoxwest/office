@@ -9,7 +9,8 @@
 /// One block of the About page, in reading order.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AboutBlock {
-    /// The opening epigraph verse set as red work in the painted head, with its reference.
+    /// The opening epigraph set as red work in the painted head, with its reference: one verse
+    /// to a line, the lines parted by `\n`.
     Verse { text: &'static str, cite: &'static str },
     /// The opening paragraph, set with the app's painted two-line dropped initial.
     Intro(&'static str),
@@ -17,7 +18,8 @@ pub enum AboutBlock {
     Heading(&'static str),
     /// A paragraph of prose, which may carry links.
     Paragraph(&'static str),
-    /// The painted Horologium (solar arc) and the seven hours in home's three periods ([`ABOUT_HOURS`]).
+    /// The painted Horologium (solar arc) and the hours: the seven in home's three periods
+    /// ([`ABOUT_HOURS`]), then Matins in the night ([`ABOUT_NIGHT`]).
     Hours,
     /// A quiet italic note set under the block before it.
     Note(&'static str),
@@ -130,6 +132,30 @@ pub const ABOUT_HOURS: [(&str, &[(&str, &str)]); 3] = [
     ("Evening", &[("vespers", "toward sunset"), ("compline", "late in the evening")]),
 ];
 
+/// Matins, the night office, which the table and the Horologium set after the seven, under
+/// home's fourth period. It is not yet prayed in the app ([`crate::hour_coming_soon`]): the
+/// fronts set it unlinked with [`crate::COMING_SOON`], and reminders and the hour schedule leave
+/// it out until it is.
+pub const ABOUT_NIGHT: (&str, &[(&str, &str)]) = ("Night", &[("matins", "before dawn")]);
+
+/// How far under the horizon the Horologium's night course dips, in the figure's units (the
+/// day's arc rises 104 above it): Matins stands at the foot of that course, under Sext, on the
+/// noon axis ([`about_horologium_angle`]). The figure is 16 units taller for it (320×160).
+pub const ABOUT_HOROLOGIUM_NIGHT_DEPTH: f64 = 22.0;
+
+/// The Horologium's viewBox height: the day's 144 and the night's course under it.
+pub const ABOUT_HOROLOGIUM_HEIGHT: f64 = 160.0;
+
+/// The Horologium's point for an angle, in its 320-wide viewBox: centre (160, 128), the day's
+/// arc 118 wide and 104 high above the horizon, the night's course [`ABOUT_HOROLOGIUM_NIGHT_DEPTH`]
+/// deep below it. `scale` draws a ring inside the arc (the ticks' inner ends).
+pub fn about_horologium_point(angle: f64, scale: f64) -> (f64, f64) {
+    let rad = angle.to_radians();
+    let (sin, cos) = rad.sin_cos();
+    let ry = if sin >= 0.0 { 104.0 } else { ABOUT_HOROLOGIUM_NIGHT_DEPTH };
+    (160.0 + cos * 118.0 * scale, 128.0 - sin * ry * scale)
+}
+
 /// When the hours follow the sun where the reader is ([`crate::sun`]), what the table and the
 /// Horologium say of each hour's time in place of [`ABOUT_HOURS`]' own, before today's clock
 /// time there: when the sun sets it ([`crate::sun::office_minute`]: Vespers at sunset, Prime,
@@ -171,6 +197,8 @@ pub fn about_horologium_angle(slug: &str) -> f64 {
         "none" => 62.0,
         "vespers" => 34.0,
         "compline" => 10.0,
+        // Under the horizon on the noon axis: the sign reaches it past either foot.
+        "matins" => 270.0,
         _ => 90.0,
     }
 }
@@ -178,6 +206,15 @@ pub fn about_horologium_angle(slug: &str) -> f64 {
 /// Whether the Horologium marks an hour with the crescent moon rather than the sun.
 pub fn about_horologium_is_night(slug: &str) -> bool {
     matches!(slug, "vespers" | "compline")
+}
+
+/// The Horologium's sign for an hour: `star` (Matins), `moon` (Vespers, Compline) or `sun`.
+pub fn about_horologium_sign(slug: &str) -> &'static str {
+    match slug {
+        "matins" => "star",
+        s if about_horologium_is_night(s) => "moon",
+        _ => "sun",
+    }
 }
 
 /// The miniature office leaf shown in "Reading the page".
@@ -212,19 +249,21 @@ pub const ABOUT_ORDO_COLORS: &[AboutOrdoColor] = &[
 
 /// The page, in reading order.
 pub const ABOUT: &[AboutBlock] = &[
-    AboutBlock::Verse { text: "“Seven times a day do I praise thee.”", cite: "Psalm 118 (119):164" },
+    AboutBlock::Verse {
+        text: "“Seven times a day do I praise thee.”\n“At midnight I will rise to give thanks unto thee.”",
+        cite: "Psalm 118 (119):164, 62",
+    },
     AboutBlock::Intro(
         "The Divine Office is the Church’s daily rhythm of psalms, hymns, and prayers, prayed at set \
-         hours from morning to night. This app presents the Benedictine Office of the Antiochian \
+         hours through the day, and one kept in the night. This app presents the Benedictine Office of the Antiochian \
          Western Rite Vicariate—assembled automatically for each day’s feast and season, so you can \
          simply open an hour and pray.",
     ),
-    AboutBlock::Heading("The seven hours"),
+    AboutBlock::Heading("The hours"),
     AboutBlock::Hours,
-    AboutBlock::Note("Matins, the night office, is not yet included."),
     AboutBlock::Heading("Where to begin"),
     AboutBlock::Paragraph(
-        "No one is expected to pray all seven hours at once. Most people begin with one—Prime in the \
+        "No one is expected to pray all the hours at once. Most people begin with one—Prime in the \
          morning or Compline before sleep—and add others gradually. Your parish priest can help you \
          establish a prayer rule that fits your life. Whenever you open the home page, the main button \
          takes you straight to the hour for the current time of day.",
@@ -301,9 +340,10 @@ pub const ABOUT: &[AboutBlock] = &[
     AboutBlock::OrdoRibbon,
     AboutBlock::Heading("This app"),
     AboutBlock::Paragraph(
-        "The psalms follow the Coverdale translation, and the texts are checked against the printed \
-         Western Rite books. You can set up [Reminders](/reminders) for the hours you pray, or open \
-         Settings (under Menu on a phone) to switch between the Nave and Apse themes, adjust text \
+        "The psalms follow Coverdale’s translation as printed in the 1662 Book of Common Prayer (not \
+         the 1928 revision), and the texts are checked against the printed Western Rite books. You \
+         can set up [Reminders](/reminders) for the hours you pray, or open Settings (under Menu on \
+         a phone) to switch between the Nave and Apse themes, adjust text \
          size, include the Martyrology at Prime, or display chant notation where available. The mobile \
          apps work without a connection.",
     ),
@@ -419,13 +459,12 @@ mod tests {
         assert!(crate::usage::ENDPOINT.starts_with("https://orthodoxwestbreviary.com/"));
     }
 
-    /// Every front sets the hours, their heading and their note as one column (a rail when
-    /// wide), finding the heading as the block before them: so the hours have one, and a note.
+    /// Every front sets the hours and their heading as one column (a rail when wide), finding the
+    /// heading as the block before them: so the hours have one.
     #[test]
     fn the_hours_stand_under_their_heading() {
         let at = ABOUT.iter().position(|b| *b == AboutBlock::Hours).unwrap();
         assert!(matches!(ABOUT[at - 1], AboutBlock::Heading(_)));
-        assert!(matches!(ABOUT.get(at + 1), Some(AboutBlock::Note(_))));
         assert_eq!(ABOUT.iter().filter(|b| **b == AboutBlock::Hours).count(), 1);
     }
 
@@ -440,6 +479,24 @@ mod tests {
         assert!(about_horologium_is_night("vespers"));
         assert!(about_horologium_is_night("compline"));
         assert!(!about_horologium_is_night("none"));
+    }
+
+    /// Matins stands under the horizon on the noon axis, below Sext, and the seven keep master's
+    /// places: the figure stays balanced about noon.
+    #[test]
+    fn matins_is_under_the_horizon_on_the_noon_axis() {
+        let (label, hours) = ABOUT_NIGHT;
+        assert_eq!(label, "Night");
+        assert_eq!(hours.iter().map(|(s, _)| *s).collect::<Vec<_>>(), ["matins"]);
+        assert!(crate::hour_coming_soon("matins"));
+        let (x, y) = about_horologium_point(about_horologium_angle("matins"), 1.0);
+        assert!((x - 160.0).abs() < 1e-9 && (y - (128.0 + ABOUT_HOROLOGIUM_NIGHT_DEPTH)).abs() < 1e-9);
+        assert!(y <= ABOUT_HOROLOGIUM_HEIGHT - 10.0, "room for the star under it");
+        let (sx, sy) = about_horologium_point(90.0, 1.0);
+        assert!((sx - 160.0).abs() < 1e-9 && (sy - 24.0).abs() < 1e-9);
+        assert_eq!(about_horologium_sign("matins"), "star");
+        assert_eq!(about_horologium_sign("compline"), "moon");
+        assert_eq!(about_horologium_sign("terce"), "sun");
     }
 
     #[test]

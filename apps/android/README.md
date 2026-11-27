@@ -22,7 +22,7 @@ possible without distracting from a reverent experience. The app is the web's de
 native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
 
 - **Pages.** Home (the day's frontispiece, the "Pray the hours" inscription band, the
-  invitation, the hour directory by period, "Change date"), each hour (colour band, the gold
+  invitation, the hour directory by period with Matins under Night, coming soon, "Change date"), each hour (colour band, the gold
   hairline of progress through the prayer, framed title, its date opening the date picker,
   "Prayer form", the
   office, its continuation and report link), and
@@ -30,9 +30,9 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   day rows with colour rails, ranks, and one "Office details" disclosure holding the day's
   commemorations and its hours), and the year's frontispiece (the Tabula Temporaria, each
   date leading to its day in the ordo), and About the Office (`AboutScreen.kt`: the core's
-  `about()` words, the seven hours as home's table of periods; home offers it as "Introduction"
-  beside Change date in a reader's first week). The site menu carries the day's hours, the Ordo,
-  Reminders and About (left out of a wide hour's header, as on the web), and the Theme
+  `about()` words, the hours as home's table of periods, Matins first under Night, coming
+  soon; home offers it as "Introduction" beside Change date in a reader's first week). The site menu carries the Ordo, Reminders and About
+  (the hours are on home and at each hour's end, as on the web), and the Theme
   (Default / Nave / Apse), Text (A A A) and Martyrology (Off / On) rows, and Chant (Off / On)
   once a hymn or Marian antiphon has a score: neuma (its bindings in `org.orthodoxwest.neuma`,
   from the same library) engraves the score and `Score.kt` draws it. The date picker's title
@@ -225,16 +225,20 @@ clone of `master`.
 The **Publish to Play** workflow (`.github/workflows/play.yml`) builds the bundle from `master`
 and uploads it to Google Play.
 
-- **Every merge to `master` that changes the app** goes to Internal testing and Closed testing
-  at once, with `apps/android/whatsnew.txt` as the release notes. Internal testing skips Google's
-  review and reaches the maintainers within minutes, so a bad build shows there first; Closed
-  testing reaches testers once the review passes (usually hours), and a newer merge replaces a
-  release still in review.
-- **The release notes** ("What's new") are only ever the text of `apps/android/whatsnew.txt`
-  (lines starting with `#` dropped), never anything from the merge. The same text goes with
-  every build until it is edited, and an empty file uploads builds with no notes. Edit it in the
-  pull request whose merge should carry it; a change to that file alone uploads nothing. A text
-  over Play's 500 characters stops the run before it builds.
+- **Every merge to `master` that changes the app** goes to Internal testing, with the release
+  notes since the last production release, once every check on the commit (CI, iOS, Android) has
+  passed (`scripts/ci_gate.py`); a commit with a red check is never uploaded. Internal testing
+  skips Google's review and reaches the maintainers as soon as the slowest check (usually iOS)
+  is done, so a bad build shows there first. Once a day the **Promote to
+  production** workflow (below) moves Internal's newest build up to Closed testing, which reaches
+  testers once Google's review passes (usually hours).
+- **The release notes** ("What's new") are the note files under `release-notes/` that pull
+  requests add for notable changes (`release-notes/README.md`), never anything taken from the
+  merge. A testing upload carries every note added since the newest `android/` tag (what
+  production last had out), so testers see what the public has yet to get; with none, the
+  standing line "Corrections to the texts and improvements to the app." A note alone uploads
+  nothing; the next app change carries it. A manual run's notes replace them. Closed testing
+  gets the notes the build carried on Internal testing.
 - **The public** gets a build when the **Promote to production** workflow moves it there (below),
   or when you promote it in Play Console (*Closed testing → Promote release → Production*); either
   way it is the exact build testers have been running. A manual run of Publish to Play can also upload to any
@@ -258,18 +262,29 @@ done by hand in Play Console.
 ### Promoting to production
 
 The **Promote to production** workflow (`.github/workflows/play-promote.yml`,
-`scripts/play-promote.py`) moves a build from Closed testing to production through the Play API,
-by its version code, without rebuilding. It carries the release notes the build had on Closed
-testing.
+`scripts/play-promote.py`) moves builds up Play's tracks through the Play API, by version code,
+without rebuilding: from Internal testing to Closed testing, and from there to production. Its
+production release notes are the notes added since production's newest *completed* build, so
+each note goes out once on Android; a staged, halted or replaced release may never reach
+everyone, so its notes go again with the release after it. Each run then tags that completed
+build (`android/0.1.<code>`) as the record, in a job of its own that alone holds a token able to
+push.
 
 - **Every day** at 15:00 UTC: a staged rollout the workflow started two days before is
-  finished (all users). Otherwise the newest build uploaded to Closed testing at least 24 hours
-  before, if it is newer than production's, goes to 20% of users. So a merge reaches a fifth of
-  the public 1 to 2 days after testers get it, and everyone two days later. Google's review of
-  each new release (usually hours) comes out of the 20% stage. A build's upload time is when its
-  Publish to Play run finished. A build a later merge has replaced on Closed testing still
-  qualifies, with the notes it was uploaded with (`whatsnew.txt` at its commit): merges land more
-  than once a day, so the build on Closed testing now is seldom a day old.
+  finished (all users). Otherwise Closed testing's build, if it is newer than production's and
+  has been there a day (20 hours, as GitHub starts scheduled runs late), goes to 20% of users.
+  Then, once production has Closed testing's build (at any share), Internal testing's newest build
+  moves up to Closed testing. So testers get one build a day, the public a fifth of it a day
+  later and everyone two days after that. Google's review of each release (usually hours) comes
+  out of those stages.
+- **Why a day on Closed testing, not a day since upload:** Play's API can release only a build
+  some track still holds. Merges land more than once a day and each replaces the build on Internal
+  testing, so a build picked from older uploads is usually gone ("APK version codes could not be
+  found"), though Play Console still lists it. A build on Closed testing stays there until the
+  workflow moves the next one up, which waits until production has it.
+- **The Closed testing release's name** ("0.1.130 tested from 2026-11-13T15:00Z") records when
+  the workflow moved it there. A build put on Closed testing another way (by hand, or a manual
+  run of Publish to Play) has no such name and counts as a day old.
 - **The staged release's name** in Play Console ("0.1.120 staged 2026-11-12T15:00Z") records when
   it started; that is how the next runs know its age.
 - **Halting** a rollout in Play Console (*Production → Halt rollout*), or starting one there,

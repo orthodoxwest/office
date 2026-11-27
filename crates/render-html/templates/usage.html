@@ -66,6 +66,16 @@
     <p class="usage-splits-note">At its time is by the reader’s own clock, as home’s invitation reckons it. Prayed is read to the end at a praying pace, as home marks it.</p>
     {% if habits %}<dl class="usage-office-totals usage-settings usage-habits">{% for o in habits %}<div><dt>{{ o.name }}</dt><dd><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect width="{{ o.width }}" height="8"/></svg><span class="usage-share">{{ o.value }}</span><span class="usage-count">{{ o.detail }}</span></dd></div>{% endfor %}</dl>{% endif %}
   </section>{% endif %}
+  {% if builds %}<section class="usage-panel" aria-labelledby="usage-builds-title">
+    <div class="usage-section-heading"><div><h2 id="usage-builds-title">App builds</h2><p>Share of each app’s readers in the last 7 days on a build or a newer one, and how long after its first day half and nine in ten were</p></div></div>
+    {% for app in builds %}<table class="usage-table usage-keeping usage-builds">
+      <caption>{{ app.name }}</caption>
+      <thead><tr><th scope="col">Build</th><th scope="col">First day</th><th scope="col">On it or newer</th><th scope="col">Half</th><th scope="col">Nine in ten</th></tr></thead>
+      <tbody>{% for b in app.builds %}<tr><th scope="row">{{ b.build }}</th><td>{{ b.first }}</td><td>{{ b.now }}</td><td>{% if b.half %}{{ b.half }}{% else %}<span aria-hidden="true">–</span><span class="sr-only">not yet</span>{% endif %}</td><td>{% if b.most %}{{ b.most }}{% else %}<span aria-hidden="true">–</span><span class="sr-only">not yet</span>{% endif %}</td></tr>{% endfor %}</tbody>
+    </table>
+    {% if app.older and app.older != "0%" %}<p class="usage-splits-note">{{ app.older }} of its readers have a build from before builds reported their number.</p>{% endif %}{% endfor %}
+    <p class="usage-splits-note">A build’s number is the count of the project’s commits it was built from, on Android and iOS alike: a correction merged at commit N is in build N and every one after it. Half and nine in ten are read day by day, so at a few readers a day they can come early by chance.</p>
+  </section>{% endif %}
   <section class="usage-panel" aria-labelledby="usage-settings-title">
     <div class="usage-section-heading"><div><h2 id="usage-settings-title">Settings in use</h2><p>Each setting’s share of the period’s reports: a reader counts once a day in each</p></div></div>
     {% if settings %}<dl class="usage-office-totals usage-settings">{% for o in settings %}<div><dt>{{ o.name }}</dt><dd><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect width="{{ o.width }}" height="8"/></svg><span class="usage-share">{{ o.value }}</span><span class="usage-count">{{ o.detail }}</span></dd></div>{% endfor %}</dl>{% else %}<p class="usage-splits-note">Nothing reported in this period.</p>{% endif %}

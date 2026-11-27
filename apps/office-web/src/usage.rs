@@ -10,7 +10,8 @@ use axum::body::Body;
 use axum::http::{HeaderMap, Method, Response, StatusCode, Uri, header};
 use calendar::Date;
 use presentation::usage::{
-    DIMENSIONS, ENDPOINT_HEADER, HOURS, advertised_endpoint, dimension_key, endpoint_for, offices_scope, parse_event, valid_scope,
+    BUILD_HEADER, DIMENSIONS, ENDPOINT_HEADER, HOURS, advertised_endpoint, build_of, build_scope, dimension_key, endpoint_for,
+    offices_scope, parse_event, valid_scope,
 };
 use render_html::usage::UsageDay;
 use rusqlite::{Connection, params};
@@ -171,9 +172,10 @@ CREATE TABLE IF NOT EXISTS seen (
     }
 
     /// Counts a browser once per day for the site, the page scope, and each
-    /// dimension. Only a per-day hash of the cookie is stored.
+    /// dimension, an app's build among them (`build:android:2009`). Only a per-day hash of the
+    /// cookie is stored.
     pub fn record(&self, now: jiff::Timestamp, browser: &str, scope: &str, dimensions: &[String]) -> Result<(), String> {
-        if !valid_scope(scope) || dimensions.iter().any(|d| dimension_key(d).is_none()) {
+        if !valid_scope(scope) || dimensions.iter().any(|d| dimension_key(d).is_none() && build_of(d).is_none()) {
             return Err("invalid usage event".into());
         }
         let today = eastern_day(now);
@@ -288,7 +290,7 @@ CREATE TABLE IF NOT EXISTS seen (
                 "site" => r.users = n,
                 "ordo" => r.ordo = n,
                 "reminders" => r.reminders = n,
-                s if dimension_key(s).is_some() => {
+                s if dimension_key(s).is_some() || build_of(s).is_some() => {
                     r.dimensions.insert(scope, n);
                 }
                 s => {
@@ -503,7 +505,9 @@ fn event_at(
     let new = cookie(headers, NEW_COOKIE).as_deref() == Some("1");
     let flag = |name: &str| cookie(headers, name).as_deref() == Some("1");
     let periods = PERIOD_COOKIES.map(|(_, period, opened)| (flag(period), flag(opened)));
-    let dimensions = settle_periods(settle_visit(event.dimensions, seen, new), periods);
+    let mut dimensions = settle_periods(settle_visit(event.dimensions, seen, new), periods);
+    // An app's build, from its header: counted beside the beacon's words, never one of them.
+    dimensions.extend(build_scope(&dimensions, header_value(headers, BUILD_HEADER)));
     // Only a browser sends an Origin; the apps keep their own first day and take no cookies.
     if !origin.is_empty() {
         let mut flags = vec![format!("{SEEN_COOKIE}=1; Path=/api/usage; Max-Age=34560000; HttpOnly{secure}; SameSite=Strict")];
@@ -950,6 +954,41 @@ mod tests {
         ] {
             assert_eq!(sum(scope), n, "{scope}");
         }
+    }
+
+    // An app's beacon carries its build on a header of its own: each reader counts once a day under
+    // the build, which the report reads back beside the clients. A browser's header, or one that is
+    // not a build number, is ignored and the beacon still counts.
+    #[test]
+    fn app_builds_count_once_a_day_beside_the_words() {
+        let db = TempDb::new("builds");
+        let store = db.open();
+        let post = |id: &str, body: &str, build: &str| {
+            let mut headers = HeaderMap::new();
+            headers.insert("x-office-usage", "1".parse().unwrap());
+            headers.insert(header::USER_AGENT, "DivineOffice/0.1.2009 (Android 15)".parse().unwrap());
+            headers.insert(header::COOKIE, format!("office-usage={id}").parse().unwrap());
+            if !build.is_empty() {
+                headers.insert(BUILD_HEADER, build.parse().unwrap());
+            }
+            handle_event(Some(&store), &Method::POST, &headers, "office.fly.dev", None, Some(body.as_bytes().to_vec())).status()
+        };
+        let a = "0123456789abcdef0123456789abcdef";
+        let b = "fedcba9876543210fedcba9876543210";
+        let c = "00112233445566778899aabbccddeeff";
+        assert_eq!(post(a, "lauds client:android", "2009"), StatusCode::NO_CONTENT);
+        assert_eq!(post(a, "vespers client:android", "2009"), StatusCode::NO_CONTENT);
+        assert_eq!(post(b, "lauds client:ios", "2010"), StatusCode::NO_CONTENT);
+        assert_eq!(post(c, "lauds client:android", "not-a-build"), StatusCode::NO_CONTENT);
+        assert_eq!(post(c, "prime client:browser", "2010"), StatusCode::NO_CONTENT);
+        let sum = |scope: &str| count(&store, &format!("SELECT COALESCE(SUM(users), 0) FROM totals WHERE scope = '{scope}'"));
+        assert_eq!(sum("site"), 3);
+        assert_eq!(sum("build:android:2009"), 1);
+        assert_eq!(sum("build:ios:2010"), 1);
+        assert_eq!(count(&store, "SELECT COUNT(*) FROM totals WHERE scope LIKE 'build:%'"), 2);
+        let rows = store.daily(jiff::Timestamp::now(), 1).unwrap();
+        assert_eq!(rows[0].dimensions.get("build:android:2009"), Some(&1));
+        assert_eq!(rows[0].dimensions.get("build:ios:2010"), Some(&1));
     }
 
     // Safari erases a page's storage after seven days without a visit, so a weekly reader's page

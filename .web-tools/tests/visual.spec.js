@@ -121,8 +121,8 @@ test("mobile menu — light", async ({ page }) => {
   await expect(page).toHaveScreenshot("menu-open-light.png");
 });
 
-// Hour pages add the Morning / Day / Evening bands above Ordo and the
-// preferences; dark checks the panel's rules and underlines on the night.
+// Hour pages add the preferences under Ordo, Reminders and About; dark
+// checks the panel's rules and underlines on the night.
 test("mobile hour menu — dark", async ({ page }) => {
   await openForSnapshot(page, `/lauds/${testDate}`, "dark");
   await page.getByText("Menu", { exact: true }).click();

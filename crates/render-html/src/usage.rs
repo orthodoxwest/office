@@ -75,6 +75,33 @@ pub struct UsageClient {
     pub new: i64,
 }
 
+/// A build's row in "App builds".
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct UsageBuild {
+    pub build: u32,
+    /// The day it was first counted ("Nov 23"), or "by Nov 1" when it was already counted on the
+    /// first day the report reads.
+    pub first: String,
+    /// The share of the client's readers over the last seven completed days on it or a newer
+    /// build ("64%"), and its bar, 0–100.
+    pub now: String,
+    pub width: String,
+    /// Days from its first day to the first completed day half, and nine in ten, of the client's
+    /// readers were on it or newer ("3 days"); empty while it has not, or when its first day is
+    /// out of reach.
+    pub half: String,
+    pub most: String,
+}
+
+/// A native app's builds in readers' hands.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct UsageBuilds {
+    pub name: String,
+    pub builds: Vec<UsageBuild>,
+    /// Builds older than any that reports, as the share of the last seven days' readers.
+    pub older: String,
+}
+
 /// An hour's row in "How they keep the hours": of the readers whose client says so, the share who
 /// opened it at its own time, and who prayed it to the end.
 #[derive(Clone, Debug, Default, Serialize)]
@@ -197,6 +224,8 @@ pub struct UsageData {
     /// The share of readers whose client reports these.
     pub habits_note: String,
     pub hours: Vec<String>,
+    /// Each native app's builds, newest first; empty until a build reports.
+    pub builds: Vec<UsageBuilds>,
     /// The newest days, then the rest of the window.
     pub rows: Vec<UsageDay>,
     pub more_rows: Vec<UsageDay>,
@@ -361,6 +390,7 @@ pub fn usage_data(
     d.clients = clients(&all, corrections.released, &year);
     breakdowns(&mut d, &all, window, &year);
     habits(&mut d, &all, window);
+    d.builds = builds(&all, window, &year);
     for (day, why) in corrections.test_days {
         if window.iter().any(|r| r.day == *day) {
             d.corrections.push(format!("{}: {why}. The day is shown, but left out of every average, share and scale.", label(day)));
@@ -719,6 +749,79 @@ fn clients(all: &[UsageDay], released: &[(&str, &str, &str)], year: &str) -> Vec
         .collect()
 }
 
+/// Builds shown for each app: those its readers had in the window, newest first.
+const BUILD_ROWS: usize = 6;
+
+/// Each native app's builds in readers' hands, for "how long until a correction reaches them":
+/// a correction merged at master's Nth commit is in every build numbered N or more (see
+/// `presentation::usage::BUILD_HEADER`). A day's share of a build is the app's readers that day
+/// on it or a newer one, against all the app's readers, so builds too old to say their number
+/// count below every build.
+fn builds(all: &[UsageDay], window: &[UsageDay], year: &str) -> Vec<UsageBuilds> {
+    let counts = |row: &UsageDay, client: &str| -> Vec<(u32, i64)> {
+        row.dimensions
+            .iter()
+            .filter_map(|(k, &n)| presentation::usage::build_of(k).filter(|(c, _)| *c == client).map(|(_, b)| (b, n)))
+            .collect()
+    };
+    let completed = all.get(1..).unwrap_or_default();
+    let week: Vec<&UsageDay> = completed.iter().take(7).filter(|r| !r.excluded).collect();
+    CLIENT_NAMES
+        .iter()
+        .filter_map(|(client, name)| {
+            let readers = |row: &UsageDay| dim(row, &format!("client:{client}")).max(counts(row, client).iter().map(|c| c.1).sum());
+            let on_or_after = |row: &UsageDay, build: u32| counts(row, client).iter().filter(|c| c.0 >= build).map(|c| c.1).sum::<i64>();
+            let mut shown: Vec<u32> = window.iter().flat_map(|r| counts(r, client)).filter(|c| c.1 > 0).map(|c| c.0).collect();
+            shown.sort_unstable_by(|a, b| b.cmp(a));
+            shown.dedup();
+            shown.truncate(BUILD_ROWS);
+            if shown.is_empty() {
+                return None;
+            }
+            let week_readers: i64 = week.iter().map(|r| readers(r)).sum();
+            let builds = shown
+                .into_iter()
+                .map(|build| {
+                    // Oldest first, from the day it was first counted.
+                    let first = all.iter().rposition(|r| counts(r, client).iter().any(|c| c.0 == build && c.1 > 0)).unwrap_or(0);
+                    let edge = first + 1 == all.len();
+                    let reached = |tenths: i64| -> String {
+                        if edge {
+                            return String::new();
+                        }
+                        (1..=first)
+                            .rev()
+                            .find(|&i| {
+                                let r = &all[i];
+                                !r.excluded && readers(r) > 0 && 10 * on_or_after(r, build) >= tenths * readers(r)
+                            })
+                            .map_or(String::new(), |i| match first - i {
+                                0 => "Same day".into(),
+                                1 => "1 day".into(),
+                                n => format!("{n} days"),
+                            })
+                    };
+                    let on: i64 = week.iter().map(|r| on_or_after(r, build)).sum();
+                    UsageBuild {
+                        build,
+                        first: if edge { format!("by {}", date_label(&all[first].day, year)) } else { date_label(&all[first].day, year) },
+                        now: if week_readers > 0 { percent(on, week_readers) } else { String::new() },
+                        width: format_float((100.0 * on as f64 / week_readers.max(1) as f64).round()),
+                        half: reached(5),
+                        most: reached(9),
+                    }
+                })
+                .collect();
+            let reporting: i64 = week.iter().map(|r| counts(r, client).iter().map(|c| c.1).sum::<i64>()).sum();
+            Some(UsageBuilds {
+                name: name.to_string(),
+                builds,
+                older: if week_readers > 0 { percent(week_readers - reporting, week_readers) } else { String::new() },
+            })
+        })
+        .collect()
+}
+
 /// What the window's readers opened, and the settings they read with.
 fn breakdowns(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay], year: &str) {
     let readers = total(window, |r| r.users);
@@ -986,6 +1089,33 @@ mod tests {
             .enumerate()
             .map(|(i, n)| row(&presentation::date_slug(start.add_days(-(i as i32))), n))
             .collect()
+    }
+
+    // Build 105 reaches Android's readers over five days beside 100, which was already out when
+    // the record begins; a few readers keep a build too old to say its number.
+    #[test]
+    fn app_builds_say_how_soon_readers_had_them() {
+        let builds: [(i64, i64); 10] = [(9, 0), (9, 0), (8, 0), (6, 2), (4, 4), (2, 6), (0, 8), (0, 8), (0, 8), (0, 8)];
+        let rows = days(10, &[10; 9])
+            .into_iter()
+            .zip(builds)
+            .map(|(r, (new, old))| {
+                let mut dims = vec![("client:android", 10)];
+                dims.extend([("build:android:105", new), ("build:android:100", old)].into_iter().filter(|d| d.1 > 0));
+                with(r, &dims)
+            })
+            .collect();
+        let d = data(rows, 30, "2026-09-01");
+        assert_eq!(d.builds.len(), 1, "iOS reported no build");
+        let app = &d.builds[0];
+        assert_eq!(app.name, "Android app");
+        let shown: Vec<_> =
+            app.builds.iter().map(|b| (b.build, b.first.as_str(), b.now.as_str(), b.half.as_str(), b.most.as_str())).collect();
+        assert_eq!(shown, [(105, "Oct 1", "41%", "2 days", "4 days"), (100, "by Sep 27", "81%", "", "")]);
+        // 13 of the week's 70 readers said no build.
+        assert_eq!(app.older, "19%");
+        let html = crate::Pages::new(|name| crate::links::static_url(name, "test")).unwrap().usage(&d).unwrap();
+        assert!(html.contains("App builds") && html.contains("<caption>Android app</caption>"), "{html}");
     }
 
     #[test]

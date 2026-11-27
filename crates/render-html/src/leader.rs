@@ -4,7 +4,7 @@
 use liturgy::{OfficeElement, OfficeHour, PrayerForm};
 
 use crate::escape::html_escape_string;
-use crate::html::render_section_elements;
+use crate::html::{POSTURE_OPEN, render_section_elements};
 
 /// A section rendered for every prayer form at once.
 #[derive(Clone, Debug, PartialEq, Eq, serde::Serialize)]
@@ -78,10 +78,11 @@ pub fn leader_sections(forms: &[(PrayerForm, &OfficeHour)]) -> Result<Vec<Leader
                 positions[fi] = end;
             }
             if first.leader_slot.is_empty() {
-                if groups[1..].iter().any(|g| *g != groups[0]) {
-                    return Err("unmarked leader variation".into());
+                if groups[1..].iter().all(|g| *g == groups[0]) {
+                    html.push_str(&render_section_elements(groups[0]));
+                } else {
+                    html.push_str(&posture_variation(forms, &groups).ok_or("unmarked leader variation")?);
                 }
-                html.push_str(&render_section_elements(groups[0]));
                 continue;
             }
             let available: Vec<&str> = forms.iter().zip(&groups).filter(|(_, g)| !g.is_empty()).map(|((f, _), _)| f.as_str()).collect();
@@ -122,6 +123,32 @@ pub fn leader_sections(forms: &[(PrayerForm, &OfficeHour)]) -> Result<Vec<Leader
         });
     }
     Ok(sections)
+}
+
+/// A common run whose forms differ only in posture cues, as the Little Hours
+/// do (cued when a priest or deacon leads): rendered once with the cues, each
+/// tagged with the forms that take them. The forms that differ must carry the
+/// same cues and the rest none, or the run is an unmarked variation.
+fn posture_variation(forms: &[(PrayerForm, &OfficeHour)], groups: &[&[OfficeElement]]) -> Option<String> {
+    let bare =
+        |g: &[OfficeElement]| -> Vec<OfficeElement> { g.iter().map(|e| OfficeElement { postures: Vec::new(), ..e.clone() }).collect() };
+    let cued = |g: &[OfficeElement]| g.iter().any(|e| !e.postures.is_empty());
+    let template = groups.iter().find(|g| cued(g))?;
+    let shared = bare(template);
+    let mut leaders = Vec::new();
+    for ((form, _), group) in forms.iter().zip(groups) {
+        if bare(group) != shared {
+            return None;
+        }
+        if cued(group) {
+            if group != template {
+                return None;
+            }
+            leaders.push(form.as_str());
+        }
+    }
+    let tagged = format!("{POSTURE_OPEN} data-leaders=\"{}\"", leaders.join(" "));
+    Some(render_section_elements(template).replace(POSTURE_OPEN, &tagged))
 }
 
 #[cfg(test)]
@@ -209,5 +236,34 @@ mod tests {
         // legitimate form variation.
         hours[0].sections[0].elements.remove(0);
         assert!(sections(&hours).is_err(), "accepted missing common prayer");
+    }
+
+    #[test]
+    fn tag_posture_cues_only_some_forms_take() {
+        use liturgy::{Posture, PostureAnchor, PostureCue};
+        let psalm = "Psalm 70\n\nHASTE thee, O God, to deliver me * make haste to help me, O Lord.\n2. Let them be ashamed and confounded * that seek after my soul.";
+        let mut hours: Vec<OfficeHour> = PrayerForm::ALL
+            .iter()
+            .map(|&form| {
+                let mut p = el(ElementType::Psalm, psalm, "");
+                if form != PrayerForm::Private {
+                    p.postures = vec![
+                        PostureCue::new(Posture::Sit, PostureAnchor::AfterMediant(0)),
+                        PostureCue::new(Posture::Stand, PostureAnchor::AfterMediant(1)),
+                    ];
+                }
+                hour(form, vec![p])
+            })
+            .collect();
+        let html = &sections(&hours).unwrap()[0].html;
+        assert_eq!(html.matches("make haste").count(), 1, "psalm not shared: {html}");
+        assert_eq!(html.matches(r#"<span class="posture gloss-quiet" data-leaders="deacon priest""#).count(), 2, "{html}");
+        // Cues that differ between the cued forms are not a posture variation.
+        hours[1].sections[0].elements[0].postures.pop();
+        assert!(sections(&hours).is_err(), "accepted differing cues");
+        // Nor is a text change hiding behind the cues.
+        hours[1].sections[0].elements[0].postures = hours[2].sections[0].elements[0].postures.clone();
+        hours[0].sections[0].elements[0].text = "unexpected variant".into();
+        assert!(sections(&hours).is_err(), "accepted text variation beside cues");
     }
 }

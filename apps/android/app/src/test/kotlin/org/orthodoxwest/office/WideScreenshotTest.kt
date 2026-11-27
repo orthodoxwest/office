@@ -133,6 +133,20 @@ class WideScreenshotTest {
 
     @Test
     @Config(qualifiers = "w800dp-h1280dp-mdpi")
+    fun tabletHomeApse() { show(Page.Home(lent), ThemeChoice.APSE); shoot("tablet-home-apse") }
+
+    @Test fun aboutApse() { show(Page.About, ThemeChoice.APSE); shoot("about-apse") }
+
+    @Test
+    @Config(qualifiers = "w800dp-h2400dp-mdpi")
+    fun tabletAbout() { show(Page.About, ThemeChoice.NAVE); shoot("tablet-about") }
+
+    @Test
+    @Config(qualifiers = "w800dp-h2400dp-mdpi")
+    fun tabletAboutApse() { show(Page.About, ThemeChoice.APSE); shoot("tablet-about-apse") }
+
+    @Test
+    @Config(qualifiers = "w800dp-h1280dp-mdpi")
     fun tabletLauds() { show(Page.Hour(lent, "lauds"), ThemeChoice.APSE); shoot("tablet-lauds") }
 
     @Test
