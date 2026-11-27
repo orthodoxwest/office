@@ -1347,7 +1347,7 @@ pub struct AboutHourView {
     pub coming_soon: bool,
 }
 
-/// One of the table's periods (Night, Morning, Day, Evening).
+/// One of the table's periods (Morning, Day, Evening, Night).
 #[derive(Clone, Debug, PartialEq, uniffi::Record)]
 pub struct AboutPeriodView {
     pub label: String,
@@ -1486,8 +1486,10 @@ pub fn about() -> AboutView {
             AboutBlock::Invitation => block("invitation"),
         })
         .collect();
-    let periods = std::iter::once(&presentation::about::ABOUT_NIGHT)
-        .chain(ABOUT_HOURS.iter())
+    // The seven, then Matins in the Night, as home reads.
+    let periods = ABOUT_HOURS
+        .iter()
+        .chain(std::iter::once(&presentation::about::ABOUT_NIGHT))
         .map(|(label, hours)| AboutPeriodView {
             label: (*label).into(),
             hours: hours

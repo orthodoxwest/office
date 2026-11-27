@@ -688,7 +688,7 @@ private struct AboutHorologium: View {
                                 .allowsHitTesting(false)
                         }
 
-                        // 44pt tap targets over each station (Apple's minimum), Matins' first
+                        // 44pt tap targets over each station (Apple's minimum), Matins' last
                         ForEach(Array(hours.enumerated()), id: \.offset) { _, hr in
                             let rad = hr.angle * .pi / 180.0
                             let px = w * CGFloat((160.0 + cos(rad) * 118.0) / 320.0)

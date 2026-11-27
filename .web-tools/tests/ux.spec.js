@@ -647,13 +647,13 @@ test("the invitation names First Vespers on the eve of a feast", async ({ page }
 });
 
 // While an hour is now its period's sign is lit and the others stand back
-// (Night's too, while Matins is not yet prayed here); with no hour now all
-// four rest alike (the apps' periodSignAlpha).
+// (Night's too, after the evening, while Matins is not yet prayed here); with
+// no hour now all four rest alike (the apps' periodSignAlpha).
 test("home lights the sign of the period whose hour is now", async ({ page }) => {
   const signs = () => page.locator(".home-period-ornament").evaluateAll((els) => els.map((el) => getComputedStyle(el).opacity));
   await page.clock.setFixedTime(new Date("2026-03-15T18:00:00-04:00"));
   await openDatedPage(page, `/?date=${testDate}`);
-  await expect.poll(signs).toEqual(["0.52", "0.52", "0.52", "1"]);
+  await expect.poll(signs).toEqual(["0.52", "0.52", "1", "0.52"]);
   await openDatedPage(page, "/?date=2026-03-16");
   await expect.poll(signs).toEqual(["0.9", "0.9", "0.9", "0.9"]);
 });
@@ -7780,12 +7780,14 @@ test("subtle details: Horologium stars and keys, Specimen clergy note and revers
   expect(await page.locator(".about-horologium-stars path").count()).toBe(8);
   expect(await page.locator(".about-horologium-stars circle").count()).toBe(0);
   const firstStop = page.locator(".about-horologium-stop").first();
-  // The stops run from Matins, in the night, through the day to Compline.
+  // The stops run as the table reads, from Lauds through the day to Compline, then Matins in the night.
   await firstStop.focus();
   await page.keyboard.press("ArrowRight");
-  await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "lauds");
+  await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "prime");
   await expect(page.locator(".about-horologium-title em .sr-only")).toHaveText(", ");
   await page.keyboard.press("End");
+  await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "matins");
+  await page.keyboard.press("ArrowLeft");
   await expect(page.locator(".about-horologium")).toHaveAttribute("data-active", "compline");
 
   // 2. Specimen leaf: Deacon vs Priest note and bidirectional line -> key illumination.

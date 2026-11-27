@@ -3,7 +3,7 @@ import UIKit
 
 private let homeGlossesShared = homeGlosses()
 
-/// Home's Night row, set before the day's three periods: Matins, which the app does not yet pray,
+/// Home's Night row, set after the day's three periods: Matins, which the app does not yet pray,
 /// so it is no link, never the hour that is now, and takes no part in the light or the marks of
 /// hours prayed (the web's `.home-hour-group-night`). Its words are the core's (`home_night`).
 private let homeNightShared = homeNight()
@@ -1167,20 +1167,6 @@ private struct HourDirectory: View {
         let widest = ([night.label] + periods.map(\.label)).map { ProseLayout.advance($0, font) + label.tracking * m.type * CGFloat($0.count) }.max() ?? 0
         let labelWidth = max(widest + m.px(8), m.px(desk ? 80 : 83))
         VStack(spacing: 0) {
-            // The Night first: Matins alone and centred in its band, coming soon.
-            Group {
-                if tier.list {
-                    HourList(period: .night, label: night.label, hours: [night.hour], current: current, light: light, prayed: prayed, tier: tier, now: now, home: home, labelStyle: label, labelInk: labelInk, night: night, open: open)
-                } else {
-                    HStack(spacing: 0) {
-                        periodHead(.night, night.label, [night.hour], label: label, labelInk: labelInk, width: labelWidth, night: true)
-                        Color.clear.frame(width: 1)
-                        soonCell(night)
-                            .frame(minHeight: tier.soonInline || tier.desk ? 0 : m.px(tier.row))
-                    }
-                }
-            }
-            .modifier(HourBand(i: 0))
             ForEach(Array(periods.enumerated()), id: \.offset) { i, row in
                 Group {
                     if tier.list {
@@ -1198,8 +1184,22 @@ private struct HourDirectory: View {
                         }
                     }
                 }
-                .modifier(HourBand(i: i + 1))
+                .modifier(HourBand(i: i))
             }
+            // The Night last, after the evening: Matins alone and centred in its band, coming soon.
+            Group {
+                if tier.list {
+                    HourList(period: .night, label: night.label, hours: [night.hour], current: current, light: light, prayed: prayed, tier: tier, now: now, home: home, labelStyle: label, labelInk: labelInk, night: night, open: open)
+                } else {
+                    HStack(spacing: 0) {
+                        periodHead(.night, night.label, [night.hour], label: label, labelInk: labelInk, width: labelWidth, night: true)
+                        Color.clear.frame(width: 1)
+                        soonCell(night)
+                            .frame(minHeight: tier.soonInline || tier.desk ? 0 : m.px(tier.row))
+                    }
+                }
+            }
+            .modifier(HourBand(i: periods.count))
         }
         .padding(.bottom, 1)
         .overlay(alignment: .bottom) {
