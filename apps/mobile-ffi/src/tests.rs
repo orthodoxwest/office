@@ -75,6 +75,23 @@ fn composes_what_the_web_composes() {
 }
 
 #[test]
+fn the_little_hours_show_posture_cues_when_a_priest_or_deacon_leads() {
+    let core = OfficeCore::new().unwrap();
+    let cues = |hour: &str, form: &str| {
+        let view = core.compose(hour.into(), 2026, 10, 4, form.into(), false, false).unwrap();
+        format!("{:?}", view.sections).matches("style: Posture").count()
+    };
+    for hour in ["prime", "terce", "sext", "none"] {
+        assert_eq!(cues(hour, "private"), 0, "{hour}");
+        assert!(cues(hour, "priest") > 0 && cues(hour, "deacon") == cues(hour, "priest"), "{hour}");
+    }
+    for hour in ["lauds", "vespers"] {
+        assert!(cues(hour, "private") > 0 && cues(hour, "priest") == cues(hour, "private"), "{hour}");
+    }
+    assert_eq!(cues("compline", "priest"), 0);
+}
+
+#[test]
 fn the_martyrology_setting_reads_tomorrows_entry_at_prime() {
     let core = OfficeCore::new().unwrap();
     let text = |v: &HourView| format!("{:?}", v.sections);
@@ -160,7 +177,7 @@ fn home_invites_to_the_current_office_only_today() {
     assert_eq!((home.pray_now_label.as_str(), home.current_hour.as_str()), ("Pray Vespers", "vespers"));
     assert_eq!(home.pray_now_gloss, "Evening prayer");
     assert_eq!(crate::hour_note("prime".into()), "Prayer as work begins");
-    assert_eq!(crate::hour_note("matins".into()), "");
+    assert_eq!(crate::hour_note("matins".into()), "The night office");
     // Compline after midnight belongs to yesterday, and marks no hour today.
     let late = core.home(today, today, 1).unwrap();
     assert_eq!((late.pray_now_hour.as_str(), late.pray_now_date, late.current_hour.as_str()), ("compline", civil(2026, 3, 14), ""));
@@ -176,12 +193,16 @@ fn home_invites_to_the_current_office_only_today() {
 fn home_says_first_vespers_on_the_eve_of_a_feast() {
     let core = OfficeCore::new().unwrap();
     let eve = civil(2026, 12, 24);
-    assert_eq!(core.home(eve, eve, 18).unwrap().pray_now_gloss, "First Vespers of the Nativity of Our Lord");
-    assert_eq!(core.home(eve, eve, 21).unwrap().pray_now_gloss, "Prayer before sleep");
+    // The flag the wide niche reads to keep the gloss under its invitation (#959).
+    let vespers = core.home(eve, eve, 18).unwrap();
+    assert_eq!((vespers.pray_now_gloss.as_str(), vespers.pray_now_eve), ("First Vespers of the Nativity of Our Lord", true));
+    let compline = core.home(eve, eve, 21).unwrap();
+    assert_eq!((compline.pray_now_gloss.as_str(), compline.pray_now_eve), ("Prayer before sleep", false));
     let saturday = civil(2026, 11, 28);
     assert_eq!(core.home(saturday, saturday, 18).unwrap().pray_now_gloss, "First Vespers of I Sunday of Advent");
     let plain = civil(2026, 12, 23);
-    assert_eq!(core.home(plain, plain, 18).unwrap().pray_now_gloss, "Evening prayer");
+    let evening = core.home(plain, plain, 18).unwrap();
+    assert_eq!((evening.pray_now_gloss.as_str(), evening.pray_now_eve), ("Evening prayer", false));
 }
 
 #[test]
@@ -203,6 +224,32 @@ fn about_lights_and_invites_to_the_hour_home_does() {
     let web = &blocks[blocks.len() - 2];
     assert_eq!(web.kind, "paragraph");
     assert!(web.runs.iter().any(|r| r.link == "https://orthodoxwestbreviary.com"));
+}
+
+/// Matins closes About's table and home's hours under Night, after the evening, coming soon: no link and no part in
+/// the hour now, nor in reminders, until the app prays it.
+#[test]
+fn matins_is_shown_coming_soon_under_night() {
+    let about = crate::about();
+    let labels: Vec<&str> = about.periods.iter().map(|p| p.label.as_str()).collect();
+    assert_eq!(labels, ["Morning", "Day", "Evening", "Night"]);
+    let night = about.periods.last().unwrap();
+    assert_eq!(night.label, "Night");
+    let matins = &night.hours[0];
+    assert_eq!((matins.hour.as_str(), matins.name.as_str(), matins.gloss.as_str()), ("matins", "Matins", "The night office"));
+    assert!(matins.coming_soon && matins.sign == "star" && matins.angle == 270.0);
+    assert!(about.periods[..3].iter().flat_map(|p| &p.hours).all(|h| !h.coming_soon && h.sign != "star"));
+    assert_eq!(about.coming_soon, "coming soon");
+    assert_eq!((about.horologium_height, about.horologium_night_depth), (160.0, 22.0));
+    let home = crate::home_night();
+    assert_eq!((home.label.as_str(), home.hour.as_str(), home.name.as_str()), ("Night", "matins", "Matins"));
+    assert_eq!((home.gloss.as_str(), home.coming_soon.as_str()), ("The night office", "coming soon"));
+    assert!(crate::reminder_periods().iter().all(|p| !p.hours.iter().any(|h| h == "matins")));
+    let core = OfficeCore::new().unwrap();
+    let today = civil(2026, 3, 15);
+    for hour in 0..24 {
+        assert_ne!(core.home(today, today, hour).unwrap().current_hour, "matins", "{hour}");
+    }
 }
 
 /// About's specimen sets lines an hour prints, as it prints them (the ✠ where it falls, the

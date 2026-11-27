@@ -280,11 +280,14 @@ without rebuilding, as the Android app's promotion moves a Closed testing build 
   the next release. A version set to be released by hand (1.0.0 was) waits in *Pending Developer
   Release* until someone presses *Release this version* in App Store Connect, and holds back the
   next one until then.
-- **What's New** is `apps/android/whatsnew.txt` as of the build's commit, the notes Google Play
-  shows, or, while that is empty, "Corrections to the texts and improvements to the app." Edit
-  it in App Store Connect before Apple's review starts if a release deserves more.
+- **What's New** is the note files under `release-notes/` (`release-notes/README.md`) added
+  between the App Store's live build and this one, so each note goes out once on iOS, whatever
+  Android has already shipped; with none, "Corrections to the texts and improvements to the
+  app." Each run tags the live version's build (`ios/<version>`) as the record, in a job of its
+  own. Edit the text in
+  App Store Connect before Apple's review starts if a release deserves more.
 - **Releasing now**: a manual run from the Actions tab submits the newest valid build, of any
-  age, or the build number given, with the notes given or the file's;
+  age, or the build number given, with the notes given or those from `release-notes/`;
   *Only say what would be submitted* reads App Store Connect and changes nothing.
 - **Pausing**: disable the workflow in the Actions tab. A version in review can be taken back
   with *Remove from Review* in App Store Connect; the next run then fills in that version again

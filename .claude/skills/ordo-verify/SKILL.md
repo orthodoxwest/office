@@ -55,8 +55,10 @@ classifications instead of inheriting them as facts.
 
 For focused diagnostics, `python3 scripts/ordo-compare.py COMMAND REFERENCE APP`
 accepts `calendar`, `colors`, and `vespers` with `ours.txt`; `rubrics`,
-`commemorations`, and `antiphons` use `rubrics.tsv`. Prefer commemoration names
-to presence/absence alone. The generated ordo's Tabula supports separate checks
+`commemorations`, `antiphons` and `collects` use `rubrics.tsv`. Prefer commemoration names
+to presence/absence alone. `collects` compares each commemoration's collect with the
+Diurnal page (and quoted opening words) of the ordo's "Col. NNN", by way of the page in
+`data/review/provenance.csv`; only the 2023 and later ordos cite collect pages. The generated ordo's Tabula supports separate checks
 of computus and moveable dates.
 
 ## Diagnose before repairing

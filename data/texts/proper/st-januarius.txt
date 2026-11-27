@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: ordo "Col. 27*" (commemorated) and 'Col. "O God" (27*)' at every hour when kept as a Double (2023, 2024)
+@use commons/martyrs/collect-alternate
+
 # Proper scaffold for [st-januarius]
 # Name: St Januarius & companions, Martyrs
 # Rank: double  Category: martyrs

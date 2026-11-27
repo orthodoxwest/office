@@ -549,9 +549,68 @@ fn psalmody_posture_cues_follow_the_parish_booklets() {
     for (hour, date) in [("lauds", Date::new(2026, 11, 2)), ("lauds", moveable.good_friday), ("vespers", moveable.good_friday)] {
         assert!(cues(hour, date).iter().all(|(_, _, got)| got.is_empty()), "{hour} {date}");
     }
-    // Only Lauds and Vespers are cued.
-    for hour in ["prime", "terce", "compline"] {
+    // Said privately, only Lauds and Vespers are cued.
+    for hour in ["prime", "terce", "sext", "none", "compline"] {
         assert!(cues(hour, Date::new(2026, 10, 4)).iter().all(|(_, _, got)| got.is_empty()), "{hour}");
+    }
+}
+
+#[test]
+fn little_hours_take_posture_cues_when_a_priest_or_deacon_leads() {
+    // The prayer form stands in for praying in choir: with a priest or deacon
+    // the Little Hours take the Lauds pattern, said privately they stay bare,
+    // and Lauds, Vespers and Compline are the same under every form.
+    let (days, moveable) = year(2026);
+    let cues = |hour: &str, date: Date, form: PrayerForm| -> Vec<(String, Vec<String>)> {
+        let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], &moveable, form).unwrap();
+        composed
+            .sections
+            .iter()
+            .flat_map(|s| &s.elements)
+            .filter(|e| e.kind.is_psalmody() || e.kind == ElementType::PsalmDoxology)
+            .map(|e| {
+                let at = |c: &liturgy::PostureCue| match c.at {
+                    PostureAnchor::AfterMediant(n) => format!("{} *{n}", c.posture.as_str()),
+                    PostureAnchor::BeforeVerse(n) => format!("{} ^{n}", c.posture.as_str()),
+                };
+                (e.source_ref.clone(), e.postures.iter().map(at).collect())
+            })
+            .collect()
+    };
+    let sunday = Date::new(2026, 10, 4);
+    for form in [PrayerForm::Deacon, PrayerForm::Priest] {
+        // Sunday Prime: Psalm 119 in four parts, each under its own Gloria.
+        let prime = cues("prime", sunday, form);
+        assert_eq!(
+            prime,
+            ["i", "ii", "iii", "iv"]
+                .iter()
+                .flat_map(|part| [
+                    (format!("psalms/119-{part}"), vec!["sit *0".to_string(), "stand *7".to_string()]),
+                    ("ordinary/shared/gloria-patri".to_string(), vec!["bow ^0".to_string(), "stand-upright ^1".to_string()]),
+                ])
+                .collect::<Vec<_>>(),
+            "{form:?}"
+        );
+        for hour in ["terce", "sext", "none"] {
+            let got = cues(hour, sunday, form);
+            assert!(!got.is_empty() && got.iter().all(|(_, c)| !c.is_empty()), "{hour} {form:?}: {got:?}");
+        }
+        // The Athanasian Creed and its Gloria are left uncued (#973), while
+        // the psalms before it keep theirs.
+        let trinity = cues("prime", Date::new(2026, 6, 7), form);
+        let creed = trinity.iter().position(|(s, _)| s == "proper/trinity-sunday/athanasian-creed").expect("creed");
+        assert!(trinity[creed].1.is_empty() && trinity[creed + 1].1.is_empty(), "{form:?}: {:?}", &trinity[creed..]);
+        assert_eq!(trinity[creed - 1].1, ["bow ^0", "stand-upright ^1"], "{form:?}");
+        // Nothing is cued without the Gloria in the Triduum.
+        for hour in ["prime", "terce", "sext", "none"] {
+            assert!(cues(hour, moveable.good_friday, form).iter().all(|(_, c)| c.is_empty()), "{hour} {form:?} Good Friday");
+        }
+        for hour in ["lauds", "vespers", "compline"] {
+            for date in [sunday, Date::new(2026, 1, 19), Date::new(2026, 11, 2)] {
+                assert_eq!(cues(hour, date, form), cues(hour, date, PrayerForm::Private), "{hour} {date} {form:?}");
+            }
+        }
     }
 }
 
@@ -1314,6 +1373,42 @@ fn commemoration_definitions_choose_fitting_texts() {
     let lauds = commemorated(Date::new(2026, 11, 29), "lauds", saturninus);
     assert!(has(&vespers, "This is a Martyr") && has(&lauds, "He that hateth his life"), "{vespers:?} {lauds:?}");
     assert!(!has(&vespers, "The very hairs") && !has(&lauds, "The very hairs"));
+}
+
+/// Commemoration collects the ordos cite by Diurnal page ("Col. 468", 'Col. "O God" 22*'),
+/// checked for every ordo-cited collect by `scripts/ordo-compare.py collects`.
+#[test]
+fn commemoration_collects_follow_the_ordo_citations() {
+    let collect = |date: Date, hour: &str, owner: &str| -> String {
+        let (days, moveable) = year(date.year());
+        let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        composed
+            .sections
+            .iter()
+            .flat_map(|s| &s.elements)
+            .find(|e| e.is_commemoration && e.commemoration_owner_id == owner && e.slot_ref == "commemoration-collect")
+            .unwrap_or_else(|| panic!("{date} {hour}: {owner} has no commemoration collect"))
+            .text
+            .clone()
+    };
+    // A proper collect printed with the day (Diurnal p. 468).
+    let bridget = collect(Date::new(2026, 2, 1), "lauds", "comm-02-01-st-bridget-of-ireland-virgin");
+    assert!(bridget.contains("perfect holiness by the love of piety and devotion"), "{bridget}");
+    // The Common's "Another Collect" (pp. 22*, 23*, 27*, 36*–37*, 49*).
+    let telesphorus = collect(Date::new(2026, 1, 5), "lauds", "comm-01-05-st-telesphorus-of-rome-bishop-and-martyr");
+    assert!(telesphorus.starts_with("O God, who makest us glad by the yearly solemnity of blessed Telesphorus"), "{telesphorus}");
+    let pantaleon = collect(Date::new(2026, 7, 27), "lauds", "comm-07-27-st-pantaleon-martyr");
+    assert!(pantaleon.contains("our bodies may be delivered from all adversities"), "{pantaleon}");
+    let gervase = collect(Date::new(2026, 6, 19), "lauds", "comm-extra-06-19-ss-gervase-and-protase-martyrs");
+    assert!(gervase.starts_with("O God, who makest us glad by the yearly solemnity of thy holy Martyrs"), "{gervase}");
+    let mark = collect(Date::new(2026, 1, 19), "lauds", "comm-01-19-st-mark-of-ephesus-bishop-and-confessor");
+    assert!(mark.starts_with("O Lord, we beseech thee, hear the prayers"), "{mark}");
+    let ursula = collect(Date::new(2026, 10, 21), "lauds", "comm-10-21-ss-ursula-and-companions-martyrs");
+    assert!(ursula.starts_with("Grant us, we beseech thee, O Lord our God"), "{ursula}");
+    // #982 (needs ruling): the ordos' 'Col. "We beseech" 45*' (the Abbot's collect) against
+    // the Diurnal's "O God, who makest us glad" (p. 458). The newest ordo stands until clergy rule.
+    let paul = collect(Date::new(2026, 1, 10), "lauds", "comm-01-10-st-paul-the-first-hermit");
+    assert!(paul.starts_with("We beseech thee, O Lord, let the intercession of blessed Paul"), "{paul}");
 }
 
 /// #602: the Expectation is a feast of Our Lady in white (2017, 2018, 2023 and

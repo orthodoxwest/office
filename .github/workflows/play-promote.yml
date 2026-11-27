@@ -1,15 +1,18 @@
 name: Promote to production
 
-# Moves the Android app from Closed testing to production on Google Play, without rebuilding:
-# production gets a bundle testers already had (scripts/play-promote.py,
+# Moves the Android app up Google Play's tracks without rebuilding: merges reach Internal testing
+# (play.yml), and this moves a build from there to Closed testing and, a day later, to production,
+# so production gets a bundle testers already had (scripts/play-promote.py,
 # apps/android/README.md "Promoting to production").
 #
 # Daily: a staged rollout this workflow started two days before is finished (all users);
-# otherwise the newest build uploaded to Closed testing at least 24 hours before, if it is newer
-# than production's, goes to 20% of users, even when a later merge has replaced it there. So a merge reaches a fifth of the public 1 to 2 days after
-# testers get it and everyone two days later; Google's review of each new release comes out of
-# the 20% stage. A rollout halted, or started, in Play Console stops the promotions until it is
-# finished, resumed or replaced. Scheduled runs use the `play-auto` environment, with no reviewer.
+# otherwise Closed testing's build, if it is newer than production's and was moved there by the
+# day before's run, goes to 20% of users. Then, once production has Closed testing's build,
+# Internal testing's newest moves up to Closed testing. So testers get one build a day, the public
+# a fifth of it a day later and everyone two days after that; Google's review of each release
+# comes out of those stages. A rollout halted, or started, in Play Console stops the promotions
+# until it is finished, resumed or replaced. Scheduled runs use the `play-auto` environment, with
+# no reviewer.
 #
 # A manual run releases a build now (Closed testing's newest unless a version code is given) to
 # the share of users asked for; it uses the `play` environment, which has a required reviewer.
@@ -25,6 +28,10 @@ on:
         default: "1"
       version_code:
         description: "Version code to release; empty means Closed testing's newest"
+        type: string
+        default: ""
+      notes:
+        description: "What's new; empty uses the notes in release-notes/ since production's last completed build"
         type: string
         default: ""
       dry_run:
@@ -46,13 +53,13 @@ jobs:
     environment: ${{ github.event_name == 'schedule' && 'play-auto' || 'play' }}
     permissions:
       contents: read
-      # The Publish to Play runs say when each build reached Closed testing.
-      actions: read
+    outputs:
+      live: ${{ steps.promote.outputs.live }}
 
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          # Version codes are commit counts.
+          # Version codes are commit counts; the release notes compare commits and tags.
           fetch-depth: 0
           persist-credentials: false
 
@@ -60,12 +67,13 @@ jobs:
         run: python3 -m pip install --quiet --disable-pip-version-check google-auth==2.40.3 requests==2.32.4
 
       - name: Promote
+        id: promote
         env:
           PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
-          GITHUB_TOKEN: ${{ github.token }}
           EVENT: ${{ github.event_name }}
           ROLLOUT: ${{ inputs.rollout }}
           VERSION_CODE: ${{ inputs.version_code }}
+          NOTES: ${{ inputs.notes }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           if [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ]; then
@@ -74,10 +82,34 @@ jobs:
             exit 0
           fi
           if [ "$EVENT" = schedule ]; then
-            set -- auto --min-age 24 --rollout 0.2 --stage-hours 47
+            # A day on Closed testing: the day before's run, with slack for a late scheduled start.
+            set -- auto --min-age 20 --rollout 0.2 --stage-hours 47
           else
             set -- manual --rollout "${ROLLOUT:-1}"
             if [ -n "$VERSION_CODE" ]; then set -- "$@" --version-code "$VERSION_CODE"; fi
+            if [ -n "$NOTES" ]; then set -- "$@" "--notes=$NOTES"; fi
             if [ "$DRY_RUN" = true ]; then set -- "$@" --dry-run; fi
           fi
           python3 scripts/play-promote.py "$@"
+
+  # Tags production's newest completed build (android/0.1.<code>), the release notes' record, in a
+  # job of its own: the token that can push never meets the Google client installed from PyPI.
+  tag:
+    name: Tag what production has out
+    needs: promote
+    if: needs.promote.outputs.live != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          # Version codes are commit counts.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Tag
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          LIVE: ${{ needs.promote.outputs.live }}
+        run: python3 scripts/release_notes.py record --platform android --version "0.1.$LIVE" --build "$LIVE"

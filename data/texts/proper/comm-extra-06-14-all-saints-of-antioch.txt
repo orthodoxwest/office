@@ -1,0 +1,20 @@
+[commemoration-antiphon-lauds]
+# SOURCE: ordo 2024–2026: Lauds Comm. All Saints ("The glorious company" & Col. 639f)
+@use proper/all-saints/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# SOURCE: ordo 2024–2026: Vespers Comm. All Saints ("All ye Angels" 638; Col. 640), the Magnificat antiphon at I Vespers of All Saints, p. 638
+@use proper/all-saints/magnificat-antiphon-first
+
+[commemoration-versicle-lauds]
+# SOURCE: Diurnal p. 639 (All Saints, at Lauds: "Let the Saints be joyful with glory"), with the ordo's All Saints antiphon
+@use commons/martyrs/commemoration-versicle
+
+[commemoration-versicle-vespers]
+# SOURCE: Monastic Diurnal p. 638 (All Saints, at I Vespers, versicle before the Magnificat antiphon)
+V. Be glad, O ye righteous, and rejoice in the Lord.
+R. And be joyful, all ye that are true of heart.
+
+[commemoration-collect]
+# SOURCE: ordo 2024–2026 "Col. 639f" and "Col. 640" (All Saints)
+@use proper/all-saints/collect
