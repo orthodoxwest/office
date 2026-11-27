@@ -102,7 +102,7 @@ final class CoreTests: XCTestCase {
         XCTAssertTrue(time("lauds").hasPrefix("sunrise · "), time("lauds"))
         XCTAssertTrue(time("sext").hasPrefix("solar noon · "), time("sext"))
         XCTAssertTrue(time("vespers").hasPrefix("sunset · "), time("vespers"))
-        XCTAssertEqual(time("compline"), periods.flatMap(\.hours).first { $0.hour == "compline" }?.time)
+        XCTAssertEqual(time("compline"), periods.flatMap(\.hours).first(where: { $0.hour == "compline" })?.time)
         XCTAssertEqual(time("prime"), periods.flatMap(\.hours).first { $0.hour == "prime" }?.time)
         // Matins is not timed by the sun: it keeps its words, and that it is coming soon.
         XCTAssertEqual(hours.last, periods.last?.hours.last)
@@ -686,7 +686,8 @@ final class ReminderTests: XCTestCase {
         XCTAssertTrue(time("lauds").hasPrefix("sunrise · 5:32"), time("lauds"))
         XCTAssertTrue(time("vespers").hasPrefix("sunset · ") && time("vespers").contains(":33"), time("vespers"))
         XCTAssertTrue(time("prime").hasPrefix("first hour · "), time("prime"))
-        XCTAssertEqual(time("compline"), about().periods.last?.hours.last?.time)
+        // Compline keeps its own time. Night (Matins) now follows it in About.
+        XCTAssertEqual(time("compline"), about().periods.flatMap(\.hours).first(where: { $0.hour == "compline" })?.time)
     }
 
     func testEachDayTakesItsOwnOffsetAcrossAClockChange() throws {
