@@ -427,24 +427,36 @@ fn spaced(hour_name: &str, date: &str) -> Vec<(BlockKind, Space, String)> {
     sections.into_iter().flat_map(|s| s.blocks).map(|b| (b.kind, b.space, b.plain_text().chars().take(24).collect())).collect()
 }
 
-/// The Gospel canticles are signed with the cross, set after their drop-capped first word as the
-/// Vicariate's booklets set it ("Open ✠ my mouth"), so the initial stays a letter on every front.
+/// The sign of the cross where the Diurnal's General Rubrics place it (pp. xxxi, xxxiii): at
+/// Open my mouth before the Office and at the beginning of each Gospel canticle, set after the
+/// first word as the Vicariate's booklets set it ("Open ✠ my mouth"), so a canticle's initial
+/// stays a letter on every front.
 #[test]
-fn gospel_canticles_sign_the_cross_after_their_first_word() {
+fn the_cross_follows_the_first_word_where_the_rubrics_sign_it() {
     let src = FsData::new(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data"));
     let engine = Engine::load(&src).expect("engine");
     let data = CalendarData::load(&src).expect("calendar data");
-    let date = Date::parse("2026-11-23").expect("date");
-    let day = tools::year::office_days(&data, date.year()).expect("office days").into_iter().find(|d| d.date == date).expect("day");
-    for (hour_name, opening) in [("lauds", "Blessed "), ("vespers", "My ")] {
+    // Lauds and Vespers of an ordinary day; Compline of Holy Saturday, which says the Nunc dimittis.
+    for (hour_name, date, opening, drop_cap) in [
+        ("lauds", "2026-11-23", "Blessed ", true),
+        ("vespers", "2026-11-23", "My ", true),
+        ("compline", "2027-05-01", "Lord, ", true),
+        ("lauds", "2026-11-23", "Open ", false),
+    ] {
+        let date = Date::parse(date).expect("date");
+        let day = tools::year::office_days(&data, date.year()).expect("office days").into_iter().find(|d| d.date == date).expect("day");
         let hour = engine.compose_hour(hour_name, &day, &MoveableDates::compute(date.year()), PrayerForm::Private).expect("compose");
         let sections = hour_sections(&hour);
-        let verse = sections
+        let block = sections
             .iter()
             .flat_map(|s| &s.blocks)
-            .find(|b| b.kind == BlockKind::Verse && b.drop_cap && b.runs.first().is_some_and(|r| r.text == opening))
-            .unwrap_or_else(|| panic!("{hour_name}: no verse opening {opening:?}"));
-        assert_eq!(verse.runs[1].style, RunStyle::Cross, "{hour_name}: {:#?}", verse.runs);
+            .find(|b| {
+                b.drop_cap == drop_cap
+                    && b.runs.first().is_some_and(|r| r.text == opening)
+                    && b.runs.get(1).is_some_and(|r| r.style == RunStyle::Cross)
+            })
+            .unwrap_or_else(|| panic!("{hour_name} {date}: no block opening {opening:?} then the cross"));
+        assert!(block.kind == BlockKind::Verse || !drop_cap, "{hour_name}: {block:#?}");
     }
 }
 

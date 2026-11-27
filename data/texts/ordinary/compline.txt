@@ -22,6 +22,9 @@ V. Lord, grant a blessing.
 Blessing. The Lord Almighty grant us a quiet night and a perfect end.
 R. Amen.
 
+[post-absolution-rubric]
+After the Absolution, the small sign of the Cross is made with the thumb upon the breast:
+
 [post-absolution]
 
 V. Turn us then, O God our Saviour.
