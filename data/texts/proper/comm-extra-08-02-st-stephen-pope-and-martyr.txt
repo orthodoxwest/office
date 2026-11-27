@@ -1,0 +1,3 @@
+[commemoration-collect]
+# SOURCE: ordo 'Col. "O God" 22*' (2023–2025; 2026 at Vespers of August 1). The 2026 ordo's Lauds "Col. 595" is the page of St Stephen of Hungary (September 2), a slip
+@use commons/bishop-martyr/collect-alternate

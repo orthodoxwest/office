@@ -111,5 +111,5 @@ HOUR` emits the TeX alone.
 
 ## Deployment
 
-The site runs on Fly.io; maintainers deploy with `fly deploy`. Hosting, the canonical host,
+The site runs on Fly.io; maintainers deploy with `make deploy`, which waits for master's checks to pass. Hosting, the canonical host,
 search, and the usage metrics with their privacy rules are in [DEPLOYMENT.md](DEPLOYMENT.md).

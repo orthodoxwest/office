@@ -427,6 +427,27 @@ fn spaced(hour_name: &str, date: &str) -> Vec<(BlockKind, Space, String)> {
     sections.into_iter().flat_map(|s| s.blocks).map(|b| (b.kind, b.space, b.plain_text().chars().take(24).collect())).collect()
 }
 
+/// The Gospel canticles are signed with the cross, set after their drop-capped first word as the
+/// Vicariate's booklets set it ("Open ✠ my mouth"), so the initial stays a letter on every front.
+#[test]
+fn gospel_canticles_sign_the_cross_after_their_first_word() {
+    let src = FsData::new(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data"));
+    let engine = Engine::load(&src).expect("engine");
+    let data = CalendarData::load(&src).expect("calendar data");
+    let date = Date::parse("2026-11-23").expect("date");
+    let day = tools::year::office_days(&data, date.year()).expect("office days").into_iter().find(|d| d.date == date).expect("day");
+    for (hour_name, opening) in [("lauds", "Blessed "), ("vespers", "My ")] {
+        let hour = engine.compose_hour(hour_name, &day, &MoveableDates::compute(date.year()), PrayerForm::Private).expect("compose");
+        let sections = hour_sections(&hour);
+        let verse = sections
+            .iter()
+            .flat_map(|s| &s.blocks)
+            .find(|b| b.kind == BlockKind::Verse && b.drop_cap && b.runs.first().is_some_and(|r| r.text == opening))
+            .unwrap_or_else(|| panic!("{hour_name}: no verse opening {opening:?}"));
+        assert_eq!(verse.runs[1].style, RunStyle::Cross, "{hour_name}: {:#?}", verse.runs);
+    }
+}
+
 /// The steps rise in order, each a fraction of the body line no larger than a line.
 #[test]
 fn the_rhythm_steps_rise_within_a_line() {

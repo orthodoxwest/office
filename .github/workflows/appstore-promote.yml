@@ -24,7 +24,7 @@ on:
         type: string
         default: ""
       notes:
-        description: "What's New; empty uses apps/android/whatsnew.txt as of the build"
+        description: "What's New; empty uses the notes in release-notes/ since the App Store's live build"
         type: string
         default: ""
       dry_run:
@@ -48,15 +48,19 @@ jobs:
     environment: ${{ github.event_name == 'schedule' && 'appstore-auto' || 'appstore' }}
     permissions:
       contents: read
+    outputs:
+      version: ${{ steps.submit.outputs.version }}
+      build: ${{ steps.submit.outputs.build }}
 
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          # Build numbers are commit counts; the build's commit holds its release notes.
+          # Build numbers are commit counts; the release notes compare commits and tags.
           fetch-depth: 0
           persist-credentials: false
 
       - name: Submit
+        id: submit
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
@@ -80,3 +84,26 @@ jobs:
             if [ "$DRY_RUN" = true ]; then set -- "$@" --dry-run; fi
           fi
           python3 scripts/appstore.py "$@"
+
+  # Tags the App Store's live version (ios/<version>), the release notes' record, in a job of its
+  # own, so only this step holds a token that can push.
+  tag:
+    name: Tag what the App Store has out
+    needs: promote
+    if: needs.promote.outputs.build != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          # Build numbers are commit counts.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Tag
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.promote.outputs.version }}
+          BUILD: ${{ needs.promote.outputs.build }}
+        run: python3 scripts/release_notes.py record --platform ios --version "$VERSION" --build "$BUILD"

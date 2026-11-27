@@ -53,6 +53,8 @@ impl Pages {
         env.add_filter("urlnorm", |s: String| url_norm(&s));
         env.add_filter("urlpart", |s: String| url_part(&s));
         env.add_filter("typeset", |s: String| typeset(&s));
+        // A JSON string literal that stays inside its <script> (the home's WebSite data).
+        env.add_filter("script_string", |s: String| Value::from_safe_string(script_string(&s)));
         env.add_filter("titlecase", |s: String| title_case(&s));
         env.add_filter("season_label", |s: String| season_label(&s));
         // A feast's antiphon, versicle or collect, set as the hours set it (℣/℟, the mediant).
@@ -274,13 +276,37 @@ fn reading_key_value() -> Value {
     }
 }
 
+/// `s` as a JSON string literal, quoted, safe inside a `<script>` element: `<`, `>` and `&` are
+/// escaped too, so no `</script>` or comment opener can close it early.
+fn script_string(s: &str) -> String {
+    let mut out = String::with_capacity(s.len() + 2);
+    out.push('"');
+    for c in s.chars() {
+        match c {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            '<' | '>' | '&' | '\u{2028}' | '\u{2029}' => out.push_str(&format!("\\u{:04x}", c as u32)),
+            c if (c as u32) < 0x20 => out.push_str(&format!("\\u{:04x}", c as u32)),
+            c => out.push(c),
+        }
+    }
+    out.push('"');
+    out
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{Pages, TEMPLATES};
+    use super::{Pages, TEMPLATES, script_string};
     use crate::links::static_url;
 
     fn source(name: &str) -> &'static str {
         TEMPLATES.iter().find(|(n, _)| *n == name).map(|(_, s)| *s).unwrap()
+    }
+
+    #[test]
+    fn script_strings_cannot_close_their_script() {
+        assert_eq!(script_string("https://example.org/"), "\"https://example.org/\"");
+        assert_eq!(script_string("a\"</script><!--\\"), "\"a\\\"\\u003c/script\\u003e\\u003c!--\\\\\"");
     }
 
     #[test]
