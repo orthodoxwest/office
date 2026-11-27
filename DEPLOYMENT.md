@@ -7,8 +7,17 @@
 The app runs on Fly.io ([fly.toml](fly.toml)). The [Dockerfile](Dockerfile)
 builds a Rust binary with bundled SQLite and time-zone data, then copies it
 and `data/` into a Debian slim runtime image. CI smoke-tests that image.
-Maintainers with Fly access deploy with `fly deploy`. To roll back a change,
-revert its PR, merge the revert, and deploy it.
+Maintainers with Fly access deploy with `make deploy` from a clean checkout of
+master's newest commit: it waits for every check GitHub runs on that commit (CI,
+iOS, Android) and runs `fly deploy` only once all of them have passed
+(`scripts/ci_gate.py`). The Play and TestFlight uploads and the Android preview
+wait on the same checks, so nothing reaches readers from a red commit. A check
+cancelled because a newer merge took its place counts as that newer run does.
+If a red check is mended by a re-run, re-run the failed jobs of Publish to Play,
+iOS TestFlight and Android too, which is what publishes the commit; mend a check
+that fails for good with a pull request. In an emergency a maintainer can still
+run `fly deploy` directly. To roll back a change, revert its PR, merge the
+revert, and deploy it.
 
 **Changing address.** `OFFICE_CANONICAL_HOST` (a bare host such as
 `example.org`) makes every other host forward there: browser navigations get a

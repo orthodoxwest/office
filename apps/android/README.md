@@ -226,8 +226,10 @@ The **Publish to Play** workflow (`.github/workflows/play.yml`) builds the bundl
 and uploads it to Google Play.
 
 - **Every merge to `master` that changes the app** goes to Internal testing, with the release
-  notes since the last production release. Internal testing skips Google's review and reaches the
-  maintainers within minutes, so a bad build shows there first. Once a day the **Promote to
+  notes since the last production release, once every check on the commit (CI, iOS, Android) has
+  passed (`scripts/ci_gate.py`); a commit with a red check is never uploaded. Internal testing
+  skips Google's review and reaches the maintainers as soon as the slowest check (usually iOS)
+  is done, so a bad build shows there first. Once a day the **Promote to
   production** workflow (below) moves Internal's newest build up to Closed testing, which reaches
   testers once Google's review passes (usually hours).
 - **The release notes** ("What's new") are the note files under `release-notes/` that pull
