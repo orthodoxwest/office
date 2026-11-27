@@ -163,8 +163,9 @@ jobs:
       # Only the simulator's target: the device's library is TestFlight's.
       - name: Set up Rust
         if: steps.core.outputs.cache-hit != 'true'
-        uses: dtolnay/rust-toolchain@1.100.0
+        uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: 1.100.0
           targets: aarch64-apple-ios-sim
 
       # Shared by name with update-ios-snapshots.yml, which can only read caches and so, under its

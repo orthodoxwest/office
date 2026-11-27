@@ -76,8 +76,9 @@ jobs:
           persist-credentials: false
 
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@1.100.0
+        uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: 1.100.0
           components: rustfmt, clippy
           # Core crates must also build for the mobile apps.
           targets: aarch64-apple-ios, aarch64-linux-android
@@ -123,7 +124,9 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: dtolnay/rust-toolchain@1.100.0
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.100.0
       - uses: Swatinem/rust-cache@v2.9.3
       - run: make build
 
@@ -314,7 +317,9 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: dtolnay/rust-toolchain@1.100.0
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.100.0
 
       - uses: Swatinem/rust-cache@v2.9.3
 

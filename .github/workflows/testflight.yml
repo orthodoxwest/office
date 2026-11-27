@@ -142,8 +142,9 @@ jobs:
           fi
 
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@1.100.0
+        uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: 1.100.0
           targets: aarch64-apple-ios, aarch64-apple-ios-sim
 
       - name: Cache Cargo
