@@ -17,6 +17,7 @@ pub mod hymn;
 pub mod lauds_psalmody;
 pub mod leader;
 pub mod major;
+pub mod matins;
 pub mod minor;
 pub mod posture;
 pub mod preces;
@@ -45,7 +46,7 @@ use calendar::YearCalendar;
 
 pub use concurrence::{VespersDesignation, VespersOffice, VespersOwner, VespersPsalms};
 pub use day::{Day, Evening};
-pub use engine::{ComposeOptions, Engine, HOUR_NAMES};
+pub use engine::{COMPOSABLE_HOURS, ComposeOptions, Engine, HOUR_NAMES};
 
 /// The Office-only resolution of one day.
 #[derive(Clone, Debug)]

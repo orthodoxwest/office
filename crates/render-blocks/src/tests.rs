@@ -233,6 +233,31 @@ fn blocks_carry_the_same_text_as_the_web() {
     assert!(checked > 10_000, "only {checked} sections checked");
 }
 
+/// Matins of the Dead, which only the CLI composes so far, holds the apps to the web's words
+/// too: its invitatory, lessons and responsories are drawn from the same grammar.
+#[test]
+fn matins_of_the_dead_carries_the_same_text_as_the_web() {
+    let src = FsData::new(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data"));
+    let engine = Engine::load(&src).expect("engine");
+    let data = CalendarData::load(&src).expect("calendar data");
+    let days = tools::year::office_days(&data, 2026).expect("office days");
+    let all_souls = &days[calendar::Date::new(2026, 11, 2).ordinal() as usize - 1];
+    for form in PrayerForm::ALL {
+        let hour = engine.compose_hour("matins", all_souls, &MoveableDates::compute(2026), form).expect("compose");
+        for section in &hour.sections {
+            let html = render_html::html::render_section_elements(&section.elements);
+            let section_blocks = element_blocks(&section.elements);
+            assert_eq!(shown(&section_blocks, false), web_words(&html, false), "{} section {:?}", form.as_str(), section.label);
+            let quiet = section_blocks.iter().filter(|b| b.marker_gloss.is_some()).count()
+                + section_blocks.iter().flat_map(|b| &b.runs).filter(|r| r.gloss.is_some() && r.quiet_gloss).count();
+            assert_eq!(quiet, html.matches("gloss-quiet").count(), "{} section {:?} quiet glosses", form.as_str(), section.label);
+        }
+        let kinds: Vec<BlockKind> =
+            element_blocks(&hour.sections.iter().flat_map(|s| s.elements.clone()).collect::<Vec<_>>()).iter().map(|b| b.kind).collect();
+        assert_eq!(kinds.iter().filter(|k| **k == BlockKind::ChapterRef).count(), 9, "a reference under each lesson's heading");
+    }
+}
+
 const HYMN: &str = "To thee before the close of day,\nCreator of the world, we pray\n\nFrom all ill dreams defend our eyes,\nFrom nightly fears and fantasies;\n\nAmen.";
 /// A hymn with a rubric before a stanza, which the stanza's score does not carry.
 const HYMN_KNEELING: &str = "To thee before the close of day,\nCreator of the world, we pray\n\n/:The following stanza is said kneeling.:/\n\nFrom all ill dreams defend our eyes,\nFrom nightly fears and fantasies;\n\nAmen.";

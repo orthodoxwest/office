@@ -496,6 +496,35 @@ fn martyrology_reading_renders_paragraphs_without_chapter_heading() {
 }
 
 #[test]
+fn a_lesson_sets_its_heading_and_reference_over_flowing_text() {
+    let mut lesson = elem(ElementType::Lesson, "Let me alone, O Lord, for my days are vanity.");
+    lesson.label = "Lesson I".into();
+    lesson.incipit = "Job 7:16-21".into();
+    let got = render(&lesson);
+    has(&got, "<h2 class=\"section-heading\">Lesson I</h2>");
+    has(&got, "<p class=\"chapter-ref\">Job 7:16–21</p>");
+    has(&got, "Let me alone");
+    lacks(&got, "psalm-incipit");
+}
+
+#[test]
+fn an_invitatory_sets_its_antiphon_lines_as_antiphons() {
+    let mut invitatory = elem(
+        ElementType::Invitatory,
+        "Ant. The King unto whom all live, * O come, let us worship.\nO come, let us sing unto the Lord: † let us heartily rejoice.\nAnt. O come, let us worship.",
+    );
+    invitatory.label = "Psalm 94\u{a0}(95)".into();
+    let got = render(&invitatory);
+    assert_eq!(got.matches("<p class=\"antiphon\">").count(), 2, "{got}");
+    assert_eq!(got.matches("<p class=\"plain-line\">").count(), 1, "{got}");
+    has(&got, "<h3 class=\"item-label\">");
+    // Its label is set as a psalm's: the Septuagint number, the Hebrew one muted.
+    has(&got, "<span class=\"psalm-num\">94");
+    has(&got, "psalm-heb gloss-quiet");
+    lacks(&got, "Ant. The King");
+}
+
+#[test]
 fn composed_preces_creed_renders_silent_middle_and_spoken_tail() {
     let src = tools::fs::FsData::new("../../data");
     let engine = office::Engine::load(&src).unwrap();

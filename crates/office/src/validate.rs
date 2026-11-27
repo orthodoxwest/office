@@ -10,6 +10,7 @@ use data_format::quote;
 use crate::engine::{HOLY_SATURDAY_VESPERS_DEFINITION, HOUR_NAMES, hour_definition_names};
 use crate::hourdef::{Condition, parse_hour_definition};
 use crate::lauds_psalmody::{LAUDS_LAUDATE_PSALMODY_REF, LAUDS_PSALMODY_REF, valid_hour_psalmody_ref};
+use crate::matins::{DEAD_MATINS_DEFINITION, INVITATORY_DOXOLOGY_DEAD, INVITATORY_PSALM};
 use crate::proper::ref_candidates;
 use crate::psalmody::{
     DEFAULT_VESPERS_PSALMODY_KEY, DOXOLOGY_GLORIA_PATRI, DOXOLOGY_REF_PER_OFFICE, DOXOLOGY_REST_ETERNAL, VESPERS_PSALMODY_REF,
@@ -18,7 +19,7 @@ use crate::psalmody::{
 use crate::texts::load_texts;
 
 /// The `Type` values the engine recognises; others silently become rubrics.
-const VALID_ELEMENT_TYPES: [&str; 33] = [
+const VALID_ELEMENT_TYPES: [&str; 36] = [
     "officiant-greeting",
     "officiant-confession",
     "officiant-opening",
@@ -52,7 +53,13 @@ const VALID_ELEMENT_TYPES: [&str; 33] = [
     "proper-psalmody",
     "commemorations",
     "gloria-patri",
+    "invitatory",
+    "lesson",
+    "responsory",
 ];
+
+/// The `Type` values only the Matins composer gives their form.
+const MATINS_ELEMENT_TYPES: [&str; 3] = ["invitatory", "lesson", "responsory"];
 
 /// Every key a `marian seasonal` element may resolve to.
 const MARIAN_CORPUS_KEYS: [&str; 5] = [
@@ -91,7 +98,11 @@ pub fn validate_hour_definitions(src: &dyn DataSource) -> Vec<String> {
     };
 
     for definition in hour_definition_names() {
-        let hour = if definition == HOLY_SATURDAY_VESPERS_DEFINITION { "vespers" } else { definition };
+        let hour = match definition {
+            HOLY_SATURDAY_VESPERS_DEFINITION => "vespers",
+            DEAD_MATINS_DEFINITION => "matins",
+            _ => definition,
+        };
         let rel = format!("office/{definition}.txt");
         let path = src.display_path(&rel);
         let sections = match src.read(&rel) {
@@ -116,6 +127,9 @@ pub fn validate_hour_definitions(src: &dyn DataSource) -> Vec<String> {
                 let (kind, reference) = (elem.kind.as_str(), elem.reference.as_str());
                 if !VALID_ELEMENT_TYPES.contains(&kind) {
                     parse_errors.push(format!("{src}: unknown element Type {}", quote(kind)));
+                }
+                if MATINS_ELEMENT_TYPES.contains(&kind) && hour != "matins" {
+                    parse_errors.push(format!("{src}: element Type {} is composed only at Matins", quote(kind)));
                 }
                 match kind {
                     "proper-psalmody" => {
@@ -184,6 +198,11 @@ pub fn validate_hour_definitions(src: &dyn DataSource) -> Vec<String> {
                         } else {
                             require(reference, &src);
                         }
+                    }
+                    "invitatory" => {
+                        require(reference, &src);
+                        require(INVITATORY_PSALM, &src);
+                        require(INVITATORY_DOXOLOGY_DEAD, &src);
                     }
                     // Resolved at runtime; nothing to validate.
                     "commemorations" => {}

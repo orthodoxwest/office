@@ -21,8 +21,8 @@ use corpus::lines::{
 };
 use corpus::typography::{soften_drop_cap_opening, typeset};
 use liturgy::{
-    ChantScore, ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, RubricSpan, ScoreSpan, VoiceSpan, posture_cues_at,
-    split_words,
+    ChantScore, ElementType, INVITATORY_ANTIPHON, OfficeElement, OfficeHour, PostureAnchor, PostureCue, RubricSpan, ScoreSpan, VoiceSpan,
+    posture_cues_at, split_words,
 };
 use presentation::gloss::{
     ANTIPHON_GLOSS, Gloss, GlossRun, ORDO_COMMEMORATION_GLOSS, POSTURE_GLOSS, PSALM_NUMBER_GLOSS, gloss_runs, heading_gloss,
@@ -433,6 +433,28 @@ pub fn section_heading(label: &str) -> Block {
     Block::new(BlockKind::Heading, runs)
 }
 
+/// A psalm's, canticle's or invitatory's label with its numbering and Latin
+/// incipit; none when it has no label.
+fn psalm_label(elem: &OfficeElement) -> Option<Block> {
+    if elem.label.is_empty() {
+        return None;
+    }
+    let mut runs = match elem.psalm_label_parts() {
+        Some((word, greek, "")) => vec![Run::new(word, RunStyle::Plain), Run::new(typeset(greek), RunStyle::Numeral)],
+        Some((word, greek, hebrew)) => vec![
+            Run::new(word, RunStyle::Plain),
+            Run::new(format!("{}\u{a0}", typeset(greek)), RunStyle::Numeral),
+            Run::with_quiet_gloss(typeset(hebrew), RunStyle::HebrewNumeral, Some(&PSALM_NUMBER_GLOSS)),
+        ],
+        None => text_runs(&elem.label),
+    };
+    if !elem.incipit.is_empty() {
+        runs.push(Run::new("\u{a0}· ", RunStyle::Plain));
+        runs.push(Run::with_quiet_gloss(typeset(&elem.incipit), RunStyle::Latin, Some(&presentation::gloss::PSALM_INCIPIT_GLOSS)));
+    }
+    Some(Block::new(BlockKind::ItemLabel, runs))
+}
+
 fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&OfficeElement>) {
     match elem.kind {
         ElementType::Heading => out.push(section_heading(&elem.text)),
@@ -461,25 +483,8 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
                 let kind = if announced { BlockKind::AnnouncementNote } else { BlockKind::AntiphonNote };
                 out.push(Block { kind, ..rubric_block(&unrepeated) });
             }
-            if !elem.label.is_empty() {
-                let mut runs = match elem.psalm_label_parts() {
-                    Some((word, greek, "")) => vec![Run::new(word, RunStyle::Plain), Run::new(typeset(greek), RunStyle::Numeral)],
-                    Some((word, greek, hebrew)) => vec![
-                        Run::new(word, RunStyle::Plain),
-                        Run::new(format!("{}\u{a0}", typeset(greek)), RunStyle::Numeral),
-                        Run::with_quiet_gloss(typeset(hebrew), RunStyle::HebrewNumeral, Some(&PSALM_NUMBER_GLOSS)),
-                    ],
-                    None => text_runs(&elem.label),
-                };
-                if !elem.incipit.is_empty() {
-                    runs.push(Run::new("\u{a0}· ", RunStyle::Plain));
-                    runs.push(Run::with_quiet_gloss(
-                        typeset(&elem.incipit),
-                        RunStyle::Latin,
-                        Some(&presentation::gloss::PSALM_INCIPIT_GLOSS),
-                    ));
-                }
-                out.push(Block::new(BlockKind::ItemLabel, runs));
+            if let Some(label) = psalm_label(elem) {
+                out.push(label);
             }
             psalm_verses(out, &elem.text, &elem.postures, elem.unrepeated.as_ref().map_or(0, |u| u.words));
             if let Some(doxology) = doxology.filter(|d| !d.text.is_empty()) {
@@ -499,7 +504,33 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
         ElementType::Versicle | ElementType::Response | ElementType::Blessing | ElementType::Doxology | ElementType::Dialogue => {
             liturgical_block(out, &elem.text, Mode::PreserveLines, false);
         }
-        ElementType::ShortResponsory => {
+        ElementType::Invitatory => {
+            if let Some(label) = psalm_label(elem) {
+                out.push(label);
+            }
+            for line in elem.text.split('\n').filter(|l| !l.trim().is_empty()) {
+                match line.strip_prefix(INVITATORY_ANTIPHON) {
+                    Some(antiphon) => {
+                        let mut block = Block::marked(BlockKind::Antiphon, "Ant.", chant_runs(antiphon));
+                        block.marker_gloss = Some(&ANTIPHON_GLOSS);
+                        out.push(block);
+                    }
+                    None => out.push(Block::new(BlockKind::Paragraph, cross_runs(line, RunStyle::Plain))),
+                }
+            }
+        }
+        ElementType::Lesson => {
+            if !elem.label.is_empty() {
+                out.push(section_heading(&elem.label));
+            }
+            if !elem.incipit.is_empty() {
+                out.push(Block::new(BlockKind::ChapterRef, text_runs(&elem.incipit)));
+            }
+            let start = out.len();
+            liturgical_block(out, &elem.text, Mode::Flow, false);
+            mark_opening(out, start, |b| b.kind == BlockKind::Paragraph);
+        }
+        ElementType::ShortResponsory | ElementType::Responsory => {
             let start = out.len();
             liturgical_block(out, &elem.text, Mode::PreserveLines, true);
             mark_opening(out, start, |b| b.kind == BlockKind::Response && b.marker.is_empty());

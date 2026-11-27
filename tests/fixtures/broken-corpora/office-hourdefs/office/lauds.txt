@@ -22,3 +22,6 @@ Ref = office
 
 Type = commemorations
 Ref = anything
+
+Type = lesson
+Ref = ordinary/lauds/missing

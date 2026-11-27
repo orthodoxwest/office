@@ -5,7 +5,8 @@ use corpus::lines::{
     BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, marian_antiphon_part, parse_block, parse_hymn, parse_psalm,
 };
 use liturgy::{
-    ChantScore, ElementType, OfficeElement, PostureAnchor, PostureCue, RubricSpan, ScoreSpan, VoiceSpan, posture_cues_at, split_words,
+    ChantScore, ElementType, INVITATORY_ANTIPHON, OfficeElement, PostureAnchor, PostureCue, RubricSpan, ScoreSpan, VoiceSpan,
+    posture_cues_at, split_words,
 };
 
 pub(crate) use corpus::typography::soften_drop_cap_opening;
@@ -164,40 +165,7 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
                 sb.push_str(&render_rubric_spans(&unrepeated, "rubric unrepeated-note"));
             }
             sb.push_str(&format!("<div class=\"{}\">", elem.kind.as_str()));
-            if !elem.label.is_empty() {
-                sb.push_str("<h3 class=\"item-label\">");
-                match elem.psalm_label_parts() {
-                    Some((word, greek, hebrew)) => {
-                        sb.push_str(&esc_text(word));
-                        sb.push_str("<span class=\"psalm-num\">");
-                        sb.push_str(&esc_text(greek));
-                        if !hebrew.is_empty() {
-                            sb.push_str(&format!(
-                                "\u{a0}<span class=\"psalm-heb gloss-quiet\" data-gloss-title=\"{}\" data-gloss=\"{}\">",
-                                esc_text(PSALM_NUMBER_GLOSS.title),
-                                esc_text(PSALM_NUMBER_GLOSS.note)
-                            ));
-                            sb.push_str(&esc_text(hebrew));
-                            sb.push_str("</span>");
-                        }
-                        sb.push_str("</span>");
-                    }
-                    None => sb.push_str(&esc_text(&elem.label)),
-                }
-                if !elem.incipit.is_empty() {
-                    // The dot stays with the label; the space outside aria-hidden keeps the
-                    // spoken label and Latin title separated for screen readers.
-                    sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}·</span> ");
-                    sb.push_str(&format!(
-                        "<span class=\"psalm-incipit gloss-quiet\" lang=\"la\" data-gloss-title=\"{}\" data-gloss=\"{}\">",
-                        esc_text(presentation::gloss::PSALM_INCIPIT_GLOSS.title),
-                        esc_text(presentation::gloss::PSALM_INCIPIT_GLOSS.note),
-                    ));
-                    sb.push_str(&esc_text(&elem.incipit));
-                    sb.push_str("</span>");
-                }
-                sb.push_str("</h3>");
-            }
+            sb.push_str(&psalm_label_html(elem));
             sb.push_str(&render_psalm_verses(&elem.text, &elem.postures, elem.unrepeated.as_ref().map_or(0, |u| u.words)));
             if let Some(doxology) = doxology.filter(|d| !d.text.is_empty()) {
                 sb.push_str(&render_gloria_patri(&doxology.text, &doxology.postures));
@@ -227,7 +195,33 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
         ElementType::Versicle | ElementType::Response | ElementType::Blessing | ElementType::Doxology | ElementType::Dialogue => {
             sb.push_str(&render_liturgical_block(&elem.text));
         }
-        ElementType::ShortResponsory => sb.push_str(&render_block(&elem.text, Mode::PreserveLines, true)),
+        ElementType::ShortResponsory | ElementType::Responsory => sb.push_str(&render_block(&elem.text, Mode::PreserveLines, true)),
+        ElementType::Invitatory => {
+            sb.push_str("<div class=\"psalm invitatory\">");
+            sb.push_str(&psalm_label_html(elem));
+            for line in elem.text.split('\n').filter(|l| !l.trim().is_empty()) {
+                match line.strip_prefix(INVITATORY_ANTIPHON) {
+                    Some(antiphon) => sb.push_str(&format!(
+                        "<p class=\"antiphon\"><em{}><span aria-hidden=\"true\">Ant.</span><span class=\"sr-only\">Antiphon.</span></em> {}</p>",
+                        quiet_gloss_attrs(&ANTIPHON_GLOSS),
+                        chant_line_html(antiphon)
+                    )),
+                    None => sb.push_str(&format!("<p class=\"plain-line\">{}</p>", esc_cross(line))),
+                }
+            }
+            sb.push_str("</div>");
+        }
+        ElementType::Lesson => {
+            sb.push_str("<div class=\"lesson\">");
+            if !elem.label.is_empty() {
+                sb.push_str(&format!("<h2 class=\"section-heading\">{}</h2>", esc_text(&elem.label)));
+            }
+            if !elem.incipit.is_empty() {
+                sb.push_str(&format!("<p class=\"chapter-ref\">{}</p>", esc_text(&elem.incipit)));
+            }
+            sb.push_str(&render_flowing_block(&elem.text));
+            sb.push_str("</div>");
+        }
         ElementType::CorporateLordPrayer => sb.push_str(&render_corporate_lord_prayer(elem)),
         ElementType::Collect => {
             sb.push_str("<div class=\"collect\">");
@@ -274,6 +268,48 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
         }
         ElementType::PsalmDoxology => sb.push_str(&render_gloria_patri(&elem.text, &elem.postures)),
     }
+    sb
+}
+
+/// A psalm's, canticle's or invitatory's label with its numbering and Latin
+/// incipit; nothing when it has no label.
+fn psalm_label_html(elem: &OfficeElement) -> String {
+    let mut sb = String::new();
+    if elem.label.is_empty() {
+        return sb;
+    }
+    sb.push_str("<h3 class=\"item-label\">");
+    match elem.psalm_label_parts() {
+        Some((word, greek, hebrew)) => {
+            sb.push_str(&esc_text(word));
+            sb.push_str("<span class=\"psalm-num\">");
+            sb.push_str(&esc_text(greek));
+            if !hebrew.is_empty() {
+                sb.push_str(&format!(
+                    "\u{a0}<span class=\"psalm-heb gloss-quiet\" data-gloss-title=\"{}\" data-gloss=\"{}\">",
+                    esc_text(PSALM_NUMBER_GLOSS.title),
+                    esc_text(PSALM_NUMBER_GLOSS.note)
+                ));
+                sb.push_str(&esc_text(hebrew));
+                sb.push_str("</span>");
+            }
+            sb.push_str("</span>");
+        }
+        None => sb.push_str(&esc_text(&elem.label)),
+    }
+    if !elem.incipit.is_empty() {
+        // The dot stays with the label; the space outside aria-hidden keeps the
+        // spoken label and Latin title separated for screen readers.
+        sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}·</span> ");
+        sb.push_str(&format!(
+            "<span class=\"psalm-incipit gloss-quiet\" lang=\"la\" data-gloss-title=\"{}\" data-gloss=\"{}\">",
+            esc_text(presentation::gloss::PSALM_INCIPIT_GLOSS.title),
+            esc_text(presentation::gloss::PSALM_INCIPIT_GLOSS.note),
+        ));
+        sb.push_str(&esc_text(&elem.incipit));
+        sb.push_str("</span>");
+    }
+    sb.push_str("</h3>");
     sb
 }
 

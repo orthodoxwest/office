@@ -16,7 +16,7 @@ use std::process::ExitCode;
 
 const USAGE: &str = "usage: office <command> [args]
 
-Commands: ordo, rubrics, validate, audit, lint, review, corpus, scaffold, dump, lauds, prime, terce, sext, none, vespers, compline, tex, serve";
+Commands: ordo, rubrics, validate, audit, lint, review, corpus, scaffold, dump, matins, lauds, prime, terce, sext, none, vespers, compline, tex, serve";
 
 /// Starts the web server and blocks: `serve [ADDR]`, ":8080" by default.
 fn cmd_serve(data: &tools::fs::FsData, args: &[String], _out: &mut dyn Write) -> Result<(), String> {
@@ -48,6 +48,7 @@ fn main() -> ExitCode {
         "scaffold" => edit::cmd_scaffold,
         "ordo" => commands::cmd_ordo,
         "rubrics" => commands::cmd_rubrics,
+        "matins" => |d, a, o| commands::cmd_hour("matins", d, a, o),
         "lauds" => |d, a, o| commands::cmd_hour("lauds", d, a, o),
         "prime" => |d, a, o| commands::cmd_hour("prime", d, a, o),
         "terce" => |d, a, o| commands::cmd_hour("terce", d, a, o),

@@ -14,14 +14,14 @@ use crate::hourdef::{HourElement, HourSection, parse_hour_definition, uses_tridu
 use crate::proper::{resolve_proper_collect_text, resolve_proper_text};
 use crate::psalmody::{DOXOLOGY_REF_PER_OFFICE, VESPERS_OF_THE_DEAD_LABEL, psalm_doxology_ref, says_psalm_doxology};
 use crate::texts::{OfficeTexts, load_texts};
-use crate::{compline, lauds_psalmody, major, minor, preces, prime, rubric, seasonal, vespers, voice};
+use crate::{compline, lauds_psalmody, major, matins, minor, preces, prime, rubric, seasonal, vespers, voice};
 
-pub use liturgy::HOUR_NAMES;
+pub use liturgy::{COMPOSABLE_HOURS, HOUR_NAMES};
 pub const HOLY_SATURDAY_VESPERS_DEFINITION: &str = "vespers-holy-saturday";
 
 /// Every hour definition file, including exceptional forms.
 pub fn hour_definition_names() -> Vec<&'static str> {
-    HOUR_NAMES.iter().copied().chain([HOLY_SATURDAY_VESPERS_DEFINITION]).collect()
+    HOUR_NAMES.iter().copied().chain([HOLY_SATURDAY_VESPERS_DEFINITION, matins::DEAD_MATINS_DEFINITION]).collect()
 }
 
 /// Per-composition choices. The default is private prayer without the
@@ -78,14 +78,19 @@ impl Engine {
         options: &ComposeOptions,
     ) -> Result<OfficeHour, String> {
         let form = options.form;
-        if !HOUR_NAMES.contains(&hour_name) {
+        if !COMPOSABLE_HOURS.contains(&hour_name) {
             return Err(format!("unknown hour: {hour_name}"));
         }
-        let definition =
-            if hour_name == "vespers" && vespers::is_holy_saturday_vespers(day) { HOLY_SATURDAY_VESPERS_DEFINITION } else { hour_name };
+        let definition = match hour_name {
+            "vespers" if vespers::is_holy_saturday_vespers(day) => HOLY_SATURDAY_VESPERS_DEFINITION,
+            "matins" => matins::matins_definition(day)
+                .ok_or_else(|| format!("no Matins for {}: only the Office of the Dead's is composed so far", day.date))?,
+            _ => hour_name,
+        };
         let sections = &self.definitions[definition];
         let t = &self.texts;
         let composed = match hour_name {
+            "matins" => Ok(matins::compose_matins(day, sections, t, Some(moveable))),
             "lauds" => major::compose_major_hour(day, sections, t, Some(moveable), &major::MajorHourOptions::lauds()),
             "vespers" => vespers::compose_vespers(day, sections, t, Some(moveable)),
             "prime" => Ok(prime::compose_prime(day, sections, t, Some(moveable), options.martyrology)),
@@ -95,12 +100,14 @@ impl Engine {
             _ => Ok(minor::compose_minor_hour("None", day, sections, t, Some(moveable))),
         };
         let mut hour = composed.map_err(|e| format!("composing {hour_name}: {e}"))?;
-        if definition != hour_name {
+        if definition == HOLY_SATURDAY_VESPERS_DEFINITION {
             hour.decisions.push(Decision::new(
                 "context:office-form",
                 "holy-saturday-vigil",
                 "Diurnal pp. 360–361, Vespers apart from Mass",
             ));
+        } else if definition == matins::DEAD_MATINS_DEFINITION {
+            hour.decisions.push(Decision::new("context:office-form", "office-of-the-dead", "Diurnal pp. 81*–99*, three Nocturns"));
         }
         add_paschal_alleluias(&mut hour, day, hour_name);
         crate::leader::apply_leader(&mut hour, form, t)?;
@@ -317,9 +324,10 @@ fn collapse_uniform_antiphons(hour: &mut OfficeHour) {
 }
 
 /// Whether psalm and canticle antiphons are doubled: only Lauds and Vespers
-/// of a Double office (General Rubrics I.4 / XXIV.8).
+/// of a Double office (General Rubrics I.4 / XXIV.8), and Matins, which is
+/// composed so far only for All Souls, a Double.
 fn antiphons_doubled(day: &Day, hour_name: &str) -> bool {
-    if hour_name != "lauds" && hour_name != "vespers" {
+    if !matches!(hour_name, "lauds" | "vespers" | "matins") {
         return false;
     }
     let office_day = if hour_name == "vespers" { vespers::vespers_office_day(day) } else { day.clone() };
@@ -771,6 +779,9 @@ fn map_element_type(kind: &str) -> ElementType {
         "blessing" => ElementType::Blessing,
         "proper-opening-acclamation" => ElementType::OpeningAcclamation,
         "proper-short-responsory" => ElementType::ShortResponsory,
+        "responsory" => ElementType::Responsory,
+        "lesson" => ElementType::Lesson,
+        "invitatory" => ElementType::Invitatory,
         "dialogue" => ElementType::Dialogue,
         // Unknown types (and "commemorations") are rubrics.
         _ => ElementType::Rubric,
@@ -779,7 +790,7 @@ fn map_element_type(kind: &str) -> ElementType {
 
 /// A label from the ref's last path component: "Psalm 66 (67)", or a
 /// title-cased hymn name. A canticle's label is its name from its text.
-fn format_label(kind: &str, reference: &str) -> String {
+pub(crate) fn format_label(kind: &str, reference: &str) -> String {
     let name = reference.rsplit('/').next().unwrap_or("").replace('-', " ");
     match kind {
         "psalm" => psalm_label(&name),
@@ -848,7 +859,7 @@ pub fn psalm_label(name: &str) -> String {
 }
 
 /// A leading "!" line is the chapter's scripture reference.
-fn extract_chapter_ref(text: &str) -> (String, String) {
+pub(crate) fn extract_chapter_ref(text: &str) -> (String, String) {
     if let Some((first, rest)) = text.split_once('\n') {
         let first = first.trim();
         if let Some(r) = first.strip_prefix('!') {

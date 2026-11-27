@@ -119,6 +119,10 @@ impl OfficeCore {
         martyrology: bool,
         chant: bool,
     ) -> Result<HourView, OfficeError> {
+        // The engine composes Matins for the CLI; the apps show only the hours the fronts publish.
+        if !HOUR_NAMES.contains(&hour.as_str()) {
+            return Err(failed(format!("unknown hour: {hour}")));
+        }
         let date =
             Date::parse(&format!("{year:04}-{month:02}-{day:02}")).ok_or_else(|| failed(format!("invalid date {year}-{month}-{day}")))?;
         let form = PrayerForm::parse(&form).map_err(failed)?;
