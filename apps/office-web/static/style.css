@@ -694,30 +694,6 @@ summary:focus-visible {
   color: var(--text);
 }
 
-/* A wide hour's About beside Settings, for the ranked header below; hidden
-   wherever the links keep About among them. */
-.site-about {
-  display: none;
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 0.35rem 0.3rem;
-}
-
-.site-about:hover {
-  color: var(--accent);
-}
-
-.nav-divider {
-  width: 1px;
-  /* An empty span has no baseline; it fills the row's height instead. */
-  align-self: stretch;
-  margin: 0.45rem 0.15rem;
-  background: var(--border);
-}
-
 /* Home keeps the same header rhythm as hour pages — avoid an empty band
    between the nav rule and the day title. */
 .page-home .site-header {
@@ -989,14 +965,12 @@ summary:focus-visible {
 @media (min-width: 701px) and (pointer: coarse) {
   .site-brand,
   .site-menu nav a,
-  .site-about,
   .site-settings > summary {
     position: relative;
   }
 
   .site-brand::after,
   .site-menu nav a::after,
-  .site-about::after,
   .site-settings > summary::before {
     content: "";
     position: absolute;
@@ -1004,75 +978,6 @@ summary:focus-visible {
     top: 50%;
     height: var(--touch-target);
     transform: translateY(-50%);
-  }
-}
-
-/* A tablet's width holds the hours' full list but not beside the brand and
-   Settings: left to wrap, it broke wherever it ran out and stranded
-   Reminders on a line of its own. There the list takes a rank to itself
-   under them, centred, as a book sets its running head over the page, and
-   About, which the rank has no room for at Larger text, stands beside
-   Settings (#927). The upper bound is where brand, links and Settings fit
-   on one line: the header is 58.5rem, 936px at the default size and 1029px
-   at Larger text, which keeps the rank to 1099px, as the apps keep it below
-   1000 of their own measure, which Larger text makes 1100. */
-@media (min-width: 701px) and (max-width: 999px) {
-  .page-hour .site-nav-shell {
-    flex-wrap: wrap;
-    row-gap: 0.15rem;
-  }
-
-  .page-hour .site-menu {
-    order: 3;
-    flex-basis: 100%;
-  }
-
-  .page-hour .site-menu-panel {
-    justify-content: center;
-  }
-
-  .page-hour .site-menu nav {
-    flex-wrap: nowrap;
-    justify-content: center;
-  }
-
-  .page-hour .site-menu nav a[data-nav="about"] {
-    display: none;
-  }
-
-  .page-hour .site-about {
-    display: block;
-    margin-left: auto;
-  }
-}
-
-@media (min-width: 1000px) and (max-width: 1099px) {
-  html[data-text-size="large"] .page-hour .site-nav-shell {
-    flex-wrap: wrap;
-    row-gap: 0.15rem;
-  }
-
-  html[data-text-size="large"] .page-hour .site-menu {
-    order: 3;
-    flex-basis: 100%;
-  }
-
-  html[data-text-size="large"] .page-hour .site-menu-panel {
-    justify-content: center;
-  }
-
-  html[data-text-size="large"] .page-hour .site-menu nav {
-    flex-wrap: nowrap;
-    justify-content: center;
-  }
-
-  html[data-text-size="large"] .page-hour .site-menu nav a[data-nav="about"] {
-    display: none;
-  }
-
-  html[data-text-size="large"] .page-hour .site-about {
-    display: block;
-    margin-left: auto;
   }
 }
 
@@ -1146,10 +1051,8 @@ summary:focus-visible {
     display: none;
   }
 
-  /* Six tracks so the hours fall into home's Morning / Day / Evening bands:
-     two, three, two — no Compline stranded on a row of its own. Ordo,
-     Reminders and About take thirds, like the middle band. Centred like the home
-     directory, since the day row's cells have their own edges. */
+  /* Ordo, Reminders and About take thirds of one row, centred, since the
+     cells have their own edges. */
   .site-menu nav {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -1162,22 +1065,10 @@ summary:focus-visible {
     text-align: center;
   }
 
-  .site-menu nav a[data-hour="terce"],
-  .site-menu nav a[data-hour="sext"],
-  .site-menu nav a[data-hour="none"],
   .site-menu nav a[data-nav="calendar"],
   .site-menu nav a[data-nav="reminders"],
   .site-menu nav a[data-nav="about"] {
     grid-column: span 2;
-  }
-
-  /* A hairline between the bands, so the grouping reads without labels. */
-  .site-menu nav a[data-hour="terce"],
-  .site-menu nav a[data-hour="sext"],
-  .site-menu nav a[data-hour="none"],
-  .site-menu nav a[data-hour="vespers"],
-  .site-menu nav a[data-hour="compline"] {
-    border-top: 1px solid var(--surface-edge);
   }
 
   .site-menu nav a {
@@ -1196,15 +1087,7 @@ summary:focus-visible {
     box-shadow: inset 0 -1.5px 0 var(--lining);
   }
 
-  .nav-divider {
-    grid-column: 1 / -1;
-    width: auto;
-    height: 1px;
-    margin: 0.25rem 0;
-  }
-
-  /* Preferences close the menu, below a rule like the one between the hours
-     and Ordo. */
+  /* Preferences close the menu, below a rule. */
   .menu-prefs {
     display: grid;
     margin-top: 0.4rem;
@@ -3886,7 +3769,7 @@ body.season-passiontide .hour-end-mark::after {
   font-family: Georgia, "Times New Roman", "Ordo Cross", serif;
 }
 /* The strip's room for the year's course is reserved in its own padding and
-   row gap (the band 3px below each month's underline, the lozenge hung beneath
+   row gap (the band 3px below each month's cell, the lozenge hung beneath
    it), so the band adds no height of its own and nothing shifts. */
 .month-jump {
   display: grid;
@@ -3907,17 +3790,32 @@ body.season-passiontide .hour-end-mark::after {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.month-jump a:hover,
-.month-jump a[aria-current] {
+.month-jump a:hover {
   color: var(--accent);
-  border-bottom-color: var(--gold-line);
+}
+/* The shown month: its name in the titulus under a gilt point (home's, the
+   year control's), clear of the year's course below, which a gold underline
+   ran into. Android's and iOS's OrdoHeader set the same. */
+.month-jump a[aria-current] {
+  color: var(--titulus);
+}
+.month-jump a[aria-current]::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 6.5px;
+  width: 3.5px;
+  height: 3.5px;
+  background: var(--ornament);
+  opacity: 0.7;
+  transform: translate(-50%, -50%) rotate(45deg);
+  pointer-events: none;
 }
 /* The year's course: the rows' colour rail laid on its side under the
    months, one rect to a run of days in the rail's own pigment
    (presentation::course; viewBox 31 wide, so a short month ends early and
    the strip's hairline, the band's lowest pixel, shows in its tail). Static:
-   no stroke, no year turn. A gap of the ground parts it from the current
-   month's gold underline, which would run into a white day's pigment. */
+   no stroke, no year turn. */
 .month-course {
   position: absolute;
   left: 0;
@@ -4021,6 +3919,13 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
 @media (forced-colors: active) {
   .month-course,
   .ordo-color-key { display: none; }
+  /* The shown month's gilt point is a background, which forced colours drop:
+     the system ink draws it instead. */
+  .month-jump a[aria-current]::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+    opacity: 1;
+  }
 }
 @media print {
   .ordo-color-key { display: none; }
@@ -4043,6 +3948,38 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
   flex-basis: 100%;
   order: 1;
   margin-bottom: 0.35rem;
+}
+/* "Rank key": a phone's, with script, to unfold the key. Its handler is inline
+   beside it (calendar.html), not in the deferred app.js, so the key is folded
+   from the first layout and its toggle works even where app.js never runs. */
+.calendar-ranks-toggle {
+  display: none;
+}
+@media (max-width: 700px) {
+  html.js .calendar-ranks-toggle {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+  html.js .calendar-ranks-toggle::after {
+    content: "▾"; content: "▾" / "";
+    margin-left: 0.35em;
+    color: color-mix(in srgb, currentColor 70%, transparent);
+    font-size: 0.85em;
+  }
+  html.js .calendar-ranks-toggle[aria-expanded="true"]::after {
+    content: "▴"; content: "▴" / "";
+  }
+  html.js .calendar-ranks:not(.is-open) {
+    display: none;
+  }
 }
 .rank-key { white-space: nowrap; }
 .rank-key-abbr { color: var(--text); }
@@ -4419,9 +4356,11 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
    colour passing from the vigil's into the feast's. It is drawn, not bound:
    both rails stay as they are. .day-lead carries the row's rail colour, its
    .day-thread the other row's. Each end runs 1px under its rail, which lies
-   above it, and the feast's half starts 1px up, over the rule, where the two
-   halves overlap, so no rounding of two edges (WebKit, at a fractional pixel
-   ratio or text size) leaves a line of ground or rule between them. Not a
+   above it; the feast's half starts 1px up, over the rule, and the vigil's
+   runs 2px down, through the rule into the feast's row. WebKit snaps each
+   row to the device grid on its own, so at a fractional pixel ratio a 1px
+   overlap at the rule can round to none, and a line of rule shows between
+   the halves; 2px always keeps a device row of thread there. Not a
    pseudo-element: td:first-child::after is the Today note and the phone's
    tr::after its pressed pool. The apps draw the same (OrdoScreen.swift, .kt). */
 .month-table .day-lead {
@@ -4437,8 +4376,8 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
   pointer-events: none;
 }
 .month-table .day-thread.to-feast {
-  bottom: -1px;
-  height: calc(0.65rem + 2px);
+  bottom: -2px;
+  height: calc(0.65rem + 3px);
   background: linear-gradient(var(--thread-own), var(--thread-mid));
 }
 .month-table .day-thread.from-vigil {
@@ -4958,7 +4897,7 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
     top: 0.45rem;
     bottom: 0.45rem;
   }
-  .month-table .day-thread.to-feast { height: calc(0.45rem + 2px); }
+  .month-table .day-thread.to-feast { height: calc(0.45rem + 3px); }
   .month-table .day-thread.from-vigil { height: calc(0.45rem + 2px); }
 }
 
@@ -7835,9 +7774,24 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 /* The invitation's gloss: what the hour it opens is ("Evening prayer"), a
    quiet italic line under its words on a phone, where the hours' table
    glosses none (app.js and home.html's script keep it with the words). The
-   wide niche glosses every hour in its table, and leaves it out. */
+   wide niche glosses every hour in its table, and leaves it out, except on an
+   evening that keeps the morrow: its table still says "Evening prayer", so the
+   invitation says "First Vespers of …" there too (data-eve, #959). */
 .page-home .pray-now-gloss {
   display: none;
+}
+
+.page-home .pray-now-gloss[data-eve]:not([hidden]) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 0.08rem;
+  color: var(--now-gloss);
+  font-size: 0.86rem;
+  font-style: italic;
+  letter-spacing: 0;
+  line-height: 1.2;
 }
 
 @media (max-width: 700px) {
@@ -7954,6 +7908,18 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   opacity: 0.9;
 }
 
+/* While an hour is now, its period's sign is lit and the other two stand
+   back; the label keeps its quiet ink, red being the hour's. With no hour now
+   (the small hours, another day) all three rest alike. The apps' HourDirectory
+   sets the same. */
+.page-home .home-hour-links:has(.is-current) .home-period-ornament {
+  opacity: 0.52;
+}
+
+.page-home .home-hour-group:has(.is-current) .home-period-ornament {
+  opacity: 1;
+}
+
 .page-home .home-hour-group-links {
   display: grid;
   min-width: 0;
@@ -7966,6 +7932,112 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 
 .page-home .home-hour-group-day .home-hour-group-links {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* The Night's one office, alone and centred in its band: Matins, not yet
+   prayed in the app, so no link. Its name stands in the quiet ink and
+   "coming soon" is set under it in small capitals, where the day's form
+   ("twelve lessons") will stand once it is. */
+.page-home .home-hour-group-night .home-hour-group-links {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.page-home .home-hour-soon {
+  display: flex;
+  align-items: center;
+  cursor: default;
+}
+
+.page-home .home-hour-soon .home-hour-link-name {
+  color: color-mix(in srgb, var(--text) 55%, var(--muted));
+}
+
+/* (Nor does it take a hover's ink or a press's pool: the hover is kept
+   from it where it is set, and the pool here, after the links' own.) */
+
+.page-home .home-hour-soon-mark {
+  color: color-mix(in srgb, var(--accent) 50%, var(--muted));
+  font-size: 0.72rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+}
+
+/* Where the hours carry their glosses, Matins' follows on its gloss's line
+   ("The night office · coming soon"), so its band is no taller than the
+   others. */
+.page-home .home-hour-soon-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  column-gap: 0.4em;
+}
+
+@media (min-width: 701px) {
+  .page-home .home-hour-soon-mark {
+    font-size: 0.8rem;
+  }
+
+  .page-home .home-hour-soon-line > .home-hour-link-note + .home-hour-soon-mark::before {
+    content: "·" / "";
+    margin-inline-end: 0.4em;
+    color: var(--muted);
+    font-variant-caps: normal;
+  }
+}
+
+/* In the niche's glossed table Matins, no target, is one line: its name, its
+   gloss and its mark ("Matins  The night office · coming soon"), so the
+   fourth band costs a line, not a row, and a 768px laptop keeps "Change
+   date" above the fold. (The list of seven sets it as its other lines.) */
+@media (min-width: 701px) {
+  .page-home .home-hour-link.home-hour-soon {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.75em;
+    min-height: 0;
+    padding-block: 0.35rem 0.3rem;
+  }
+}
+
+/* A shorter phone has no height for a fourth band of touch-target height, and
+   Matins is no target: there its mark follows its name on one line, and the
+   band takes only the line's height. */
+@media (max-width: 700px) and (max-height: 760px) {
+  .page-home .home-hour-link.home-hour-soon {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 0.6em;
+    min-height: 0;
+    padding-block: 0.1rem;
+    align-self: center;
+  }
+
+  /* The band's height comes from the joints below the frieze, as on a
+     fast day with a commemoration below (the touch targets keep theirs). */
+  .page-home .pray-now {
+    padding-block: 0.45rem 0.5rem;
+  }
+
+  .page-home .pray-now-wrap {
+    margin-bottom: 0.45rem;
+  }
+
+  .page-home .home-prayer-card h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  /* And its sign stands beside its label, not over it, so the band is one
+     line high. */
+  .page-home .home-hour-group-night .home-hour-group-label {
+    flex-direction: row;
+    gap: 0.3rem;
+    padding-block: 0.25rem;
+  }
 }
 
 .page-home .home-hour-link {
@@ -7999,15 +8071,15 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 }
 
 @media (hover: hover) {
-  .page-home .home-hour-link:not(.is-current):hover,
-  :root[data-theme="dark"] .page-home .home-hour-link:not(.is-current):hover {
+  .page-home .home-hour-link:not(.is-current, .home-hour-soon):hover,
+  :root[data-theme="dark"] .page-home .home-hour-link:not(.is-current, .home-hour-soon):hover {
     background: color-mix(in srgb, var(--accent) 6%, transparent);
     color: var(--accent);
   }
 }
 
 @media (hover: hover) and (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .page-home .home-hour-link:not(.is-current):hover {
+  :root:not([data-theme="light"]) .page-home .home-hour-link:not(.is-current, .home-hour-soon):hover {
     background: color-mix(in srgb, var(--accent) 8%, transparent);
   }
 }
@@ -8673,7 +8745,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
      warm sunlit ochre across the day, quiet pearl-umber for Compline.
    - Apse stays vaulted night sky with gold-leaf stars, shifting the orb's
      lantern glow from amber-rose at dawn/dusk to warm gold at noon and cool
-     moonlight at Compline. */
+     moonlight at Compline, which Matins, in the night, keeps. */
 .about-horologium[data-active="lauds"],
 .about-horologium[data-active="vespers"] {
   --h-wash-0: rgba(196, 118, 92, 0.2);
@@ -8685,7 +8757,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   --h-wash-1: rgba(224, 178, 86, 0.09);
 }
 
-.about-horologium[data-active="compline"] {
+.about-horologium[data-active="compline"],
+.about-horologium[data-active="matins"] {
   --h-wash-0: rgba(146, 134, 122, 0.16);
   --h-wash-1: rgba(146, 134, 122, 0.05);
 }
@@ -8700,7 +8773,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
     --h-wash-0: rgba(232, 198, 122, 0.26);
     --h-wash-1: rgba(46, 72, 108, 0.26);
   }
-  :root:not([data-theme="light"]) .about-horologium[data-active="compline"] {
+  :root:not([data-theme="light"]) .about-horologium[data-active="compline"],
+  :root:not([data-theme="light"]) .about-horologium[data-active="matins"] {
     --h-wash-0: rgba(154, 182, 224, 0.22);
     --h-wash-1: rgba(34, 56, 88, 0.32);
   }
@@ -8717,15 +8791,18 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   --h-wash-1: rgba(46, 72, 108, 0.26);
 }
 
-:root[data-theme="dark"] .about-horologium[data-active="compline"] {
+:root[data-theme="dark"] .about-horologium[data-active="compline"],
+:root[data-theme="dark"] .about-horologium[data-active="matins"] {
   --h-wash-0: rgba(154, 182, 224, 0.22);
   --h-wash-1: rgba(34, 56, 88, 0.32);
 }
 
+/* 320×160: the day's 144 and the night's shallow course under the horizon, where
+   Matins stands (presentation::about::ABOUT_HOROLOGIUM_HEIGHT). */
 .about-horologium-stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 320 / 144;
+  aspect-ratio: 320 / 160;
   touch-action: pan-y;
 }
 
@@ -8768,6 +8845,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 .about-horologium[data-active="lauds"] .about-horologium-stars,
 .about-horologium[data-active="vespers"] .about-horologium-stars { opacity: 0.68; }
 .about-horologium[data-active="compline"] .about-horologium-stars { opacity: 0.88; }
+.about-horologium[data-active="matins"] .about-horologium-stars { opacity: 0.96; }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .about-horologium-stars {
@@ -8791,6 +8869,16 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   stroke-width: 0.6;
   stroke-dasharray: 2 4;
   opacity: 0.32;
+}
+
+/* The night's course under the horizon, in the inner ring's dots, let go
+   under the words Dawn and Night (its mask). */
+.about-horologium-under {
+  fill: none;
+  stroke: var(--lining);
+  stroke-width: 0.6;
+  stroke-dasharray: 2 4;
+  opacity: 0.42;
 }
 
 .about-horologium-arc {
@@ -8821,12 +8909,23 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 }
 
 .about-horologium-sun,
-.about-horologium-moon {
+.about-horologium-moon,
+.about-horologium-star {
   fill: var(--ornament);
   transition: opacity 0.25s ease;
 }
 
-.about-horologium-moon {
+.about-horologium-moon,
+.about-horologium-star {
+  opacity: 0;
+}
+
+/* Matins: the night's star, in place of the sun and moon. */
+.about-horologium-orb.is-star .about-horologium-star {
+  opacity: 1;
+}
+
+.about-horologium-orb.is-star :is(.about-horologium-sun, .about-horologium-moon) {
   opacity: 0;
 }
 
@@ -8888,11 +8987,12 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   border-radius: 50%;
 }
 
+/* Where it stood over the day's 144 (22% up), now that the night adds 16. */
 .about-horologium-readout {
   position: absolute;
   left: 14%;
   right: 14%;
-  bottom: 22%;
+  bottom: 29.8%;
   text-align: center;
   pointer-events: none;
 }
@@ -9031,6 +9131,26 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   display: block;
   color: var(--muted);
   font-size: 0.84rem;
+}
+
+/* Matins, shown and not yet prayed in the app: its name is no link and stands
+   in the quiet ink, and "coming soon" follows its time on the time's line
+   ("before dawn · coming soon"), so its row stands as tall as the others. */
+.about-hour-soon-name {
+  color: var(--muted);
+}
+
+.about-hour-soon {
+  color: color-mix(in srgb, var(--accent) 50%, var(--muted));
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+}
+
+.about-hour-soon::before {
+  content: "·" / "";
+  margin-inline-end: 0.35em;
+  color: var(--muted);
+  letter-spacing: 0;
 }
 
 /* One name column for the seven, as wide as the widest name (the apps
@@ -11622,7 +11742,6 @@ html {
 .site-menu > summary,
 .site-settings > summary,
 .site-menu nav a,
-.site-about,
 .theme-option,
 .hour-date-nav > summary,
 .day-nav a,
@@ -11719,7 +11838,6 @@ html {
   .usage-trend-details summary,
   .not-found-home a,
   .site-menu nav a,
-  .site-about,
   .date-picker-step,
   .date-picker-title
 ) {
@@ -11770,7 +11888,6 @@ html {
   .usage-trend-details summary,
   .not-found-home a,
   .site-menu nav a,
-  .site-about,
   .date-picker-step:not(:disabled),
   .date-picker-title
 ):is(:active, .is-pressed) {
@@ -11844,6 +11961,11 @@ html {
   transition:
     opacity var(--tempo-touch-out) var(--tempo-touch-out-curve),
     --pool-gain var(--tempo-touch-out) var(--tempo-touch-out-curve);
+}
+
+/* Matins, no link, takes no pool. */
+.page-home .home-hour-links .home-hour-soon::after {
+  content: none;
 }
 
 /* The hour that is now, and while the light moves (app.js's HOUR_LIGHT) the
@@ -12300,7 +12422,7 @@ html:where(:has(> body.page-hour))::before {
     --niche-below: 6.375rem;
     /* NicheFigures.landscape */
     --card-w: 37.5rem;
-    --niche-fit: 47.25rem;
+    --niche-fit: 49.40625rem;
     --niche-air: 1.6rem;
     --niche-least: 0.96;
     --niche-share: 0.62;
@@ -12314,7 +12436,7 @@ html:where(:has(> body.page-hour))::before {
 
   /* The small words never fall under 12px on the glass, however small the
      niche (a short screen): each stands back from the zoom just enough. */
-  .page-home .home-hero :is(.home-date-weekday, .feast, .home-hour-link-name, .home-hour-link-note, .home-hour-group-label, .penitential-badge, .commemorations, .octave-note, .home-versicle, .home-frieze-text, .not-today-link, .home-season, .home-introduction, .home-date-nav > summary) {
+  .page-home .home-hero :is(.home-date-weekday, .feast, .home-hour-link-name, .home-hour-link-note, .home-hour-group-label, .penitential-badge, .commemorations, .octave-note, .home-versicle, .home-frieze-text, .not-today-link, .home-season, .home-introduction, .home-date-nav > summary, .home-hour-soon-mark) {
     zoom: max(1, calc(12 / (var(--niche-zoom) * var(--floor-px))));
   }
 
@@ -12341,6 +12463,10 @@ html:where(:has(> body.page-hour))::before {
 
   .page-home .home-hero .not-today-link {
     --floor-px: 12.48;
+  }
+
+  .page-home .home-hero .home-hour-soon-mark {
+    --floor-px: 12.8;
   }
 
   .page-home .home-hero .home-date-weekday {
@@ -12652,13 +12778,13 @@ html:where(:has(> body.page-hour))::before {
    gilt point, the periods in the margin beside their hours, ruled between
    the periods as the table is. The list is set as a block centred in the
    niche, not run from its left edge. On its side the niche takes the list
-   only where its heaviest day fits at the least zoom (1146px high); below
+   only where its heaviest day fits at the least zoom (1203px high); below
    that the glossed table fits at a larger scale. */
-@media (min-width: 701px) and (min-height: 1000px) and (orientation: portrait), (min-width: 701px) and (min-height: 1146px) {
+@media (min-width: 701px) and (min-height: 1000px) and (orientation: portrait), (min-width: 701px) and (min-height: 1203px) {
   .page-home main {
     /* NicheFigures.landscapeList */
     --card-w: 37.5rem;
-    --niche-fit: 61rem;
+    --niche-fit: 64.75rem;
     --niche-air: 1.6rem;
     --niche-least: 0.96;
     --niche-share: 0.62;
@@ -12724,6 +12850,29 @@ html:where(:has(> body.page-hour))::before {
     font-size: 1.24rem;
   }
 
+  .page-home .home-hour-link.home-hour-soon {
+    display: grid;
+    align-items: baseline;
+    justify-content: start;
+    gap: 0;
+    min-height: max(3.1rem, calc(44px / var(--niche-zoom)));
+    padding: 0.25rem 0 0.15rem;
+  }
+
+  /* Matins' mark stands under its gloss, in the glosses' column. */
+  .page-home .home-hour-soon-line {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .page-home .home-hour-soon-line > .home-hour-link-note + .home-hour-soon-mark {
+    padding-inline-start: calc(3.5px + 0.85rem);
+  }
+
+  .page-home .home-hour-soon-line > .home-hour-link-note + .home-hour-soon-mark::before {
+    content: none;
+  }
+
   .page-home .home-hour-link.is-current .home-hour-link-name {
     font-size: 1.42rem;
   }
@@ -12764,7 +12913,7 @@ html:where(:has(> body.page-hour))::before {
   .page-home main {
     /* NicheFigures.upright */
     --card-w: 34.5rem;
-    --niche-fit: 48.75rem;
+    --niche-fit: 50.90625rem;
     --niche-air: 2.4rem;
     --niche-least: 0.9;
     --niche-share: 0.8;
@@ -12785,7 +12934,7 @@ html:where(:has(> body.page-hour))::before {
   .page-home main {
     /* NicheFigures.uprightList */
     --card-w: 34.5rem;
-    --niche-fit: 62.5rem;
+    --niche-fit: 66.25rem;
     --niche-air: 2.4rem;
     --niche-least: 0.9;
     --niche-share: 0.8;

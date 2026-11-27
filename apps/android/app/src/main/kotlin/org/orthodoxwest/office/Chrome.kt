@@ -429,15 +429,14 @@ val WideFrom: Dp = 701.dp
 val LocalWide = staticCompositionLocalOf { false }
 
 /**
- * Where the hours' header holds its links, About among them, beside the brand and Settings
- * (style.css `max-width: 999px`, and 1099px at Larger text): in the page's own dp, which text size
- * scales, so Larger text keeps the rank to 1100 of the screen's.
+ * Where a wide page's versicles hang their markers in the margin (style.css `max-width: 999px`):
+ * in the page's own dp, which text size scales, so Larger text keeps it to 1100 of the screen's.
  */
 val RankedBelow: Dp = 1000.dp
 
 /**
- * Whether a wide page is narrower than the hours' header holds on one line (701–999dp): there an
- * hour's links take a rank of their own under the brand and Settings.
+ * Whether a wide page is narrower than the hours' header once held on one line (701–999dp): there
+ * the versicles' markers stay in their gutter, as the web's do at those widths.
  */
 val LocalRanked = staticCompositionLocalOf { false }
 
@@ -472,14 +471,11 @@ enum class Overlay {
 }
 
 /**
- * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
- * hour page, then the Ordo, Reminders and About (`about` is its name, the core's). The menu sets
- * it out on a phone, the header inline on a wide screen.
+ * Where the site's navigation leads, and which of it is the page shown: the Ordo, Reminders and
+ * About (`about` is its name, the core's). The hours are not among them: home lists them and each
+ * hour moves on from its end. The menu sets it out on a phone, the header inline on a wide screen.
  */
 class SiteNav(
-    val hours: List<String>,
-    val currentHour: String?,
-    val onHour: ((String) -> Unit)?,
     val onOrdo: () -> Unit,
     val ordoCurrent: Boolean,
     val onReminders: () -> Unit,
@@ -496,15 +492,11 @@ class SiteNav(
 fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: SiteNav? = null) {
     val p = LocalPalette.current
     val wide = LocalWide.current && nav != null
-    // From 701 to 999dp an hour's links don't fit beside the brand and Settings: left in the row
-    // they would crowd it, so they take a centred rank of their own beneath, as a book sets its
-    // running head over the page. About, which that rank has no room for, stands beside Settings.
-    val rank = wide && LocalRanked.current && nav?.onHour != null
     Column {
         Row(
             // The web's nav shell: held to 68rem, so the whole list fits on one line.
             Modifier.fillMaxWidth().wrapContentWidth().widthIn(max = if (wide) 1088.dp else Dp.Infinity).fillMaxWidth()
-                .padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = if (rank) 0.dp else 5.6.dp).heightIn(min = 44.dp),
+                .padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = 5.6.dp).heightIn(min = 44.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // (On home each of the header's words is a row of the crown's play: Crown.kt.)
@@ -519,20 +511,13 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
                 Text(if (LocalWide.current) " DAILY OFFICE" else "DAILY OFFICE", Modifier.padding(start = 6.08.dp), style = Type.brand.copy(color = p.text))
             }
             Spacer(Modifier.weight(1f))
-            if (rank) {
-                InlineNav(nav!!, links = false, modifier = Modifier.crownUnit("r-nav"))
-            } else if (wide) {
-                InlineNav(nav!!, modifier = Modifier.crownUnit("r-nav"))
+            if (wide) {
+                InlineNav(nav, modifier = Modifier.crownUnit("r-nav"))
             } else {
                 Row(Modifier.crownUnit("r-menu").tap(label = "Menu", onClick = onMenu).disclosed(menuOpen).padding(start = 12.8.dp, end = 3.2.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("MENU", style = Type.menu.copy(color = p.accent))
                     Caret(menuOpen, p.accent)
                 }
-            }
-        }
-        if (rank) {
-            Box(Modifier.fillMaxWidth().padding(top = 2.4.dp, bottom = 5.6.dp), contentAlignment = Alignment.Center) {
-                InlineNav(nav!!, about = false, settings = false, modifier = Modifier.crownUnit("r-links"))
             }
         }
         // The beam: a 4dp course of oak, its upper edge catching the light as a timber's arris does.
@@ -547,11 +532,10 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
 
 /**
  * The desktop header's links (`.site-menu nav`): muted, the current one in ink over the lining's
- * rule; Reminders and About quieter. `links`, `about` and `settings` choose the pages' links, About
- * and Settings after them, which a ranked header sets apart.
+ * rule; Reminders and About quieter; then Settings.
  */
 @Composable
-private fun InlineNav(nav: SiteNav, links: Boolean = true, about: Boolean = true, settings: Boolean = true, modifier: Modifier = Modifier) {
+private fun InlineNav(nav: SiteNav, modifier: Modifier = Modifier) {
     val p = LocalPalette.current
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         @Composable
@@ -568,26 +552,18 @@ private fun InlineNav(nav: SiteNav, links: Boolean = true, about: Boolean = true
                 )
             }
         }
-        if (links) {
-            nav.onHour?.let { onHour ->
-                nav.hours.forEach { h -> link(hourLabel(h), h == nav.currentHour) { onHour(h) } }
-                Box(Modifier.padding(horizontal = 2.4.dp).width(1.dp).height(24.dp).background(p.border))
-            }
-            link("Ordo", nav.ordoCurrent, onClick = nav.onOrdo)
-            link("Reminders", nav.remindersCurrent, secondary = true, onClick = nav.onReminders)
-        }
+        link("Ordo", nav.ordoCurrent, onClick = nav.onOrdo)
+        link("Reminders", nav.remindersCurrent, secondary = true, onClick = nav.onReminders)
         // Every page's header reaches About, an hour's too (#927).
-        if (about) link(nav.about, nav.aboutCurrent, secondary = true, onClick = nav.onAbout)
+        link(nav.about, nav.aboutCurrent, secondary = true, onClick = nav.onAbout)
         // Settings closes the links, quiet as Reminders; its panel holds the theme and text size.
-        if (settings) {
-            Row(
-                Modifier.heightIn(min = 44.dp).tap(label = "Settings", onClick = nav.onSettings).disclosed(nav.settingsOpen)
-                    .padding(start = 8.8.dp, end = 3.2.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text("SETTINGS", style = Type.label(11.52f, 0.04f).copy(color = p.muted))
-                Caret(nav.settingsOpen, p.muted)
-            }
+        Row(
+            Modifier.heightIn(min = 44.dp).tap(label = "Settings", onClick = nav.onSettings).disclosed(nav.settingsOpen)
+                .padding(start = 8.8.dp, end = 3.2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("SETTINGS", style = Type.label(11.52f, 0.04f).copy(color = p.muted))
+            Caret(nav.settingsOpen, p.muted)
         }
     }
 }
@@ -619,16 +595,13 @@ private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle,
 }
 
 /**
- * The site menu's dropdown panel: on an hour, the day's hours (2/3/2 as on home, a hairline between
- * the bands); the Ordo, Reminders and About; then the Theme, Text and Martyrology rows, the current
- * choice in the accent over the ornament's rule. The pages are muted, the current one underlined in
- * the lining. `prefsOnly` is the wide header's Settings: the preference rows alone, under the
- * header's end at `end`.
+ * The site menu's dropdown panel: the Ordo, Reminders and About; then the Theme, Text and
+ * Martyrology rows, the current choice in the accent over the ornament's rule. The pages are muted,
+ * the current one underlined in the lining. `prefsOnly` is the wide header's Settings: the
+ * preference rows alone, under the header's end at `end`.
  */
 @Composable
 fun MenuPanel(
-    currentHour: String?,
-    onHour: ((String) -> Unit)?,
     onOrdo: () -> Unit,
     onOrdoCurrent: Boolean,
     onReminders: () -> Unit,
@@ -688,17 +661,8 @@ fun MenuPanel(
                     .verticalScroll(rememberScrollState())
                     .padding(10.4.dp),
             ) {
-                if (onHour != null && !prefsOnly) {
-                    listOf(listOf("lauds", "prime"), listOf("terce", "sext", "none"), listOf("vespers", "compline")).forEachIndexed { i, row ->
-                        // A hairline between the bands, so the grouping reads without labels.
-                        if (i > 0) Hairline(p.surfaceEdge)
-                        MenuRow { row.forEach { h -> MenuCell(hourLabel(h).uppercase(), h == currentHour, nav, page = true, spoken = hourLabel(h)) { onHour(h) } } }
-                        Spacer(Modifier.height(2.4.dp))
-                    }
-                    Hairline(p.border, Modifier.padding(vertical = 4.dp))
-                }
                 if (!prefsOnly) {
-                    // Ordo, Reminders and About share one three-up row, matching Terce · Sext · None above.
+                    // Ordo, Reminders and About share one three-up row.
                     MenuRow {
                         MenuCell("ORDO", onOrdoCurrent, nav, page = true, spoken = "Ordo", onClick = onOrdo)
                         // Habit setup and introduction: quieter than the Ordo, as on the web (`.nav-secondary`).

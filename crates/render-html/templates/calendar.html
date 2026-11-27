@@ -136,8 +136,23 @@
   <p class="calendar-legend"><span aria-hidden="true">§</span> Fasting <span aria-hidden="true">·</span> {{ fish() }} Abstinence</p>
   <button type="button" class="calendar-expand" aria-pressed="false" hidden>Show office details</button>
   {# A phone never shows the rank cells' titles, so the key spells them out,
-       each in the ink its days are set in. #}
-  <p class="calendar-legend calendar-ranks"><span class="sr-only">Ranks: </span>{% for abbr, name in [("1cl", "first class"), ("2cl", "second class"), ("gd", "greater double"), ("d", "double"), ("sd", "semi-double"), ("s", "simple"), ("f2", "privileged feria")] %}<span class="rank-key"><span class="rank-key-abbr{% if abbr in ["1cl", "2cl", "gd"] %} is-greater{% elif abbr == "d" %} is-double{% endif %}">{{ abbr }}</span> {{ name }}</span>{% if not loop.last %}<span aria-hidden="true"> · </span>{% endif %}{% endfor %}</p>
+       each in the ink its days are set in. With script a phone keeps it folded
+       under "Rank key" (each rank still glosses itself at a tap); without
+       script, and on a wide screen, it stands open (style.css). Its handler is
+       here, not in the deferred app.js, so it answers even where that never runs. #}
+  <button type="button" class="calendar-ranks-toggle" aria-expanded="false" aria-controls="calendar-ranks">Rank key</button>
+  <p class="calendar-legend calendar-ranks" id="calendar-ranks"><span class="sr-only">Ranks: </span>{% for abbr, name in [("1cl", "first class"), ("2cl", "second class"), ("gd", "greater double"), ("d", "double"), ("sd", "semi-double"), ("s", "simple"), ("f2", "privileged feria")] %}<span class="rank-key"><span class="rank-key-abbr{% if abbr in ["1cl", "2cl", "gd"] %} is-greater{% elif abbr == "d" %} is-double{% endif %}">{{ abbr }}</span> {{ name }}</span>{% if not loop.last %}<span aria-hidden="true"> · </span>{% endif %}{% endfor %}</p>
+  <script>
+    (function () {
+      var toggle = document.querySelector(".calendar-ranks-toggle");
+      var key = document.getElementById("calendar-ranks");
+      toggle.addEventListener("click", function () {
+        var open = toggle.getAttribute("aria-expanded") !== "true";
+        toggle.setAttribute("aria-expanded", String(open));
+        key.classList.toggle("is-open", open);
+      });
+    })();
+  </script>
   </div>
   {% for m in months %}
   <section class="month" id="{{ m.slug }}">

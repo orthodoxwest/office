@@ -1353,13 +1353,6 @@ function plainClickOpensHere(e, link) {
       }
     }
 
-    document.querySelectorAll('[data-nav="hour"][data-hour]').forEach(function (link) {
-      var hour = link.getAttribute("data-hour");
-      if (hour) {
-        link.setAttribute("href", "/" + hour + "/" + navDate);
-      }
-    });
-
     var ordo = document.querySelector('[data-nav="calendar"]');
     if (ordo) {
       // navDate's own month, so #d-DATE exists on the page it opens.
@@ -3529,11 +3522,13 @@ function plainClickOpensHere(e, link) {
   function prayNowGloss(prayNow) {
     return prayNow.querySelector(".pray-now-gloss");
   }
-  function setPrayNowGloss(prayNow, gloss) {
+  // `eve` marks the eve's "First Vespers of …", which wide screens show too (#959).
+  function setPrayNowGloss(prayNow, gloss, eve) {
     var el = prayNowGloss(prayNow);
     if (el) {
       el.textContent = gloss;
       el.hidden = !gloss;
+      el.toggleAttribute("data-eve", !!eve);
     }
   }
   function setPrayNowLabel(prayNow, label) {
@@ -3588,7 +3583,7 @@ function plainClickOpensHere(e, link) {
   // Plays the change from the hour lit (`was`) and the invitation's words
   // (`wasLabel`) to `lit` and `label`. The links' aria-current has already
   // moved; their look is held at the old hour's until the seat.
-  function passLight(card, was, lit, prayNow, wasLabel, label, wasGloss, gloss) {
+  function passLight(card, was, lit, prayNow, wasLabel, label, wasGloss, gloss, eve) {
     var L = HOUR_LIGHT;
     var T = L.total;
     var moves = was !== lit;
@@ -3638,7 +3633,7 @@ function plainClickOpensHere(e, link) {
         hold(false);
         if (prayNow) {
           setPrayNowLabel(prayNow, label);
-          setPrayNowGloss(prayNow, gloss);
+          setPrayNowGloss(prayNow, gloss, eve);
         }
         // The mark of an hour prayed changes with the words, at the seat, as the apps' does.
         window.dispatchEvent(new Event("officeinvitation"));
@@ -3700,9 +3695,11 @@ function plainClickOpensHere(e, link) {
       pass.words = words;
       run(words, dip, { duration: T });
     }
-    // The gloss under the words, on a phone, goes out and comes back with them.
+    // The gloss under the words goes out and comes back with them: a phone's
+    // always, a wide screen's as an eve's "First Vespers of …" comes or goes
+    // (shown or hidden at the seat, it is dipped from the start all the same).
     var glossEl = prayNow ? prayNowGloss(prayNow) : null;
-    if (glossEl && wasGloss !== gloss && glossEl.getClientRects().length) {
+    if (glossEl && wasGloss !== gloss) {
       run(glossEl, dip, { duration: T });
     }
 
@@ -3794,11 +3791,11 @@ function plainClickOpensHere(e, link) {
     }
     if (passing === true && (was !== lit || (prayNow && (wasLabel !== label || wasGloss !== gloss))) && lightMayPass()) {
       // The pass marks the invitation again at its seat.
-      passLight(card, was, lit, prayNow, wasLabel, label, wasGloss, gloss);
+      passLight(card, was, lit, prayNow, wasLabel, label, wasGloss, gloss, eve);
     } else {
       if (prayNow) {
         setPrayNowLabel(prayNow, label);
-        setPrayNowGloss(prayNow, gloss);
+        setPrayNowGloss(prayNow, gloss, eve);
       }
       // The invitation's mark of an hour prayed follows the hour it now opens.
       window.dispatchEvent(new Event("officeinvitation"));
@@ -3820,6 +3817,10 @@ function plainClickOpensHere(e, link) {
       var isCurrent = info.offset === 0 && row.getAttribute("data-hour") === info.slug;
       row.classList.toggle("is-current", isCurrent);
       var link = row.querySelector("dt a");
+      // Matins is no link until the app prays it (presentation::hour_coming_soon).
+      if (!link) {
+        return;
+      }
       if (isCurrent) {
         link.setAttribute("aria-current", "time");
       } else {
@@ -6538,7 +6539,9 @@ function plainClickOpensHere(e, link) {
   // sun/moon smoothly across the painted sky and previews that hour below.
   var horologium = page.querySelector(".about-horologium");
   if (horologium) {
-    var CX = 160, CY = 128, RX = 118, RY = 104;
+    // presentation::about::about_horologium_point: the day's arc 104 above the horizon, the
+    // night's course NIGHT_RY under it (ABOUT_HOROLOGIUM_NIGHT_DEPTH), in a 320×160 box.
+    var CX = 160, CY = 128, RX = 118, RY = 104, NIGHT_RY = 22, H = 160;
     var DAWN_RAD = (168 * Math.PI) / 180;
     var DAWN_X = CX + Math.cos(DAWN_RAD) * RX;
     var DAWN_Y = CY - Math.sin(DAWN_RAD) * RY;
@@ -6561,6 +6564,7 @@ function plainClickOpensHere(e, link) {
         time: btn.getAttribute("data-time"),
         angle: parseFloat(btn.getAttribute("data-angle")) || 90,
         night: btn.getAttribute("data-night") === "true",
+        sign: btn.getAttribute("data-sign") || "sun",
       };
       stopList.push(item);
       stopBySlug[item.slug] = item;
@@ -6571,17 +6575,30 @@ function plainClickOpensHere(e, link) {
     var renderedAngle = (stopBySlug[currentSlug] || stopBySlug.compline).angle;
     var animId = null;
 
+    var lastDeg = null;
     function placeOrb(deg) {
+      // Rising (the drawn angle growing) from under the horizon by the Night
+      // foot, the sign is coming back up to a day hour: the gilt waits for it.
+      var rising = lastDeg !== null && deg > lastDeg;
+      lastDeg = deg;
       var rad = (deg * Math.PI) / 180;
       var x = CX + Math.cos(rad) * RX;
-      var y = CY - Math.sin(rad) * RY;
+      var y = CY - Math.sin(rad) * (Math.sin(rad) >= 0 ? RY : NIGHT_RY);
       if (orb) orb.setAttribute("transform", "translate(" + x.toFixed(1) + ", " + y.toFixed(1) + ")");
       if (wash) {
         wash.setAttribute("cx", (x / 320 * 100).toFixed(1) + "%");
-        wash.setAttribute("cy", (y / 144 * 100).toFixed(1) + "%");
+        wash.setAttribute("cy", (y / H * 100).toFixed(1) + "%");
       }
       if (litArc) {
-        litArc.setAttribute("d", "M " + DAWN_X.toFixed(1) + " " + DAWN_Y.toFixed(1) + " A " + RX + " " + RY + " 0 0 1 " + x.toFixed(1) + " " + y.toFixed(1));
+        // The gilt is the day so far: none from Lauds back round to Matins, the whole day once
+        // the sign has gone under past Night on its way to Matins, fading as it nears it; none
+        // while it comes back up that way.
+        var d = ((deg % 360) + 360) % 360;
+        var ex = x, ey = y, k = 1;
+        if ((d > 168 && d <= 270) || (d > 270 && rising)) k = 0;
+        else if (d > 270) { ex = CX + RX; ey = CY; k = Math.max(0, 1 - (360 - d) / 40); }
+        litArc.setAttribute("d", "M " + DAWN_X.toFixed(1) + " " + DAWN_Y.toFixed(1) + " A " + RX + " " + RY + " 0 0 1 " + ex.toFixed(1) + " " + ey.toFixed(1));
+        litArc.style.opacity = k === 1 ? "" : (0.78 * k).toFixed(2);
       }
     }
 
@@ -6603,6 +6620,7 @@ function plainClickOpensHere(e, link) {
       horologium.setAttribute("data-active", stop.slug);
       horologium.setAttribute("data-night", stop.night ? "true" : "false");
       if (orb) orb.classList.toggle("is-night", stop.night);
+      if (orb) orb.classList.toggle("is-star", stop.sign === "star");
       stopButtons.forEach(function (btn) {
         var on = btn.getAttribute("data-hour") === stop.slug;
         btn.classList.toggle("is-active", on);
@@ -6639,6 +6657,11 @@ function plainClickOpensHere(e, link) {
       updateReadout(stop, isPreview);
 
       var targetAngle = stop.angle;
+      // Matins stands under the horizon at 270° (−90°): the sign goes under by the foot nearer
+      // the hour it leaves, and comes back up by the foot nearer the hour it goes to.
+      if (stop.angle > 180) targetAngle = renderedAngle <= 90 ? stop.angle - 360 : stop.angle;
+      else if (renderedAngle < 0 && targetAngle > 90) renderedAngle += 360;
+      else if (renderedAngle > 180 && targetAngle <= 90) renderedAngle -= 360;
       if (animId) cancelAnimationFrame(animId);
       if ((reduced && reduced.matches) || Math.abs(targetAngle - renderedAngle) < 0.2) {
         renderedAngle = targetAngle;
@@ -6647,7 +6670,7 @@ function plainClickOpensHere(e, link) {
       }
       var startAngle = renderedAngle;
       var startTime = performance.now();
-      var duration = 420;
+      var duration = Math.abs(targetAngle - startAngle) > 100 ? 620 : 420;
       function step(now) {
         var t = Math.min(1, (now - startTime) / duration);
         // Smooth cubic ease-out along the painted arc.
@@ -6736,7 +6759,7 @@ function plainClickOpensHere(e, link) {
         var rect = stage.getBoundingClientRect();
         if (!rect.width || !rect.height) return renderedAngle;
         var svgX = ((e.clientX - rect.left) / rect.width) * 320;
-        var svgY = ((e.clientY - rect.top) / rect.height) * 144;
+        var svgY = ((e.clientY - rect.top) / rect.height) * H;
         var deg = (Math.atan2(CY - svgY, svgX - CX) * 180) / Math.PI;
         return Math.max(12, Math.min(168, deg));
       }

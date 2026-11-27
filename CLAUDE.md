@@ -137,9 +137,9 @@ Use the `/ordo-verify` skill (`.claude/skills/ordo-verify/`) to machine-diff the
 an ordo PDF: `office rubrics YEAR` emits per-day composition flags, `office ordo YEAR` emits
 the Tabula Temporaria (computus figures, moveable feasts, Ember days) plus per-hour stanzas,
 and `scripts/ordo-compare.py` diffs headlines, preces/suffrage/commemorations, Ben/Mag antiphon
-incipits, colors, Vespers precedence, and moveable dates. Open divergences are tracked as GitHub
-issues: search the open `needs ruling`, `bug` and `data validation` issues rather than relying on a
-list here.
+incipits, commemoration collects against the ordo's "Col." pages, colors, Vespers precedence,
+and moveable dates. Open divergences are tracked as GitHub issues: search the open
+`needs ruling`, `bug` and `data validation` issues rather than relying on a list here.
 
 ## Standing rules
 
@@ -231,7 +231,7 @@ make check       # Formatting, Clippy, JS lint, tests, data validation and text 
 make serve       # Start web server on :8080
 make neuma-web   # Rebuild static/neuma.mjs (the web's chant engine) after moving the neuma pin
 make ordo        # Print text ordo (Tabula Temporaria header + per-hour stanzas) for YEAR (default 2026)
-./office rubrics YEAR  # Per-day TSV of composed rubric flags + Ben/Mag antiphons (for ordo cross-checks)
+./office rubrics YEAR  # Per-day TSV of composed rubric flags, Ben/Mag antiphons and commemoration collects (for ordo cross-checks)
 make validate    # Validate data files (fails on any unverified or stale corpus entry)
 make audit       # Report placeholder texts, missing propers + composition sweep (./office audit -year N)
 make scaffold-propers  # Ensure proper files exist with commented key catalogs (never overwrites live sections)

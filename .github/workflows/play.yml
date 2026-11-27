@@ -3,13 +3,15 @@ name: Publish to Play
 # Builds the signed store bundle from master and uploads it to a Google Play track. Setup and the
 # secrets it reads are in apps/android/README.md ("Publishing from CI").
 #
-# Every merge to master that changes the app goes to Internal testing and Closed testing (the
-# `alpha` track) at once: Internal reaches the maintainers within minutes, unreviewed, so a bad build
-# shows there first; Closed testing reaches testers once Google's review passes, and a newer merge
-# replaces a release still in review.
+# Every merge to master that changes the app goes to Internal testing once all of its checks (CI,
+# iOS, Android) have passed, which reaches the maintainers unreviewed, so a bad build shows there
+# first. A commit with a red check is never uploaded, so nothing promotes it either; a manual run
+# waits on master's checks the same way. Once a day play-promote.yml moves
+# Internal's newest build up to Closed testing (the `alpha` track), where testers get it once
+# Google's review passes, and production gets it after its day there.
 # Those runs use the `play-internal` environment, with no reviewer, and skip quietly until
 # PLAY_SERVICE_ACCOUNT_JSON is set. The public gets a build when play-promote.yml promotes it
-# (daily, once it was uploaded a day before), when it is promoted in Play Console, or
+# (daily, after a day on Closed testing), when it is promoted in Play Console, or
 # when a manual run from the Actions tab uploads it; manual runs use the `play` environment, so
 # give it a required reviewer.
 #
@@ -55,6 +57,31 @@ env:
   NDK_VERSION: 28.2.13676358
 
 jobs:
+  checks:
+    name: Wait for the commit's checks
+    needs: ready
+    if: github.event_name == 'workflow_dispatch' || needs.ready.outputs.play == 'true'
+    runs-on: ubuntu-latest
+    # Long enough for iOS's build, tests and screenshots, queued macOS runners included.
+    timeout-minutes: 180
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts
+      # Nothing reaches readers from a commit whose CI, iOS or Android checks are red or still
+      # running (scripts/ci_gate.py). The publishers (play.yml, testflight.yml, and Android's own
+      # gate and preview release) are not waited on: they wait on the checks themselves. A run
+      # cancelled for a newer push is judged by the run that took its place. After a red check
+      # is mended by a re-run, re-run this workflow's failed jobs to publish.
+      - name: Wait for every check on this commit to pass
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_gate.py --require ci.yml --exclude play.yml --exclude testflight.yml --exclude-job "Wait for the commit's checks" --exclude-job "Publish android-preview"
+
   ready:
     name: Check for the Play credentials
     runs-on: ubuntu-latest
@@ -68,8 +95,8 @@ jobs:
         run: echo "play=$HAS_PLAY" >> "$GITHUB_OUTPUT"
 
   publish:
-    name: Build and upload to ${{ inputs.track || 'internal and closed testing' }}
-    needs: ready
+    name: Build and upload to ${{ inputs.track || 'internal testing' }}
+    needs: [checks, ready]
     # A manual run without the credentials still fails, at the upload, so the missing secret shows.
     if: github.event_name == 'workflow_dispatch' || needs.ready.outputs.play == 'true'
     runs-on: ubuntu-latest
@@ -78,7 +105,7 @@ jobs:
       contents: read
     env:
       # One upload, released on each comma-separated track in the same edit.
-      TRACKS: ${{ inputs.track || 'internal,alpha' }}
+      TRACKS: ${{ inputs.track || 'internal' }}
 
     steps:
       - name: Release from master only
@@ -128,9 +155,9 @@ jobs:
               exit 1
             fi
             mkdir -p "$RUNNER_TEMP/whatsnew"
-            printf '%s\n' "$NOTES" > "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
+            printf '%s' "$NOTES" > "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
             echo "dir=$RUNNER_TEMP/whatsnew" >> "$GITHUB_OUTPUT"
-            echo "Release notes:"; cat "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
+            echo "Release notes:"; cat "$RUNNER_TEMP/whatsnew/whatsnew-en-US"; echo
           else
             echo "No release notes"
           fi

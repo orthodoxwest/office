@@ -445,8 +445,10 @@ impl Server {
             calendar_link: calendar_link(&slug),
             pray_now_label: invite.label,
             pray_now_gloss: invite.gloss,
+            pray_now_eve: invite.eve,
             pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
             hours,
+            night: Default::default(),
         };
         match self.pages.home(&data) {
             Ok(body) => html(StatusCode::OK, body),

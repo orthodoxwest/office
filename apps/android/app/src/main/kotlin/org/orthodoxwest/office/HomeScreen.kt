@@ -106,6 +106,7 @@ import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.LightFrame
 import org.orthodoxwest.office.core.dayNameGloss
 import org.orthodoxwest.office.core.homeGlosses
+import org.orthodoxwest.office.core.homeNight
 import org.orthodoxwest.office.core.hourLightAt
 import org.orthodoxwest.office.core.hourLightTotalMs
 import org.orthodoxwest.office.core.hourNote
@@ -113,6 +114,9 @@ import org.orthodoxwest.office.core.penitentialGloss
 import org.orthodoxwest.office.core.seasonGloss
 
 private val HOME_GLOSSES by lazy { homeGlosses() }
+
+/** The Night's one office, set after the day's three periods: Matins, coming soon (`home_night`). */
+private val HOME_NIGHT by lazy { homeNight() }
 
 private val PERIODS = listOf(
     Triple(Period.MORNING, "Morning", listOf("lauds", "prime")),
@@ -279,6 +283,11 @@ private fun PhoneHome(height: Dp, header: @Composable () -> Unit, card: @Composa
  */
 private class HomeTier(screen: Dp, tall: Dp, card: Dp, private val dyn: Float, val wide: NicheLayout? = null, val heavy: Boolean = false) {
     val desk = wide != null
+    /**
+     * A phone up to 760 high has no height for a fourth band of a thumb's height, and Matins is no
+     * target: its mark follows its name on one line there (the web's max-width 700, max-height 760).
+     */
+    val nightInline = !desk && tall <= 760.dp
     /** The wide niche's hours one to a line (from 1000 high), else its glossed table. */
     val list = wide?.list == true
     private val upright = wide?.upright == true
@@ -379,6 +388,8 @@ private class HomeTier(screen: Dp, tall: Dp, card: Dp, private val dyn: Float, v
     val commemorationLine = if (!desk && tall <= 700.dp) 1.3f else 1.4f
     /** The fasts, as red work: a little larger in the niche. */
     val fast = if (desk) legible(14.4f) else 0f
+    /** "coming soon" under an hour not yet prayed in the app: 0.72rem on a phone, 0.8rem wider. */
+    val soon = if (desk) legible(12.8f) else 11.52f
     /**
      * The day's versicle's size, set only where a phone is over 700 high, and its measure, at most
      * 19rem wide and inside the day's clearance of the lining.
@@ -390,17 +401,23 @@ private class HomeTier(screen: Dp, tall: Dp, card: Dp, private val dyn: Float, v
     val band = pick(legible(14.4f), 12.8f, 12.8f, 13.6f)
     val bandTracking = if (desk) 0.2f else 0.15f
     val bandPad = pick(2.56.dp, 3.2.dp, 3.2.dp, 3.84.dp)
-    val bandGap = pick(17.6.dp, 12.dp, 16.dp, 20.dp)
+    /**
+     * Under the band, to the invitation: 0.75rem on a phone, 0.5rem where the phone is short
+     * ([nightInline]), whose fourth band's height comes from the joints below the frieze.
+     */
+    val bandGap = if (nightInline) 8.dp else pick(17.6.dp, 12.dp, 16.dp, 20.dp)
     val pray = pick(25.6f, 19.2f, 22.4f, 24f)
     /**
      * The invitation's padding above and below its words, its 1px line included, as the web's
      * `.pray-now` (0.68rem 0.72rem on a phone, 0.8rem from 830 high, 0.95rem from 880, 0.85rem
      * 0.9rem in the niche): measured against the web's snapshot, Compose sets the line where the
-     * browser does, so nothing is added.
+     * browser does, so nothing is added. A short phone ([nightInline]) closes it to 0.45rem
+     * 0.5rem and the space under it to 0.45rem (0.7rem otherwise), as the web's does on every day
+     * there: the joints below the frieze give the Night's band its height, the touch targets none.
      */
-    val prayTop = pick(14.6.dp, 11.9.dp, 13.8.dp, 16.2.dp)
-    val prayBottom = pick(15.4.dp, 12.5.dp, 13.8.dp, 16.2.dp)
-    val prayGap = pick(14.4.dp, 11.2.dp, 20.dp, 24.dp)
+    val prayTop = if (nightInline) 8.2.dp else pick(14.6.dp, 11.9.dp, 13.8.dp, 16.2.dp)
+    val prayBottom = if (nightInline) 9.dp else pick(15.4.dp, 12.5.dp, 13.8.dp, 16.2.dp)
+    val prayGap = if (nightInline) 7.2.dp else pick(14.4.dp, 11.2.dp, 20.dp, 24.dp)
     /** An hour's row: the niche's table 3.5rem, its list 3.1rem (a thumb's height at its least zoom). */
     val row = if (desk) maxOf(if (list) 49.6.dp else 56.dp, (44f / zoom).dp) else pick(56.dp, 44.dp, 54.4.dp, 62.4.dp)
     val hour = if (desk) legible(if (list) 19.84f else 18.56f) else 15.68f
@@ -454,7 +471,7 @@ private fun Frontispiece(
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val frame = frontispieceFrame(p)
-    val light = rememberHourLight(HourLit(view.currentHour, view.prayNowGloss, view.prayNowLabel), lightMoves)
+    val light = rememberHourLight(HourLit(view.currentHour, view.prayNowGloss, view.prayNowLabel, view.prayNowEve), lightMoves)
     val panelPlaster = ImageBitmap.imageResource(p.panel)
     var picking by remember { mutableStateOf(false) }
     val follow = LocalFollow.current
@@ -775,10 +792,11 @@ private fun Frontispiece(
                     Spacer(Modifier.height(tier.bandGap))
                     // The light moves with the hours: drawn each frame of a pass from the shared
                     // figures, and at rest from the view.
-                    val lit = light?.lit ?: HourLit(view.currentHour, view.prayNowGloss, view.prayNowLabel)
+                    val lit = light?.lit ?: HourLit(view.currentHour, view.prayNowGloss, view.prayNowLabel, view.prayNowEve)
                     // A phone says what the hour is under the invitation's words, so the hours' table keeps
-                    // one shape whichever hour is now; the niche glosses every hour in its table.
-                    PrayNow(lit.label, tier.pray, tier.prayTop, tier.prayBottom, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null, light?.words ?: 1f, gloss = if (desk) "" else lit.note, glossSize = tier.gloss, glossInk = home.nowGloss, prayed = invitePrayed && lit.label == view.prayNowLabel) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
+                    // one shape whichever hour is now; the niche glosses every hour in its table, and
+                    // under the invitation only an eve's "First Vespers of …" (#959), at the phone's size as on the web.
+                    PrayNow(lit.label, tier.pray, tier.prayTop, tier.prayBottom, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null, light?.words ?: 1f, gloss = if (desk && !lit.eve) "" else lit.note, glossSize = 13.76f, glossInk = home.nowGloss, prayed = invitePrayed && lit.label == view.prayNowLabel) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
                     HourDirectory(lit.hour, light, prayed, tier, titulusNow(p, season), home) { onHour(date, it) }
                 }
@@ -1046,6 +1064,7 @@ fun PrayNow(label: String, size: Float, top: Dp, bottom: Dp, frontal: Color, was
  * table keeps one shape whichever hour is now: the invitation says what the hour is ([PrayNow]).
  * In the wide niche every hour carries its gloss and the hour that is now is set larger as well,
  * so it is not told by colour alone; from 1000 high the hours stand one to a line there ([HourList]).
+ * The Night's band follows them, Matins alone in it and no link until the app prays it ([NightBand]).
  */
 @Composable
 private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<String>, tier: HomeTier, now: Color, home: HomeInk, onHour: (String) -> Unit) {
@@ -1058,10 +1077,10 @@ private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<Str
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
     val labelWidth = remember(labelStyle, density) {
-        with(density) { PERIODS.maxOf { measurer.measure(it.second, labelStyle).size.width }.toDp() + 8.dp }.coerceAtLeast(if (desk) 80.dp else 83.dp)
+        with(density) { (PERIODS.map { it.second } + HOME_NIGHT.label).maxOf { measurer.measure(it, labelStyle).size.width }.toDp() + 8.dp }.coerceAtLeast(if (desk) 80.dp else 83.dp)
     }
-    // Where the periods meet, for the rules between them.
-    val joints = remember { FloatArray(2) }
+    // Where the periods meet, for the rules between them: the day's three and the Night's band.
+    val joints = remember { FloatArray(PERIODS.size) }
     Column(
         Modifier.fillMaxWidth().drawBehind {
             val u = 1.dp.toPx()
@@ -1073,14 +1092,16 @@ private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<Str
             joints.forEachIndexed { i, y -> if (y > 0f) drawPath(ruledLine(0f, y + 0.5f * u, w, y + 0.5f * u, 0.9f * u, 41 + i, u), p.lining.copy(alpha = 0.36f)) }
         },
     ) {
-        PERIODS.forEachIndexed { i, (period, label, hours) ->
+        PERIODS.forEachIndexed { k, (period, label, hours) ->
+            // The day's periods first; the rule above each but the first (joints[k - 1]).
+            val i = k + 1
             if (tier.list) {
                 HourList(i, period, label, hours, current, light, prayed, tier, now, home, labelStyle, joints, onHour)
                 return@forEachIndexed
             }
             Row(
                 Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 1.dp)
-                    .then(if (i > 0) Modifier.onGloballyPositioned { joints[i - 1] = it.positionInParent().y - 1f } else Modifier)
+                    .onGloballyPositioned { if (i > 1) joints[i - 2] = it.positionInParent().y - 1f }
                     .crownUnit("r-period$i"),
             ) {
                 Column(
@@ -1089,7 +1110,7 @@ private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<Str
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    PeriodIcon(period, o.flat, modifier = if (desk) Modifier.scale(1.12f) else Modifier, alpha = 0.9f)
+                    PeriodIcon(period, o.flat, modifier = if (desk) Modifier.scale(1.12f) else Modifier, alpha = periodSignAlpha(hours, current))
                     Text(label, Modifier.padding(top = 2.dp), softWrap = false, style = labelStyle)
                 }
                 Spacer(Modifier.width(1.dp))
@@ -1147,12 +1168,171 @@ private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<Str
                 }
             }
         }
+        // The Night after the evening, its rule the last joint.
+        NightBand(current, tier, labelStyle, labelWidth, Modifier.onGloballyPositioned { joints[PERIODS.size - 1] = it.positionInParent().y - 1f })
         Spacer(Modifier.height(1.dp))
     }
 }
 
 /**
- * One period of the niche's list of seven (the web's from 1000px high upright, 1146px on its
+ * The niche's table's gap between Matins and its gloss: the web's 0.75em of the link's 1.1875rem
+ * (14.25), less the 2dp the name keeps each side.
+ */
+private val NightNameGap = 12.25.dp
+
+/**
+ * The Night's band after the day's three (the web's `.home-hour-group-night`): its star in the
+ * margin, and Matins alone and centred, with no gilt point beside it. The app does not yet pray
+ * it, so it is no link, never the hour that is now and never marked prayed; its name stands in a
+ * quieter ink, with "coming soon" in small capitals. On a phone the mark stands under the name, or
+ * beside it on one line where the phone is short ([HomeTier.nightInline]), the star beside "Night"
+ * there too; in the niche's table name, gloss and mark are one line ("Matins  The night office ·
+ * coming soon"), with no thumb's height, so the band costs a line, not a row; in the niche's list the name takes the names' column and the gloss the
+ * glosses', with the mark under the gloss. Its sign stands back with the others while an hour is
+ * now ([periodSignAlpha]).
+ */
+@Composable
+private fun NightBand(current: String, tier: HomeTier, labelStyle: androidx.compose.ui.text.TextStyle, labelWidth: Dp, modifier: Modifier = Modifier) {
+    val p = LocalPalette.current
+    val o = LocalOrnament.current
+    val night = HOME_NIGHT
+    val desk = tier.desk
+    val nameInk = mix(p.text, p.muted, 0.55f)
+    val nameStyle = Type.body.copy(fontSize = tier.hour.sp, lineHeight = (tier.hour * 1.2f).sp, letterSpacing = 0.31.sp, color = nameInk)
+    val soonSize = tier.soon
+    val soonStyle = Type.label(soonSize, 0.16f).copy(lineHeight = (soonSize * 1.2f).sp, color = mix(p.accent, p.muted, 0.5f), fontFeatureSettings = ALL_SMALL_CAPS)
+    val glossStyle = Type.small.copy(fontSize = tier.gloss.sp, lineHeight = (tier.gloss * 1.15f).sp, color = p.muted, fontStyle = FontStyle.Italic)
+    // A phone shows no gloss, so says none (the web's phone hides `.home-hour-link-note`).
+    val said = listOfNotNull(night.name, night.gloss.ifEmpty { null }?.takeIf { desk }, night.comingSoon).joinToString(", ")
+    // At a large font the one line would not hold the mark: it stands under the name instead.
+    val inline = tier.nightInline && LocalDensity.current.fontScale <= 1.3f
+    val sign = periodSignAlpha(listOf(night.hour), current)
+    if (tier.list) {
+        Layout(
+            contents = listOf(
+                {
+                    Column(Modifier.padding(end = 22.4.dp).semantics(mergeDescendants = true) { heading() }, horizontalAlignment = Alignment.CenterHorizontally) {
+                        PeriodIcon(Period.NIGHT, o.flat, modifier = Modifier.scale(1.25f), alpha = sign)
+                        Text(night.label, Modifier.padding(top = 4.dp), softWrap = false, style = labelStyle)
+                    }
+                },
+                {
+                    Row(
+                        Modifier.padding(vertical = 4.8.dp).heightIn(min = tier.row).clearAndSetSemantics { contentDescription = said },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        // The gloss keeps the name's baseline; "coming soon" stands under the
+                        // gloss, past the gilt point, in the glosses' column.
+                        Box(Modifier.width(100.8.dp).alignByBaseline()) {
+                            Text(night.name, style = nameStyle, maxLines = 1, softWrap = false)
+                        }
+                        Column(Modifier.alignByBaseline()) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Canvas(Modifier.padding(end = 13.6.dp).size(5.dp)) { lozenge(center, 1.75.dp.toPx(), o.flat.copy(alpha = 0.7f), null) }
+                                Text(night.gloss, style = glossStyle, maxLines = 1, softWrap = false)
+                            }
+                            Text(night.comingSoon, Modifier.padding(start = 18.6.dp), style = soonStyle, maxLines = 1, softWrap = false)
+                        }
+                    }
+                },
+            ),
+            modifier = modifier.fillMaxWidth().padding(top = 1.dp).crownUnit("r-period0"),
+        ) { (labels, lists), constraints ->
+            // As [HourList]: the label in the first of three columns, the hour across the others.
+            val width = constraints.maxWidth
+            val middle = tier.listMiddle.roundToPx()
+            val side = ((width - middle) / 2).coerceAtLeast(0)
+            val list = lists.first().measure(Constraints(maxWidth = (width - side).coerceAtLeast(0)))
+            val tag = labels.first().measure(Constraints(maxWidth = side))
+            val height = maxOf(list.height, tag.height)
+            layout(width, height) {
+                tag.place(side - tag.width, (height - tag.height) / 2)
+                list.place(side, 0)
+            }
+        }
+        return
+    }
+    Row(modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 1.dp).crownUnit("r-period0")) {
+        val labelBox = Modifier.width(labelWidth).fillMaxHeight().padding(start = 1.4.dp).semantics(mergeDescendants = true) { heading() }
+        if (tier.nightInline) {
+            // A short phone: the star beside "Night", not over it, so the band is one line high.
+            Row(
+                labelBox.padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.8.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                PeriodIcon(Period.NIGHT, o.flat, alpha = sign)
+                Text(night.label, softWrap = false, style = labelStyle)
+            }
+        } else {
+            // The niche's table sets the label with no padding of its own, so the band takes only
+            // its one line's height (the web's label there has none).
+            Column(
+                labelBox.padding(vertical = if (desk) 0.dp else 6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                PeriodIcon(Period.NIGHT, o.flat, modifier = if (desk) Modifier.scale(1.12f) else Modifier, alpha = sign)
+                Text(night.label, Modifier.padding(top = 2.dp), softWrap = false, style = labelStyle)
+            }
+        }
+        Spacer(Modifier.width(1.dp))
+        // The niche's table: no target, so no thumb's height, only 0.35rem over the line and
+        // 0.3rem under it (the band 2.156rem high, as [NicheFigures]' fit counts it).
+        val cell = when {
+            inline -> Modifier.padding(vertical = 1.6.dp)
+            desk -> Modifier.padding(top = 5.6.dp, bottom = 4.8.dp)
+            else -> Modifier.heightIn(min = tier.row).padding(vertical = 4.dp)
+        }
+        Box(
+            Modifier.weight(1f).fillMaxHeight().then(cell).clearAndSetSemantics { contentDescription = said },
+            contentAlignment = Alignment.Center,
+        ) {
+            val name: @Composable (Modifier) -> Unit = { mod ->
+                BasicText(
+                    night.name,
+                    mod.padding(horizontal = 2.dp),
+                    style = nameStyle,
+                    maxLines = 1,
+                    autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = nameStyle.fontSize),
+                )
+            }
+            when {
+                // A short phone: "Matins  coming soon" on one line, its band only the line's height.
+                inline -> Row {
+                    name(Modifier.alignByBaseline())
+                    Text(night.comingSoon, Modifier.alignByBaseline().padding(start = (tier.hour * 0.6f - 2f).dp), style = soonStyle, maxLines = 1, softWrap = false)
+                }
+                // The niche's table: one line, centred, on one baseline: the name, 0.75em, then
+                // the gloss and the mark parted by a point ("Matins  The night office · coming soon").
+                desk -> Row {
+                    name(Modifier.alignByBaseline())
+                    Text(night.gloss, Modifier.alignByBaseline().padding(start = NightNameGap), style = glossStyle, maxLines = 1, softWrap = false)
+                    Text(
+                        buildAnnotatedString {
+                            withStyle(SpanStyle(color = p.muted, fontFeatureSettings = "normal", letterSpacing = 0.sp)) { append("·") }
+                            append("\u2002")
+                            append(night.comingSoon)
+                        },
+                        Modifier.alignByBaseline().padding(start = (soonSize * 0.4f).dp),
+                        style = soonStyle,
+                        maxLines = 1,
+                        softWrap = false,
+                    )
+                }
+                // A taller phone: "coming soon" under the name, on two lines if a large font
+                // needs them.
+                else -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    name(Modifier)
+                    Text(night.comingSoon, style = soonStyle, textAlign = TextAlign.Center)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * One period of the niche's list of seven (the web's from 1000px high upright, 1203px on its
  * side): its label in the margin beside its hours, and each hour on a line of its own, its name and
  * its gloss on one baseline parted by a gilt point; the label and the hours, read as one block,
  * stand centred in the niche ([NicheLayout.listMiddle]).
@@ -1179,7 +1359,7 @@ private fun HourList(
         contents = listOf(
             {
                 Column(Modifier.padding(end = 22.4.dp).semantics(mergeDescendants = true) { heading() }, horizontalAlignment = Alignment.CenterHorizontally) {
-                    PeriodIcon(period, o.flat, modifier = Modifier.scale(1.25f), alpha = 0.9f)
+                    PeriodIcon(period, o.flat, modifier = Modifier.scale(1.25f), alpha = periodSignAlpha(hours, current))
                     Text(label, Modifier.padding(top = 4.dp), softWrap = false, style = labelStyle)
                 }
             },
@@ -1215,7 +1395,7 @@ private fun HourList(
             },
         ),
         modifier = Modifier.fillMaxWidth().padding(top = 1.dp)
-            .then(if (i > 0) Modifier.onGloballyPositioned { joints[i - 1] = it.positionInParent().y - 1f } else Modifier)
+            .onGloballyPositioned { if (i > 1) joints[i - 2] = it.positionInParent().y - 1f }
             .crownUnit("r-period$i"),
     ) { (labels, lists), constraints ->
         // grid-template-columns: 1fr middle 1fr, the label in the first column, the hours across
@@ -1233,8 +1413,22 @@ private fun HourList(
     }
 }
 
-/** What home's light rests on: the hour that is now (none in the small hours), the invitation's words and its gloss. */
-internal data class HourLit(val hour: String, val note: String, val label: String)
+/**
+ * A period's sign in home's table: lit while one of its hours is now, the others standing back,
+ * and all four alike when no hour is (the web's `.home-hour-group:has(.is-current)`). The Night's
+ * Matins is never now, so its sign only ever stands back or rests with the rest.
+ */
+internal fun periodSignAlpha(hours: List<String>, current: String): Float = when {
+    current.isEmpty() -> 0.9f
+    current in hours -> 1f
+    else -> 0.52f
+}
+
+/**
+ * What home's light rests on: the hour that is now (none in the small hours), the invitation's
+ * words and its gloss, and whether that gloss is the eve's "First Vespers of …" (`eve`).
+ */
+internal data class HourLit(val hour: String, val note: String, val label: String, val eve: Boolean = false)
 
 /** The light moving with the hours (the web's `HOUR_LIGHT`, `render_blocks::hour_light`), from one hour to the next. */
 internal class HourLightPass(val from: HourLit, val to: HourLit)

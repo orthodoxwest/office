@@ -284,6 +284,9 @@ pub struct Invitation {
     /// evening whose Vespers already keeps the morrow, [`Invitation::on_eve`] makes it
     /// "First Vespers of …".
     pub gloss: String,
+    /// Whether the gloss is the eve's "First Vespers of …", which the wide niche sets under the
+    /// invitation too, though its table glosses every hour (#959).
+    pub eve: bool,
 }
 
 impl Invitation {
@@ -296,6 +299,7 @@ impl Invitation {
             && self.current == "vespers"
         {
             self.gloss = first_vespers_gloss(feast);
+            self.eve = true;
         }
         self
     }
@@ -367,8 +371,18 @@ pub fn hour_gloss(slug: &str) -> &'static str {
         "none" => "Afternoon prayer",
         "vespers" => "Evening prayer",
         "compline" => "Prayer before sleep",
+        "matins" => "The night office",
         _ => "",
     }
+}
+
+/// What an hour the app does not yet pray says in its place on home and About: Matins, until
+/// its texts are in. Set in small capitals under the hour's name, which is not a link.
+pub const COMING_SOON: &str = "coming soon";
+
+/// Whether an hour is shown but not yet prayed in the app ([`COMING_SOON`]).
+pub fn hour_coming_soon(slug: &str) -> bool {
+    slug == "matins"
 }
 
 /// How fast home's mark of an hour prayed lets a reader go: words a second, a quick silent
@@ -480,7 +494,7 @@ impl EndLeaf {
 /// The invitation on home for `shown`, given the reader's own day and clock hour.
 pub fn invitation(shown: Date, now: Date, now_hour: i8) -> Invitation {
     if shown != now {
-        return Invitation { hour: "lauds", label: "Open Lauds".to_string(), date: shown, current: "", gloss: String::new() };
+        return Invitation { hour: "lauds", label: "Open Lauds".to_string(), date: shown, current: "", gloss: String::new(), eve: false };
     }
     let (hour, name, offset) = current_hour_entry(now_hour);
     Invitation {
@@ -489,6 +503,7 @@ pub fn invitation(shown: Date, now: Date, now_hour: i8) -> Invitation {
         date: now.add_days(offset),
         current: if offset == 0 { hour } else { "" },
         gloss: hour_gloss(hour).to_string(),
+        eve: false,
     }
 }
 
@@ -957,6 +972,9 @@ mod tests {
         let eve = Date::new(2026, 12, 24);
         let vespers = invitation(eve, eve, 18).on_eve(Some("The Nativity of Our Lord"));
         assert_eq!((vespers.label.as_str(), vespers.gloss.as_str()), ("Pray Vespers", "First Vespers of the Nativity of Our Lord"));
+        assert!(vespers.eve);
+        assert!(!invitation(eve, eve, 21).on_eve(Some("The Nativity of Our Lord")).eve);
+        assert!(!invitation(eve, eve, 18).on_eve(None).eve);
         // Only Vespers says it: Compline that evening, None that afternoon and another day's
         // "Open Lauds" keep their own words, and an evening of the day's own Vespers is unchanged.
         assert_eq!(invitation(eve, eve, 21).on_eve(Some("The Nativity of Our Lord")).gloss, "Prayer before sleep");

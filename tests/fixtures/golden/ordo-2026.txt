@@ -1009,7 +1009,7 @@ JUNE
            Vespers w · I fol. (Sunday within the Octave of Corpus Christi) · Mag. The child Samuel · No Suff.
                Com. Day III within the Octave of Corpus Christi ("O sacred banquet")
                Com. St Basil the Great, Bishop, Confessor & Doctor ("O Teacher right excellent")
-               Com. All Saints of Antioch ("I will liken him")
+               Com. All Saints of Antioch ("O ye Angels and Archangels")
  14  Sun     Sunday within the Octave of Corpus Christi [sd]  w
            II Sunday after Pentecost
            Day IV within the Octave of Corpus Christi (sd)
@@ -1018,7 +1018,7 @@ JUNE
            Lauds   w · Ben. A certain man · No Preces · No Suff.
                Com. Day IV within the Octave of Corpus Christi ("I am")
                Com. St Basil the Great, Bishop, Confessor & Doctor ("Well done")
-               Com. All Saints of Antioch ("Well done, good and faithful servant")
+               Com. All Saints of Antioch ("The glorious company")
            Hours   No Preces
            Vespers w · II prec. · Mag. Go out quickly · No Suff.
                Com. Day IV within the Octave of Corpus Christi ("O how sweet")
@@ -1365,7 +1365,7 @@ AUGUST
                Com. St Stephen, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
            Vespers g · II prec. · Mag. Is it not written · No Suff.
-               Com. The Finding of St Stephen, Protomartyr ("Devout men")
+               Com. The Finding of St Stephen, Protomartyr ("And Stephen, full of faith and power")
   3  Mon     The Finding of St Stephen, Protomartyr     [d]   r
            Lauds   r · Ben. And Stephen, full of faith and power · No Preces · No Suff.
            Hours   No Preces
@@ -1385,7 +1385,7 @@ AUGUST
   6  Thu     The Transfiguration of Our Lord Jesus Christ [2cl] w
            Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus (Deacons), Martyrs (com)
            Lauds   w · Ben. And behold a voice · No Preces · No Suff.
-               Com. Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus (Deacons), Martyrs ("He that hateth his life")
+               Com. Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus (Deacons), Martyrs ("The very hairs of your head")
            Hours   No Preces
            Vespers w · II prec. · Mag. And when the disciples heard it · No Suff.
   7  Fri  L  Feria                                            g
@@ -1836,13 +1836,13 @@ OCTOBER
            Lauds   g · Ben. The Lord hath raised up for us · No Preces · Suff.
            Hours   Preces
            Vespers g · Mag. Let my spirit rejoice · Suff.
-               Com. Ss Ursula & companions, Martyrs ("For theirs is the kingdom of heaven")
+               Com. Ss Ursula & companions, Martyrs ("O ye wise Virgins")
                Com. St Hilarion, Abbot ("I will liken him")
  21  Wed     Feria                                            g
            Ss Ursula & companions, Martyrs (com)
            St Hilarion, Abbot (com)
            Lauds   g · Ben. From the hand of all · No Preces · Suff.
-               Com. Ss Ursula & companions, Martyrs ("The very hairs of your head")
+               Com. Ss Ursula & companions, Martyrs ("O ye wise Virgins")
                Com. St Hilarion, Abbot ("Well done, good and faithful servant")
            Hours   Preces
            Vespers g · Mag. The Lord · Suff.

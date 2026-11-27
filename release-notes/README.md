@@ -12,10 +12,12 @@ The ordo's month strip now scrolls to today.
 ```
 
 The `Platforms:` line is optional and keeps a note to `android` or `ios` (or both, comma
-separated); without it a note goes to both apps. Blank lines part paragraphs; a note must fit
-Google Play's 500 characters (`python3 scripts/release_notes.py check`, run by `make test` and
-CI). Don't rename a note that has shipped unless the rename keeps most of its words: git's rename
-detection is what keeps it from going out again.
+separated); without it a note goes to both apps. Blank lines part paragraphs; a note must fit its
+stores' limit — Google Play's 500 characters, or the App Store's 4,000 for an `ios`-only note
+(`python3 scripts/release_notes.py check`, run by `make test` and CI). A note renamed in a pull
+request, even with edits, stays the note it was while git still sees a rename (about half its
+text unchanged); rewritten further, it goes out again as a new note. A note deleted in one pull
+request is never mistaken for a similar one added in another.
 
 Each platform's next release carries every note added since the release everyone has (on
 Android, production's newest completed release, not one still staged), newest first by when

@@ -381,7 +381,8 @@ private struct OrdoHeader: View {
         Text(s).type(style).foregroundStyle(p.accent).padding(m.px(12)).frame(maxWidth: wide ? nil : .infinity)
     }
 
-    // The month strip: the shown month underlined in gold along its cell's foot, and under each
+    // The month strip: the shown month in the titulus under a gilt point (the web's
+    // `.month-jump a[aria-current]`), clear of the year's course below; and under each
     // month the year's course (`CourseBand`), with today's lozenge hung beneath at today's place.
     private var strip: some View {
         let t = model.today
@@ -395,10 +396,11 @@ private struct OrdoHeader: View {
                         VStack(spacing: 0) {
                             Button { model.open(.ordo(year: year, month: mo, day: 0)) } label: {
                                 Text(monthShort(mo).uppercased()).type(.label(12.48, 0.06))
-                                    .foregroundStyle(current ? p.accent : p.muted)
+                                    .foregroundStyle(current ? p.titulus : p.muted)
                                     .frame(maxWidth: .infinity, minHeight: 44)
-                                    .overlay(alignment: .bottom) {
-                                        if current { Rectangle().fill(p.goldLine).frame(height: 2) }
+                                    .overlay(alignment: .top) {
+                                        // Centred 6.5pt below the cell's top, as on the web and Android.
+                                        if current { GiltPoint().padding(.top, 4) }
                                     }
                             }
                             .buttonStyle(Quiet())

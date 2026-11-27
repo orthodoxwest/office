@@ -96,17 +96,17 @@ fun nicheTokens(p: Palette): NicheTokens = if (!p.dark) {
  */
 data class NicheFigures(val card: Float, val fit: Float, val air: Float, val least: Float, val share: Float) {
     companion object {
-        val Landscape = NicheFigures(card = 37.5f, fit = 47.25f, air = 1.6f, least = 0.96f, share = 0.62f)
-        val LandscapeList = NicheFigures(card = 37.5f, fit = 61f, air = 1.6f, least = 0.96f, share = 0.62f)
-        val Upright = NicheFigures(card = 34.5f, fit = 48.75f, air = 2.4f, least = 0.9f, share = 0.8f)
-        val UprightList = NicheFigures(card = 34.5f, fit = 62.5f, air = 2.4f, least = 0.9f, share = 0.8f)
+        val Landscape = NicheFigures(card = 37.5f, fit = 49.40625f, air = 1.6f, least = 0.96f, share = 0.62f)
+        val LandscapeList = NicheFigures(card = 37.5f, fit = 64.75f, air = 1.6f, least = 0.96f, share = 0.62f)
+        val Upright = NicheFigures(card = 34.5f, fit = 50.90625f, air = 2.4f, least = 0.9f, share = 0.8f)
+        val UprightList = NicheFigures(card = 34.5f, fit = 66.25f, air = 2.4f, least = 0.9f, share = 0.8f)
         val Short = NicheFigures(card = 37.5f, fit = 35.25f, air = 0.5f, least = 0.5f, share = 0.62f)
 
         /** What is not zoomed above the niche (the header) and below it (the colophon), in rem. */
         const val ABOVE = 5.0625f
         const val BELOW = 6.375f
         /** The list of seven on a screen on its side, from this high (an upright one's from 1000). */
-        const val LIST_LANDSCAPE = 1146f
+        const val LIST_LANDSCAPE = 1203f
         /** A short screen, to this high: the niche is fitted down to the invitation. */
         const val SHORT = 560f
     }
