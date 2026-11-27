@@ -430,6 +430,9 @@ Type = versicle
 Ref = shared/formulas/faithful-departed
 
 # The optional Martyrology follows Prime's closing versicles (Diurnal p. 10).
+# The rubric marks its place only: Prime reads tomorrow's entry here when the
+# reader turns the Martyrology on, and otherwise ends with May the souls of the
+# faithful, as the Diurnal's Prime does when the Capitular Office is not said (#960).
 [Martyrology]
 Condition = not-triduum,not-office-of-the-dead
 Type = rubric

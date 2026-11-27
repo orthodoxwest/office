@@ -1316,14 +1316,19 @@ test("a place hidden by another prayer form or the Martyrology opens where the w
   }, [LINES, amen("private")]);
   expect(confession.index).toBe(privateAmen);
   expect(confession.at).toBeLessThanOrEqual(1);
-  // A day in the Martyrology; with the Martyrology off, the line said in its place.
+  // A day in the Martyrology; with the Martyrology off, Prime says nothing in its place (#960), so
+  // the line after it.
   await page.evaluate(() => localStorage.setItem("office-prayer-form", "priest"));
   const martyrology = await reopened(
     (all) => all.filter((l) => l.closest('[data-martyrology-variant="on"]'))[5],
     () => localStorage.setItem("office-martyrology", "off"),
   );
-  expect(await page.evaluate(([LINES, i]) => !!document.querySelectorAll(LINES)[i].closest('[data-martyrology-variant="off"]'), [LINES, martyrology.index])).toBe(true);
-  expect(martyrology.at).toBeLessThanOrEqual(1);
+  const after = await page.evaluate(([LINES]) => {
+    const all = [...document.querySelectorAll(LINES)];
+    const read = all.filter((l) => l.closest('[data-martyrology-variant="on"]')).pop();
+    return all.findIndex((l, i) => i > all.indexOf(read) && l.getClientRects().length > 0);
+  }, [LINES]);
+  expect(martyrology.index).toBe(after);
 });
 
 test("an hour reopened at its place can still be marked prayed", async ({ page }) => {
@@ -6107,6 +6112,8 @@ test("the Martyrology at Prime is a Settings choice, off by default, that holds 
     const year = now.getFullYear() + (now >= new Date(now.getFullYear(), 8, 8) ? 1 : 0);
     const prime = `/prime/${year}-09-07`;
     const reading = page.getByRole("heading", { name: "Martyrology for tomorrow, September 8", exact: true });
+    // Off, Prime ends with May the souls of the faithful: no rubric points to a Martyrology it
+    // does not give (#960).
     const rubric = page.locator(".elements").getByText("this may laudably be done");
     await page.goto(prime);
     await page.evaluate(async () => {
@@ -6116,8 +6123,8 @@ test("the Martyrology at Prime is a Settings choice, off by default, that holds 
       }
     });
     await page.reload();
-    // Off by default: the rubric stands, and nothing is stored.
-    await expect(rubric).toBeVisible();
+    // Off by default, and nothing is stored.
+    await expect(rubric).toHaveCount(0);
     await expect(reading).toBeHidden();
     expect(await page.evaluate(() => localStorage.getItem("office-martyrology"))).toBeNull();
     for (const button of await page.locator('.martyrology-option[data-martyrology-choice="off"]').all()) {
@@ -6126,7 +6133,6 @@ test("the Martyrology at Prime is a Settings choice, off by default, that holds 
 
     await choosePreference(page, "On", ".martyrology-option");
     await expect(reading).toBeVisible();
-    await expect(rubric).toBeHidden();
     await expect(page.locator(".elements")).not.toContainText("Thomas of Villanova");
     // Remembered, and the same page serves both settings, offline too.
     await context.setOffline(true);
@@ -6134,8 +6140,8 @@ test("the Martyrology at Prime is a Settings choice, off by default, that holds 
     await expect(page.locator("html")).toHaveAttribute("data-martyrology", "on");
     await expect(reading).toBeVisible();
     await choosePreference(page, "Off", ".martyrology-option");
-    await expect(rubric).toBeVisible();
     await expect(reading).toBeHidden();
+    await expect(rubric).toHaveCount(0);
     expect(await page.evaluate(() => localStorage.getItem("office-martyrology"))).toBe("off");
   } finally {
     await context.close();

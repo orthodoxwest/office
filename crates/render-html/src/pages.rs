@@ -7,7 +7,7 @@ use minijinja::{AutoEscape, Environment};
 
 use crate::escape::{url_norm, url_part, url_start};
 use crate::html::{render_feast_hymn, render_flowing_block, render_liturgical_block, render_section_heading_in, typeset};
-use crate::leader::leader_sections;
+use crate::leader::{LeaderSection, leader_sections};
 use crate::links::{home_link, hour_link, nav_link};
 use crate::usage::UsageData;
 use crate::view::{
@@ -174,6 +174,12 @@ impl Pages {
             let mut sections = leader_sections(forms)?;
             if !martyrology.is_empty() {
                 let read = leader_sections(martyrology)?;
+                // Prime without the Martyrology has no section for it: give the
+                // reading a section whose other variant is empty.
+                if read.len() == sections.len() + 1 {
+                    let at = (0..sections.len()).find(|&i| sections[i] != read[i]).unwrap_or(sections.len());
+                    sections.insert(at, LeaderSection { html: String::new(), ..read[at].clone() });
+                }
                 if read.len() != sections.len() {
                     return Err("martyrology section mismatch".into());
                 }
