@@ -51,17 +51,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -84,6 +89,7 @@ import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.shadow.Shadow
@@ -97,9 +103,12 @@ import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -128,8 +137,11 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.orthodoxwest.office.core.DayMarkView
 import org.orthodoxwest.office.core.preferenceHints
 
 /** The reading measure's side gutter (`--page-gutter` on a phone). */
@@ -417,15 +429,14 @@ val WideFrom: Dp = 701.dp
 val LocalWide = staticCompositionLocalOf { false }
 
 /**
- * Where the hours' header holds its links, About among them, beside the brand and Settings
- * (style.css `max-width: 999px`, and 1099px at Larger text): in the page's own dp, which text size
- * scales, so Larger text keeps the rank to 1100 of the screen's.
+ * Where a wide page's versicles hang their markers in the margin (style.css `max-width: 999px`):
+ * in the page's own dp, which text size scales, so Larger text keeps it to 1100 of the screen's.
  */
 val RankedBelow: Dp = 1000.dp
 
 /**
- * Whether a wide page is narrower than the hours' header holds on one line (701–999dp): there an
- * hour's links take a rank of their own under the brand and Settings.
+ * Whether a wide page is narrower than the hours' header once held on one line (701–999dp): there
+ * the versicles' markers stay in their gutter, as the web's do at those widths.
  */
 val LocalRanked = staticCompositionLocalOf { false }
 
@@ -460,14 +471,11 @@ enum class Overlay {
 }
 
 /**
- * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
- * hour page, then the Ordo, Reminders and About (`about` is its name, the core's). The menu sets
- * it out on a phone, the header inline on a wide screen.
+ * Where the site's navigation leads, and which of it is the page shown: the Ordo, Reminders and
+ * About (`about` is its name, the core's). The hours are not among them: home lists them and each
+ * hour moves on from its end. The menu sets it out on a phone, the header inline on a wide screen.
  */
 class SiteNav(
-    val hours: List<String>,
-    val currentHour: String?,
-    val onHour: ((String) -> Unit)?,
     val onOrdo: () -> Unit,
     val ordoCurrent: Boolean,
     val onReminders: () -> Unit,
@@ -484,15 +492,11 @@ class SiteNav(
 fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: SiteNav? = null) {
     val p = LocalPalette.current
     val wide = LocalWide.current && nav != null
-    // From 701 to 999dp an hour's links don't fit beside the brand and Settings: left in the row
-    // they would crowd it, so they take a centred rank of their own beneath, as a book sets its
-    // running head over the page. About, which that rank has no room for, stands beside Settings.
-    val rank = wide && LocalRanked.current && nav?.onHour != null
     Column {
         Row(
             // The web's nav shell: held to 68rem, so the whole list fits on one line.
             Modifier.fillMaxWidth().wrapContentWidth().widthIn(max = if (wide) 1088.dp else Dp.Infinity).fillMaxWidth()
-                .padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = if (rank) 0.dp else 5.6.dp).heightIn(min = 44.dp),
+                .padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = 5.6.dp).heightIn(min = 44.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // (On home each of the header's words is a row of the crown's play: Crown.kt.)
@@ -507,20 +511,13 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
                 Text(if (LocalWide.current) " DAILY OFFICE" else "DAILY OFFICE", Modifier.padding(start = 6.08.dp), style = Type.brand.copy(color = p.text))
             }
             Spacer(Modifier.weight(1f))
-            if (rank) {
-                InlineNav(nav!!, links = false, modifier = Modifier.crownUnit("r-nav"))
-            } else if (wide) {
-                InlineNav(nav!!, modifier = Modifier.crownUnit("r-nav"))
+            if (wide) {
+                InlineNav(nav, modifier = Modifier.crownUnit("r-nav"))
             } else {
                 Row(Modifier.crownUnit("r-menu").tap(label = "Menu", onClick = onMenu).disclosed(menuOpen).padding(start = 12.8.dp, end = 3.2.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("MENU", style = Type.menu.copy(color = p.accent))
                     Caret(menuOpen, p.accent)
                 }
-            }
-        }
-        if (rank) {
-            Box(Modifier.fillMaxWidth().padding(top = 2.4.dp, bottom = 5.6.dp), contentAlignment = Alignment.Center) {
-                InlineNav(nav!!, about = false, settings = false, modifier = Modifier.crownUnit("r-links"))
             }
         }
         // The beam: a 4dp course of oak, its upper edge catching the light as a timber's arris does.
@@ -535,11 +532,10 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
 
 /**
  * The desktop header's links (`.site-menu nav`): muted, the current one in ink over the lining's
- * rule; Reminders and About quieter. `links`, `about` and `settings` choose the pages' links, About
- * and Settings after them, which a ranked header sets apart.
+ * rule; Reminders and About quieter; then Settings.
  */
 @Composable
-private fun InlineNav(nav: SiteNav, links: Boolean = true, about: Boolean = true, settings: Boolean = true, modifier: Modifier = Modifier) {
+private fun InlineNav(nav: SiteNav, modifier: Modifier = Modifier) {
     val p = LocalPalette.current
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         @Composable
@@ -556,26 +552,18 @@ private fun InlineNav(nav: SiteNav, links: Boolean = true, about: Boolean = true
                 )
             }
         }
-        if (links) {
-            nav.onHour?.let { onHour ->
-                nav.hours.forEach { h -> link(hourLabel(h), h == nav.currentHour) { onHour(h) } }
-                Box(Modifier.padding(horizontal = 2.4.dp).width(1.dp).height(24.dp).background(p.border))
-            }
-            link("Ordo", nav.ordoCurrent, onClick = nav.onOrdo)
-            link("Reminders", nav.remindersCurrent, secondary = true, onClick = nav.onReminders)
-        }
+        link("Ordo", nav.ordoCurrent, onClick = nav.onOrdo)
+        link("Reminders", nav.remindersCurrent, secondary = true, onClick = nav.onReminders)
         // Every page's header reaches About, an hour's too (#927).
-        if (about) link(nav.about, nav.aboutCurrent, secondary = true, onClick = nav.onAbout)
+        link(nav.about, nav.aboutCurrent, secondary = true, onClick = nav.onAbout)
         // Settings closes the links, quiet as Reminders; its panel holds the theme and text size.
-        if (settings) {
-            Row(
-                Modifier.heightIn(min = 44.dp).tap(label = "Settings", onClick = nav.onSettings).disclosed(nav.settingsOpen)
-                    .padding(start = 8.8.dp, end = 3.2.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text("SETTINGS", style = Type.label(11.52f, 0.04f).copy(color = p.muted))
-                Caret(nav.settingsOpen, p.muted)
-            }
+        Row(
+            Modifier.heightIn(min = 44.dp).tap(label = "Settings", onClick = nav.onSettings).disclosed(nav.settingsOpen)
+                .padding(start = 8.8.dp, end = 3.2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("SETTINGS", style = Type.label(11.52f, 0.04f).copy(color = p.muted))
+            Caret(nav.settingsOpen, p.muted)
         }
     }
 }
@@ -607,16 +595,13 @@ private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle,
 }
 
 /**
- * The site menu's dropdown panel: on an hour, the day's hours (2/3/2 as on home, a hairline between
- * the bands); the Ordo, Reminders and About; then the Theme, Text and Martyrology rows, the current
- * choice in the accent over the ornament's rule. The pages are muted, the current one underlined in
- * the lining. `prefsOnly` is the wide header's Settings: the preference rows alone, under the
- * header's end at `end`.
+ * The site menu's dropdown panel: the Ordo, Reminders and About; then the Theme, Text and
+ * Martyrology rows, the current choice in the accent over the ornament's rule. The pages are muted,
+ * the current one underlined in the lining. `prefsOnly` is the wide header's Settings: the
+ * preference rows alone, under the header's end at `end`.
  */
 @Composable
 fun MenuPanel(
-    currentHour: String?,
-    onHour: ((String) -> Unit)?,
     onOrdo: () -> Unit,
     onOrdoCurrent: Boolean,
     onReminders: () -> Unit,
@@ -673,31 +658,23 @@ fun MenuPanel(
                         val w = 1.dp.toPx()
                         drawRect(p.surfaceEdge, Offset(w, 2.dp.toPx()), size.copy(width = size.width - 2 * w, height = w))
                     }
+                    .verticalScroll(rememberScrollState())
                     .padding(10.4.dp),
             ) {
-                if (onHour != null && !prefsOnly) {
-                    listOf(listOf("lauds", "prime"), listOf("terce", "sext", "none"), listOf("vespers", "compline")).forEachIndexed { i, row ->
-                        // A hairline between the bands, so the grouping reads without labels.
-                        if (i > 0) Hairline(p.surfaceEdge)
-                        MenuRow { row.forEach { h -> MenuCell(hourLabel(h).uppercase(), h == currentHour, nav, page = true) { onHour(h) } } }
-                        Spacer(Modifier.height(2.4.dp))
-                    }
-                    Hairline(p.border, Modifier.padding(vertical = 4.dp))
-                }
                 if (!prefsOnly) {
-                    // Ordo, Reminders and About share one three-up row, matching Terce · Sext · None above.
+                    // Ordo, Reminders and About share one three-up row.
                     MenuRow {
-                        MenuCell("ORDO", onOrdoCurrent, nav, page = true, onClick = onOrdo)
+                        MenuCell("ORDO", onOrdoCurrent, nav, page = true, spoken = "Ordo", onClick = onOrdo)
                         // Habit setup and introduction: quieter than the Ordo, as on the web (`.nav-secondary`).
-                        MenuCell("REMINDERS", onRemindersCurrent, Type.label(11.52f, 0.04f), page = true, onClick = onReminders)
-                        MenuCell(about.uppercase(), onAboutCurrent, Type.label(11.52f, 0.04f), page = true, onClick = onAbout)
+                        MenuCell("REMINDERS", onRemindersCurrent, Type.label(11.52f, 0.04f), page = true, spoken = "Reminders", onClick = onReminders)
+                        MenuCell(about.uppercase(), onAboutCurrent, Type.label(11.52f, 0.04f), page = true, spoken = about, onClick = onAbout)
                     }
                     Hairline(p.border, Modifier.padding(top = 6.4.dp))
                     Spacer(Modifier.height(6.4.dp))
                 }
                 MenuRow {
                     Text("THEME", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
-                    ThemeChoice.entries.forEach { t -> MenuCell(t.label.uppercase(), t == theme, Type.label(12f, 0.06f)) { onTheme(t) } }
+                    ThemeChoice.entries.forEach { t -> MenuCell(t.label.uppercase(), t == theme, Type.label(12f, 0.06f), spoken = t.label) { onTheme(t) } }
                 }
                 // The names are the church's, so a line says what they are, as on the web.
                 PrefHint(
@@ -737,7 +714,7 @@ fun MenuPanel(
                     }
                     Spacer(Modifier.weight(1f))
                     listOf("OFF" to false, "ON" to true).forEach { (label, on) ->
-                        MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f)) { martyrology.onChange(on) }
+                        MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f), spoken = "Martyrology ${label.lowercase()}") { martyrology.onChange(on) }
                     }
                 }
                 PrefHint(AnnotatedString(PREF_HINTS.martyrology))
@@ -917,11 +894,11 @@ fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onP
             (if (centred) Modifier.align(Alignment.CenterHorizontally).widthIn(max = 44.dp * 7) else Modifier).fillMaxWidth().padding(top = 8.dp).heightIn(min = 44.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("← ${DAY_NAV.previous}", Modifier.tap(label = DAY_NAV.previous) { onPick(shown.minusDays(1)) }.padding(horizontal = if (centred) 4.dp else 16.dp), style = link)
+            Text("← ${DAY_NAV.previous}", Modifier.heightIn(min = 44.dp).tap(label = DAY_NAV.previous) { onPick(shown.minusDays(1)) }.padding(horizontal = if (centred) 4.dp else 16.dp).wrapContentHeight(Alignment.CenterVertically), style = link)
             Spacer(Modifier.weight(1f))
-            if (shown != today) Text("TODAY", Modifier.tap { onPick(today) }, style = Type.control.copy(color = p.muted))
+            if (shown != today) Text("TODAY", Modifier.heightIn(min = 44.dp).tap(label = "Today") { onPick(today) }.wrapContentHeight(Alignment.CenterVertically), style = Type.control.copy(color = p.muted))
             Spacer(Modifier.weight(1f))
-            Text("${DAY_NAV.next} →", Modifier.tap(label = DAY_NAV.next) { onPick(shown.plusDays(1)) }.padding(horizontal = if (centred) 4.dp else 16.dp), style = link)
+            Text("${DAY_NAV.next} →", Modifier.heightIn(min = 44.dp).tap(label = DAY_NAV.next) { onPick(shown.plusDays(1)) }.padding(horizontal = if (centred) 4.dp else 16.dp).wrapContentHeight(Alignment.CenterVertically), style = link)
         }
         Column(Modifier.align(Alignment.CenterHorizontally).widthIn(max = 44.dp * 7).fillMaxWidth()) {
             // A hairline parts the day's turn above from the month's below.
@@ -934,13 +911,15 @@ fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onP
                 val stepStyle = link.copy(fontSize = 22.sp)
                 // Each step a day's cell wide, over the first and last columns.
                 Box(
-                    Modifier.size(44.dp).then(if (back != null) Modifier.tap(label = if (months) "Previous year" else "Previous month") { month = back } else Modifier),
+                    Modifier.size(44.dp).then(if (back != null) Modifier.tap(label = if (months) "Previous year" else "Previous month") { month = back } else Modifier.clearAndSetSemantics {}),
                     contentAlignment = Alignment.Center,
                 ) { Text("‹", style = if (back != null) stepStyle else stepStyle.copy(color = p.border)) }
                 val title = if (months) "${month.year}" else "${month.month.getDisplayName(JavaTextStyle.FULL, Locale.US)} ${month.year}"
                 Row(
                     Modifier.weight(1f).heightIn(min = 44.dp)
-                        .tap(label = if (months) "$title, back to days" else "$title, choose another month") { months = !months },
+                        .tap(label = if (months) "$title, back to days" else "$title, choose another month") { months = !months }
+                        .disclosed(months)
+                        .semantics { liveRegion = LiveRegionMode.Polite },
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -949,7 +928,7 @@ fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onP
                     Caret(months, p.goldLine, lighter = false)
                 }
                 Box(
-                    Modifier.size(44.dp).then(if (forward != null) Modifier.tap(label = if (months) "Next year" else "Next month") { month = forward } else Modifier),
+                    Modifier.size(44.dp).then(if (forward != null) Modifier.tap(label = if (months) "Next year" else "Next month") { month = forward } else Modifier.clearAndSetSemantics {}),
                     contentAlignment = Alignment.Center,
                 ) { Text("›", style = if (forward != null) stepStyle else stepStyle.copy(color = p.border)) }
             }
@@ -1014,6 +993,26 @@ private fun YearMonth.coerceIn(years: IntRange): YearMonth = when {
     else -> this
 }
 
+/** How a screen reader names a first-class feast in the picker (`presentation::course::FIRST_CLASS_SPOKEN`). */
+private val FIRST_CLASS_SPOKEN by lazy { org.orthodoxwest.office.core.firstClassSpoken() }
+
+/**
+ * A day's marks in the picker (#953, `.date-picker-day[data-color]`): a whisper-thin hairline of
+ * its colour under the figure, below the chosen day's gold rule, and on a first-class feast a gilt
+ * lozenge riding it, as home gilds the day.
+ */
+private fun Modifier.dayMark(mark: DayMarkView, p: Palette): Modifier = drawBehind {
+    val line = 2.dp.toPx()
+    val y = size.height - 4.dp.toPx() - line / 2f
+    val half = 15.2.dp.toPx() / 2f
+    drawLine(dayColor(mark.color, p).copy(alpha = 0.6f), Offset(center.x - half, y), Offset(center.x + half, y), line)
+    if (mark.firstClass) {
+        val side = 4.5.dp.toPx()
+        val at = Offset(center.x, size.height - 5.dp.toPx())
+        rotate(45f, at) { drawRect(p.gold, Offset(at.x - side / 2f, at.y - side / 2f), Size(side, side)) }
+    }
+}
+
 /** A month's days in six weeks always, blank where the month is not; `live` false while the months cover them. */
 @Composable
 private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boolean, onPick: (LocalDate) -> Unit) {
@@ -1030,17 +1029,23 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
             )
         }
     }
+    // The month's marks (#953), from the calendar off the main thread; until they come the days are plain.
+    val marks by produceState(emptyList<DayMarkView>(), month) {
+        value = withContext(Dispatchers.Default) { runCatching { Office.core.dayMarks(month.year, month.monthValue) }.getOrDefault(emptyList()) }
+    }
     val lead = month.atDay(1).dayOfWeek.value % 7
     val cells = (0 until 42).map { i -> (i - lead + 1).takeIf { it in 1..month.lengthOfMonth() }?.let(month::atDay) }
     cells.chunked(7).forEach { week ->
         Row(Modifier.fillMaxWidth()) {
             week.forEach { day ->
+                val mark = day?.let { marks.getOrNull(it.dayOfMonth - 1) }
                 Box(
                     Modifier
                         .weight(1f)
                         .heightIn(min = 44.dp)
                         .then(if (day == today) Modifier.todayPool(p) else Modifier)
-                        .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown, lit = Lit(homeInk(p).nowPool)) {
+                        .then(if (mark != null) Modifier.dayMark(mark, p) else Modifier)
+                        .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today) + if (mark?.firstClass == true) ", $FIRST_CLASS_SPOKEN" else "", selected = day == shown, lit = Lit(homeInk(p).nowPool)) {
                             haptics.chose()
                             onPick(day)
                         } else Modifier),
@@ -1075,12 +1080,14 @@ private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: M
                 row.forEach { m ->
                     val name = Month.of(m).getDisplayName(JavaTextStyle.FULL, Locale.US)
                     val chosen = shown.year == year && shown.monthValue == m
+                    val isCurrentMonth = today.year == year && today.monthValue == m
+                    val spokenMonth = if (isCurrentMonth) "$name $year, this month" else "$name $year"
                     Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                         Text(
                             Month.of(m).getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
                             Modifier
-                                .then(if (today.year == year && today.monthValue == m) Modifier.todayPool(p) else Modifier)
-                                .then(if (live) Modifier.tap(label = "$name $year", selected = chosen, lit = Lit(homeInk(p).nowPool)) { onMonth(m) } else Modifier.clearAndSetSemantics {})
+                                .then(if (isCurrentMonth) Modifier.todayPool(p) else Modifier)
+                                .then(if (live) Modifier.tap(label = spokenMonth, selected = chosen, lit = Lit(homeInk(p).nowPool)) { onMonth(m) } else Modifier.clearAndSetSemantics {})
                                 .heightIn(min = 44.dp)
                                 .goldUnderline(chosen, p.goldLine)
                                 .padding(horizontal = 14.4.dp, vertical = 13.dp),
@@ -1104,8 +1111,12 @@ fun FormChooser(form: String, onForm: (String) -> Unit) {
     val p = LocalPalette.current
     val haptics = LocalHapticFeedback.current
     Column(Modifier.widthIn(max = 368.dp).fillMaxWidth().padding(top = 12.dp, bottom = 8.dp)) {
-        Text("HOW ARE YOU PRAYING?", Modifier.padding(bottom = 10.4.dp), style = Type.label(11.2f, 0.1f).copy(color = p.muted))
-        Column(Modifier.fillMaxWidth().drawBehind {
+        Text(
+            "HOW ARE YOU PRAYING?",
+            Modifier.padding(bottom = 10.4.dp).semantics { heading(); contentDescription = "How are you praying?" },
+            style = Type.label(11.2f, 0.1f).copy(color = p.muted),
+        )
+        Column(Modifier.fillMaxWidth().selectableGroup().drawBehind {
             val w = 1.dp.toPx()
             drawLine(p.border, Offset(0f, w / 2f), Offset(size.width, w / 2f), w)
             drawLine(p.border, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)

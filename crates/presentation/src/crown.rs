@@ -246,6 +246,9 @@ pub const SKY_TEAL: Rgb = [72, 112, 118];
 /// The cross's ember gold: the last light it keeps at dusk, the first it takes at dawn (deep
 /// enough to stand on cream plaster, where leaf alone is lost).
 pub const CROSS_EMBER: Rgb = [186, 118, 52];
+/// The same cross ember veiled during Passiontide: slate-plum legible on both plaster and night sky,
+/// so tapping the veiled cross never flashes gold during the veiled fortnight.
+pub const CROSS_EMBER_VEILED: Rgb = [141, 127, 156];
 
 /// The cross answers the hand at once, in real ms from the tap (not slowed by [`PACE`]): it
 /// gives a little under the finger, [`CROSS_PRESS`] of its size and back in [`CROSS_PRESS_LEN`],

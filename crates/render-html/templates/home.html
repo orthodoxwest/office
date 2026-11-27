@@ -1,6 +1,6 @@
-{% extends "layout.html" %}{% block title %}Daily Office — {{ date_str }}{% endblock %}{% block content %}
+{% extends "layout.html" %}{% block title %}{% if noindex %}Daily Office — {{ date_str }}{% else %}Daily Office — The Benedictine Divine Office for the Orthodox Western Rite{% endif %}{% endblock %}{% block content %}
 <div class="home">
-  {% if from_feast %}<a class="from-feast" href="{{ from_feast.href|url }}">&lsaquo; {{ from_feast.label|typeset }}</a>{% endif %}
+  {% if from_feast %}<a class="from-feast" href="{{ from_feast.href|url }}"><span aria-hidden="true">&lsaquo; </span>{{ from_feast.label|typeset }}</a>{% endif %}
   <span class="sr-only">Liturgical color: {{ color }}</span>
   {# The source order is the frontispiece order at every width: day identity,
        prayer invitation, then the secondary date control. Keeping the visual
@@ -15,7 +15,7 @@
     {# The consecration cross opens the card (at the niche's crown on a
          desktop): decorative, outside the reading and focus order. #}
     <span class="home-crown" aria-hidden="true"></span>
-    <section class="home-summary day-color-{{ color }}" aria-labelledby="home-date-heading">
+    <section class="home-summary day-color-{{ color }}" aria-labelledby="home-date-heading" data-nosnippet>
       {# By night on a phone, the apse's painted sky inside the head, down to
            the frieze; app.js sets its gold-leaf stars in it, clear of the
            day's words. Without script the sky has no stars. #}
@@ -38,18 +38,18 @@
         {# A familiar name the ordo gives in parentheses ("(Corpus Christi)")
            is set apart from the name, so it is kept whole and, when the two
            cannot share a line, takes the next line of its own. #}
-        {% if feast_name %}<p class="feast{% if feast_alias %} has-alias{% endif %}">{% if feast_href %}<a class="feast-link" href="{{ feast_href|url }}" title="About this feast">{% endif %}{% if feast_alias %}<span class="feast-name">{{ feast_name|typeset }}</span> <span class="feast-alias">{{ feast_alias|typeset }}</span>{% else %}{{ feast_name|typeset }}{% endif %}{% if feast_href %}</a>{% endif %}</p>{% endif %}
-        {% if octave_note %}<p class="octave-note">{{ octave_note }}</p>{% endif %}
+        {% if feast_name %}{% set dg = "" if feast_href else (feast_name|day_name_gloss) %}<p class="feast{% if feast_alias %} has-alias{% endif %}">{% if feast_href %}<a class="feast-link" href="{{ feast_href|url }}" title="About this feast">{% elif dg %}<span class="gloss-quiet" data-gloss-title="{{ dg.title }}" data-gloss="{{ dg.note }}">{% endif %}{% if feast_alias %}<span class="feast-name">{{ feast_name|typeset }}</span> <span class="feast-alias">{{ feast_alias|typeset }}</span>{% else %}{{ feast_name|typeset }}{% endif %}{% if feast_href %}</a>{% elif dg %}</span>{% endif %}</p>{% endif %}
+        {% if octave_note %}<p class="octave-note"><span class="gloss-quiet" data-gloss-title="{{ octave_gloss.title }}" data-gloss="{{ octave_gloss.note }}">{{ octave_note }}</span></p>{% endif %}
         {% if penitential %}
         <p class="penitential">
-          {% for label in penitential %}{% if not loop.first %} {% endif %}<span class="penitential-badge">{{ label }}</span>{% endfor %}
+          {% for label in penitential %}{% if not loop.first %} {% endif %}{% set pg = label|penitential_gloss %}<span class="penitential-badge{% if pg %} gloss-quiet{% endif %}"{% if pg %} data-gloss-title="{{ pg.title }}" data-gloss="{{ pg.note }}"{% endif %}>{{ label }}</span>{% endfor %}
         </p>
         {% endif %}
         {# The day's versicle from Lauds, on a day plain enough to have room
            for it: never in Passiontide or on a violet day, when the head is
            stripped (presentation::home_shows_versicle). #}
         {% if versicle %}
-        <p class="home-versicle"><span class="home-versicle-line"><span class="home-versicle-sigil">℣.</span> {{ versicle|typeset }}</span> <span class="home-versicle-line"><span class="home-versicle-sigil">℟.</span> {{ response|typeset }}</span></p>
+        <p class="home-versicle"><span class="home-versicle-line gloss-quiet" data-gloss-title="{{ versicle_gloss.title }}" data-gloss="{{ versicle_gloss.note }}"><span class="home-versicle-sigil"><span aria-hidden="true">℣.</span><span class="sr-only">Versicle.</span></span> {{ versicle|typeset }}</span> <span class="home-versicle-line gloss-quiet" data-gloss-title="{{ versicle_gloss.title }}" data-gloss="{{ versicle_gloss.note }}"><span class="home-versicle-sigil"><span aria-hidden="true">℟.</span><span class="sr-only">Response.</span></span> {{ response|typeset }}</span></p>
         {% endif %}
         {% if commemorations %}
         <div class="commemorations">
@@ -82,7 +82,7 @@
            picker unfolds under its own control instead. #}
       <div class="home-stage">
       <div class="home-hours-face">
-      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}"><span class="pray-now-label">{{ pray_now_label }}</span> <span class="pray-now-gloss"{% if not pray_now_gloss %} hidden{% endif %}>{{ pray_now_gloss }}</span></a></p>
+      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}"><span class="pray-now-label">{{ pray_now_label }}</span> <span class="pray-now-gloss"{% if pray_now_eve %} data-eve=""{% endif %}{% if not pray_now_gloss %} hidden{% endif %}>{{ pray_now_gloss|typeset }}</span></a></p>
       <nav class="home-hour-links" aria-label="Hours for the day">
         <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
           <h3 class="home-hour-group-label" id="home-hours-morning">
@@ -127,12 +127,29 @@
           </h3>
           <div class="home-hour-group-links">
             {% for h in hours %}{% if h.slug in ["vespers", "compline"] %}
-            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
+            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.eve %} data-eve="{{ h.eve|typeset }}"{% endif %}{% if h.is_current %} aria-current="time"{% endif %}>
               <span class="home-hour-link-name">{{ h.name }}</span>
               {% if h.note %}<span class="home-hour-link-note">{{ h.note }}</span>{% endif %}
               {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
             </a>
             {% endif %}{% endfor %}
+          </div>
+        </section>
+        {# Matins, the night office, after the day's seven (its place in the night, and so
+           home reads on from the evening into the night): shown and not yet prayed in the app
+           (presentation::hour_coming_soon), so it is no link and takes no part in the hour now. #}
+        <section class="home-hour-group home-hour-group-night" aria-labelledby="home-hours-night">
+          <h3 class="home-hour-group-label" id="home-hours-night">
+            <svg class="home-period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
+              <path d="M12.00,0.10L12.84,5.97L15.11,4.89L14.03,7.16L19.90,8.00L14.03,8.84L15.11,11.11L12.84,10.03L12.00,15.90L11.16,10.03L8.89,11.11L9.97,8.84L4.10,8.00L9.97,7.16L8.89,4.89L11.16,5.97Z"/>
+            </svg>
+            <span>{{ night.label }}</span>
+          </h3>
+          <div class="home-hour-group-links">
+            <span class="home-hour-link home-hour-soon">
+              <span class="home-hour-link-name">{{ night.name }}</span>
+              <span class="home-hour-soon-line"><span class="home-hour-link-note">{{ night.gloss }}</span><span class="home-hour-soon-mark">{{ night.coming_soon }}</span></span>
+            </span>
           </div>
         </section>
       </nav>
@@ -143,7 +160,7 @@
     {# Season rides the secondary control row: context without interrupting
          the date → prayer invitation reading order. #}
     <div class="home-day-meta">
-      {% if season %}<p class="home-season">{{ season }}</p>{% endif %}
+      {% if season %}{% set sg = season|season_gloss %}<p class="home-season">{% if sg %}<span class="gloss-quiet" data-gloss-title="{{ sg.title }}" data-gloss="{{ sg.note }}">{{ season }}</span>{% else %}{{ season }}{% endif %}</p>{% endif %}
       {# Shown only in a reader's first week (layout.html's data-newcomer); the menu keeps About after. #}
       <a class="home-introduction" href="/about">{{ about_introduction }}</a>
       <details class="hour-date-nav home-date-nav">
@@ -211,12 +228,18 @@
         }
         if (href) prayNow.setAttribute("href", href);
         (prayNow.querySelector(".pray-now-label") || prayNow).textContent = label;
-        // The hour's gloss, which a phone sets under the words: the one its hour carries below.
+        // The hour's gloss, which a phone sets under the words: the one its hour carries below,
+        // or on an evening that keeps the morrow, "First Vespers of …" (its data-eve).
         var gloss = prayNow.querySelector(".pray-now-gloss");
+        var row = hour && entry[3] === 0 && card.querySelector('.home-hour-link[data-hour="' + hour + '"]');
         var note = hour && card.querySelector('.home-hour-link[data-hour="' + hour + '"] .home-hour-link-note');
+        var eve = row && row.getAttribute("data-eve");
+        var said = eve || (note ? note.textContent : "");
         if (gloss) {
-          gloss.textContent = note ? note.textContent : "";
-          gloss.hidden = !note;
+          gloss.textContent = said;
+          gloss.hidden = !said;
+          // The eve's gloss shows on wide screens too (style.css, #959).
+          gloss.toggleAttribute("data-eve", !!eve);
         }
       })();
     </script>

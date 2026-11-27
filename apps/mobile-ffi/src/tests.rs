@@ -75,6 +75,23 @@ fn composes_what_the_web_composes() {
 }
 
 #[test]
+fn the_little_hours_show_posture_cues_when_a_priest_or_deacon_leads() {
+    let core = OfficeCore::new().unwrap();
+    let cues = |hour: &str, form: &str| {
+        let view = core.compose(hour.into(), 2026, 10, 4, form.into(), false, false).unwrap();
+        format!("{:?}", view.sections).matches("style: Posture").count()
+    };
+    for hour in ["prime", "terce", "sext", "none"] {
+        assert_eq!(cues(hour, "private"), 0, "{hour}");
+        assert!(cues(hour, "priest") > 0 && cues(hour, "deacon") == cues(hour, "priest"), "{hour}");
+    }
+    for hour in ["lauds", "vespers"] {
+        assert!(cues(hour, "private") > 0 && cues(hour, "priest") == cues(hour, "private"), "{hour}");
+    }
+    assert_eq!(cues("compline", "priest"), 0);
+}
+
+#[test]
 fn the_martyrology_setting_reads_tomorrows_entry_at_prime() {
     let core = OfficeCore::new().unwrap();
     let text = |v: &HourView| format!("{:?}", v.sections);
@@ -160,7 +177,7 @@ fn home_invites_to_the_current_office_only_today() {
     assert_eq!((home.pray_now_label.as_str(), home.current_hour.as_str()), ("Pray Vespers", "vespers"));
     assert_eq!(home.pray_now_gloss, "Evening prayer");
     assert_eq!(crate::hour_note("prime".into()), "Prayer as work begins");
-    assert_eq!(crate::hour_note("matins".into()), "");
+    assert_eq!(crate::hour_note("matins".into()), "The night office");
     // Compline after midnight belongs to yesterday, and marks no hour today.
     let late = core.home(today, today, 1).unwrap();
     assert_eq!((late.pray_now_hour.as_str(), late.pray_now_date, late.current_hour.as_str()), ("compline", civil(2026, 3, 14), ""));
@@ -169,6 +186,23 @@ fn home_invites_to_the_current_office_only_today() {
     let other = core.home(civil(2026, 3, 16), today, 18).unwrap();
     assert_eq!((other.pray_now_label.as_str(), other.is_today, other.pray_now_gloss.as_str()), ("Open Lauds", false, ""));
     assert_eq!(core.home(civil(2026, 3, 30), today, 9).unwrap().ornament, "passiontide");
+}
+
+/// On an evening that keeps the morrow, the invitation to Vespers says so (#951).
+#[test]
+fn home_says_first_vespers_on_the_eve_of_a_feast() {
+    let core = OfficeCore::new().unwrap();
+    let eve = civil(2026, 12, 24);
+    // The flag the wide niche reads to keep the gloss under its invitation (#959).
+    let vespers = core.home(eve, eve, 18).unwrap();
+    assert_eq!((vespers.pray_now_gloss.as_str(), vespers.pray_now_eve), ("First Vespers of the Nativity of Our Lord", true));
+    let compline = core.home(eve, eve, 21).unwrap();
+    assert_eq!((compline.pray_now_gloss.as_str(), compline.pray_now_eve), ("Prayer before sleep", false));
+    let saturday = civil(2026, 11, 28);
+    assert_eq!(core.home(saturday, saturday, 18).unwrap().pray_now_gloss, "First Vespers of I Sunday of Advent");
+    let plain = civil(2026, 12, 23);
+    let evening = core.home(plain, plain, 18).unwrap();
+    assert_eq!((evening.pray_now_gloss.as_str(), evening.pray_now_eve), ("Evening prayer", false));
 }
 
 #[test]
@@ -190,6 +224,32 @@ fn about_lights_and_invites_to_the_hour_home_does() {
     let web = &blocks[blocks.len() - 2];
     assert_eq!(web.kind, "paragraph");
     assert!(web.runs.iter().any(|r| r.link == "https://orthodoxwestbreviary.com"));
+}
+
+/// Matins closes About's table and home's hours under Night, after the evening, coming soon: no link and no part in
+/// the hour now, nor in reminders, until the app prays it.
+#[test]
+fn matins_is_shown_coming_soon_under_night() {
+    let about = crate::about();
+    let labels: Vec<&str> = about.periods.iter().map(|p| p.label.as_str()).collect();
+    assert_eq!(labels, ["Morning", "Day", "Evening", "Night"]);
+    let night = about.periods.last().unwrap();
+    assert_eq!(night.label, "Night");
+    let matins = &night.hours[0];
+    assert_eq!((matins.hour.as_str(), matins.name.as_str(), matins.gloss.as_str()), ("matins", "Matins", "The night office"));
+    assert!(matins.coming_soon && matins.sign == "star" && matins.angle == 270.0);
+    assert!(about.periods[..3].iter().flat_map(|p| &p.hours).all(|h| !h.coming_soon && h.sign != "star"));
+    assert_eq!(about.coming_soon, "coming soon");
+    assert_eq!((about.horologium_height, about.horologium_night_depth), (160.0, 22.0));
+    let home = crate::home_night();
+    assert_eq!((home.label.as_str(), home.hour.as_str(), home.name.as_str()), ("Night", "matins", "Matins"));
+    assert_eq!((home.gloss.as_str(), home.coming_soon.as_str()), ("The night office", "coming soon"));
+    assert!(crate::reminder_periods().iter().all(|p| !p.hours.iter().any(|h| h == "matins")));
+    let core = OfficeCore::new().unwrap();
+    let today = civil(2026, 3, 15);
+    for hour in 0..24 {
+        assert_ne!(core.home(today, today, hour).unwrap().current_hour, "matins", "{hour}");
+    }
 }
 
 /// About's specimen sets lines an hour prints, as it prints them (the ✠ where it falls, the
@@ -389,6 +449,34 @@ fn the_ordo_leads_a_vigil_into_its_feast_as_the_web_does() {
     assert_eq!(lead(2026, 11, 1), (String::new(), "violet".to_string()));
     // St Andrew's vigil, anticipated over Advent Sunday, leads nowhere.
     assert_eq!(lead(2026, 11, 28), (String::new(), String::new()));
+}
+
+/// The bells are silent through the Triduum: Maundy Thursday's Vespers through Holy Saturday's
+/// None come without the bell, and Holy Saturday's Vespers rings again (#950).
+#[test]
+fn reminders_keep_the_triduum_without_the_bell() {
+    let core = OfficeCore::new().unwrap();
+    let choose = |hour: &str, h: i32, m: i32| ReminderChoice { hour: hour.into(), hour_of_day: h, minute: m };
+    let hours = vec![choose("lauds", 6, 45), choose("none", 15, 0), choose("vespers", 18, 0)];
+    let got = core.reminders(civil(2026, 4, 9), 4, hours, vec![true; 7], None).unwrap();
+    let silent: Vec<_> = got.iter().map(|r| (r.date.day, r.hour.as_str(), r.silent)).collect();
+    assert_eq!(
+        silent,
+        [
+            (9, "lauds", false),
+            (9, "none", false),
+            (9, "vespers", true),
+            (10, "lauds", true),
+            (10, "none", true),
+            (10, "vespers", true),
+            (11, "lauds", true),
+            (11, "none", true),
+            (11, "vespers", false),
+            (12, "lauds", false),
+            (12, "none", false),
+            (12, "vespers", false),
+        ]
+    );
 }
 
 #[test]
@@ -787,6 +875,7 @@ fn crown_plan_carries_presentations_figures() {
         assert_eq!((plan.dawn_field_out, plan.dawn_star_linger, plan.star_over), (c::DAWN_FIELD_OUT, c::DAWN_STAR_LINGER, c::STAR_OVER));
         assert_eq!((plan.beat_hold, plan.beat_len), (c::BEAT_HOLD, c::BEAT_LEN));
         assert_eq!([plan.cross_ember.r, plan.cross_ember.g, plan.cross_ember.b], c::CROSS_EMBER);
+        assert_eq!([plan.cross_ember_veiled.r, plan.cross_ember_veiled.g, plan.cross_ember_veiled.b], c::CROSS_EMBER_VEILED);
         assert_eq!([plan.veil_ink.r, plan.veil_ink.g, plan.veil_ink.b], play.veil_ink);
         assert_eq!((plan.veil_peak, plan.ink_at), (play.veil_peak, play.ink_at));
         let g = plan.glow_ease;
@@ -861,4 +950,49 @@ fn the_apps_read_whether_an_hour_ends_bare() {
     assert!(souls.bare && souls.end_bare);
     let plain = hour("vespers", 10, 31);
     assert!(!plain.bare && !plain.end_bare);
+}
+
+#[test]
+fn subtle_details_exports_match_presentation() {
+    let core = OfficeCore::new().unwrap();
+    assert_eq!(crate::day_name_gloss("Feria".into()).unwrap().term, "Feria");
+    assert_eq!(crate::day_name_gloss("Advent feria".into()).unwrap().term, "Feria");
+    assert_eq!(crate::day_name_gloss("Vigil of the Nativity".into()).unwrap().term, "Vigil");
+    assert!(crate::day_name_gloss("The Nativity of Our Lord".into()).is_none());
+
+    let about = crate::about();
+    assert!(!about.specimen.deacon_note.is_empty());
+    assert!(!about.specimen.priest_note.is_empty());
+    assert_ne!(about.specimen.deacon_note, about.specimen.priest_note);
+    assert_eq!(about.ordo_colors.len(), 6);
+    assert_eq!(crate::ordo_colors().len(), 6);
+
+    let course = core.ordo_course(2026).unwrap();
+    let rose_note = crate::color_days_note(course.clone(), "rose".into(), 2026);
+    assert!(rose_note.contains("Mar") && rose_note.contains("Dec"), "expected Rose dates, got: {rose_note}");
+    let green_note = crate::color_days_note(course, "green".into(), 2026);
+    assert!(green_note.contains("days in 2026"), "expected day count in 2026, got: {green_note}");
+    assert_eq!(crate::rare_color_max_days(), presentation::course::RARE_COLOR_MAX_DAYS);
+}
+
+/// The picker's marks spell, month by month, the web's letters for the year (#953).
+#[test]
+fn day_marks_match_the_webs_year() {
+    let core = OfficeCore::new().unwrap();
+    let fs = repo_data();
+    let cal = calendar::build_calendar(2026, &calendar::CalendarData::load(&fs).unwrap()).unwrap();
+    let want = presentation::course::day_marks_code(&presentation::course::day_marks(&cal.days, &MoveableDates::compute(2026)));
+    let got: String = (1..=12)
+        .flat_map(|m| core.day_marks(2026, m).unwrap())
+        .map(|d| {
+            let letter = calendar::Color::parse(&d.color).unwrap().abbrev();
+            if d.first_class { letter.to_ascii_uppercase() } else { letter.to_string() }
+        })
+        .collect();
+    assert_eq!(got, want);
+    let december = core.day_marks(2026, 12).unwrap();
+    assert_eq!(december.len(), 31);
+    assert!(december[24].first_class && december[24].color == "white");
+    assert!(core.day_marks(2026, 13).is_err());
+    assert_eq!(first_class_spoken(), "first-class feast");
 }

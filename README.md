@@ -39,10 +39,8 @@ editor without installing anything. Cite the source and page or section for each
 
 - [Editing liturgical data](DATA.md): file formats, proper slots, aliases, scaffolding and psalm
   numbering.
-- [Reviewing the Office](REVIEWING.md): checking texts and rendered hours, composition checks and
-  text provenance.
-- [Diurnal transcription and discovery](scripts/DIURNAL-PIPELINE.md): reading scanned pages and
-  finding propers hidden by fallbacks.
+- [Reviewing the Office](REVIEWING.md): checking texts and rendered hours, composition checks,
+  text provenance and scanned page lookup.
 - [The Martyrology at Prime](MARTYROLOGY.md).
 
 ## Common commands
@@ -59,7 +57,7 @@ editor without installing anything. Cite the source and page or section for each
 ./office lint                            # corpus findings
 ./office corpus show proper/st-andrew/collect
 ./office review explain lauds 2026-09-04 # why an hour is composed as it is
-make project-status YEAR=2026            # proper, assurance and ordo reports
+make project-status YEAR=2026            # proper, provenance and ordo reports
 ```
 
 ## Development
@@ -113,5 +111,5 @@ HOUR` emits the TeX alone.
 
 ## Deployment
 
-The site runs on Fly.io; maintainers deploy with `fly deploy`. Hosting, the canonical host,
+The site runs on Fly.io; maintainers deploy with `make deploy`, which waits for master's checks to pass. Hosting, the canonical host,
 search, and the usage metrics with their privacy rules are in [DEPLOYMENT.md](DEPLOYMENT.md).

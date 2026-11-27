@@ -13,6 +13,7 @@
 <svg class="period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
   {%- if key == "morning" %}<path d="M7.60,13.20A4.4,4.4 0 0,1 16.40,13.20ZM1.5,13.40h21v1.1h-21ZM7.36,10.03L3.32,9.60L6.48,12.16ZM8.92,8.50L3.66,4.86L7.30,10.12ZM10.96,7.68L8.40,4.52L8.83,8.56ZM13.15,7.70L12.00,1.40L10.85,7.70ZM15.17,8.56L15.60,4.52L13.04,7.68ZM16.70,10.12L20.34,4.86L15.08,8.50ZM17.52,12.16L20.68,9.60L16.64,10.03Z"/>
   {%- elif key == "day" %}<path d="M15.30,8.00A3.3,3.3 0 1,0 8.70,8.00A3.3,3.3 0 1,0 15.30,8.00ZM12.95,3.50L12.00,0.30L11.05,3.50ZM15.07,4.58L15.10,2.63L13.43,3.63ZM16.37,6.57L18.67,4.15L15.42,4.93ZM16.50,8.95L18.20,8.00L16.50,7.05ZM15.42,11.07L18.67,11.85L16.37,9.43ZM13.43,12.37L15.10,13.37L15.07,11.42ZM11.05,12.50L12.00,15.70L12.95,12.50ZM8.93,11.42L8.90,13.37L10.57,12.37ZM7.63,9.43L5.33,11.85L8.58,11.07ZM7.50,7.05L5.80,8.00L7.50,8.95ZM8.58,4.93L5.33,4.15L7.63,6.57ZM10.57,3.63L8.90,2.63L8.93,4.58Z"/>
+  {%- elif key == "night" %}<path d="M12.00,0.10L12.84,5.97L15.11,4.89L14.03,7.16L19.90,8.00L14.03,8.84L15.11,11.11L12.84,10.03L12.00,15.90L11.16,10.03L8.89,11.11L9.97,8.84L4.10,8.00L9.97,7.16L8.89,4.89L11.16,5.97Z"/>
   {%- else %}<path d="M13.32 1.80A6.34 6.34 0 1 0 17.40 11.32A5.21 5.21 0 0 1 13.32 1.80Z"/>{% endif %}
 </svg>
 {% endmacro %}
@@ -88,7 +89,7 @@
    is leaves its status unsaid but for a screen reader (the feast page's rows; the search's say every
    status). #}
 {% macro feast_years(years) %}
-<ol class="find-years">
-  {% for y in years %}<li>{% if y.href %}<a class="find-year day-color-{{ y.color }}" href="{{ y.href|url }}">{% else %}<span class="find-year day-color-{{ y.color }}">{% endif %}<span class="find-year-num">{{ y.year }}</span><span class="find-year-date">{{ y.date }}</span>{% if y.usual %}<span class="sr-only">{{ y.label }}</span>{% endif %}{% if not y.usual or y.note %}<span class="find-year-status is-{{ y.class }}">{% if not y.usual %}<b>{{ y.label }}</b>{% endif %}{% if y.note %}<span class="find-year-note">{{ y.note|typeset }}</span>{% endif %}</span>{% endif %}{% if y.href %}<span class="find-year-go" aria-hidden="true">&rsaquo;</span></a>{% else %}</span>{% endif %}</li>{% endfor %}
+<ol class="find-years" role="list">
+  {% for y in years %}<li>{% if y.href %}<a class="find-year day-color-{{ y.color }}" href="{{ y.href|url }}">{% else %}<span class="find-year day-color-{{ y.color }}">{% endif %}<span class="find-year-num">{{ y.year }}</span> <span class="find-year-date">{{ y.date }}</span>{% if y.usual %}<span class="sr-only">, {{ y.label }}</span>{% endif %}{% if not y.usual or y.note %} <span class="find-year-status is-{{ y.class }}">{% if not y.usual %}<b>{{ y.label }}</b>{% endif %}{% if y.note %}{% if not y.usual %} {% endif %}<span class="find-year-note">{{ y.note|typeset }}</span>{% endif %}</span>{% endif %}{% if y.href %}<span class="find-year-go" aria-hidden="true">&rsaquo;</span></a>{% else %}</span>{% endif %}</li>{% endfor %}
 </ol>
 {% endmacro %}

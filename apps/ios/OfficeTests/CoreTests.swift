@@ -51,15 +51,33 @@ final class CoreTests: XCTestCase {
         let page = about()
         XCTAssertFalse(page.title.isEmpty)
         XCTAssertFalse(page.kicker.isEmpty)
+        // The seven the app prays, then Matins under the Night, coming soon, after the evening.
+        XCTAssertEqual(page.periods.map(\.label), ["Morning", "Day", "Evening", "Night"])
         let hours = page.periods.flatMap(\.hours)
-        XCTAssertEqual(hours.map(\.hour), hourNames())
-        XCTAssertEqual(hours.count, 7)
+        XCTAssertEqual(hours.map(\.hour), hourNames() + ["matins"])
+        XCTAssertEqual(hours.filter { !$0.comingSoon }.map(\.hour), hourNames())
+        XCTAssertEqual(hours.count, 8)
+        XCTAssertEqual(hours.last?.sign, "star")
+        XCTAssertEqual(hours.last?.angle, 270)
         XCTAssertEqual(hours.first?.night, false)
-        XCTAssertEqual(hours.last?.night, true)
-        XCTAssertTrue(zip(hours, hours.dropFirst()).allSatisfy { $0.angle > $1.angle })
+        XCTAssertEqual(hours.dropLast().last?.night, true)
+        XCTAssertEqual(hours.map(\.sign), ["sun", "sun", "sun", "sun", "sun", "moon", "moon", "star"])
+        let seven = hours.dropLast()
+        XCTAssertTrue(zip(seven, seven.dropFirst()).allSatisfy { $0.angle > $1.angle })
+        XCTAssertEqual(page.comingSoon, "coming soon")
+        XCTAssertEqual(page.horologiumHeight, 160)
+        XCTAssertEqual(page.horologiumNightDepth, 22)
+        // The epigraph is two verses, one to a line, and no note follows the hours.
+        let verse = page.blocks.first { $0.kind == "verse" }
+        XCTAssertEqual(verse?.text.split(separator: "\n").count, 2)
+        XCTAssertFalse(page.blocks.contains { $0.kind == "note" && $0.text.contains("Matins") })
         XCTAssertFalse(page.specimen.aloneVersicle.isEmpty)
         XCTAssertFalse(page.specimen.priestVersicle.isEmpty)
+        XCTAssertFalse(page.specimen.deaconNote.isEmpty)
+        XCTAssertFalse(page.specimen.priestNote.isEmpty)
         XCTAssertEqual(page.ordoColors.count, 6)
+        XCTAssertEqual(ordoColors().count, 6)
+        XCTAssertEqual(dayNameGloss(name: "Feria")?.term, "Feria")
         let links = page.blocks.flatMap(\.runs).map(\.link).filter { !$0.isEmpty }
         XCTAssertFalse(links.isEmpty)
         for link in links {
@@ -72,6 +90,79 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(aboutLink("/privacy", defaults: defaults), .web(URL(string: "https://orthodoxwestbreviary.com/privacy")!))
         defaults.set("https://example.org/api/usage", forKey: "usage-endpoint")
         XCTAssertEqual(aboutLink("/privacy", defaults: defaults), .web(URL(string: "https://example.org/privacy")!))
+    }
+
+    /// While the hours follow the sun, About gives today's sun's times, and Compline keeps its words.
+    func testAboutGivesTheSunsTimesButCompline() {
+        let periods = about().periods
+        XCTAssertEqual(aboutSunPeriods(periods, sun: nil), periods)
+        let sun: [String: (hour: Int, minute: Int)] = ["lauds": (6, 48), "sext": (12, 14), "vespers": (17, 19), "compline": (21, 0)]
+        let hours = aboutSunPeriods(periods, sun: sun).flatMap(\.hours)
+        let time = { (slug: String) in hours.first { $0.hour == slug }?.time ?? "" }
+        XCTAssertTrue(time("lauds").hasPrefix("sunrise · "), time("lauds"))
+        XCTAssertTrue(time("sext").hasPrefix("solar noon · "), time("sext"))
+        XCTAssertTrue(time("vespers").hasPrefix("sunset · "), time("vespers"))
+        XCTAssertEqual(time("compline"), periods.flatMap(\.hours).first(where: { $0.hour == "compline" })?.time)
+        XCTAssertEqual(time("prime"), periods.flatMap(\.hours).first { $0.hour == "prime" }?.time)
+        // Matins is not timed by the sun: it keeps its words, and that it is coming soon.
+        XCTAssertEqual(hours.last, periods.last?.hours.last)
+        XCTAssertEqual(aboutSunTime(hour: "lauds", clock: "6:48 AM"), "sunrise · 6:48 am")
+        XCTAssertEqual(aboutTimeSpoken(time: "sunrise · 6:48 am"), "sunrise, 6:48 am")
+    }
+
+    /// Home's Night row is Matins, coming soon, in the core's words; its sign is the night's star,
+    /// and dims with the others' when another hour is now, as it is never the hour that is now.
+    func testHomeSetsMatinsUnderTheNightComingSoon() throws {
+        let night = homeNight()
+        XCTAssertEqual(night.label, "Night")
+        XCTAssertEqual(night.hour, "matins")
+        XCTAssertEqual(night.name, "Matins")
+        XCTAssertEqual(night.gloss, "The night office")
+        XCTAssertEqual(night.comingSoon, "coming soon")
+        XCTAssertEqual(Period.named(night.label), .night)
+        XCTAssertEqual(Period.named("Evening"), .evening)
+        XCTAssertFalse(hourNames().contains(night.hour))
+        XCTAssertEqual(periodSignAlpha([night.hour], "terce"), 0.52)
+        XCTAssertEqual(periodSignAlpha([night.hour], ""), 0.9)
+        let core = try Office.core.get()
+        let today = CivilDate(year: 2026, month: 3, day: 15)
+        for hour in 0..<24 {
+            XCTAssertNotEqual(try core.home(date: today, today: today, clockHour: Int32(hour)).currentHour, "matins", "\(hour)")
+        }
+    }
+
+    /// The Horologium's sign goes under the horizon to Matins by the nearer foot, and comes back
+    /// up by the foot nearer the hour it goes to, never across the sky; a long move is said so.
+    func testTheHorologiumGoesUnderToMatinsByTheNearerFoot() {
+        // From Compline (10°) through Night to −90°; from Lauds (168°) through Dawn to 270°.
+        XCTAssertEqual(horologiumGlide(from: 10, to: 270).end, -90)
+        XCTAssertEqual(horologiumGlide(from: 168, to: 270).end, 270)
+        XCTAssertEqual(horologiumGlide(from: 90, to: 270).end, -90)
+        // Back up: to Lauds by Dawn, to Compline by Night, wherever it went under.
+        XCTAssertEqual(horologiumGlide(from: -90, to: 168).end, -192)
+        XCTAssertEqual(horologiumGlide(from: 270, to: 168).end, 168)
+        XCTAssertEqual(horologiumGlide(from: -90, to: 10).end, 10)
+        XCTAssertEqual(horologiumGlide(from: 270, to: 10).end, 370)
+        // On the day's arc a move is as it was; a whole turn on is the same place.
+        XCTAssertEqual(horologiumGlide(from: 168, to: 90).end, 90)
+        XCTAssertEqual(horologiumGlide(from: 370, to: 34).end, 394)
+        XCTAssertEqual(horologiumGlide(from: 168, to: 156).span, 12)
+        XCTAssertEqual(horologiumGlide(from: 10, to: 270).span, 100)
+        XCTAssertEqual(horologiumGlide(from: 156, to: 270).span, 114)
+        XCTAssertEqual(horologiumGlide(from: 270, to: 168).span, 102)
+        XCTAssertEqual(horologiumGlide(from: 0, to: 0).span, 0)
+        // The gilt day: so far on the day's arc; none between Lauds and Matins; past Night the
+        // whole day, fading in on the way down to Matins and dark on the way back up.
+        XCTAssertEqual(horologiumLit(angle: 90).to, 90)
+        XCTAssertEqual(horologiumLit(angle: 90).k, 1)
+        XCTAssertEqual(horologiumLit(angle: 90, rising: true).k, 1)
+        XCTAssertEqual(horologiumLit(angle: 200).k, 0)
+        XCTAssertEqual(horologiumLit(angle: 270).k, 0)
+        XCTAssertEqual(horologiumLit(angle: -90).k, 0)
+        XCTAssertEqual(horologiumLit(angle: -10).k, 0.75, accuracy: 1e-9)
+        XCTAssertEqual(horologiumLit(angle: -10).to, 0)
+        XCTAssertEqual(horologiumLit(angle: -10, rising: true).k, 0)
+        XCTAssertEqual(horologiumLit(angle: 350, rising: true).k, 0)
     }
 
     /// About lights the hour home lights, none from midnight to 2 am, and ends with home's invitation.
@@ -133,6 +224,30 @@ final class SpokenTests: XCTestCase {
         let verse = try XCTUnwrap(blocks.first { b in b.kind == .verse && b.runs.contains { $0.style == .posture } })
         let cue = try XCTUnwrap(verse.runs.first { $0.style == .posture }).text.trimmingCharacters(in: .whitespaces)
         XCTAssertTrue(spoken(verse).contains("(\(cue))"), spoken(verse))
+    }
+
+    func testChantScoresSpeakCleanWordsAndStanzaNumbers() throws {
+        let core = try Office.core.get()
+        // (Plain loops: the nested flatMaps took the type checker past its limit.)
+        var scored: [BlockView] = []
+        for (month, day) in [(3, 15), (4, 5), (12, 25)] {
+            for hour in hourNames() {
+                let view = try core.compose(hour: hour, year: 2026, month: Int32(month), day: Int32(day), form: "priest", martyrology: false, chant: true)
+                for section in view.sections {
+                    scored += section.blocks.filter { $0.kind == .score }
+                }
+            }
+        }
+        XCTAssertFalse(scored.isEmpty)
+        for b in scored {
+            let said = spoken(b)
+            for mark in ["*", "†", "℣", "℟", "✠", "\u{E000}"] { XCTAssertFalse(said.contains(mark), "\(mark) in: \(said)") }
+            XCTAssertFalse(said.trimmingCharacters(in: .whitespaces).isEmpty)
+        }
+        XCTAssertTrue(scored.contains { b in
+            let num = b.marker.trimmingCharacters(in: CharacterSet(charactersIn: ". "))
+            return !num.isEmpty && spoken(b).hasPrefix("Stanza \(num).")
+        })
     }
 }
 
@@ -510,6 +625,20 @@ final class ReminderTests: XCTestCase {
         XCTAssertGreaterThan(after.fireDate, first.fireDate)
     }
 
+    /// The bells are silent from Vespers of Maundy Thursday through None of Holy Saturday (#950).
+    func testTheTriduumsRemindersComeWithoutTheBell() throws {
+        let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 4, day: 9, hour: 0, minute: 0)))
+        let plan = try ReminderScheduler.plan(settings(["lauds": (7, 0), "vespers": (18, 0)]), now: now, core: Office.core.get(), calendar: calendar)
+        let silent = plan.prefix(6).map { "\($0.date.iso) \($0.hour) \($0.silent)" }
+        XCTAssertEqual(silent, [
+            "2026-04-09 lauds false", "2026-04-09 vespers true",
+            "2026-04-10 lauds true", "2026-04-10 vespers true",
+            "2026-04-11 lauds true", "2026-04-11 vespers false",
+        ])
+        XCTAssertNil(ReminderScheduler.content(plan[1]).sound)
+        XCTAssertNotNil(ReminderScheduler.content(plan[0]).sound)
+    }
+
     func testTheScheduleStopsAtIOSsLimit() throws {
         let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 15, hour: 0, minute: 0)))
         let all = Dictionary(uniqueKeysWithValues: hourNames().enumerated().map { ($0.element, (6 + 2 * $0.offset, 0)) })
@@ -544,6 +673,21 @@ final class ReminderTests: XCTestCase {
         let plan = try ReminderScheduler.plan(bySun(philadelphia), now: now, core: Office.core.get(), calendar: calendar)
         let first = plan.prefix(3).map { "\($0.hour) \($0.at.hour ?? -1):\($0.at.minute ?? -1)" }
         XCTAssertEqual(first, ["lauds 5:22", "vespers 20:23", "compline 21:23"])
+    }
+
+    /// About gives the same day's sun as the reminders: Philadelphia at midsummer.
+    func testAboutGivesTheSunsTimesAtThePlaceKept() throws {
+        let day = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 6, day: 21, hour: 12)))
+        let core = try Office.core.get()
+        XCTAssertNil(settings(["lauds": (6, 45)]).sunTimes(on: day, core: core, calendar: calendar))
+        let sun = bySun(philadelphia).sunTimes(on: day, core: core, calendar: calendar)
+        let hours = aboutSunPeriods(about().periods, sun: sun).flatMap(\.hours)
+        let time = { (slug: String) in hours.first { $0.hour == slug }?.time ?? "" }
+        XCTAssertTrue(time("lauds").hasPrefix("sunrise · 5:32"), time("lauds"))
+        XCTAssertTrue(time("vespers").hasPrefix("sunset · ") && time("vespers").contains(":33"), time("vespers"))
+        XCTAssertTrue(time("prime").hasPrefix("first hour · "), time("prime"))
+        // Compline keeps its own time. Night (Matins) now follows it in About.
+        XCTAssertEqual(time("compline"), about().periods.flatMap(\.hours).first(where: { $0.hour == "compline" })?.time)
     }
 
     func testEachDayTakesItsOwnOffsetAcrossAClockChange() throws {

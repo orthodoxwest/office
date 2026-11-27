@@ -1,0 +1,3 @@
+[commemoration-collect]
+# SOURCE: ordo "Col. 533"
+@use proper/st-boniface/collect

@@ -13,8 +13,8 @@ an app defect, a printed error, or an unresolved source conflict.
 ## Composition review
 
 Start from a requirement in the sources, then check what the app renders. A
-correct page says nothing about other dates, and engine feature or sample
-counts are not a measure of completeness.
+correct page says nothing about other dates, and feature or sample counts are
+not a measure of completeness.
 
 Keep a short checklist in the relevant issue or PR. For each check record:
 
@@ -44,39 +44,19 @@ is correct.
 ### Executable composition requirements
 
 `data/review/composition-requirements.json` holds source-backed appointment
-cases; `TestCompositionRequirements` checks the composed slot, source, optional
-wording, omission, and relative order. Cases name a commemoration's owner
-explicitly so a correct principal-office text can't hide a wrong
-commemoration. Add a citation plus representative and boundary cases with each
-repair, and never regenerate expectations from current output.
+cases; `requirements_tests` checks the composed slot, source, optional wording,
+omission, and relative order. Cases name a commemoration's owner explicitly so
+a correct principal-office text can't hide a wrong commemoration. Add a
+citation plus representative and boundary cases with each repair, and never
+regenerate expectations from current output.
 
 ```bash
 cargo test -p office requirements_tests
 ```
 
 The calendar tests compose all seven hours on every date of 2026, 2027, and
-2032, including unnamed ferias; all run in `make check`. See also the
-[composition audit](data/review/composition-audit.md) (requirements checked so
-far and remaining passes) and [seasonal appointment scopes](data/APPOINTMENT-SCOPES.md).
-
-The ingestion resolution inventory deliberately excludes unnamed owners (an
-unnamed feria is never a feast-proper target), so a composition audit must
-compose those hours directly or use `review explain`.
-
-### Optional sample dates
-
-`review plan` picks representative pages from engine decisions and source
-tiers already observed in a sweep, weighted by frequency. It finds examples to
-inspect; it cannot find an unmodeled rubric. Its CSV gives the page URL,
-priority, context, `primary_year`, `sampled_features` (features not covered by
-earlier rows), and `feature_exposure` (their summed date-hour-form occurrences,
-which overlap and are not a progress measure). Later-year rows cover cases
-absent from the primary year and can't be checked against an unpublished ordo.
-
-Weekday psalmody gates are not sampled, so check those explicitly.
-`-include-sources` also samples corpus keys without attesting them. Samples
-never shrink as pages are reviewed; record the checked requirement in tests
-and issues rather than signing off a page.
+2032, including unnamed ferias; all run in `make check`. See also
+[seasonal appointment scopes](data/APPOINTMENT-SCOPES.md).
 
 ### Reporting a problem
 
@@ -88,19 +68,10 @@ day, and a generic fallback can hide a missing proper.
 ## Text provenance
 
 A text attestation records that one corpus entry matches a named source and
-page; it says nothing about where the entry is appointed. For scanned sources
-use the [page-image workflow](scripts/DIURNAL-PIPELINE.md). One check covers
-every date the entry appears on.
+page; it says nothing about where the entry is appointed.
 
 ```bash
-mkdir -p output/review
-make -s review-manifest > output/review/manifest.csv   # distinct rendered compositions
 make review-provenance                                 # source coverage, flat and usage-weighted
-make -s review-provenance-queue > output/review/provenance-queue.csv
-make -s review-zero-occurrences START=2026 YEARS=30 > output/review/zero-occurrences.csv
-make -s review-suspects > output/review/suspects.csv
-make -s review-plan > output/review/samples.csv       # optional examples, default 28 years
-make review-assurance                                  # text-provenance floor and summary
 ./office review explain lauds 2026-06-07 --form private
 ```
 
@@ -115,68 +86,37 @@ attestation stale automatically. Record one with:
 ```
 
 The command validates every field and rewrites the ledger atomically; pass
-`--replace` only to supersede an existing attestation deliberately.
+`--replace` only to supersede an existing attestation deliberately. Notes never
+cite `output/` paths, which are ignored scratch space.
 
 Every corpus entry must carry a verified attestation of its current text:
-`office validate` (and so CI) fails on any entry that is `needs-review`,
-`source-unknown`, or stale. A PR that adds or edits a text attests it in the
-same change. The web app no longer reads provenance at all.
+`office validate` (and so CI) fails on any entry that is unverified or stale.
+A PR that adds or edits a text attests it in the same change. The web app does
+not read provenance.
 
-Sections marked `# SOURCE: … — agent-proposed, not attested` came from a
-retired pipeline. Treat them as awaiting a human check and keep the hedge
-until `review attest` marks the key `verified`.
+`./office review explain HOUR DATE` prints an hour's dependency states,
+fallback tiers, and rule IDs as JSON.
 
-### Prescreen flags
+## Reading scanned pages
 
-The provenance queue ranks by exposure (pages covered per check), which alone
-would send reviewers to hundreds of probably-fine texts. **Suspicion** forms a
-top tier, and `make review-suspects` prints only that tier. It comes from:
+Keep source PDFs outside the repository (`../resources/books` by default, or
+`/mnt/project-files/` in a cloud session) and never commit book pages,
+extracted or OCR text, or images; caches and scratch output stay under ignored
+`output/`.
 
-1. **The prescreen ledger** (`data/review/prescreen.csv`): read-through
-   findings bound to the entry's current content.
+`scripts/diurnal-pages.py` renders PDF pages into a content-bound PNG/OCR
+cache under `output/` so you can locate printed labels and inspect the page
+images directly. OCR locates pages; wording always comes from reading the page
+images.
 
-   ```bash
-   ./office review flag --severity high \
-     --reason "collect ends mid-sentence; no termination formula" \
-     proper/example/collect
-   ```
-
-   Attesting the entry removes the flag. Editing it only marks the flag
-   `(addressed)` until the fix is attested.
-
-2. **Advisory lints** (`./office lint`): truncation, unpointed antiphons,
-   near-duplicates, leftover Latin; recomputed each run.
-
-Both show in the queue's `flags` column. Record findings in the ledger, keyed by entry, not in narrative
-write-ups that go stale.
-
-### Zero-occurrence entries
-
-Entries never rendered in a sweep need classification, not attestation.
-`review zero-occurrences` groups them by key shape and joins the judgments in
-`data/review/zero-occurrences.csv`: `shadowed-fallback`, `displaced`,
-`dormant-policy`, `suppressed`, `dead`, `defect` (must cite its issue), or
-`unclassified`. Rows are hash-bound, so an edit makes them stale. The
-provenance queue puts classified zeroes in a final tier, and the assurance
-summary counts them apart from rendered entries.
-
-### Coverage figures
-
-`make review-provenance` prints two figures. The flat count weights every
-rendered entry equally. The usage-weighted count composes every hour in the
-sweep (default: current year; override with `START`/`YEARS`) and reports
-verified renders over total renders — how much of what is actually prayed is
-verified. Common texts are verified first, so it runs well above the flat
-figure.
-
-`./office review assurance` fails if the verified-text count drops below the
-floor in `data/review/assurance-baseline.json` (zero enforces nothing), and
-reports stale attestations separately. Raise the floor deliberately with
-`./office review assurance --update-baseline`.
-
-`./office review explain HOUR DATE` lists an hour's dependency states,
-fallback tiers, and rule IDs. `needs-review` means a source lead exists;
-`source-unknown` means provenance research comes first.
+```bash
+make pages                                                 # render/index Diurnal + supplements (DPI=150)
+make pages DPI=200 BOOKS_DIR=/path/to/books
+python3 scripts/diurnal-pages.py locate monastic-diurnal 595
+python3 scripts/diurnal-pages.py locate monastic-diurnal xxvi
+python3 scripts/diurnal-pages.py find monastic-diurnal "blessed Athanasius"
+python3 scripts/diurnal-pages.py feast-pages 7 17 "Translation of St. Osmund"
+```
 
 ## Date-sensitive parity
 
@@ -187,19 +127,6 @@ deserves direct review. The full inventory (69 kept/dropped pairs: duplicates,
 title variants, and octave aliases) was human-reviewed on 2026-07-17 with no
 false merges. When it changes, review each new pair before accepting the
 golden update, and fix any false merge narrowly with a dedicated test.
-
-## Ingesting scanned diurnal pages
-
-See [scripts/DIURNAL-PIPELINE.md](scripts/DIURNAL-PIPELINE.md):
-
-```bash
-make pages
-make transcribe KEYS=proper/st-athanasius/collect
-make discover FEASTS=st-stephen-hungary
-```
-
-Both prepare prompts only; add `APPLY=1` after inspecting them. Unresolved rows
-stay `needs-human`.
 
 ## Annual cadence
 
@@ -262,16 +189,14 @@ distinguishing a confirmed repair from diagnosis or a clergy question. Use
 `scope=triduum` for Triduum rows and `ordinary-year` otherwise.
 
 Rows don't close when a finding disappears; remove a row in the PR that fixes
-it, keeping its regression tests. Speculative fallback candidates stay in the
-resolution inventory and discovery reports until a concrete problem is found.
+it, keeping its regression tests.
 
 ## Prayer forms
 
 Review links carry `?form=private|deacon|priest` so they reproduce regardless
 of a device's saved choice; CLI commands take `--form` (default private). The
-manifest, provenance queue, and sample plan sweep all three forms, sharing one
-unit where Deacon and Priest compose identically; the parity snapshot checks
-all three. Forms only replace marked ordinary slots after proper resolution.
+parity snapshot checks all three forms. Forms only replace marked ordinary
+slots after proper resolution.
 
 Sources:
 

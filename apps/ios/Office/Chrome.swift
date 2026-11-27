@@ -177,14 +177,11 @@ struct CaretShape: Shape {
 }
 
 /**
- * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
- * hour page, then the Ordo, Reminders and About. The menu sets it out on a phone, the header
- * inline on a wide screen.
+ * Where the site's navigation leads, and which of it is the page shown: the Ordo, Reminders and
+ * About. The hours are not among them: home lists them and each hour moves on from its end. The
+ * menu sets it out on a phone, the header inline on a wide screen.
  */
 struct SiteNav {
-    let hours: [String]
-    let currentHour: String?
-    let onHour: ((String) -> Void)?
     let onOrdo: () -> Void
     let ordoCurrent: Bool
     let onReminders: () -> Void
@@ -194,14 +191,6 @@ struct SiteNav {
 
     init(_ model: AppModel) {
         let page = model.page
-        hours = model.hours
-        if case let .hour(date, hour) = page {
-            currentHour = hour
-            onHour = { model.open(.hour(date, $0)) }
-        } else {
-            currentHour = nil
-            onHour = nil
-        }
         onOrdo = {
             // The ordo at the day shown, as the web's /calendar opens at today's row.
             switch page {
@@ -228,15 +217,9 @@ struct SiteHeader: View {
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
-    @Environment(\.ranked) private var ranked
 
     var body: some View {
         let nav = SiteNav(model)
-        // From 701 to 999pt (1099 at Larger text) an hour's links don't fit beside the brand and
-        // Settings: left in the row they would crowd it, so they take a centred rank of their own
-        // beneath, as a book sets its running head over the page. About, which that rank has no
-        // room for, stands beside Settings.
-        let rank = wide && ranked && nav.onHour != nil
         VStack(spacing: 0) {
             HStack(spacing: 0) {
                 Button(action: model.goHome) {
@@ -258,9 +241,7 @@ struct SiteHeader: View {
                 .buttonStyle(Quiet())
                 .accessibilityLabel("Daily Office, home")
                 Spacer(minLength: m.px(8))
-                if rank {
-                    InlineNav(nav: nav, links: false)
-                } else if wide {
+                if wide {
                     InlineNav(nav: nav)
                 } else {
                     Button { model.toggle(.menu) } label: {
@@ -279,17 +260,11 @@ struct SiteHeader: View {
             }
             .padding(.horizontal, m.px(gutter))
             .padding(.top, m.px(6.4))
-            .padding(.bottom, rank ? 0 : m.px(5.6))
+            .padding(.bottom, m.px(5.6))
             .frame(minHeight: 44)
             // The web's nav shell: held to 68rem, so the whole list fits on one line.
             .frame(maxWidth: wide ? m.px(1088) : .infinity)
             .frame(maxWidth: .infinity)
-            if rank {
-                InlineNav(nav: nav, about: false, settings: false)
-                    .padding(.top, m.px(2.4))
-                    .padding(.bottom, m.px(5.6))
-                    .frame(maxWidth: .infinity)
-            }
             // The beam: a 4pt course of oak, its upper edge catching the light as a timber's arris does.
             VStack(spacing: 0) {
                 Rectangle().fill(p.materialHighlight).frame(height: 1)
@@ -303,43 +278,29 @@ struct SiteHeader: View {
 /// The desktop header's links (`.site-menu nav`), muted: the current one in ink over the lining's terracotta; Reminders and About quieter.
 private struct InlineNav: View {
     let nav: SiteNav
-    /// The pages' links, About, and Settings after them; a ranked header sets the links apart.
-    var links = true
-    var about = true
-    var settings = true
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
         HStack(spacing: 0) {
-            if links {
-                if let onHour = nav.onHour {
-                    ForEach(nav.hours, id: \.self) { h in link(hourLabel(h), h == nav.currentHour) { onHour(h) } }
-                    Rectangle().fill(p.border).frame(width: 1, height: m.px(24)).padding(.horizontal, m.px(2.4))
-                }
-                link("Ordo", nav.ordoCurrent, action: nav.onOrdo)
-                link("Reminders", nav.remindersCurrent, secondary: true, action: nav.onReminders)
-            }
+            link("Ordo", nav.ordoCurrent, action: nav.onOrdo)
+            link("Reminders", nav.remindersCurrent, secondary: true, action: nav.onReminders)
             // Every page's header reaches About, an hour's too (#927).
-            if about {
-                link(aboutPage.menu, nav.aboutCurrent, secondary: true, action: nav.onAbout)
-            }
+            link(aboutPage.menu, nav.aboutCurrent, secondary: true, action: nav.onAbout)
             // Settings closes the links, quiet as Reminders; its panel holds the theme and text size.
-            if settings {
-                Button { model.toggle(.settings) } label: {
-                    HStack(spacing: 0) {
-                        Text("SETTINGS").type(.label(11.52, 0.04)).foregroundStyle(p.muted)
-                        Caret(open: model.overlay == .settings, color: p.muted)
-                    }
-                    .padding(.leading, m.px(8.8))
-                    .padding(.trailing, m.px(3.2))
-                    .frame(minHeight: 44)
+            Button { model.toggle(.settings) } label: {
+                HStack(spacing: 0) {
+                    Text("SETTINGS").type(.label(11.52, 0.04)).foregroundStyle(p.muted)
+                    Caret(open: model.overlay == .settings, color: p.muted)
                 }
-                .buttonStyle(Quiet())
-                .accessibilityLabel("Settings")
-                .accessibilityValue(model.overlay == .settings ? "Expanded" : "Collapsed")
+                .padding(.leading, m.px(8.8))
+                .padding(.trailing, m.px(3.2))
+                .frame(minHeight: 44)
             }
+            .buttonStyle(Quiet())
+            .accessibilityLabel("Settings")
+            .accessibilityValue(model.overlay == .settings ? "Expanded" : "Collapsed")
         }
     }
 
@@ -359,11 +320,10 @@ private struct InlineNav: View {
 }
 
 /**
- * The site menu's panel: on an hour, the day's hours (2/3/2 as on home, a hairline between the
- * bands); the Ordo, Reminders and About, the current page underlined in the lining's terracotta;
- * then the Theme, Text and Martyrology rows, muted, the current choice in the accent over the
- * gilding's rule. `prefsOnly` is the wide header's Settings: the Theme, Text and Martyrology rows
- * alone. Its top edge is the painted line, which follows the season of the page shown.
+ * The site menu's panel: the Ordo, Reminders and About, the current page underlined in the
+ * lining's terracotta; then the Theme, Text and Martyrology rows, muted, the current choice in the
+ * accent over the gilding's rule. `prefsOnly` is the wide header's Settings: the Theme, Text and
+ * Martyrology rows alone. Its top edge is the painted line, which follows the season of the page shown.
  */
 struct MenuPanel: View {
     var prefsOnly = false
@@ -377,20 +337,8 @@ struct MenuPanel: View {
         let nav = SiteNav(model)
         let style = TextStyle.label(13.12, 0.06)
         VStack(spacing: 0) {
-            if let onHour = nav.onHour, !prefsOnly {
-                let bands = [["lauds", "prime"], ["terce", "sext", "none"], ["vespers", "compline"]]
-                ForEach(Array(bands.enumerated()), id: \.offset) { i, row in
-                    HStack(spacing: 0) {
-                        ForEach(row, id: \.self) { h in link(hourLabel(h).uppercased(), h == nav.currentHour, style) { onHour(h) } }
-                    }
-                    // A hairline between the bands, so the grouping reads without labels.
-                    .overlay(alignment: .top) { if i > 0 { Hairline(color: p.surfaceEdge) } }
-                    .padding(.bottom, m.px(2.4))
-                }
-                Hairline(color: p.border).padding(.vertical, m.px(4))
-            }
             if !prefsOnly {
-                // Ordo, Reminders and About share one three-up row, matching Terce · Sext · None above.
+                // Ordo, Reminders and About share one three-up row.
                 HStack(spacing: 0) {
                     link("ORDO", nav.ordoCurrent, style, action: nav.onOrdo)
                     // Habit setup and the page for newcomers, not hours: quieter than the Ordo, as on the web.
@@ -476,6 +424,7 @@ struct MenuPanel: View {
                 Image(uiImage: plaster).resizable().scaledToFill()
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .clipped()
+                    .accessibilityHidden(true)
             } else {
                 p.surface
             }
@@ -697,6 +646,9 @@ struct Disclosure: View {
 /// Change date's day links, worded as the web's.
 private let dayNav = dayNavWords()
 
+/// How a screen reader names a first-class feast in the picker (`presentation::course::FIRST_CLASS_SPOKEN`).
+private let firstClassWords = firstClassSpoken()
+
 /// How far back and ahead of this year the picker reaches (presentation's offered_years), as the
 /// web's (app.js YEARS_BACK, YEARS_AHEAD); the ordo's year links stop at its ends too.
 let yearsBack = 30
@@ -729,6 +681,8 @@ struct DayPicker: View {
     @State private var turn: CGFloat = 1
     /// The days' width, of which a turning month travels a fifth, as Android's does.
     @State private var daysWidth: CGFloat = 0
+    /// Each month's marks (#953), by `year * 12 + month`, loaded off the main thread as it is shown.
+    @State private var marks: [Int: [DayMarkView]] = [:]
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -757,7 +711,9 @@ struct DayPicker: View {
                     .buttonStyle(Quiet()).accessibilityLabel(dayNav.previous)
                 Spacer(minLength: 0)
                 if shown != today {
-                    Button { pick(today) } label: { Text("TODAY").type(Scale.control).foregroundStyle(p.muted).frame(minHeight: 44) }.buttonStyle(Quiet())
+                    Button { pick(today) } label: { Text("TODAY").type(Scale.control).foregroundStyle(p.muted).frame(minHeight: 44) }
+                        .buttonStyle(Quiet())
+                        .accessibilityLabel("Today")
                 }
                 Spacer(minLength: 0)
                 Button { pick(shown.adding(days: 1)) } label: { Text("\(dayNav.next) →").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(centred ? 4 : 16)).frame(minHeight: 44) }
@@ -773,7 +729,7 @@ struct DayPicker: View {
                 HStack(spacing: 0) {
                     // A month's step in the days, a year's in the months; none past the picker's span.
                     step("‹", back, months ? "Previous year" : "Previous month", width: cell)
-                    Button { withAnimation(.easeInOut(duration: 0.18)) { months.toggle() } } label: {
+                    Button { withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.18)) { months.toggle() } } label: {
                         // Set like the disclosure labels around it, with their gold caret.
                         HStack(spacing: 0) {
                             Text(title.uppercased()).type(.label(11.52, 0.1)).foregroundStyle(p.text)
@@ -783,6 +739,7 @@ struct DayPicker: View {
                     }
                     .buttonStyle(Quiet())
                     .accessibilityLabel(months ? "\(title), back to days" : "\(title), choose another month")
+                    .accessibilityValue(months ? "Expanded" : "Collapsed")
                     step("›", forward, months ? "Next year" : "Next month", width: cell)
                 }
                 .padding(.top, m.px(12))
@@ -793,6 +750,7 @@ struct DayPicker: View {
                     let travel = daysWidth > 0 ? daysWidth / 5 : 60
                     days
                         .id(year * 12 + month)
+                        .task(id: year * 12 + month) { await loadMarks(year, month) }
                         .transition(reduceMotion ? .opacity : .asymmetric(
                             insertion: .offset(x: travel * turn).combined(with: .opacity.animation(.easeOut(duration: 0.18).delay(0.06))),
                             removal: .offset(x: -travel * turn).combined(with: .opacity.animation(.easeIn(duration: 0.09)))
@@ -833,9 +791,13 @@ struct DayPicker: View {
     private func turnTo(_ to: (Int, Int)?) {
         guard let to else { return }
         turn = to.0 * 12 + to.1 > year * 12 + month ? 1 : -1
-        withAnimation(.easeInOut(duration: 0.26)) {
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.26)) {
             year = to.0
             month = to.1
+        }
+        if UIAccessibility.isVoiceOverRunning {
+            let announced = months ? "\(to.0)" : "\(monthName(to.1)) \(to.0)"
+            UIAccessibility.post(notification: .announcement, argument: announced)
         }
     }
 
@@ -861,9 +823,33 @@ struct DayPicker: View {
         .accessibilityLabel(label)
     }
 
+    /// The month's marks from the calendar, once; until they come the days are plain.
+    private func loadMarks(_ y: Int, _ mo: Int) async {
+        guard marks[y * 12 + mo] == nil else { return }
+        if case let .success(got) = await compose({ try Office.core.get().dayMarks(year: Int32(y), month: Int32(mo)) }) {
+            marks[y * 12 + mo] = got
+        }
+    }
+
+    /// A day's marks (#953, `.date-picker-day[data-color]`): a whisper-thin hairline of its colour
+    /// under the figure, below the chosen day's gold rule, and on a first-class feast a gilt lozenge
+    /// riding it, as home gilds the day.
+    private func dayMark(_ mark: DayMarkView) -> some View {
+        ZStack {
+            Rectangle().fill(dayColor(mark.color, p).opacity(0.6)).frame(width: m.px(15.2), height: m.px(2))
+            if mark.firstClass {
+                Rectangle().fill(p.gold).frame(width: m.px(4.5), height: m.px(4.5)).rotationEffect(.degrees(45))
+            }
+        }
+        .frame(height: m.px(2))
+        .padding(.bottom, m.px(4))
+        .accessibilityHidden(true)
+    }
+
     /// A month's days in six weeks always, blank where the month is not.
     private var days: some View {
         let first = CivilDate(year: Int32(year), month: Int32(month), day: 1)
+        let monthMarks = marks[year * 12 + month] ?? []
         let lead = first.weekday - 1
         let length = civil.range(of: .day, in: .month, for: first.date)?.count ?? 30
         return VStack(spacing: 0) {
@@ -879,6 +865,7 @@ struct DayPicker: View {
                         let n = week * 7 + i - lead + 1
                         if (1...length).contains(n) {
                             let day = CivilDate(year: Int32(year), month: Int32(month), day: Int32(n))
+                            let mark = monthMarks.indices.contains(n - 1) ? monthMarks[n - 1] : nil
                             Button {
                                 chose()
                                 pick(day)
@@ -888,10 +875,11 @@ struct DayPicker: View {
                                     .foregroundStyle(i == 0 ? p.rubric : day == shown ? p.accent : p.text)
                                     .goldUnderline(day == shown, p.goldLine)
                                     .frame(maxWidth: .infinity, minHeight: 44)
+                                    .overlay(alignment: .bottom) { if let mark { dayMark(mark) } }
                                     .background { if day == today { todayPool } }
                             }
                             .buttonStyle(Lit())
-                            .accessibilityLabel(spokenDay(day, today: today))
+                            .accessibilityLabel(spokenDay(day, today: today) + (mark?.firstClass == true ? ", \(firstClassWords)" : ""))
                             .accessibilityAddTraits(day == shown ? .isSelected : [])
                         } else {
                             // As tall as a day's cell at any text size, and no taller.

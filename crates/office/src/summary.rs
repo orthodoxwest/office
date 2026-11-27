@@ -15,6 +15,9 @@ use crate::engine::Engine;
 pub struct CommSummary {
     pub name: String,
     pub incipit: String,
+    /// The corpus key of the text the commemoration's collect prints (the end of its `@use`
+    /// chain), so the ordo cross-check can compare it with the ordo's "Col. NNN" page.
+    pub collect: String,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -55,14 +58,15 @@ pub fn summarize_hour(hour: &OfficeHour) -> HourSummary {
             } else if el.kind == ElementType::Heading
                 && let Some(name) = el.text.strip_prefix("Commemoration of ")
             {
-                let mut c = CommSummary { name: name.to_string(), incipit: String::new() };
+                let mut c = CommSummary { name: name.to_string(), incipit: String::new(), collect: String::new() };
                 for next in &sec.elements[i + 1..] {
-                    if next.kind == ElementType::Antiphon {
-                        c.incipit = incipit(&next.text);
-                        break;
-                    }
                     if next.kind == ElementType::Heading {
                         break;
+                    }
+                    if next.kind == ElementType::Antiphon && c.incipit.is_empty() {
+                        c.incipit = incipit(&next.text);
+                    } else if next.slot_ref == "commemoration-collect" && c.collect.is_empty() {
+                        c.collect = next.source_refs.first().unwrap_or(&next.source_ref).clone();
                     }
                 }
                 s.comms.push(c);

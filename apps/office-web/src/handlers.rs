@@ -42,7 +42,10 @@ pub struct Req<'a> {
     pub site: &'a str,
 }
 
-fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
+/// Home's hours. Vespers on an evening that already keeps the morrow carries the invitation's
+/// gloss for it ("First Vespers of …"), which the page's script sets under "Pray Vespers" by the
+/// reader's clock; its own note in the table stays "Evening prayer".
+fn build_home_hours(date_slug: &str, current: &str, first_vespers: Option<&str>) -> Vec<HomeHourLink> {
     HOUR_NAMES
         .iter()
         .map(|slug| HomeHourLink {
@@ -51,6 +54,10 @@ fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
             url: hour_link(slug, date_slug),
             is_current: *slug == current,
             note: hour_gloss(slug).to_string(),
+            eve: match (*slug, first_vespers) {
+                ("vespers", Some(feast)) => presentation::first_vespers_gloss(feast),
+                _ => String::new(),
+            },
         })
         .collect()
 }
@@ -315,6 +322,27 @@ impl Server {
         }
     }
 
+    /// The date picker's marks for a year (#953): `{"year":2026,"days":"wwwW…"}`, a letter a day
+    /// from the first of January (`presentation::course::day_marks_code`). The calendar alone, no
+    /// office resolved or hour composed, in its own small cache; only the offered years, as the
+    /// picker offers.
+    pub fn day_marks(&self, method: &Method, year: &str) -> Response<Body> {
+        if method != Method::GET && method != Method::HEAD {
+            return crate::http::http_error("405 method not allowed", StatusCode::METHOD_NOT_ALLOWED);
+        }
+        let Some(year) = (year.len() == 4 && year.bytes().all(|b| b.is_ascii_digit())).then(|| year.parse::<i32>().ok()).flatten() else {
+            return crate::http::not_found();
+        };
+        let Ok(code) = self.cache.day_marks(year) else { return crate::http::not_found() };
+        let body = format!(r#"{{"year":{year},"days":"{code}"}}"#);
+        let mut resp = response(StatusCode::OK, if method == Method::HEAD { String::new() } else { body });
+        set(&mut resp, header::CONTENT_TYPE, "application/json");
+        set(&mut resp, header::X_CONTENT_TYPE_OPTIONS, "nosniff");
+        // A deploy may move a feast; a day's old marks do no harm meanwhile.
+        set(&mut resp, header::CACHE_CONTROL, "public, max-age=86400");
+        resp
+    }
+
     pub fn not_found_page(&self, req: &Req) -> Response<Body> {
         let data =
             NotFoundData { chrome: Chrome { page: "notice".into(), nav_date: self.nav_date_now(req), noindex: true, ..Chrome::default() } };
@@ -364,14 +392,15 @@ impl Server {
         let heading = day_heading(day);
         let (now, now_hour) = now_in(&loc);
         let now_slug = date_slug(now);
-        let invite = invitation(date, now, now_hour);
+        let first_vespers = day.vespers.first_vespers_of();
+        let invite = invitation(date, now, now_hour).on_eve(first_vespers);
         let versicle = if home_shows_versicle(day) {
             self.engine.compose_hour("lauds", day, &entry.moveable, PrayerForm::Private).ok().and_then(|h| hour_versicle(&h))
         } else {
             None
         };
         let Versicle { versicle, response } = versicle.unwrap_or(Versicle { versicle: String::new(), response: String::new() });
-        let hours = build_home_hours(&slug, invite.current);
+        let hours = build_home_hours(&slug, invite.current, first_vespers);
         let (feast_name, feast_alias) = split_alias(&heading.feast);
         let feasts = self.cache.feasts();
         let from = req.query.get("from");
@@ -415,9 +444,11 @@ impl Server {
             response,
             calendar_link: calendar_link(&slug),
             pray_now_label: invite.label,
-            pray_now_gloss: invite.gloss.into(),
+            pray_now_gloss: invite.gloss,
+            pray_now_eve: invite.eve,
             pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
             hours,
+            night: Default::default(),
         };
         match self.pages.home(&data) {
             Ok(body) => html(StatusCode::OK, body),
@@ -627,6 +658,8 @@ impl Server {
             Ok(entry) => presentation::course::year_course(entry.days.iter().map(|d| &**d)),
             Err(e) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, &format!("error building calendar: {e}")),
         };
+        let rare = render_html::view::rare_colors_in(&course);
+        let span = f64::from(presentation::course::COURSE_SPAN);
         // Search needs only this year's ordo and the next.
         let indexed = |y: i32| (now.year()..=now.year() + 1).contains(&y);
         let step = |y: i32, m: u32| MonthStep {
@@ -663,6 +696,21 @@ impl Server {
                 .zip(1..)
                 .map(|(name, m)| {
                     let today = (year, m) == (now.year(), now.month());
+                    let runs = &course[m as usize - 1];
+                    let rare_pins = if view == OrdoView::Year {
+                        runs.iter()
+                            .filter(|r| rare.contains(&r.color))
+                            .map(|r| {
+                                let mid = f64::from(r.start) + f64::from(r.days) * 0.5;
+                                render_html::view::AboutRibbonPin {
+                                    color: r.color.as_str().to_string(),
+                                    left_pct: format!("{:.3}%", mid / span * 100.0),
+                                }
+                            })
+                            .collect()
+                    } else {
+                        Vec::new()
+                    };
                     MonthLink {
                         name: if today { format!("{name}, this month") } else { name.to_string() },
                         abbr: name[..3].to_string(),
@@ -672,13 +720,15 @@ impl Server {
                         current: current == Some(m),
                         today,
                         today_x: if today { presentation::course::course_place_percent(now.day()) } else { String::new() },
-                        course: course[m as usize - 1]
+                        course: runs
                             .iter()
                             .map(|r| CourseRunView { start: r.start, days: r.days, color: r.color.as_str().to_string() })
                             .collect(),
+                        rare_pins,
                     }
                 })
                 .collect(),
+            ordo_colors: if view == OrdoView::Year { render_html::view::build_ordo_colors(year, Some(&course)) } else { Vec::new() },
             months,
             prev_month: current.and_then(|m| match m {
                 1 if crate::cache::offered_year(year - 1) => Some(step(year - 1, 12)),
@@ -856,6 +906,7 @@ mod tests {
             ("peach", crown::SKY_PEACH),
             ("teal", crown::SKY_TEAL),
             ("cross-ember", crown::CROSS_EMBER),
+            ("cross-ember-veiled", crown::CROSS_EMBER_VEILED),
         ] {
             rules.push(format!("--crown-{name}: {};", rgb(c)));
         }
@@ -1028,8 +1079,15 @@ mod tests {
         };
         // St Placidus: the martyrs' versicle, each half with its sigil.
         let placidus = versicle("2026-10-05").expect("a plain day's versicle");
-        assert!(placidus.contains("<span class=\"home-versicle-sigil\">℣.</span> Let the Saints be joyful with glory."), "{placidus}");
-        assert!(placidus.contains("<span class=\"home-versicle-sigil\">℟.</span> Let them rejoice in their beds."), "{placidus}");
+        assert!(
+            placidus.contains(r#">℣.</span><span class="sr-only">Versicle.</span></span> Let the Saints be joyful with glory."#),
+            "{placidus}"
+        );
+        assert!(
+            placidus.contains(r#">℟.</span><span class="sr-only">Response.</span></span> Let them rejoice in their beds."#),
+            "{placidus}"
+        );
+        assert!(placidus.contains(r#"class="home-versicle-line gloss-quiet""#), "{placidus}");
         // Laetare, in rose, keeps it.
         assert!(versicle("2026-03-22").is_some_and(|v| v.contains("God shall give his angels charge over thee.")));
         // A Lenten feria (violet), Passion Sunday, Maundy Thursday, and a day with a commemoration.
@@ -1099,14 +1157,27 @@ mod tests {
         assert!(month.find(r##"expect.href = "#ordo-place""##).unwrap() < month.find("<body").unwrap());
     }
 
+    /// On an evening that keeps the morrow, Vespers carries "First Vespers of …" for the
+    /// invitation to set under "Pray Vespers" by the reader's clock (#951); other evenings none.
+    #[test]
+    fn home_marks_first_vespers_on_the_eve_of_a_feast() {
+        let eve = get("/?date=2026-12-24").2;
+        assert!(eve.contains(r#"data-hour="vespers" data-eve="First Vespers of the Nativity of Our Lord""#), "{eve}");
+        assert!(get("/?date=2026-11-28").2.contains(r#"data-eve="First Vespers of I Sunday of Advent""#));
+        assert!(!get("/?date=2026-12-23").2.contains("data-eve=\""));
+    }
+
     /// 1 January is the Nativity's eighth day (#833; the 2026 ordo's "(Octave Day of the
     /// Nativity)"), so home names the octave under the Circumcision, as it does under St Stephen
     /// and St Sylvester; 2 January is past it.
     #[test]
     fn home_names_the_nativity_octave_on_the_first_of_january() {
-        let note = r#"<p class="octave-note">Octave of Christmas</p>"#;
         for date in ["2026-12-26", "2026-12-31", "2027-01-01"] {
-            assert!(get(&format!("/?date={date}")).2.contains(note), "{date}");
+            let body = get(&format!("/?date={date}")).2;
+            assert!(
+                body.contains(r#"<p class="octave-note"><span class="gloss-quiet""#) && body.contains(">Octave of Christmas</span></p>"),
+                "{date}"
+            );
         }
         assert!(!get("/?date=2027-01-02").2.contains("octave-note"));
     }
@@ -1254,7 +1325,7 @@ mod tests {
     #[test]
     fn ordo_month_page_holds_one_month_between_its_neighbours() {
         let body = ordo("/calendar/2026/09");
-        assert!(body.contains("<title>September 2026 — Ordo</title>"));
+        assert!(body.contains("<title>September 2026 — Ordo — Daily Office</title>"));
         assert_eq!(body.matches(r#"<tr class="day "#).count(), 30);
         assert!(body.contains(r#"id="d-2026-09-01""#) && body.contains(r#"id="d-2026-09-30""#));
         assert!(!body.contains(r#"id="d-2026-08-31""#) && !body.contains(r#"id="d-2026-10-01""#));
@@ -1276,8 +1347,8 @@ mod tests {
         let unruled = |page: String| page.replace(r#" rel="nofollow""#, "");
         let body = unruled(body);
         for want in [
-            r#"href="/calendar/2026/08"><span class="continuation-label">Previous month</span><span>&larr; August</span>"#,
-            r#"href="/calendar/2026/10"><span class="continuation-label">Next month</span><span>October &rarr;</span>"#,
+            r#"href="/calendar/2026/08"><span class="continuation-label">Previous month</span><span class="sr-only">: </span><span><span aria-hidden="true">&larr; </span>August</span>"#,
+            r#"href="/calendar/2026/10"><span class="continuation-label">Next month</span><span class="sr-only">: </span><span>October<span aria-hidden="true"> &rarr;</span></span>"#,
             r#"<a class="day-hours-link" href="/calendar/2026">2026 Ordo</a>"#,
         ] {
             assert!(body.contains(want), "month continuation missing {want:?}");
@@ -1285,10 +1356,10 @@ mod tests {
         // Neighbours across the year name their year.
         assert!(
             unruled(ordo("/calendar/2026/12"))
-                .contains(r#"href="/calendar/2027/01"><span class="continuation-label">Next month</span><span>January 2027 &rarr;</span>"#)
+                .contains(r#"href="/calendar/2027/01"><span class="continuation-label">Next month</span><span class="sr-only">: </span><span>January 2027<span aria-hidden="true"> &rarr;</span></span>"#)
         );
         assert!(unruled(ordo("/calendar/2026/01")).contains(
-            r#"href="/calendar/2025/12"><span class="continuation-label">Previous month</span><span>&larr; December 2025</span>"#
+            r#"href="/calendar/2025/12"><span class="continuation-label">Previous month</span><span class="sr-only">: </span><span><span aria-hidden="true">&larr; </span>December 2025</span>"#
         ));
         // The ordo runs over the years every front offers, and stops at their ends.
         let years = presentation::offered_years(Server::local_year());
@@ -1309,7 +1380,8 @@ mod tests {
         let row = |slug: &str| body.split(&format!(r#"id="d-{slug}""#)).nth(1).and_then(|r| r.split("</tr>").next()).unwrap().to_string();
         let benedict = row("2026-07-11");
         assert!(benedict.contains("Saturday Office of the B.V.M."), "{benedict}");
-        assert!(benedict.contains(r#"<div class="day-monastic"><p>[Solemnity of St Benedict (Monastics &amp; Oblates Only)] <abbr tabindex="0" title="Greater Double">gd</abbr><span class="day-monastic-office">Proper Office, Monastic Diurnal pp. 560–564</span></p></div>"#), "{benedict}");
+        assert!(benedict.contains(r#"<div class="day-monastic"><p><span class="gloss-quiet""#), "{benedict}");
+        assert!(benedict.contains(r#">[Solemnity of St Benedict (Monastics &amp; Oblates Only)]</span> <abbr tabindex="0" title="Greater Double">gd</abbr> <span class="day-monastic-office">Proper Office, Monastic Diurnal pp. 560–564</span></p></div>"#), "{benedict}");
         assert!(row("2026-07-16").contains("[Our Lady of Einsiedeln (Monastics &amp; Oblates Only)]"));
         assert_eq!(body.matches(r#"class="day-monastic""#).count(), 2);
     }
@@ -1376,7 +1448,7 @@ mod tests {
     #[test]
     fn ordo_whole_year_keeps_every_day_and_jumps_within_itself() {
         let body = ordo("/calendar/2026/all");
-        assert!(body.contains("<title>Ordo 2026 — Whole year</title>"));
+        assert!(body.contains("<title>Ordo 2026 — Whole year — Daily Office</title>"));
         assert_eq!(body.matches(r#"<tr class="day "#).count(), 365);
         assert!(body.contains(r##"<a href="#january" aria-label="January""##));
         assert!(body.contains(r#"<section class="month" id="december">"#));
@@ -1390,7 +1462,9 @@ mod tests {
         let (status, headers, body) = get("/?date=2026-09-22");
         assert_eq!(status, StatusCode::OK);
         assert_eq!(headers[header::CACHE_CONTROL], "no-cache");
-        let feast = body.find(r#"<p class="feast">Feria</p>"#).expect("names the feria");
+        let feast = body.find(r#"<p class="feast">"#).expect("names the feria");
+        let feast_end = body[feast..].find("</p>").expect("closes feast");
+        assert!(body[feast..feast + feast_end].contains(">Feria</span>"), "names the feria with a quiet gloss");
         let also = body.find(r#"class="commemorations-label""#).expect("commemorations");
         assert!(feast < also);
         assert!(!body.contains(r#"class="home-season""#), "the season is not repeated");

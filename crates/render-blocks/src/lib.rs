@@ -24,7 +24,9 @@ use liturgy::{
     ChantScore, ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, RubricSpan, ScoreSpan, VoiceSpan, posture_cues_at,
     split_words,
 };
-use presentation::gloss::{ANTIPHON_GLOSS, Gloss, GlossRun, PSALM_NUMBER_GLOSS, gloss_runs, heading_gloss};
+use presentation::gloss::{
+    ANTIPHON_GLOSS, Gloss, GlossRun, ORDO_COMMEMORATION_GLOSS, POSTURE_GLOSS, PSALM_NUMBER_GLOSS, gloss_runs, heading_gloss,
+};
 
 /// What a block is, which decides its paragraph style.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -412,7 +414,16 @@ pub fn section_heading(label: &str) -> Block {
     if let Some(name) = label.strip_prefix("Commemoration of ").filter(|n| !n.is_empty()) {
         return Block::new(
             BlockKind::CommemorationHeading,
-            vec![Run::new("Commemoration of", RunStyle::Kicker), Run::new("\n", RunStyle::Break), Run::new(typeset(name), RunStyle::Plain)],
+            vec![
+                // The Cross keeps its own note; any other is a commemorated feast or season.
+                Run::with_quiet_gloss(
+                    "Commemoration of",
+                    RunStyle::Kicker,
+                    Some(heading_gloss(label).unwrap_or(&ORDO_COMMEMORATION_GLOSS)),
+                ),
+                Run::new("\n", RunStyle::Break),
+                Run::new(typeset(name), RunStyle::Plain),
+            ],
         );
     }
     let runs = match heading_gloss(label) {
@@ -434,7 +445,12 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
                 block.marker_gloss = Some(&ANTIPHON_GLOSS);
                 out.push(block);
             } else {
-                out.push(Block::new(BlockKind::LatinTitle, text_runs_styled(&elem.label, RunStyle::Latin)));
+                let gloss = presentation::gloss::marian_antiphon_gloss(&elem.label);
+                let runs = match gloss {
+                    Some(g) => vec![Run::with_quiet_gloss(typeset(&elem.label), RunStyle::Latin, Some(g))],
+                    None => text_runs_styled(&elem.label, RunStyle::Latin),
+                };
+                out.push(Block::new(BlockKind::LatinTitle, runs));
                 marian_antiphon(out, &elem.text, elem.score.as_ref());
             }
         }
@@ -457,7 +473,11 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
                 };
                 if !elem.incipit.is_empty() {
                     runs.push(Run::new("\u{a0}· ", RunStyle::Plain));
-                    runs.push(Run::new(typeset(&elem.incipit), RunStyle::Latin));
+                    runs.push(Run::with_quiet_gloss(
+                        typeset(&elem.incipit),
+                        RunStyle::Latin,
+                        Some(&presentation::gloss::PSALM_INCIPIT_GLOSS),
+                    ));
                 }
                 out.push(Block::new(BlockKind::ItemLabel, runs));
             }
@@ -469,7 +489,10 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
         ElementType::Hymn => {
             out.push(section_heading("Hymn"));
             if !elem.label.is_empty() {
-                out.push(Block::new(BlockKind::LatinTitle, text_runs_styled(&elem.label, RunStyle::Latin)));
+                out.push(Block::new(
+                    BlockKind::LatinTitle,
+                    vec![Run::with_quiet_gloss(typeset(&elem.label), RunStyle::Latin, Some(&presentation::gloss::HYMN_TITLE_GLOSS))],
+                ));
             }
             scored_hymn(out, elem);
         }
@@ -607,10 +630,10 @@ fn rubric_text_runs(s: &str) -> Vec<Run> {
         .collect()
 }
 
-/// Posture cues at one anchor, each a run followed by a space.
+/// Posture cues at one anchor, each a run carrying a quiet gloss, followed by a space.
 fn push_postures(runs: &mut Vec<Run>, cues: &[PostureCue], at: PostureAnchor) {
     for cue in posture_cues_at(cues, at) {
-        runs.push(Run::new(cue, RunStyle::Posture));
+        runs.push(Run::with_quiet_gloss(cue, RunStyle::Posture, Some(&POSTURE_GLOSS)));
         runs.push(Run::new(" ", RunStyle::Plain));
     }
 }

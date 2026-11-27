@@ -2,7 +2,7 @@
 
 use std::path::Path;
 use tools::fs::FsData;
-use tools::review::{provenance, zero_occurrence};
+use tools::review::provenance;
 use tools::validate::{validate_calendar, validate_texts};
 
 const CASES: &str = "../../tests/fixtures/broken-corpora";
@@ -29,10 +29,7 @@ fn report(dir: &str) -> String {
     if Path::new(dir).join("review").is_dir() {
         let errs = match provenance::scan_provenance(&src) {
             Err(e) => vec![format!("review provenance: {e}")],
-            Ok(inventory) => match zero_occurrence::load_zero_classifications(&src, &inventory) {
-                Err(e) => vec![format!("review zero occurrences: {e}")],
-                Ok(_) => Vec::new(),
-            },
+            Ok(_) => Vec::new(),
         };
         layer("review", errs);
     }
@@ -48,7 +45,7 @@ fn broken_corpora_match_diagnostics() {
         .map(|e| e.file_name().into_string().unwrap())
         .collect();
     names.sort();
-    assert!(names.len() >= 15, "found {} cases", names.len());
+    assert!(names.len() >= 14, "found {} cases", names.len());
     let mut failures = Vec::new();
     for name in &names {
         let dir = format!("{CASES}/{name}");
@@ -63,25 +60,9 @@ fn broken_corpora_match_diagnostics() {
 
 #[test]
 fn appended_dead_office_keeps_its_resolution_boundary_without_a_rubric() {
-    let inventory = tools::review::resolution::build_resolution_inventory(&FsData::new("../../data"), 2026, 1).unwrap();
-    let rows: Vec<_> =
-        inventory.rows.iter().filter(|r| r.hour == "vespers" && r.trace.selected_ref.starts_with("proper/all-souls/")).collect();
-    assert!(!rows.is_empty());
-    assert!(rows.iter().all(|r| r.part == "appended-office-of-the-dead" && r.dates == ["2026-11-01"]));
-    for row in rows {
-        let t = &row.trace;
-        assert_eq!(t.owner_id, "all-souls");
-        assert_eq!(t.canonical_owner, "all-souls");
-        assert_eq!(t.proper_ids, ["all-souls"]);
-        assert_eq!(t.selected_tier, "proper");
-        assert!(!t.first_vespers);
-        assert!(!t.direct_candidates.is_empty());
-        assert!(t.direct_candidates.iter().all(|r| r.starts_with("proper/all-souls/")));
-    }
     for date in [calendar::Date::new(2026, 11, 1), calendar::Date::new(2025, 11, 2)] {
         let explanation =
-            tools::review::assurance::explain_composition(&FsData::new("../../data"), "vespers", date, liturgy::PrayerForm::Private)
-                .unwrap();
+            tools::review::explain::explain_composition(&FsData::new("../../data"), "vespers", date, liturgy::PrayerForm::Private).unwrap();
         let json: serde_json::Value = serde_json::from_str(&explanation).unwrap();
         let resolutions = json.get("resolutions").unwrap().as_array().unwrap();
         let mut dead_count = 0;

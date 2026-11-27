@@ -41,6 +41,8 @@ for (const theme of ["light", "dark"]) {
     await openForSnapshot(page, `/lauds/${testDate}`, theme);
     await page.locator("button.hour-meta-date").click();
     await expect(page.locator(".date-picker")).toBeVisible();
+    // The day marks come with the year's letters; shoot them laid.
+    await expect(page.locator(".date-picker-day[data-color]")).toHaveCount(31);
     // The picker lends its parts to the controls' grid, so the row and its open panel are shot.
     await expect(page.locator(".hour-context-controls")).toHaveScreenshot(`date-picker-${theme}.png`);
   });
@@ -119,8 +121,8 @@ test("mobile menu — light", async ({ page }) => {
   await expect(page).toHaveScreenshot("menu-open-light.png");
 });
 
-// Hour pages add the Morning / Day / Evening bands above Ordo and the
-// preferences; dark checks the panel's rules and underlines on the night.
+// Hour pages add the preferences under Ordo, Reminders and About; dark
+// checks the panel's rules and underlines on the night.
 test("mobile hour menu — dark", async ({ page }) => {
   await openForSnapshot(page, `/lauds/${testDate}`, "dark");
   await page.getByText("Menu", { exact: true }).click();

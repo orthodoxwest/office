@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}Daily Office — Reminders{% endblock %}{% block content %}{% from "macros.html" import headpiece, period_ornament, store_buttons %}
+{% extends "layout.html" %}{% block title %}Reminders — Daily Office{% endblock %}{% block content %}{% from "macros.html" import headpiece, period_ornament, store_buttons %}
 <div class="reminders">
   {{ headpiece() }}
   <h1>Set prayer reminders</h1>
@@ -34,7 +34,7 @@
           <div class="reminder-hour-row{% if h.checked %} is-selected{% endif %}" data-reminder-hour="{{ h.slug }}">
             <label class="reminder-hour-name">
               <input type="checkbox" name="hour" value="{{ h.slug }}"{% if h.checked %} checked{% endif %}>
-              <span class="reminder-hour-label-stack"><span>{{ h.name }}</span>{% if h.gloss %}<span class="reminder-hour-gloss">{{ h.gloss }}</span>{% endif %}</span>
+              <span class="reminder-hour-label-stack"><span>{{ h.name }}</span>{% if h.gloss %}<span class="sr-only">, </span><span class="reminder-hour-gloss">{{ h.gloss }}</span>{% endif %}</span>
             </label>
             {# An unchosen hour's greyed time lets a tap through to the row, which chooses the hour (app.js). #}
             <span class="reminder-time"><input type="time" name="time-{{ h.slug }}" value="{{ h.default }}" aria-label="Time for {{ h.name }}"{% if not h.checked %} disabled{% endif %}></span>
@@ -48,10 +48,11 @@
     {# One ruled week, Sunday in red as every calendar in the app sets it. #}
     <fieldset class="reminder-days">
       <legend>Days</legend>
+      {%- set day_full = {"sun": "Sunday", "mon": "Monday", "tue": "Tuesday", "wed": "Wednesday", "thu": "Thursday", "fri": "Friday", "sat": "Saturday"} %}
       {% for day in days %}
       <label class="reminder-day{% if day.slug == "sun" %} is-sunday{% endif %}">
-        <input type="checkbox" name="day" value="{{ day.slug }}" checked>
-        <span class="reminder-day-name">{{ day.name }}</span>
+        <input type="checkbox" name="day" value="{{ day.slug }}" aria-label="{{ day_full[day.slug] }}" checked>
+        <span class="reminder-day-name" aria-hidden="true">{{ day.name }}</span>
       </label>
       {% endfor %}
     </fieldset>
@@ -82,7 +83,7 @@
       <button type="button" id="reminder-copy" class="reminder-copy"><span class="reminder-copy-words">Copy link</span><span class="reminder-copy-done" aria-hidden="true">Copied</span></button>
     </p>
     <p id="reminder-copied" class="sr-only" role="status" aria-live="polite"></p>
-    <p id="reminder-copy-note" class="reminder-copy-note" hidden></p>
+    <p id="reminder-copy-note" class="reminder-copy-note" role="alert" hidden></p>
     <details class="reminder-address">
       <summary>View calendar address</summary>
       <p id="reminder-url" class="reminder-url"></p>
@@ -95,10 +96,10 @@
     <h3>iPhone, iPad, Mac (Apple Calendar)</h3>
     <p>Tap <em>Subscribe in calendar app</em> above and confirm. Reminders work as configured.
       If alerts don’t appear, check that <em>Remove Alerts</em> is off for the
-      subscription (Settings &rsaquo; Calendar &rsaquo; Accounts).</p>
+      subscription (Settings<span aria-hidden="true"> &rsaquo; </span><span class="sr-only">, </span>Calendar<span aria-hidden="true"> &rsaquo; </span><span class="sr-only">, </span>Accounts).</p>
     <h3>Google Calendar</h3>
     <p>Copy the calendar link, then in Google Calendar choose
-      <em>Other calendars &rsaquo; + &rsaquo; From URL</em> and paste it.
+      <em>Other calendars<span aria-hidden="true"> &rsaquo; </span><span class="sr-only">, </span>+<span aria-hidden="true"> &rsaquo; </span><span class="sr-only">, </span>From URL</em> and paste it.
       <strong>Google ignores the alerts inside subscribed feeds</strong> — after
       subscribing, open the calendar’s settings and add a default
       <em>Event notification</em> (e.g. 10 minutes) so reminders fire.

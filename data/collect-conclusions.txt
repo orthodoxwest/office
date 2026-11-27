@@ -38,10 +38,9 @@
 # suffrage collects ARE referenced directly and keep their conclusions inline.
 # The Cross collect is also direct; its hour sections append the shared
 # through-same formula explicitly. These must NOT be listed here.
-# Note: resolveProperCollectText redirects terce/sext/none to the lauds collect
-# slot, so ordinary/{terce,sext,none}/collect are unreachable in practice (see
-# data/review/zero-occurrences.csv). They are classified anyway so that the data
-# stays correct if that redirect ever changes.
+# Note: Terce, Sext, and None redirect to the Lauds collect slot, so
+# ordinary/{terce,sext,none}/collect are unreachable in practice. They are
+# classified anyway so that the data stays correct if that redirect ever changes.
 
 # --- Addressed to the Son: "Who with God the Father ... livest and reignest" ---
 proper/advent-sunday-1/collect who-livest
@@ -54,6 +53,8 @@ proper/chair-peter-antioch/collect who-livest
 # This is the same collect whose Diurnal form is printed for the commemoration
 # of St Peter on p. 463 with "Who with God the Father ... livest".
 proper/comm-01-25-commemoration-of-st-peter/commemoration-collect who-livest
+# Diurnal p. 538 prints "Who with God the Father . . . livest" (St Paulinus of Nola).
+proper/comm-06-22-st-paulinus-bishop-and-confessor/commemoration-collect who-livest
 proper/corpus-christi/collect who-livest
 proper/corpus-christi/collect-lauds who-livest
 proper/finding-holy-cross/collect who-livest

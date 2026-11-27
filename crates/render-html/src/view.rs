@@ -39,6 +39,9 @@ pub struct HomeHourLink {
     /// What the hour is ("Evening prayer"), shown under its name while it is the current hour on
     /// a phone, and under every hour's name in the wide home's niche.
     pub note: String,
+    /// Vespers on an evening that already keeps the morrow: "First Vespers of …", which the
+    /// invitation sets under "Pray Vespers" in place of the note; empty otherwise.
+    pub eve: String,
 }
 
 /// The day-landing page.
@@ -78,8 +81,37 @@ pub struct HomeData {
     /// What the hour the invitation opens is ("Evening prayer"), set under its words on a phone
     /// so the hours' table keeps one shape whichever hour is now; empty for "Open Lauds".
     pub pray_now_gloss: String,
+    /// Whether the gloss is the eve's "First Vespers of …", which the wide niche sets under the
+    /// invitation too (#959).
+    pub pray_now_eve: bool,
     pub pray_now_link: String,
     pub hours: Vec<HomeHourLink>,
+    /// The Night's row after the seven: Matins, not yet prayed in the app.
+    pub night: HomeNight,
+}
+
+/// Home's Night row: Matins under its period, with what it is and that it is coming soon
+/// (`presentation::about::ABOUT_NIGHT`, `presentation::COMING_SOON`). Its words are the same
+/// every day, so its default is the row.
+#[derive(Clone, Debug, Serialize)]
+pub struct HomeNight {
+    pub label: String,
+    pub name: String,
+    pub gloss: String,
+    pub coming_soon: String,
+}
+
+impl Default for HomeNight {
+    fn default() -> Self {
+        let (label, hours) = presentation::about::ABOUT_NIGHT;
+        let slug = hours[0].0;
+        HomeNight {
+            label: label.into(),
+            name: presentation::title_case(slug),
+            gloss: presentation::hour_gloss(slug).into(),
+            coming_soon: presentation::COMING_SOON.into(),
+        }
+    }
 }
 
 /// One prayer form's composition of the hour.
@@ -235,6 +267,9 @@ pub struct MonthLink {
     pub today_x: String,
     /// The month's runs of day colours, the year's course (`presentation::course`).
     pub course: Vec<CourseRunView>,
+    /// Rare-color pins (Rose, Black) in this month so selecting a rare color on the frontispiece
+    /// legend visibly locates its single-day flecks.
+    pub rare_pins: Vec<AboutRibbonPin>,
 }
 
 /// One run of a month's band: `days` days of `color` from `start` (0-based), on a span of 31.
@@ -302,6 +337,8 @@ pub struct CalendarData {
     pub year_link: String,
     pub all_link: String,
     pub month_links: Vec<MonthLink>,
+    /// The six liturgical colors with this year's dates/counts, shown interactively on the frontispiece.
+    pub ordo_colors: Vec<AboutOrdoColorView>,
     /// The month shown, or every month of the whole-year view.
     pub months: Vec<std::sync::Arc<MonthData>>,
     pub prev_month: Option<MonthStep>,
@@ -393,15 +430,18 @@ pub struct AboutData {
     pub chrome: Chrome,
     pub kicker: String,
     pub title: String,
-    pub verse_text: String,
+    /// The epigraph, a verse to a line.
+    pub verse_lines: Vec<String>,
     pub verse_cite: String,
     pub intro: String,
     pub hours_heading: String,
-    /// The seven hours in home's three bands.
+    /// The seven hours in home's three bands, then Matins in the Night.
     pub about_hours: Vec<AboutPeriod>,
-    /// Flat list of the seven hours with Horologium coordinates for the solar arc.
+    /// Flat list of the hours with Horologium coordinates for the arc of the day and the night.
     pub horologium: AboutHorologium,
     pub hours_note: String,
+    /// What an hour not yet prayed in the app says (`presentation::COMING_SOON`).
+    pub coming_soon: String,
     /// The remaining sections of the page (Where to begin, Reading the page, An ancient prayer,
     /// The Ordo, This app) in reading order.
     pub sections: Vec<AboutSection>,
@@ -436,6 +476,8 @@ pub struct AboutBlockView {
     pub period: String,
     pub mark: String,
     pub tail: String,
+    /// What a screen reader says for a key's mark (`presentation::about::AboutBlock::Key`).
+    pub spoken: String,
     pub ink: &'static str,
 }
 
@@ -456,9 +498,12 @@ pub struct AboutHour {
     pub url: String,
     pub gloss: String,
     pub time: String,
+    /// Shown but not yet prayed in the app: unlinked, with `presentation::COMING_SOON`.
+    pub coming_soon: bool,
 }
 
-/// A single station along the Horologium's solar arc (viewBox 320×144, center 160×128, radii 118×104).
+/// A single station along the Horologium's arc (viewBox 320×160, center 160×128, radii 118×104
+/// above the horizon and 118×22 under it: `presentation::about::about_horologium_point`).
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct AboutHorologiumStop {
     pub slug: String,
@@ -467,6 +512,10 @@ pub struct AboutHorologiumStop {
     pub time: String,
     pub angle: f64,
     pub night: bool,
+    /// `star`, `moon` or `sun` (`presentation::about::about_horologium_sign`).
+    pub sign: &'static str,
+    /// Shown and not yet prayed in the app (`presentation::hour_coming_soon`): its stop says so.
+    pub coming_soon: bool,
     pub is_current: bool,
     pub x: String,
     pub y: String,
@@ -511,6 +560,8 @@ pub struct AboutSpecimenView {
     pub alone_response: String,
     pub priest_versicle: String,
     pub priest_response: String,
+    pub deacon_note: String,
+    pub priest_note: String,
     pub secret_voiced: String,
     pub secret_silent: String,
 }
@@ -521,15 +572,27 @@ pub struct AboutOrdoColorView {
     pub slug: String,
     pub name: String,
     pub meaning: String,
+    /// Dates in this year for rare colors ("Mar 15, Dec 13"), or day count ("92 days in 2026").
+    pub note: String,
 }
 
 /// One month's slice of the full-year liturgical color ribbon shown in "The Ordo".
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct AboutCourseMonth {
+    pub month: u32,
+    pub name: &'static str,
+    pub href: String,
     pub offset_x: u32,
     pub runs: Vec<CourseRunView>,
     pub short_start: u32,
     pub short_days: u32,
+}
+
+/// A subtle diamond pin locating a rare liturgical color (Rose, Black) along a color band.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct AboutRibbonPin {
+    pub color: String,
+    pub left_pct: String,
 }
 
 /// Full-year liturgical color ribbon for the About page's "The Ordo" section.
@@ -542,6 +605,8 @@ pub struct AboutOrdoRibbon {
     pub width: u32,
     pub today_pct: String,
     pub months: Vec<AboutCourseMonth>,
+    /// Rare-color pins (Rose, Black) positioned along the full ribbon.
+    pub rare_pins: Vec<AboutRibbonPin>,
     /// Every other month's name, set at its own month's start (a percentage of the width).
     pub labels: Vec<AboutRibbonLabel>,
 }
@@ -556,20 +621,50 @@ pub struct AboutRibbonLabel {
 /// The gap between two months' bands on About's ribbon, in days' widths.
 pub const ABOUT_RIBBON_GAP: u32 = 3;
 
+/// Builds the six liturgical color legend entries, enriched with this year's dates/counts when `course` is given.
+pub fn build_ordo_colors(year: i32, course: Option<&[Vec<presentation::course::CourseRun>]>) -> Vec<AboutOrdoColorView> {
+    use calendar::Color;
+    presentation::about::ABOUT_ORDO_COLORS
+        .iter()
+        .map(|c| {
+            let note = course
+                .and_then(|months| {
+                    let color = Color::parse(c.slug).ok()?;
+                    Some(presentation::course::color_days_note(months, color, year))
+                })
+                .unwrap_or_default();
+            AboutOrdoColorView { slug: c.slug.into(), name: c.name.into(), meaning: c.meaning.into(), note }
+        })
+        .collect()
+}
+
+/// Computes which liturgical colors in `course` are rare (total days <= `RARE_COLOR_MAX_DAYS`).
+pub fn rare_colors_in(course: &[Vec<presentation::course::CourseRun>]) -> Vec<calendar::Color> {
+    use calendar::Color;
+    let all = [Color::White, Color::Red, Color::Violet, Color::Green, Color::Rose, Color::Black];
+    all.into_iter()
+        .filter(|&color| {
+            let total: u32 = course.iter().flat_map(|m| m.iter()).filter(|r| r.color == color).map(|r| r.days).sum();
+            total > 0 && total <= presentation::course::RARE_COLOR_MAX_DAYS
+        })
+        .collect()
+}
+
 impl AboutData {
     /// The page as presentation words it, for the page chrome given, with the hour it is now
     /// marked and invited to as home does at `now`'s `clock_hour` (0–23).
     pub fn new(chrome: Chrome, now: calendar::Date, clock_hour: i8) -> AboutData {
         use crate::escape::html_escape_string as esc;
         use presentation::about::{
-            ABOUT, ABOUT_HOURS, ABOUT_KICKER, ABOUT_ORDO_COLORS, ABOUT_SPECIMEN, ABOUT_TITLE, AboutBlock, AboutRun, about_current_hour,
-            about_horologium_angle, about_horologium_is_night, about_runs,
+            ABOUT, ABOUT_HOROLOGIUM_HEIGHT, ABOUT_HOURS, ABOUT_KICKER, ABOUT_NIGHT, ABOUT_SPECIMEN, ABOUT_TITLE, AboutBlock, AboutRun,
+            about_current_hour, about_horologium_angle, about_horologium_is_night, about_horologium_point, about_horologium_sign,
+            about_runs,
         };
         let current = about_current_hour(clock_hour);
         let invite = presentation::invitation(now, now, clock_hour);
         let block = |kind| AboutBlockView { kind, ..AboutBlockView::default() };
 
-        let mut verse_text = String::new();
+        let mut verse_lines = Vec::new();
         let mut verse_cite = String::new();
         let mut intro = String::new();
         let mut hours_heading = String::new();
@@ -580,7 +675,7 @@ impl AboutData {
         for (i, b) in ABOUT.iter().enumerate() {
             match *b {
                 AboutBlock::Verse { text, cite } => {
-                    verse_text = text.into();
+                    verse_lines = text.lines().map(String::from).collect();
                     verse_cite = cite.into();
                 }
                 AboutBlock::Intro(text) => intro = text.into(),
@@ -622,13 +717,14 @@ impl AboutData {
                         sec.blocks.push(block("specimen"));
                     }
                 }
-                AboutBlock::Key { id, mark, tail, ink, text } => {
+                AboutBlock::Key { id, mark, tail, spoken, ink, text } => {
                     if let Some(sec) = sections.last_mut() {
                         sec.blocks.push(AboutBlockView {
                             id: id.into(),
                             text: text.into(),
                             mark: mark.into(),
                             tail: tail.into(),
+                            spoken: spoken.into(),
                             ink: ink.name(),
                             ..block("key")
                         });
@@ -653,8 +749,10 @@ impl AboutData {
             }
         }
 
-        let about_hours: Vec<AboutPeriod> = ABOUT_HOURS
-            .iter()
+        // The seven, then Matins in the Night, as home reads: the table's order and the
+        // Horologium's.
+        let periods = || ABOUT_HOURS.iter().chain(std::iter::once(&ABOUT_NIGHT));
+        let about_hours: Vec<AboutPeriod> = periods()
             .map(|(label, hours)| AboutPeriod {
                 label: (*label).into(),
                 hours: hours
@@ -666,19 +764,17 @@ impl AboutData {
                         url: format!("/{slug}"),
                         gloss: presentation::hour_gloss(slug).into(),
                         time: (*time).into(),
+                        coming_soon: presentation::hour_coming_soon(slug),
                     })
                     .collect(),
             })
             .collect();
 
-        // Horologium arc coordinates: viewBox 320×144, center (160, 128), radii (118, 104).
-        let (cx, cy, rx, ry) = (160.0_f64, 128.0_f64, 118.0_f64, 104.0_f64);
-        let point = |deg: f64, scale: f64| {
-            let rad = deg.to_radians();
-            (cx + rad.cos() * rx * scale, cy - rad.sin() * ry * scale)
-        };
-        let stops: Vec<AboutHorologiumStop> = ABOUT_HOURS
-            .iter()
+        // Horologium coordinates: viewBox 320×160, the day's arc over the horizon at y 128 and
+        // the night's shallow course under it (presentation::about::about_horologium_point).
+        let height = ABOUT_HOROLOGIUM_HEIGHT;
+        let point = about_horologium_point;
+        let stops: Vec<AboutHorologiumStop> = periods()
             .flat_map(|(_, hours)| hours.iter())
             .map(|(slug, time)| {
                 let angle = about_horologium_angle(slug);
@@ -691,19 +787,22 @@ impl AboutData {
                     time: (*time).into(),
                     angle,
                     night: about_horologium_is_night(slug),
+                    sign: about_horologium_sign(slug),
+                    coming_soon: presentation::hour_coming_soon(slug),
                     is_current: *slug == current,
                     x: format!("{x:.1}"),
                     y: format!("{y:.1}"),
                     tick_x1: format!("{tx:.1}"),
                     tick_y1: format!("{ty:.1}"),
                     left_pct: format!("{:.2}%", x / 320.0 * 100.0),
-                    top_pct: format!("{:.2}%", y / 144.0 * 100.0),
+                    top_pct: format!("{:.2}%", y / height * 100.0),
                 }
             })
             .collect();
         // Between midnight and 2 am, `current` is empty (yesterday's Compline): the Horologium
         // rests calmly on Compline without claiming "Now" for today's row.
-        let active_stop = stops.iter().find(|s| s.slug == current).or_else(|| stops.last()).cloned().unwrap_or_default();
+        let active_stop =
+            stops.iter().find(|s| s.slug == current).or_else(|| stops.iter().find(|s| s.slug == "compline")).cloned().unwrap_or_default();
         let (ax, ay) = point(active_stop.angle, 1.0);
         let (dx, dy) = point(about_horologium_angle("lauds"), 1.0);
         let horologium = AboutHorologium {
@@ -715,7 +814,7 @@ impl AboutData {
             active_x: format!("{ax:.1}"),
             active_y: format!("{ay:.1}"),
             active_cx_pct: format!("{:.1}%", ax / 320.0 * 100.0),
-            active_cy_pct: format!("{:.1}%", ay / 144.0 * 100.0),
+            active_cy_pct: format!("{:.1}%", ay / height * 100.0),
             active_night: active_stop.night,
             active_is_now: !current.is_empty(),
             dawn_x: format!("{dx:.1}"),
@@ -738,26 +837,26 @@ impl AboutData {
             alone_response: ABOUT_SPECIMEN.alone_response.into(),
             priest_versicle: ABOUT_SPECIMEN.priest_versicle.into(),
             priest_response: ABOUT_SPECIMEN.priest_response.into(),
+            deacon_note: ABOUT_SPECIMEN.deacon_note.into(),
+            priest_note: ABOUT_SPECIMEN.priest_note.into(),
             secret_voiced: ABOUT_SPECIMEN.secret_voiced.into(),
             secret_silent: ABOUT_SPECIMEN.secret_silent.into(),
         };
 
-        let ordo_colors = ABOUT_ORDO_COLORS
-            .iter()
-            .map(|c| AboutOrdoColorView { slug: c.slug.into(), name: c.name.into(), meaning: c.meaning.into() })
-            .collect();
+        let ordo_colors = build_ordo_colors(now.year(), None);
 
         AboutData {
             chrome,
             kicker: ABOUT_KICKER.into(),
             title: ABOUT_TITLE.into(),
-            verse_text,
+            verse_lines,
             verse_cite,
             intro,
             hours_heading,
             about_hours,
             horologium,
             hours_note,
+            coming_soon: presentation::COMING_SOON.into(),
             sections,
             specimen,
             ordo_ribbon: AboutOrdoRibbon { year: now.year(), ..AboutOrdoRibbon::default() },
@@ -774,13 +873,29 @@ impl AboutData {
         let span = presentation::course::COURSE_SPAN;
         let gap = ABOUT_RIBBON_GAP;
         let total = 12 * span + 11 * gap;
+        let year = now.year();
+        let rare = rare_colors_in(course);
+        let mut rare_pins = Vec::new();
         let months = course
             .iter()
             .enumerate()
             .map(|(mi, runs)| {
                 let offset_x = (mi as u32) * (span + gap);
                 let end = runs.last().map_or(0, |r| r.start + r.days);
+                let month = (mi as u32) + 1;
+                for r in runs {
+                    if rare.contains(&r.color) {
+                        let mid = f64::from(offset_x + r.start) + f64::from(r.days) * 0.5;
+                        rare_pins.push(AboutRibbonPin {
+                            color: r.color.as_str().into(),
+                            left_pct: format!("{:.3}%", mid / f64::from(total) * 100.0),
+                        });
+                    }
+                }
                 AboutCourseMonth {
+                    month,
+                    name: presentation::MONTHS.get(mi).copied().unwrap_or(""),
+                    href: format!("/calendar/{year:04}/{month:02}"),
                     offset_x,
                     runs: runs.iter().map(|r| CourseRunView { start: r.start, days: r.days, color: r.color.as_str().into() }).collect(),
                     short_start: end,
@@ -797,13 +912,15 @@ impl AboutData {
                 left_pct: format!("{:.3}%", f64::from(2 * i as u32 * (span + gap)) / f64::from(total) * 100.0),
             })
             .collect();
+        self.ordo_colors = build_ordo_colors(year, Some(course));
         self.ordo_ribbon = AboutOrdoRibbon {
-            year: now.year(),
+            year,
             span,
             gap,
             width: total,
             today_pct: format!("{:.3}%", today_x / f64::from(total) * 100.0),
             months,
+            rare_pins,
             labels,
         };
         self

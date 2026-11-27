@@ -27,9 +27,9 @@ error to improve agreement.
 
 Read the printed page when an extracted instruction, scope, or wording is in
 doubt. Keep PDFs outside Git and generated evidence under ignored `output/`.
-Text discovery and transcription follow [the Diurnal pipeline](../../../scripts/DIURNAL-PIPELINE.md)
-and [AGENTS.md](../../../AGENTS.md), including independent readings and guarded
-corpus/attestation writes. Source verification does not certify an appointment or composed office.
+Use `scripts/diurnal-pages.py` to locate and inspect page images, and attest
+any text change with `office review attest` (see [REVIEWING.md](../../../REVIEWING.md)).
+Source verification does not certify an appointment or composed office.
 
 ## Capture a reproducible comparison
 
@@ -55,8 +55,10 @@ classifications instead of inheriting them as facts.
 
 For focused diagnostics, `python3 scripts/ordo-compare.py COMMAND REFERENCE APP`
 accepts `calendar`, `colors`, and `vespers` with `ours.txt`; `rubrics`,
-`commemorations`, and `antiphons` use `rubrics.tsv`. Prefer commemoration names
-to presence/absence alone. The generated ordo's Tabula supports separate checks
+`commemorations`, `antiphons` and `collects` use `rubrics.tsv`. Prefer commemoration names
+to presence/absence alone. `collects` compares each commemoration's collect with the
+Diurnal page (and quoted opening words) of the ordo's "Col. NNN", by way of the page in
+`data/review/provenance.csv`; only the 2023 and later ordos cite collect pages. The generated ordo's Tabula supports separate checks
 of computus and moveable dates.
 
 ## Diagnose before repairing
@@ -74,8 +76,6 @@ path. A verified text can still be selected for the wrong office. Useful tools:
 
 ```bash
 ./office review explain HOUR YYYY-MM-DD
-./office review resolution-inventory -start "$ORDO_YEAR" -years 1 -json \
-  > "$ORDO_RUN/resolution.json"
 ./office review provenance -start "$ORDO_YEAR" -years 1 \
   > "$ORDO_RUN/provenance.txt"
 ```
@@ -118,9 +118,7 @@ Keep these measures distinct:
 For composition review, follow the source-requirement checklist in
 [REVIEWING.md](../../../REVIEWING.md#composition-review): record the cited rule,
 expected behavior, representative/boundary cases, and linked tests or open
-questions. `review plan` only supplies examples of observed engine behavior;
-its feature and sample counts are not completion measures. Whole-page signoffs
-are retired. Keep known incomplete Triduum work separate from ordinary-year
+questions. Keep known incomplete Triduum work separate from ordinary-year
 assessment.
 
 Do not turn the aggregate agreement percentage, old “known residue,” or the

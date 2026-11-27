@@ -338,7 +338,7 @@ struct HourScreen: View {
         let scoreColumn = min(m.px(measure), width - 2 * (inset + m.px(gutter)))
         ScrollViewReader { scroll in
             ScrollView {
-                LazyVStack(spacing: 0) {
+                HourStack(eager: anchoredShot) {
                     Rectangle().fill(bandColor(view.color, p)).frame(height: 3).accessibilityHidden(true)
                     SiteHeader()
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
@@ -400,6 +400,7 @@ struct HourScreen: View {
                     .read(Reading.ending, at: rows.count, into: reading)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { epilogueHeight = $0 }
                 }
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named(Reading.space)).minY } action: { reading.contentTop = $0 }
                 .background(alignment: .top) {
                     if view.firstClass {
                         FirstClassFrame(top: 3 + headerHeight, bottom: epilogueHeight + m.px(20))
@@ -693,6 +694,10 @@ final class Reading {
     /// Each row's height as last laid out, by index; and where those on screen now stand, by the
     /// row's id, so a row leaving never clears the place of one that has taken its index.
     @ObservationIgnored private var heights: [Int: CGFloat] = [:]
+    /// Where the list's top stands on screen: minus how far it has scrolled.
+    @ObservationIgnored var contentTop: CGFloat = 0 {
+        didSet { if contentTop != oldValue { update() } }
+    }
     @ObservationIgnored private var frames: [String: (row: Int, frame: CGRect)] = [:]
     /// Where the cross that ends the hour stands in the ending, from its top, and its size; and
     /// whether it stands wholly on the screen now, for its leaf.
@@ -732,6 +737,12 @@ final class Reading {
     private func update() {
         let now = read()
         ScreenshotGeometry.note("hour.reading", "ratio \(now), rows \(rows), frames \(frames.count), heights \(heights.count), viewport \(viewport)")
+        // Where the rows on screen stand, to the bit, and the list's own top (minus the scroll
+        // offset): two launches whose shots differ by a hair say which moved (#948).
+        if ScreenshotGeometry.on {
+            let shown = shownRows().map { "\($0.id) \(exact($0.frame.minY))+\(exact($0.frame.height))" }
+            ScreenshotGeometry.note("hour.rows", "content top \(exact(contentTop)); " + shown.joined(separator: ", "))
+        }
         if abs(now - ratio) > 0.0005 || (now != ratio && (now == 0 || now == 1)) { ratio = now }
         let mark = frames[Reading.ending].map { $0.frame.minY + endMark.top }
         let shown = mark.map { Reading.whollyShown(from: $0, size: endMark.size, foot: viewport.height) } ?? false
@@ -756,6 +767,34 @@ final class Reading {
         return passed + left <= 0 ? 1 : min(1, max(0, passed / (passed + left)))
     }
 }
+
+/**
+ * The hour's rows: lazily, as a reader has them, or all laid out at once for a screenshot opened
+ * at an anchor (`-anchor`). A lazy list scrolled straight to a row far down stands it where the
+ * heights guessed for the rows above leave it, a fraction of a pixel that changes from launch to
+ * launch with how many of them were laid out, and its text draws a hair apart from one launch to
+ * the next (#948: the probe, ios.yml probe=N, found the list's top at -6350 or -6386.333 points
+ * and the Hymn heading 0.029 or 0.092 points below the screen's top). With every row laid out the
+ * rows above have their real heights, and the row lands on the same fraction every time.
+ */
+private struct HourStack<Content: View>: View {
+    let eager: Bool
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        if eager {
+            VStack(spacing: 0) { content }
+        } else {
+            LazyVStack(spacing: 0) { content }
+        }
+    }
+}
+
+/// Whether this launch is a screenshot opened at an anchor (apps/ios/screenshots.sh's -anchor).
+private let anchoredShot = UserDefaults.standard.string(forKey: "anchor") != nil
+
+/// Every digit a CGFloat holds, for the screenshots' geometry notes.
+private func exact(_ v: CGFloat) -> String { String(format: "%.6f", Double(v)) }
 
 private extension View {
     /// Reports the place on screen of this row, `id`, the `row`th, to `reading`, and its leaving.
@@ -943,6 +982,10 @@ private struct HourTitle: View {
                             .accessibilityLabel(part)
                             .accessibilityHint("Changes the date")
                             .accessibilityValue(picking ? "Expanded" : "Collapsed")
+                        } else if let sg = seasonGloss(label: part) {
+                            GlossMark(gloss: sg, label: part, reaches: false) {
+                                Text(text).type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                            }
                         } else {
                             Text(text).type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
                                 .accessibilityLabel(part)
@@ -958,6 +1001,12 @@ private struct HourTitle: View {
                         .buttonStyle(Quiet())
                         .padding(.top, m.px(1.9))
                         .accessibilityHint("About this feast")
+                    } else if let dg = dayNameGloss(name: view.feast) {
+                        GlossMark(gloss: dg, label: view.feast, reaches: false) {
+                            Text(view.feast).type(Scale.dayName).foregroundStyle(p.text)
+                                .multilineTextAlignment(.center)
+                        }
+                        .padding(.top, m.px(1.9))
                     } else {
                         Text(view.feast).type(Scale.dayName).foregroundStyle(p.text)
                             .multilineTextAlignment(.center)
@@ -1065,6 +1114,8 @@ private struct ReadingKeyPanel: View {
                 .type(.label(11.2, 0.1))
                 .foregroundStyle(p.muted)
                 .padding(.bottom, m.px(8.8))
+                .accessibilityLabel(key.title)
+                .accessibilityAddTraits(.isHeader)
             Hairline(color: p.border)
             ForEach(Array(key.items.enumerated()), id: \.offset) { i, item in
                 if i > 0 { Hairline(color: p.surfaceEdge) }
@@ -1078,6 +1129,8 @@ private struct ReadingKeyPanel: View {
                 }
                 .padding(.vertical, m.px(8.3))
                 .padding(.horizontal, m.px(3.2))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(item.spoken): \(item.text)")
             }
             Hairline(color: p.border)
             Button(action: onAbout) {
@@ -1086,11 +1139,11 @@ private struct ReadingKeyPanel: View {
                     + Text(key.footAfter).foregroundColor(p.muted))
                     .type(TextStyle(size: 12.8, line: 19.2))
                     .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
             }
             .buttonStyle(Quiet())
             .padding(.top, m.px(10.4))
-            .accessibilityLabel(key.footLink)
+            .accessibilityLabel("\(key.footBefore)\(key.footLink)\(key.footAfter)")
             .accessibilityHint("Opens About the Office")
         }
         .frame(maxWidth: m.px(384))

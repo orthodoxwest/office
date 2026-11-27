@@ -9,7 +9,7 @@
     <p class="about-kicker">{{ kicker }}</p>
     <h1>{{ title }}</h1>
     <blockquote class="about-verse">
-      <p>{{ verse_text }}</p>
+      <p>{% for line in verse_lines %}{% if not loop.first %}<br>{% endif %}{{ line }}{% endfor %}</p>
       <cite>{{ verse_cite }}</cite>
     </blockquote>
   </header>
@@ -20,7 +20,7 @@
     <h2 id="about-hours-heading">{{ hours_heading }}</h2>
     <div class="about-horologium" data-active="{{ horologium.active_slug }}" data-now="{{ horologium.active_slug if horologium.active_is_now else '' }}" data-night="{{ 'true' if horologium.active_night else 'false' }}">
       <div class="about-horologium-stage">
-        <svg class="about-horologium-svg" viewBox="0 0 320 144" aria-hidden="true" focusable="false">
+        <svg class="about-horologium-svg" viewBox="0 0 320 160" aria-hidden="true" focusable="false">
           <defs>
             <radialGradient id="about-horologium-wash" cx="{{ horologium.active_cx_pct }}" cy="{{ horologium.active_cy_pct }}" r="68%">
               <stop class="h-wash-0" offset="0%"/>
@@ -32,31 +32,54 @@
               <stop class="h-halo-1" offset="55%"/>
               <stop class="h-halo-2" offset="100%"/>
             </radialGradient>
+            {# The night's course lets go where Dawn and Night are written. #}
+            <linearGradient id="about-horologium-under-fade" gradientUnits="userSpaceOnUse" x1="42" y1="0" x2="278" y2="0">
+              <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+              <stop offset="0.13" stop-color="#fff" stop-opacity="0"/>
+              <stop offset="0.3" stop-color="#fff" stop-opacity="1"/>
+              <stop offset="0.7" stop-color="#fff" stop-opacity="1"/>
+              <stop offset="0.87" stop-color="#fff" stop-opacity="0"/>
+              <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+            </linearGradient>
+            <mask id="about-horologium-under-mask" maskUnits="userSpaceOnUse" x="0" y="120" width="320" height="40">
+              <rect x="0" y="120" width="320" height="40" fill="url(#about-horologium-under-fade)"/>
+            </mask>
             <clipPath id="about-horologium-dome">
               <path d="M 42 128 A 118 104 0 0 1 278 128 Z"/>
             </clipPath>
           </defs>
           <path class="about-horologium-fill" d="M 42 128 A 118 104 0 0 1 278 128 Z" fill="url(#about-horologium-wash)"/>
           <g class="about-horologium-stars" clip-path="url(#about-horologium-dome)">
-            <circle cx="102" cy="56" r="1.3"/><circle cx="134" cy="38" r="1.6"/>
-            <circle cx="176" cy="35" r="1.2"/><circle cx="218" cy="52" r="1.5"/>
-            <circle cx="82" cy="84" r="1.1"/><circle cx="154" cy="54" r="1.0"/>
-            <circle cx="238" cy="82" r="1.2"/><circle cx="192" cy="62" r="1.0"/>
+            {# Parish apse stars: 8-ray principal stars and 4-ray minor stars, matching vault.svg. #}
+            <path d="M0,-3.4 L0.65,-0.85 L1.55,-1.55 L0.85,-0.65 L3.4,0 L0.85,0.65 L1.55,1.55 L0.65,0.85 L0,3.4 L-0.65,0.85 L-1.55,1.55 L-0.85,0.65 L-3.4,0 L-0.85,-0.65 L-1.55,-1.55 L-0.65,-0.85 Z" transform="translate(102 56)" opacity="0.88"/>
+            <path d="M0,-4.2 L0.8,-1.05 L1.9,-1.9 L1.05,-0.8 L4.2,0 L1.05,0.8 L1.9,1.9 L0.8,1.05 L0,4.2 L-0.8,1.05 L-1.9,1.9 L-1.05,0.8 L-4.2,0 L-1.05,-0.8 L-1.9,-1.9 L-0.8,-1.05 Z" transform="translate(134 38)" opacity="0.96"/>
+            <path d="M0,-2.9 L0.6,-0.6 L2.9,0 L0.6,0.6 L0,2.9 L-0.6,0.6 L-2.9,0 L-0.6,-0.6 Z" transform="translate(176 35)" opacity="0.78"/>
+            <path d="M0,-3.9 L0.75,-0.95 L1.75,-1.75 L0.95,-0.75 L3.9,0 L0.95,0.75 L1.75,1.75 L0.75,0.95 L0,3.9 L-0.75,0.95 L-1.75,1.75 L-0.95,0.75 L-3.9,0 L-0.95,-0.75 L-1.75,-1.75 L-0.75,-0.95 Z" transform="translate(218 52)" opacity="0.92"/>
+            <path d="M0,-2.6 L0.55,-0.55 L2.6,0 L0.55,0.55 L0,2.6 L-0.55,0.55 L-2.6,0 L-0.55,-0.55 Z" transform="translate(82 84)" opacity="0.74"/>
+            <path d="M0,-2.4 L0.5,-0.5 L2.4,0 L0.5,0.5 L0,2.4 L-0.5,0.5 L-2.4,0 L-0.5,-0.5 Z" transform="translate(154 54)" opacity="0.68"/>
+            <path d="M0,-3.1 L0.6,-0.75 L1.4,-1.4 L0.75,-0.6 L3.1,0 L0.75,0.6 L1.4,1.4 L0.6,0.75 L0,3.1 L-0.6,0.75 L-1.4,1.4 L-0.75,0.6 L-3.1,0 L-0.75,-0.6 L-1.4,-1.4 L-0.6,-0.75 Z" transform="translate(238 82)" opacity="0.82"/>
+            <path d="M0,-2.4 L0.5,-0.5 L2.4,0 L0.5,0.5 L0,2.4 L-0.5,0.5 L-2.4,0 L-0.5,-0.5 Z" transform="translate(192 62)" opacity="0.72"/>
           </g>
-          {%- for s in horologium.stops %}
+          {%- for s in horologium.stops %}{% if s.sign != "star" %}
           <line class="about-horologium-tick" x1="{{ s.tick_x1 }}" y1="{{ s.tick_y1 }}" x2="{{ s.x }}" y2="{{ s.y }}"/>
-          {%- endfor %}
+          {%- endif %}{% endfor %}
           <path class="about-horologium-inner" d="M 50.3 128 A 109.7 96.7 0 0 1 269.7 128"/>
           <path class="about-horologium-arc" d="M 42 128 A 118 104 0 0 1 278 128"/>
           <path class="about-horologium-lit" d="M {{ horologium.dawn_x }} {{ horologium.dawn_y }} A 118 104 0 0 1 {{ horologium.active_x }} {{ horologium.active_y }}"/>
           <text class="about-horologium-cardinal" x="42" y="141" text-anchor="start">Dawn</text>
           <text class="about-horologium-cardinal" x="160" y="15" text-anchor="middle">Noon</text>
           <text class="about-horologium-cardinal" x="278" y="141" text-anchor="end">Night</text>
+          {# The night's course, under the horizon from Night round to Dawn, in the inner ring's dots
+             (presentation::about::ABOUT_HOROLOGIUM_NIGHT_DEPTH). #}
+          <path class="about-horologium-under" mask="url(#about-horologium-under-mask)" d="M 278 128 A 118 22 0 0 1 42 128"/>
           <line class="about-horologium-horizon" x1="16" y1="128" x2="304" y2="128"/>
-          <g class="about-horologium-orb{% if horologium.active_night %} is-night{% endif %}" transform="translate({{ horologium.active_x }}, {{ horologium.active_y }})">
+          <g class="about-horologium-orb{% if horologium.active_night %} is-night{% endif %}{% if horologium.active_slug == "matins" %} is-star{% endif %}" transform="translate({{ horologium.active_x }}, {{ horologium.active_y }})">
             <circle class="about-horologium-halo" r="15" fill="url(#about-horologium-halo)"/>
             <g class="about-horologium-sun" transform="translate(-10.5,-10.5) scale(0.875)">
               <path d="M17.20,12.00A5.2,5.2 0 1,0 6.80,12.00A5.2,5.2 0 1,0 17.20,12.00ZM13.45,5.60 12.00,0.40 10.55,5.60ZM16.46,7.18 16.70,3.86 13.94,5.73ZM18.27,10.06 22.05,6.20 16.82,7.54ZM18.40,13.45 21.40,12.00 18.40,10.55ZM16.82,16.46 22.05,17.80 18.27,13.94ZM13.94,18.27 16.70,20.14 16.46,16.82ZM10.55,18.40 12.00,23.60 13.45,18.40ZM7.54,16.82 7.30,20.14 10.06,18.27ZM5.73,13.94 1.95,17.80 7.18,16.46ZM5.60,10.55 2.60,12.00 5.60,13.45ZM7.18,7.54 1.95,6.20 5.73,10.06ZM10.06,5.73 7.30,3.86 7.54,7.18Z"/>
+            </g>
+            <g class="about-horologium-star" transform="scale(2.05)">
+              <path d="M0,-4.2 L0.8,-1.05 L1.9,-1.9 L1.05,-0.8 L4.2,0 L1.05,0.8 L1.9,1.9 L0.8,1.05 L0,4.2 L-0.8,1.05 L-1.9,1.9 L-1.05,0.8 L-4.2,0 L-1.05,-0.8 L-1.9,-1.9 L-0.8,-1.05 Z"/>
             </g>
             <g class="about-horologium-moon" transform="translate(-9.5,-9.5) scale(0.8)">
               <path d="M14.00 2.61A9.6 9.6 0 1 0 20.18 17.02A7.9 7.9 0 0 1 14.00 2.61Z"/>
@@ -65,14 +88,14 @@
         </svg>
         <div class="about-horologium-stops" role="group" aria-label="Hours along the arc of the day">
           {%- for s in horologium.stops %}
-          <button type="button" class="about-horologium-stop{% if s.slug == horologium.active_slug %} is-active{% endif %}{% if s.night %} is-night-stop{% endif %}" style="left: {{ s.left_pct }}; top: {{ s.top_pct }};" data-hour="{{ s.slug }}" data-name="{{ s.name }}" data-gloss="{{ s.gloss }}" data-time="{{ s.time }}" data-angle="{{ s.angle }}" data-night="{{ 'true' if s.night else 'false' }}" aria-label="{{ s.name }}: {{ s.gloss }}, {{ s.time }}" aria-pressed="{{ 'true' if s.slug == horologium.active_slug else 'false' }}"></button>
+          <button type="button" class="about-horologium-stop{% if s.slug == horologium.active_slug %} is-active{% endif %}{% if s.night %} is-night-stop{% endif %}" style="left: {{ s.left_pct }}; top: {{ s.top_pct }};" data-hour="{{ s.slug }}" data-name="{{ s.name }}" data-gloss="{{ s.gloss }}" data-time="{{ s.time }}" data-angle="{{ s.angle }}" data-night="{{ 'true' if s.night else 'false' }}" data-sign="{{ s.sign }}" aria-label="{{ s.name }}: {{ s.gloss }}, {{ s.time }}{% if s.coming_soon %}, {{ coming_soon }}{% endif %}" aria-pressed="{{ 'true' if s.slug == horologium.active_slug else 'false' }}"></button>
           {%- endfor %}
         </div>
         {# Not a live region: each stop's button already names its hour, and a readout spoken at
            every pointer pass would talk over the page. #}
         <div class="about-horologium-readout">
-          <span class="about-horologium-time">{% if horologium.active_is_now %}Now · {% endif %}{{ horologium.active_time }}</span>
-          <span class="about-horologium-title"><strong>{{ horologium.active_name }}</strong> <em>· {{ horologium.active_gloss }}</em></span>
+          <span class="about-horologium-time">{% if horologium.active_is_now %}Now<span aria-hidden="true"> · </span><span class="sr-only">, </span>{% endif %}{{ horologium.active_time }}</span>
+          <span class="about-horologium-title"><strong>{{ horologium.active_name }}</strong> <em><span aria-hidden="true">· </span><span class="sr-only">, </span>{{ horologium.active_gloss }}</em></span>
         </div>
       </div>
     </div>
@@ -84,8 +107,13 @@
         <dl>
           {%- for h in period.hours %}
           <div class="about-hour{% if h.is_current %} is-current{% endif %}" data-hour="{{ h.slug }}">
+            {%- if h.coming_soon %}
+            <dt><span class="about-hour-soon-name">{{ h.name }}</span></dt>
+            <dd><span class="about-hour-gloss">{{ h.gloss }}</span> <span class="about-hour-time">{{ h.time }} <span class="about-hour-soon">{{ coming_soon }}</span></span></dd>
+            {%- else %}
             <dt><a href="{{ h.url|url }}"{% if h.is_current %} aria-current="time"{% endif %}>{{ h.name }}</a></dt>
             <dd><span class="about-hour-gloss">{{ h.gloss }}</span> <span class="about-hour-time">{{ h.time }}</span></dd>
+            {%- endif %}
           </div>
           {%- endfor %}
         </dl>
@@ -121,22 +149,23 @@
         {# Lauds' opening as the hour prints it, then its close, where the form sets the greeting. #}
         <p class="about-specimen-line about-specimen-rubric" data-key="rubric">{{ specimen.rubric }}</p>
         <p class="about-specimen-line about-specimen-secret" data-key="secret"><span>{{ specimen.secret_voiced }}</span> <span class="about-specimen-unsaid">{{ specimen.secret_silent }}</span></p>
-        <p class="about-specimen-line about-specimen-vr about-specimen-opening" data-key="vr cross"><span class="about-specimen-sigil">℣.</span><span>{{ specimen.opening_before }}<span class="about-specimen-cross">✠</span>{{ specimen.opening_after }}</span></p>
-        <p class="about-specimen-line about-specimen-vr" data-key="vr"><span class="about-specimen-sigil">℟.</span><span>{{ specimen.opening_response }}</span></p>
-        <div class="about-specimen-form-lines" data-key="form" data-alone-v="{{ specimen.alone_versicle }}" data-alone-r="{{ specimen.alone_response }}" data-priest-v="{{ specimen.priest_versicle }}" data-priest-r="{{ specimen.priest_response }}">
-          <p class="about-specimen-line about-specimen-vr"><span class="about-specimen-sigil">℣.</span><span class="about-specimen-v-text">{{ specimen.alone_versicle }}</span></p>
-          <p class="about-specimen-line about-specimen-vr"><span class="about-specimen-sigil">℟.</span><span class="about-specimen-r-text">{{ specimen.alone_response }}</span></p>
+        <p class="about-specimen-line about-specimen-vr about-specimen-opening" data-key="vr cross"><span class="about-specimen-sigil"><span aria-hidden="true">℣.</span><span class="sr-only">Versicle.</span></span> <span>{{ specimen.opening_before }}<span class="about-specimen-cross" data-key-direct="cross"><span aria-hidden="true">✠</span><span class="sr-only">sign of the cross,</span></span>{{ specimen.opening_after }}</span></p>
+        <p class="about-specimen-line about-specimen-vr" data-key="vr"><span class="about-specimen-sigil"><span aria-hidden="true">℟.</span><span class="sr-only">Response.</span></span> <span>{{ specimen.opening_response }}</span></p>
+        <div class="about-specimen-form-lines" data-key="form" aria-live="polite" aria-atomic="true" data-alone-v="{{ specimen.alone_versicle }}" data-alone-r="{{ specimen.alone_response }}" data-priest-v="{{ specimen.priest_versicle }}" data-priest-r="{{ specimen.priest_response }}" data-deacon-note="{{ specimen.deacon_note }}" data-priest-note="{{ specimen.priest_note }}">
+          <p class="about-specimen-line about-specimen-vr"><span class="about-specimen-sigil"><span aria-hidden="true">℣.</span><span class="sr-only">Versicle.</span></span> <span class="about-specimen-v-text">{{ specimen.alone_versicle }}</span></p>
+          <p class="about-specimen-line about-specimen-vr"><span class="about-specimen-sigil"><span aria-hidden="true">℟.</span><span class="sr-only">Response.</span></span> <span class="about-specimen-r-text">{{ specimen.alone_response }}</span></p>
+          <p class="about-specimen-form-note" hidden></p>
         </div>
       </div>
       {%- elif b.kind == "key" %}
       {%- if loop.previtem is undefined or loop.previtem.kind != "key" %}
-      <ul class="about-keys">
+      <ul class="about-keys" role="list">
       {%- endif %}
         <li class="about-key-row" data-key="{{ b.id }}">
           <button type="button" class="about-key-btn" data-key="{{ b.id }}" aria-pressed="false">
             <span class="about-key about-key-{{ b.ink }}">
-              {%- if b.ink == "secret" %}<span class="about-key-voiced">{{ b.mark }}</span> <span class="about-key-unsaid">{{ b.tail }}</span>{% else %}{{ b.mark }}{% endif -%}
-            </span>
+              {%- if b.ink == "secret" %}<span class="about-key-voiced">{{ b.mark }}</span> <span class="about-key-unsaid">{{ b.tail }}</span>{% elif b.spoken != b.mark %}<span aria-hidden="true">{{ b.mark }}</span><span class="sr-only">{{ b.spoken }}</span>{% else %}{{ b.mark }}{% endif -%}
+            </span><span class="sr-only">: </span>
             <span class="about-key-desc">{{ b.text }}</span>
           </button>
         </li>
@@ -145,7 +174,7 @@
       {%- endif %}
       {%- elif b.kind == "era" %}
       {%- if loop.previtem is undefined or loop.previtem.kind != "era" %}
-      <ol class="about-lineage">
+      <ol class="about-lineage" role="list">
       {%- endif %}
         <li class="about-era">
           <p class="about-era-head">{{ b.period }}</p>
@@ -168,6 +197,12 @@
               {%- endif %}
             {%- endfor %}
           </svg>
+          <div class="about-ordo-month-hits" aria-hidden="true">
+            {%- for m in ordo_ribbon.months %}<a class="about-ordo-month-hit" href="{{ m.href|url }}" title="{{ m.name }} {{ ordo_ribbon.year }} in the Ordo" tabindex="-1"></a>{% endfor %}
+          </div>
+          {%- for p in ordo_ribbon.rare_pins %}
+          <span class="about-ordo-pin day-color-{{ p.color }}" data-color="{{ p.color }}" style="left: {{ p.left_pct }}" aria-hidden="true"></span>
+          {%- endfor %}
           <span class="about-ordo-today" style="left: {{ ordo_ribbon.today_pct }}" aria-hidden="true"></span>
           <span class="sr-only">{{ ribbon_label }}</span>
         </div>
@@ -177,7 +212,7 @@
         {%- endif %}
         <div class="about-ordo-legend" role="group" aria-label="Liturgical colors">
           {%- for c in ordo_colors %}
-          <button type="button" class="about-ordo-swatch day-color-{{ c.slug }}" data-color="{{ c.slug }}" data-name="{{ c.name }}" data-meaning="{{ c.meaning }}" aria-pressed="false"><i aria-hidden="true"></i>{{ c.name }}</button>
+          <button type="button" class="about-ordo-swatch day-color-{{ c.slug }}" data-color="{{ c.slug }}" data-name="{{ c.name }}" data-meaning="{{ c.meaning }}"{% if c.note %} data-note="{{ c.note }}"{% endif %} aria-pressed="false"><i aria-hidden="true"></i>{{ c.name }}</button>
           {%- endfor %}
         </div>
         <p class="about-ordo-meaning" aria-live="polite"></p>

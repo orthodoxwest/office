@@ -474,11 +474,7 @@ fun OfficeApp(
                 }
                 val page = visit.entry.page
                 val front = visit.entry.id == screen.targetState?.entry?.id
-                val onHourPage = page as? Page.Hour
                 val nav = SiteNav(
-                    hours = hours,
-                    currentHour = onHourPage?.hour,
-                    onHour = onHourPage?.let { h -> { name: String -> overlay = Overlay.NONE; onOpen(Page.Hour(h.date, name)) } },
                     onOrdo = {
                         overlay = Overlay.NONE
                         // The ordo at the day shown, as the web's /calendar opens at today's row.
@@ -512,8 +508,6 @@ fun OfficeApp(
                     if (front && !LocalWide.current) {
                         MenuPanel(
                             visible = overlay == Overlay.MENU,
-                            currentHour = nav.currentHour,
-                            onHour = nav.onHour,
                             onOrdo = nav.onOrdo,
                             onOrdoCurrent = nav.ordoCurrent,
                             onReminders = nav.onReminders,
@@ -536,8 +530,6 @@ fun OfficeApp(
                         val width = this@BoxWithConstraints.maxWidth - insets.calculateStartPadding(direction) - insets.calculateEndPadding(direction)
                         MenuPanel(
                             visible = overlay == Overlay.SETTINGS,
-                            currentHour = null,
-                            onHour = null,
                             onOrdo = nav.onOrdo,
                             onOrdoCurrent = nav.ordoCurrent,
                             onReminders = nav.onReminders,
@@ -658,6 +650,7 @@ fun OfficeApp(
                                 view = aboutView,
                                 today = today,
                                 clockHour = clockHour,
+                                reminders = reminders,
                                 chrome = chrome,
                                 insets = insets,
                                 onOpen = onOpen,

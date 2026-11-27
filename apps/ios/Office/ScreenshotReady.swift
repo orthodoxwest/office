@@ -48,7 +48,8 @@ private struct ScreenshotReadyMark: ViewModifier {
  */
 enum ScreenshotGeometry {
     static let file = FileManager.default.temporaryDirectory.appendingPathComponent("screenshot-geometry.txt")
-    private static let on = ProcessInfo.processInfo.arguments.contains("-page")
+    /// Whether this launch notes anything: a caller with a costly note asks first.
+    static let on = ProcessInfo.processInfo.arguments.contains("-page")
     private static var notes: [String: (first: String, last: String, changes: Int)] = [:]
 
     /// Notes `value` under `key`, and writes the page's notes out again.

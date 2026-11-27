@@ -9,7 +9,8 @@
 /// One block of the About page, in reading order.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AboutBlock {
-    /// The opening epigraph verse set as red work in the painted head, with its reference.
+    /// The opening epigraph set as red work in the painted head, with its reference: one verse
+    /// to a line, the lines parted by `\n`.
     Verse { text: &'static str, cite: &'static str },
     /// The opening paragraph, set with the app's painted two-line dropped initial.
     Intro(&'static str),
@@ -17,7 +18,8 @@ pub enum AboutBlock {
     Heading(&'static str),
     /// A paragraph of prose, which may carry links.
     Paragraph(&'static str),
-    /// The painted Horologium (solar arc) and the seven hours in home's three periods ([`ABOUT_HOURS`]).
+    /// The painted Horologium (solar arc) and the hours: the seven in home's three periods
+    /// ([`ABOUT_HOURS`]), then Matins in the night ([`ABOUT_NIGHT`]).
     Hours,
     /// A quiet italic note set under the block before it.
     Note(&'static str),
@@ -26,8 +28,10 @@ pub enum AboutBlock {
     Specimen,
     /// A row of the ruled typographic key under the specimen: `id` links the row to the
     /// matching line in the specimen (`rubric`, `vr`, `cross`, `secret`, `form`); `tail`, when
-    /// non-empty, is set in the unsaid ink after `mark` (e.g. `Our` + `Father…`).
-    Key { id: &'static str, mark: &'static str, tail: &'static str, ink: KeyInk, text: &'static str },
+    /// non-empty, is set in the unsaid ink after `mark` (e.g. `Our` + `Father…`); `spoken` is
+    /// what a screen reader says for the mark and its tail, naming glyphs (℣. ℟., ✠) on every
+    /// front.
+    Key { id: &'static str, mark: &'static str, tail: &'static str, spoken: &'static str, ink: KeyInk, text: &'static str },
     /// One chronological beat in "An ancient prayer", set beside a fine marginal thread.
     Era { period: &'static str, text: &'static str },
     /// The current year's liturgical color ribbon (`presentation::course`) and interactive color key
@@ -87,6 +91,9 @@ pub struct AboutSpecimen {
     pub alone_response: &'static str,
     pub priest_versicle: &'static str,
     pub priest_response: &'static str,
+    /// Brief rubric explaining how Deacon and Priest differ in choir (shown when toggled).
+    pub deacon_note: &'static str,
+    pub priest_note: &'static str,
     pub secret_voiced: &'static str,
     pub secret_silent: &'static str,
 }
@@ -125,6 +132,60 @@ pub const ABOUT_HOURS: [(&str, &[(&str, &str)]); 3] = [
     ("Evening", &[("vespers", "toward sunset"), ("compline", "late in the evening")]),
 ];
 
+/// Matins, the night office, which the table and the Horologium set after the seven, under
+/// home's fourth period. It is not yet prayed in the app ([`crate::hour_coming_soon`]): the
+/// fronts set it unlinked with [`crate::COMING_SOON`], and reminders and the hour schedule leave
+/// it out until it is.
+pub const ABOUT_NIGHT: (&str, &[(&str, &str)]) = ("Night", &[("matins", "before dawn")]);
+
+/// How far under the horizon the Horologium's night course dips, in the figure's units (the
+/// day's arc rises 104 above it): Matins stands at the foot of that course, under Sext, on the
+/// noon axis ([`about_horologium_angle`]). The figure is 16 units taller for it (320×160).
+pub const ABOUT_HOROLOGIUM_NIGHT_DEPTH: f64 = 22.0;
+
+/// The Horologium's viewBox height: the day's 144 and the night's course under it.
+pub const ABOUT_HOROLOGIUM_HEIGHT: f64 = 160.0;
+
+/// The Horologium's point for an angle, in its 320-wide viewBox: centre (160, 128), the day's
+/// arc 118 wide and 104 high above the horizon, the night's course [`ABOUT_HOROLOGIUM_NIGHT_DEPTH`]
+/// deep below it. `scale` draws a ring inside the arc (the ticks' inner ends).
+pub fn about_horologium_point(angle: f64, scale: f64) -> (f64, f64) {
+    let rad = angle.to_radians();
+    let (sin, cos) = rad.sin_cos();
+    let ry = if sin >= 0.0 { 104.0 } else { ABOUT_HOROLOGIUM_NIGHT_DEPTH };
+    (160.0 + cos * 118.0 * scale, 128.0 - sin * ry * scale)
+}
+
+/// When the hours follow the sun where the reader is ([`crate::sun`]), what the table and the
+/// Horologium say of each hour's time in place of [`ABOUT_HOURS`]' own, before today's clock
+/// time there: when the sun sets it ([`crate::sun::office_minute`]: Vespers at sunset, Prime,
+/// Terce and None at the first, third and ninth of the day's twelve hours). Short, so the
+/// Horologium's readout keeps one line with its "Now". Compline keeps the reader's own time, so
+/// it keeps its gloss.
+pub const ABOUT_SUN_HOURS: [(&str, &str); 6] = [
+    ("lauds", "sunrise"),
+    ("prime", "first hour"),
+    ("terce", "third hour"),
+    ("sext", "solar noon"),
+    ("none", "ninth hour"),
+    ("vespers", "sunset"),
+];
+
+/// An hour's time on the About page while the hours follow the sun: "sunrise · 6:48 am", the
+/// clock time `clock` in the reader's own style, set in the table's lower case. None for an hour
+/// the sun does not time (Compline), which keeps [`ABOUT_HOURS`]' words.
+pub fn about_sun_time(slug: &str, clock: &str) -> Option<String> {
+    let (_, lead) = ABOUT_SUN_HOURS.iter().find(|(s, _)| *s == slug)?;
+    let clock = clock.trim();
+    (!clock.is_empty()).then(|| format!("{lead} · {}", clock.to_lowercase()))
+}
+
+/// What a screen reader says for an hour's time on the About page: the time as set, its middle
+/// dot a pause ("sunrise, 6:48 am").
+pub fn about_time_spoken(time: &str) -> String {
+    time.replace(" · ", ", ")
+}
+
 /// Each hour's station angle along the Horologium's semicircular arc, in degrees from the western
 /// horizon (180° = dawn at left, 90° = solar noon at zenith, 0° = night at right).
 pub fn about_horologium_angle(slug: &str) -> f64 {
@@ -136,6 +197,8 @@ pub fn about_horologium_angle(slug: &str) -> f64 {
         "none" => 62.0,
         "vespers" => 34.0,
         "compline" => 10.0,
+        // Under the horizon on the noon axis: the sign reaches it past either foot.
+        "matins" => 270.0,
         _ => 90.0,
     }
 }
@@ -143,6 +206,15 @@ pub fn about_horologium_angle(slug: &str) -> f64 {
 /// Whether the Horologium marks an hour with the crescent moon rather than the sun.
 pub fn about_horologium_is_night(slug: &str) -> bool {
     matches!(slug, "vespers" | "compline")
+}
+
+/// The Horologium's sign for an hour: `star` (Matins), `moon` (Vespers, Compline) or `sun`.
+pub fn about_horologium_sign(slug: &str) -> &'static str {
+    match slug {
+        "matins" => "star",
+        s if about_horologium_is_night(s) => "moon",
+        _ => "sun",
+    }
 }
 
 /// The miniature office leaf shown in "Reading the page".
@@ -159,6 +231,8 @@ pub const ABOUT_SPECIMEN: AboutSpecimen = AboutSpecimen {
     alone_response: "And let my cry come unto thee.",
     priest_versicle: "The Lord be with you.",
     priest_response: "And with thy spirit.",
+    deacon_note: "In choir, a deacon greets and blesses; at Prime and Compline, only a priest gives the absolution.",
+    priest_note: "In choir, a priest greets, blesses, and gives the absolution at Prime and Compline.",
     secret_voiced: "Our Father,",
     secret_silent: "who art in heaven, Hallowed be thy Name…",
 };
@@ -175,19 +249,21 @@ pub const ABOUT_ORDO_COLORS: &[AboutOrdoColor] = &[
 
 /// The page, in reading order.
 pub const ABOUT: &[AboutBlock] = &[
-    AboutBlock::Verse { text: "“Seven times a day do I praise thee.”", cite: "Psalm 118 (119):164" },
+    AboutBlock::Verse {
+        text: "“Seven times a day do I praise thee.”\n“At midnight I will rise to give thanks unto thee.”",
+        cite: "Psalm 118 (119):164, 62",
+    },
     AboutBlock::Intro(
         "The Divine Office is the Church’s daily rhythm of psalms, hymns, and prayers, prayed at set \
-         hours from morning to night. This app presents the Benedictine Office of the Antiochian \
+         hours through the day, and one kept in the night. This app presents the Benedictine Office of the Antiochian \
          Western Rite Vicariate—assembled automatically for each day’s feast and season, so you can \
          simply open an hour and pray.",
     ),
-    AboutBlock::Heading("The seven hours"),
+    AboutBlock::Heading("The hours"),
     AboutBlock::Hours,
-    AboutBlock::Note("Matins, the night office, is not yet included."),
     AboutBlock::Heading("Where to begin"),
     AboutBlock::Paragraph(
-        "No one is expected to pray all seven hours at once. Most people begin with one—Prime in the \
+        "No one is expected to pray all the hours at once. Most people begin with one—Prime in the \
          morning or Compline before sleep—and add others gradually. Your parish priest can help you \
          establish a prayer rule that fits your life. Whenever you open the home page, the main button \
          takes you straight to the hour for the current time of day.",
@@ -198,6 +274,7 @@ pub const ABOUT: &[AboutBlock] = &[
         id: "rubric",
         mark: "Rubrics",
         tail: "",
+        spoken: "Rubrics",
         ink: KeyInk::Rubric,
         text: "Directions for posture, gestures, and order—not read aloud.",
     },
@@ -205,14 +282,16 @@ pub const ABOUT: &[AboutBlock] = &[
         id: "vr",
         mark: "℣. ℟.",
         tail: "",
+        spoken: "Versicle and response",
         ink: KeyInk::Symbol,
         text: "A versicle and its response. When praying alone, say both.",
     },
-    AboutBlock::Key { id: "cross", mark: "✠", tail: "", ink: KeyInk::Cross, text: "Make the sign of the cross." },
+    AboutBlock::Key { id: "cross", mark: "✠", tail: "", spoken: "Cross", ink: KeyInk::Cross, text: "Make the sign of the cross." },
     AboutBlock::Key {
         id: "secret",
         mark: "Our",
         tail: "Father…",
+        spoken: "Our Father…",
         ink: KeyInk::Secret,
         text: "Grey text is prayed silently; lines in full ink at the start or close of a silent prayer are spoken aloud.",
     },
@@ -220,6 +299,7 @@ pub const ABOUT: &[AboutBlock] = &[
         id: "form",
         mark: "Prayer form",
         tail: "",
+        spoken: "Prayer form",
         ink: KeyInk::Form,
         text: "At the top of each hour, switches between praying alone or in a group led by a deacon or priest.",
     },
@@ -260,9 +340,10 @@ pub const ABOUT: &[AboutBlock] = &[
     AboutBlock::OrdoRibbon,
     AboutBlock::Heading("This app"),
     AboutBlock::Paragraph(
-        "The psalms follow the Coverdale translation, and the texts are checked against the printed \
-         Western Rite books. You can set up [Reminders](/reminders) for the hours you pray, or open \
-         Settings (under Menu on a phone) to switch between the Nave and Apse themes, adjust text \
+        "The psalms follow Coverdale’s translation as printed in the 1662 Book of Common Prayer (not \
+         the 1928 revision), and the texts are checked against the printed Western Rite books. You \
+         can set up [Reminders](/reminders) for the hours you pray, or open Settings (under Menu on \
+         a phone) to switch between the Nave and Apse themes, adjust text \
          size, include the Martyrology at Prime, or display chant notation where available. The mobile \
          apps work without a connection.",
     ),
@@ -323,6 +404,20 @@ pub fn about_newcomer(days_since_first: Option<i64>) -> bool {
 mod tests {
     use super::*;
 
+    /// A screen reader names every key's mark in words, as the reading key's are.
+    #[test]
+    fn every_key_mark_is_named_in_words() {
+        let mut keys = 0;
+        for block in ABOUT {
+            if let AboutBlock::Key { mark, spoken, .. } = block {
+                keys += 1;
+                assert!(!spoken.is_empty(), "{mark}");
+                assert!(!spoken.contains(['℣', '℟', '✠', '*', '†']), "{mark} is said {spoken}");
+            }
+        }
+        assert!(keys > 0);
+    }
+
     #[test]
     fn links_split_from_their_paragraph() {
         assert_eq!(
@@ -364,13 +459,12 @@ mod tests {
         assert!(crate::usage::ENDPOINT.starts_with("https://orthodoxwestbreviary.com/"));
     }
 
-    /// Every front sets the hours, their heading and their note as one column (a rail when
-    /// wide), finding the heading as the block before them: so the hours have one, and a note.
+    /// Every front sets the hours and their heading as one column (a rail when wide), finding the
+    /// heading as the block before them: so the hours have one.
     #[test]
     fn the_hours_stand_under_their_heading() {
         let at = ABOUT.iter().position(|b| *b == AboutBlock::Hours).unwrap();
         assert!(matches!(ABOUT[at - 1], AboutBlock::Heading(_)));
-        assert!(matches!(ABOUT.get(at + 1), Some(AboutBlock::Note(_))));
         assert_eq!(ABOUT.iter().filter(|b| **b == AboutBlock::Hours).count(), 1);
     }
 
@@ -385,6 +479,45 @@ mod tests {
         assert!(about_horologium_is_night("vespers"));
         assert!(about_horologium_is_night("compline"));
         assert!(!about_horologium_is_night("none"));
+    }
+
+    /// Matins stands under the horizon on the noon axis, below Sext, and the seven keep master's
+    /// places: the figure stays balanced about noon.
+    #[test]
+    fn matins_is_under_the_horizon_on_the_noon_axis() {
+        let (label, hours) = ABOUT_NIGHT;
+        assert_eq!(label, "Night");
+        assert_eq!(hours.iter().map(|(s, _)| *s).collect::<Vec<_>>(), ["matins"]);
+        assert!(crate::hour_coming_soon("matins"));
+        let (x, y) = about_horologium_point(about_horologium_angle("matins"), 1.0);
+        assert!((x - 160.0).abs() < 1e-9 && (y - (128.0 + ABOUT_HOROLOGIUM_NIGHT_DEPTH)).abs() < 1e-9);
+        assert!(y <= ABOUT_HOROLOGIUM_HEIGHT - 10.0, "room for the star under it");
+        let (sx, sy) = about_horologium_point(90.0, 1.0);
+        assert!((sx - 160.0).abs() < 1e-9 && (sy - 24.0).abs() < 1e-9);
+        assert_eq!(about_horologium_sign("matins"), "star");
+        assert_eq!(about_horologium_sign("compline"), "moon");
+        assert_eq!(about_horologium_sign("terce"), "sun");
+    }
+
+    #[test]
+    fn the_sun_times_every_hour_but_compline() {
+        assert_eq!(about_sun_time("lauds", "6:48 AM").as_deref(), Some("sunrise · 6:48 am"));
+        assert_eq!(about_sun_time("prime", "7:43 AM").as_deref(), Some("first hour · 7:43 am"));
+        assert_eq!(about_sun_time("sext", "12:14").as_deref(), Some("solar noon · 12:14"));
+        assert_eq!(about_sun_time("vespers", "5:19 PM").as_deref(), Some("sunset · 5:19 pm"));
+        assert_eq!(about_time_spoken("sunrise · 6:48 am"), "sunrise, 6:48 am");
+        assert_eq!(about_time_spoken("about 7 am"), "about 7 am");
+        // No longer in the readout than the longest of the table's own, with its "Now · ".
+        let longest = ABOUT_HOURS.iter().flat_map(|(_, h)| h.iter().map(|(_, t)| t.chars().count())).max().unwrap();
+        for (slug, _) in ABOUT_SUN_HOURS {
+            assert!(about_sun_time(slug, "12:59 PM").unwrap().chars().count() <= longest + 3, "{slug}");
+        }
+        assert_eq!(about_sun_time("compline", "9:00 PM"), None);
+        assert_eq!(about_sun_time("lauds", " "), None);
+        // The six the sun times are the table's own, in its order.
+        let table: Vec<_> = ABOUT_HOURS.iter().flat_map(|(_, hours)| hours.iter().map(|(slug, _)| *slug)).collect();
+        let sun: Vec<_> = ABOUT_SUN_HOURS.iter().map(|(slug, _)| *slug).collect();
+        assert_eq!(sun, table[..6]);
     }
 
     #[test]

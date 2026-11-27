@@ -174,7 +174,7 @@ object ReminderScheduler {
         return Office.core.reminders(from.toCivil(), HORIZON_DAYS, chosen, settings.weekdays, settings.sunPlace(from, HORIZON_DAYS, zone)).mapNotNull { r ->
             val office = LocalDate.of(r.date.year, r.date.month, r.date.day).atTime(r.hourOfDay, r.minute).atZone(zone)
             val at = office.minusMinutes(settings.lead.toLong())
-            if (!at.isAfter(now)) null else Alarm(r.hour, office, at, r.title, r.feast, r.summary)
+            if (!at.isAfter(now)) null else Alarm(r.hour, office, at, r.title, r.feast, r.summary, r.silent)
         }
     }
 
@@ -214,8 +214,11 @@ object ReminderScheduler {
         }
     }
 
-    /** One scheduled reminder: the office's time, when to remind, and its words. */
-    data class Alarm(val hour: String, val office: ZonedDateTime, val at: ZonedDateTime, val title: String, val feast: String, val summary: String) {
+    /**
+     * One scheduled reminder: the office's time, when to remind, and its words; `silent` through
+     * the Triduum, when the bells are silent (posted on [Notifications.SILENT_CHANNEL]).
+     */
+    data class Alarm(val hour: String, val office: ZonedDateTime, val at: ZonedDateTime, val title: String, val feast: String, val summary: String, val silent: Boolean = false) {
         val code: Int get() = reminderCode(office.toLocalDate(), hour)
 
         fun pendingIntent(context: Context): PendingIntent {
@@ -227,6 +230,7 @@ object ReminderScheduler {
                 .putExtra(EXTRA_FEAST, feast)
                 .putExtra(EXTRA_SUMMARY, summary)
                 .putExtra(EXTRA_WHEN, office.toInstant().toEpochMilli())
+                .putExtra(EXTRA_SILENT, silent)
             return PendingIntent.getBroadcast(context, code, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
     }
@@ -242,6 +246,7 @@ private const val EXTRA_TITLE = "org.orthodoxwest.office.TITLE"
 private const val EXTRA_FEAST = "org.orthodoxwest.office.FEAST"
 private const val EXTRA_SUMMARY = "org.orthodoxwest.office.SUMMARY"
 private const val EXTRA_WHEN = "org.orthodoxwest.office.WHEN"
+private const val EXTRA_SILENT = "org.orthodoxwest.office.SILENT"
 
 /** Posts a reminder when its alarm fires, and syncs the schedule on every event that can disturb it. */
 class ReminderReceiver : BroadcastReceiver() {
@@ -278,8 +283,24 @@ object Notifications {
     const val CHANNEL = "hours-bell"
     private const val FIRST_CHANNEL = "hours"
 
+    /**
+     * The Triduum's channel: the bells are silent from Vespers of Maundy Thursday through None of
+     * Holy Saturday (`presentation::reminders::reminder_silent`), so those reminders come with no
+     * sound and no vibration. A channel's sound is fixed once created, hence a channel of its own.
+     */
+    const val SILENT_CHANNEL = "hours-triduum"
+
     fun ensureChannel(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java)
+        if (manager.getNotificationChannel(SILENT_CHANNEL) == null) {
+            manager.createNotificationChannel(
+                NotificationChannel(SILENT_CHANNEL, "Hours of the Triduum", NotificationManager.IMPORTANCE_DEFAULT).apply {
+                    description = "Without the bell, from Maundy Thursday evening through Holy Saturday, while the church's bells are silent"
+                    setSound(null, null)
+                    enableVibration(false)
+                },
+            )
+        }
         if (manager.getNotificationChannel(CHANNEL) != null) return
         manager.deleteNotificationChannel(FIRST_CHANNEL)
         manager.createNotificationChannel(
@@ -334,7 +355,7 @@ object Notifications {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val office = Instant.ofEpochMilli(alarm.getLongExtra(EXTRA_WHEN, now.toEpochMilli()))
-        val notification = NotificationCompat.Builder(context, CHANNEL)
+        val notification = NotificationCompat.Builder(context, if (alarm.getBooleanExtra(EXTRA_SILENT, false)) SILENT_CHANNEL else CHANNEL)
             .setSmallIcon(R.drawable.ic_notification)
             .setColor(Nave.gold.toArgb())
             .setContentTitle(title(context, alarm.getStringExtra(EXTRA_TITLE) ?: return, office.atZone(ZoneId.systemDefault())))

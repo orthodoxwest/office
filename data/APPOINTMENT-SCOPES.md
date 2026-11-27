@@ -58,11 +58,10 @@ one scope may cover a season/hour/slot family, even with disjoint dates: there
 are no ordered rules or interval unions. A valid file replaces the index
 atomically.
 
-`NewEngine` requires the file (an explicit `[]` is valid) and fails if it is
-missing or malformed. `LoadTexts` and `NewTestCorpus` tolerate a missing file
-for small fixtures and text-only tools, so tests of scoped composition should
-call `LoadAppointmentScopes` explicitly, before sharing the corpus with
-concurrent composers.
+`Engine::load` requires the file (an explicit `[]` is valid) and fails if it is
+missing or malformed. `office::texts::load_texts` tolerates a missing file for
+small fixtures and text-only tools, and `AppointmentScopes::load` parses a scope
+file directly in unit tests.
 
 Extend the data with a source-backed requirement and independent expected
 appointments at its boundaries, feast collisions, and fallbacks; extend the

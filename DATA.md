@@ -22,7 +22,7 @@ data/
     shared/        texts reused across several files (Marian texts, formulas)
     chant/         GABC chant scores (psalms/, canticles/, hymns/)
   office/          hour structure definitions
-  review/          provenance attestations, prescreen flags, assurance baseline
+  review/          provenance attestations, composition requirements, ordo triage, repair backlog
 ```
 
 Feast files use `[section]` headers and `Key = value` lines; text files use
@@ -124,7 +124,7 @@ supported key):
   composer drops the element (and any section left empty). Use it only where
   the books say an element is omitted, such as the Triduum's chapter, short
   responsory, hymn, and Vespers versicle. It is not allowed on a psalm antiphon
-  and is excluded from the lint, provenance, and zero-occurrence inventories.
+  and is excluded from the lint and provenance inventories.
 - `#` lines, including `# SOURCE:` provenance notes, are stripped by the loader
   and never render.
 
