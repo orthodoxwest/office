@@ -354,13 +354,15 @@ test("the rhythm reaches into a prayer form's part and the Martyrology", async (
       thanks: above(leaves.findIndex((e, i) => i > heading && e.textContent.includes("Thanks be to God"))),
       // A section's label stands as a part's heading, as the apps' toggle row does.
       label: (() => {
-        const after = [...document.querySelectorAll(".session-prayers")].pop();
+        const after = [...document.querySelectorAll(".session-prayers")].filter(shown).pop();
         const box = after.querySelector("summary").getBoundingClientRect();
-        const before = after.previousElementSibling.getBoundingClientRect();
+        let prior = after.previousElementSibling;
+        while (!shown(prior)) prior = prior.previousElementSibling;
+        const before = prior.getBoundingClientRect();
         return (box.top - before.bottom) / line;
       })(),
       under: (() => {
-        const after = [...document.querySelectorAll(".session-prayers")].pop();
+        const after = [...document.querySelectorAll(".session-prayers")].filter(shown).pop();
         const box = after.querySelector("summary").getBoundingClientRect();
         return (after.querySelector(".session-prayers-content p").getBoundingClientRect().top - box.bottom) / line;
       })(),
