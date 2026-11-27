@@ -16,9 +16,10 @@
 //! uncued. Compline is never cued.
 
 use corpus::lines::{PsalmItem, parse_psalm};
-use liturgy::{ElementType, OfficeElement, OfficeHour, Posture, PostureAnchor, PostureCue, PrayerForm};
+use liturgy::{ElementType, OfficeElement, Posture, PostureAnchor, PostureCue, PrayerForm};
 
 use crate::Day;
+use crate::finish::Classified;
 use crate::psalmody::{is_office_of_the_dead, says_psalm_doxology};
 
 const GOSPEL_CANTICLES: [&str; 2] = ["canticles/benedictus", "canticles/magnificat"];
@@ -39,7 +40,8 @@ pub fn cues_postures(hour_name: &str, form: PrayerForm) -> bool {
 }
 
 /// Marks the posture cues on the psalmody of the hours [`cues_postures`] names.
-pub fn mark_postures(hour: &mut OfficeHour, day: &Day, hour_name: &str, form: PrayerForm) {
+pub fn mark_postures(classified: &mut Classified, day: &Day, hour_name: &str, form: PrayerForm) {
+    let hour = classified.hour_mut();
     if !cues_postures(hour_name, form) {
         return;
     }
