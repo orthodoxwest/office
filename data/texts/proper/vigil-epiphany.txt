@@ -217,3 +217,8 @@ R. His salvation, alleluia.
 [lauds-psalmody]
 # SOURCE: Monastic Diurnal pp. 210 and 222 (Ant. & Pss. of the Circumcision, "Ps. 93 Dominus regnavit and the rest, p. 34"); p. 33 rubric (Vigils of Christmas, Epiphany and Pentecost)
 @use psalmody/lauds/festal
+
+[martyrology-announcement]
+# SOURCE: Roman Martyrology (1916), January-June, p. 2; announcement line
+# Read at Prime the day before the calendar keeps the vigil, in the first place after the date.
+The vigil of the Epiphany of our Lord.

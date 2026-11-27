@@ -1,3 +1,8 @@
 [collect]
 # SOURCE: Monastic Diurnal.pdf, p. 585 (August 9, Vigil of St Laurence)
 Be favourable, O Lord, to our supplications: and by the intercession of blessed Laurence thy Martyr, to whose feast we are drawing nigh, graciously bestow upon us thy mercy for evermore.
+
+[martyrology-announcement]
+# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 14; announcement line
+# Read at Prime the day before the calendar keeps the vigil, in the first place after the date.
+The vigil of St. Lawrence, martyr.

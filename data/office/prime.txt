@@ -430,8 +430,10 @@ Type = versicle
 Ref = shared/formulas/faithful-departed
 
 # The optional Martyrology follows Prime's closing versicles (Diurnal p. 10).
+# On All Souls it follows the Collect and begins with the day's own
+# announcement (Diurnal p. 653); the composer reads the feasts' propers.
 [Martyrology]
-Condition = not-triduum,not-office-of-the-dead
+Condition = not-triduum
 Type = rubric
 Ref = ordinary/prime/martyrology-rubric
 

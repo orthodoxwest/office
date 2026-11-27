@@ -1,3 +1,8 @@
 [collect]
 # SOURCE: Monastic Diurnal.pdf, p. 635 (October 27, Vigil of Sts Simon and Jude)
 Grant, we beseech thee, Almighty God: that like as we approach the glorious birthday of thine Apostles Simon and Jude, so they may approach thy Majesty for us, that we may be made worthy of all thy benefits.
+
+[martyrology-announcement]
+# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 38; announcement line
+# Read at Prime the day before the calendar keeps the vigil, in the first place after the date.
+The vigil of the holy apostles Simon and Jude.

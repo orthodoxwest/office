@@ -160,6 +160,7 @@ fn day(date: Date, season: Season) -> CalendarDay {
         within_octave_of: None,
         penitential: Penitential::default(),
         monastic: Vec::new(),
+        kept: Vec::new(),
     }
 }
 
@@ -179,6 +180,7 @@ pub fn resolve_day(
         transferred_in.iter().cloned().partition(|_| date.weekday() == Weekday::Sunday);
     let transferred_in = transferred_in.as_slice();
     let mut all: Vec<FeastRef> = candidates.iter().chain(transferred_in).cloned().collect();
+    let occurring = all.clone();
     let mut transfers_out = held.clone();
     let mut decisions = vec![Decision::new(
         "occurrence:resolution-mode",
@@ -196,6 +198,8 @@ pub fn resolve_day(
     }
     let mut result = day(date, season);
     result.color = season_color;
+    // Held over a Sunday or carried out again, a feast is not kept today (applied at every return).
+    let kept = |out: &[FeastRef]| occurring.iter().filter(|f| !out.iter().any(|o| Arc::ptr_eq(o, f))).cloned().collect::<Vec<_>>();
 
     if all.is_empty() {
         let (_, color_decision) = resolved_day_color(None, season, season_color);
@@ -203,6 +207,7 @@ pub fn resolve_day(
         decisions.push(color_decision);
         result.resolution_rule = "occurrence:no-candidates".to_string();
         result.occurrence_decisions = decisions;
+        result.kept = kept(&transfers_out);
         return (result, transfers_out);
     }
 
@@ -215,6 +220,7 @@ pub fn resolve_day(
         result.commemorations = comms;
         result.resolution_rule = "occurrence:commemorations-only".to_string();
         result.occurrence_decisions = decisions;
+        result.kept = kept(&transfers_out);
         return (result, transfers_out);
     }
 
@@ -281,5 +287,6 @@ pub fn resolve_day(
     result.color = color;
     result.resolution_rule = if is_privileged_mode { "occurrence:privileged-day" } else { "occurrence:general-precedence" }.to_string();
     result.occurrence_decisions = decisions;
+    result.kept = kept(&transfers_out);
     (result, transfers_out)
 }

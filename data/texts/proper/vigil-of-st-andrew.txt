@@ -1,3 +1,8 @@
 [collect]
 # SOURCE: Monastic Diurnal.pdf, p. 669 (November 29, Vigil of St Andrew; also p. 443)
 We beseech thee, Almighty God: that the blessed Apostle Andrew, whose feast we are about to keep, may implore for us thine aid; that our guilt being done away, we may also be rescued from all perils.
+
+[martyrology-announcement]
+# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 47; announcement line
+# Read at Prime the day before the calendar keeps the vigil, in the first place after the date.
+The vigil of St. Andrew, apostle.

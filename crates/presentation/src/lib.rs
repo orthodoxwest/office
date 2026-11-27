@@ -739,6 +739,7 @@ mod tests {
             within_octave_of: None,
             penitential: Default::default(),
             monastic: Vec::new(),
+            kept: Vec::new(),
         }
     }
 

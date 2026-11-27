@@ -1,3 +1,8 @@
 [collect]
 # SOURCE: Monastic Diurnal.pdf, p. 481 (Vigil of St Matthias, as in the Common of Apostles, p. 7*)
 @use commons/apostle/vigil-collect
+
+[martyrology-announcement]
+# SOURCE: Roman Martyrology (1916), January-June, pp. 14-15; announcement line
+# Read at Prime the day before the calendar keeps the vigil, in the first place after the date.
+The vigil of the apostle St. Matthias.

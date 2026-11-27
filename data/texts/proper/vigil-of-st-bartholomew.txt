@@ -1,3 +1,8 @@
 [collect]
 # SOURCE: Monastic Diurnal.pdf, p. 592 (Vigil of St Bartholomew, Collect as in the Common, p. 7*)
 @use commons/apostle/vigil-collect
+
+[martyrology-announcement]
+# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 19; announcement line
+# Read at Prime the day before the calendar keeps the vigil, in the first place after the date.
+The vigil of St. Bartholomew, apostle.
