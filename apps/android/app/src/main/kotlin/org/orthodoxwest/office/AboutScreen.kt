@@ -538,7 +538,7 @@ private fun Horologium(
     val o = LocalOrnament.current
     val hours = remember(periods) { periods.flatMap { it.hours } }
     val activeSlug = pinned ?: current.ifEmpty { "compline" }
-    val active = hours.firstOrNull { it.hour == activeSlug } ?: hours.lastOrNull() ?: return
+    val active = hours.firstOrNull { it.hour == activeSlug } ?: hours.firstOrNull { it.hour == "compline" } ?: hours.lastOrNull() ?: return
     val isNow = active.hour == current && current.isNotEmpty()
     var dragAngle by remember { mutableStateOf<Float?>(null) }
     // The sign's angle as drawn, unwrapped: Matins stands at 270° (−90°), and the sign goes under

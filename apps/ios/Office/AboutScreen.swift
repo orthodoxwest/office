@@ -598,7 +598,7 @@ private struct AboutHorologium: View {
     var body: some View {
         let hours = periods.flatMap(\.hours)
         let activeSlug = pinned ?? (current.isEmpty ? "compline" : current)
-        if let active = hours.first(where: { $0.hour == activeSlug }) ?? hours.last {
+        if let active = hours.first(where: { $0.hour == activeSlug }) ?? hours.first(where: { $0.hour == "compline" }) ?? hours.last {
             let isNow = active.hour == current && !current.isEmpty
             let largeType = m.type > 1.35
             let readoutSpoken = "\(isNow ? "Now, " : "")\(aboutTimeSpoken(time: active.time)). \(active.name), \(active.gloss)"
