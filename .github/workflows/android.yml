@@ -1,7 +1,8 @@
 name: Android
 
 # Builds the sideloadable preview APK and renders review screenshots. Pushes to
-# master (and manual runs) also publish the APK as a new release, tagged
+# master (and manual runs) also publish the APK, once every check on the commit
+# (CI, iOS and this build) has passed, as a new release, tagged
 # android-preview-<versionName> and marked latest, so this URL always serves the
 # newest preview:
 # https://github.com/orthodoxwest/office/releases/latest/download/office-preview.apk
@@ -148,9 +149,33 @@ jobs:
           path: apps/android/app/build/screenshots/
           if-no-files-found: warn
 
+  checks:
+    name: Wait for the commit's checks
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    # Long enough for iOS's build, tests and screenshots, queued macOS runners included.
+    timeout-minutes: 180
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts
+      # Nothing reaches readers from a commit whose CI, iOS or Android checks are red or still
+      # running (scripts/ci_gate.py). The publishers (play.yml, testflight.yml, and Android's own
+      # gate and preview release) are not waited on: they wait on the checks themselves. A run
+      # cancelled for a newer push is judged by the run that took its place. After a red check
+      # is mended by a re-run, re-run this workflow's failed jobs to publish.
+      - name: Wait for every check on this commit to pass
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_gate.py --require ci.yml --exclude play.yml --exclude testflight.yml --exclude-job "Wait for the commit's checks" --exclude-job "Publish android-preview"
+
   publish:
     name: Publish android-preview
-    needs: build
+    needs: [build, checks]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
