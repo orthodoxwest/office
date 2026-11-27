@@ -2,8 +2,8 @@ use std::path::Path;
 
 use calendar::{CalendarData, Date, MoveableDates};
 use liturgy::{
-    ElementType, OfficeElement, OfficeHour, OfficeSection, Posture, PostureAnchor, PostureCue, PrayerForm, RubricSpan, Unrepeated,
-    VoiceSpan,
+    ChantScore, ElementType, OfficeElement, OfficeHour, OfficeSection, Posture, PostureAnchor, PostureCue, PrayerForm, RubricSpan,
+    ScoreSpan, Unrepeated, VoiceSpan,
 };
 use office::{Engine, HOUR_NAMES};
 use tools::fs::FsData;
@@ -152,9 +152,21 @@ fn compline_opens_with_a_heading_and_collapsible_sections_do_not() {
         feast: String::new(),
         rank: None,
         color: None,
+        paschaltide: false,
+        bare: false,
         sections: vec![
-            OfficeSection { label: String::new(), collapsible: false, elements: vec![elem(ElementType::Prayer, "Pray, Father.")] },
-            OfficeSection { label: "Before the Office".into(), collapsible: true, elements: vec![elem(ElementType::Prayer, "Open.")] },
+            OfficeSection {
+                label: String::new(),
+                collapsible: false,
+                bare: false,
+                elements: vec![elem(ElementType::Prayer, "Pray, Father.")],
+            },
+            OfficeSection {
+                label: "Before the Office".into(),
+                collapsible: true,
+                bare: false,
+                elements: vec![elem(ElementType::Prayer, "Open.")],
+            },
         ],
         decisions: Vec::new(),
     };
@@ -201,17 +213,342 @@ fn blocks_carry_the_same_text_as_the_web() {
                 let hour = engine.compose_hour(hour_name, day, &moveable, form).expect("compose");
                 for section in &hour.sections {
                     let html = render_html::html::render_section_elements(&section.elements);
-                    let web = squeeze(&html_text(&html));
                     let section_blocks = element_blocks(&section.elements);
-                    let native: String = section_blocks.iter().map(|b| squeeze(&b.plain_text())).collect();
-                    assert_eq!(native, web, "{hour_name} {} {} section {:?}", day.date, form.as_str(), section.label);
-                    // Every rubric term the web glosses, the apps gloss too.
-                    let glossed = section_blocks.iter().flat_map(|b| &b.runs).filter(|r| r.gloss.is_some()).count();
-                    assert_eq!(glossed, html.matches("class=\"gloss-term\"").count(), "{hour_name} {} glosses", day.date);
+                    // A score's words (the Marian antiphon's, say) are read either way.
+                    for on in [false, true] {
+                        let (native, web) = (shown(&section_blocks, on), web_words(&html, on));
+                        assert_eq!(native, web, "{hour_name} {} {} section {:?} chant {on}", day.date, form.as_str(), section.label);
+                    }
+                    // Every rubric term and quiet structural mark the web glosses, the apps gloss too.
+                    let underlined = section_blocks.iter().flat_map(|b| &b.runs).filter(|r| r.gloss.is_some() && !r.quiet_gloss).count();
+                    assert_eq!(underlined, html.matches("class=\"gloss-term\"").count(), "{hour_name} {} rubric glosses", day.date);
+                    let quiet = section_blocks.iter().filter(|b| b.marker_gloss.is_some()).count()
+                        + section_blocks.iter().flat_map(|b| &b.runs).filter(|r| r.gloss.is_some() && r.quiet_gloss).count();
+                    assert_eq!(quiet, html.matches("gloss-quiet").count(), "{hour_name} {} quiet glosses", day.date);
                     checked += 1;
                 }
             }
         }
     }
     assert!(checked > 10_000, "only {checked} sections checked");
+}
+
+const HYMN: &str = "To thee before the close of day,\nCreator of the world, we pray\n\nFrom all ill dreams defend our eyes,\nFrom nightly fears and fantasies;\n\nAmen.";
+/// A hymn with a rubric before a stanza, which the stanza's score does not carry.
+const HYMN_KNEELING: &str = "To thee before the close of day,\nCreator of the world, we pray\n\n/:The following stanza is said kneeling.:/\n\nFrom all ill dreams defend our eyes,\nFrom nightly fears and fantasies;\n\nAmen.";
+const MARIAN: &str = "Hail, holy Queen, * Mother of mercy,\nour life, our sweetness and our hope.\n\nV. Pray for us, O holy Mother of God.\nR. That we may be made worthy.\n\nLet us pray.\n\nAlmighty, everlasting God, who didst prepare.";
+
+fn scored(kind: ElementType, text: &str, gabc: &str, sets: ScoreSpan) -> OfficeElement {
+    let mut e = elem(kind, text);
+    if kind == ElementType::Antiphon {
+        e.label = "Salve Regina".into();
+        e.slot_ref = "marian-antiphon".into();
+    }
+    e.score = Some(ChantScore { gabc: gabc.into(), sets });
+    e
+}
+
+/// The words a front shows with Chant off, or (`on`) the words its scores set and the text around them.
+fn shown(out: &[Block], on: bool) -> String {
+    let hidden = if on { ChantVariant::Off } else { ChantVariant::On };
+    out.iter().filter(|b| b.chant != hidden).map(|b| squeeze(&b.plain_text())).collect()
+}
+
+/// The web's words as a reader sees them with Chant `on` or off: with it on, each score by its
+/// stanza number and spoken words, the words it replaces left out. Screen-reader-only expansions
+/// (`class="sr-only"`) outside scores are skipped so visible text stays word-for-word with blocks.
+fn web_words(html: &str, on: bool) -> String {
+    let mut out = String::new();
+    let mut rest = html;
+    while let Some(i) = rest.find('<') {
+        out.push_str(&squeeze(&html_text(&rest[..i])));
+        rest = &rest[i..];
+        let tag = &rest[..rest.find('>').unwrap() + 1];
+        let name: String = tag[1..].chars().take_while(char::is_ascii_alphanumeric).collect();
+        let score = on && tag.contains("class=\"chant-score");
+        let hidden = if on { "data-chant-variant=\"off\"" } else { "data-chant-variant=\"on\"" };
+        let sr_only = tag.contains("class=\"sr-only\"");
+        if score || tag.contains(hidden) || sr_only {
+            let end = element_end(rest, &name);
+            if score {
+                let element = &rest[..end];
+                if let Some(n) = element.split("class=\"chant-stanza-number\" aria-hidden=\"true\">").nth(1) {
+                    out.push_str(n.split('<').next().unwrap());
+                }
+                out.push_str(&squeeze(&html_text(element.split("class=\"sr-only\">").nth(1).unwrap().split('<').next().unwrap())));
+            }
+            rest = &rest[end..];
+        } else {
+            rest = &rest[tag.len()..];
+        }
+    }
+    out.push_str(&squeeze(&html_text(rest)));
+    out
+}
+
+/// Where the `name` element that `html` opens with closes.
+fn element_end(html: &str, name: &str) -> usize {
+    let (open, close) = (format!("<{name}"), format!("</{name}>"));
+    let mut depth = 0;
+    let mut i = 0;
+    while i < html.len() {
+        if html[i..].starts_with(&open) {
+            depth += 1;
+        } else if html[i..].starts_with(&close) {
+            depth -= 1;
+            if depth == 0 {
+                return i + close.len();
+            }
+        }
+        i += html[i..].chars().next().map_or(1, char::len_utf8);
+    }
+    html.len()
+}
+
+#[test]
+fn a_hymn_s_tune_stands_before_the_stanza_it_sets() {
+    let gabc = "name: t;\n%%\n(c4) To(g) thee(h) be(j)fore(h) the(g) close(h) of(g) day,(g.) (;) Cre(g)a(h)tor(j) of(h) the(g) world,(h) we(g) pray(g.) (::)";
+    let e = scored(ElementType::Hymn, HYMN, gabc, ScoreSpan::FirstStanza);
+    let out = blocks(&e);
+    let kinds: Vec<(BlockKind, ChantVariant)> = out.iter().map(|b| (b.kind, b.chant)).collect();
+    assert_eq!(
+        kinds,
+        [
+            (BlockKind::Heading, ChantVariant::Always),
+            (BlockKind::Score, ChantVariant::On),
+            (BlockKind::Stanza, ChantVariant::Off),
+            (BlockKind::Stanza, ChantVariant::Always)
+        ]
+    );
+    assert!(out[1].drop_cap && out[1].score == gabc);
+    assert_eq!(out[1].plain_text(), "To thee before the close of day, Creator of the world, we pray");
+}
+
+#[test]
+fn a_whole_hymn_is_a_score_per_stanza_numbered_after_the_first() {
+    let gabc = "name: t;\n%%\n(c4) To(g) thee(h) be(j)fore(h) the(g) close(h) of(g) day,(g.) (::) From(g) all(h) ill(j) dreams(h) de(g)fend(h) our(g) eyes,(g.) (::) A(gh)men.(g) (::)";
+    let out = blocks(&scored(ElementType::Hymn, HYMN, gabc, ScoreSpan::WholeHymn));
+    let scores: Vec<&Block> = out.iter().filter(|b| b.kind == BlockKind::Score).collect();
+    assert_eq!(scores.len(), 2);
+    assert!(scores[0].drop_cap && scores[0].marker.is_empty());
+    assert!(!scores[1].drop_cap && scores[1].marker == "2.");
+    assert!(scores[1].score.ends_with("A(gh)men.(g) (::)"), "{}", scores[1].score);
+    assert!(scores.iter().all(|b| b.phrases));
+    assert!(out.iter().filter(|b| b.kind == BlockKind::Stanza).all(|b| b.chant == ChantVariant::Off));
+}
+
+/// With Chant off a scored piece reads as it did unscored; with it on, the blocks name what the
+/// web's scores set, around the same unscored text.
+#[test]
+fn scored_blocks_carry_the_web_s_words_either_way() {
+    let hymn_gabc = "name: t;\n%%\n(c4) To(g) thee(h) (::) From(g) all(h) A(g)men.(g) (::)";
+    let marian_gabc = "name: t;\n%%\n(c4) Hail,(g) ho(h)ly(g) Queen.(g) (::)";
+    for e in [
+        scored(ElementType::Hymn, HYMN, hymn_gabc, ScoreSpan::FirstStanza),
+        scored(ElementType::Hymn, HYMN, hymn_gabc, ScoreSpan::WholeHymn),
+        scored(ElementType::Hymn, HYMN_KNEELING, hymn_gabc, ScoreSpan::WholeHymn),
+        scored(ElementType::Antiphon, MARIAN, marian_gabc, ScoreSpan::Antiphon),
+    ] {
+        let unscored = OfficeElement { score: None, ..e.clone() };
+        let out = blocks(&e);
+        assert_eq!(shown(&out, false), shown(&blocks(&unscored), false), "{:?}", e.score);
+        let html = render_html::html::render_section_elements(std::slice::from_ref(&e));
+        assert_eq!(shown(&out, false), web_words(&render_html::html::render_section_elements(&[unscored]), false));
+        assert_eq!(shown(&out, true), web_words(&html, true), "{:?}", e.score);
+        assert_eq!(e.text.contains("kneeling"), shown(&out, true).contains("kneeling"), "a rubric shows with Chant on too");
+    }
+}
+
+/// A score is announced by the words it sets without the pointing asterisk, wherever it falls:
+/// Ave Regina caelorum's ends a line.
+#[test]
+fn a_score_s_label_leaves_out_the_pointing() {
+    let text = "Queen of the heavens, we hail thee *\nHail thee, Lady of all the Angels.\n\nV. Vouchsafe.\nR. Give me strength.";
+    let e = scored(ElementType::Antiphon, text, "name: t;\n%%\n(c4) Queen(f) (::)", ScoreSpan::Antiphon);
+    let label = "Queen of the heavens, we hail thee Hail thee, Lady of all the Angels.";
+    let score = blocks(&e).into_iter().find(|b| b.kind == BlockKind::Score).unwrap();
+    assert_eq!(score.plain_text(), label);
+    let html = render_html::html::render_section_elements(&[e]);
+    assert!(html.contains(&format!("<span class=\"sr-only\">{label}</span>")), "{html}");
+}
+
+/// A feast page's texts read the same on every front: each feast kept or commemorated in a year,
+/// as said that day.
+#[test]
+fn a_feasts_texts_carry_the_same_text_as_the_web() {
+    use office::feast::{DayOf, feast_texts};
+
+    let src = FsData::new(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data"));
+    let engine = Engine::load(&src).expect("engine");
+    let data = CalendarData::load(&src).expect("calendar data");
+    let cal = calendar::build_calendar(2027, &data).expect("calendar");
+    let offices = office::resolve_office_days(&cal);
+    let days: Vec<office::Day> = cal.days.into_iter().zip(offices).map(|(c, o)| office::Day::new(c, o)).collect();
+    let moveable = MoveableDates::compute(2027);
+    let (mut checked, mut hymns) = (0, 0);
+    for (i, day) in days.iter().enumerate() {
+        let feasts: Vec<(String, String)> =
+            day.celebration.iter().chain(&day.commemorations).map(|f| (f.id.clone(), f.name.clone())).collect();
+        for (id, name) in feasts {
+            // By id in a commemoration's heading, by name in an hour's title, as the feast page has it.
+            let is_it = |i: &str, n: &str| i == id || (i.is_empty() && n == name);
+            let eve = i.checked_sub(1).map(|e| DayOf { day: &days[e], moveable: &moveable });
+            for t in feast_texts(&engine, &is_it, eve, DayOf { day, moveable: &moveable }).texts {
+                let (html, native) = match &t.hymn {
+                    Some(_) => (render_html::html::render_feast_hymn(&t.text), crate::feast_hymn_blocks(&t.text)),
+                    None if t.prayer => (render_html::html::render_flowing_block(&t.text), text_blocks(&t.text, true)),
+                    None => (render_html::html::render_liturgical_block(&t.text), text_blocks(&t.text, false)),
+                };
+                hymns += usize::from(t.hymn.is_some());
+                let native: String = native.iter().map(|b| squeeze(&b.plain_text())).collect();
+                assert_eq!(native, web_words(&html, false), "{id} {} {}", day.date, t.label);
+                checked += 1;
+            }
+        }
+    }
+    assert!(checked > 1_000, "only {checked} texts checked");
+    assert!(hymns > 200, "only {hymns} hymns checked");
+}
+
+/// Each block of `hour` on `date` in private prayer, as shown with Chant off: kind, opening an
+/// element, and its space.
+fn spaced(hour_name: &str, date: &str) -> Vec<(BlockKind, Space, String)> {
+    let src = FsData::new(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data"));
+    let engine = Engine::load(&src).expect("engine");
+    let data = CalendarData::load(&src).expect("calendar data");
+    let date = Date::parse(date).expect("date");
+    let day = tools::year::office_days(&data, date.year()).expect("office days").into_iter().find(|d| d.date == date).expect("day");
+    let hour = engine.compose_hour(hour_name, &day, &MoveableDates::compute(date.year()), PrayerForm::Private).expect("compose");
+    let mut sections = hour_sections(&hour);
+    for s in &mut sections {
+        s.blocks.retain(|b| b.chant != ChantVariant::On);
+    }
+    space_blocks(sections.iter_mut().flat_map(|s| &mut s.blocks));
+    sections.into_iter().flat_map(|s| s.blocks).map(|b| (b.kind, b.space, b.plain_text().chars().take(24).collect())).collect()
+}
+
+/// The Gospel canticles are signed with the cross, set after their drop-capped first word as the
+/// Vicariate's booklets set it ("Open ✠ my mouth"), so the initial stays a letter on every front.
+#[test]
+fn gospel_canticles_sign_the_cross_after_their_first_word() {
+    let src = FsData::new(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data"));
+    let engine = Engine::load(&src).expect("engine");
+    let data = CalendarData::load(&src).expect("calendar data");
+    let date = Date::parse("2026-11-23").expect("date");
+    let day = tools::year::office_days(&data, date.year()).expect("office days").into_iter().find(|d| d.date == date).expect("day");
+    for (hour_name, opening) in [("lauds", "Blessed "), ("vespers", "My ")] {
+        let hour = engine.compose_hour(hour_name, &day, &MoveableDates::compute(date.year()), PrayerForm::Private).expect("compose");
+        let sections = hour_sections(&hour);
+        let verse = sections
+            .iter()
+            .flat_map(|s| &s.blocks)
+            .find(|b| b.kind == BlockKind::Verse && b.drop_cap && b.runs.first().is_some_and(|r| r.text == opening))
+            .unwrap_or_else(|| panic!("{hour_name}: no verse opening {opening:?}"));
+        assert_eq!(verse.runs[1].style, RunStyle::Cross, "{hour_name}: {:#?}", verse.runs);
+    }
+}
+
+/// The steps rise in order, each a fraction of the body line no larger than a line.
+#[test]
+fn the_rhythm_steps_rise_within_a_line() {
+    for pair in Space::ALL.windows(2) {
+        assert!(pair[0] < pair[1] && pair[0].lines() < pair[1].lines(), "{pair:?}");
+    }
+    assert_eq!(Space::None.lines(), 0.0);
+    assert_eq!(Space::Section.lines(), 1.0);
+}
+
+/// Sext's run from the opening into the psalmody, the page that showed the rhythm uneven: the
+/// part's heading takes the only large space, the hymn's title sits close under it, and the
+/// hymn gives way to the psalmody by a group's threshold, the antiphon bound to its psalm.
+#[test]
+fn sext_moves_from_hymn_to_psalm_by_steps() {
+    let blocks = spaced("sext", "2026-10-29");
+    let at = |kind: BlockKind| blocks.iter().position(|b| b.0 == kind).unwrap_or_else(|| panic!("{kind:?} in {blocks:#?}"));
+    let hymn = blocks.iter().position(|b| b.0 == BlockKind::Heading && b.2 == "Hymn").expect("hymn heading");
+    let antiphon = at(BlockKind::AnnouncedAntiphon);
+    let steps: Vec<(BlockKind, Space)> = blocks[hymn - 1..antiphon + 4].iter().map(|b| (b.0, b.1)).collect();
+    use BlockKind as K;
+    assert_eq!(
+        steps,
+        [
+            (K::Paragraph, Space::Stanza),
+            (K::Heading, Space::Section),
+            (K::LatinTitle, Space::Line),
+            (K::Stanza, Space::Bind),
+            (K::Stanza, Space::Stanza),
+            (K::Stanza, Space::Stanza),
+            (K::AnnouncedAntiphon, Space::Group),
+            (K::ItemLabel, Space::Bind),
+            (K::Verse, Space::Bind),
+            (K::Verse, Space::Line),
+        ],
+        "{blocks:#?}"
+    );
+}
+
+/// Over a year's hours: a heading always opens with a part's space and nothing else does; the
+/// lines within an element never stand further apart than stanzas; and a group's threshold
+/// falls only where psalmody begins or ends.
+#[test]
+fn the_rhythm_holds_across_a_year() {
+    let src = FsData::new(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data"));
+    let engine = Engine::load(&src).expect("engine");
+    let data = CalendarData::load(&src).expect("calendar data");
+    let year = 2026;
+    let moveable = MoveableDates::compute(year);
+    let mut checked = 0;
+    for day in tools::year::office_days(&data, year).expect("office days") {
+        for hour_name in HOUR_NAMES {
+            let hour = engine.compose_hour(hour_name, &day, &moveable, PrayerForm::Private).expect("compose");
+            let blocks: Vec<Block> = hour_sections(&hour).into_iter().flat_map(|s| s.blocks).collect();
+            for (i, b) in blocks.iter().enumerate() {
+                let at =
+                    || format!("{hour_name} {} block {i} {:?} after {:?}", day.date, b.kind, blocks.get(i.wrapping_sub(1)).map(|p| p.kind));
+                let heading = matches!(b.kind, BlockKind::Heading | BlockKind::CommemorationHeading);
+                assert_eq!(heading && i > 0, b.space == Space::Section, "{}", at());
+                if !b.starts_element && !heading && b.kind != BlockKind::Score {
+                    assert!(b.space <= Space::Stanza, "{}", at());
+                }
+                if b.space == Space::Group {
+                    let prev = blocks[i - 1].kind;
+                    let psalmody = |k: BlockKind| {
+                        matches!(k, BlockKind::Antiphon | BlockKind::AnnouncedAntiphon | BlockKind::ItemLabel | BlockKind::Score)
+                    };
+                    assert!(psalmody(b.kind) || psalmody(prev) || prev == BlockKind::Stanza, "{}", at());
+                }
+                checked += 1;
+            }
+        }
+    }
+    assert!(checked > 100_000, "only {checked} blocks checked");
+}
+
+/// The web sets the same steps: each `--space-*` property in style.css is the step's fraction of
+/// the prayer's line, so the web and the apps keep one rhythm.
+#[test]
+fn the_web_sets_the_same_steps() {
+    let css =
+        std::fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../apps/office-web/static/style.css")).expect("style.css");
+    for step in Space::ALL.into_iter().filter(|s| *s != Space::None) {
+        let property = format!("--space-{}:", step.name());
+        let at = css.find(&property).unwrap_or_else(|| panic!("{property} in style.css"));
+        let value = css[at + property.len()..].split(';').next().unwrap().trim();
+        let lines = if value == "var(--line)" {
+            1.0
+        } else {
+            let factor =
+                value.strip_prefix("calc(var(--line) * ").and_then(|v| v.strip_suffix(')')).unwrap_or_else(|| panic!("{property} {value}"));
+            factor.parse::<f32>().expect("factor")
+        };
+        assert_eq!(lines, step.lines(), "{property} {value}");
+    }
+}
+
+/// The Cross's commemoration heading keeps the kicker but carries the Cross's own note, as the web's.
+#[test]
+fn the_cross_commemoration_kicker_carries_the_cross_note() {
+    let kicker = |label: &str| section_heading(label).runs[0].gloss.map(|g| g.title);
+    assert_eq!(kicker("Commemoration of the Cross"), Some(presentation::gloss::COMMEMORATION_OF_CROSS_GLOSS.title));
+    assert_eq!(kicker("Commemoration of St Mark"), Some(presentation::gloss::ORDO_COMMEMORATION_GLOSS.title));
 }

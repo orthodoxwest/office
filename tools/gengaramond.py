@@ -35,6 +35,10 @@ variable fonts from Google Fonts (github.com/google/fonts, ofl/ebgaramond:
 EBGaramond[wght].ttf and EBGaramond-Italic[wght].ttf, Octavio Pardo's
 redraw of Duffner's design, version 1.003 or later). `--css` prints the
 unicode-range lines for style.css.
+
+A chant score's lyrics are measured by eb-garamond-lyrics.nmet, built from the
+native faces by neuma's neuma-metrics: write it again after this tool (see
+static/fonts/README.txt).
 """
 import argparse
 import tempfile

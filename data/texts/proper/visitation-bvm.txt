@@ -21,9 +21,6 @@ Blessed art thou * among women, and blessed is the fruit of thy womb.
 # SOURCE: draft archdiocesan Lauds book, p. 496 (Visitation BVM)
 For lo, as soon * as the voice of thy salutation sounded in mine ears, the babe leaped in my womb for joy, alleluia.
 
-[psalm-antiphon-4-vespers]
-@use proper/visitation-bvm/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 499 (Visitation BVM)
 When Elisabeth * heard the salutation of Mary, she spake out with a loud voice, and said: Whence is this to me, that the mother of my Lord should come to me? alleluia.

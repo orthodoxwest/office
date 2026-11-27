@@ -17,8 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -58,11 +62,14 @@ class ScreenshotTest {
         form: String = "private",
         reminders: ReminderSettings = ReminderStore(ApplicationProvider.getApplicationContext()).load(),
         status: ReminderStatus = ReminderStatus(notificationsAllowed = true, exactAllowed = true),
+        newcomer: Boolean = false,
         insets: PaddingValues = PaddingValues(),
+        clockHour: Int = 18,
     ) {
-        val home = (page as? Page.Home)?.let { core.home(it.date.toCivil(), today.toCivil(), 18) }
+        val home = (page as? Page.Home)?.let { core.home(it.date.toCivil(), today.toCivil(), clockHour) }
         val hour = (page as? Page.Hour)?.let { core.compose(it.hour, it.date.year, it.date.monthValue, it.date.dayOfMonth, form) }
         val ordo = (page as? Page.Ordo)?.let { core.ordoMonth(it.year, it.month) }
+        val course = (page as? Page.Year)?.let { core.ordoCourse(it.year) }
         compose.setContent {
             OfficeTheme(choice = theme, season = home?.ornament ?: hour?.ornament ?: "") {
                 OfficeApp(
@@ -70,6 +77,8 @@ class ScreenshotTest {
                     onOpen = {}, onHome = {}, onForm = {}, onTheme = {}, onTextSize = {},
                     reminders = reminders, reminderStatus = status,
                     onReminders = {}, onTurnOn = {}, onTurnOff = {}, onAllowNotifications = {}, onAllowExact = {},
+                    course = course,
+                    newcomer = newcomer,
                 )
             }
         }
@@ -82,6 +91,23 @@ class ScreenshotTest {
 
     @Test
     fun homeApse() { show(Page.Home(lent), ThemeChoice.APSE); shoot("home-apse") }
+
+    /** A reader's first week: the introduction before Change date, in the season's place. */
+    @Test
+    fun homeNewcomer() { show(Page.Home(lent), ThemeChoice.NAVE, newcomer = true); shoot("home-newcomer-nave") }
+
+    /** Terce's gloss, the widest among the day's three, takes a second line rather than being cut off. */
+    @Test
+    fun homeTerce() { show(Page.Home(lent), ThemeChoice.NAVE, clockHour = 10); shoot("home-terce") }
+
+    /** A phone up to 760 high sets Matins and "coming soon" on one line, its band only the line's height. */
+    @Test
+    @Config(qualifiers = "w375dp-h667dp-xxhdpi")
+    fun homeShortPhone() { show(Page.Home(lent), ThemeChoice.NAVE, clockHour = 10); shoot("home-short-nave") }
+
+    @Test
+    @Config(qualifiers = "w375dp-h667dp-xxhdpi")
+    fun homeShortPhoneApse() { show(Page.Home(lent), ThemeChoice.APSE, clockHour = 10); shoot("home-short-apse") }
 
     @Test
     fun homeAnotherDay() { show(Page.Home(LocalDate.of(2026, 12, 25)), ThemeChoice.NAVE); shoot("home-christmas") }
@@ -137,6 +163,11 @@ class ScreenshotTest {
     @Config(qualifiers = "w390dp-h6000dp-xxhdpi")
     fun vespersEastertideTall() { show(Page.Hour(LocalDate.of(2026, 4, 12), "vespers"), ThemeChoice.NAVE); shoot("vespers-eastertide-tall") }
 
+    /** The hymn into the psalmody, where the rhythm's steps were first measured against the Diurnal. */
+    @Test
+    @Config(qualifiers = "w411dp-h4000dp-xxhdpi")
+    fun sextApseTall() { show(Page.Hour(LocalDate.of(2026, 10, 29), "sext"), ThemeChoice.APSE); shoot("sext-apse-tall") }
+
     @Test
     @Config(qualifiers = "w390dp-h2400dp-xxhdpi")
     fun ordoNave() { show(Page.Ordo(2026, 3), ThemeChoice.NAVE); shoot("ordo-nave") }
@@ -180,18 +211,32 @@ class ScreenshotTest {
     @Config(qualifiers = "w390dp-h1400dp-xxhdpi")
     fun ordoYearNave() { show(Page.Year(2026), ThemeChoice.NAVE); shoot("ordo-year-nave") }
 
+    /** The hour header's date, which opens the date picker. */
+    private val changesDate = SemanticsMatcher("clicks to change date") { it.config.getOrNull(SemanticsActions.OnClick)?.label == "change date" }
+
     @Test
     fun datePicker() {
         show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE, today = LocalDate.of(2026, 3, 18))
-        compose.onNodeWithText("CHANGE DATE", substring = true).performClick()
+        // The header's date opens the picker.
+        compose.onNode(changesDate).performClick()
         compose.waitForIdle()
         shoot("date-picker-nave")
+    }
+
+    /** Home's "Change date": the calendar in the hours' place under the band. */
+    @Test
+    fun homeCalendar() {
+        show(Page.Home(lent), ThemeChoice.NAVE, today = LocalDate.of(2026, 3, 18))
+        compose.onNodeWithText("Change date", substring = true).performClick()
+        compose.waitForIdle()
+        shoot("home-calendar-nave")
     }
 
     @Test
     fun datePickerMonths() {
         show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE, today = LocalDate.of(2026, 3, 18))
-        compose.onNodeWithText("CHANGE DATE", substring = true).performClick()
+        // The header's date opens the picker.
+        compose.onNode(changesDate).performClick()
         compose.onNodeWithText("MARCH 2026").performClick()
         compose.waitForIdle()
         shoot("date-picker-months-nave")
@@ -201,7 +246,7 @@ class ScreenshotTest {
     @Test
     fun prayerForm() {
         show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE)
-        compose.onNodeWithText("PRAYER FORM", substring = true).performClick()
+        compose.onNodeWithText("Prayer form", substring = true).performClick()
         compose.waitForIdle()
         shoot("prayer-form-nave")
     }
@@ -243,6 +288,42 @@ class ScreenshotTest {
         val on = ReminderStore(ApplicationProvider.getApplicationContext()).load().copy(on = true)
         show(Page.Reminders, ThemeChoice.APSE, reminders = on, status = ReminderStatus(notificationsAllowed = true, exactAllowed = false))
         shoot("reminders-on-apse")
+    }
+
+    @Test
+    @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
+    fun aboutNave() { show(Page.About, ThemeChoice.NAVE); shoot("about-nave") }
+
+    @Test
+    @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
+    fun aboutApse() { show(Page.About, ThemeChoice.APSE); shoot("about-apse") }
+
+    /** Matins chosen on the Horologium: the star under the horizon, the day's gilt put out. */
+    @Test
+    @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
+    fun aboutMatinsNave() {
+        show(Page.About, ThemeChoice.NAVE)
+        compose.onNodeWithContentDescription("Matins: The night office, before dawn, coming soon").performClick()
+        compose.waitForIdle()
+        shoot("about-matins-nave")
+    }
+
+    @Test
+    @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
+    fun aboutMatinsApse() {
+        show(Page.About, ThemeChoice.APSE)
+        compose.onNodeWithContentDescription("Matins: The night office, before dawn, coming soon").performClick()
+        compose.waitForIdle()
+        shoot("about-matins-apse")
+    }
+
+    /** About closes the phone's menu on every page, an hour's included. */
+    @Test
+    fun menuOnAbout() {
+        show(Page.About, ThemeChoice.NAVE)
+        compose.onNodeWithText("MENU").performClick()
+        compose.waitForIdle()
+        captureScreenRoboImage("build/screenshots/menu-about-nave.png")
     }
 
     /** Lauds, Sext, Vespers and Compline chosen, reminders on, following the sun at a place read today. */

@@ -8,6 +8,10 @@
 # Commons fallback: commons/blessed-virgin/{ref}
 # Intentional commons-only: add this feast id to data/audit-ok.txt
 #
+# Monastic Diurnal pp. 504-509: the Seven Sorrows are kept as a Memorial within the
+# Passiontide feria (antiphons, versicle and collect pp. 504-505, as the ordos
+# commemorate them), "or the following office", the Compassion B.V.M. (pp. 505-509).
+#
 # --- core ---
 #
 # [collect]
@@ -94,7 +98,7 @@
 # Vespers-only override for psalm antiphon 3.
 #
 # [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+# Vespers-only override for psalm antiphon 4; without one, Vespers takes Lauds antiphon 5, omitting the fourth.
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.
@@ -107,3 +111,193 @@
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[collect]
+# SOURCE: Monastic Diurnal pp. 505, 508 (Friday after Passion Sunday, Collect)
+O God, in whose Passion, according to the prophecy of Simeon, a sword of grief pierced through the well-beloved soul of the glorious Virgin Mother Mary: mercifully grant that we who devoutly call to mind her transfixion and suffering, may through the glorious merits and prayers of all the Saints who faithfully stood beside thy Cross, obtain the blessed fruit of thy Passion.
+
+[magnificat-antiphon-first]
+# SOURCE: Monastic Diurnal p. 504 (Memorial, At Vespers) and p. 507 (I Vespers, Ant. on Magnificat)
+Simeon * said unto Mary, Yea, a sword shall pierce through thine own soul also.
+
+[benedictus-antiphon]
+# SOURCE: Monastic Diurnal p. 505 (Memorial, At Lauds) and p. 508 (Ant. on Benedictus)
+When Jesus therefore * saw his mother standing by the cross, and the disciple whom he loved, he saith unto his mother, Woman, behold thy son! Then saith he to the disciple, Behold thy mother.
+
+[magnificat-antiphon]
+# SOURCE: Monastic Diurnal p. 509 (II Vespers: "Ant. on Magnificat, When Jesus therefore, as above at Lauds")
+@use proper/our-lady-of-sorrows-passion/benedictus-antiphon
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal pp. 504, 506 (Memorial, At Vespers; I Vespers after the hymn)
+V. Pray for us, O sorrowful Virgin.
+R. That we may be made worthy of the promises of Christ.
+
+[versicle-lauds]
+# SOURCE: Monastic Diurnal p. 505 (Memorial, At Lauds) and p. 508 (after the hymn)
+@use proper/our-lady-of-sorrows-passion/versicle-vespers
+
+[versicle-none]
+# SOURCE: Monastic Diurnal p. 509 (At None)
+@use proper/our-lady-of-sorrows-passion/versicle-vespers
+
+[hymn-doxology]
+# SOURCE: Monastic Diurnal p. 505 ("At Compline and at the Hours through None the Hymns end")
+@use proper/seven-sorrows-bvm/hymn-doxology
+
+[vespers-psalmody]
+# SOURCE: Monastic Diurnal p. 505 (I Vespers: "Ants. of Lauds, omitting the fourth. Psalms Credidi, Ad Dominum, Eripe me, and Voce mea"); II Vespers as at I Vespers, p. 509
+@use psalmody/vespers/compassion-bvm
+
+[psalm-antiphon]
+@use proper/our-lady-of-sorrows-passion/psalm-antiphon-1
+
+[psalm-antiphon-1]
+# SOURCE: Monastic Diurnal p. 507 (At Lauds and the Hours)
+I will get me * to the mountain of myrrh, and to the hill of frankincense.
+
+[psalm-antiphon-2]
+# SOURCE: Monastic Diurnal p. 507
+My beloved * is white and ruddy: the locks of his head are as royal purple, bound in tresses.
+
+[psalm-antiphon-3]
+# SOURCE: Monastic Diurnal p. 507
+Whither * is thy beloved gone, O thou fairest among women? whither is thy beloved turned aside?
+
+[psalm-antiphon-4]
+# SOURCE: Monastic Diurnal p. 507
+A bundle of myrrh * is my well-beloved unto me; he shall lie all night betwixt my breasts.
+
+[psalm-antiphon-5]
+# SOURCE: Monastic Diurnal p. 507
+Stay me with flagons, * comfort me with apples; for I am sick of love.
+
+[chapter-lauds]
+# SOURCE: Monastic Diurnal p. 507 (At Lauds)
+!Isa. 53:1, 2
+Who hath believed our report? and to whom is the arm of the Lord revealed? For he shall grow up before him as a tender plant, * and as a root out of a dry ground.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: Monastic Diurnal p. 505 (I Vespers: "Chapter as below at Lauds"); II Vespers as at I Vespers, p. 509
+@use proper/our-lady-of-sorrows-passion/chapter-lauds
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 508 (At Terce: "Chapter as above at Lauds")
+@use proper/our-lady-of-sorrows-passion/chapter-lauds
+
+[chapter-sext]
+# SOURCE: Monastic Diurnal pp. 508-509 (At Sext)
+!Isa. 53:5
+He was wounded for our transgressions, he was bruised for our iniquities: the chastisement of our peace was upon him; * and with his stripes we are healed.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: Monastic Diurnal p. 509 (At None)
+!Isa. 53:8
+Who shall declare his generation? for he was cut off out of the land of the living: * for the transgression of my people was he stricken.
+R. Thanks be to God.
+
+[short-responsory-vespers]
+# SOURCE: Monastic Diurnal p. 505 (I Vespers); II Vespers as at I Vespers, p. 509
+R. He hath made me * desolate.
+R. He hath made me * desolate.
+V. And faint all the day.
+R. Desolate.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. He hath made me * desolate.
+
+[short-responsory-lauds]
+# SOURCE: Monastic Diurnal p. 507 (At Lauds)
+R. O God, my life * I have declared unto thee.
+R. O God, my life * I have declared unto thee.
+V. Thou hast put my tears in thy sight.
+R. I have declared unto thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. O God, my life * I have declared unto thee.
+
+[versicle-terce]
+# SOURCE: Monastic Diurnal p. 508 (At Terce)
+V. My face is swollen with weeping.
+R. And on my eyelids is the shadow of death.
+
+[versicle-sext]
+# SOURCE: Monastic Diurnal p. 509 (At Sext)
+V. O God, my life I have declared unto thee.
+R. Thou hast put my tears in thy sight.
+
+[hymn-vespers]
+# SOURCE: Monastic Diurnal p. 506 (I Vespers, Hymn); II Vespers as at I Vespers, p. 509
+Stabat Mater dolorosa
+
+At the cross her station keeping,
+Stood the mournful Mother weeping,
+Where he hung, the dying Lord;
+
+For her soul, of joy bereaved,
+Bowed with anguish, deeply grieved,
+Felt the sharp and piercing sword.
+
+O how sad and sore distressed
+Now was she, that Mother blessed
+Of the sole-begotten One.
+
+Deep the woe of her affliction
+When she saw the crucifixion
+Of her ever-glorious Son.
+
+Who, on Christ's dear Mother gazing,
+Pierced by anguish so amazing,
+Born of woman, would not weep?
+
+Who, on Christ's dear Mother thinking,
+Such a cup of sorrow drinking,
+Would not share her sorrows deep?
+
+For his people's sins chastised,
+She beheld her Son despised,
+Scourged, and crowned with thorns entwined;
+
+Saw him then from judgment taken,
+And in death by all forsaken,
+Till his spirit he resigned.
+
+Mother, fount of love, O teach me,
+How thy sorrows deep may reach me,
+That with thee I may lament.
+
+Let my heart, fresh ardour gaining,
+Purer love for Christ attaining,
+Make his broken Heart content.
+
+Amen.
+
+[hymn-lauds]
+# SOURCE: Monastic Diurnal pp. 507-508 (At Lauds, Hymn)
+Virgo virginum præclara
+
+Virgin of all virgins fairest,
+O withhold not what thou bearest:
+Let thy sorrow on me fall;
+
+Make the death of Christ my burden;
+Let his passion be my guerdon,
+While his wounding I recall.
+
+Let his stripes and scourging smite me,
+At his holy Cross requite me,
+Let his Blood refresh me there.
+
+When the flames of hell would end me
+At the judgment day, defend me,
+Gentle Virgin, with thy prayer.
+
+Christ, when hence I go, receive me;
+Thine own palm of victory give me
+Through thy Mother, full of grace.
+
+When death ends my mortal story,
+Grant my soul within the glory
+Of thy Paradise a place.
+
+Amen.

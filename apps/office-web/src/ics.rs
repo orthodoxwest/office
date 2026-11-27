@@ -10,10 +10,6 @@ use crate::Server;
 use crate::http::{Query, header_value, http_error, response, set};
 use crate::web_time::{ics_stamp, load_location, parse_clock, wall_time};
 
-/// The hours in liturgical order, so a day's events are in sequence
-/// whatever the query's order.
-const HOUR_ORDER: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
-
 const DEFAULT_HORIZON_DAYS: i64 = 60;
 const MAX_HORIZON_DAYS: i64 = 366;
 
@@ -65,7 +61,8 @@ fn parse_days(spec: &str) -> Result<[bool; 7], String> {
 
 fn parse_config(q: &Query) -> Result<IcsConfig, String> {
     let mut hours = Vec::new();
-    for name in HOUR_ORDER {
+    // The hours in liturgical order, so a day's events are in sequence whatever the query's order.
+    for name in office::HOUR_NAMES {
         let v = q.get(name);
         if v.is_empty() {
             continue;

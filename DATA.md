@@ -22,7 +22,7 @@ data/
     shared/        texts reused across several files (Marian texts, formulas)
     chant/         GABC chant scores (psalms/, canticles/, hymns/)
   office/          hour structure definitions
-  review/          provenance attestations, prescreen flags, assurance baseline
+  review/          provenance attestations, composition requirements, ordo triage, repair backlog
 ```
 
 Feast files use `[section]` headers and `Key = value` lines; text files use
@@ -114,6 +114,7 @@ supported key):
 | `[commemoration-antiphon]`, `[commemoration-versicle]` | When commemorated |
 | `[commemoration-collect]` | When commemorated (defaults to `[collect]`) |
 | `[benedictus-antiphon-monday]`, `[collect-monday]`, `[collect-vespers-monday]`, … | In a Sunday's proper: that week's feria (the Lauds collect serves through None; a Lenten feria's Vespers collect only at Vespers, and when the feria is commemorated there) |
+| `[collect-vespers]` | In a day's own proper (the Lenten Ember Wednesday and Friday; Monday–Wednesday in Holy Week): the collect at Vespers, and when the day is commemorated there; `[collect]` still serves Lauds through None |
 
 ### Directives
 
@@ -123,7 +124,7 @@ supported key):
   composer drops the element (and any section left empty). Use it only where
   the books say an element is omitted, such as the Triduum's chapter, short
   responsory, hymn, and Vespers versicle. It is not allowed on a psalm antiphon
-  and is excluded from the lint, provenance, and zero-occurrence inventories.
+  and is excluded from the lint and provenance inventories.
 - `#` lines, including `# SOURCE:` provenance notes, are stripped by the loader
   and never render.
 

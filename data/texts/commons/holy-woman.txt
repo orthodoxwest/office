@@ -24,9 +24,6 @@ Come, O thou my chosen one, * and I will set my throne within thee, alleluia.
 # SOURCE: monastic diurnal, p. 52* (Common of Holy Women not Virgins, At Lauds)
 This woman * is beautiful among the daughters of Jerusalem.
 
-[psalm-antiphon-4-vespers]
-@use commons/holy-woman/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Holy Women not Virgins) — parish noted manual
 Give her * of the fruit of her hands; and let her own works praise her in the gates.

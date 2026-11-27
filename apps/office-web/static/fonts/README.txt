@@ -15,6 +15,14 @@ hold the remaining glyphs, which style.css loads only for pages that use
 them. The same tool writes the native apps' eb_garamond_{regular,italic}.ttf.
 Regenerate them all from the variable fonts, never from these files.
 
+eb-garamond-lyrics.nmet is those two faces' advance and kerning table, by
+which neuma measures a chant score's lyrics in the face every front draws
+them in (presentation::CHANT_LYRIC_METRICS; chant.js fetches it). Write it
+again whenever the faces change, with neuma's tool at the pinned rev:
+  neuma-metrics --regular apps/android/app/src/main/res/font/eb_garamond_regular.ttf \
+    --italic apps/android/app/src/main/res/font/eb_garamond_italic.ttf \
+    -o apps/office-web/static/fonts/eb-garamond-lyrics.nmet
+
 Noto Sans Symbols (The Noto Project Authors)
 Copyright 2022 The Noto Project Authors (https://github.com/notofonts/symbols)
 Licensed under the SIL Open Font License, Version 1.1.

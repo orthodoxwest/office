@@ -27,6 +27,7 @@ corpus.workspace = true
 office.workspace = true
 presentation.workspace = true
 render-blocks.workspace = true
+neuma-mobile.workspace = true
 uniffi.workspace = true
 miniz_oxide.workspace = true
 

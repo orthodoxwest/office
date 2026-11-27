@@ -19,10 +19,11 @@ import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.SeekableTransitionState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -46,6 +47,7 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,8 +59,10 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
@@ -68,10 +72,15 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import java.time.LocalDate
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.orthodoxwest.office.core.CourseMonthView
+import org.orthodoxwest.office.core.FeastPageView
+import org.orthodoxwest.office.core.FindView
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.OrdoMonthView
+import org.orthodoxwest.office.core.about
 import org.orthodoxwest.office.core.ordoYear
 
 /** The scrims `enableEdgeToEdge` gives a three-button navigation bar by default (Android 8–9). */
@@ -110,15 +119,35 @@ class MainActivity : ComponentActivity() {
             val dark = vm.theme.dark(isSystemInDarkTheme())
             LaunchedEffect(vm.theme, dark) { dress(vm.theme, dark) }
             val dissolve = rememberDissolve()
-            Box(Modifier.fillMaxSize().dissolving(dissolve)) {
+            // Home's crown turns the look over with a play of its own (Crown.kt): the choice is
+            // saved at the tap and shown at the play's turn; where there is no play, the Menu's
+            // dissolve. Any other change of theme, a new page, or the window going, ends it.
+            val crown = rememberCrown()
+            val context = LocalContext.current
+            crown.choice = { vm.theme }
+            crown.deviceDark = isSystemInDarkTheme()
+            crown.animationScale = { Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) }
+            crown.save = vm::keepTheme
+            crown.apply = vm::chooseTheme
+            crown.plain = { t -> dissolve.change { vm.chooseTheme(t) } }
+            val haptics = LocalHapticFeedback.current
+            crown.closing = { haptics.cameToRest() }
+            LaunchedEffect(vm.shown?.entry) { crown.cut() }
+            DisposableEffect(crown) { onDispose { crown.finish() } }
+            Box(Modifier.fillMaxSize().dissolving(dissolve).crowning(crown)) {
                 OfficeTheme(choice = vm.theme, textSize = vm.textSize, season = vm.season) {
-                    CompositionLocalProvider(LocalAfterPrime provides AfterPrimeChoice(vm.afterPrime) { a -> if (a != vm.afterPrime) vm.chooseAfterPrime(a) }) {
+                    CompositionLocalProvider(
+                        LocalCrown provides crown,
+                        LocalAfterPrime provides AfterPrimeChoice(vm.afterPrime) { a -> if (a != vm.afterPrime) vm.chooseAfterPrime(a) },
+                        LocalChant provides ChantChoice(vm.offersChant, vm.chant) { on -> if (on != vm.chant) vm.chooseChant(on) },
+                    ) {
                         OfficeApp(
                             shown = vm.shown,
                             behind = vm.behind,
                             motion = vm.motion,
                             onBack = { vm.back() },
                             today = vm.today,
+                            clockHour = vm.clockHour,
                             hours = vm.hours,
                             form = vm.form,
                             theme = vm.theme,
@@ -128,7 +157,10 @@ class MainActivity : ComponentActivity() {
                             onOpen = vm::open,
                             onHome = vm::goHome,
                             onForm = vm::chooseForm,
-                            onTheme = { t -> if (t != vm.theme) dissolve.change { vm.chooseTheme(t) } },
+                            onTheme = { t ->
+                                crown.finish()
+                                if (t != vm.theme) dissolve.change { vm.chooseTheme(t) }
+                            },
                             onTextSize = { t -> if (t != vm.textSize) dissolve.change { vm.chooseTextSize(t) } },
                             reminders = vm.reminders,
                             reminderStatus = vm.reminderStatus,
@@ -139,7 +171,11 @@ class MainActivity : ComponentActivity() {
                             onAllowExact = ::openExactAlarmSettings,
                             onFollowSun = ::followSun,
                             onAllowLocation = ::openAppSettings,
+                            onSearch = vm::search,
+                            onFindAgain = vm::findAgain,
+                            pageUnder = vm::pageUnder,
                             entries = vm.entries.map { it.id },
+                            newcomer = vm.newcomer,
                         )
                     }
                 }
@@ -154,6 +190,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        vm.inFront = true
         vm.refreshReminderStatus()
         // Every visit keeps the alarm window running ahead, and the widget current; following the
         // sun, the place is read again and the schedule follows it once it comes.
@@ -164,6 +201,11 @@ class MainActivity : ComponentActivity() {
         vm.refreshClock()
         // A return on a new day is that day's visit.
         vm.countVisit()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        vm.inFront = false
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -247,7 +289,7 @@ class MainActivity : ComponentActivity() {
 
 /**
  * The app on its plaster wall, for the screenshot tests: `page` shown with whichever of `home`,
- * `hour` and `ordo` is its content, still.
+ * `hour`, `ordo` and the year's `course` is its content, still. `newcomer` is a reader's first week.
  */
 @Composable
 fun OfficeApp(
@@ -278,12 +320,22 @@ fun OfficeApp(
     onAllowLocation: () -> Unit = {},
     entry: Long = 0,
     entries: List<Long> = listOf(entry),
+    newcomer: Boolean = false,
+    find: FindView? = null,
+    feast: FeastPageView? = null,
+    course: List<CourseMonthView>? = null,
+    pageUnder: (Long) -> Page? = { null },
+    // Home's screenshots are composed at 6 pm; About lights the same hour.
+    clockHour: Int = 18,
 ) {
     val content = when {
         error != null -> Content.Failed(error)
         page is Page.Home -> home?.let(Content::Home)
         page is Page.Hour -> hour?.takeIf { it.hour == page.hour }?.let(Content::Hour)
         page is Page.Ordo -> ordo?.takeIf { it.year == page.year && it.month == page.month }?.let(Content::Ordo)
+        page is Page.Find -> find?.let(Content::Find)
+        page is Page.Feast -> feast?.takeIf { it.id == page.id }?.let(Content::Feast)
+        page is Page.Year || page is Page.About -> Content.Year(course.orEmpty())
         else -> Content.Drawn
     }
     OfficeApp(
@@ -292,6 +344,7 @@ fun OfficeApp(
         motion = Motion.FADE,
         onBack = null,
         today = today,
+        clockHour = clockHour,
         hours = hours,
         form = form,
         theme = theme,
@@ -311,14 +364,17 @@ fun OfficeApp(
         onAllowExact = onAllowExact,
         onFollowSun = onFollowSun,
         onAllowLocation = onAllowLocation,
+        pageUnder = pageUnder,
         entries = entries,
+        newcomer = newcomer,
     )
 }
 
 /**
  * The app on its plaster wall: the page shown, under the shared header and menu. A new page
  * comes in as `motion` says, over the wall, once its content is ready; until then the page
- * before it stays. With `onBack`, the back gesture draws the page `behind` in as it is made.
+ * before it stays. With `onBack`, the back gesture draws the page `behind` in as it is made. In a
+ * reader's first week (`newcomer`) home offers the introduction.
  */
 @Composable
 fun OfficeApp(
@@ -327,6 +383,8 @@ fun OfficeApp(
     motion: Motion,
     onBack: (() -> Unit)?,
     today: LocalDate,
+    /** The clock hour (0–23) at the last minute's check: About lights it and invites to it (tests: 6 pm, as home's). */
+    clockHour: Int = 18,
     hours: List<String>,
     form: String,
     theme: ThemeChoice,
@@ -346,11 +404,18 @@ fun OfficeApp(
     onAllowExact: () -> Unit,
     onFollowSun: (Boolean) -> Unit = {},
     onAllowLocation: () -> Unit = {},
+    onSearch: (String) -> Unit = {},
+    onFindAgain: () -> Unit = { onOpen(Page.Find("")) },
+    pageUnder: (Long) -> Page? = { null },
     entries: List<Long>,
+    newcomer: Boolean = false,
 ) {
-    var menu by remember { mutableStateOf(false) }
-    // The wide header's Settings panel: the theme and text size.
-    var settings by remember { mutableStateOf(false) }
+    // About's words are the core's, the menu's name for the page and home's introduction among them.
+    val aboutView = remember { about() }
+    // The menu, or on a wide screen the header's Settings panel (the theme and text size).
+    var overlay by remember { mutableStateOf(Overlay.NONE) }
+    // Whatever moves to another page puts it away, a link in the page as well as the header's.
+    LaunchedEffect(entries.lastOrNull()) { overlay = Overlay.NONE }
     // Each visit keeps its own scroll position and open sections, for Back and for a return
     // after Android has closed the app; a visit's state goes when it leaves the way back.
     val visits = rememberSaveableStateHolder()
@@ -369,8 +434,7 @@ fun OfficeApp(
         PredictiveBackHandler(enabled = entries.size > 1) { progress ->
             val under = behind
             try {
-                menu = false
-                settings = false
+                overlay = Overlay.NONE
                 if (under != null) {
                     revealing = true
                     progress.collect { screen.seekTo(it.progress, under) }
@@ -389,7 +453,11 @@ fun OfficeApp(
     }
     // The web's desktop composition from its breakpoint up: a tablet, or a phone on its side.
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        CompositionLocalProvider(LocalWide provides (maxWidth >= WideFrom), LocalRanked provides (maxWidth >= WideFrom && maxWidth < RankedBelow), LocalPrefs provides Prefs(theme, onTheme, textSize, onTextSize)) {
+        // The menu belongs to the narrow screen and Settings to the wide one: neither survives a
+        // rotation or resize across the breakpoint, to come back later unasked.
+        val wide = maxWidth >= WideFrom
+        LaunchedEffect(wide) { overlay = Overlay.NONE }
+        CompositionLocalProvider(LocalWide provides wide, LocalRanked provides (maxWidth >= WideFrom && maxWidth < RankedBelow), LocalPrefs provides Prefs(theme, onTheme, textSize, onTextSize)) {
             PlasterWall()
             // The wall runs under the bars; the page keeps clear of them at the sides (the screens
             // take the top and bottom themselves, so their backgrounds run under the bars).
@@ -401,18 +469,14 @@ fun OfficeApp(
                 contentKey = { it?.entry?.id },
             ) { visit ->
                 if (visit == null) {
-                    Message("Preparing the office…", insets)
+                    Preparing(insets)
                     return@AnimatedContent
                 }
                 val page = visit.entry.page
                 val front = visit.entry.id == screen.targetState?.entry?.id
-                val onHourPage = page as? Page.Hour
                 val nav = SiteNav(
-                    hours = hours,
-                    currentHour = onHourPage?.hour,
-                    onHour = onHourPage?.let { h -> { name: String -> menu = false; onOpen(Page.Hour(h.date, name)) } },
                     onOrdo = {
-                        menu = false
+                        overlay = Overlay.NONE
                         // The ordo at the day shown, as the web's /calendar opens at today's row.
                         onOpen(
                             when (page) {
@@ -420,52 +484,64 @@ fun OfficeApp(
                                 is Page.Hour -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
                                 is Page.Ordo -> Page.Ordo(page.year, page.month)
                                 is Page.Year -> Page.Year(page.year)
-                                Page.Reminders -> Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
+                                Page.Reminders, Page.About, is Page.Find, is Page.Feast -> Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
                             },
                         )
                     },
-                    ordoCurrent = page is Page.Ordo || page is Page.Year,
-                    onReminders = { menu = false; onOpen(Page.Reminders) },
+                    ordoCurrent = page is Page.Ordo || page is Page.Year || page is Page.Find || page is Page.Feast,
+                    onReminders = { overlay = Overlay.NONE; onOpen(Page.Reminders) },
                     remindersCurrent = page is Page.Reminders,
-                    settingsOpen = settings,
-                    onSettings = { settings = !settings },
+                    about = aboutView.menu,
+                    onAbout = { overlay = Overlay.NONE; onOpen(Page.About) },
+                    aboutCurrent = page is Page.About,
+                    settingsOpen = overlay == Overlay.SETTINGS,
+                    onSettings = { overlay = overlay.toggled(Overlay.SETTINGS) },
                 )
                 val chrome: @Composable () -> Unit = {
-                    SiteHeader(onHome = { menu = false; settings = false; onHome() }, menuOpen = menu, onMenu = { menu = !menu }, nav = nav)
+                    SiteHeader(
+                        onHome = { overlay = Overlay.NONE; onHome() },
+                        menuOpen = overlay == Overlay.MENU,
+                        onMenu = { overlay = overlay.toggled(Overlay.MENU) },
+                        nav = nav,
+                    )
                     // Only the page in front opens the menu: the one leaving keeps none.
                     if (front && !LocalWide.current) {
                         MenuPanel(
-                            visible = menu,
-                            currentHour = nav.currentHour,
-                            onHour = nav.onHour,
+                            visible = overlay == Overlay.MENU,
                             onOrdo = nav.onOrdo,
                             onOrdoCurrent = nav.ordoCurrent,
                             onReminders = nav.onReminders,
                             onRemindersCurrent = nav.remindersCurrent,
+                            about = nav.about,
+                            onAbout = nav.onAbout,
+                            onAboutCurrent = nav.aboutCurrent,
                             theme = theme,
                             onTheme = onTheme,
                             textSize = textSize,
                             onTextSize = onTextSize,
-                            onDismiss = { menu = false },
+                            onDismiss = { overlay = Overlay.NONE },
                             topOffset = insets.calculateTopPadding() + 52.dp,
                         )
                     }
                     if (front && LocalWide.current) {
-                        // Under the header's end: the nav shell is held to 68rem and centred.
-                        val width = LocalConfiguration.current.screenWidthDp.dp
+                        // Under the header's end: the nav shell is held to 68rem and centred. The width is
+                        // in the text size's dp, as the shell's 1088dp is, so the panel keeps to the
+                        // Settings button at every size; the shell stands between the side insets.
+                        val width = this@BoxWithConstraints.maxWidth - insets.calculateStartPadding(direction) - insets.calculateEndPadding(direction)
                         MenuPanel(
-                            visible = settings,
-                            currentHour = null,
-                            onHour = null,
+                            visible = overlay == Overlay.SETTINGS,
                             onOrdo = nav.onOrdo,
                             onOrdoCurrent = nav.ordoCurrent,
                             onReminders = nav.onReminders,
                             onRemindersCurrent = nav.remindersCurrent,
+                            about = nav.about,
+                            onAbout = nav.onAbout,
+                            onAboutCurrent = nav.aboutCurrent,
                             theme = theme,
                             onTheme = onTheme,
                             textSize = textSize,
                             onTextSize = onTextSize,
-                            onDismiss = { settings = false },
+                            onDismiss = { overlay = Overlay.NONE },
                             topOffset = insets.calculateTopPadding() + 52.dp,
                             prefsOnly = true,
                             end = ((width - 1088.dp) / 2).coerceAtLeast(0.dp) + Gutter,
@@ -480,6 +556,7 @@ fun OfficeApp(
                             content is Content.Failed -> Message(content.message, insets)
                             page is Page.Home && content is Content.Home -> HomeScreen(
                                 view = content.view,
+                                lightMoves = content.seen,
                                 date = page.date,
                                 today = today,
                                 chrome = chrome,
@@ -487,6 +564,9 @@ fun OfficeApp(
                                 onDate = { onOpen(Page.Home(it)) },
                                 onHour = { d, h -> onOpen(Page.Hour(d, h)) },
                                 onOrdoDay = { onOpen(Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)) },
+                                onFeast = { onOpen(Page.Feast(it)) },
+                                introduction = aboutView.introduction.takeIf { newcomer },
+                                onIntroduction = { onOpen(Page.About) },
                             )
                             page is Page.Hour && content is Content.Hour -> HourScreen(
                                 view = content.view,
@@ -500,6 +580,8 @@ fun OfficeApp(
                                 onForm = onForm,
                                 onHour = { d, h -> onOpen(Page.Hour(d, h)) },
                                 onAllHours = { onOpen(Page.Home(page.date)) },
+                                onFeast = { onOpen(Page.Feast(it)) },
+                                onAbout = { onOpen(Page.About) },
                             )
                             page is Page.Ordo && content is Content.Ordo -> OrdoScreen(
                                 month = content.view,
@@ -512,10 +594,34 @@ fun OfficeApp(
                                 onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
                                 onYear = { onOpen(Page.Year(it)) },
                                 onDay = { onOpen(Page.Home(it)) },
+                                onFind = { onOpen(Page.Find("")) },
+                                onFeast = { onOpen(Page.Feast(it)) },
                                 focusDay = page.day,
+                            )
+                            page is Page.Find && content is Content.Find -> FindScreen(
+                                view = content.view,
+                                query = page.query,
+                                chrome = chrome,
+                                insets = insets,
+                                onQuery = onSearch,
+                                onFeast = { onOpen(Page.Feast(it)) },
+                                onDay = { onOpen(Page.Home(it)) },
+                            )
+                            page is Page.Feast && content is Content.Feast -> FeastScreen(
+                                view = content.view,
+                                chrome = chrome,
+                                insets = insets,
+                                // Named for the day or the ordo it was opened from, and back to it as
+                                // Back goes (the web's `back_link`); else the search.
+                                back = feastBack(pageUnder(visit.entry.id), today),
+                                onBack = { onBack?.invoke() },
+                                onFind = onFindAgain,
+                                onFeast = { onOpen(Page.Feast(it)) },
+                                onDay = { onOpen(Page.Home(it)) },
                             )
                             page is Page.Year -> OrdoYearScreen(
                                 view = remember(page.year) { ordoYear(page.year) },
+                                course = (content as? Content.Year)?.course,
                                 today = today,
                                 chrome = chrome,
                                 insets = insets,
@@ -523,6 +629,8 @@ fun OfficeApp(
                                 onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
                                 onYear = { onOpen(Page.Year(it)) },
                                 onDay = { onOpen(Page.Ordo(it.year, it.monthValue, it.dayOfMonth)) },
+                                onFind = { onOpen(Page.Find("")) },
+                                onFeast = { onOpen(Page.Feast(it)) },
                             )
                             page is Page.Reminders -> RemindersScreen(
                                 settings = reminders,
@@ -538,7 +646,17 @@ fun OfficeApp(
                                 onFollowSun = onFollowSun,
                                 onAllowLocation = onAllowLocation,
                             )
-                            else -> Message("Preparing the office…", insets)
+                            page is Page.About -> AboutScreen(
+                                view = aboutView,
+                                today = today,
+                                clockHour = clockHour,
+                                reminders = reminders,
+                                chrome = chrome,
+                                insets = insets,
+                                onOpen = onOpen,
+                                course = (content as? Content.Year)?.course,
+                            )
+                            else -> Preparing(insets)
                         }
                     }
                 }
@@ -557,16 +675,38 @@ private val TRAVEL = 30.dp
  * governs it, so Remove animations shows each page at once.
  */
 private fun AnimatedContentTransitionScope<Shown?>.moving(motion: Motion, travel: Int): ContentTransform {
+    // The wall first: on a launch, home comes into the light on the wall the splash showed, over
+    // Tempo's dim, opacity only (iOS's `Loaded` does the same once a launch). Only from nothing
+    // composed yet, so never on a return to home within the session.
+    if (initialState == null && targetState?.entry?.page is Page.Home) {
+        return fadeIn(Tempo.dimIn.spec()) togetherWith ExitTransition.None using null
+    }
     val transform = when (motion) {
-        Motion.FADE -> fadeIn(tween(210, delayMillis = 90, easing = LinearOutSlowInEasing)) togetherWith
-            fadeOut(tween(90, easing = FastOutLinearInEasing))
+        Motion.FADE -> fadeIn(Tempo.turnIn.spec()) togetherWith fadeOut(Tempo.turnOut.spec())
         else -> {
             val on = if (motion == Motion.BACK || motion == Motion.PREVIOUS) -1 else 1
-            (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { on * travel } + fadeIn(tween(210, delayMillis = 90, easing = LinearOutSlowInEasing))) togetherWith
-                (slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -on * travel } + fadeOut(tween(90, easing = FastOutLinearInEasing)))
+            (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { on * travel } + fadeIn(Tempo.turnIn.spec())) togetherWith
+                (slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -on * travel } + fadeOut(Tempo.turnOut.spec()))
         }
     }
     return transform using null
+}
+
+/**
+ * "Preparing the office…", only when composing takes long enough to be noticed: it waits 400ms and
+ * then fades in over 200, so a quick open or cold start never flashes it (the iOS app's `Preparing`).
+ */
+@Composable
+private fun Preparing(insets: PaddingValues) {
+    var shown by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(400)
+        shown = true
+    }
+    val fade by animateFloatAsState(if (shown) 1f else 0f, tween(200, easing = LinearOutSlowInEasing), label = "preparing")
+    Box(Modifier.fillMaxSize().alpha(fade).then(if (shown) Modifier else Modifier.clearAndSetSemantics {})) {
+        Message("Preparing the office…", insets)
+    }
 }
 
 @Composable

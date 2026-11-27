@@ -1,9 +1,23 @@
 name: iOS
 
 # Builds the iOS app for the simulator on macOS, runs its tests there, and renders review
-# screenshots of the app at fixed dates. The screenshots and the build log are uploaded as an
-# artifact and also force-pushed to the branch ci/ios-screenshots/<branch>, one commit holding
-# the latest run's files, so they can be read with git where artifact downloads are not reachable.
+# screenshots of the app at fixed dates (apps/ios/screenshots.sh). The screenshots and the logs
+# are uploaded as an artifact and also force-pushed to the branch ci/ios-screenshots/<branch>,
+# one commit holding the latest run's files, so they can be read with git where artifact
+# downloads are not reachable; a pull request's comment shows the changed ones inline.
+#
+#   build    the Rust core (cached by its inputs), the app and its tests, once, no simulator
+#   test     the unit tests on the phone          } each on its own runner, booting only its
+#   shoot    the phone's shots, the iPad's shots  } own simulator, in parallel
+#   report   on Linux: the comparison, the artifacts, the screenshots branch
+#   comment  the pull request's comment
+#
+# The screenshots are compared with the baselines checked in at apps/ios/snapshots/
+# (scripts/ios-snapshots.py has the tolerance). A pull request whose shots changed fails, with
+# each changed shot beside its baseline in the ios-snapshot-diffs artifact; the
+# update-ios-snapshots label checks this run's shots in (update-ios-snapshots.yml). On master a
+# change is only a warning: master cannot take the label, so the next pull request that runs this
+# job takes them again.
 #
 # A pull request's paths filter looks at the whole pull request, so every push to one that ever
 # touched the app would run the whole job again. The `changes` job skips the build when the push
@@ -12,28 +26,53 @@ on:
   push:
     branches: [master]
     paths:
+      # Everything the app and its screenshots are built from: the app, the core and the corpus
+      # it embeds (apps/mobile-ffi/build.rs), the crates it composes with (one embeds the web's
+      # lyric metrics), the faces and plaster it shares with the Android app, and the comparison.
       - "apps/ios/**"
       - "!apps/ios/README.md"
       - "apps/mobile-ffi/**"
       - "crates/**"
-      - "apps/android/app/src/main/res/font/**"
-      - "apps/android/app/src/main/res/drawable-nodpi/**"
       - "data/**"
       - "Cargo.toml"
       - "Cargo.lock"
+      - "apps/office-web/static/fonts/eb-garamond-lyrics.nmet"
+      - "apps/android/app/src/main/res/font/**"
+      - "apps/android/app/src/main/res/drawable-nodpi/**"
+      - "scripts/ios-snapshots.py"
+      - "scripts/ios-snapshots-requirements.txt"
+      - "scripts/test_ios_snapshots.py"
       - ".github/workflows/ios.yml"
   pull_request:
     branches: [master]
     paths:
+      # Everything the app and its screenshots are built from: the app, the core and the corpus
+      # it embeds (apps/mobile-ffi/build.rs), the crates it composes with (one embeds the web's
+      # lyric metrics), the faces and plaster it shares with the Android app, and the comparison.
       - "apps/ios/**"
       - "!apps/ios/README.md"
       - "apps/mobile-ffi/**"
-      - "crates/render-blocks/**"
-      # The faces and plaster the iOS app shares with the Android app.
+      - "crates/**"
+      - "data/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "apps/office-web/static/fonts/eb-garamond-lyrics.nmet"
       - "apps/android/app/src/main/res/font/**"
       - "apps/android/app/src/main/res/drawable-nodpi/**"
+      - "scripts/ios-snapshots.py"
+      - "scripts/ios-snapshots-requirements.txt"
+      - "scripts/test_ios_snapshots.py"
       - ".github/workflows/ios.yml"
   workflow_dispatch:
+    inputs:
+      store:
+        description: "Shoot at the App Store's sizes (6.9-inch iPhone, 13-inch iPad)"
+        type: boolean
+        default: false
+      probe:
+        description: "Shoot the anchored hymn and psalm pages this many times each instead, and say whether every launch drew the same pixels (#948)"
+        type: string
+        default: ""
 
 concurrency:
   group: ios-${{ github.event.pull_request.number || github.ref }}
@@ -59,7 +98,7 @@ jobs:
           AFTER: ${{ github.event.pull_request.head.sha }}
           # The pull_request paths above, as patterns on a changed file's path.
           APP_PATHS: >-
-            ^apps/ios/|^apps/mobile-ffi/|^crates/render-blocks/|^apps/android/app/src/main/res/font/|^apps/android/app/src/main/res/drawable-nodpi/|^\.github/workflows/ios\.yml$
+            ^apps/ios/|^apps/mobile-ffi/|^crates/|^data/|^Cargo\.(toml|lock)$|^apps/office-web/static/fonts/eb-garamond-lyrics\.nmet$|^apps/android/app/src/main/res/font/|^apps/android/app/src/main/res/drawable-nodpi/|^scripts/(test_)?ios[-_]snapshots(-requirements\.txt|\.py)$|^\.github/workflows/ios\.yml$
         run: |
           build() { echo "$1"; echo "build=true" >> "$GITHUB_OUTPUT"; exit 0; }
           # Only a new push to an open pull request can be skipped; master and manual runs always build.
@@ -78,138 +117,366 @@ jobs:
           echo "Skipping: ${BEFORE::7}...${AFTER::7} changed nothing the app is built from, and the job passed on ${BEFORE::7}."
           echo "build=false" >> "$GITHUB_OUTPUT"
 
+  # The app and its tests, built once with no simulator running, for the jobs below to take.
   build:
-    name: Build, test and screenshot (simulator)
+    name: Build the app and its tests
     needs: changes
     if: needs.changes.outputs.build == 'true'
-    runs-on: macos-15
+    # Xcode 27's image (macOS 27), as testflight.yml, so the tests and shots use the SDK that ships.
+    runs-on: xcode-27
+    timeout-minutes: 40
     permissions:
-      # The screenshots branch.
-      contents: write
+      contents: read
 
     steps:
-      - uses: actions/checkout@v7
-
-      - name: Choose and boot the simulators
-        id: sim
-        run: |
-          # The newest runtime's iPhone 16 and an 11-inch iPad, else its first of each.
-          xcrun simctl list devices available -j > devices.json
-          pick() {
-            python3 - "$1" "$2" <<'PY'
-          import json, sys
-          family, preferred = sys.argv[1], sys.argv[2]
-          devices = json.load(open("devices.json"))["devices"]
-          ios = sorted((k for k in devices if "iOS" in k), key=lambda k: [int(x) for x in k.rsplit("iOS-", 1)[1].split("-")])
-          found = [d for d in devices[ios[-1]] if d["name"].startswith(family)]
-          exact = [d for d in found if d["name"] == preferred]
-          print((exact or [d for d in found if d["name"].startswith(preferred)] or found)[0]["udid"])
-          PY
-          }
-          phone=$(pick iPhone 'iPhone 16') ipad=$(pick iPad 'iPad Pro 11')
-          echo "udid=$phone" >> "$GITHUB_OUTPUT"
-          echo "ipad=$ipad" >> "$GITHUB_OUTPUT"
-          # A simulator's first boot takes minutes, so both start now, behind the builds, and the
-          # screenshots wait for them (simctl bootstatus).
-          for sim in "$phone" "$ipad"; do
-            nohup xcrun simctl boot "$sim" > "$RUNNER_TEMP/boot-$sim.log" 2>&1 &
-          done
-
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@1.94.1
+      - uses: actions/checkout@v7.0.1
         with:
-          targets: aarch64-apple-ios, aarch64-apple-ios-sim
+          persist-credentials: false
 
+      # The Xcode the baselines were taken with (screenshots.sh devices selects it), so the app is
+      # built with the one it is shot with. Nothing boots here: a booting simulator made every
+      # step behind it five to ten times slower (the Rust core's build 7 to 14 minutes, against a
+      # minute and a half on TestFlight's runner of the same image, which boots none).
+      - name: Choose Xcode
+        env:
+          STORE: ${{ inputs.store }}
+        run: |
+          if [ "$STORE" = true ]; then
+            apps/ios/screenshots.sh devices store
+          else
+            apps/ios/screenshots.sh devices
+          fi
+
+      # The XCFramework and its bindings come only from the Rust side, so a change to the app's
+      # Swift alone takes the last one built from the same inputs: the crates, the corpus the core
+      # embeds, the web files the crates include, the lockfile and the toolchain pin below.
+      - name: Restore the Rust core
+        id: core
+        uses: actions/cache@v6.1.0
+        with:
+          path: |
+            apps/ios/build/OfficeCore.xcframework
+            apps/ios/build/generated
+            apps/ios/build/include
+          key: ios-core-sim-1.100.0-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'crates/**', 'apps/mobile-ffi/**', 'data/**', 'apps/office-web/static/**', 'apps/office-web/templates/**', 'apps/ios/build-core.sh') }}
+
+      # Only the simulator's target: the device's library is TestFlight's.
+      - name: Set up Rust
+        if: steps.core.outputs.cache-hit != 'true'
+        uses: dtolnay/rust-toolchain@1.100.0
+        with:
+          targets: aarch64-apple-ios-sim
+
+      # Shared by name with update-ios-snapshots.yml, which can only read caches and so, under its
+      # own job's key, never found one: its core build ran cold, 11 to 13 minutes instead of 2½.
       - name: Cache Cargo
-        uses: Swatinem/rust-cache@v2
-
-      - name: Install XcodeGen
-        run: brew install xcodegen
+        if: steps.core.outputs.cache-hit != 'true'
+        uses: Swatinem/rust-cache@v2.9.3
+        with:
+          shared-key: ios-simulator
 
       - name: Build the Rust core and its Swift bindings
+        if: steps.core.outputs.cache-hit != 'true'
+        env:
+          # Only the simulator's library: the device's is TestFlight's, and costs two minutes here.
+          IOS_TARGETS: aarch64-apple-ios-sim
         run: apps/ios/build-core.sh
+
+      - name: Install XcodeGen
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+        run: brew install xcodegen
 
       - name: Generate the Xcode project
         working-directory: apps/ios
         run: xcodegen generate
 
-      - name: Build and test
+      # For any simulator, so no device need be ready; arm64 only, the one slice the core has.
+      # The products go to the jobs below as one tar, which keeps the app's symlinks and modes.
+      - name: Build the app and its tests
         working-directory: apps/ios
         run: |
-          # The whole log goes with the screenshots; the job log shows what failed.
-          mkdir -p build/review
-          if ! xcodebuild test -project Office.xcodeproj -scheme Office \
-            -destination "id=${{ steps.sim.outputs.udid }}" \
-            -derivedDataPath build/dd > build/review/xcodebuild.log 2>&1; then
-            grep -E "error:|: error|FAILED|failed|Undefined symbol" build/review/xcodebuild.log | head -n 120
-            tail -n 40 build/review/xcodebuild.log
+          mkdir -p build/logs
+          if ! xcodebuild build-for-testing -project Office.xcodeproj -scheme Office \
+            -destination 'generic/platform=iOS Simulator' ARCHS=arm64 \
+            -derivedDataPath build/dd > build/logs/xcodebuild-build.log 2>&1; then
+            grep -E "error:|: error|FAILED|failed|Undefined symbol" build/logs/xcodebuild-build.log | head -n 120
+            tail -n 40 build/logs/xcodebuild-build.log
             exit 1
           fi
-          grep -E "Test Case .*(passed|failed)|Executed [0-9]+ test" build/review/xcodebuild.log | tail -n 20
+          tar -C build/dd/Build -cf build/products.tar Products
+
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: ios-products
+          path: apps/ios/build/products.tar
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 1
+
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: ios-log-build
+          path: apps/ios/build/logs/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  test:
+    name: Test (iPhone simulator)
+    needs: build
+    runs-on: xcode-27
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Choose the simulators
+        id: sim
+        run: apps/ios/screenshots.sh devices >> "$GITHUB_OUTPUT"
+
+      # Before the boot: twice the download hung behind a booting simulator, and on a quiet
+      # runner it takes seconds. The limit is a guard against a hang all the same.
+      - uses: actions/download-artifact@v8.0.2
+        timeout-minutes: 3
+        with:
+          name: ios-products
+          path: apps/ios/build
+
+      - name: Unpack the build
+        working-directory: apps/ios
+        run: mkdir -p build/dd/Build && tar -C build/dd/Build -xf build/products.tar
+
+      - name: Start the phone booting
+        env:
+          PHONE: ${{ steps.sim.outputs.phone }}
+        run: apps/ios/screenshots.sh boot "$PHONE"
+
+      # xcodebuild lists no simulator at all, only placeholders, and fails while the image is
+      # still making its simulator runtime ready (seen on macos-26 with a booting phone), so the
+      # tests wait for the boot to finish.
+      - name: Wait for the phone to boot
+        env:
+          PHONE: ${{ steps.sim.outputs.phone }}
+        run: |
+          start=$SECONDS
+          apps/ios/screenshots.sh booted "$PHONE"
+          echo "booted after $((SECONDS - start))s of waiting"
+
+      - name: Test
+        working-directory: apps/ios
+        env:
+          PHONE: ${{ steps.sim.outputs.phone }}
+        run: |
+          mkdir -p build/logs
+          xctestrun=$(ls build/dd/Build/Products/*.xctestrun | head -n 1)
+          if ! xcodebuild test-without-building -xctestrun "$xctestrun" \
+            -destination "id=$PHONE" > build/logs/xcodebuild-test.log 2>&1; then
+            grep -E "error:|: error|FAILED|failed" build/logs/xcodebuild-test.log | head -n 120
+            tail -n 40 build/logs/xcodebuild-test.log
+            exit 1
+          fi
+          grep -E "Test Case .*(passed|failed)|Executed [0-9]+ test" build/logs/xcodebuild-test.log | tail -n 20
+
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: ios-log-test
+          path: apps/ios/build/logs/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # The phone's shots and the iPad's on runners of their own, each booting only its simulator.
+  # (Taken at once on one runner, each simulator's launches waited on the other's.)
+  shoot:
+    name: Screenshots (${{ matrix.device }})
+    needs: build
+    runs-on: xcode-27
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        device: [phone, ipad]
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Choose the simulators
+        id: sim
+        env:
+          STORE: ${{ inputs.store }}
+        run: |
+          # The Xcode, runtime and devices the baselines were taken with (their environment.json),
+          # else the image's newest iPhone 17 and 11-inch iPad Pro. A manual run with `store` takes
+          # the sizes App Store Connect asks for instead.
+          if [ "$STORE" = true ]; then
+            apps/ios/screenshots.sh devices store >> "$GITHUB_OUTPUT"
+          else
+            apps/ios/screenshots.sh devices >> "$GITHUB_OUTPUT"
+          fi
+
+      # Before the boot: twice the download hung behind a booting simulator, and on a quiet
+      # runner it takes seconds. The limit is a guard against a hang all the same.
+      - uses: actions/download-artifact@v8.0.2
+        timeout-minutes: 3
+        with:
+          name: ios-products
+          path: apps/ios/build
+
+      - name: Unpack the build
+        working-directory: apps/ios
+        run: mkdir -p build/dd/Build && tar -C build/dd/Build -xf build/products.tar
+
+      - name: Start the simulator booting
+        env:
+          SIM: ${{ steps.sim.outputs[matrix.device] }}
+        run: apps/ios/screenshots.sh boot "$SIM"
+
+      # Pillow, for the shots' blank test while they are taken (screenshots.sh).
+      - name: Set up the snapshot tools
+        run: |
+          python3 -m venv "$RUNNER_TEMP/snapshots"
+          "$RUNNER_TEMP/snapshots/bin/pip" install --quiet --require-hashes --only-binary :all: \
+            -r scripts/ios-snapshots-requirements.txt
 
       - name: Render screenshots
         working-directory: apps/ios
-        run: |
-          app=build/dd/Build/Products/Debug-iphonesimulator/Office.app
-          id=org.orthodoxwest.office
-          # Each page at a fixed day (DATE, else 15 March 2026), with today pinned to it.
-          shoot() {
-            sim=$1 name=$2
-            shift 2
-            day=${DATE:-2026-03-15}
-            xcrun simctl launch --terminate-running-process "$sim" "$id" -today "$day" -date "$day" "$@" > /dev/null
-            sleep 7
-            xcrun simctl io "$sim" screenshot "build/review/$name.png" > /dev/null
-          }
-          for sim in ${{ steps.sim.outputs.udid }} ${{ steps.sim.outputs.ipad }}; do
-            echo "$(date +%T) waiting for $sim to boot"
-            xcrun simctl bootstatus "$sim" -b > /dev/null
-            echo "$(date +%T) booted"
-            xcrun simctl ui "$sim" appearance light
-            xcrun simctl status_bar "$sim" override --time 9:41 --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4
-            xcrun simctl install "$sim" "$app"
-          done
-          phone=${{ steps.sim.outputs.udid }}
-          for theme in nave apse; do
-            shoot "$phone" "home-$theme" -page home -theme "$theme"
-            for hour in lauds vespers compline; do
-              shoot "$phone" "$hour-$theme" -page hour -hour "$hour" -theme "$theme"
-            done
-            shoot "$phone" "psalm-$theme" -page hour -hour vespers -anchor psalm -theme "$theme"
-            shoot "$phone" "hymn-$theme" -page hour -hour vespers -anchor hymn -theme "$theme"
-            shoot "$phone" "ordo-$theme" -page ordo -theme "$theme"
-            shoot "$phone" "year-$theme" -page year -theme "$theme"
-            shoot "$phone" "reminders-$theme" -page reminders -theme "$theme"
-          done
-          # Eastertide's warmer gilding.
-          DATE=2026-04-12 shoot "$phone" "easter-nave" -page hour -hour lauds -theme nave
-          # A first-class day's hour in its frame.
-          for theme in nave apse; do
-            DATE=2026-12-25 shoot "$phone" "christmas-$theme" -page hour -hour lauds -theme "$theme"
-          done
-          # The desktop composition on an iPad.
-          ipad=${{ steps.sim.outputs.ipad }}
-          for theme in nave apse; do
-            shoot "$ipad" "ipad-home-$theme" -page home -theme "$theme"
-            shoot "$ipad" "ipad-vespers-$theme" -page hour -hour vespers -theme "$theme"
-            shoot "$ipad" "ipad-ordo-$theme" -page ordo -theme "$theme"
-          done
-          shoot "$ipad" "ipad-year-nave" -page year -theme nave
-          shoot "$ipad" "ipad-settings-nave" -page home -theme nave -settings YES
+        env:
+          SNAPSHOT_PYTHON: ${{ runner.temp }}/snapshots/bin/python
+          PROBE: ${{ inputs.probe }}
+          DEVICE: ${{ matrix.device }}
+          SIM: ${{ steps.sim.outputs[matrix.device] }}
+        run: ./screenshots.sh shoot-one "$DEVICE" "$SIM" build/dd/Build/Products/Debug-iphonesimulator/Office.app build/review
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
-          name: ios-screenshots
+          name: ios-shots-${{ matrix.device }}
+          path: apps/ios/build/review/
+          if-no-files-found: warn
+          retention-days: 3
+
+  # On Linux: the comparison, the artifacts and the screenshots branch need no Mac.
+  report:
+    name: Compare and publish the screenshots
+    needs: [build, shoot]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # The screenshots branch.
+      contents: write
+    outputs:
+      snapshots: ${{ steps.compare.outputs.state }}
+      changes: ${{ steps.compare.outputs.changes }}
+      published: ${{ steps.publish.outputs.commit }}
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: ios-shots-*
+          merge-multiple: true
+          path: apps/ios/build/review
+
+      # The build's and the tests' logs go with the shots.
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: ios-log-*
+          merge-multiple: true
+          path: apps/ios/build/review
+
+      - name: Join the devices' environments
+        if: needs.shoot.result == 'success'
+        run: python3 scripts/ios-snapshots.py environment apps/ios/build/review
+
+      - name: Set up the snapshot tools
+        if: needs.shoot.result == 'success'
+        run: |
+          python3 -m venv "$RUNNER_TEMP/snapshots"
+          "$RUNNER_TEMP/snapshots/bin/pip" install --quiet --require-hashes --only-binary :all: \
+            -r scripts/ios-snapshots-requirements.txt
+
+      - name: Arrange the App Store's sets
+        if: ${{ inputs.store && needs.shoot.result == 'success' }}
+        run: |
+          "$RUNNER_TEMP/snapshots/bin/python" scripts/ios-snapshots.py store apps/ios/build/review apps/ios/build/review/store
+
+      - name: Say whether every launch drew the same pixels
+        if: ${{ inputs.probe && needs.shoot.result == 'success' }}
+        run: |
+          "$RUNNER_TEMP/snapshots/bin/python" scripts/ios-snapshots.py probe apps/ios/build/review --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: Compare with the checked-in baselines
+        id: compare
+        if: ${{ !inputs.store && !inputs.probe && needs.shoot.result == 'success' }}
+        run: |
+          "$RUNNER_TEMP/snapshots/bin/python" scripts/test_ios_snapshots.py
+          # Exits 1 when the shots differ, 2 when one is blank (its page not drawn) or none was
+          # taken; state= goes to the step's outputs and a section to the summary either way.
+          "$RUNNER_TEMP/snapshots/bin/python" scripts/ios-snapshots.py compare apps/ios/build/review apps/ios/snapshots \
+            --updates apps/ios/build/review/snapshots --diffs apps/ios/build/review/snapshot-diffs \
+            --changes "$RUNNER_TEMP/changes.json" \
+            --summary "$GITHUB_STEP_SUMMARY" --output "$GITHUB_OUTPUT" || [ $? -eq 1 ]
+          if [ -f "$RUNNER_TEMP/changes.json" ]; then
+            echo "changes=$(jq -c . "$RUNNER_TEMP/changes.json")" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: ios-screenshots${{ inputs.store && '-store' || '' }}${{ inputs.probe && '-probe' || '' }}
           path: apps/ios/build/review/
           if-no-files-found: warn
 
+      # The update-ios-snapshots label commits these instead of shooting again: the set the
+      # comparison would check in (unchanged baselines kept as they are). They come from the pull
+      # request's code, so that workflow validates them first.
+      - name: Upload snapshot candidates
+        if: >-
+          !inputs.store &&
+          steps.compare.outcome == 'success' &&
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: ios-snapshot-candidates
+          # The geometry notes are for review only; the baselines are the PNGs and environment.json.
+          path: |
+            apps/ios/build/review/snapshots/
+            !apps/ios/build/review/snapshots/*.geometry.txt
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Upload snapshot diffs
+        if: steps.compare.outputs.state == 'differ'
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: ios-snapshot-diffs
+          path: apps/ios/build/review/snapshot-diffs/
+          if-no-files-found: warn
+          retention-days: 14
+
+      # The commit's own address goes to the comment below, which shows the changed shots from it.
       - name: Publish the screenshots to a branch
+        id: publish
         # A fork's token cannot push; its run keeps the artifact.
         if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         env:
           GH_TOKEN: ${{ github.token }}
-          BRANCH: ci/ios-screenshots/${{ github.head_ref || github.ref_name }}
+          # The store-size set beside the review set, not over it.
+          BRANCH: ci/ios-screenshots/${{ github.head_ref || github.ref_name }}${{ inputs.store && '-store' || '' }}${{ inputs.probe && '-probe' || '' }}
         run: |
           [ -d apps/ios/build/review ] || exit 0
           cd apps/ios/build/review
@@ -218,3 +485,134 @@ jobs:
           git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" \
             commit -q -m "iOS screenshots for ${GITHUB_SHA::7}"
           git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$BRANCH"
+          commit=$(git rev-parse HEAD)
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+          echo "Every shot of this run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/tree/$commit" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail if a device's shots were not all taken
+        if: needs.shoot.result != 'success'
+        run: |
+          echo "::error::A screenshot job failed; its log and the shots it did take are in the ios-screenshots artifact."
+          exit 1
+
+      # Last, so the artifacts and the screenshots branch are there to look at.
+      - name: Fail if the screenshots differ
+        if: steps.compare.outputs.state == 'differ'
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = pull_request ]; then
+            echo "::error::The iOS screenshots differ from their baselines; see the summary and the ios-snapshot-diffs artifact."
+            exit 1
+          fi
+          echo "::warning::The iOS screenshots differ from their baselines; the next pull request that touches the app can take them again with the update-ios-snapshots label."
+
+  # Apart from the report, so the job that runs the pull request's code holds no token that can
+  # write to it.
+  comment:
+    name: Report the screenshot comparison
+    needs: report
+    if: >-
+      !cancelled() &&
+      needs.report.outputs.snapshots != '' &&
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Post or update the snapshot comment
+        uses: actions/github-script@v9.0.0
+        env:
+          STATE: ${{ needs.report.outputs.snapshots }}
+          CHANGES: ${{ needs.report.outputs.changes }}
+          PUBLISHED: ${{ needs.report.outputs.published }}
+        with:
+          script: |
+            const marker = '<!-- ios-snapshot-result -->';
+            const { owner, repo } = context.repo;
+            const runURL = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const state = process.env.STATE;
+            // The run's shots, from the commit the report pushed to the screenshots branch: the
+            // changed ones inline (baseline, this run, its differing pixels in red), so the change
+            // can be seen from the pull request, and a link to every shot.
+            const commit = /^[0-9a-f]{40}$/.test(process.env.PUBLISHED || '') ? process.env.PUBLISHED : '';
+            let changes = { changed: [], new: [], gone: [] };
+            try { changes = { ...changes, ...JSON.parse(process.env.CHANGES || '{}') }; } catch (_) {}
+            const safe = name => typeof name === 'string' && /^[A-Za-z0-9._-]{1,80}$/.test(name);
+            const raw = path => `https://raw.githubusercontent.com/${owner}/${repo}/${commit}/${path}`;
+            const browse = commit
+              ? `[Every shot this run took](${context.serverUrl}/${owner}/${repo}/tree/${commit}) is on the screenshots branch.\n\n`
+              : '';
+            const LIMIT = 24;
+            const pictures = () => {
+              if (!commit) return '';
+              const shown = [
+                ...changes.changed.filter(safe).map(n => [n, `snapshot-diffs/${n}.png`, 'changed: baseline, this run, differences in red', '100%']),
+                ...changes.new.filter(safe).map(n => [n, `snapshots/${n}.png`, 'new, no baseline', '320']),
+              ];
+              let out = shown.slice(0, LIMIT)
+                .map(([name, path, what, width]) => `**\`${name}\`** (${what})\n\n<img src="${raw(path)}" alt="${name}" width="${width}">\n`)
+                .join('\n');
+              if (shown.length > LIMIT) out += `\n…and ${shown.length - LIMIT} more in the run's summary.\n`;
+              const gone = changes.gone.filter(safe);
+              if (gone.length) out += `\nNo longer taken: ${gone.map(n => `\`${n}\``).join(', ')}.\n`;
+              return out ? `${out}\n` : '';
+            };
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
+            );
+            let body;
+            if (state === 'differ') {
+              body =
+                '## iOS screenshot mismatch detected\n\n' +
+                'The app built, but one or more simulator screenshots differ from the baselines in `apps/ios/snapshots/`. ' +
+                `The [run's summary](${runURL}) lists them, and its \`ios-snapshot-diffs\` artifact shows each beside its baseline.\n\n` +
+                pictures() + browse +
+                '**If this change is intentional** — add the `update-ios-snapshots` label to this PR. ' +
+                'GitHub Actions will push the screenshots this run took (or take them again, if this run has none for the current head) to this branch.\n\n' +
+                '**If this is unexpected** — inspect the diffs and fix the app before applying the label.\n\n' +
+                marker;
+            } else if (state === 'blank' || state === 'none') {
+              body =
+                '## iOS screenshots not taken\n\n' +
+                `[This run](${runURL}) has a blank screenshot (a page not drawn when it was shot) or none at all, so nothing was compared and nothing can be checked in. ` +
+                'Its summary names the shots; the fault is in the app or the run, not in a baseline.\n\n' +
+                browse +
+                marker;
+            } else if (state === 'not-compared') {
+              body =
+                '## iOS screenshots not compared\n\n' +
+                `This runner lacks the Xcode or simulator runtime the baselines were taken with, so [this run](${runURL}) compared nothing. ` +
+                'Add the `update-ios-snapshots` label to take the baselines again on the current image.\n\n' +
+                browse +
+                marker;
+            } else if (existing) {
+              // Matched, or no baselines yet: only an earlier comment needs correcting.
+              body = state === 'matched'
+                ? `## iOS screenshots passing\n\nThe simulator screenshots match their baselines.\n\n${browse}${marker}`
+                : `## iOS screenshots not compared\n\nThere are no baselines yet; [this run](${runURL}) compared nothing.\n\n${browse}${marker}`;
+            } else {
+              return;
+            }
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body,
+              });
+            }

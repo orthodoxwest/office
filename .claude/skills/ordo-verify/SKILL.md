@@ -10,7 +10,9 @@ an error-bearing PDF is not the target; a difference is a finding to diagnose.
 
 ## Authority and evidence
 
-Locate the available ordos in the resources directory; use the newest local
+Locate the available ordos in the resources directory (in a cloud session of the
+Daily Office project: the PDFs at the root of `/mnt/project-files/`, text extracts in
+`/mnt/project-files/sources/ordos/`; there is no 2020 ordo); use the newest local
 archdiocesan ordo for current practice. Set the comparison year explicitly
 rather than relying on script defaults. Older ordos are comparison witnesses,
 not grounds for overriding a newer appointment. A closed issue or an old
@@ -25,9 +27,9 @@ error to improve agreement.
 
 Read the printed page when an extracted instruction, scope, or wording is in
 doubt. Keep PDFs outside Git and generated evidence under ignored `output/`.
-Text discovery and transcription follow [the Diurnal pipeline](../../../scripts/DIURNAL-PIPELINE.md)
-and [AGENTS.md](../../../AGENTS.md), including independent readings and guarded
-corpus/attestation writes. Source verification does not certify an appointment or composed office.
+Use `scripts/diurnal-pages.py` to locate and inspect page images, and attest
+any text change with `office review attest` (see [REVIEWING.md](../../../REVIEWING.md)).
+Source verification does not certify an appointment or composed office.
 
 ## Capture a reproducible comparison
 
@@ -53,8 +55,10 @@ classifications instead of inheriting them as facts.
 
 For focused diagnostics, `python3 scripts/ordo-compare.py COMMAND REFERENCE APP`
 accepts `calendar`, `colors`, and `vespers` with `ours.txt`; `rubrics`,
-`commemorations`, and `antiphons` use `rubrics.tsv`. Prefer commemoration names
-to presence/absence alone. The generated ordo's Tabula supports separate checks
+`commemorations`, `antiphons` and `collects` use `rubrics.tsv`. Prefer commemoration names
+to presence/absence alone. `collects` compares each commemoration's collect with the
+Diurnal page (and quoted opening words) of the ordo's "Col. NNN", by way of the page in
+`data/review/provenance.csv`; only the 2023 and later ordos cite collect pages. The generated ordo's Tabula supports separate checks
 of computus and moveable dates.
 
 ## Diagnose before repairing
@@ -72,8 +76,6 @@ path. A verified text can still be selected for the wrong office. Useful tools:
 
 ```bash
 ./office review explain HOUR YYYY-MM-DD
-./office review resolution-inventory -start "$ORDO_YEAR" -years 1 -json \
-  > "$ORDO_RUN/resolution.json"
 ./office review provenance -start "$ORDO_YEAR" -years 1 \
   > "$ORDO_RUN/provenance.txt"
 ```
@@ -98,7 +100,12 @@ snapshots after reviewing why they changed. A documentation-only skill edit
 does not require a new annual parity sweep.
 
 Report comparable assertions, differences, cleared repair targets, and remaining
-uncertainty. Keep these measures distinct:
+uncertainty. For an engine or rule change, run the before/after comparison for
+every local ordo year, not just the one that prompted it, and state whether the
+change strictly improves parity: give strict agreement and agreement with known
+ordo errors excused side by side, and list any newly introduced differences. A
+fix keyed to a single year is not acceptable; generalize it or file a ruling.
+Keep these measures distinct:
 
 - Headline/incipit matches do not verify ranks, full wording, collects, psalmody,
   or complete office structure. Matins and Mass are outside this app's supported
@@ -111,9 +118,7 @@ uncertainty. Keep these measures distinct:
 For composition review, follow the source-requirement checklist in
 [REVIEWING.md](../../../REVIEWING.md#composition-review): record the cited rule,
 expected behavior, representative/boundary cases, and linked tests or open
-questions. `review plan` only supplies examples of observed engine behavior;
-its feature and sample counts are not completion measures. Whole-page signoffs
-are retired. Keep known incomplete Triduum work separate from ordinary-year
+questions. Keep known incomplete Triduum work separate from ordinary-year
 assessment.
 
 Do not turn the aggregate agreement percentage, old “known residue,” or the

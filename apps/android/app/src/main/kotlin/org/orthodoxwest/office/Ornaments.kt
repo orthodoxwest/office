@@ -2,6 +2,7 @@ package org.orthodoxwest.office
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,17 +11,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.background
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -31,23 +36,18 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -79,7 +79,7 @@ private val CrossArms = svg(
 )
 
 // The Lauds sun and the Vespers and Compline moon, viewBox 24×24.
-private val Sun = svg(
+internal val Sun = svg(
     "M17.20,12.00A5.2,5.2 0 1,0 6.80,12.00A5.2,5.2 0 1,0 17.20,12.00Z" +
         "M13.45,5.60 12.00,0.40 10.55,5.60Z" +
         "M16.46,7.18 16.70,3.86 13.94,5.73Z" +
@@ -94,10 +94,28 @@ private val Sun = svg(
         "M7.18,7.54 1.95,6.20 5.73,10.06Z" +
         "M10.06,5.73 7.30,3.86 7.54,7.18Z",
 )
-private val Moon = svg("M14.00 2.61A9.6 9.6 0 1 0 20.18 17.02A7.9 7.9 0 0 1 14.00 2.61Z")
+internal val Moon = svg("M14.00 2.61A9.6 9.6 0 1 0 20.18 17.02A7.9 7.9 0 0 1 14.00 2.61Z")
 
-/** Home's period glyphs (home.html), viewBox 24×16, filled: the rising sun, the sun, the moon. */
+/**
+ * The Horologium's sign at Matins (about.html's `.about-horologium-star`): the apse's eight-rayed
+ * star about its centre, 8.4 across, which the figure scales by 2.05.
+ */
+internal val HorologiumStar = svg(
+    "M0,-4.2 L0.8,-1.05 L1.9,-1.9 L1.05,-0.8 L4.2,0 L1.05,0.8 L1.9,1.9 L0.8,1.05 L0,4.2 L-0.8,1.05 " +
+        "L-1.9,1.9 L-1.05,0.8 L-4.2,0 L-1.05,-0.8 L-1.9,-1.9 L-0.8,-1.05 Z",
+)
+
+/**
+ * Home's period glyphs (home.html), viewBox 24×16, filled: the star of the night (four long rays,
+ * four short), the rising sun, the sun, the moon.
+ */
 enum class Period(val path: Path) {
+    NIGHT(
+        svg(
+            "M12.00,0.10L12.84,5.97L15.11,4.89L14.03,7.16L19.90,8.00L14.03,8.84L15.11,11.11L12.84,10.03" +
+                "L12.00,15.90L11.16,10.03L8.89,11.11L9.97,8.84L4.10,8.00L9.97,7.16L8.89,4.89L11.16,5.97Z",
+        ),
+    ),
     MORNING(
         svg(
             "M7.60,13.20A4.4,4.4 0 0,1 16.40,13.20ZM1.5,13.40h21v1.1h-21ZM7.36,10.03L3.32,9.60L6.48,12.16ZM8.92,8.50L3.66,4.86L7.30,10.12Z" +
@@ -223,7 +241,7 @@ private fun Sprig() {
 fun Headpiece(modifier: Modifier = Modifier) {
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
         Sprig()
-        Text("✠", style = TextStyle(fontFamily = CrossFont, fontSize = 11.sp, color = LocalPalette.current.lining))
+        Text("✠", Modifier.clearAndSetSemantics {}, style = TextStyle(fontFamily = CrossFont, fontSize = 11.sp, color = LocalPalette.current.lining))
         Sprig()
     }
 }
@@ -242,7 +260,7 @@ fun HourSign(hour: String) {
         "vespers", "compline" -> Canvas(Modifier.size(16.64.dp)) { fitted(24f, 24f) { drawPath(Moon, p.moonInk) } }
         // A step larger than the shared headpiece's cross (the web's 1rem against 0.8rem), nearer
         // the sun's and moon's weight in the rule's break.
-        else -> Text("✠", style = TextStyle(fontFamily = CrossFont, fontSize = 13.75.sp, color = p.lining))
+        else -> Text("✠", Modifier.clearAndSetSemantics {}, style = TextStyle(fontFamily = CrossFont, fontSize = 13.75.sp, color = p.lining))
     }
 }
 
@@ -326,12 +344,21 @@ fun DrawScope.quatrefoil(topLeft: Offset, side: Float, color: Color) {
  * the hour's end, home's crown and the header's mark.
  */
 @Composable
-fun ConsecrationCross(modifier: Modifier) {
-    val ink = LocalPalette.current.lining
-    Canvas(modifier) {
-        fitted(40f, 40f) {
-            drawPath(ConsecrationRing, ink)
-            drawPath(ConsecrationArms, ink)
+fun ConsecrationCross(modifier: Modifier, ink: Color = LocalPalette.current.lining, brush: Brush? = null, alpha: Float = 1f, pigment: androidx.compose.ui.graphics.ImageBitmap? = null) {
+    Canvas(modifier) { consecrationCross(ink, brush, alpha, pigment) }
+}
+
+/**
+ * The consecration cross drawn to this scope's size: home's crown draws it so, in the look the
+ * crown's play turns to (Crown.kt), before that look is the screen's.
+ */
+fun DrawScope.consecrationCross(ink: Color, brush: Brush? = null, alpha: Float = 1f, pigment: androidx.compose.ui.graphics.ImageBitmap? = null) {
+    // Home's painted cross lies unevenly, through the pigment; a gilt or leaf one is a brush.
+    val paint = brush ?: pigment?.let { pigmentBrush(it, 96f * 40f / size.width) }
+    val tint = if (brush == null && paint != null) androidx.compose.ui.graphics.ColorFilter.tint(ink, BlendMode.SrcIn) else null
+    fitted(40f, 40f) {
+        for (part in listOf(ConsecrationRing, ConsecrationArms)) {
+            if (paint != null) drawPath(part, paint, alpha = alpha, colorFilter = tint) else drawPath(part, ink, alpha = alpha)
         }
     }
 }
@@ -343,8 +370,8 @@ fun PaintedCross(modifier: Modifier, ink: Color = LocalPalette.current.lining) {
 }
 
 @Composable
-fun PeriodIcon(period: Period, color: Color, modifier: Modifier = Modifier) {
-    Canvas(modifier.size(19.dp, 13.dp).graphicsLayer { alpha = 0.7f }) {
+fun PeriodIcon(period: Period, color: Color, modifier: Modifier = Modifier, alpha: Float = 0.7f) {
+    Canvas(modifier.size(19.dp, 13.dp).graphicsLayer { this.alpha = alpha }) {
         fitted(24f, 16f) { drawPath(period.path, color) }
     }
 }
@@ -415,18 +442,29 @@ private fun DrawScope.tiles(w: Float, h: Float, seam: Float, draw: DrawScope.() 
 
 /**
  * The field a page's wall carries (apse-vault.md), home's and the hour's ending: by night the
- * Apse vault, the hand-set stars of one tile each at its own opacity in the gilding; by day the
+ * Apse vault, the hand-set stars of one tile each at its own opacity in the gilding, or with `sky`
+ * (the hour's ending) home's sky, its stars in the apse's matte leaf on one 384dp tile; by day the
  * Nave's powdering, one rosette to each cell of a quincunx in the rubrics' red at 12%, its tile
  * (96×168) never scaled. Tiled from the field's centre and from `seam` down it, and faded by
- * `fade`'s stops of (fraction, alpha), for the field's size in either theme.
+ * `fade`'s stops of (fraction, alpha), for the field's size in either theme. Unlit, the vault
+ * has no stars: a bare hour's under the veil, the Triduum's (the web's `hour-bare`).
  */
 @Composable
-fun WallField(modifier: Modifier, seam: Dp = 0.dp, fade: DrawScope.(dark: Boolean) -> List<Pair<Float, Float>>) {
+fun WallField(modifier: Modifier, seam: Dp = 0.dp, lit: Boolean = true, sky: Boolean = false, fade: DrawScope.(dark: Boolean) -> List<Pair<Float, Float>>) {
     val p = LocalPalette.current
-    val star = LocalOrnament.current.flat
+    val o = LocalOrnament.current
+    val star = o.flat
+    val leaf = remember(o) { Leaf(o).mid }
     val rosette = p.rubric.copy(alpha = 0.12f)
     Canvas(modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
-        if (p.dark) {
+        if (p.dark && sky) {
+            if (!lit) return@Canvas
+            val tile = SkyTile.dp.toPx()
+            tiles(tile, tile, seam.toPx()) {
+                scale(density, density, pivot = Offset.Zero) { for ((alpha, s) in SkyTileStars) drawPath(s, leaf, alpha = alpha) }
+            }
+        } else if (p.dark) {
+            if (!lit) return@Canvas
             val tile = vaultTile(size.width.toDp()).toPx()
             val k = tile / 528f
             tiles(tile, tile, seam.toPx()) {
@@ -443,14 +481,15 @@ fun WallField(modifier: Modifier, seam: Dp = 0.dp, fade: DrawScope.(dark: Boolea
     }
 }
 
+/** A gilt point, as the web's `.home-hour-link + .home-hour-link::before`: the ornament's gold at 70%, 3.5dp on its corner. */
+@Composable
+fun GiltPoint(modifier: Modifier = Modifier) {
+    val o = LocalOrnament.current
+    Canvas(modifier.size(5.dp)) { lozenge(center, 2.5.dp.toPx(), o.flat.copy(alpha = 0.7f), null) }
+}
+
 /** A hairline across the measure. */
 @Composable
 fun Hairline(color: Color, modifier: Modifier = Modifier) {
     Box(modifier.fillMaxWidth().height(1.dp).background(color))
-}
-
-/** A short vertical hairline between neighbouring items. */
-@Composable
-fun Divider(color: Color, height: Dp = 14.dp) {
-    Box(Modifier.width(1.dp).height(height).background(color))
 }

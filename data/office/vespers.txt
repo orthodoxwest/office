@@ -605,13 +605,14 @@ Ref = shared/formulas/closing-peace
 Condition = office-of-the-dead
 
 Type = versicle
-Ref = shared/formulas/rest-eternal
+Ref = shared/formulas/rest-eternal-versicle
 
 Type = versicle
 Ref = shared/formulas/may-they-rest-in-peace
 
 [Marian]
 Condition = not-appended-office-of-the-dead,not-office-of-the-dead,not-triduum
+Label = Final Antiphon of the Blessed Virgin Mary
 
 Type = marian
 Ref = seasonal

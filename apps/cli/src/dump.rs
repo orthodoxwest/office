@@ -18,11 +18,8 @@ const GROUP_CALENDAR: &str = "calendar";
 const GROUP_OFFICE: &str = "office";
 const GROUP_HOURS: &str = "hours";
 const GROUPS: [&str; 4] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE, GROUP_HOURS];
-pub(super) const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
-pub(super) const PRAYER_FORMS: [&str; 3] = ["private", "deacon", "priest"];
-
-/// Groups this engine can produce so far.
-const PORTED_GROUPS: [&str; 4] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE, GROUP_HOURS];
+pub(super) use office::HOUR_NAMES;
+pub(super) const PRAYER_FORMS: [&str; 3] = liturgy::PrayerForm::NAMES;
 
 const USAGE: &str = "usage: office dump -start YEAR [-years N] [-hours LIST] [-forms LIST] [-groups LIST] [-digest]
        office dump -dates YYYY-MM-DD,... [-hours LIST] [-forms LIST] [-groups LIST] [-digest]
@@ -107,9 +104,6 @@ impl Selection {
 }
 
 pub fn cmd_dump(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(), String> {
-    if args.first().is_some_and(|command| command == "diff") {
-        return crate::dump_tools::cmd_diff(&args[1..], out);
-    }
     let flags = Flags::parse_with_bools(args, &["start", "years", "dates", "hours", "forms", "groups"], &["digest"])
         .map_err(|e| format!("{e}\n{USAGE}"))?;
     if !flags.rest.is_empty() {
@@ -136,9 +130,6 @@ pub fn cmd_dump(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(
         sel.years = years;
     }
     let sel = sel.normalize()?;
-    if let Some(g) = sel.groups.iter().find(|g| !PORTED_GROUPS.contains(&g.as_str())) {
-        return Err(format!("the Rust engine does not produce the {g} record group yet (use -groups {})", PORTED_GROUPS.join(",")));
-    }
     let engine = if sel.has(GROUP_CORPUS) || sel.has(GROUP_HOURS) {
         Some(office::Engine::load(data).map_err(|e| format!("creating office engine: {e}"))?)
     } else {
@@ -262,7 +253,11 @@ pub(crate) fn generate_year(
 
 /// `None` is serialized as null.
 fn opt(s: &Option<String>) -> Value {
-    s.as_ref().map_or(Value::Null, |s| Value::String(s.clone()))
+    opt_str(s.as_deref())
+}
+
+fn opt_str(s: Option<&str>) -> Value {
+    s.map_or(Value::Null, |s| Value::String(s.to_string()))
 }
 
 fn day_str(d: Date) -> Value {
@@ -312,7 +307,7 @@ fn decisions(list: &[Decision]) -> Value {
 }
 
 /// One composed hour, for reading and diffing. The parity digest hashes the
-/// same fields straight from `OfficeHour` (see `dump_tools::hash_hour`).
+/// same fields straight from `OfficeHour` (see `parity::hash_hour`).
 fn hour_record(hour_name: &str, h: &OfficeHour) -> Value {
     let sections: Vec<Value> = h
         .sections
@@ -464,19 +459,19 @@ fn office_day_record(d: &CalendarDay, o: &office::OfficeDay) -> Value {
         "date": day_str(d.date),
         "marian_antiphon": {"lauds": marian("lauds"), "vespers": marian("vespers"), "compline": marian("compline")},
         "vespers": {
-            "owner": v.owner.as_str(),
-            "feast": feast(v.feast.as_deref()),
-            "color": v.color.map(|c| c.as_str()),
-            "season": v.season.map(|s| s.as_str()),
-            "within_octave_of": opt(&v.within_octave_of),
+            "owner": v.owner().as_str(),
+            "feast": feast(v.feast().map(|f| &**f)),
+            "color": v.color().map(|c| c.as_str()),
+            "season": v.season().map(|s| s.as_str()),
+            "within_octave_of": opt_str(v.within_octave_of()),
             "rule": v.rule,
             "decisions": decisions(&v.decisions),
             "commemorations": feasts(&v.commemorations),
-            "following_office_commemoration_id": opt(&v.following_office_commemoration_id),
-            "following_office_octave_of": opt(&v.following_office_octave_of),
-            "psalmody_from_preceding": v.psalmody_from_preceding,
-            "appended_office_of_the_dead": v.appended_office_of_the_dead,
-            "appended_feast": feast(v.appended_feast.as_deref()),
+            "following_office_commemoration_id": opt_str(v.following_office_commemoration_id()),
+            "following_office_octave_of": opt_str(v.following_office_octave_of()),
+            "psalmody_from_preceding": v.psalmody_from_preceding(),
+            "appended_office_of_the_dead": v.appended_office_of_the_dead(),
+            "appended_feast": feast(v.appended.as_deref()),
         },
     })
 }

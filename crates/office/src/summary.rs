@@ -15,6 +15,9 @@ use crate::engine::Engine;
 pub struct CommSummary {
     pub name: String,
     pub incipit: String,
+    /// The corpus key of the text the commemoration's collect prints (the end of its `@use`
+    /// chain), so the ordo cross-check can compare it with the ordo's "Col. NNN" page.
+    pub collect: String,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -26,6 +29,9 @@ pub struct HourSummary {
     pub gospel_ant_full: String,
     pub preces: bool,
     pub suffrage: bool,
+    /// The Commemoration of the Cross, said in Paschaltide where the Suffrage
+    /// would be (Rubrics XXXVIII.2; the ordos' "Comm. HC").
+    pub cross: bool,
     pub comms: Vec<CommSummary>,
 }
 
@@ -36,11 +42,15 @@ pub fn summarize_hour(hour: &OfficeHour) -> HourSummary {
         gospel_ant_full: String::new(),
         preces: false,
         suffrage: false,
+        cross: false,
         comms: Vec::new(),
     };
     for sec in &hour.sections {
         if sec.label.contains("Suffrage") {
             s.suffrage = true;
+        }
+        if sec.label.contains("Commemoration of the Cross") {
+            s.cross = true;
         }
         for (i, el) in sec.elements.iter().enumerate() {
             if el.kind == ElementType::Preces {
@@ -48,14 +58,15 @@ pub fn summarize_hour(hour: &OfficeHour) -> HourSummary {
             } else if el.kind == ElementType::Heading
                 && let Some(name) = el.text.strip_prefix("Commemoration of ")
             {
-                let mut c = CommSummary { name: name.to_string(), incipit: String::new() };
+                let mut c = CommSummary { name: name.to_string(), incipit: String::new(), collect: String::new() };
                 for next in &sec.elements[i + 1..] {
-                    if next.kind == ElementType::Antiphon {
-                        c.incipit = incipit(&next.text);
-                        break;
-                    }
                     if next.kind == ElementType::Heading {
                         break;
+                    }
+                    if next.kind == ElementType::Antiphon && c.incipit.is_empty() {
+                        c.incipit = incipit(&next.text);
+                    } else if next.slot_ref == "commemoration-collect" && c.collect.is_empty() {
+                        c.collect = next.source_refs.first().unwrap_or(&next.source_ref).clone();
                     }
                 }
                 s.comms.push(c);
@@ -113,9 +124,9 @@ pub fn ordo_day(day: &Day, engine: &Engine, moveable: &MoveableDates) -> OrdoDay
         lauds: summarize("lauds"),
         hours_preces: summarize("prime").is_some_and(|h| h.preces),
         vespers: summarize("vespers"),
-        vespers_note: match day.vespers.owner {
+        vespers_note: match day.vespers.owner() {
             VespersOwner::IIOfPreceding => "II Vespers of preceding".to_string(),
-            VespersOwner::IOfFollowing => day.vespers.feast.as_ref().map(|f| format!("I Vespers of {}", f.name)).unwrap_or_default(),
+            VespersOwner::IOfFollowing => day.vespers.feast().map(|f| format!("I Vespers of {}", f.name)).unwrap_or_default(),
             VespersOwner::NotApplicable => String::new(),
         },
     }

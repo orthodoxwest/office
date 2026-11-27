@@ -12,6 +12,7 @@ calendar.workspace = true
 corpus.workspace = true
 liturgy.workspace = true
 serde_json.workspace = true
+neuma.workspace = true
 
 [lints]
 workspace = true

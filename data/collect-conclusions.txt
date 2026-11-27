@@ -38,10 +38,9 @@
 # suffrage collects ARE referenced directly and keep their conclusions inline.
 # The Cross collect is also direct; its hour sections append the shared
 # through-same formula explicitly. These must NOT be listed here.
-# Note: resolveProperCollectText redirects terce/sext/none to the lauds collect
-# slot, so ordinary/{terce,sext,none}/collect are unreachable in practice (see
-# data/review/zero-occurrences.csv). They are classified anyway so that the data
-# stays correct if that redirect ever changes.
+# Note: Terce, Sext, and None redirect to the Lauds collect slot, so
+# ordinary/{terce,sext,none}/collect are unreachable in practice. They are
+# classified anyway so that the data stays correct if that redirect ever changes.
 
 # --- Addressed to the Son: "Who with God the Father ... livest and reignest" ---
 proper/advent-sunday-1/collect who-livest
@@ -54,6 +53,8 @@ proper/chair-peter-antioch/collect who-livest
 # This is the same collect whose Diurnal form is printed for the commemoration
 # of St Peter on p. 463 with "Who with God the Father ... livest".
 proper/comm-01-25-commemoration-of-st-peter/commemoration-collect who-livest
+# Diurnal p. 538 prints "Who with God the Father . . . livest" (St Paulinus of Nola).
+proper/comm-06-22-st-paulinus-bishop-and-confessor/commemoration-collect who-livest
 proper/corpus-christi/collect who-livest
 proper/corpus-christi/collect-lauds who-livest
 proper/finding-holy-cross/collect who-livest
@@ -67,6 +68,8 @@ proper/st-helen/collect who-livest
 proper/st-joseph/collect who-livest
 # The Diurnal prints this collect and its second-person ending directly (p. 604).
 proper/seven-sorrows-bvm/collect who-livest
+# Diurnal pp. 505, 508 print Who with God the Father . . . livest.
+proper/our-lady-of-sorrows-passion/collect who-livest
 # Diurnal pp. 177-178 print Who with God the Father ... livest.
 proper/advent-ember-friday/collect-lauds who-livest
 proper/advent-ember-saturday/collect-lauds who-livest
@@ -87,6 +90,7 @@ proper/holy-monday/collect who-liveth
 proper/holy-thursday/collect who-liveth
 proper/holy-saturday/collect who-liveth
 proper/holy-wednesday/collect who-liveth
+proper/holy-wednesday/collect-vespers who-liveth
 # The restored final Christ clauses are printed on pp. 265, 430, and 441.
 proper/laetare-sunday/collect who-liveth
 proper/pentecost-sunday-3/collect who-liveth
@@ -108,6 +112,9 @@ proper/st-stephen/commemoration-collect who-liveth
 # Same collect with the August wording adaptation (2026 ordo p. 86).
 proper/finding-st-stephen/collect who-liveth
 proper/vigil-nativity/collect who-liveth
+# The supplemental collects sheet (Nov 2026, p. 4) prints "Who liveth": the
+# prayer ends on "thy Son, Jesus Christ our Lord".
+proper/comm-05-24-st-vincent-of-lerins-confessor/commemoration-collect who-liveth
 # Diurnal p. 538 prints Who with thee ... liveth.
 proper/vigil-of-nativity-john-baptist/collect who-liveth
 
@@ -125,6 +132,8 @@ proper/epiphany/collect through-same
 # Printed "Through the same" in the Expectation B.V.M. supplement, p. 1.
 proper/expectation-bvm/collect through-same
 proper/holy-name-jesus/collect through-same
+# Diurnal p. 282 prints Tuesday in Holy Week's Lauds collect with "Through the same".
+proper/holy-tuesday/collect through-same
 proper/motherhood-bvm/collect through-same
 proper/nativity-sunday-within-octave/collect through-same
 proper/palm-sunday/collect through-same
@@ -132,6 +141,9 @@ proper/st-anne/collect through-same
 proper/st-joachim/collect through-same
 proper/transfiguration/collect through-same
 proper/vigil-epiphany/collect through-same
+# Diurnal pp. 489 and 510 print St Cyril's and St Justin's collects with "Through the same".
+proper/st-cyril-jerusalem/collect through-same
+proper/comm-04-14-st-justin-martyr/commemoration-collect through-same
 
 # --- The Holy Spirit is mentioned: "in the unity of the same Holy Ghost" ---
 proper/pentecost/collect through-spirit

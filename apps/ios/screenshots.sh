@@ -1,0 +1,357 @@
+#!/usr/bin/env bash
+# The simulator screenshots, for .github/workflows/ios.yml and update-ios-snapshots.yml.
+#
+#   screenshots.sh devices [store]   choose Xcode and the two simulators; prints phone=, ipad=
+#                                    and pinned= lines for $GITHUB_OUTPUT
+#   screenshots.sh boot SIM          start SIM booting in the background
+#   screenshots.sh shoot-one ROLE SIM APP OUT
+#                                    ROLE is phone or ipad: wait for SIM to boot, install APP and
+#                                    shoot that device's pages into OUT, with what they were taken
+#                                    with (environment-ROLE.json; scripts/ios-snapshots.py
+#                                    environment joins the two into environment.json)
+#   screenshots.sh shoot PHONE IPAD APP OUT
+#                                    both on one runner, one after the other, and the joined
+#                                    environment.json
+#
+# ios.yml shoots the phone and the iPad on runners of their own (shoot-one), each booting only
+# its own simulator; update-ios-snapshots.yml's fallback takes both on one (shoot).
+#
+# The checked-in baselines (apps/ios/snapshots/) record the Xcode, runtime and devices they were
+# taken with (environment.json). `devices` takes the same ones when the runner has them, and says
+# pinned=true; otherwise (or with `store`, or before any baselines exist) it takes the image's
+# default Xcode, an iPhone 17 and an 11-inch iPad Pro, each from the newest iOS runtime that has
+# it, and says pinned=false, since shots from another runtime differ in ways no page changed.
+set -euo pipefail
+
+here=$(cd "$(dirname "$0")" && pwd)
+recorded=$here/snapshots/environment.json
+
+devices() {
+  local store=${1:-}
+  local xcode="" runtime="" phone_name="" ipad_name="" pinned=false
+  if [ -z "$store" ] && [ -f "$recorded" ]; then
+    # Each value as scripts/ios-snapshots.py allows it (no newlines: they reach ::warning:: lines).
+    field() {
+      jq -er --arg k "$1" '.[$k] | select(type == "string" and test("^[A-Za-z0-9 ._()-]{1,100}$"))' "$recorded" \
+        || { echo "::error::$recorded: $1 is missing or malformed" >&2; exit 1; }
+    }
+    xcode=$(field xcode)
+    runtime=$(field runtime)
+    phone_name=$(field phone)
+    ipad_name=$(field ipad)
+    xcode=${xcode// /_}
+    # "26.1_17B55": the version and build of the Xcode the baselines were taken with.
+    local found=""
+    for app in /Applications/Xcode*.app; do
+      local plist=$app/Contents/version.plist
+      [ -f "$plist" ] || continue
+      local have
+      have="$(plutil -extract CFBundleShortVersionString raw -o - "$plist")_$(plutil -extract ProductBuildVersion raw -o - "$plist")"
+      if [ "$have" = "$xcode" ]; then found=$app; break; fi
+    done
+    if [ -n "$found" ]; then
+      sudo xcode-select -s "$found/Contents/Developer"
+      pinned=true
+    else
+      echo "::warning::The iOS baselines were taken with Xcode ${xcode/_/ build }, which this runner lacks; the screenshots will not be compared. Add the update-ios-snapshots label to a pull request to take them again on this image." >&2
+    fi
+  fi
+  xcodebuild -version >&2
+  xcrun simctl list devices available -j > "${RUNNER_TEMP:-/tmp}/devices.json"
+  local sdk_version
+  sdk_version=$(xcrun --sdk iphonesimulator --show-sdk-version)
+  pick() {
+    python3 - "${RUNNER_TEMP:-/tmp}/devices.json" "$1" "$2" "$3" "$4" "$sdk_version" <<'PY'
+import json, re, sys
+path, family, preferred, runtime, exact_name, sdk_version = sys.argv[1:]
+devices = json.load(open(path))["devices"]
+if runtime:
+    if runtime not in devices:
+        sys.exit(0)
+    found = [d for d in devices[runtime] if d["name"] == exact_name]
+else:
+    # The newest runtime this Xcode's simulator SDK can run that has the family: an image can
+    # carry a runtime newer than its default Xcode, whose devices xcodebuild cannot see.
+    # A key can carry a suffix after the version (Xcode 27.1's iOS-27-1-iPhone19-1 for a model
+    # with its own build), so only the leading numbers count.
+    version = lambda k: [int(x) for x in re.search(r"iOS-(\d+(?:-\d+)*)", k).group(1).split("-")]
+    sdk = [int(x) for x in sdk_version.split(".")]
+    # `preferred` is one or more models, best first, split by "|" (a store size's model changes
+    # with the image). A point release's runtime can carry only a new model (Xcode 27.1's iOS
+    # 27.1 has only the iPhone Duo), so the newest runtime with a preferred model wins, else the
+    # newest with the family.
+    usable = [k for k in devices if re.search(r"iOS-\d", k) and version(k) <= sdk]
+    has = lambda k, prefix: any(d["name"].startswith(prefix) for d in devices[k])
+    for prefix in [*preferred.split("|"), family]:
+        ios = sorted((k for k in usable if has(k, prefix)), key=version)
+        if ios:
+            break
+    if not ios:
+        sys.exit(0)
+    runtime = ios[-1]
+    found = [d for d in devices[runtime] if d["name"].startswith(prefix)]
+    exact = [d for d in found if d["name"] in preferred.split("|")]
+    found = exact or found
+if found:
+    print(found[0]["udid"], runtime, found[0]["name"], sep="\t")
+PY
+  }
+  local phone="" ipad=""
+  if [ "$pinned" = true ]; then
+    phone=$(pick iPhone '' "$runtime" "$phone_name")
+    ipad=$(pick iPad '' "$runtime" "$ipad_name")
+    if [ -z "$phone" ] || [ -z "$ipad" ]; then
+      echo "::warning::The iOS baselines were taken on $phone_name and $ipad_name with $runtime, which this runner lacks; the screenshots will not be compared. Add the update-ios-snapshots label to a pull request to take them again on this image." >&2
+      pinned=false
+    fi
+  fi
+  if [ "$pinned" != true ]; then
+    # A manual run with `store` takes the sizes App Store Connect asks for instead: the 6.9-inch
+    # iPhone (1320 x 2868) and the 13-inch iPad (2064 x 2752).
+    if [ -n "$store" ]; then
+      phone=$(pick iPhone 'iPhone 18 Pro Max|iPhone 17 Pro Max' '' '') ipad=$(pick iPad 'iPad Pro 13' '' '')
+    else
+      phone=$(pick iPhone 'iPhone 17' '' '') ipad=$(pick iPad 'iPad Pro 11' '' '')
+    fi
+  fi
+  if [ -z "$phone" ] || [ -z "$ipad" ]; then
+    echo "::error::No iOS $sdk_version-or-older simulator runtime here has both an iPhone and an iPad." >&2
+    exit 1
+  fi
+  local phone_id=${phone%%$'\t'*} ipad_id=${ipad%%$'\t'*}
+  xcrun simctl list devices | grep -E "$phone_id|$ipad_id" >&2
+  # Nothing is booted here. A simulator's first boot keeps the runner's cores and disk busy for
+  # minutes: booted behind the Rust build, the two made it five to ten times slower (unpacking a
+  # cached toolchain took five minutes, the core's build seven to fourteen, against a minute and
+  # a half on TestFlight's runner of the same image, which boots none). So nothing is built on a
+  # runner while a simulator boots there (`boot`).
+  echo "phone=$phone_id"
+  echo "ipad=$ipad_id"
+  echo "pinned=$pinned"
+}
+
+boot() {
+  nohup xcrun simctl boot "$1" > "${RUNNER_TEMP:-/tmp}/boot-$1.log" 2>&1 &
+}
+
+# Waits until SIM has booted, booting it if nothing has. bootstatus -b fails ("Unable to boot
+# device in current state: Booted") when a `boot` started just before it is still under way, so
+# then it only waits.
+booted() {
+  xcrun simctl bootstatus "$1" -b > /dev/null 2>&1 || xcrun simctl bootstatus "$1" > /dev/null
+}
+
+shoot_one() {
+  local role=$1 sim=$2 app=$3 out=$4
+  case "$role" in
+    phone | ipad) ;;
+    *) echo "shoot-one: ROLE is phone or ipad, not $role" >&2; exit 2 ;;
+  esac
+  local phone=$sim ipad=$sim
+  local id=org.orthodoxwest.office
+  mkdir -p "$out"
+  # The app's clock and zone, and the reader's language, are fixed with today; nothing else in
+  # it moves at rest (the crown plays only when tapped, home's light only on a turn of the hour seen).
+  export SIMCTL_CHILD_TZ=America/New_York
+  local frames=${RUNNER_TEMP:-/tmp}/frames
+  mkdir -p "$frames"
+  # Installed once on each simulator; before every shot, `fresh` puts the app back as an install
+  # leaves it. An earlier shot's kept reading place, way back, settings or prayed marks would
+  # otherwise open a later one differently. A reinstall did this too, but took 15 to 40 seconds a
+  # shot on the runners, most of the screenshots' time.
+  fresh() {
+    local sim=$1 data
+    xcrun simctl terminate "$sim" "$id" > /dev/null 2>&1 || true
+    data=$(xcrun simctl get_app_container "$sim" "$id" data)
+    # The defaults through cfprefsd, which may still hold the last launch's in memory and would
+    # write them back over a file merely deleted; then everything else the app keeps (scene
+    # storage, caches, the screenshot marker), as the install made it.
+    xcrun simctl spawn "$sim" defaults delete "$data/Library/Preferences/$id" > /dev/null 2>&1 || true
+    rm -rf "$data/Library" "$data/Documents" "$data/tmp"
+    mkdir -p "$data/Library/Preferences" "$data/Library/Caches" "$data/Documents" "$data/tmp"
+  }
+  # Whether a full-size shot is the bare wall, a page not yet on the screen, by the comparison's
+  # own test (scripts/ios-snapshots.py blank). Without SNAPSHOT_PYTHON (a Python with Pillow)
+  # nothing is taken for wall, and the comparison still refuses a blank shot afterwards.
+  wall() {
+    [ -n "${SNAPSHOT_PYTHON:-}" ] || return 1
+    case "$2" in
+      ipad-*) "$SNAPSHOT_PYTHON" "$here/../../scripts/ios-snapshots.py" blank "$1" --ipad ;;
+      *) "$SNAPSHOT_PYTHON" "$here/../../scripts/ios-snapshots.py" blank "$1" ;;
+    esac
+  }
+  # Each page at a fixed day (DATE, else 15 March 2026), with today pinned to it, at 9 AM.
+  one() {
+    local sim=$1 name=$2
+    shift 2
+    local day=${DATE:-2026-03-15}
+    local began=$SECONDS
+    fresh "$sim"
+    xcrun simctl launch "$sim" "$id" \
+      -AppleLanguages '(en)' -AppleLocale en_US -today "$day" -date "$day" -clock 9 "$@" > /dev/null
+    local launched=$SECONDS
+    # Shot once the app says the page asked for is drawn (ScreenshotReady.swift: composed, laid
+    # out, scrolled to its anchor), which `fresh` emptying the temporary directory makes this
+    # launch's own; then once it has come to rest, two frames a second apart alike, so an
+    # arrival's fade or a panel's drop has finished. Until it is drawn the page can be the bare
+    # wall, as still as a finished one, so stillness alone is not enough.
+    # A launch on the runner's simulators now and then stalls before its first frame, on any
+    # page and at any place in the run: most pages say they are drawn at once, but 20 to 59
+    # seconds have been seen, and one master run's home took just over a minute. So the wait
+    # allows three minutes, counted by the clock from the launch, and a launch that still has
+    # not drawn leaves its screen, the app's log and whether it was running beside the shots.
+    local data marker deadline=180
+    data=$(xcrun simctl get_app_container "$sim" "$id" data)
+    marker="$data/tmp/screenshot-ready"
+    until [ -f "$marker" ]; do
+      if [ $((SECONDS - launched)) -ge "$deadline" ]; then
+        echo "::error::$name: the app did not say its page was drawn within $deadline seconds of its launch" >&2
+        xcrun simctl io "$sim" screenshot "$out/$name-not-drawn.png" > /dev/null || true
+        {
+          echo "# simctl spawn launchctl list (the app's line, if it was running)"
+          xcrun simctl spawn "$sim" launchctl list 2>&1 | grep -F "$id" || echo "not running"
+          echo "# the app's log since its install"
+          xcrun simctl spawn "$sim" log show --style compact --last "$((SECONDS - began + 10))s" \
+            --predicate 'process == "Office"' 2>&1 | tail -n 400
+        } > "$out/$name-not-drawn.log" || true
+        exit 1
+      fi
+      sleep 0.25
+    done
+    local drawn=$((SECONDS - launched))
+    local last="$frames/$sim-last.png" this="$frames/$sim-this.png" settled=0
+    sleep 1
+    xcrun simctl io "$sim" screenshot "$last" > /dev/null
+    while :; do
+      sleep 1
+      settled=$((settled + 1))
+      xcrun simctl io "$sim" screenshot "$this" > /dev/null
+      # Still, and showing the page: on Xcode 27's simulators the screen can stay the bare wall
+      # (the launch screen's colour) for some seconds after the app says its page is drawn, and
+      # two frames of wall are alike. So a still wall waits on, as a moving frame does.
+      if cmp -s "$last" "$this" && ! wall "$this" "$name"; then break; fi
+      if [ "$settled" -ge 20 ]; then
+        echo "::warning::$name did not come to rest, or still showed the bare wall, 20 seconds after it was drawn" >&2
+        break
+      fi
+      mv "$this" "$last"
+    done
+    mv "$this" "$out/$name.png"
+    # What the page measured of itself (ScreenshotGeometry), beside the shot and in the log, so a
+    # shot that differs from its baseline says which measure moved (#891).
+    if cp "$data/tmp/screenshot-geometry.txt" "$out/$name.geometry.txt" 2> /dev/null; then
+      sed "s/^/    $name /" "$out/$name.geometry.txt"
+    fi
+    echo "$(date +%T) $name (cleared and launched in $((launched - began))s, drawn after ${drawn}s, at rest $((settled + 1))s later)"
+  }
+  # The simulator booted (if it is not already, `booted` boots it), set up and given the
+  # app. Each step says when it is done, so a slow one shows in the log.
+  local start=$SECONDS
+  step() { echo "$(date +%T) $role: $1 ($((SECONDS - start))s in)"; }
+  step "waiting for $sim to boot"
+  booted "$sim"
+  step "booted"
+  xcrun simctl ui "$sim" appearance light
+  # Dynamic Type at its default, whatever the image set.
+  xcrun simctl ui "$sim" content_size large
+  xcrun simctl status_bar "$sim" override --time 9:41 --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4
+  step "appearance and status bar set"
+  xcrun simctl uninstall "$sim" "$id" > /dev/null 2>&1 || true
+  xcrun simctl install "$sim" "$app"
+  step "app installed"
+  phone_shots() {
+    for theme in nave apse; do
+      one "$phone" "home-$theme" -page home -theme "$theme"
+      for hour in lauds vespers compline; do
+        one "$phone" "$hour-$theme" -page hour -hour "$hour" -theme "$theme"
+      done
+      one "$phone" "psalm-$theme" -page hour -hour vespers -anchor psalm -theme "$theme"
+      one "$phone" "hymn-$theme" -page hour -hour vespers -anchor hymn -theme "$theme"
+      one "$phone" "ordo-$theme" -page ordo -theme "$theme"
+      one "$phone" "year-$theme" -page year -theme "$theme"
+      one "$phone" "reminders-$theme" -page reminders -theme "$theme"
+      one "$phone" "about-$theme" -page about -theme "$theme"
+      one "$phone" "menu-$theme" -page hour -hour compline -menu YES -theme "$theme"
+    done
+    # The ordo scrolled to a day, its month heading pinned under the sensor housing.
+    one "$phone" "ordo-day-nave" -page ordo -day YES -theme nave
+    # A saint's feast page, and Lent's Vespers hymn sung from its notation.
+    one "$phone" "feast-nave" -page feast -feast st-benedict -theme nave
+    one "$phone" "chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave
+    # Eastertide's warmer gilding.
+    DATE=2026-04-12 one "$phone" "easter-nave" -page hour -hour lauds -theme nave
+    # A first-class day's hour in its frame.
+    for theme in nave apse; do
+      DATE=2026-12-25 one "$phone" "christmas-$theme" -page hour -hour lauds -theme "$theme"
+    done
+  }
+  # The desktop composition on an iPad.
+  ipad_shots() {
+    for theme in nave apse; do
+      one "$ipad" "ipad-home-$theme" -page home -theme "$theme"
+      one "$ipad" "ipad-vespers-$theme" -page hour -hour vespers -theme "$theme"
+      one "$ipad" "ipad-ordo-$theme" -page ordo -theme "$theme"
+    done
+    one "$ipad" "ipad-year-nave" -page year -theme nave
+    one "$ipad" "ipad-feast-nave" -page feast -feast st-benedict -theme nave
+    one "$ipad" "ipad-chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave
+    one "$ipad" "ipad-settings-nave" -page home -theme nave -settings YES
+  }
+  # PROBE=N: the anchored pages whose shots have differed by a hair between runs (#948), each N
+  # times on the phone and nothing on the iPad, for ios-snapshots.py probe to say whether every
+  # launch lands on the same pixels.
+  probe_shots() {
+    local i
+    for i in $(seq 1 "$PROBE"); do
+      one "$phone" "hymn-nave-$i" -page hour -hour vespers -anchor hymn -theme nave
+      one "$phone" "psalm-apse-$i" -page hour -hour vespers -anchor psalm -theme apse
+      one "$phone" "hymn-apse-$i" -page hour -hour vespers -anchor hymn -theme apse
+      one "$phone" "psalm-nave-$i" -page hour -hour vespers -anchor psalm -theme nave
+    done
+  }
+  if [ -z "${PROBE:-}" ]; then
+    "${role}_shots"
+  elif [ "$role" = phone ]; then
+    probe_shots
+  fi
+  step "shots taken"
+  # What they were taken with, which the baselines keep (joined with the other device's by
+  # scripts/ios-snapshots.py environment) and the next run's `devices` follows.
+  python3 - "$sim" "$out/environment-$role.json" <<'PY'
+import json, plistlib, subprocess, sys
+sim, path = sys.argv[1:]
+developer = subprocess.run(["xcode-select", "-p"], capture_output=True, text=True, check=True).stdout.strip()
+with open(developer.rsplit("/Contents/", 1)[0] + "/Contents/version.plist", "rb") as f:
+    version = plistlib.load(f)
+devices = json.loads(subprocess.run(["xcrun", "simctl", "list", "devices", "-j"], capture_output=True, text=True, check=True).stdout)["devices"]
+where = {d["udid"]: (runtime, d["name"]) for runtime, ds in devices.items() for d in ds}
+env = {
+    "xcode": f'{version["CFBundleShortVersionString"]} {version["ProductBuildVersion"]}',
+    "runtime": where[sim][0],
+    "device": where[sim][1],
+}
+with open(path, "w") as f:
+    json.dump(env, f, indent=2)
+    f.write("\n")
+print(json.dumps(env))
+PY
+}
+
+# Both devices on one runner: the iPad boots behind the phone's shots, as the two have long done
+# on update-ios-snapshots.yml's fallback, where nothing else is left to slow.
+shoot() {
+  local phone=$1 ipad=$2 app=$3 out=$4
+  boot "$ipad"
+  (shoot_one phone "$phone" "$app" "$out")
+  (shoot_one ipad "$ipad" "$app" "$out")
+  python3 "$here/../../scripts/ios-snapshots.py" environment "$out"
+}
+
+case "${1:-}" in
+  devices) shift; devices "$@" ;;
+  boot) shift; boot "$@" ;;
+  booted) shift; booted "$@" ;;
+  shoot-one) shift; shoot_one "$@" ;;
+  shoot) shift; shoot "$@" ;;
+  *) echo "usage: $0 devices [store] | boot SIM | booted SIM | shoot-one ROLE SIM APP OUT | shoot PHONE IPAD APP OUT" >&2; exit 2 ;;
+esac

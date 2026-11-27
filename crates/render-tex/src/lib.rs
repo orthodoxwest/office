@@ -1,7 +1,7 @@
 //! LuaLaTeX booklet rendering (half-letter) of a composed hour. The renderer does no file access:
 //! chant scores are found through a caller-supplied [`Chant`] lookup.
 
-use calendar::{Color, Season};
+use calendar::Color;
 use corpus::lines::{BlockKind, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
 use corpus::typography::typeset;
 use liturgy::{
@@ -9,9 +9,6 @@ use liturgy::{
 };
 
 const PREAMBLE: &str = include_str!("preamble.tex");
-
-const MONTHS: [&str; 12] =
-    ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 /// Longest feast name the right-hand running head carries; a longer one gives
 /// way to the date so the head stays on one line.
@@ -48,14 +45,9 @@ pub fn format_office_hour_tex(hour: &OfficeHour, chant: Option<&Chant<'_>>) -> S
     b
 }
 
-fn long_date(hour: &OfficeHour) -> String {
-    let d = hour.date;
-    format!("{}, {} {}, {:04}", d.weekday().name(), MONTHS[d.month() as usize - 1], d.day(), d.year())
-}
-
 /// The running-head names and PDF metadata for this booklet.
 fn document_setup(hour: &OfficeHour) -> String {
-    let date = long_date(hour);
+    let date = presentation::long_date(hour.date);
     let day = if hour.feast.is_empty() || hour.feast.chars().count() > RUNNING_HEAD_FEAST_MAX { &date } else { &hour.feast };
     let mut b = format!("\n\\newcommand{{\\officehour}}{{{}}}\n", tex_line(&hour.hour));
     b.push_str(&format!("\\newcommand{{\\officeday}}{{{}}}\n", tex_line(day)));
@@ -71,28 +63,12 @@ fn title_block(hour: &OfficeHour) -> String {
     format!(
         "\\officetitle{{{}}}{{{}}}{{{}}}{{{}}}{{{}}}{{{}}}\n\n",
         tex_line(&hour.hour),
-        tex_line(&long_date(hour)),
+        tex_line(&presentation::long_date(hour.date)),
         tex_line(&hour.feast),
-        hour.season.map_or("", season_name),
+        hour.season.map_or_else(String::new, |s| presentation::season_label(s.as_str())),
         hour.color.map_or("", color_name),
         hour.color.map_or("", Color::as_str),
     )
-}
-
-/// The season as the web hour header names it: the tides by their season
-/// names, so none reads as the feast day, and the season after Pentecost
-/// unnamed, its Sundays and feasts naming themselves.
-fn season_name(season: Season) -> &'static str {
-    match season {
-        Season::Advent => "Advent",
-        Season::Christmas => "Christmastide",
-        Season::Epiphany => "Epiphanytide",
-        Season::Septuagesima => "Septuagesima",
-        Season::Lent => "Lent",
-        Season::Passiontide => "Passiontide",
-        Season::Easter => "Eastertide",
-        Season::Pentecost => "",
-    }
 }
 
 fn color_name(color: Color) -> &'static str {
@@ -570,8 +546,8 @@ impl Initial {
 ///
 /// A source opening in capitals ("IN THE LORD put I my trust") runs on in
 /// small caps to the end of the capitals, as a printed psalter sets it. The
-/// small-caps face draws capitals and lowercase alike, so the text keeps its
-/// source case and needs no softening.
+/// small-caps run is lowercased (`split_opening`), so every letter of it is the
+/// face's own small cap and capitals and lowercase openings match.
 fn initial(mode: Initial, text: &str, more: &str) -> String {
     let text = typeset(text);
     let Some(o) = split_opening(&text) else {
@@ -631,7 +607,11 @@ fn split_opening(text: &str) -> Option<Opening> {
     };
     let capitals = is_capitals(&if standalone { word.clone() } else { format!("{init}{word}") });
     let run = if capitals { capitals_run(&tail) } else { 0 };
-    Some(Opening { word: format!("{word}{}", &tail[..run]), tail: tail[run..].to_string(), init, letter, standalone, capitals })
+    // The small caps are drawn from lower case: the face's capitals-to-small-caps
+    // glyphs are a heavier design, and in its 8 pt cut the W has no width
+    // ("HEREWTHAL", "I WLL"). Lowercase letters give the same small caps.
+    let word = format!("{word}{}", &tail[..run]).to_lowercase();
+    Some(Opening { word, tail: tail[run..].to_string(), init, letter, standalone, capitals })
 }
 
 /// A word of two or more letters, all capitals ("LORD," but not "I" or "God").
@@ -943,7 +923,7 @@ mod tests {
         let ant = OfficeElement::new(ElementType::Antiphon, "Have mercy * upon me.");
         let psalm = OfficeElement::new(ElementType::Psalm, PSALM_67);
         let elements = vec![ant.clone(), psalm, ant];
-        let section = OfficeSection { label: String::new(), collapsible: false, elements: elements.clone() };
+        let section = OfficeSection { label: String::new(), collapsible: false, bare: false, elements: elements.clone() };
         let body = format_elements_tex(&elements, None);
         assert!(body.starts_with("\\antopen{"), "{body}");
         assert!(body.contains("\\antclose{"), "{body}");
@@ -990,25 +970,37 @@ mod tests {
             ("Almighty God", ("A", "lmighty", " God"), "\\initial{prose}{A}{A}{lmighty}{ God}\n"),
             ("God * save us", ("G", "od", " * save us"), "\\initial{prose}{G}{G}{od}{\\mediant{}save us}\n"),
             // A standalone O or I gives the small caps to the next word.
-            ("O God", ("O", "", " God"), "\\initial*{prose}{O}{O}{God}{}\n"),
-            ("O\u{a0}God", ("O", "", "\u{a0}God"), "\\initial*{prose}{O}{O}{God}{}\n"),
+            ("O God", ("O", "", " God"), "\\initial*{prose}{O}{O}{god}{}\n"),
+            ("O\u{a0}God", ("O", "", "\u{a0}God"), "\\initial*{prose}{O}{O}{god}{}\n"),
             ("I said, I will", ("I", "", " said, I will"), "\\initial*{prose}{I}{I}{said,}{ I will}\n"),
             ("O * rest", ("O", "", " * rest"), "\\initial{prose}{O}{O}{}{\\mediant{}rest}\n"),
-            // An opening in capitals runs on in small caps to the end of the capitals.
-            ("GOD be merciful", ("G", "OD", " be merciful"), "\\initial{prose}{G}{G}{OD}{ be merciful}\n"),
-            ("IN THE Lord put I my trust", ("I", "N", " THE Lord put I my trust"), "\\initial{prose}{I}{I}{N THE}{ Lord put I my trust}\n"),
-            ("MY SOUL * cleaveth", ("M", "Y", " SOUL * cleaveth"), "\\initial{prose}{M}{M}{Y SOUL}{\\mediant{}cleaveth}\n"),
+            // An opening in capitals runs on in small caps to the end of the capitals,
+            // lowercased so the face sets its own small caps, never its heavier
+            // capitals-to-small-caps (whose W has no width in the 8 pt cut).
+            ("GOD be merciful", ("G", "OD", " be merciful"), "\\initial{prose}{G}{G}{od}{ be merciful}\n"),
+            ("IN THE Lord put I my trust", ("I", "N", " THE Lord put I my trust"), "\\initial{prose}{I}{I}{n the}{ Lord put I my trust}\n"),
+            ("MY SOUL * cleaveth", ("M", "Y", " SOUL * cleaveth"), "\\initial{prose}{M}{M}{y soul}{\\mediant{}cleaveth}\n"),
             (
                 "O GIVE THANKS unto the Lord",
                 ("O", "", " GIVE THANKS unto the Lord"),
-                "\\initial*{prose}{O}{O}{GIVE THANKS}{ unto the Lord}\n",
+                "\\initial*{prose}{O}{O}{give thanks}{ unto the Lord}\n",
             ),
-            ("O LORD, I cry", ("O", "", " LORD, I cry"), "\\initial*{prose}{O}{O}{LORD,}{ I cry}\n"),
+            ("O LORD, I cry", ("O", "", " LORD, I cry"), "\\initial*{prose}{O}{O}{lord,}{ I cry}\n"),
         ] {
             let (a, b, c) = split_drop_cap(text);
             assert_eq!((a.as_str(), b.as_str(), c.as_str()), parts, "{text:?}");
             assert_eq!(initial(Initial::Prose, text, ""), tex, "{text:?}");
         }
+        // The psalms the 8 pt cut's capital-to-small-cap W broke ("HEREWTHAL", "I WLL").
+        assert_eq!(
+            initial(Initial::Psalm, "WHEREWITHAL shall a young man", ""),
+            "\\initial{psalm}{W}{W}{herewithal}{ shall a young man}\n"
+        );
+        assert_eq!(initial(Initial::Psalm, "I WILL give thanks", ""), "\\initial*{psalm}{I}{I}{will}{ give thanks}\n");
+        // A plain opening in capitals is lowercased for its small caps too.
+        assert_eq!(capitals_opening("I CONFESS to God"), "I \\capsrun{confess} to God");
+        assert_eq!(capitals_opening("WE BESEECH thee"), "W\\capsrun{e beseech} thee");
+        assert!(!PREAMBLE.contains("UppercaseSmallCaps"), "small caps come from lower case only");
     }
 
     #[test]
@@ -1040,7 +1032,7 @@ mod tests {
 
         let hymn = "Aeterne rerum conditor\n\nO Framer of the earth and sky,\nRuler of all things high and low.\n";
         let text = format_hymn(hymn, "Aeterne Rerum Conditor", Some(&chant));
-        assert!(text.contains("\\initial*{drop}{O}{O}{Framer}{ of the earth and sky,\\\\\nRuler of all things high and low.}"), "{text}");
+        assert!(text.contains("\\initial*{drop}{O}{O}{framer}{ of the earth and sky,\\\\\nRuler of all things high and low.}"), "{text}");
     }
 
     #[test]
@@ -1052,6 +1044,7 @@ mod tests {
         let section = OfficeSection {
             label: String::new(),
             collapsible: false,
+            bare: false,
             elements: vec![
                 OfficeElement::new(ElementType::Antiphon, "First antiphon."),
                 OfficeElement::new(ElementType::Psalm, "Psalm 1\n\nBLESSED is the man * that hath not walked.\n"),
@@ -1076,7 +1069,7 @@ mod tests {
             2,
             None,
         );
-        assert!(got.contains("{{\\color{mutedgray}ELIVER}}{ {\\color{mutedgray}me,} O Lord, from the evil man\\mediant{}and"), "{got}");
+        assert!(got.contains("{{\\color{mutedgray}eliver}}{ {\\color{mutedgray}me,} O Lord, from the evil man\\mediant{}and"), "{got}");
         assert!(got.contains("\\psalmverse{2}{Who imagine\\mediant{}mischief.}"), "{got}");
     }
 
@@ -1095,7 +1088,7 @@ mod tests {
             0,
             None,
         );
-        assert!(got.contains("\\initial{psalm}{T}{T}{HE}{ Lord\\mediant{}\\rubric{Sit.} is King.}"), "{got}");
+        assert!(got.contains("\\initial{psalm}{T}{T}{he}{ Lord\\mediant{}\\rubric{Sit.} is King.}"), "{got}");
         assert!(got.contains("\\psalmverse{2}{\\rubric{Bow.} He hath\\mediant{}made.}"), "{got}");
         assert!(got.contains("\\psalmverse{3}{No mediant here \\rubric{Stand.}}"), "{got}");
         let got = format_gloria_patri("Glory be to the Father;\nas it was in the beginning.", &[]);

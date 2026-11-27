@@ -90,7 +90,7 @@ pub fn compose_prime(
             }
             append_hour_element(&mut elems, day, "prime", elem, t);
         }
-        hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, elements: elems });
+        hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, bare: false, elements: elems });
     }
     hour
 }
@@ -267,6 +267,7 @@ fn martyrology_announcement_keys(date: Date) -> Vec<String> {
 
 /// An hour titled `name` for the day's own office.
 pub fn new_hour(name: &str, day: &Day) -> OfficeHour {
+    let hour_name = name.to_lowercase();
     OfficeHour {
         form: PrayerForm::Private,
         date: day.date,
@@ -276,9 +277,18 @@ pub fn new_hour(name: &str, day: &Day) -> OfficeHour {
         feast: day.celebration.as_deref().map(|c| c.name.clone()).unwrap_or_default(),
         rank: day.celebration.as_deref().map(|c| c.rank),
         color: Some(day.color),
+        paschaltide: day.is_paschaltide(&hour_name),
+        bare: is_bare(day, &hour_name),
         sections: Vec::new(),
         decisions: Vec::new(),
     }
+}
+
+/// Whether the hour is stripped of its furniture (`OfficeHour::bare`): the Triduum's form,
+/// which ends at None of Holy Saturday, and the Office of the Dead. Decided by the same
+/// predicates that strip the text, so the page cannot disagree with the office.
+pub fn is_bare(day: &Day, hour_name: &str) -> bool {
+    crate::hourdef::uses_triduum_form(day, hour_name) || crate::psalmody::is_office_of_the_dead(day)
 }
 
 /// Prime's antiphon rubric: feasts and Sundays take the first Lauds
@@ -291,7 +301,13 @@ fn resolve_prime_psalm_antiphon(day: &Day, t: &OfficeTexts, moveable: Option<&Mo
     if !text.is_empty() && is_prime_antiphon_ref(&key, day.season) {
         return prime_element(SLOT, &key, text);
     }
-    let ferial = day.celebration.as_deref().is_none_or(|c| c.is_category(Category::Feria));
+    // A feria that resumes another office (ProperID) says its Hours from
+    // that office, Prime's antiphon included: the days after the Octave of
+    // the Ascension take the Sunday's, as Terce, Sext and None do ("Hours Of
+    // Sun.", 2026 ordo, 29 May; Diurnal pp. 392, 394) (#873).
+    let ferial = day.celebration.as_deref().is_none_or(|c| {
+        c.is_category(Category::Feria) && !(c.proper_id.as_ref().is_some_and(|p| *p != c.id) && resumes_lauds_antiphons(day, t))
+    });
     // The Saturday Office of Our Lady takes the Common of Feasts B.V.M.'s
     // Prime antiphon, "While the King" (Diurnal p. 67*; p. 69*) (#652).
     if !ferial {
@@ -340,6 +356,11 @@ fn resolve_prime_psalm_antiphon(day: &Day, t: &OfficeTexts, moveable: Option<&Mo
     }
     let text = t.get(&key).to_string();
     prime_element(SLOT, &key, text)
+}
+
+/// Whether the day's resumed office prints its own first Lauds antiphon.
+fn resumes_lauds_antiphons(day: &Day, t: &OfficeTexts) -> bool {
+    !lookup_feast_proper_text(day, "lauds", "psalm-antiphon-1", t).0.is_empty()
 }
 
 pub(crate) fn is_prime_antiphon_ref(reference: &str, season: Season) -> bool {

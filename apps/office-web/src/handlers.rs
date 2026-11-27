@@ -3,26 +3,32 @@
 
 use axum::body::Body;
 use axum::http::{HeaderMap, Method, Response, StatusCode, header};
-use calendar::MoveableDates;
+use calendar::{Date, MoveableDates};
 use jiff::tz::TimeZone;
 use liturgy::{OfficeHour, PrayerForm};
 use office::day::Day;
 use office::prime::{AfterPrime, reads_martyrology, says_chapter_office};
 use office::summary::{CommSummary, ordo_day};
-use office::{ComposeOptions, Engine};
-use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, home_link, hour_link};
+use office::{ComposeOptions, Engine, HOUR_NAMES};
+use presentation::feast::{FeastIndex, is_feast_id};
+use presentation::rails::Rail;
+use render_html::chant;
+use render_html::links::{
+    calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, feast_from, feast_link, home_link, hour_link,
+};
 use render_html::view::{
-    BetaData, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm,
-    MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, RemindersData, TabulaData,
-    TabulaRow,
+    AboutData, CalendarData, Chrome, CommemorationRow, CourseRunView, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader,
+    LeaderForm, LinkRow, MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour,
+    ReminderPeriod, ReminderRulePhrase, RemindersData, TabulaData, TabulaRow,
 };
 
 use crate::Server;
 use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{load_location, local, now_in, parse_date};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_name, home_shows_versicle, hour_gloss, hour_versicle, invitation,
-    long_date, month_name, rank_class, report_url, season_class, season_str, split_alias,
+    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_in_paschaltide, day_name, gilding_class, home_first_class,
+    home_shows_versicle, hour_gloss, hour_versicle, invitation, long_date, month_name, rank_class, report_url, season_str, split_alias,
+    title_case,
 };
 
 /// What a page handler reads from the request.
@@ -36,27 +42,22 @@ pub struct Req<'a> {
     pub site: &'a str,
 }
 
-const VALID_HOURS: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
-
-const ORDERED_HOURS: [(&str, &str); 7] = [
-    ("Lauds", "lauds"),
-    ("Prime", "prime"),
-    ("Terce", "terce"),
-    ("Sext", "sext"),
-    ("None", "none"),
-    ("Vespers", "vespers"),
-    ("Compline", "compline"),
-];
-
-fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
-    ORDERED_HOURS
+/// Home's hours. Vespers on an evening that already keeps the morrow carries the invitation's
+/// gloss for it ("First Vespers of …"), which the page's script sets under "Pray Vespers" by the
+/// reader's clock; its own note in the table stays "Evening prayer".
+fn build_home_hours(date_slug: &str, current: &str, first_vespers: Option<&str>) -> Vec<HomeHourLink> {
+    HOUR_NAMES
         .iter()
-        .map(|(name, slug)| HomeHourLink {
-            name: name.to_string(),
+        .map(|slug| HomeHourLink {
+            name: title_case(slug),
             slug: slug.to_string(),
             url: hour_link(slug, date_slug),
             is_current: *slug == current,
             note: hour_gloss(slug).to_string(),
+            eve: match (*slug, first_vespers) {
+                ("vespers", Some(feast)) => presentation::first_vespers_gloss(feast),
+                _ => String::new(),
+            },
         })
         .collect()
 }
@@ -65,45 +66,64 @@ fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
 /// page of the day does not end in a blank.
 fn adjacent_hours(hour: &str, date: &str, tomorrow: &str) -> (String, String, String, String) {
     let mut out = (String::new(), String::new(), String::new(), String::new());
-    if let Some(i) = ORDERED_HOURS.iter().position(|(_, slug)| *slug == hour) {
+    if let Some(i) = HOUR_NAMES.iter().position(|slug| *slug == hour) {
         if i > 0 {
-            out.0 = ORDERED_HOURS[i - 1].0.to_string();
-            out.1 = hour_link(ORDERED_HOURS[i - 1].1, date);
+            out.0 = title_case(HOUR_NAMES[i - 1]);
+            out.1 = hour_link(HOUR_NAMES[i - 1], date);
         }
-        if i + 1 < ORDERED_HOURS.len() {
-            out.2 = ORDERED_HOURS[i + 1].0.to_string();
-            out.3 = hour_link(ORDERED_HOURS[i + 1].1, date);
+        if i + 1 < HOUR_NAMES.len() {
+            out.2 = title_case(HOUR_NAMES[i + 1]);
+            out.3 = hour_link(HOUR_NAMES[i + 1], date);
         } else {
-            out.2 = ORDERED_HOURS[0].0.to_string();
-            out.3 = hour_link(ORDERED_HOURS[0].1, tomorrow);
+            out.2 = title_case(HOUR_NAMES[0]);
+            out.3 = hour_link(HOUR_NAMES[0], tomorrow);
         }
     }
     out
 }
 
 /// An HTML page that revalidates on every request.
-fn html(status: StatusCode, body: String) -> Response<Body> {
+pub(crate) fn html(status: StatusCode, body: String) -> Response<Body> {
     let mut resp = response(status, body);
     set(&mut resp, header::CONTENT_TYPE, "text/html; charset=utf-8");
     set(&mut resp, header::CACHE_CONTROL, "no-cache");
     resp
 }
 
-fn render_failed(e: &str) -> Response<Body> {
+pub(crate) fn render_failed(e: &str) -> Response<Body> {
     crate::http::http_error(e, StatusCode::INTERNAL_SERVER_ERROR)
 }
 
-fn comm_rows(comms: &[CommSummary]) -> Vec<CommemorationRow> {
-    comms.iter().map(|c| CommemorationRow { name: c.name.clone(), incipit: c.incipit.clone() }).collect()
+/// The page of the feast a day keeps or commemorates as `id` and `name`, or empty, with the way
+/// back to `from` (see `links::feast_from`).
+pub fn feast_href(feasts: &FeastIndex, id: &str, name: &str, date: Date, from: &str) -> String {
+    feasts.find(id, name, date).map(|e| feast_from(&e.id, from)).unwrap_or_default()
+}
+
+/// The `from` a feast link on the ordo carries: the ordo's row for `date`.
+pub fn ordo_from(date: Date) -> String {
+    format!("ordo-{}", date_slug(date))
+}
+
+fn comm_rows(comms: &[CommSummary], feasts: &FeastIndex, date: Date) -> Vec<CommemorationRow> {
+    comms
+        .iter()
+        .map(|c| CommemorationRow {
+            name: c.name.clone(),
+            incipit: c.incipit.clone(),
+            href: feast_href(feasts, "", &c.name, date, &ordo_from(date)),
+        })
+        .collect()
 }
 
 /// One month of the ordo: each day's row with the composed Lauds, Hours,
-/// and Vespers digest. `days` are the month's days in order.
-pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> MonthData {
+/// and Vespers digest. `days` are the month's days in order, `rails` their rails.
+pub fn build_month(days: &[Day], rails: &[Rail], engine: &Engine, moveable: &MoveableDates, feasts: &FeastIndex) -> MonthData {
     let name = days.first().map(|d| month_name(d.date)).unwrap_or_default();
     let mut month = MonthData { name: name.to_string(), slug: name.to_lowercase(), days: Vec::new() };
-    for d in days {
+    for (i, d) in days.iter().enumerate() {
         let o = ordo_day(d, engine, moveable);
+        let rail = rails.get(i).copied().unwrap_or_else(|| Rail::alone(o.color));
         let mut row = DayRow {
             day_num: d.date.day(),
             weekday: d.date.weekday().name()[..3].to_string(),
@@ -111,10 +131,17 @@ pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> M
             rank: o.rank,
             rank_full: o.rank_full,
             color: o.color.as_str().to_string(),
-            color_class: format!("day-color-{}", o.color.as_str()),
+            color_class: format!("day-color-{}", rail.color.as_str()),
+            rail_inset: rail.inset.map(|c| c.as_str().to_string()).unwrap_or_default(),
+            bound_above: rail.above,
+            bound_below: rail.below,
+            lead_to: rail.lead_to.map(|c| c.as_str().to_string()).unwrap_or_default(),
+            lead_from: rail.lead_from.map(|c| c.as_str().to_string()).unwrap_or_default(),
             feast_name: day_name(d),
+            feast_href: d.celebration.as_ref().map(|c| feast_href(feasts, &c.id, &c.name, d.date, &ordo_from(d.date))).unwrap_or_default(),
             fast: o.fast,
             abstinence: o.abstinence,
+            commemoration_hrefs: d.commemorations.iter().map(|c| feast_href(feasts, &c.id, &c.name, d.date, &ordo_from(d.date))).collect(),
             commemorations: o.commemorations,
             monastic: d
                 .monastic
@@ -134,17 +161,24 @@ pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> M
             row.benedictus_antiphon = lauds.gospel_ant;
             row.lauds_preces = lauds.preces;
             row.lauds_suffrage = lauds.suffrage;
-            row.lauds_comms = comm_rows(&lauds.comms);
+            row.lauds_cross = lauds.cross;
+            row.lauds_comms = comm_rows(&lauds.comms, feasts, d.date);
         }
         if let Some(vespers) = o.vespers {
             row.magnificat_antiphon = vespers.gospel_ant;
             row.vespers_preces = vespers.preces;
             row.vespers_suffrage = vespers.suffrage;
-            row.vespers_comms = comm_rows(&vespers.comms);
+            row.vespers_cross = vespers.cross;
+            row.vespers_comms = comm_rows(&vespers.comms, feasts, d.date);
         }
         // The day's commemorations open its office details; one its Lauds or Vespers names with
         // an antiphon is not named twice.
-        row.commemorations.retain(|c| !row.lauds_comms.iter().chain(&row.vespers_comms).any(|r| &r.name == c));
+        let named = |c: &String| row.lauds_comms.iter().chain(&row.vespers_comms).any(|r| &r.name == c);
+        let keep: Vec<bool> = row.commemorations.iter().map(|c| !named(c)).collect();
+        let mut keep_href = keep.iter();
+        row.commemoration_hrefs.retain(|_| *keep_href.next().unwrap_or(&true));
+        let mut keep_name = keep.iter();
+        row.commemorations.retain(|_| *keep_name.next().unwrap_or(&true));
         month.days.push(row);
     }
     month
@@ -192,14 +226,28 @@ fn loose_month(s: &str) -> Option<u32> {
     MONTHS.iter().zip(1..).find(|(name, _)| name.eq_ignore_ascii_case(s) || name[..3].eq_ignore_ascii_case(s)).map(|(_, m)| m)
 }
 
-/// The Tabula Temporaria (presentation::tabula), each date leading to its row.
-fn tabula(year: i32) -> TabulaData {
+/// The Tabula Temporaria (presentation::tabula), each date leading to its row and each moveable
+/// feast leading directly to its feast overview page.
+fn tabula(year: i32, feasts: &FeastIndex) -> TabulaData {
+    let from = format!("ordo-{year}");
     let rows = |rows: Vec<presentation::TabulaRow>| {
         rows.into_iter()
-            .map(|r| TabulaRow {
-                label: r.label.into(),
-                value: r.value,
-                href: r.date.map(|d| calendar_link(&date_slug(d))).unwrap_or_default(),
+            .map(|r| {
+                let feast_href = r
+                    .date
+                    .filter(|_| !r.feast_id.is_empty())
+                    .map(|d| feast_href(feasts, r.feast_id, r.label, d, &from))
+                    .unwrap_or_default();
+                let (gloss_title, gloss_note) =
+                    presentation::gloss::tabula_figure_gloss(r.label).map(|g| (g.title.into(), g.note.into())).unwrap_or_default();
+                TabulaRow {
+                    label: r.label.into(),
+                    value: r.value,
+                    href: r.date.map(|d| calendar_link(&date_slug(d))).unwrap_or_default(),
+                    feast_href,
+                    gloss_title,
+                    gloss_note,
+                }
             })
             .collect()
     };
@@ -209,7 +257,7 @@ fn tabula(year: i32) -> TabulaData {
 
 impl Server {
     /// The zone in the browser's `tz` cookie, else the host zone.
-    fn user_location(&self, req: &Req) -> TimeZone {
+    pub(crate) fn user_location(&self, req: &Req) -> TimeZone {
         match cookie(req.headers, "tz") {
             Some(name) => load_location(&name).unwrap_or_else(local),
             None => local(),
@@ -235,6 +283,29 @@ impl Server {
         }
     }
 
+    pub fn about(&self, req: &Req) -> Response<Body> {
+        let (now, now_hour) = now_in(&self.user_location(req));
+        let course = self.cache.get(now.year()).map(|entry| presentation::course::year_course(entry.days.iter().map(|d| &**d))).ok();
+        let mut data = AboutData::new(
+            Chrome {
+                page: "about".into(),
+                nav_date: date_slug(now),
+                site: req.site.into(),
+                canonical: "/about".into(),
+                ..Chrome::default()
+            },
+            now,
+            now_hour,
+        );
+        if let Some(course) = course {
+            data = data.with_course(now, &course);
+        }
+        match self.pages.about(&data) {
+            Ok(body) => html(StatusCode::OK, body),
+            Err(e) => render_failed(&e),
+        }
+    }
+
     pub fn privacy(&self, req: &Req) -> Response<Body> {
         let data = PrivacyData {
             chrome: Chrome {
@@ -251,23 +322,25 @@ impl Server {
         }
     }
 
-    /// The Android closed test's sign-up, passed around by hand rather than found: kept out of
-    /// search and the sitemap.
-    pub fn beta(&self, req: &Req) -> Response<Body> {
-        let data = BetaData {
-            chrome: Chrome {
-                page: "beta".into(),
-                nav_date: self.nav_date_now(req),
-                site: req.site.into(),
-                canonical: "/beta".into(),
-                noindex: true,
-                ..Chrome::default()
-            },
-        };
-        match self.pages.beta(&data) {
-            Ok(body) => html(StatusCode::OK, body),
-            Err(e) => render_failed(&e),
+    /// The date picker's marks for a year (#953): `{"year":2026,"days":"wwwW…"}`, a letter a day
+    /// from the first of January (`presentation::course::day_marks_code`). The calendar alone, no
+    /// office resolved or hour composed, in its own small cache; only the offered years, as the
+    /// picker offers.
+    pub fn day_marks(&self, method: &Method, year: &str) -> Response<Body> {
+        if method != Method::GET && method != Method::HEAD {
+            return crate::http::http_error("405 method not allowed", StatusCode::METHOD_NOT_ALLOWED);
         }
+        let Some(year) = (year.len() == 4 && year.bytes().all(|b| b.is_ascii_digit())).then(|| year.parse::<i32>().ok()).flatten() else {
+            return crate::http::not_found();
+        };
+        let Ok(code) = self.cache.day_marks(year) else { return crate::http::not_found() };
+        let body = format!(r#"{{"year":{year},"days":"{code}"}}"#);
+        let mut resp = response(StatusCode::OK, if method == Method::HEAD { String::new() } else { body });
+        set(&mut resp, header::CONTENT_TYPE, "application/json");
+        set(&mut resp, header::X_CONTENT_TYPE_OPTIONS, "nosniff");
+        // A deploy may move a feast; a day's old marks do no harm meanwhile.
+        set(&mut resp, header::CACHE_CONTROL, "public, max-age=86400");
+        resp
     }
 
     pub fn not_found_page(&self, req: &Req) -> Response<Body> {
@@ -304,6 +377,9 @@ impl Server {
                 None => return self.error_page(req, StatusCode::BAD_REQUEST, &invalid_date(ds)),
             }
         };
+        if !crate::cache::offered_year(date.year()) {
+            return self.not_found_page(req);
+        }
         let slug = date_slug(date);
         let entry = match self.cache.get(date.year()) {
             Ok(e) => e,
@@ -316,29 +392,39 @@ impl Server {
         let heading = day_heading(day);
         let (now, now_hour) = now_in(&loc);
         let now_slug = date_slug(now);
-        let invite = invitation(date, now, now_hour);
+        let first_vespers = day.vespers.first_vespers_of();
+        let invite = invitation(date, now, now_hour).on_eve(first_vespers);
         let versicle = if home_shows_versicle(day) {
             self.engine.compose_hour("lauds", day, &entry.moveable, PrayerForm::Private).ok().and_then(|h| hour_versicle(&h))
         } else {
             None
         };
         let Versicle { versicle, response } = versicle.unwrap_or(Versicle { versicle: String::new(), response: String::new() });
-        let hours = build_home_hours(&slug, invite.current);
+        let hours = build_home_hours(&slug, invite.current, first_vespers);
         let (feast_name, feast_alias) = split_alias(&heading.feast);
+        let feasts = self.cache.feasts();
+        let from = req.query.get("from");
+        let from_feast =
+            is_feast_id(from).then(|| feasts.get(from)).flatten().map(|e| LinkRow { label: e.name.clone(), href: feast_link(&e.id) });
+        let offered = presentation::offered_years(Server::local_year());
         let data = HomeData {
             chrome: Chrome {
                 page: "home".into(),
                 nav_date: slug.clone(),
                 usage_when: slug.clone(),
                 // The ornament follows the day itself, not the display season.
-                season_class: season_class(Some(day.season)).into(),
-                rank_class: String::new(),
+                season_class: gilding_class(Some(day.season), Some(day.color), day_in_paschaltide(day, &entry.moveable)).into(),
+                // Home keeps a first-class feast too: its cross gilt by day, its stars larger by night.
+                rank_class: if home_first_class(day, &entry.moveable) { "rank-first-class".into() } else { String::new() },
+                bare: false,
                 show_today: slug != now_slug,
                 // Today's page is the one to find; each dated day is one tap from it.
                 site: req.site.into(),
                 canonical: home_link(if ds.is_empty() { "" } else { &slug }),
                 noindex: !ds.is_empty(),
             },
+            first_year: *offered.start(),
+            last_year: *offered.end(),
             date_str: long_date(date),
             date_slug: slug.clone(),
             prev_link: home_link(&date_slug(date.add_days(-1))),
@@ -346,7 +432,10 @@ impl Server {
             today_link: home_link(&now_slug),
             feast_name: feast_name.into(),
             feast_alias: feast_alias.into(),
+            feast_href: day.celebration.as_ref().map(|c| feast_href(feasts, &c.id, &c.name, date, &slug)).unwrap_or_default(),
             commemorations: day.commemorations.iter().map(|c| c.name.clone()).collect(),
+            commemoration_hrefs: day.commemorations.iter().map(|c| feast_href(feasts, &c.id, &c.name, date, &slug)).collect(),
+            from_feast,
             color: day.color.as_str().into(),
             season: heading.season,
             octave_note: heading.octave_note,
@@ -355,8 +444,11 @@ impl Server {
             response,
             calendar_link: calendar_link(&slug),
             pray_now_label: invite.label,
+            pray_now_gloss: invite.gloss,
+            pray_now_eve: invite.eve,
             pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
             hours,
+            night: Default::default(),
         };
         match self.pages.home(&data) {
             Ok(body) => html(StatusCode::OK, body),
@@ -365,7 +457,7 @@ impl Server {
     }
 
     fn hour(&self, req: &Req, hour_name: &str, date_str: &str) -> Response<Body> {
-        if !VALID_HOURS.contains(&hour_name) {
+        if !HOUR_NAMES.contains(&hour_name) {
             return self.not_found_page(req);
         }
         let dated = !date_str.is_empty() || !req.query.get("date").is_empty();
@@ -387,6 +479,10 @@ impl Server {
                 None => return self.error_page(req, StatusCode::BAD_REQUEST, &invalid_date(date_str)),
             }
         };
+        // Years beyond the ones every front offers are not built (see `YearCache::get`).
+        if !crate::cache::offered_year(date.year()) {
+            return self.not_found_page(req);
+        }
         let entry = match self.cache.get(date.year()) {
             Ok(e) => e,
             Err(e) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, &format!("error building calendar: {e}")),
@@ -434,6 +530,7 @@ impl Server {
         let (previous_hour_name, previous_hour_link, next_hour_name, next_hour_link) =
             adjacent_hours(hour_name, &date_str, &date_slug(date.add_days(1)));
         let today_slug = date_slug(now_in(&loc).0);
+        let offered = presentation::offered_years(Server::local_year());
         let mut data = HourData {
             chrome: Chrome {
                 page: hour_name.into(),
@@ -441,22 +538,27 @@ impl Server {
                 usage_when: date_str.clone(),
                 // The hour's own season: I Vespers of Easter on Holy Saturday
                 // is unveiled while that day's Lauds is still veiled.
-                season_class: season_class(hour.season).into(),
-                rank_class: rank_class(hour.rank, hour.color).into(),
+                season_class: gilding_class(hour.season, hour.color, hour.paschaltide).into(),
+                rank_class: rank_class(hour.rank, hour.color, hour.bare).into(),
+                bare: hour.bare,
                 show_today: date_str != today_slug,
                 site: req.site.into(),
                 canonical: if dated { hour_link(hour_name, &date_slug(date)) } else { hour_link(hour_name, "") },
                 noindex: dated,
             },
+            first_year: *offered.start(),
+            last_year: *offered.end(),
             leader_forms: composed
                 .iter()
                 .map(|(form, h)| LeaderForm {
                     form: form.as_str().into(),
                     label: form.label().into(),
+                    phrase: form.phrase().into(),
                     report_url: report_url(h, hour_name, &date_str),
                 })
                 .collect(),
             hour_name: hour_name.into(),
+            prayers_open: presentation::prayers_open_by_default(hour_name),
             date_str: long_date(date),
             date_slug: date_str.clone(),
             prev_link: hour_link(hour_name, &date_slug(date.add_days(-1))),
@@ -470,10 +572,16 @@ impl Server {
             hour: HourHeader {
                 title: hour.title.clone(),
                 color: hour.color.map(|c| c.as_str()).unwrap_or("").into(),
+                feast_href: if hour.feast.is_empty() {
+                    String::new()
+                } else {
+                    feast_href(self.cache.feasts(), "", &hour.feast, date, &format!("{hour_name}-{date_str}"))
+                },
                 feast: hour.feast.clone(),
                 season: season_str(&hour).into(),
             },
             report_url: report_url(&hour, hour_name, &date_str),
+            end_bare: presentation::ends_bare(hour.bare, &hour.sections),
             ..HourData::default()
         };
         let forms: Vec<(PrayerForm, &OfficeHour)> = composed.iter().map(|(f, h)| (*f, h)).collect();
@@ -481,7 +589,18 @@ impl Server {
             after_prime.iter().map(|(choice, hours)| (*choice, hours.iter().map(|(f, h)| (*f, h)).collect())).collect();
         let after_prime: Vec<(&str, &[(PrayerForm, &OfficeHour)])> = after_prime.iter().map(|(c, h)| (*c, h.as_slice())).collect();
         match self.pages.hour(&mut data, &forms, &after_prime) {
-            Ok(body) => html(StatusCode::OK, body),
+            // Scores engraved at the reader's own column, as chant.js last measured it, so that
+            // none is laid out again under them (render_html::chant::at_width). The page differs
+            // with that cookie, so a cache keeps one reader's copy from another.
+            Ok(body) => {
+                let body = match cookie(req.headers, chant::WIDTH_COOKIE).as_deref().and_then(chant::column_em) {
+                    Some(steps) => chant::at_width(&body, steps),
+                    None => body,
+                };
+                let mut resp = html(StatusCode::OK, body);
+                set(&mut resp, header::VARY, "Cookie");
+                resp
+            }
             Err(e) => render_failed(&e),
         }
     }
@@ -495,6 +614,9 @@ impl Server {
         if parts.len() > 3 {
             return self.not_found_page(req);
         }
+        if parts.get(1) == Some(&"find") {
+            return if parts.len() == 2 { self.find(req) } else { self.not_found_page(req) };
+        }
         let now = now_in(&self.user_location(req)).0;
         if parts.len() == 1 {
             // No year: today's row in the current month.
@@ -507,7 +629,9 @@ impl Server {
             return redirect(&target, StatusCode::FOUND);
         }
         let year = match data_format::atoi(parts[1]) {
-            Ok(y) if (1..=9999).contains(&y) => y as i32,
+            // Years beyond the ones every front offers are not built (see `YearCache::get`).
+            Ok(y) if i32::try_from(y).is_ok_and(crate::cache::offered_year) => y as i32,
+            Ok(_) => return self.not_found_page(req),
             // Beneath a year that is not one, there is no page at all.
             _ if parts.len() == 3 => return self.not_found_page(req),
             _ => return self.error_page(req, StatusCode::BAD_REQUEST, &format!("Invalid year {}.", data_format::quote(parts[1]))),
@@ -538,9 +662,19 @@ impl Server {
             OrdoView::Month(m) => calendar_month_link(y, m),
             OrdoView::All => calendar_all_link(y),
         };
+        // The year's course under the strip: each month's runs of the rows' own colours.
+        let course = match self.cache.get(year) {
+            Ok(entry) => presentation::course::year_course(entry.days.iter().map(|d| &**d)),
+            Err(e) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, &format!("error building calendar: {e}")),
+        };
+        let rare = render_html::view::rare_colors_in(&course);
+        let span = f64::from(presentation::course::COURSE_SPAN);
+        // Search needs only this year's ordo and the next.
+        let indexed = |y: i32| (now.year()..=now.year() + 1).contains(&y);
         let step = |y: i32, m: u32| MonthStep {
             name: if y == year { MONTHS[m as usize - 1].to_string() } else { format!("{} {y}", MONTHS[m as usize - 1]) },
             href: calendar_month_link(y, m),
+            follow: indexed(y),
         };
         let data = CalendarData {
             chrome: Chrome {
@@ -550,7 +684,7 @@ impl Server {
                 site: req.site.into(),
                 canonical: same_view(year),
                 // Every year has an ordo; search needs only this one and the next.
-                noindex: !(now.year()..=now.year() + 1).contains(&year),
+                noindex: !indexed(year),
                 ..Chrome::default()
             },
             year,
@@ -560,6 +694,10 @@ impl Server {
             next_year: year + 1,
             prev_year_link: same_view(year - 1),
             next_year_link: same_view(year + 1),
+            prev_year_follow: indexed(year - 1),
+            next_year_follow: indexed(year + 1),
+            has_prev_year: crate::cache::offered_year(year - 1),
+            has_next_year: crate::cache::offered_year(year + 1),
             year_link: calendar_year_link(year),
             all_link: calendar_all_link(year),
             month_links: MONTHS
@@ -567,6 +705,21 @@ impl Server {
                 .zip(1..)
                 .map(|(name, m)| {
                     let today = (year, m) == (now.year(), now.month());
+                    let runs = &course[m as usize - 1];
+                    let rare_pins = if view == OrdoView::Year {
+                        runs.iter()
+                            .filter(|r| rare.contains(&r.color))
+                            .map(|r| {
+                                let mid = f64::from(r.start) + f64::from(r.days) * 0.5;
+                                render_html::view::AboutRibbonPin {
+                                    color: r.color.as_str().to_string(),
+                                    left_pct: format!("{:.3}%", mid / span * 100.0),
+                                }
+                            })
+                            .collect()
+                    } else {
+                        Vec::new()
+                    };
                     MonthLink {
                         name: if today { format!("{name}, this month") } else { name.to_string() },
                         abbr: name[..3].to_string(),
@@ -575,21 +728,28 @@ impl Server {
                         month: format!("{year:04}-{m:02}"),
                         current: current == Some(m),
                         today,
+                        today_x: if today { presentation::course::course_place_percent(now.day()) } else { String::new() },
+                        course: runs
+                            .iter()
+                            .map(|r| CourseRunView { start: r.start, days: r.days, color: r.color.as_str().to_string() })
+                            .collect(),
+                        rare_pins,
                     }
                 })
                 .collect(),
+            ordo_colors: if view == OrdoView::Year { render_html::view::build_ordo_colors(year, Some(&course)) } else { Vec::new() },
             months,
             prev_month: current.and_then(|m| match m {
-                1 if year > 1 => Some(step(year - 1, 12)),
+                1 if crate::cache::offered_year(year - 1) => Some(step(year - 1, 12)),
                 1 => None,
                 m => Some(step(year, m - 1)),
             }),
             next_month: current.and_then(|m| match m {
-                12 if year < 9999 => Some(step(year + 1, 1)),
+                12 if crate::cache::offered_year(year + 1) => Some(step(year + 1, 1)),
                 12 => None,
                 m => Some(step(year, m + 1)),
             }),
-            tabula: (view == OrdoView::Year).then(|| tabula(year)),
+            tabula: (view == OrdoView::Year).then(|| tabula(year, self.cache.feasts())),
         };
         match self.pages.calendar(&data) {
             Ok(body) => html(StatusCode::OK, body),
@@ -606,19 +766,31 @@ impl Server {
                 canonical: "/reminders".into(),
                 ..Chrome::default()
             },
-            hours: REMINDER_DEFAULTS
+            // The hours in home's three periods, as home and About group them.
+            periods: presentation::about::ABOUT_HOURS
                 .iter()
-                .map(|&(slug, name, hh, mm, checked)| ReminderHour {
-                    name: name.into(),
-                    slug: slug.into(),
-                    default: format!("{hh:02}:{mm:02}"),
-                    checked,
+                .map(|(label, hours)| ReminderPeriod {
+                    key: label.to_lowercase(),
+                    label: label.to_string(),
+                    hours: hours
+                        .iter()
+                        .filter_map(|(slug, _)| REMINDER_DEFAULTS.iter().find(|d| d.0 == *slug))
+                        .map(|&(slug, name, hh, mm, checked)| ReminderHour {
+                            name: name.into(),
+                            gloss: hour_gloss(slug).into(),
+                            slug: slug.into(),
+                            default: format!("{hh:02}:{mm:02}"),
+                            checked,
+                        })
+                        .collect(),
                 })
                 .collect(),
             days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
                 .iter()
                 .map(|d| ReminderDay { name: d.to_string(), slug: d.to_lowercase() })
                 .collect(),
+            rule: reminder_rule_at_first(),
+            rule_words: render_html::view::reminder_rule_words(),
         };
         match self.pages.reminders(&data) {
             Ok(body) => html(StatusCode::OK, body),
@@ -630,6 +802,19 @@ impl Server {
     pub fn local_year() -> i32 {
         now_in(&local()).0.year()
     }
+}
+
+/// The reminder rule for the page's default choices, with times as an American browser shows
+/// them ("6:45 AM"); app.js rewrites it in the reader's own clock, leaving alike phrases alone.
+fn reminder_rule_at_first() -> Vec<ReminderRulePhrase> {
+    use presentation::reminders::{RuleHour, RuleTime, rule};
+    let times: Vec<(&str, String)> = REMINDER_DEFAULTS
+        .iter()
+        .filter(|d| d.4)
+        .map(|&(slug, _, hh, mm, _)| (slug, format!("{}:{mm:02}\u{a0}{}", (hh + 11) % 12 + 1, if hh < 12 { "AM" } else { "PM" })))
+        .collect();
+    let hours: Vec<RuleHour> = times.iter().map(|(slug, t)| RuleHour { hour: slug, time: RuleTime::Clock(t) }).collect();
+    rule(&hours, [true; 7], Some(10)).into_iter().map(|p| ReminderRulePhrase { key: p.key, text: p.text }).collect()
 }
 
 #[cfg(test)]
@@ -660,6 +845,122 @@ mod tests {
         }
     }
 
+    // app.js and style.css play the crown's tap to presentation::crown's timetable and pigments.
+    #[test]
+    fn client_crown_play_matches_presentation() {
+        use presentation::crown::{self, CrownPlay, Ease, Rgb};
+        let js = std::str::from_utf8(crate::pwa::file("static/app.js").unwrap()).unwrap();
+        let css = std::str::from_utf8(crate::pwa::file("static/style.css").unwrap()).unwrap();
+        let ease = |e: Ease| format!("[{}, {}, {}, {}]", e[0], e[1], e[2], e[3]);
+        let rgb = |c: Rgb| format!("{}, {}, {}", c[0], c[1], c[2]);
+        let play = |name: &str, p: CrownPlay| {
+            format!(
+                "{name}: {{ turn: {}, front: [{}, {}], spread: [{}, {}], veil: [{}, {}], frieze: [{}, {}], end: {}, inkAt: {}, glowEase: {}, linger: [{}, {}] }},",
+                p.turn,
+                p.front.at,
+                p.front.len,
+                p.spread.at,
+                p.spread.len,
+                p.veil.0,
+                p.veil.1,
+                p.frieze.at,
+                p.frieze.len,
+                p.end,
+                p.ink_at,
+                ease(p.glow_ease),
+                p.linger.at,
+                p.linger.len
+            )
+        };
+        let mut lines = vec![play("dusk", crown::DUSK), play("dawn", crown::DAWN)];
+        lines.push(format!("var FRONT_EASE = {};", ease(crown::FRONT_EASE)));
+        lines.push(format!("var SPREAD_EASE = {};", ease(crown::SPREAD_EASE)));
+        lines.push(format!("var SPREAD_WIDE = {};", crown::SPREAD_WIDE));
+        lines.push(format!("var SPREAD_FEATHER = {};", crown::SPREAD_FEATHER));
+        lines.push(format!("var SPREAD_SHAPE_PART = {};", crown::SPREAD_SHAPE_PART));
+        lines.push(format!("var SPREAD_BEND = {};", crown::SPREAD_BEND));
+        lines.push(format!("var SPREAD_GLOW_PART = {};", crown::SPREAD_GLOW_PART));
+        lines.push(format!("var VEIL_LEAD = {};", crown::VEIL_LEAD));
+        lines.push(format!("var VEIL_PART = {};", crown::VEIL_PART));
+        lines.push(format!("var STAR_KINDLE = {};", crown::STAR_KINDLE));
+        lines.push(format!("var EVENING_STAR_ALONE = {};", crown::EVENING_STAR_ALONE));
+        lines.push(format!("var STARS_BRIGHT = {};", crown::STARS_BRIGHT));
+        lines.push(format!("var STARS_BRIGHT_APART = {};", crown::STARS_BRIGHT_APART));
+        lines.push(format!("var DAWN_FIELD_OUT = {};", crown::DAWN_FIELD_OUT));
+        lines.push(format!("var DAWN_STAR_LINGER = {};", crown::DAWN_STAR_LINGER));
+        lines.push(format!("var BEAT_HOLD = {};", crown::BEAT_HOLD));
+        lines.push(format!("var BEAT_LEN = {};", crown::BEAT_LEN));
+        lines.push(format!("var TAP_APART = {};", crown::TAP_APART));
+        lines.push(format!("var PACE = {};", crown::PACE));
+        lines.push(format!("var LINGER = {};", crown::LINGER));
+        lines.push(format!("var RUSH = {};", crown::RUSH));
+        for line in &lines {
+            assert!(js.contains(line), "app.js lacks {line:?}");
+        }
+        let mut rules = Vec::new();
+        for (name, p) in [("dusk", crown::DUSK), ("dawn", crown::DAWN)] {
+            rules.push(format!(
+                ":root.crown-{name} {{ --crown-veil-warm: {}; --crown-veil-ink: {}; --crown-veil-peak: {}; }}",
+                rgb(p.veil_warm),
+                rgb(p.veil_ink),
+                p.veil_peak
+            ));
+        }
+        for (name, c) in [
+            ("ochre", crown::SKY_OCHRE),
+            ("red-ochre", crown::SKY_RED_OCHRE),
+            ("ember", crown::SKY_EMBER),
+            ("lime", crown::SKY_LIME),
+            ("rose-lilac", crown::SKY_ROSE_LILAC),
+            ("peach", crown::SKY_PEACH),
+            ("teal", crown::SKY_TEAL),
+            ("cross-ember", crown::CROSS_EMBER),
+            ("cross-ember-veiled", crown::CROSS_EMBER_VEILED),
+        ] {
+            rules.push(format!("--crown-{name}: {};", rgb(c)));
+        }
+        // The veil's two ramps, the stars' and the beat's lengths, and the front's ease, as
+        // style.css writes them.
+        let bez = |e: Ease| format!("cubic-bezier({}, {}, {}, {})", e[0], e[1], e[2], e[3]);
+        for (name, p) in [("dusk", crown::DUSK), ("dawn", crown::DAWN)] {
+            let gone = if p.veil_gone < 1.0 { format!("{}%, 100%", p.veil_gone * 100.0) } else { "100%".to_string() };
+            rules.push(format!(
+                "@keyframes crown-veil-{name} {{\n  0% {{ opacity: 0; animation-timing-function: {}; }}\n  {}% {{ opacity: var(--crown-veil-peak); animation-timing-function: {}; }}\n  {gone} {{ opacity: 0; }}\n}}",
+                bez(p.veil_in),
+                p.veil_top * 100.0,
+                bez(p.veil_out)
+            ));
+            // The veil's colour rides the same clock and curves as its strength.
+            rules.push(format!(
+                "@keyframes crown-veil-ink-{name} {{\n  0% {{ --crown-veil-c: rgb(var(--crown-veil-warm)); animation-timing-function: {}; }}\n  {}% {{ --crown-veil-c: rgb(var(--crown-veil-ink)); animation-timing-function: {}; }}\n  {gone} {{ --crown-veil-c: rgb(var(--crown-veil-warm)); }}\n}}",
+                bez(p.veil_in),
+                p.veil_top * 100.0,
+                bez(p.veil_out)
+            ));
+        }
+        rules.push(format!("--crown-veil-far: {};", crown::VEIL_FAR));
+        rules.push(format!("animation-timing-function: {};\n  }}\n  95% {{", bez(crown::FRONT_EASE)));
+        rules.push(format!("animation: crown-kindle calc({}ms * var(--crown-kp))", crown::STAR_KINDLE));
+        rules.push(format!("animation: crown-snuff calc({}ms * var(--crown-kp))", crown::STAR_SNUFF));
+        rules.push(format!("55% {{ opacity: 1; transform: scale({}); }}", crown::STAR_OVER));
+        rules.push(format!("crown-snuff calc({}ms * var(--crown-kp))", crown::BEAT_LEN));
+        rules.push(format!("--crown-ink-handover: {}ms;", crown::INK_HANDOVER));
+        rules.push(format!("--crown-pace: {};", crown::PACE));
+        // The cross's answer to the hand, in real time.
+        rules.push(format!("animation: crown-press calc({}ms * var(--crown-k))", crown::CROSS_PRESS_LEN));
+        rules.push(format!("from {{ transform: translateX(-50%) scale({}); }}", crown::CROSS_PRESS));
+        rules.push(format!("animation: crown-catch calc({}ms * var(--crown-k))", crown::CROSS_CATCH_LEN));
+        rules.push(format!("{}% {{ opacity: 0.7; }}", crown::CROSS_CATCH_PEAK * 100.0));
+        rules.push(format!(
+            "crown-ember-in calc({}ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.3, 1) calc({}ms * var(--crown-k)) both",
+            crown::CROSS_EMBER_IN,
+            crown::CROSS_EMBER_AT
+        ));
+        for rule in &rules {
+            assert!(css.contains(rule), "style.css lacks {rule:?}");
+        }
+    }
+
     // app.js reads an hour at presentation::Reading's pace before home marks it prayed.
     #[test]
     fn client_prayed_pace_matches_server() {
@@ -673,19 +974,106 @@ mod tests {
         assert_eq!(constant("PRAYED_LONGEST_STEP"), presentation::PRAYED_LONGEST_STEP);
     }
 
+    // app.js writes the browser's beacon by hand in presentation::usage's vocabulary: every
+    // "family:value" it can send is one the server reads, and it names every family a browser
+    // reports (new-client and offices are the server's own). The test reads the code from usageVisitToken to
+    // the next top-level IIFE, takes each double-quoted string that opens " family:", and finds
+    // the prayer forms as one array literal; keep app.js's beacon code in that shape.
+    #[test]
+    fn client_beacon_tokens_match_server() {
+        use presentation::usage::{DIMENSIONS, PRAYER_FORMS};
+        let src = std::str::from_utf8(crate::pwa::file("static/app.js").unwrap()).unwrap();
+        let start = src.find("function usageVisitToken").unwrap();
+        let beacon = &src[start..start + src[start..].find("\n(function () {").unwrap()];
+        let tokens: Vec<(&str, &str)> = beacon
+            .split('"')
+            .skip(1)
+            .step_by(2)
+            .filter_map(|s| s.strip_prefix(' ')?.split_once(':'))
+            .filter(|(key, value)| !key.contains(' ') && !value.contains(' '))
+            .collect();
+        for (key, value) in &tokens {
+            let family = DIMENSIONS.iter().find(|d| d.key == *key).unwrap_or_else(|| panic!("app.js sends unknown family {key}"));
+            assert!(value.is_empty() || family.values.contains(value), "app.js sends {key}:{value}");
+        }
+        // The server derives four; the web cannot see its reminders, which live in a calendar.
+        for family in DIMENSIONS.iter().filter(|d| !["new-client", "offices", "reported", "new-offices", "reminder"].contains(&d.key)) {
+            assert!(tokens.iter().any(|(key, _)| *key == family.key), "app.js never sends {}", family.key);
+        }
+        assert!(beacon.contains(&format!("\" version:{}\"", presentation::usage::VERSION)), "app.js's version");
+        // The hour schedule, and the day first days were kept from, as presentation has them.
+        let starts = presentation::CURRENT_HOUR_SCHEDULE
+            .iter()
+            .map(|(start, slug, _, offset)| format!("[{start}, \"{slug}\", {offset}]"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        assert!(beacon.contains(&format!("var USAGE_HOUR_STARTS = [{starts}];")), "app.js's hour starts are [{starts}]");
+        let (y, m, d) = presentation::usage::FIRST_DAYS_KEPT_SINCE;
+        assert!(beacon.contains(&format!("var USAGE_FIRST_KEPT = \"{y}-{m:02}-{d:02}\";")), "app.js's first days kept");
+        let forms = format!("[{}]", PRAYER_FORMS.iter().map(|f| format!("\"{f}\"")).collect::<Vec<_>>().join(", "));
+        assert!(beacon.contains(&forms), "app.js's prayer forms are {forms}");
+    }
+
     use axum::http::Uri;
 
     use crate::test_server;
 
     /// A GET through the whole server, as the mux dispatches it.
     fn get(path: &str) -> (StatusCode, HeaderMap, String) {
+        get_with_cookie(path, "")
+    }
+
+    fn get_with_cookie(path: &str, cookie: &str) -> (StatusCode, HeaderMap, String) {
         use tower::ServiceExt;
         let runtime = tokio::runtime::Builder::new_current_thread().build().unwrap();
-        let request = axum::extract::Request::builder().uri(path.parse::<Uri>().unwrap()).body(Body::empty()).unwrap();
+        let mut request = axum::extract::Request::builder().uri(path.parse::<Uri>().unwrap());
+        if !cookie.is_empty() {
+            request = request.header(header::COOKIE, cookie);
+        }
+        let request = request.body(Body::empty()).unwrap();
         let resp = runtime.block_on(test_server().router().oneshot(request)).unwrap();
         let (parts, body) = resp.into_parts();
         let bytes = runtime.block_on(axum::body::to_bytes(body, usize::MAX)).unwrap();
         (parts.status, parts.headers, String::from_utf8(bytes.to_vec()).unwrap())
+    }
+
+    // Reminders sets its rule for the default choices at once, and sends app.js the words it
+    // rewrites the rule from; the hours stand in home's three periods.
+    #[test]
+    fn reminders_writes_out_the_rule_and_sends_its_words() {
+        let (status, _, body) = get("/reminders");
+        assert_eq!(status, StatusCode::OK);
+        let at = body.find("id=\"reminder-rule\"").expect("the rule");
+        let rule = &body[at..at + body[at..].find("</p>").unwrap()];
+        assert!(rule.contains("<span data-key=\"lauds-time\"> at 6:45\u{a0}AM</span>"), "{rule}");
+        assert!(rule.contains("<span data-key=\"lead\">, ten minutes before.</span>"), "{rule}");
+        let at = body.find("id=\"reminder-rule-words\">").expect("the words") + "id=\"reminder-rule-words\">".len();
+        let words = &body[at..at + body[at..].find("</script>").unwrap()];
+        assert!(words.contains("\"none\":\"with no alert\"") && words.contains("\"Sundays\""), "{words}");
+        assert_eq!(body.matches("class=\"reminder-period\"").count(), 3);
+    }
+
+    // The app comes first on Reminders, and the calendar feed is the fallback: a fold served open
+    // (so a reader with no app to get, or no script, has the feed as the page), which a phone
+    // whose store has the app shuts before it is painted. About names the apps once, before its
+    // closing invitation.
+    #[test]
+    fn reminders_offers_the_app_before_the_calendar() {
+        let (_, _, body) = get("/reminders");
+        let app = body.find("class=\"reminders-app app-offer").expect("the app's offer");
+        let fold = body.find("<details class=\"reminder-calendar").expect("the calendar's fold");
+        let form = body.find("id=\"reminders-form\"").unwrap();
+        assert!(app < fold && fold < form);
+        assert!(
+            body[fold..].starts_with("<details class=\"reminder-calendar\" open>")
+                || body[fold..].starts_with("<details class=\"reminder-calendar has-ios\" open>")
+        );
+        assert!(body[app..fold].contains(presentation::stores::PLAY_LABEL));
+        assert!(body[fold..form].contains("removeAttribute(\"open\")"));
+        let (_, _, about) = get("/about");
+        let apps = about.find("class=\"about-apps").expect("the apps");
+        assert!(apps < about.find("about-door").unwrap());
+        assert!(!about.contains("orthodoxwestbreviary.com</a>"), "the web does not point to itself");
     }
 
     // Home's head carries the day's versicle from Lauds on a plain day, and is
@@ -700,8 +1088,15 @@ mod tests {
         };
         // St Placidus: the martyrs' versicle, each half with its sigil.
         let placidus = versicle("2026-10-05").expect("a plain day's versicle");
-        assert!(placidus.contains("<span class=\"home-versicle-sigil\">℣.</span> Let the Saints be joyful with glory."), "{placidus}");
-        assert!(placidus.contains("<span class=\"home-versicle-sigil\">℟.</span> Let them rejoice in their beds."), "{placidus}");
+        assert!(
+            placidus.contains(r#">℣.</span><span class="sr-only">Versicle.</span></span> Let the Saints be joyful with glory."#),
+            "{placidus}"
+        );
+        assert!(
+            placidus.contains(r#">℟.</span><span class="sr-only">Response.</span></span> Let them rejoice in their beds."#),
+            "{placidus}"
+        );
+        assert!(placidus.contains(r#"class="home-versicle-line gloss-quiet""#), "{placidus}");
         // Laetare, in rose, keeps it.
         assert!(versicle("2026-03-22").is_some_and(|v| v.contains("God shall give his angels charge over thee.")));
         // A Lenten feria (violet), Passion Sunday, Maundy Thursday, and a day with a commemoration.
@@ -716,23 +1111,27 @@ mod tests {
     fn prime_carries_what_follows_it_for_the_setting() {
         let (status, _, body) = get("/prime/2026-09-07");
         assert_eq!(status, StatusCode::OK);
-        let off = body.find("<p data-martyrology-variant=\"off\" class=\"rubric\">Then the Martyrology is read").expect("rubric variant");
-        let on = body
-            .find("<h2 data-martyrology-variant=\"on chapter\" class=\"section-heading\">Martyrology for tomorrow, September 8</h2>")
-            .expect("reading");
-        let chapter =
-            body.find("<h2 data-martyrology-variant=\"chapter\" class=\"section-heading\">Chapter Office</h2>").expect("Chapter Office");
+        // Where a passage read under `choices` opens with `inner`.
+        let wrapped = |choices: &str, inner: &str| -> Option<usize> {
+            let open = format!("<div data-martyrology-variant=\"{choices}\" data-martyrology-passage=\"");
+            body.match_indices(&open).map(|(i, _)| i).find(|&i| {
+                let rest = &body[i + open.len()..];
+                rest.find("\">").is_some_and(|q| rest[..q].bytes().all(|b| b.is_ascii_digit()) && rest[q + 2..].starts_with(inner))
+            })
+        };
+        let off = wrapped("off", "<p class=\"rubric\">Then the <span class=\"gloss-term\"").expect("rubric variant");
+        assert!(body[off..off + 500].contains(">Martyrology</span> is read"));
+        let on = wrapped("on chapter", "<h2 class=\"section-heading\">Martyrology for tomorrow, September 8</h2>").expect("reading");
+        let chapter = wrapped("chapter", "<h2 class=\"section-heading\">Chapter Office</h2>").expect("Chapter Office");
         assert!(off < on && on < chapter);
         // The Capitular Office ends with the faithful departed, so Prime's own closing differs.
         let faithful = "May the souls of the faithful, through the mercy of God, rest in peace.";
         let closing = &body[..off];
         assert!(closing.contains("data-martyrology-variant=\"off on\"") && closing.contains(faithful));
-        // Every variant element is the hour's own child: nothing wraps them.
-        assert!(!body.contains("<div data-martyrology-variant=\"off\"><"));
         assert_eq!(get("/prime/2026-09-07?preview=martyrology").2, body, "the retired preview flag is ignored");
         // Other hours, and a Prime without the Martyrology (Good Friday), carry no choice.
         for path in ["/lauds/2026-09-07", "/prime/2026-04-10"] {
-            assert!(!get(path).2.contains("data-martyrology-variant"), "{path}");
+            assert!(!get(path).2.contains("data-martyrology-variant=\""), "{path}");
         }
     }
 
@@ -748,6 +1147,146 @@ mod tests {
         assert_eq!(body.matches(r#"class="report-issue""#).count(), 3, "one report link per prayer form");
         for unwanted in ["assurance", "Text dependencies", "Composition decisions", "SOURCE:", ".txt", "/home/", "../resources"] {
             assert!(!body.contains(unwanted) && !body.contains(&unwanted.replace('/', "&#x2f;")), "hour page contains {unwanted:?}");
+        }
+    }
+
+    /// An hour keeps the reader's place by presentation's rule: the page names its own hour and
+    /// day for the place, the limit is presentation's, and the place is found before the hour is
+    /// first painted (the head) and kept from the foot, after every line it may name.
+    #[test]
+    fn hour_page_keeps_the_place_by_the_shared_rule() {
+        let (_, _, body) = get("/vespers/2026-06-07");
+        let head = &body[..body.find("<body").unwrap()];
+        assert!(head.contains(r#"var hour = "vespers", day = "2026-06-07";"#), "the head finds the place for this hour");
+        // The head block renders once, in the head: not again inside the page's content.
+        assert_eq!(body.matches(r##"expect.href = "#hour-place""##).count(), 1, "the finder runs once");
+        let limit = format!("away <= {} * 60", presentation::PLACE_KEPT_MINUTES);
+        assert!(head.contains(&limit), "the head keeps presentation's limit, {limit}");
+        assert!(head.contains("office-prayed"), "a prayed hour opens at its top");
+        let foot = body.find(r#"<span id="hour-place" hidden></span>"#).expect("the foot marks where Chromium may paint");
+        assert!(foot > body.find(r#"class="hour-epilogue""#).unwrap(), "the place is set once every line is in");
+        assert_eq!(body.matches(r#"localStorage.setItem(KEY"#).count(), 1, "one keeper");
+        // Other pages neither keep nor find one.
+        assert!(!get("/").2.contains("office-place"));
+        // The ordo month's hold, likewise, renders once and in the head.
+        let month = get("/calendar/2026/11").2;
+        assert_eq!(month.matches(r##"expect.href = "#ordo-place""##).count(), 1, "the ordo's hold runs once");
+        assert!(month.find(r##"expect.href = "#ordo-place""##).unwrap() < month.find("<body").unwrap());
+    }
+
+    /// On an evening that keeps the morrow, Vespers carries "First Vespers of …" for the
+    /// invitation to set under "Pray Vespers" by the reader's clock (#951); other evenings none.
+    #[test]
+    fn home_marks_first_vespers_on_the_eve_of_a_feast() {
+        let eve = get("/?date=2026-12-24").2;
+        assert!(eve.contains(r#"data-hour="vespers" data-eve="First Vespers of the Nativity of Our Lord""#), "{eve}");
+        assert!(get("/?date=2026-11-28").2.contains(r#"data-eve="First Vespers of I Sunday of Advent""#));
+        assert!(!get("/?date=2026-12-23").2.contains("data-eve=\""));
+    }
+
+    /// 1 January is the Nativity's eighth day (#833; the 2026 ordo's "(Octave Day of the
+    /// Nativity)"), so home names the octave under the Circumcision, as it does under St Stephen
+    /// and St Sylvester; 2 January is past it.
+    #[test]
+    fn home_names_the_nativity_octave_on_the_first_of_january() {
+        for date in ["2026-12-26", "2026-12-31", "2027-01-01"] {
+            let body = get(&format!("/?date={date}")).2;
+            assert!(
+                body.contains(r#"<p class="octave-note"><span class="gloss-quiet""#) && body.contains(">Octave of Christmas</span></p>"),
+                "{date}"
+            );
+        }
+        assert!(!get("/?date=2027-01-02").2.contains("octave-note"));
+    }
+
+    /// Days bound together (presentation::rails; needs ruling #838): the Nativity's rail runs
+    /// from 25 December across the year's turn to 1 January, St Stephen's red standing beside its
+    /// white, and the days outside it keep their lone bars and their markup.
+    #[test]
+    fn the_ordo_binds_the_nativity_octave_across_the_new_year() {
+        let row = |body: &str, date: &str| {
+            let at = body.find(&format!(r#"id="d-{date}""#)).unwrap();
+            let start = body[..at].rfind("<tr").unwrap();
+            body[start..start + body[start..].find("</td>").unwrap()].to_string()
+        };
+        let december = get("/calendar/2026/12").2;
+        assert!(row(&december, "2026-12-24").starts_with(r#"<tr class="day day-color-violet lead-to" id="d-2026-12-24""#));
+        assert!(row(&december, "2026-12-25").starts_with(r#"<tr class="day day-color-white bound-below lead-from" "#));
+        let stephen = row(&december, "2026-12-26");
+        assert!(stephen.starts_with(r#"<tr class="day day-color-white bound-above bound-below" "#), "{stephen}");
+        assert!(stephen.contains(r#"<span class="day-inset day-color-red" aria-hidden="true"></span>"#), "{stephen}");
+        assert!(row(&december, "2026-12-31").starts_with(r#"<tr class="day day-color-white bound-above bound-below" "#));
+        let january = get("/calendar/2027/01").2;
+        let circumcision = row(&january, "2027-01-01");
+        assert!(circumcision.starts_with(r#"<tr class="day day-color-white bound-above" "#), "{circumcision}");
+        assert!(!circumcision.contains("day-inset"));
+        assert!(row(&january, "2027-01-02").starts_with(r#"<tr class="day day-color-red" id="d-2027-01-02""#));
+    }
+
+    /// A vigil leads into its feast (presentation::rails; needs ruling #838, question 3(d)): on
+    /// Christmas Eve and the Vigil of St Laurence a thread runs from the vigil's rail into the
+    /// feast's, carried in the date's cell for the table and in the feast's for the phone's card.
+    /// St Andrew's vigil, anticipated over Advent Sunday, and the Vigil of Ss Peter & Paul,
+    /// commemorated within the Baptist's octave, have none.
+    #[test]
+    fn the_ordo_leads_a_vigil_into_its_feast() {
+        let row = |body: &str, date: &str| {
+            let at = body.find(&format!(r#"id="d-{date}""#)).unwrap();
+            let start = body[..at].rfind("<tr").unwrap();
+            body[start..start + body[start..].find("</tr>").unwrap()].to_string()
+        };
+        let thread = |own: &str, dir: &str, other: &str| {
+            format!(
+                r#"<span class="day-lead day-color-{own}" aria-hidden="true"><span class="day-thread {dir} day-color-{other}"></span></span>"#
+            )
+        };
+        for (month, vigil, feast, (v, f)) in
+            [("2026/12", "2026-12-24", "2026-12-25", ("violet", "white")), ("2027/08", "2027-08-09", "2027-08-10", ("violet", "red"))]
+        {
+            let body = get(&format!("/calendar/{month}")).2;
+            let (vigil, feast) = (row(&body, vigil), row(&body, feast));
+            assert!(vigil.starts_with(&format!(r#"<tr class="day day-color-{v} lead-to" "#)), "{vigil}");
+            assert_eq!(vigil.matches(&thread(v, "to-feast", f)).count(), 2, "{vigil}");
+            assert!(feast.contains(r#" lead-from" id="#), "{feast}");
+            assert_eq!(feast.matches(&thread(f, "from-vigil", v)).count(), 2, "{feast}");
+        }
+        for (month, days) in
+            [("2026/11", ["2026-11-28", "2026-11-29", "2026-11-30"]), ("2028/06", ["2028-06-27", "2028-06-28", "2028-06-29"])]
+        {
+            let body = get(&format!("/calendar/{month}")).2;
+            for day in days {
+                assert!(!row(&body, day).contains("day-lead"), "{day}");
+            }
+        }
+    }
+
+    /// A browser that has laid a score out names its column's width, and the hour's scores come
+    /// engraved at it, so chant.js has nothing to lay out again and no score changes height under
+    /// the reader; a width that is not one leaves the page's own.
+    #[test]
+    fn an_hours_scores_are_engraved_at_the_column_the_browser_named() {
+        let units = |body: &str| body.matches(" data-chant-units=\"").count();
+        let at = |body: &str, em: f32| body.matches(&format!(" data-chant-units=\"{:.3}\"", em * 2.45 * 6.0)).count();
+        // Every request names the same zone, so "today" (and with it the page's
+        // links back to today) is the same day in each, whatever the hour in UTC.
+        let (_, headers, plain) = get_with_cookie("/compline/2026-10-27", "tz=America/New_York");
+        assert_eq!(headers[header::VARY], "Cookie");
+        assert!(units(&plain) > 0 && at(&plain, 17.0) == units(&plain), "the scores at the fallback's width");
+        let (status, headers, narrow) = get_with_cookie("/compline/2026-10-27", "tz=America/New_York; chant-width=17.875");
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(headers[header::VARY], "Cookie");
+        assert_eq!(at(&narrow, 17.875), units(&plain), "every score at the reader's column");
+        // A width between sixteenths of an em is engraved at the nearest.
+        assert_eq!(get_with_cookie("/compline/2026-10-27", "tz=America/New_York; chant-width=17.900").2, narrow);
+        // Only the scores differ.
+        let words = |body: &str| {
+            body.split("<div class=\"chant-width\"")
+                .map(|s| s.split_once("</div>").map_or(s, |(_, rest)| rest).to_string())
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(words(&narrow), words(&plain));
+        for odd in ["chant-width=wide", "chant-width=900", "chant-width="] {
+            assert_eq!(get_with_cookie("/compline/2026-10-27", &format!("tz=America/New_York; {odd}")).2, plain, "{odd}");
         }
     }
 
@@ -803,36 +1342,51 @@ mod tests {
     #[test]
     fn ordo_month_page_holds_one_month_between_its_neighbours() {
         let body = ordo("/calendar/2026/09");
-        assert!(body.contains("<title>September 2026 — Ordo</title>"));
+        assert!(body.contains("<title>September 2026 — Ordo — Daily Office</title>"));
         assert_eq!(body.matches(r#"<tr class="day "#).count(), 30);
         assert!(body.contains(r#"id="d-2026-09-01""#) && body.contains(r#"id="d-2026-09-30""#));
         assert!(!body.contains(r#"id="d-2026-08-31""#) && !body.contains(r#"id="d-2026-10-01""#));
         // The strip leads to each month, naming this one as the current page.
         let strip = body.split(r#"<nav class="month-jump""#).nth(1).and_then(|s| s.split("</nav>").next()).unwrap();
         assert_eq!(strip.matches(r#"<a href="/calendar/2026/"#).count(), 12);
-        assert!(strip.contains(r#"<a href="/calendar/2026/09" aria-label="September"#) && strip.contains(r#"aria-current="page">Sep</a>"#));
+        assert!(
+            strip.contains(r#"<a href="/calendar/2026/09" aria-label="September"#)
+                && strip.contains(r#"aria-current="page">Sep<span class="month-course""#)
+        );
         assert_eq!(strip.matches(r#"aria-current="page""#).count(), 1);
         assert!(strip.contains(r#"data-month="2026-09""#));
         assert_eq!(body.matches(r#"aria-current="page""#).count(), 2, "the month and the Ordo menu item");
-        assert!(body.contains(r#"href="/calendar/2025/09" aria-label="Previous year, 2025""#));
-        assert!(body.contains(r#"href="/calendar/2027/09" aria-label="Next year, 2027""#));
+        // (Whether a crawler follows them depends on the year it is; see
+        // search_engines_find_the_undated_pages_on_the_canonical_host.)
+        assert!(body.contains(r#"href="/calendar/2025/09""#) && body.contains(r#"aria-label="Previous year, 2025""#));
+        assert!(body.contains(r#"href="/calendar/2027/09""#) && body.contains(r#"aria-label="Next year, 2027""#));
+        // The month links, whichever a crawler follows this year.
+        let unruled = |page: String| page.replace(r#" rel="nofollow""#, "");
+        let body = unruled(body);
         for want in [
-            r#"href="/calendar/2026/08"><span class="continuation-label">Previous month</span><span>&larr; August</span>"#,
-            r#"href="/calendar/2026/10"><span class="continuation-label">Next month</span><span>October &rarr;</span>"#,
+            r#"href="/calendar/2026/08"><span class="continuation-label">Previous month</span><span class="sr-only">: </span><span><span aria-hidden="true">&larr; </span>August</span>"#,
+            r#"href="/calendar/2026/10"><span class="continuation-label">Next month</span><span class="sr-only">: </span><span>October<span aria-hidden="true"> &rarr;</span></span>"#,
             r#"<a class="day-hours-link" href="/calendar/2026">2026 Ordo</a>"#,
         ] {
             assert!(body.contains(want), "month continuation missing {want:?}");
         }
         // Neighbours across the year name their year.
         assert!(
-            ordo("/calendar/2026/12")
-                .contains(r#"href="/calendar/2027/01"><span class="continuation-label">Next month</span><span>January 2027 &rarr;</span>"#)
+            unruled(ordo("/calendar/2026/12"))
+                .contains(r#"href="/calendar/2027/01"><span class="continuation-label">Next month</span><span class="sr-only">: </span><span>January 2027<span aria-hidden="true"> &rarr;</span></span>"#)
         );
-        assert!(ordo("/calendar/2026/01").contains(
-            r#"href="/calendar/2025/12"><span class="continuation-label">Previous month</span><span>&larr; December 2025</span>"#
+        assert!(unruled(ordo("/calendar/2026/01")).contains(
+            r#"href="/calendar/2025/12"><span class="continuation-label">Previous month</span><span class="sr-only">: </span><span><span aria-hidden="true">&larr; </span>December 2025</span>"#
         ));
-        assert!(!ordo("/calendar/0001/01").contains("Previous month"));
-        assert!(!ordo("/calendar/9999/12").contains("Next month"));
+        // The ordo runs over the years every front offers, and stops at their ends.
+        let years = presentation::offered_years(Server::local_year());
+        let (first, last) = (*years.start(), *years.end());
+        let opening = ordo(&format!("/calendar/{first}/01"));
+        let next = format!("Next year, {}", first + 1);
+        assert!(!opening.contains("Previous month") && !opening.contains("Previous year") && opening.contains(&next));
+        let closing = ordo(&format!("/calendar/{last}/12"));
+        let previous = format!("Previous year, {}", last - 1);
+        assert!(!closing.contains("Next month") && !closing.contains("Next year") && closing.contains(&previous));
     }
 
     /// An observance kept by monastics and oblates only is the ordo's bracketed line under the
@@ -843,7 +1397,8 @@ mod tests {
         let row = |slug: &str| body.split(&format!(r#"id="d-{slug}""#)).nth(1).and_then(|r| r.split("</tr>").next()).unwrap().to_string();
         let benedict = row("2026-07-11");
         assert!(benedict.contains("Saturday Office of the B.V.M."), "{benedict}");
-        assert!(benedict.contains(r#"<div class="day-monastic"><p>[Solemnity of St Benedict (Monastics &amp; Oblates Only)] <abbr tabindex="0" title="Greater Double">gd</abbr><span class="day-monastic-office">Proper Office, Monastic Diurnal pp. 560–564</span></p></div>"#), "{benedict}");
+        assert!(benedict.contains(r#"<div class="day-monastic"><p><span class="gloss-quiet""#), "{benedict}");
+        assert!(benedict.contains(r#">[Solemnity of St Benedict (Monastics &amp; Oblates Only)]</span> <abbr tabindex="0" title="Greater Double">gd</abbr> <span class="day-monastic-office">Proper Office, Monastic Diurnal pp. 560–564</span></p></div>"#), "{benedict}");
         assert!(row("2026-07-16").contains("[Our Lady of Einsiedeln (Monastics &amp; Oblates Only)]"));
         assert_eq!(body.matches(r#"class="day-monastic""#).count(), 2);
     }
@@ -858,14 +1413,59 @@ mod tests {
         assert_eq!(body.matches("is-today-month").count(), 1);
         let link = body.split("<a ").find(|a| a.contains(&this_month)).unwrap();
         assert!(link.contains(r#"class="is-today-month""#) && link.contains(", this month\""), "{link}");
+        // Its lozenge hangs at today's place along the course.
+        assert!(link.contains(&format!(r#"style="--today-x: {}""#, presentation::course::course_place_percent(now.day()))), "{link}");
         assert!(!ordo(&format!("/calendar/{}", now.year() - 1)).contains("is-today-month"));
         assert!(!ordo(&format!("/calendar/{}", now.year() + 1)).contains("this month"));
+    }
+
+    /// The year's course under the strip spells, day by day, the days' own colours, on
+    /// the frontispiece and every month page alike, and is drawn for the eye alone.
+    #[test]
+    fn ordo_strip_lays_the_years_course_in_the_rows_colours() {
+        let strip =
+            |body: &str| body.split(r#"<nav class="month-jump""#).nth(1).and_then(|s| s.split("</nav>").next()).unwrap().to_string();
+        let bands =
+            |strip: &str| -> Vec<String> { strip.split("<svg").skip(1).map(|s| s.split("</svg>").next().unwrap().to_string()).collect() };
+        let year = strip(&ordo("/calendar/2026"));
+        let bands_of_year = bands(&year);
+        assert_eq!(bands_of_year.len(), 12);
+        assert_eq!(year.matches(r#"<span class="month-course" aria-hidden="true">"#).count(), 12);
+        assert!(bands_of_year.iter().all(|b| b.starts_with(r#" viewBox="0 0 31 1" preserveAspectRatio="none" focusable="false">"#)));
+        // The days' own colours, from the whole year: a row's rail, or, where an octave's strand
+        // runs through a day of another colour (presentation::rails), that day's own inset.
+        let all = ordo("/calendar/2026/all");
+        let mut rows = vec![Vec::new(); 12];
+        for row in all.split(r#"<tr class="day day-color-"#).skip(1) {
+            let row = row.split("</tr>").next().unwrap();
+            let colour = match row.split(r#"<span class="day-inset day-color-"#).nth(1) {
+                Some(inset) => inset.split('"').next().unwrap(),
+                None => row.split(' ').next().unwrap().trim_end_matches('"'),
+            };
+            let month: usize = row.split(r#"id="d-2026-"#).nth(1).unwrap()[..2].parse().unwrap();
+            rows[month - 1].push(colour.to_string());
+        }
+        for (m, band) in bands_of_year.iter().enumerate() {
+            let mut days = Vec::new();
+            for rect in band.split("<rect ").skip(1) {
+                let attr = |name: &str| rect.split(&format!(r#"{name}=""#)).nth(1).unwrap().split('"').next().unwrap().to_string();
+                assert_eq!(attr("x").parse::<usize>().unwrap(), days.len(), "month {}: runs abut", m + 1);
+                let colour = attr("class").strip_prefix("day-color-").unwrap().to_string();
+                days.extend(std::iter::repeat_n(colour, attr("width").parse().unwrap()));
+            }
+            assert_eq!(days, rows[m], "month {}", m + 1);
+        }
+        // February ends early: 28 of the 31.
+        assert_eq!(rows[1].len(), 28);
+        // A month page and the whole year carry the same course.
+        assert_eq!(bands(&strip(&ordo("/calendar/2026/09"))), bands_of_year);
+        assert_eq!(bands(&strip(&all)), bands_of_year);
     }
 
     #[test]
     fn ordo_whole_year_keeps_every_day_and_jumps_within_itself() {
         let body = ordo("/calendar/2026/all");
-        assert!(body.contains("<title>Ordo 2026 — Whole year</title>"));
+        assert!(body.contains("<title>Ordo 2026 — Whole year — Daily Office</title>"));
         assert_eq!(body.matches(r#"<tr class="day "#).count(), 365);
         assert!(body.contains(r##"<a href="#january" aria-label="January""##));
         assert!(body.contains(r#"<section class="month" id="december">"#));
@@ -879,7 +1479,9 @@ mod tests {
         let (status, headers, body) = get("/?date=2026-09-22");
         assert_eq!(status, StatusCode::OK);
         assert_eq!(headers[header::CACHE_CONTROL], "no-cache");
-        let feast = body.find(r#"<p class="feast">Feria</p>"#).expect("names the feria");
+        let feast = body.find(r#"<p class="feast">"#).expect("names the feria");
+        let feast_end = body[feast..].find("</p>").expect("closes feast");
+        assert!(body[feast..feast + feast_end].contains(">Feria</span>"), "names the feria with a quiet gloss");
         let also = body.find(r#"class="commemorations-label""#).expect("commemorations");
         assert!(feast < also);
         assert!(!body.contains(r#"class="home-season""#), "the season is not repeated");
@@ -912,29 +1514,126 @@ mod tests {
             ("Palm Sunday", m.passion_sunday.add_days(7), "season-passiontide"),
             ("Good Friday", m.good_friday, "season-passiontide"),
             ("Holy Saturday", m.holy_saturday, "season-passiontide"),
-            // Lent proper keeps the ordinary gold.
-            ("Saturday before Passion Sunday", m.passion_sunday.add_days(-1), ""),
-            ("Ash Wednesday", m.ash_wednesday, ""),
-            // Bright: Easter Sunday through the eve of Pentecost.
+            // Quiet: Septuagesima, Lent and Advent, and the violet days elsewhere.
+            ("Septuagesima", m.septuagesima, "season-quiet"),
+            ("Ash Wednesday", m.ash_wednesday, "season-quiet"),
+            ("Saturday before Passion Sunday", m.passion_sunday.add_days(-1), "season-quiet"),
+            ("Rogation Monday", m.ascension.add_days(-3), "season-quiet"),
+            ("Advent Sunday", m.advent1, "season-quiet"),
+            // Rose lifts the quiet for the day.
+            ("Laetare", m.passion_sunday.add_days(-7), ""),
+            ("Gaudete", m.advent3, ""),
+            // Bright: Easter Sunday through the Saturday of the Pentecost octave.
             ("Easter Sunday", m.easter, "season-eastertide"),
             ("Easter Monday", m.easter.add_days(1), "season-eastertide"),
             ("Low Sunday", m.easter.add_days(7), "season-eastertide"),
             ("Ascension", m.ascension, "season-eastertide"),
             ("eve of Pentecost", m.pentecost.add_days(-1), "season-eastertide"),
-            ("Pentecost", m.pentecost, ""),
+            ("Pentecost", m.pentecost, "season-eastertide"),
+            ("Ember Saturday in Pentecost", m.pentecost.add_days(6), "season-eastertide"),
             ("Trinity Sunday", m.pentecost.add_days(7), ""),
+            ("Corpus Christi", m.pentecost.add_days(11), ""),
         ] {
             let slug = date_slug(date);
             for path in [format!("/lauds/{slug}"), format!("/?date={slug}")] {
                 let classes = body_classes(&path);
-                for class in ["season-passiontide", "season-eastertide"] {
+                for class in ["season-passiontide", "season-quiet", "season-eastertide"] {
                     assert_eq!(classes.iter().any(|c| c == class), class == want, "{what} ({path}): {class} in {classes:?}");
                 }
             }
         }
-        // Holy Saturday's Vespers is I Vespers of Easter: the ornament
-        // follows the hour on hour pages and the day on the home page.
+        // Holy Saturday's Vespers is I Vespers of Easter, and the Ember Saturday's I Vespers of
+        // Trinity ends Paschaltide: the ornament follows the hour on hour pages and the day on home.
         let classes = body_classes(&format!("/vespers/{}", date_slug(m.holy_saturday)));
         assert!(classes.iter().any(|c| c == "season-eastertide"), "{classes:?}");
+        let classes = body_classes(&format!("/vespers/{}", date_slug(m.pentecost.add_days(6))));
+        assert!(!classes.iter().any(|c| c == "season-eastertide"), "{classes:?}");
+    }
+
+    /// The cross under the last Amen takes no leaf where the hour ends bare: a bare hour, and
+    /// Vespers of All Saints followed by Vespers of the Dead, which is not a bare hour.
+    #[test]
+    fn an_hour_ending_bare_marks_its_end_cross() {
+        let end = |path: &str| {
+            let (status, _, body) = get(path);
+            assert_eq!(status, StatusCode::OK, "{path}");
+            let at = body.find(r#"<span class="hour-end-mark"#).expect("end mark");
+            body[at..at + body[at..].find('>').unwrap()].to_string()
+        };
+        assert!(end("/vespers/2026-11-01").contains(r#"class="hour-end-mark is-bare""#));
+        assert!(!body_classes("/vespers/2026-11-01").iter().any(|c| c == "hour-bare"));
+        assert!(end("/lauds/2026-11-02").contains("is-bare"));
+        for path in ["/vespers/2026-10-31", "/lauds/2026-11-01", "/compline/2026-10-07"] {
+            assert!(!end(path).contains("is-bare"), "{path}");
+        }
+    }
+
+    /// A bare hour (the Triduum's, the Office of the Dead's) is stamped `hour-bare` and never
+    /// framed; the days around it are not.
+    #[test]
+    fn bare_hours_take_off_their_leaf() {
+        let m = MoveableDates::compute(2026);
+        let bare = |path: &str| body_classes(path).iter().any(|c| c == "hour-bare");
+        let framed = |path: &str| body_classes(path).iter().any(|c| c == "rank-first-class");
+        for (what, date) in
+            [("Maundy Thursday", m.good_friday.add_days(-1)), ("Good Friday", m.good_friday), ("Holy Saturday", m.holy_saturday)]
+        {
+            for hour in ["lauds", "prime", "none"] {
+                let path = format!("/{hour}/{}", date_slug(date));
+                assert!(bare(&path) && !framed(&path), "{what}: {path}");
+            }
+        }
+        // All Souls' Day is bare without the veil; Holy Saturday's Vespers is Easter's, framed.
+        assert!(bare("/lauds/2026-11-02") && !framed("/lauds/2026-11-02"));
+        let easter_eve = format!("/vespers/{}", date_slug(m.holy_saturday));
+        assert!(!bare(&easter_eve) && framed(&easter_eve));
+        for path in [format!("/lauds/{}", date_slug(m.good_friday.add_days(-2))), "/lauds/2026-10-07".into(), "/?date=2026-04-10".into()] {
+            assert!(!bare(&path), "{path}");
+        }
+        // Laetare and the Annunciation in Lent: first class, but rose and violet are not framed,
+        // and a white feast in a penitential season is.
+        assert!(!framed(&format!("/lauds/{}", date_slug(m.passion_sunday.add_days(-7)))));
+        assert!(framed("/lauds/2026-03-25"));
+    }
+
+    #[test]
+    fn newcomer_guidance_and_feast_links() {
+        // Hour page: collapsed-by-default How to read disclosure + quiet header feast link.
+        let (status, _, lauds) = get("/lauds/2026-03-25");
+        assert_eq!(status, StatusCode::OK);
+        assert!(lauds.contains(r#"<details class="reading-key" name="hour-controls">"#));
+        assert!(lauds.contains("<summary>How to read</summary>"));
+        assert!(lauds.contains(r#"<a href="/about">About the Office</a>"#));
+        assert!(lauds.contains(r#"class="feast-link hour-feast-link""#));
+        assert!(lauds.contains("?from=lauds-2026-03-25"));
+
+        // Reminders page: plain-English hour glosses beneath each hour name.
+        let (status, _, reminders) = get("/reminders");
+        assert_eq!(status, StatusCode::OK);
+        assert!(reminders.contains(r#"<span class="reminder-hour-gloss">Morning praise</span>"#));
+        assert!(reminders.contains(r#"<span class="reminder-hour-gloss">Prayer before sleep</span>"#));
+
+        // Tabula Temporaria: figure & Ember days glosses + moveable feast overview links.
+        let (status, _, year) = get("/calendar/2026");
+        assert_eq!(status, StatusCode::OK);
+        let year = year.replace("&#x2f;", "/");
+        assert!(year.contains(r#"data-gloss-title="Golden Number""#));
+        assert!(year.contains(r#"data-gloss-title="Dominical Letter""#));
+        assert!(year.contains(r#"data-gloss-title="Ember days""#));
+        assert!(
+            year.contains(r#"<a class="feast-link" href="/feast/ash-wednesday?from=ordo-2026" title="About this feast">Ash Wednesday</a>"#)
+        );
+        assert!(year.contains(
+            r#"<a class="feast-link" href="/feast/easter-sunday?from=ordo-2026" title="About this feast">Easter (Pascha) Day</a>"#
+        ));
+
+        // Month Ordo: inline feast link on feast days + Office details abbreviation glosses.
+        let (status, _, march) = get("/calendar/2026/03");
+        assert_eq!(status, StatusCode::OK);
+        let march = march.replace("&#x2f;", "/");
+        assert!(march.contains(r#"href="/feast/annunciation?from=ordo-2026-03-25" title="About this feast""#));
+        assert!(march.contains(r#"data-gloss-title="Benedictus antiphon""#));
+        assert!(march.contains(r#"data-gloss-title="Magnificat antiphon""#));
+        assert!(march.contains(r#"data-gloss-title="Commemoration""#));
     }
 }

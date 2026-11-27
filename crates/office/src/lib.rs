@@ -4,12 +4,14 @@
 //!
 //! Like the calendar crate, this crate does no file, network, or clock access.
 
+pub mod chant;
 pub mod commemoration;
 pub mod compline;
 pub mod conclusion;
 pub mod concurrence;
 pub mod day;
 pub mod engine;
+pub mod feast;
 pub mod hourdef;
 pub mod hymn;
 pub mod lauds_psalmody;
@@ -41,8 +43,8 @@ mod testutil;
 
 use calendar::YearCalendar;
 
-pub use concurrence::{VespersDesignation, VespersOwner};
-pub use day::Day;
+pub use concurrence::{VespersDesignation, VespersOffice, VespersOwner, VespersPsalms};
+pub use day::{Day, Evening};
 pub use engine::{ComposeOptions, Engine, HOUR_NAMES};
 
 /// The Office-only resolution of one day.

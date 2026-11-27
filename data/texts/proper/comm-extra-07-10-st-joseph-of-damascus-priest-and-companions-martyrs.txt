@@ -1,0 +1,3 @@
+[commemoration-collect]
+# SOURCE: ordo "Col. 27*" (2023–2026)
+@use commons/martyrs/collect-alternate

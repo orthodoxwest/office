@@ -2,60 +2,166 @@
 //! recently used years, not an archive.
 
 use std::collections::HashMap;
+#[cfg(test)]
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
-use calendar::{CalendarData, MoveableDates};
-use office::Engine;
+use calendar::{CalendarData, MoveableDates, build_calendar};
 use office::day::Day;
+use office::{Engine, resolve_office_days};
+use presentation::feast::{FeastIndex, YearIndex};
+use presentation::rails::{Rail, octave_rails};
 use render_html::view::MonthData;
 
 /// One year's office days, with each month's ordo rows built on first use.
 pub struct YearEntry {
     pub days: Vec<Day>,
+    /// Each day's rail, the octaves bound (`presentation::rails`).
+    pub rails: Vec<Rail>,
     pub moveable: MoveableDates,
     months: [OnceLock<Arc<MonthData>>; 12],
 }
 
 const MAX_CACHED_YEARS: usize = 8;
 
+/// Whether `year` is one every front offers now (`presentation::offered_years`), by the
+/// server's clock. Only these are built: the ordo's links stop there, and a request beyond them
+/// does not set the server building years no reader is offered.
+pub fn offered_year(year: i32) -> bool {
+    presentation::offered_years(crate::Server::local_year()).contains(&year)
+}
+
+fn offered(year: i32) -> Result<(), String> {
+    match offered_year(year) {
+        true => Ok(()),
+        false => Err(format!("{year} is outside the years offered")),
+    }
+}
+
+/// A year as it is built once: the first reader builds it outside the cache's lock, and
+/// readers of the same year who come meanwhile wait for that build rather than repeat it.
+/// Building depends only on data fixed at startup, so a failure is kept as a success is.
+type Slot<T> = Arc<OnceLock<Result<Arc<T>, String>>>;
+
 /// The cached years and their order of use, least recent first.
 #[derive(Default)]
 struct Entries {
-    years: HashMap<i32, Arc<YearEntry>>,
+    years: HashMap<i32, Slot<YearEntry>>,
     order: Vec<i32>,
+}
+
+impl Entries {
+    /// The year's slot, new if the year is not cached, moved to the back of the order of use.
+    fn slot(&mut self, year: i32) -> Slot<YearEntry> {
+        if let Some(slot) = self.years.get(&year) {
+            let slot = Arc::clone(slot);
+            self.order.retain(|y| *y != year);
+            self.order.push(year);
+            return slot;
+        }
+        if self.order.len() == MAX_CACHED_YEARS {
+            let oldest = self.order.remove(0);
+            self.years.remove(&oldest);
+        }
+        self.order.push(year);
+        Arc::clone(self.years.entry(year).or_default())
+    }
 }
 
 pub struct YearCache {
     data: CalendarData,
     entries: Mutex<Entries>,
+    feasts: FeastIndex,
+    /// Each year's feasts and how they are kept, for search and the feast pages: the calendar
+    /// alone, with no hour composed.
+    keepings: Mutex<HashMap<i32, Slot<YearIndex>>>,
+    /// Each year's date-picker marks (`presentation::course::day_marks_code`): the calendar
+    /// alone, kept apart from the years above so a reader turning the picker's years does not
+    /// push the hours' and the ordo's years out.
+    marks: Mutex<HashMap<i32, Slot<String>>>,
+    /// How many years have been built, for the tests.
+    #[cfg(test)]
+    builds: AtomicUsize,
 }
+
+/// The feast pages reach this many years ahead and search two; a reader browsing far years
+/// starts the window afresh rather than growing it.
+const MAX_KEEPING_YEARS: usize = 12;
 
 impl YearCache {
     pub fn new(data: CalendarData) -> YearCache {
-        YearCache { data, entries: Mutex::new(Entries::default()) }
+        let feasts = FeastIndex::new(&data);
+        YearCache {
+            data,
+            entries: Mutex::new(Entries::default()),
+            feasts,
+            keepings: Mutex::new(HashMap::new()),
+            marks: Mutex::new(HashMap::new()),
+            #[cfg(test)]
+            builds: AtomicUsize::new(0),
+        }
+    }
+
+    /// Every feast a reader can look up.
+    pub fn feasts(&self) -> &FeastIndex {
+        &self.feasts
+    }
+
+    /// How every feast is kept in `year`.
+    pub fn keeping(&self, year: i32) -> Result<Arc<YearIndex>, String> {
+        offered(year)?;
+        let slot = {
+            let mut keepings = self.keepings.lock().map_err(|e| e.to_string())?;
+            if keepings.len() >= MAX_KEEPING_YEARS && !keepings.contains_key(&year) {
+                keepings.clear();
+            }
+            Arc::clone(keepings.entry(year).or_default())
+        };
+        // Built outside the lock (see `Slot`): another year's reader does not wait on this one.
+        slot.get_or_init(|| Ok(Arc::new(YearIndex::new(year, build_calendar(year, &self.data)?.days)))).clone()
+    }
+
+    /// The year's date-picker marks, a letter a day (`presentation::course::day_marks_code`).
+    pub fn day_marks(&self, year: i32) -> Result<Arc<String>, String> {
+        offered(year)?;
+        let slot = {
+            let mut marks = self.marks.lock().map_err(|e| e.to_string())?;
+            if marks.len() >= MAX_KEEPING_YEARS && !marks.contains_key(&year) {
+                marks.clear();
+            }
+            Arc::clone(marks.entry(year).or_default())
+        };
+        slot.get_or_init(|| {
+            let cal = build_calendar(year, &self.data)?;
+            let marks = presentation::course::day_marks(&cal.days, &MoveableDates::compute(year));
+            Ok(Arc::new(presentation::course::day_marks_code(&marks)))
+        })
+        .clone()
     }
 
     /// The year's days, building them if the year is not cached. A year in
     /// use moves to the back so browsing older years does not evict it.
-    // Feast data is loaded once at startup and stays fixed for the lifetime of this cache.
+    ///
+    /// A missing year is built outside the lock (see `Slot`): building takes a fraction of a
+    /// second on a laptop and seconds on the server's shared CPU, and every hour, ordo and
+    /// feast page asks this cache for its year, so building under the lock held every reader
+    /// of every year until it finished. Readers of the year being built wait for it; readers
+    /// of other years do not.
     pub fn get(&self, year: i32) -> Result<Arc<YearEntry>, String> {
-        let mut guard = self.entries.lock().map_err(|e| e.to_string())?;
-        let Entries { years: entries, order } = &mut *guard;
-        if let Some(e) = entries.get(&year) {
-            let e = Arc::clone(e);
-            order.retain(|y| *y != year);
-            order.push(year);
-            return Ok(e);
-        }
-        let days = tools::year::office_days(&self.data, year)?;
-        let entry = Arc::new(YearEntry { days, moveable: MoveableDates::compute(year), months: Default::default() });
-        if order.len() == MAX_CACHED_YEARS {
-            let oldest = order.remove(0);
-            entries.remove(&oldest);
-        }
-        entries.insert(year, Arc::clone(&entry));
-        order.push(year);
-        Ok(entry)
+        offered(year)?;
+        let slot = self.entries.lock().map_err(|e| e.to_string())?.slot(year);
+        slot.get_or_init(|| self.build(year).map(Arc::new)).clone()
+    }
+
+    // Feast data is loaded once at startup and stays fixed for the lifetime of this cache.
+    fn build(&self, year: i32) -> Result<YearEntry, String> {
+        #[cfg(test)]
+        self.builds.fetch_add(1, Ordering::Relaxed);
+        let cal = build_calendar(year, &self.data)?;
+        let rails = octave_rails(&cal, &self.data.feasts);
+        let office = resolve_office_days(&cal);
+        let days = cal.days.into_iter().zip(office).map(|(c, o)| Day::new(c, o)).collect();
+        Ok(YearEntry { days, rails, moveable: MoveableDates::compute(year), months: Default::default() })
     }
 
     /// A month's ordo rows (`month` is 1-based), composed once outside the
@@ -63,22 +169,23 @@ impl YearCache {
     /// proceed, and a month page never waits on the rest of its year.
     pub fn month(&self, year: i32, month: u32, engine: &Engine) -> Result<Arc<MonthData>, String> {
         let entry = self.get(year)?;
-        Ok(entry.month(month, engine))
+        Ok(entry.month(month, engine, &self.feasts))
     }
 
     /// Every month of the year, for the whole-year page.
     pub fn months(&self, year: i32, engine: &Engine) -> Result<Vec<Arc<MonthData>>, String> {
         let entry = self.get(year)?;
-        Ok((1..=12).map(|m| entry.month(m, engine)).collect())
+        Ok((1..=12).map(|m| entry.month(m, engine, &self.feasts)).collect())
     }
 }
 
 impl YearEntry {
-    fn month(&self, month: u32, engine: &Engine) -> Arc<MonthData> {
+    fn month(&self, month: u32, engine: &Engine, feasts: &FeastIndex) -> Arc<MonthData> {
         Arc::clone(self.months[month as usize - 1].get_or_init(|| {
             let start = self.days.iter().position(|d| d.date.month() == month).unwrap_or(self.days.len());
             let len = self.days[start..].iter().take_while(|d| d.date.month() == month).count();
-            Arc::new(crate::handlers::build_month(&self.days[start..start + len], engine, &self.moveable))
+            let range = start..start + len;
+            Arc::new(crate::handlers::build_month(&self.days[range.clone()], &self.rails[range], engine, &self.moveable, feasts))
         }))
     }
 }
@@ -104,14 +211,69 @@ mod tests {
             assert!(Arc::ptr_eq(month, &results[0]), "concurrent requests did not reuse the composed month");
         }
         let entry = cache.get(2026).unwrap();
-        let september: Vec<Day> = entry.days.iter().filter(|d| d.date.month() == 9).cloned().collect();
-        assert_eq!(*results[0], crate::handlers::build_month(&september, engine, &entry.moveable));
+        let start = entry.days.iter().position(|d| d.date.month() == 9).unwrap();
+        let september = start..start + 30;
+        assert_eq!(
+            *results[0],
+            crate::handlers::build_month(&entry.days[september.clone()], &entry.rails[september], engine, &entry.moveable, cache.feasts())
+        );
         assert_eq!((results[0].name.as_str(), results[0].days.len()), ("September", 30));
         let year = cache.months(2026, engine).unwrap();
         assert_eq!(year.iter().map(|m| m.days.len()).sum::<usize>(), 365);
         assert!(Arc::ptr_eq(&year[8], &results[0]), "the whole year reuses composed months");
         assert_eq!(year[0].name, "January");
         assert_eq!(year[11].days.last().map(|d| d.day_num), Some(31));
+    }
+
+    #[test]
+    fn a_cached_year_is_not_held_while_another_builds() {
+        let cache = cache();
+        cache.get(2026).unwrap();
+        let (cached_at, built_at) = std::thread::scope(|s| {
+            let builder = s.spawn(|| {
+                for year in 2090..2093 {
+                    cache.get(year).unwrap();
+                }
+                std::time::Instant::now()
+            });
+            std::thread::sleep(std::time::Duration::from_millis(20));
+            cache.get(2026).unwrap();
+            (std::time::Instant::now(), builder.join().unwrap())
+        });
+        assert!(cached_at < built_at, "a reader of a cached year waited for other years to be built");
+    }
+
+    #[test]
+    fn builds_only_the_offered_years() {
+        let cache = cache();
+        let years = presentation::offered_years(crate::Server::local_year());
+        let (first, last) = (*years.start(), *years.end());
+        assert!(cache.get(first - 1).is_err() && cache.get(last + 1).is_err() && cache.keeping(last + 1).is_err());
+        assert!(cache.get(first).is_ok() && cache.get(last).is_ok());
+        assert_eq!(cache.builds.load(Ordering::Relaxed), 2);
+    }
+
+    /// The picker's marks come from the calendar alone and leave the years' window untouched, so
+    /// a reader turning the picker's years builds no office year and evicts none.
+    #[test]
+    fn day_marks_build_no_office_year() {
+        let cache = cache();
+        let year = crate::Server::local_year();
+        let marks = cache.day_marks(year).unwrap();
+        assert!(marks.len() >= 365 && Arc::ptr_eq(&marks, &cache.day_marks(year).unwrap()));
+        assert!(cache.day_marks(year + presentation::YEARS_AHEAD + 1).is_err());
+        assert_eq!(cache.builds.load(Ordering::Relaxed), 0);
+    }
+
+    #[test]
+    fn readers_of_a_new_year_share_one_build() {
+        let cache = cache();
+        let years: Vec<Arc<YearEntry>> = std::thread::scope(|s| {
+            let handles: Vec<_> = (0..6).map(|_| s.spawn(|| cache.get(2094).unwrap())).collect();
+            handles.into_iter().map(|h| h.join().unwrap()).collect()
+        });
+        assert!(years.iter().all(|y| Arc::ptr_eq(y, &years[0])));
+        assert_eq!(cache.builds.load(Ordering::Relaxed), 1, "concurrent readers built the same year more than once");
     }
 
     #[test]

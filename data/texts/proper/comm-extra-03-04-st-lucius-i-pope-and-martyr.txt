@@ -1,0 +1,3 @@
+[commemoration-collect]
+# SOURCE: 2023-2026 ordos, 4 March (Comm. Lucius, Col. "O God" 22*): Monastic Diurnal p. 22*, For a Martyr Bishop, Another Collect
+@use commons/bishop-martyr/collect-alternate

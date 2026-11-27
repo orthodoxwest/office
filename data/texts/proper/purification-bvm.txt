@@ -21,9 +21,6 @@ A light * to lighten the Gentiles, and the glory of thy people Israel.
 # SOURCE: draft archdiocesan Lauds book, p. 384 (Purification BVM)
 And they offered * for him to the Lord a pair of turtle doves, or two young pigeons.
 
-[psalm-antiphon-4-vespers]
-@use proper/purification-bvm/psalm-antiphon-5
-
 [psalm-antiphon-1-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 270 (I Vespers, Purification BVM)
 O wondrous interchange! * The Creator of mankind, taking upon him a living body, vouchsafed to be born of a Virgin: and proceeding forth as Man, without seed, hath made us partakers of his Divinity.

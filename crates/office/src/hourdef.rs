@@ -239,7 +239,7 @@ fn evaluate_atom(atom: &Atom, day: &Day, moveable: Option<&MoveableDates>, t: &O
         Atom::IsFerial => day.is_ferial(),
         Atom::PrivilegedVigil => day.celebration.as_deref().is_some_and(calendar::traits::is_privileged_vigil),
         Atom::OfficeOfTheDead => psalmody::is_office_of_the_dead(day),
-        Atom::AppendedOfficeOfTheDead => day.vespers.appended_office_of_the_dead,
+        Atom::AppendedOfficeOfTheDead => day.vespers.appended_office_of_the_dead(),
         Atom::Triduum => is_triduum(day),
         Atom::SeptuagesimaEve => day.is_septuagesima_eve(),
         Atom::Weekday(w) => day.civil_weekday() == *w,

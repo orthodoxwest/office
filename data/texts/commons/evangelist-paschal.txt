@@ -23,7 +23,7 @@
 @use commons/apostle-paschal/psalm-antiphon-5
 
 [psalm-antiphon-4-vespers]
-@use commons/apostle-paschal/psalm-antiphon-4-vespers
+@use commons/apostle-paschal/psalm-antiphon-5
 
 [benedictus-antiphon]
 @use commons/apostle-paschal/benedictus-antiphon

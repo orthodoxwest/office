@@ -1,7 +1,8 @@
 name: Android
 
 # Builds the sideloadable preview APK and renders review screenshots. Pushes to
-# master (and manual runs) also publish the APK as a new release, tagged
+# master (and manual runs) also publish the APK, once every check on the commit
+# (CI, iOS and this build) has passed, as a new release, tagged
 # android-preview-<versionName> and marked latest, so this URL always serves the
 # newest preview:
 # https://github.com/orthodoxwest/office/releases/latest/download/office-preview.apk
@@ -51,8 +52,9 @@ jobs:
       version: ${{ steps.version.outputs.version }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
+          persist-credentials: false
           # The version code counts commits, so the preview needs full history.
           fetch-depth: 0
 
@@ -62,20 +64,20 @@ jobs:
         run: echo "version=0.1.$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@1.94.1
+        uses: dtolnay/rust-toolchain@1.100.0
         with:
           targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
 
       - name: Cache Cargo
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@v2.9.3
 
       - name: Install cargo-ndk
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@v2.90.3
         with:
           tool: cargo-ndk
 
       - name: Set up Java
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@v6.2.0
         with:
           distribution: temurin
           java-version: 21
@@ -84,7 +86,26 @@ jobs:
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$NDK_VERSION" "platforms;android-36" > /dev/null
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.4.1
+
+      # Robolectric fetches each SDK's android-all jar from Maven Central into
+      # ~/.m2 when the tests first run, outside Gradle's dependency cache, so
+      # without this every run downloads it again and a hiccup there fails
+      # every Robolectric class before a test runs. Keyed on the Robolectric
+      # version and the SDKs the tests ask for, so a bump fetches afresh.
+      - name: Read the Robolectric key
+        id: robolectric
+        run: |
+          version=$(sed -n 's/^robolectric = "\(.*\)"$/\1/p' apps/android/gradle/libs.versions.toml)
+          sdks=$(grep -rhoE '@Config\(sdk *= *\[[0-9, ]+\]' apps/android/app/src/test | grep -oE '[0-9]+' | sort -un | paste -sd- -)
+          test -n "$version" && test -n "$sdks"
+          echo "key=robolectric-$version-sdk-$sdks" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Robolectric's Android jars
+        uses: actions/cache@v6.1.0
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: ${{ steps.robolectric.outputs.key }}
 
       - name: Build the APK and render screenshots
         working-directory: apps/android
@@ -105,7 +126,7 @@ jobs:
           echo "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$OFFICE_UPLOAD_KEYSTORE"
           ./gradlew --console=plain bundleRelease
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.2
         if: steps.bundle.outcome == 'success'
         with:
           name: office-release-aab
@@ -115,29 +136,53 @@ jobs:
       - name: Name the APK
         run: cp apps/android/app/build/outputs/apk/preview/app-preview.apk office-preview.apk
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: office-preview-apk
           path: office-preview.apk
           if-no-files-found: error
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
           name: android-screenshots
           path: apps/android/app/build/screenshots/
           if-no-files-found: warn
 
+  checks:
+    name: Wait for the commit's checks
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    # Long enough for iOS's build, tests and screenshots, queued macOS runners included.
+    timeout-minutes: 180
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts
+      # Nothing reaches readers from a commit whose CI, iOS or Android checks are red or still
+      # running (scripts/ci_gate.py). The publishers (play.yml, testflight.yml, and Android's own
+      # gate and preview release) are not waited on: they wait on the checks themselves. A run
+      # cancelled for a newer push is judged by the run that took its place. After a red check
+      # is mended by a re-run, re-run this workflow's failed jobs to publish.
+      - name: Wait for every check on this commit to pass
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_gate.py --require ci.yml --exclude play.yml --exclude testflight.yml --exclude-job "Wait for the commit's checks" --exclude-job "Publish android-preview"
+
   publish:
     name: Publish android-preview
-    needs: build
+    needs: [build, checks]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@v8.0.2
         with:
           name: office-preview-apk
 

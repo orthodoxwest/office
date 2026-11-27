@@ -2,7 +2,9 @@ import { defineConfig } from "@playwright/test";
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:18159";
 const externalServer = Boolean(process.env.PLAYWRIGHT_EXTERNAL_SERVER);
-const serverCommand = "target/release/office serve 127.0.0.1:18159";
+// The server runs from the checkout, where cargo puts the binary unless CARGO_TARGET_DIR says otherwise.
+const targetDir = process.env.CARGO_TARGET_DIR || "target";
+const serverCommand = `${targetDir}/release/office serve 127.0.0.1:18159`;
 // Separate CI invocations must retain both reports and their failure traces.
 const outputRoot = process.env.PLAYWRIGHT_SUITE
   ? `../output/playwright/${process.env.PLAYWRIGHT_SUITE}`
