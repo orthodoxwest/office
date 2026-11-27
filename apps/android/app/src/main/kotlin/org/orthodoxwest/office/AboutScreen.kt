@@ -853,7 +853,7 @@ private fun Horologium(
             }
 
             // 44dp tap targets over each of the stations (Lauds and Prime sit about 48dp apart on a
-            // phone), Matins first, under the horizon
+            // phone), Matins last, under the horizon
             val tapPx = with(density) { 44.dp.toPx() }
             hours.forEach { h ->
                 val rad = Math.toRadians(h.angle)
@@ -928,7 +928,7 @@ internal fun sunPeriods(periods: List<AboutPeriodView>, sun: Map<String, LocalTi
 }
 
 /**
- * The hours in home's periods, Matins under Night before the seven, ruled as home's painted page:
+ * The hours in home's periods, the seven, then Matins under Night, ruled as home's painted page:
  * firm hand-ruled terracotta frame above and below, medium dividers between periods, faint
  * hairlines between hours inside a period, and zero vertical rules or shaded cells. An hour not
  * yet prayed in the app (Matins) is no link: its name stands in the muted ink and `comingSoon`

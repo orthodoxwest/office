@@ -28,7 +28,9 @@ class AboutTest {
         assertEquals(hourNames(), view.periods.flatMap { p -> p.hours.filter { !it.comingSoon }.map { it.hour } })
         val hours = view.periods.flatMap { it.hours }
         assertTrue(hours.all { it.name.isNotBlank() && it.gloss.isNotBlank() && it.time.isNotBlank() })
-        assertTrue(hours.zipWithNext().all { (a, b) -> a.angle > b.angle })
+        // The seven down the sky, Lauds to Compline; Matins after them, under the horizon.
+        assertTrue(hours.dropLast(1).zipWithNext().all { (a, b) -> a.angle > b.angle })
+        assertEquals("matins", hours.last().hour)
         assertEquals(1, view.blocks.count { it.kind == "hours" })
         assertEquals(1, view.blocks.count { it.kind == "specimen" })
         assertEquals(1, view.blocks.count { it.kind == "ordo_ribbon" })
@@ -41,19 +43,20 @@ class AboutTest {
     }
 
     /**
-     * Matins leads the table under Night, coming soon: the star at the foot of the night's course,
+     * Matins closes the table under Night, after the evening, coming soon: the star at the foot of the night's course,
      * under the horizon on the noon axis, and no hour the app prays. Home's Night row says the same.
      */
     @Test
-    fun matinsLeadsUnderNightComingSoon() {
-        val night = view.periods.first()
+    fun matinsClosesUnderNightComingSoon() {
+        assertEquals(listOf("Morning", "Day", "Evening", "Night"), view.periods.map { it.label })
+        val night = view.periods.last()
         assertEquals("Night", night.label)
         val matins = night.hours.single()
         assertEquals("matins", matins.hour)
         assertTrue(matins.comingSoon)
         assertEquals("star", matins.sign)
         assertEquals(270.0, matins.angle, 0.0)
-        assertTrue(view.periods.drop(1).flatMap { it.hours }.none { it.comingSoon || it.sign == "star" })
+        assertTrue(view.periods.dropLast(1).flatMap { it.hours }.none { it.comingSoon || it.sign == "star" })
         assertEquals("coming soon", view.comingSoon)
         assertEquals(160.0, view.horologiumHeight, 0.0)
         assertEquals(22.0, view.horologiumNightDepth, 0.0)
@@ -118,7 +121,7 @@ class AboutTest {
         assertEquals("ninth hour · 2:15 pm", times["none"])
         assertEquals("sunset · 5:19 pm", times["vespers"])
         assertEquals("sunrise, 6:48 am", aboutTimeSpoken(times.getValue("lauds")))
-        assertEquals(view.periods.last().hours.last().time, times["compline"])
+        assertEquals(view.periods.flatMap { it.hours }.first { it.hour == "compline" }.time, times["compline"])
     }
 
     /** The table lights the hour home lights, none from midnight to 2 am, and the page ends with home's invitation. */

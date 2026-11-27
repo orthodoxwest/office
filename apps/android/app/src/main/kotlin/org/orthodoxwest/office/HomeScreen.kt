@@ -115,7 +115,7 @@ import org.orthodoxwest.office.core.seasonGloss
 
 private val HOME_GLOSSES by lazy { homeGlosses() }
 
-/** The Night's one office, set before the day's three periods: Matins, coming soon (`home_night`). */
+/** The Night's one office, set after the day's three periods: Matins, coming soon (`home_night`). */
 private val HOME_NIGHT by lazy { homeNight() }
 
 private val PERIODS = listOf(
@@ -1064,7 +1064,7 @@ fun PrayNow(label: String, size: Float, top: Dp, bottom: Dp, frontal: Color, was
  * table keeps one shape whichever hour is now: the invitation says what the hour is ([PrayNow]).
  * In the wide niche every hour carries its gloss and the hour that is now is set larger as well,
  * so it is not told by colour alone; from 1000 high the hours stand one to a line there ([HourList]).
- * The Night's band leads them, Matins alone in it and no link until the app prays it ([NightBand]).
+ * The Night's band follows them, Matins alone in it and no link until the app prays it ([NightBand]).
  */
 @Composable
 private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<String>, tier: HomeTier, now: Color, home: HomeInk, onHour: (String) -> Unit) {
@@ -1079,7 +1079,7 @@ private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<Str
     val labelWidth = remember(labelStyle, density) {
         with(density) { (PERIODS.map { it.second } + HOME_NIGHT.label).maxOf { measurer.measure(it, labelStyle).size.width }.toDp() + 8.dp }.coerceAtLeast(if (desk) 80.dp else 83.dp)
     }
-    // Where the periods meet, for the rules between them: the Night's band and the day's three.
+    // Where the periods meet, for the rules between them: the day's three and the Night's band.
     val joints = remember { FloatArray(PERIODS.size) }
     Column(
         Modifier.fillMaxWidth().drawBehind {
@@ -1092,9 +1092,8 @@ private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<Str
             joints.forEachIndexed { i, y -> if (y > 0f) drawPath(ruledLine(0f, y + 0.5f * u, w, y + 0.5f * u, 0.9f * u, 41 + i, u), p.lining.copy(alpha = 0.36f)) }
         },
     ) {
-        NightBand(current, tier, labelStyle, labelWidth)
         PERIODS.forEachIndexed { k, (period, label, hours) ->
-            // Each day's period stands after the Night's band.
+            // The day's periods first; the rule above each but the first (joints[k - 1]).
             val i = k + 1
             if (tier.list) {
                 HourList(i, period, label, hours, current, light, prayed, tier, now, home, labelStyle, joints, onHour)
@@ -1102,7 +1101,7 @@ private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<Str
             }
             Row(
                 Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 1.dp)
-                    .onGloballyPositioned { joints[i - 1] = it.positionInParent().y - 1f }
+                    .onGloballyPositioned { if (i > 1) joints[i - 2] = it.positionInParent().y - 1f }
                     .crownUnit("r-period$i"),
             ) {
                 Column(
@@ -1169,6 +1168,8 @@ private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<Str
                 }
             }
         }
+        // The Night after the evening, its rule the last joint.
+        NightBand(current, tier, labelStyle, labelWidth, Modifier.onGloballyPositioned { joints[PERIODS.size - 1] = it.positionInParent().y - 1f })
         Spacer(Modifier.height(1.dp))
     }
 }
@@ -1180,7 +1181,7 @@ private fun HourDirectory(current: String, light: HourLightNow?, prayed: Set<Str
 private val NightNameGap = 12.25.dp
 
 /**
- * The Night's band before the day's three (the web's `.home-hour-group-night`): its star in the
+ * The Night's band after the day's three (the web's `.home-hour-group-night`): its star in the
  * margin, and Matins alone and centred, with no gilt point beside it. The app does not yet pray
  * it, so it is no link, never the hour that is now and never marked prayed; its name stands in a
  * quieter ink, with "coming soon" in small capitals. On a phone the mark stands under the name, or
@@ -1191,7 +1192,7 @@ private val NightNameGap = 12.25.dp
  * now ([periodSignAlpha]).
  */
 @Composable
-private fun NightBand(current: String, tier: HomeTier, labelStyle: androidx.compose.ui.text.TextStyle, labelWidth: Dp) {
+private fun NightBand(current: String, tier: HomeTier, labelStyle: androidx.compose.ui.text.TextStyle, labelWidth: Dp, modifier: Modifier = Modifier) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val night = HOME_NIGHT
@@ -1235,7 +1236,7 @@ private fun NightBand(current: String, tier: HomeTier, labelStyle: androidx.comp
                     }
                 },
             ),
-            modifier = Modifier.fillMaxWidth().padding(top = 1.dp).crownUnit("r-period0"),
+            modifier = modifier.fillMaxWidth().padding(top = 1.dp).crownUnit("r-period0"),
         ) { (labels, lists), constraints ->
             // As [HourList]: the label in the first of three columns, the hour across the others.
             val width = constraints.maxWidth
@@ -1251,7 +1252,7 @@ private fun NightBand(current: String, tier: HomeTier, labelStyle: androidx.comp
         }
         return
     }
-    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 1.dp).crownUnit("r-period0")) {
+    Row(modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 1.dp).crownUnit("r-period0")) {
         val labelBox = Modifier.width(labelWidth).fillMaxHeight().padding(start = 1.4.dp).semantics(mergeDescendants = true) { heading() }
         if (tier.nightInline) {
             // A short phone: the star beside "Night", not over it, so the band is one line high.
@@ -1394,7 +1395,7 @@ private fun HourList(
             },
         ),
         modifier = Modifier.fillMaxWidth().padding(top = 1.dp)
-            .onGloballyPositioned { joints[i - 1] = it.positionInParent().y - 1f }
+            .onGloballyPositioned { if (i > 1) joints[i - 2] = it.positionInParent().y - 1f }
             .crownUnit("r-period$i"),
     ) { (labels, lists), constraints ->
         // grid-template-columns: 1fr middle 1fr, the label in the first column, the hours across
