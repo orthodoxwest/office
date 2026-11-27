@@ -1536,7 +1536,7 @@ pub fn about() -> AboutView {
     }
 }
 
-/// Home's Night row, set before the day's three periods: Matins, which the app does not yet
+/// Home's Night row, set after the day's three periods: Matins, which the app does not yet
 /// pray, so it is no link and takes no part in the hour now. The web's home.html sets the same.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct HomeNightView {
