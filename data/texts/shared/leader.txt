@@ -11,6 +11,11 @@ R. And let my cry come unto thee.
 V. The Lord be with you.
 R. And with thy spirit.
 
+[marian-kneeling-private]
+# SOURCE: Monastic Breviary General Rubrics XXXIX.3 (diurnal-rubrics.pdf, p. 53), without the
+# Officiant's rising at the Collect, which has no place in private recitation.
+The Antiphon is said kneeling.
+
 [let-us-pray]
 # SOURCE: diurnal p. 9
 Let us pray.

@@ -38,6 +38,26 @@ pub fn marian_antiphon(date: Date, hour_name: &str, m: &MoveableDates) -> &'stat
     "salve-regina"
 }
 
+/// Whether the Final Antiphon said at `hour_name` on the civil `date` is said
+/// kneeling: always, except on Sundays from I Vespers on Saturday and
+/// throughout Paschaltide, the Officiant alone rising at the Collect
+/// (Monastic Breviary General Rubrics XXXIX.3, p. 53; Diurnal General
+/// Rubrics, p. xxxii: "except in Paschaltide, on Sundays, and at Saturday
+/// Vespers and Compline"; 2026 ordo, Office Notes). Paschaltide's antiphon
+/// is Regina caeli, from Compline of Holy Saturday ("There is no kneeling
+/// during Paschaltide", p. 362) through None of the Saturday in the Octave
+/// of Pentecost, whose Vespers is Saturday's.
+pub fn marian_antiphon_said_kneeling(date: Date, hour_name: &str, m: &MoveableDates) -> bool {
+    if marian_antiphon(date, hour_name, m) == "regina-caeli" {
+        return false;
+    }
+    match date.weekday() {
+        Weekday::Sunday => false,
+        Weekday::Saturday => hour_order(hour_name) < hour_order("vespers"),
+        Weekday::Monday | Weekday::Tuesday | Weekday::Wednesday | Weekday::Thursday | Weekday::Friday => true,
+    }
+}
+
 /// The order of the hours within one civil day; the Little Hours sit
 /// between Lauds and Vespers.
 fn hour_order(hour_name: &str) -> u8 {

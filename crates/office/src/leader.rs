@@ -25,7 +25,7 @@ pub fn apply_leader(hour: &mut OfficeHour, leader: PrayerForm, t: &OfficeTexts) 
                 // A priest absolves, so only he takes the choir Confiteor; a deacon may
                 // greet and bless, so he takes the clergy greeting and the blessing.
                 let choir = leader == PrayerForm::Priest
-                    || (matches!(elem.leader_slot.as_str(), "greeting" | "opening") && leader == PrayerForm::Deacon);
+                    || (matches!(elem.leader_slot.as_str(), "greeting" | "opening" | "marian-kneeling") && leader == PrayerForm::Deacon);
                 hour.decisions.push(Decision::new(
                     format!("prayer-form:{}", elem.leader_slot),
                     if choir { "choir" } else { "private" },
@@ -46,6 +46,10 @@ pub fn apply_leader(hour: &mut OfficeHour, leader: PrayerForm, t: &OfficeTexts) 
                 }
                 "opening" if leader != PrayerForm::Private => {
                     Some(vec![leader_element(ElementType::Versicle, "compline-opening-choir", t)?])
+                }
+                // Alone there is no Officiant to rise at the Collect.
+                "marian-kneeling" if leader == PrayerForm::Private => {
+                    Some(vec![leader_element(ElementType::Rubric, "marian-kneeling-private", t)?])
                 }
                 "confession" if leader == PrayerForm::Priest => Some(priest_confession(t)?),
                 "confession" if leader == PrayerForm::Deacon => {
