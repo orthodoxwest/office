@@ -1,0 +1,18 @@
+home.niche: none
+hour.reading: ratio 0.5439585985105443, rows 156, frames 157, heights 157, viewport (402.0, 778.0) (first ratio 0.0, rows 0, frames 0, heights 0, viewport (402.0, 778.0), changed 158 times)
+hour.rows: content top -7290.000000; #2|heading||Hymn#0 -0.139990+76.480000, #2|latinTitle||Audi benigne Conditor#0 76.340010+36.800000, #2|stanza||O Maker of the world, give ear;
+Accept the prayer and own the tear
+Towards thy seat of mercy sent
+In this most holy fast of Lent.#0 113.140010+141.600000, #2|stanza||Each heart is manifest to thee;
+Thou knowest our infirmity.
+Forgive thou then each soul that fain
+Would seek to thee, and turn again.#0 254.740011+146.400000, #2|stanza||Our sins are manifold and sore,
+But pardon them that sin deplore:
+And for thy Name’s sake, make each soul
+That feels and owns its languor, whole.#0 401.140010+146.400000, #2|stanza||So mortify we every sense
+By grace of outward abstinence,
+That from each stain and spot of sin
+The soul may keep her fast within.#0 547.540010+146.400000, #2|stanza||Grant, O thou blessed Trinity,
+Grant, O essential Unity,
+That this our fast of forty days
+May work our profit and thy praise. Amen.#0 693.940010+146.400000 (first content top 0.000000; , changed 20 times)
