@@ -139,3 +139,17 @@ Almighty, everlasting God, who didst consecrate the first-fruits of the Martyrs 
 [versicle-none]
 # SOURCE: Monastic Diurnal p. 220 ("At the Little Hours all as on the Feast")
 @use proper/st-stephen/versicle-none
+
+# Diurnal p. 220: Lauds has the occurrent Feria's antiphons and psalms, but "At the Little
+# Hours all as on the Feast": the Feast's Lauds antiphons, omitting the fourth.
+[psalm-antiphon-1-prime]
+@use proper/st-stephen/psalm-antiphon-1
+
+[psalm-antiphon-2-terce]
+@use proper/st-stephen/psalm-antiphon-2
+
+[psalm-antiphon-3-sext]
+@use proper/st-stephen/psalm-antiphon-3
+
+[psalm-antiphon-5-none]
+@use proper/st-stephen/psalm-antiphon-5
