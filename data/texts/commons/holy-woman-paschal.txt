@@ -40,9 +40,6 @@ Come, O thou my chosen one, * and I will set my throne within thee, alleluia.
 # SOURCE: draft archdiocesan Lauds book, p. 691 (Common of Holy Women not Virgins, Paschaltide)
 This woman * is beautiful among the daughters of Jerusalem, alleluia.
 
-[psalm-antiphon-4-vespers]
-@use commons/holy-woman-paschal/psalm-antiphon-5
-
 [short-responsory-lauds]
 # SOURCE: Monastic Diurnal.pdf, p. 52*
 R. In thy grace and in thy beauty * alleluia, alleluia.

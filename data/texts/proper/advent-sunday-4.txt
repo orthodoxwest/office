@@ -89,4 +89,6 @@ Hail, Mary, * thou that art full of grace, the Lord is with thee; blessed art th
 @use proper/advent-sunday-4/benedictus-antiphon
 
 [psalm-antiphon-4-vespers]
+# Spelled out with 1-3 because I Vespers on Saturday reads only the -vespers set
+# (proper.rs, step 0.8); "omitting the fourth" (Diurnal p. 162).
 @use proper/advent-sunday-4/psalm-antiphon-5

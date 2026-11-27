@@ -59,8 +59,17 @@ fn preces_label(b: bool) -> &'static str {
     if b { "Preces" } else { "No Preces" }
 }
 
-fn suffrage_label(b: bool) -> &'static str {
-    if b { "Suff." } else { "No Suff." }
+/// What the hour says after its commemorations: the Suffrage, or in
+/// Paschaltide the Commemoration of the Cross in its place, as the ordos
+/// print it ("Comm. HC") (#869).
+fn suffrage_label(h: &HourSummary) -> &'static str {
+    if h.suffrage {
+        "Suff."
+    } else if h.cross {
+        "Comm. HC"
+    } else {
+        "No Suff."
+    }
 }
 
 fn join_bar(parts: &[&str]) -> String {
@@ -126,7 +135,7 @@ pub fn format_day(day: &Day, engine: Option<&Engine>, moveable: &MoveableDates) 
         let ben = if lauds.gospel_ant.is_empty() { String::new() } else { format!("Ben. {}", lauds.gospel_ant) };
         lines.push(format!(
             "{INDENT}Lauds   {}",
-            join_bar(&[color_abbrev(lauds.color), &ben, preces_label(lauds.preces), suffrage_label(lauds.suffrage)])
+            join_bar(&[color_abbrev(lauds.color), &ben, preces_label(lauds.preces), suffrage_label(&lauds)])
         ));
         lines.extend(comm_lines(&lauds.comms));
     }
@@ -142,7 +151,7 @@ pub fn format_day(day: &Day, engine: Option<&Engine>, moveable: &MoveableDates) 
             VespersOwner::NotApplicable => String::new(),
         };
         let mag = if vespers.gospel_ant.is_empty() { String::new() } else { format!("Mag. {}", vespers.gospel_ant) };
-        lines.push(format!("{INDENT}Vespers {}", join_bar(&[color_abbrev(vespers.color), &owner, &mag, suffrage_label(vespers.suffrage)])));
+        lines.push(format!("{INDENT}Vespers {}", join_bar(&[color_abbrev(vespers.color), &owner, &mag, suffrage_label(&vespers)])));
         lines.extend(comm_lines(&vespers.comms));
         if v.appended_office_of_the_dead() {
             if day.celebration_is("all-saints") {
@@ -206,9 +215,13 @@ pub fn format_tabula(year: i32) -> String {
 /// order and spelling are a contract with `scripts/ordo-compare.py`.
 pub fn rubrics_tsv(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> Result<String, String> {
     let mut out = String::from(
-        "date\tcelebration\tlauds_preces\tlauds_suffrage\tlauds_comms\thours_preces\tvespers_preces\tvespers_suffrage\tvespers_comms\tbenedictus_ant\tmagnificat_ant\n",
+        "date\tcelebration\tlauds_preces\tlauds_suffrage\tlauds_comms\thours_preces\tvespers_preces\tvespers_suffrage\tvespers_comms\tbenedictus_ant\tmagnificat_ant\tlauds_comm_collects\tvespers_comm_collects\n",
     );
-    let names = |comms: &[CommSummary]| comms.iter().map(|c| c.name.as_str()).collect::<Vec<_>>().join("; ");
+    // A name may itself hold ";" ("Ss Nazarius & Celsus, Martyrs; St Victor…"); written as ","
+    // so the names split one to one with the collect keys.
+    let names = |comms: &[CommSummary]| comms.iter().map(|c| c.name.replace(';', ",")).collect::<Vec<_>>().join("; ");
+    // Aligned with the names: the corpus key each commemoration's collect prints.
+    let collects = |comms: &[CommSummary]| comms.iter().map(|c| c.collect.as_str()).collect::<Vec<_>>().join("; ");
     for day in days {
         let celebration = day.celebration.as_deref().map_or("Feria", |c| c.name.as_str());
         let summarize = |hour_name: &str| -> Result<HourSummary, String> {
@@ -232,6 +245,8 @@ pub fn rubrics_tsv(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> R
             names(&vespers.comms),
             lauds.gospel_ant_full,
             vespers.gospel_ant_full,
+            collects(&lauds.comms),
+            collects(&vespers.comms),
         ];
         out.push_str(&row.join("\t"));
         out.push('\n');

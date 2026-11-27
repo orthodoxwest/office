@@ -56,7 +56,7 @@
 % ✠ (U+2720) fallback via Noto Sans Symbols (Dingbats block)
 \newfontface\CrossFont[Path=/usr/share/fonts/truetype/noto/,Scale=MatchLowercase]{NotoSansSymbols-Black.ttf}
 % The small caps an ornamented opening word takes (see \initial).
-\newfontface\InitialWordFont{EB Garamond}[Ligatures=TeX,Letters={SmallCaps,UppercaseSmallCaps},LetterSpace=2.5]
+\newfontface\InitialWordFont{EB Garamond}[Ligatures=TeX,Letters=SmallCaps,LetterSpace=2.5]
 \newcommand{\crux}{{\color{rubricred}{\Large\CrossFont\symbol{"2720}}}}
 
 % Page flow: a paragraph never leaves a single line behind or ahead of a
@@ -223,9 +223,10 @@
     \dim_set:Nn \l__initial_hang_dim { \l__initial_hang_tl \l__initial_size_dim }
   }
 
-% The opening word in the font's drawn small caps, capitals included, with
-% the web's light tracking. Small caps are upright, so an italic anthem's
-% opening word is too.
+% The opening word, which the renderer writes in lower case, in the font's
+% drawn small caps (never its capitals-to-small-caps, a heavier design whose
+% W has no width in the 8 pt cut), with the web's light tracking. Small caps
+% are upright, so an italic anthem's opening word is too.
 \cs_new_protected:Npn \__initial_word:n #1
   { { \upshape \InitialWordFont #1 } }
 
@@ -416,8 +417,9 @@
 \newenvironment{sourcelines}{\setlength{\parskip}{1pt}}{\par}
 \newcommand{\sourceline}[1]{\noindent\hangindent=1.2em\hangafter=1 #1\par}
 
-% A plain opening in capitals, after its first letter: the font's drawn small
-% caps, as the web sets "I CONFESS" where no ornamented initial stands.
+% A plain opening in capitals, after its first letter and lowercased by the
+% renderer: the font's drawn small caps, as the web sets "I CONFESS" where no
+% ornamented initial stands.
 \newcommand{\capsrun}[1]{{\upshape\InitialWordFont #1}}
 
 % Pointing mediant: muted and raised to the optical middle of the line, as the

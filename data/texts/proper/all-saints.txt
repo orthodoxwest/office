@@ -36,9 +36,6 @@ All his Saints * shall praise him, even the children of Israel, even the people 
 [psalm-antiphon-3-vespers]
 @use proper/all-saints/psalm-antiphon-3
 
-[psalm-antiphon-4-vespers]
-@use proper/all-saints/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: diurnal p. 639
 The glorious company * of the Apostles praise thee; the goodly fellowship of the Prophets praise thee; the white-robed army of Martyrs praise thee; with one heart and voice do all the elect acknowledge thee: O blessed Trinity, one only God.

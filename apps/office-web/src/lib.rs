@@ -7,6 +7,7 @@ mod crawl;
 // compiles it only to test it.
 #[cfg(test)]
 mod css;
+mod etag;
 mod feasts;
 mod handlers;
 mod http;
@@ -16,8 +17,8 @@ pub mod pwa;
 pub mod usage;
 pub mod web_time;
 
-use std::path::Path;
-use std::sync::Arc;
+use std::path::{Path, PathBuf};
+use std::sync::{Arc, OnceLock};
 
 use axum::Router;
 use axum::body::Body;
@@ -31,7 +32,7 @@ use tools::fs::FsData;
 
 use crate::cache::YearCache;
 use crate::handlers::Req;
-use crate::http::{Query, bad_request, unescape_path};
+use crate::http::{Query, bad_request, redirect, unescape_path};
 use crate::usage::{BeaconBody, MAX_BEACON, Store};
 
 /// Everything a request reads, loaded once and shared.
@@ -39,7 +40,10 @@ pub struct Server {
     engine: Engine,
     cache: YearCache,
     pages: Pages,
-    version: String,
+    /// Hashing the binary and the data takes as long as loading the engine,
+    /// so it waits until the server listens; see [`Server::version`].
+    version: OnceLock<String>,
+    data_dir: PathBuf,
     usage: Option<Store>,
     /// The host every other host forwards to; see [`moved`].
     canonical: Option<String>,
@@ -49,12 +53,14 @@ pub struct Server {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Route {
     UsageEvent,
+    DayMarks,
     UsageDashboard,
     Static,
     ServiceWorker,
     Ics,
     Reminders,
     Privacy,
+    About,
     Beta,
     Calendar,
     Feast,
@@ -69,11 +75,18 @@ impl Server {
         let src = FsData::new(data_dir);
         let engine = Engine::load(&src).map_err(|e| format!("creating office engine: {e}"))?;
         let calendar = CalendarData::load(&src).map_err(|e| format!("loading calendar data: {e}"))?;
-        let version = pwa::compute_version(data_dir);
         let pages = Pages::new(pwa::asset_url)
             .map_err(|e| format!("parsing templates: {e}"))?
             .with_chant(office::chant::offers_chant(&engine.texts));
-        Ok(Server { engine, cache: YearCache::new(calendar), pages, version, usage: None, canonical: None })
+        Ok(Server {
+            engine,
+            cache: YearCache::new(calendar),
+            pages,
+            version: OnceLock::new(),
+            data_dir: data_dir.to_path_buf(),
+            usage: None,
+            canonical: None,
+        })
     }
 
     /// Opens the usage database named by `OFFICE_USAGE_DB`, if any. A
@@ -116,12 +129,13 @@ impl Server {
         {
             match route {
                 // Clients that already hold these URLs keep using them where they are.
-                Route::UsageEvent | Route::Static => {}
+                Route::UsageEvent | Route::Static | Route::DayMarks => {}
                 Route::Ics => return self.ics(&query, &format!("https://{canonical}")),
                 Route::ServiceWorker => return moved::farewell_worker(),
                 Route::UsageDashboard
                 | Route::Reminders
                 | Route::Privacy
+                | Route::About
                 | Route::Beta
                 | Route::Calendar
                 | Route::Feast
@@ -133,26 +147,58 @@ impl Server {
                 }
             }
         }
-        match route {
+        // The pages answer a request for the copy the reader holds with "not modified" (see etag).
+        let page = matches!(route, Route::Reminders | Route::Privacy | Route::About | Route::Calendar | Route::Feast | Route::Root)
+            && (method == Method::GET || method == Method::HEAD);
+        let tag = page.then(|| {
+            let target = uri.path_and_query().map(|p| p.as_str()).unwrap_or("/");
+            etag::page_tag(self.version(), &site, target, headers, web_time::now_in(&self.user_location(&req)), Server::local_year())
+        });
+        if let Some(tag) = &tag
+            && etag::matches(headers, tag)
+        {
+            return etag::not_modified(tag);
+        }
+        let mut resp = match route {
             Route::UsageEvent => usage::handle_event(self.usage.as_ref(), method, headers, host, self.canonical.as_deref(), body),
+            Route::DayMarks => self.day_marks(method, path.trim_start_matches("/api/day-marks/")),
             Route::UsageDashboard => usage::handle_dashboard(self.usage.as_ref(), &self.pages, method, &query),
             Route::Static => pwa::serve_static(&path, query.get("v")),
-            Route::ServiceWorker => pwa::service_worker(&self.version),
+            Route::ServiceWorker => pwa::service_worker(self.version()),
             Route::Ics => self.ics(&query, &ics::base_url(headers, host)),
             Route::Reminders => self.reminders(&req),
             Route::Privacy => self.privacy(&req),
-            Route::Beta => self.beta(&req),
+            Route::About => self.about(&req),
+            // The Android app's closed-test sign-up, retired now the app is on Google Play.
+            Route::Beta => redirect("/", StatusCode::MOVED_PERMANENTLY),
             Route::Calendar => self.calendar(&req),
             Route::Feast => self.feast(&req),
             Route::Robots => crawl::robots(&site),
             Route::Sitemap => crawl::sitemap(&site, Server::local_year(), self.cache.feasts()),
             Route::Root => self.root(&req),
+        };
+        if let Some(tag) = tag
+            && resp.status() == StatusCode::OK
+        {
+            // The tag names the reader's cookies, so the page varies with them.
+            http::set(&mut resp, header::ETAG, &tag);
+            http::set(&mut resp, header::VARY, "Cookie");
+        }
+        resp
+    }
+
+    /// Composes `year`'s calendar months ahead of the first request for them.
+    fn warm_year(&self, year: i32) {
+        if let Err(e) = self.cache.months(year, &self.engine) {
+            eprintln!("warn: pre-warming cache for {year}: {e}");
         }
     }
 
-    /// The build stamp on the service worker and its page cache.
+    /// The build stamp on the service worker and its page cache, computed
+    /// on first use. [`run`] computes it in the background as soon as the
+    /// server listens; a request that comes first waits for it.
     pub fn version(&self) -> &str {
-        &self.version
+        self.version.get_or_init(|| pwa::compute_version(&self.data_dir))
     }
 }
 
@@ -165,6 +211,7 @@ impl Server {
         };
         Router::new()
             .route("/api/usage", endpoint(Route::UsageEvent))
+            .route("/api/day-marks/{year}", endpoint(Route::DayMarks))
             .route("/admin/usage", endpoint(Route::UsageDashboard))
             .route("/static", endpoint(Route::Static))
             .route("/static/", endpoint(Route::Static))
@@ -173,6 +220,7 @@ impl Server {
             .route("/office.ics", endpoint(Route::Ics))
             .route("/reminders", endpoint(Route::Reminders))
             .route("/privacy", endpoint(Route::Privacy))
+            .route("/about", endpoint(Route::About))
             .route("/beta", endpoint(Route::Beta))
             .route("/calendar", endpoint(Route::Calendar))
             .route("/calendar/", endpoint(Route::Calendar))
@@ -204,36 +252,47 @@ async fn entry(server: Arc<Server>, route: Route, req: Request) -> Response<Body
     }
 }
 
-/// An address of the form `:8080` listens on every interface.
-async fn listen(addr: &str) -> Result<tokio::net::TcpListener, String> {
-    if let Some(port) = addr.strip_prefix(':') {
-        if let Ok(l) = tokio::net::TcpListener::bind(format!("[::]:{port}")).await {
-            return Ok(l);
+/// Binds `addr` before the server loads, so that connections arriving while
+/// it loads wait in the backlog instead of being refused. An address of the
+/// form `:8080` listens on every interface.
+pub fn listen(addr: &str) -> Result<std::net::TcpListener, String> {
+    let listener = match addr.strip_prefix(':') {
+        Some(port) => {
+            std::net::TcpListener::bind(format!("[::]:{port}")).or_else(|_| std::net::TcpListener::bind(format!("0.0.0.0:{port}")))
         }
-        return tokio::net::TcpListener::bind(format!("0.0.0.0:{port}")).await.map_err(|e| format!("listen tcp {addr}: {e}"));
-    }
-    tokio::net::TcpListener::bind(addr).await.map_err(|e| format!("listen tcp {addr}: {e}"))
+        None => std::net::TcpListener::bind(addr),
+    };
+    listener.map_err(|e| format!("listen tcp {addr}: {e}"))
 }
 
-/// Serves until the process ends. The current year's calendar page, then
-/// the next year's, are composed in the background so the first visit to
-/// either is fast: composing a year takes about half a second, and the next
-/// year is one tap from the ordo and enters the offline precache each
-/// December.
-pub fn run(server: Server, addr: &str) -> Result<(), String> {
+/// How long after starting the server waits to compose next year's calendar,
+/// so that a machine fresh from a deploy spends its CPU on the readers in front
+/// of it first.
+const NEXT_YEAR_WARM_DELAY: std::time::Duration = std::time::Duration::from_secs(60);
+
+/// Serves on `listener` (from [`listen`]) until the process ends. In the
+/// background the build version is hashed and the current year's calendar
+/// page composed at once, so the first visit to it is fast (a year takes
+/// about half a second, nearly all of it composing each day's Lauds, Prime
+/// and Vespers for the ordo's digest). Next year's follows a minute later: it
+/// is one tap from the ordo and enters the offline precache each December.
+pub fn run(server: Server, listener: std::net::TcpListener) -> Result<(), String> {
     let runtime = tokio::runtime::Builder::new_multi_thread().enable_all().build().map_err(|e| e.to_string())?;
     runtime.block_on(async {
         let server = Arc::new(server);
+        let year = Server::local_year();
         let warm = Arc::clone(&server);
         tokio::task::spawn_blocking(move || {
-            let year = Server::local_year();
-            for year in [year, year + 1] {
-                if let Err(e) = warm.cache.months(year, &warm.engine) {
-                    eprintln!("warn: pre-warming cache for {year}: {e}");
-                }
-            }
+            warm.version();
+            warm.warm_year(year);
         });
-        let listener = listen(addr).await?;
+        let warm = Arc::clone(&server);
+        tokio::spawn(async move {
+            tokio::time::sleep(NEXT_YEAR_WARM_DELAY).await;
+            let _ = tokio::task::spawn_blocking(move || warm.warm_year(year + 1)).await;
+        });
+        listener.set_nonblocking(true).map_err(|e| format!("listen: {e}"))?;
+        let listener = tokio::net::TcpListener::from_std(listener).map_err(|e| format!("listen: {e}"))?;
         let app = server.router();
         axum::serve(listener, app).await.map_err(|e| format!("server error: {e}"))
     })
@@ -262,9 +321,25 @@ mod routing_tests {
         test_server().router().oneshot(request).await.unwrap()
     }
 
+    /// The date picker's marks: a letter a day for an offered year, nothing for another.
+    #[tokio::test]
+    async fn day_marks_serve_a_letter_a_day_for_offered_years() {
+        let year = Server::local_year();
+        let resp = request(Method::GET, &format!("/api/day-marks/{year}"), Body::empty()).await;
+        assert_eq!(resp.status(), StatusCode::OK);
+        assert_eq!(resp.headers().get(header::CONTENT_TYPE).unwrap(), "application/json");
+        let body = String::from_utf8(axum::body::to_bytes(resp.into_body(), usize::MAX).await.unwrap().to_vec()).unwrap();
+        let days = body.strip_prefix(&format!(r#"{{"year":{year},"days":""#)).and_then(|b| b.strip_suffix(r#""}"#)).expect(&body);
+        assert!(days.len() == 365 || days.len() == 366, "{body}");
+        assert!(days.chars().all(|c| "wrgvbpWRGVBP".contains(c)), "{body}");
+        for path in ["/api/day-marks/1066", "/api/day-marks/20x6", "/api/day-marks/02026"] {
+            assert_eq!(request(Method::GET, path, Body::empty()).await.status(), StatusCode::NOT_FOUND, "{path}");
+        }
+    }
+
     #[tokio::test]
     async fn routes_serve_pages_assets_and_head() {
-        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/privacy", "/beta", "/sw.js"] {
+        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/privacy", "/about", "/sw.js"] {
             let get = request(Method::GET, path, Body::empty()).await;
             let head = request(Method::HEAD, path, Body::empty()).await;
             assert_eq!(get.status(), StatusCode::OK, "{path}");
@@ -272,6 +347,9 @@ mod routing_tests {
             assert_eq!(head.headers().get(header::CONTENT_TYPE), get.headers().get(header::CONTENT_TYPE));
             assert!(axum::body::to_bytes(head.into_body(), usize::MAX).await.unwrap().is_empty());
         }
+        let beta = request(Method::GET, "/beta", Body::empty()).await;
+        assert_eq!(beta.status(), StatusCode::MOVED_PERMANENTLY);
+        assert_eq!(beta.headers()[header::LOCATION], "/");
         let redirect = request(Method::GET, "/calendar?form=priest", Body::empty()).await;
         assert_eq!(redirect.status(), StatusCode::FOUND);
         let location = redirect.headers()[header::LOCATION].to_str().unwrap();
@@ -326,6 +404,54 @@ mod routing_tests {
     }
 
     #[tokio::test]
+    async fn an_unchanged_page_is_not_sent_again() {
+        let get = |path: &str, cookie: &str, tag: Option<&str>| {
+            let mut request = Request::builder().uri(path).header(header::COOKIE, cookie);
+            if let Some(tag) = tag {
+                request = request.header(header::IF_NONE_MATCH, tag);
+            }
+            let router = test_server().router();
+            let request = request.body(Body::empty()).unwrap();
+            async move {
+                let resp = router.oneshot(request).await.unwrap();
+                let (status, tag) = (resp.status(), resp.headers().get(header::ETAG).map(|t| t.to_str().unwrap().to_string()));
+                (status, tag, axum::body::to_bytes(resp.into_body(), usize::MAX).await.unwrap().len())
+            }
+        };
+        // The tag names the reader's hour, so a pair of requests either side of the hour's turn
+        // is asked again.
+        let hour = || web_time::now_in(&web_time::load_location("America/New_York").unwrap()).1;
+        for path in ["/lauds/2026-12-25", "/?date=2026-12-25", "/calendar/2026/12", "/feast/christmas", "/about"] {
+            let (tag, again) = loop {
+                let before = hour();
+                let (status, tag, _) = get(path, "tz=America/New_York", None).await;
+                let tag = tag.unwrap_or_else(|| panic!("{path} has no ETag"));
+                assert_eq!(status, StatusCode::OK, "{path}");
+                assert!(tag.starts_with("W/\""), "{path}: {tag}");
+                // The copy held is answered "not modified", with nothing sent.
+                let again = get(path, "tz=America/New_York", Some(&tag)).await;
+                if hour() == before {
+                    break (tag, again);
+                }
+            };
+            assert_eq!((again.0, again.1.as_deref(), again.2), (StatusCode::NOT_MODIFIED, Some(tag.as_str()), 0), "{path}");
+            // Another reader's cookies, or another page, is another copy.
+            let (status, _, _) = get(path, "tz=Europe/London", Some(&tag)).await;
+            assert_eq!(status, StatusCode::OK, "{path}: another time zone");
+            let (status, _, _) =
+                get(&format!("{path}{}x=1", if path.contains('?') { '&' } else { '?' }), "tz=America/New_York", Some(&tag)).await;
+            assert_eq!(status, StatusCode::OK, "{path}: another address");
+        }
+        // A list of tags, and a strong copy of the weak one, are compared as RFC 9110 says.
+        let mut headers = HeaderMap::new();
+        headers.insert(header::IF_NONE_MATCH, "\"other\", \"v-1\"".parse().unwrap());
+        assert!(etag::matches(&headers, "W/\"v-1\"") && !etag::matches(&headers, "W/\"v-2\""));
+        // Only a page that was found carries a tag.
+        let (status, tag, _) = get("/calendar/0001", "", None).await;
+        assert_eq!((status, tag), (StatusCode::NOT_FOUND, None));
+    }
+
+    #[tokio::test]
     async fn search_engines_find_the_undated_pages_on_the_canonical_host() {
         let mut server = Server::new(Path::new("../../data")).unwrap();
         server.canonical = moved::parse_host("example.org");
@@ -343,8 +469,13 @@ mod routing_tests {
         let (status, robots) = get("example.org", "/robots.txt").await;
         assert_eq!(status, StatusCode::OK);
         assert!(robots.contains("Disallow: /admin/") && robots.contains("Sitemap: https://example.org/sitemap.xml"), "{robots}");
+        // The dated days and hours are kept from crawlers; the undated ones are not.
+        for line in ["Disallow: /?date=", "Disallow: /lauds/", "Disallow: /lauds?date=", "Disallow: /compline/"] {
+            assert!(robots.lines().any(|l| l == line), "{line}: {robots}");
+        }
+        assert!(!robots.lines().any(|l| l == "Disallow: /lauds" || l == "Disallow: /"), "{robots}");
         let (_, sitemap) = get("example.org", "/sitemap.xml").await;
-        for page in ["/", "/lauds", "/compline", "/privacy"] {
+        for page in ["/", "/lauds", "/compline", "/privacy", "/about"] {
             assert!(sitemap.contains(&format!("<loc>https://example.org{page}</loc>")), "{page}: {sitemap}");
         }
         assert!(!sitemap.contains("<loc>https://example.org/calendar</loc>"), "the bare ordo address only redirects");
@@ -359,11 +490,58 @@ mod routing_tests {
         assert!(dated.contains("Lauds for Friday, December 25, 2026: The Nativity of Our Lord."), "the preview names the feast");
         let (_, home) = get("example.org", "/").await;
         assert!(home.contains("og:title\" content=\"Daily Office\"") && !home.contains("noindex"));
+        // A search result shows what was crawled days ago, so an undated page's title and
+        // description name no day, and the day's heading is kept out of the snippet.
+        let title = |page: &str| page.split("<title>").nth(1).and_then(|t| t.split("</title>").next()).unwrap_or("").to_string();
+        assert_eq!(title(&home), "Daily Office — The Benedictine Divine Office for the Orthodox Western Rite");
+        assert_eq!(title(&today), "Lauds — Daily Office");
+        assert!(
+            today.contains("<meta name=\"description\" content=\"Lauds for today in the Benedictine Divine Office of the Antiochian Western Rite Vicariate, composed for the day with its feast, psalms, hymn and propers.\">"),
+            "{today}"
+        );
+        assert!(home.contains("data-nosnippet") && today.contains("data-nosnippet"));
+        assert_eq!(title(&dated), "Lauds — Friday, December 25, 2026", "a dated hour keeps its date");
+        let (_, dated_home) = get("example.org", "/?date=2026-12-25").await;
+        assert_eq!(title(&dated_home), "Daily Office — Friday, December 25, 2026");
+        assert!(!dated_home.contains("ld+json") && !today.contains("ld+json"), "only home names the site");
+        let site_data = home
+            .split("<script type=\"application/ld+json\">")
+            .nth(1)
+            .and_then(|s| s.split("</script>").next())
+            .expect("home names the site");
+        let site_data: serde_json::Value = serde_json::from_str(site_data).expect(site_data);
+        assert_eq!(site_data["@type"], "WebSite");
+        assert_eq!(site_data["url"], "https://example.org/");
         assert!(home.contains("icons&#x2f;share-card.png") && home.contains("summary_large_image"));
         let (status, _) = get("example.org", &pwa::asset_url("icons/share-card.png")).await;
         assert_eq!(status, StatusCode::OK, "the preview card is served");
-        let (_, far) = get("example.org", "/calendar/1900").await;
+        let this_year = Server::local_year();
+        let (_, far) = get("example.org", &format!("/calendar/{}", this_year - 10)).await;
         assert!(far.contains("noindex"));
+        // A crawler follows the year links only to the years search indexes, not a year at a
+        // time from end to end: each new year is a year's calendar built on the server.
+        assert_eq!(far.matches("rel=\"nofollow\"").count(), 2, "neither neighbour of a far year is indexed");
+        // Nor month by month across the years.
+        let (_, january) = get("example.org", &format!("/calendar/{}/01", this_year - 10)).await;
+        assert!(january.contains("rel=\"nofollow\"><span class=\"continuation-label\">Previous month"), "{january}");
+        let (_, this_january) = get("example.org", &format!("/calendar/{this_year}/12")).await;
+        assert!(!this_january.contains("rel=\"nofollow\"><span class=\"continuation-label\">Next month"), "next year is indexed");
+        // Nor is a year beyond the ones every front offers built at all.
+        let years = presentation::offered_years(this_year);
+        let (before, after) = (years.start() - 1, years.end() + 1);
+        for path in [
+            format!("/calendar/{before}"),
+            format!("/calendar/{after}/01"),
+            "/calendar/4294969196".to_string(),
+            format!("/lauds/{after}-01-01"),
+            format!("/?date={before}-12-31"),
+        ] {
+            let (status, _) = get("example.org", &path).await;
+            assert_eq!(status, StatusCode::NOT_FOUND, "{path}");
+        }
+        let (_, current) = get("example.org", &format!("/calendar/{this_year}")).await;
+        let nofollow = format!("{}\" rel=\"nofollow\"", this_year - 1);
+        assert!(current.contains(&nofollow) && current.matches("rel=\"nofollow\"").count() == 1, "next year is followed, last year not");
         let (_, missing) = get("example.org", "/nowhere").await;
         assert!(missing.contains("noindex") && !missing.contains("rel=\"canonical\""));
     }

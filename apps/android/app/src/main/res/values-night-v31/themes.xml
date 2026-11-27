@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The phone's dark: the Apse's wall, and nothing on it (values-v31). -->
+    <style name="Theme.Office" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/page</item>
+        <item name="android:windowSplashScreenBackground">@color/page</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/wall</item>
+    </style>
+</resources>

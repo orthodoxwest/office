@@ -122,9 +122,16 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
     var open by remember(block) { mutableStateOf<Int?>(null) }
     val m = if (block.kind == BlockKind.GAP) modifier else modifier.clearAndSetSemantics {
         contentDescription = spoken(block)
-        if (block.kind == BlockKind.HEADING || block.kind == BlockKind.COMMEMORATION_HEADING) heading()
+        if (
+            block.kind == BlockKind.HEADING ||
+            block.kind == BlockKind.COMMEMORATION_HEADING ||
+            block.kind == BlockKind.ITEM_LABEL ||
+            block.kind == BlockKind.CANTICLE_SECTION
+        ) {
+            heading()
+        }
         if (glossed.isNotEmpty()) {
-            customActions = glossed.map { (i, gloss) -> CustomAccessibilityAction("Explain “${gloss.title.lowercase()}”") { open = i; true } }
+            customActions = glossed.map { (i, gloss) -> CustomAccessibilityAction(explain(gloss)) { open = i; true } }
         }
     }
     @Composable
@@ -132,6 +139,9 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         if (glossed.isEmpty()) Text(runs(block), modifier, style = style)
         else GlossedText(runs(block), block, open, { open = it }, modifier, style)
     }
+    // A verse's or the Gloria Patri's words: a posture cue among them ("Bow.") answers a tap, as on the web.
+    @Composable
+    fun verseText(modifier: Modifier, style: TextStyle) = rubricText(modifier, style)
     val p = LocalPalette.current
     val text = Type.body.copy(color = p.text)
     val verse = Type.verse.copy(color = p.text)
@@ -141,14 +151,14 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         // Tituli, as painted in red ochre on the limewash (gilt on the Apse night), clear of the rubrics' red.
         BlockKind.HEADING, BlockKind.COMMEMORATION_HEADING -> Column(m.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             if (cross) PaintedCross(Modifier.padding(bottom = Space.BIND.of(LocalDensity.current.bodyLine())).size(9.92.dp))
-            val style = if (block.kind == BlockKind.COMMEMORATION_HEADING) Type.commemorationName else Type.heading
-            Text(runs(block), Modifier.fillMaxWidth(), style = style.copy(color = p.titulus))
+            val style = (if (block.kind == BlockKind.COMMEMORATION_HEADING) Type.commemorationName else Type.heading).copy(color = p.titulus)
+            if (glossed.isEmpty()) Text(runs(block), Modifier.fillMaxWidth(), style = style)
+            else GlossedText(runs(block), block, open, { open = it }, Modifier.fillMaxWidth(), style)
         }
-        BlockKind.ITEM_LABEL -> ItemLabel(block, m.fillMaxWidth(), Type.itemLabel.copy(color = p.titulus))
-        BlockKind.LATIN_TITLE, BlockKind.CANTICLE_SECTION -> Text(
-            runs(block),
+        BlockKind.ITEM_LABEL -> ItemLabel(block, glossed.isNotEmpty(), open, { open = it }, m.fillMaxWidth(), Type.itemLabel.copy(color = p.titulus))
+        BlockKind.LATIN_TITLE, BlockKind.CANTICLE_SECTION -> rubricText(
             m.fillMaxWidth(),
-            style = text.copy(color = p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center),
+            text.copy(color = p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center),
         )
         BlockKind.CHAPTER_REF, BlockKind.SCRIPTURE_REF -> Text(runs(block), m.fillMaxWidth(), style = Type.reference.copy(color = p.rubric))
         BlockKind.RUBRIC -> rubricText(m.fillMaxWidth(), Type.rubric.copy(color = p.rubric))
@@ -165,22 +175,25 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         BlockKind.SPEAKER -> Text(runs(block), m.fillMaxWidth(), style = Type.speaker.copy(color = p.rubric))
         // Body antiphons hang left: the sigil opens the line, wrapped lines clear it. An announcement's
         // opening words stand centred over the psalm's label, as the web's `.antiphon-announce`.
-        BlockKind.ANTIPHON, BlockKind.ANNOUNCED_ANTIPHON -> Text(
-            buildAnnotatedString {
+        BlockKind.ANTIPHON, BlockKind.ANNOUNCED_ANTIPHON -> {
+            val antText = buildAnnotatedString {
+                if (block.markerGloss != null) pushStringAnnotation(GLOSS, "-1")
                 withStyle(SpanStyle(color = p.titulus, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 1.4.sp)) { append(block.marker) }
+                if (block.markerGloss != null) pop()
                 append(" ")
                 append(runs(block))
-            },
-            m.fillMaxWidth(),
-            style = if (block.kind == BlockKind.ANNOUNCED_ANTIPHON) {
+            }
+            val antStyle = if (block.kind == BlockKind.ANNOUNCED_ANTIPHON) {
                 text.copy(textAlign = TextAlign.Center)
             } else {
                 text.copy(textIndent = TextIndent(restLine = 21.6.sp))
-            },
-        )
+            }
+            if (glossed.isEmpty()) Text(antText, m.fillMaxWidth(), style = antStyle)
+            else GlossedText(antText, block, open, { open = it }, m.fillMaxWidth(), antStyle)
+        }
         BlockKind.VERSE -> when {
-            block.dropCap -> Opening(block, verse, m, textStart = VerseGutter)
-            block.marker.isEmpty() -> Text(runs(block), m.fillMaxWidth().padding(start = VerseGutter), style = verse)
+            block.dropCap -> Opening(block, verse, m, textStart = VerseGutter, gloss = if (glossed.isEmpty()) null else (open to { open = it }))
+            block.marker.isEmpty() -> verseText(m.fillMaxWidth().padding(start = VerseGutter), verse)
             else -> Row(m.fillMaxWidth()) {
                 Text(
                     block.marker,
@@ -188,14 +201,13 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
                     softWrap = false,
                     style = Type.verseNumber.copy(color = p.muted),
                 )
-                Text(runs(block), Modifier.alignByBaseline(), style = verse)
+                verseText(Modifier.alignByBaseline(), verse)
             }
         }
         // The Gloria Patri keeps the verses' edge; each line's wrap steps in (the web's `.source-line`, 1.1rem).
-        BlockKind.GLORIA_PATRI -> Text(
-            runs(block),
+        BlockKind.GLORIA_PATRI -> verseText(
             m.fillMaxWidth().padding(start = VerseGutter),
-            style = verse.copy(textIndent = TextIndent(restLine = 17.6.sp)),
+            verse.copy(textIndent = TextIndent(restLine = 17.6.sp)),
         )
         BlockKind.VERSICLE, BlockKind.RESPONSE, BlockKind.ALL -> when {
             block.dropCap -> Opening(block, text, m, textStart = 0.dp, raised = true)
@@ -258,10 +270,24 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
  * A line that turns over below the capital keeps its style's hanging indent (a hymn's, a sung line's).
  */
 @Composable
-private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, textStart: Dp, raised: Boolean = false) {
+internal fun Opening(
+    block: BlockView,
+    style: TextStyle,
+    modifier: Modifier,
+    textStart: Dp,
+    raised: Boolean = false,
+    // The open note and its setter, where the opening's words carry a gloss (a psalm's "Sit." at its
+    // first mediant): its lines then answer a tap on the cue, as the other verses' do.
+    gloss: Pair<Int?, (Int?) -> Unit>? = null,
+) {
+    @Composable
+    fun Words(text: AnnotatedString, modifier: Modifier, style: TextStyle) {
+        if (gloss == null) Text(text, modifier, style = style)
+        else GlossedText(text, block, gloss.first, gloss.second, modifier, style)
+    }
     val (letter, rest) = splitInitial(block, runs(block))
     if (letter == null) {
-        Text(rest, modifier.fillMaxWidth().padding(start = textStart), style = style)
+        Words(rest, modifier.fillMaxWidth().padding(start = textStart), style)
         return
     }
     val ochre = LocalOrnament.current.cap
@@ -337,14 +363,14 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
             }
         }
         when (setting) {
-            OpeningSetting.Raised -> Text(raisedText, Modifier.fillMaxWidth(), style = plain)
+            OpeningSetting.Raised -> Words(raisedText, Modifier.fillMaxWidth(), plain)
             is OpeningSetting.Elevated -> {
                 // One line pitch above the text, into which the capital rises; its ink top meets the
                 // cap height of that empty line, its foot the text's baseline.
                 val capTop = setting.layout.firstBaseline + cap.drop - cap.glyph.firstBaseline
                 Column(Modifier.drawBehind { translate(cap.left, capTop) { initial(cap.glyph) } }) {
                     Spacer(Modifier.height(with(density) { style.lineHeight.toDp() }))
-                    Text(body, Modifier.padding(start = textStart), style = elevatedStyle)
+                    Words(body, Modifier.padding(start = textStart), elevatedStyle)
                 }
             }
             is OpeningSetting.Dropped -> {
@@ -377,9 +403,9 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
                 Column {
                     // Painted behind the lines beside it, taking no room of its own: the lines set the height.
                     Box(Modifier.drawBehind { translate(cap.left, capTop) { initial(cap.glyph) } }) {
-                        Text(first, Modifier.padding(start = with(density) { besideStart.toDp() }), style = plain)
+                        Words(first, Modifier.padding(start = with(density) { besideStart.toDp() }), plain)
                     }
-                    if (after.isNotEmpty()) Text(after, Modifier.padding(start = textStart), style = style)
+                    if (after.isNotEmpty()) Words(after, Modifier.padding(start = textStart), style)
                 }
             }
         }
@@ -519,6 +545,7 @@ fun spoken(block: BlockView): String {
             else -> run.text
         }
     }
+        .replace("✠", CROSS_MARK)
         .replace("†", ", ")
         .replace("·", ".")
         .replace("℣.", "Versicle.").replace("℟.", "Response.")
@@ -535,8 +562,11 @@ fun spoken(block: BlockView): String {
         .replaceFirstChar { it.uppercase() }
     val marker = when (block.kind) {
         BlockKind.ANTIPHON, BlockKind.ANNOUNCED_ANTIPHON -> "Antiphon."
-        BlockKind.VERSICLE, BlockKind.RESPONSE -> block.marker.replace("℣.", "Versicle.").replace("℟.", "Response.")
+        BlockKind.VERSICLE, BlockKind.RESPONSE -> block.marker
+            .replace("℣.", "Versicle.").replace("℟.", "Response.")
+            .replace("℣", "Versicle").replace("℟", "Response")
         BlockKind.VERSE -> ""
+        BlockKind.SCORE -> block.marker.trim('.', ' ').let { if (it.isEmpty()) "" else "Stanza $it." }
         else -> block.marker
     }
     return listOf(marker, words).filter { it.isNotEmpty() }.joinToString(" ")
@@ -616,10 +646,22 @@ fun hymnColumns(sections: List<SectionView>, density: Density = LocalDensity.cur
  * `.item-label.stacked`): a separator ending a line alone separates nothing.
  */
 @Composable
-private fun ItemLabel(block: BlockView, modifier: Modifier, style: TextStyle) {
+private fun ItemLabel(
+    block: BlockView,
+    hasGloss: Boolean,
+    open: Int?,
+    onOpen: (Int?) -> Unit,
+    modifier: Modifier,
+    style: TextStyle,
+) {
+    @Composable
+    fun labelText(text: AnnotatedString, sub: BlockView, mod: Modifier) {
+        if (hasGloss) GlossedText(text, sub, open, onOpen, mod, style)
+        else Text(text, mod, style = style)
+    }
     val latin = block.runs.indexOfFirst { it.style == RunStyle.LATIN }
     if (latin < 1) {
-        Text(runs(block), modifier, style = style)
+        labelText(runs(block), block, modifier)
         return
     }
     val whole = runs(block)
@@ -630,10 +672,11 @@ private fun ItemLabel(block: BlockView, modifier: Modifier, style: TextStyle) {
             !measurer.measure(whole, style, softWrap = false, maxLines = 1, constraints = Constraints(maxWidth = width)).didOverflowWidth
         }
         if (fits) {
-            Text(whole, Modifier.fillMaxWidth(), style = style)
+            labelText(whole, block, Modifier.fillMaxWidth())
         } else {
+            val head = block.copy(runs = block.runs.subList(0, latin - 1))
             Column(Modifier.fillMaxWidth()) {
-                Text(runs(block.copy(runs = block.runs.subList(0, latin - 1))), Modifier.fillMaxWidth(), style = style)
+                labelText(runs(head), head, Modifier.fillMaxWidth())
                 Text(runs(block.copy(runs = block.runs.subList(latin, block.runs.size))), Modifier.fillMaxWidth(), style = style)
             }
         }

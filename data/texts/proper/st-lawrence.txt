@@ -30,9 +30,6 @@ Blessed Laurence * prayed, saying: I render thanks unto thee, O Lord, who hast c
 [psalm-antiphon-3-vespers]
 @use proper/st-lawrence/psalm-antiphon-3
 
-[psalm-antiphon-4-vespers]
-@use proper/st-lawrence/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 519 (Saint Laurence, Martyr)
 On the iron grate, * O God, I denied thee not; and when fire was kindled beneath me, O Christ, I confessed thee: thou hast proved my heart and hast visited me in the night season: thou hast tried me with fire, and hast found no wickedness in me.

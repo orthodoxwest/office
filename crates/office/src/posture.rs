@@ -1,5 +1,5 @@
-//! Congregational posture cues in the psalmody of Lauds and Vespers, as the
-//! parish booklets print them: all sit after the mediant of a unit's first
+//! Congregational posture cues in the psalmody, as the parish booklets print
+//! them for Lauds and Vespers: all sit after the mediant of a unit's first
 //! verse, stand at the mediant of the verse before its doxology, bow at
 //! "Glory be" and stand upright at "As it was". A unit is the run of psalms
 //! said under one doxology, so a psalm said on without Glory be is cued only
@@ -9,9 +9,14 @@
 //!
 //! The Office of the Dead ("Rest eternal") and the Triduum (no doxology) are
 //! not cued: the booklets give no pattern for them.
+//!
+//! Lauds and Vespers are always cued. The Little Hours (Prime, Terce, Sext and
+//! None) take the same pattern only when a priest or deacon leads, the prayer
+//! form standing in for an office said in choir; said privately, they stay
+//! uncued. Compline is never cued.
 
 use corpus::lines::{PsalmItem, parse_psalm};
-use liturgy::{ElementType, OfficeElement, Posture, PostureAnchor, PostureCue};
+use liturgy::{ElementType, OfficeElement, Posture, PostureAnchor, PostureCue, PrayerForm};
 
 use crate::Day;
 use crate::finish::Classified;
@@ -19,11 +24,25 @@ use crate::psalmody::{is_office_of_the_dead, says_psalm_doxology};
 
 const GOSPEL_CANTICLES: [&str; 2] = ["canticles/benedictus", "canticles/magnificat"];
 const IN_TEXT_DOXOLOGY: &str = "Let us bless the Father";
+const LITTLE_HOURS: [&str; 4] = ["prime", "terce", "sext", "none"];
+/// Left uncued, its Gloria included: the Athanasian Creed, a profession of
+/// faith rather than a psalm, for which the booklets give no pattern (needs
+/// ruling, #973).
+const UNCUED: [&str; 1] = ["proper/trinity-sunday/athanasian-creed"];
 
-/// Marks the posture cues on the psalmody of Lauds and Vespers.
-pub fn mark_postures(classified: &mut Classified, day: &Day, hour_name: &str) {
+/// Whether an hour's psalmody is cued: Lauds and Vespers always, the Little
+/// Hours only when a priest or deacon leads (a proxy for praying in choir).
+pub fn cues_postures(hour_name: &str, form: PrayerForm) -> bool {
+    match hour_name {
+        "lauds" | "vespers" => true,
+        _ => LITTLE_HOURS.contains(&hour_name) && form != PrayerForm::Private,
+    }
+}
+
+/// Marks the posture cues on the psalmody of the hours [`cues_postures`] names.
+pub fn mark_postures(classified: &mut Classified, day: &Day, hour_name: &str, form: PrayerForm) {
     let hour = classified.hour_mut();
-    if hour_name != "lauds" && hour_name != "vespers" {
+    if !cues_postures(hour_name, form) {
         return;
     }
     let in_text_doxology = says_psalm_doxology(day, hour_name) && !is_office_of_the_dead(day);
@@ -40,6 +59,9 @@ pub fn mark_postures(classified: &mut Classified, day: &Day, hour_name: &str) {
                 i += 1;
             }
             let end = i;
+            if UNCUED.contains(&elems[start].source_ref.as_str()) {
+                continue;
+            }
             let followed_by_gloria =
                 end < elems.len() && elems[end].kind == ElementType::PsalmDoxology && elems[end].text.trim_start().starts_with("Glory be");
             if followed_by_gloria {

@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}{% if query %}{{ query }} — {{ feast_words.find_title }}{% else %}{{ feast_words.find_title }}{% endif %}{% endblock %}{% block description %}Find when a feast or saint falls in the Benedictine Divine Office of the Antiochian Western Rite Vicariate, and how it is kept this year and next.{% endblock %}{% block content %}{% from "macros.html" import headpiece, feast_search, feast_years %}
+{% extends "layout.html" %}{% block title %}{% if query %}{{ query }} — {{ feast_words.find_title }}{% else %}{{ feast_words.find_title }}{% endif %} — Daily Office{% endblock %}{% block description %}Find when a feast or saint falls in the Benedictine Divine Office of the Antiochian Western Rite Vicariate, and how it is kept this year and next.{% endblock %}{% block content %}{% from "macros.html" import headpiece, feast_search, feast_years %}
 <div class="calendar find-page">
   <div class="calendar-header find-header" id="calendar-top">
     <div class="calendar-title">
@@ -15,7 +15,7 @@
       <h2><a class="find-name {{ r.rank_class }}" href="{{ r.href|url }}">{{ r.name|typeset }}</a></h2>
       {% if r.rank %}<abbr class="find-rank {{ r.rank_class }}" tabindex="0" title="{{ r.rank_full }}">{{ r.rank }}</abbr>{% endif %}
     </header>
-    <p class="find-meta">{{ r.meta|typeset }} · <a href="{{ r.href|url }}">{{ feast_words.every_year }}</a></p>
+    <p class="find-meta">{{ r.meta|typeset }}<span aria-hidden="true"> · </span><span class="sr-only">. </span><a href="{{ r.href|url }}">{{ feast_words.every_year }}<span class="sr-only"> for {{ r.name|typeset }}</span></a></p>
     {{ feast_years(r.years) }}
   </article>
   {% endfor %}

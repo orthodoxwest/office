@@ -5,9 +5,15 @@
 //!
 //! Every run of display text passes through the same typography as the web and the booklet.
 
+pub mod hour_light;
 pub mod initials;
+pub mod tempo;
+pub mod wall;
 
+pub use hour_light::{HourLight, LightFrame, light_at};
 pub use initials::{InitialFit, initial_fit, initial_size};
+pub use tempo::{Beat, Curve, Tempo};
+pub use wall::Wall;
 
 use corpus::lines::{
     BlockKind as LineKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, hymn_sung_stanza_rubrics, hymn_sung_stanzas,
@@ -18,7 +24,9 @@ use liturgy::{
     ChantScore, ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, RubricSpan, ScoreSpan, VoiceSpan, posture_cues_at,
     split_words,
 };
-use presentation::gloss::{Gloss, GlossRun, gloss_runs};
+use presentation::gloss::{
+    ANTIPHON_GLOSS, Gloss, GlossRun, ORDO_COMMEMORATION_GLOSS, POSTURE_GLOSS, PSALM_NUMBER_GLOSS, gloss_runs, heading_gloss,
+};
 
 /// What a block is, which decides its paragraph style.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -128,14 +136,21 @@ pub enum RunStyle {
 pub struct Run {
     pub text: String,
     pub style: RunStyle,
-    /// A rubric term a newcomer stumbles on ("secretly"), and the note a tap on it opens, as the
-    /// web's `.gloss-term` (presentation::gloss).
+    /// A rubric term or structural label a newcomer can tap for a short note
+    /// (`presentation::gloss`).
     pub gloss: Option<&'static Gloss>,
+    /// True for structural marks (Ant., psalm Hebrew number, Chapter, Preces, Suffrage):
+    /// tappable for the note with no underline at rest.
+    pub quiet_gloss: bool,
 }
 
 impl Run {
     fn new(text: impl Into<String>, style: RunStyle) -> Run {
-        Run { text: text.into(), style, gloss: None }
+        Run { text: text.into(), style, gloss: None, quiet_gloss: false }
+    }
+
+    fn with_quiet_gloss(text: impl Into<String>, style: RunStyle, gloss: Option<&'static Gloss>) -> Run {
+        Run { text: text.into(), style, gloss, quiet_gloss: gloss.is_some() }
     }
 }
 
@@ -145,6 +160,8 @@ pub struct Block {
     pub kind: BlockKind,
     /// A sigil, verse number, or "Ant." set in the gutter before the text.
     pub marker: String,
+    /// A quiet note a tap on `marker` opens (e.g. "Ant."), with no underline at rest.
+    pub marker_gloss: Option<&'static Gloss>,
     /// An opening that takes an initial, as the web marks them: a psalm's or
     /// canticle's first verse, a hymn's first stanza, a Marian antiphon's sung
     /// opening, and the first line of a chapter, a spoken collect, the corporate
@@ -169,6 +186,7 @@ impl Block {
         Block {
             kind,
             marker: String::new(),
+            marker_gloss: None,
             drop_cap: false,
             starts_element: false,
             runs,
@@ -206,7 +224,7 @@ impl Block {
     }
 }
 
-/// The steps of the hour's vertical rhythm, each a fraction of the prayer's body line, so the
+/// The steps of the hour's vertical rhythm (its motion is [`Tempo`]'s), each a fraction of the prayer's body line, so the
 /// space grows with the text on every front. The web's `--space-*` properties (style.css) and the
 /// apps' gaps are these fractions of the line; a step's name says what it separates. The
 /// printed Monastic Diurnal steps the same way: lines of one unit set solid, a head close to
@@ -378,15 +396,41 @@ pub fn text_blocks(text: &str, prayer: bool) -> Vec<Block> {
     out
 }
 
+/// A feast page's hymn: its stanzas, spaced as the hours space them, under the fold that names it
+/// (its label and Latin title). The page opens only its collect on a dropped initial, so the
+/// hymn's first stanza has none (as render-html's `render_feast_hymn`).
+pub fn feast_hymn_blocks(text: &str) -> Vec<Block> {
+    let mut out = Vec::new();
+    hymn_stanzas(&mut out, text);
+    for b in &mut out {
+        b.drop_cap = false;
+    }
+    space_blocks(&mut out);
+    out
+}
+
 /// A section heading, separating a commemoration's lead-in from its feast.
 pub fn section_heading(label: &str) -> Block {
     if let Some(name) = label.strip_prefix("Commemoration of ").filter(|n| !n.is_empty()) {
         return Block::new(
             BlockKind::CommemorationHeading,
-            vec![Run::new("Commemoration of", RunStyle::Kicker), Run::new("\n", RunStyle::Break), Run::new(typeset(name), RunStyle::Plain)],
+            vec![
+                // The Cross keeps its own note; any other is a commemorated feast or season.
+                Run::with_quiet_gloss(
+                    "Commemoration of",
+                    RunStyle::Kicker,
+                    Some(heading_gloss(label).unwrap_or(&ORDO_COMMEMORATION_GLOSS)),
+                ),
+                Run::new("\n", RunStyle::Break),
+                Run::new(typeset(name), RunStyle::Plain),
+            ],
         );
     }
-    Block::new(BlockKind::Heading, text_runs(label))
+    let runs = match heading_gloss(label) {
+        Some(g) => vec![Run::with_quiet_gloss(typeset(label), RunStyle::Plain, Some(g))],
+        None => text_runs(label),
+    };
+    Block::new(BlockKind::Heading, runs)
 }
 
 fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&OfficeElement>) {
@@ -397,9 +441,16 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
         ElementType::Antiphon => {
             if elem.label.is_empty() {
                 let kind = if elem.announce { BlockKind::AnnouncedAntiphon } else { BlockKind::Antiphon };
-                out.push(Block::marked(kind, "Ant.", chant_runs(&elem.display_text())));
+                let mut block = Block::marked(kind, "Ant.", chant_runs(&elem.display_text()));
+                block.marker_gloss = Some(&ANTIPHON_GLOSS);
+                out.push(block);
             } else {
-                out.push(Block::new(BlockKind::LatinTitle, text_runs_styled(&elem.label, RunStyle::Latin)));
+                let gloss = presentation::gloss::marian_antiphon_gloss(&elem.label);
+                let runs = match gloss {
+                    Some(g) => vec![Run::with_quiet_gloss(typeset(&elem.label), RunStyle::Latin, Some(g))],
+                    None => text_runs_styled(&elem.label, RunStyle::Latin),
+                };
+                out.push(Block::new(BlockKind::LatinTitle, runs));
                 marian_antiphon(out, &elem.text, elem.score.as_ref());
             }
         }
@@ -416,13 +467,17 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
                     Some((word, greek, hebrew)) => vec![
                         Run::new(word, RunStyle::Plain),
                         Run::new(format!("{}\u{a0}", typeset(greek)), RunStyle::Numeral),
-                        Run::new(typeset(hebrew), RunStyle::HebrewNumeral),
+                        Run::with_quiet_gloss(typeset(hebrew), RunStyle::HebrewNumeral, Some(&PSALM_NUMBER_GLOSS)),
                     ],
                     None => text_runs(&elem.label),
                 };
                 if !elem.incipit.is_empty() {
                     runs.push(Run::new("\u{a0}· ", RunStyle::Plain));
-                    runs.push(Run::new(typeset(&elem.incipit), RunStyle::Latin));
+                    runs.push(Run::with_quiet_gloss(
+                        typeset(&elem.incipit),
+                        RunStyle::Latin,
+                        Some(&presentation::gloss::PSALM_INCIPIT_GLOSS),
+                    ));
                 }
                 out.push(Block::new(BlockKind::ItemLabel, runs));
             }
@@ -434,7 +489,10 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
         ElementType::Hymn => {
             out.push(section_heading("Hymn"));
             if !elem.label.is_empty() {
-                out.push(Block::new(BlockKind::LatinTitle, text_runs_styled(&elem.label, RunStyle::Latin)));
+                out.push(Block::new(
+                    BlockKind::LatinTitle,
+                    vec![Run::with_quiet_gloss(typeset(&elem.label), RunStyle::Latin, Some(&presentation::gloss::HYMN_TITLE_GLOSS))],
+                ));
             }
             scored_hymn(out, elem);
         }
@@ -572,10 +630,10 @@ fn rubric_text_runs(s: &str) -> Vec<Run> {
         .collect()
 }
 
-/// Posture cues at one anchor, each a run followed by a space.
+/// Posture cues at one anchor, each a run carrying a quiet gloss, followed by a space.
 fn push_postures(runs: &mut Vec<Run>, cues: &[PostureCue], at: PostureAnchor) {
     for cue in posture_cues_at(cues, at) {
-        runs.push(Run::new(cue, RunStyle::Posture));
+        runs.push(Run::with_quiet_gloss(cue, RunStyle::Posture, Some(&POSTURE_GLOSS)));
         runs.push(Run::new(" ", RunStyle::Plain));
     }
 }

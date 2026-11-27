@@ -22,21 +22,28 @@ possible without distracting from a reverent experience. The app is the web's de
 native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
 
 - **Pages.** Home (the day's frontispiece, the "Pray the hours" inscription band, the
-  invitation, the hour directory by period, "Change date"), each hour (colour band, the gold
-  hairline of progress through the prayer, framed title, "Change date" and "Prayer form", the
+  invitation, the hour directory by period with Matins under Night, coming soon, "Change date"), each hour (colour band, the gold
+  hairline of progress through the prayer, framed title, its date opening the date picker,
+  "Prayer form", the
   office, its continuation and report link), and
   the ordo's month (year and month navigation, the month's heading pinned while its days scroll,
   day rows with colour rails, ranks, and one "Office details" disclosure holding the day's
   commemorations and its hours), and the year's frontispiece (the Tabula Temporaria, each
-  date leading to its day in the ordo). The site menu carries the day's hours, the Ordo and
-  Reminders, and the Theme (Default / Nave / Apse), Text (A A A) and Martyrology (Off / On)
-  rows, and Chant (Off / On) once a hymn or Marian antiphon has a score: neuma (its bindings in
-  `org.orthodoxwest.neuma`, from the same library) engraves the score and `Score.kt` draws it. The date picker's title turns its
+  date leading to its day in the ordo), and About the Office (`AboutScreen.kt`: the core's
+  `about()` words, the hours as home's table of periods, Matins first under Night, coming
+  soon; home offers it as "Introduction" beside Change date in a reader's first week). The site menu carries the Ordo, Reminders and About
+  (the hours are on home and at each hour's end, as on the web), and the Theme
+  (Default / Nave / Apse), Text (A A A) and Martyrology (Off / On) rows, and Chant (Off / On)
+  once a hymn or Marian antiphon has a score: neuma (its bindings in `org.orthodoxwest.neuma`,
+  from the same library) engraves the score and `Score.kt` draws it. The date picker's title
+  turns its
   days into the year's months, as the web's does.
 - **Wide screens.** From the web's breakpoint (701dp: a tablet, or a phone on its side) the app
   takes the web's desktop composition: the header's links inline, ending in Settings for the
-  theme and text size; home's frontispiece set in the niche, with its pointed head, stone
-  moulding and day-coloured trim, centred in the room with the chapel's light on it
+  theme and text size; home's frontispiece set in one lancet niche for the screen's
+  orientation, its depth told by light on the reveal by day and the phone's apse sky by night,
+  every hour glossed (one to a line from 1000dp high), the whole at one computed scale
+  (`nicheZoom`, the web's `--niche-zoom`), centred in the room with the chapel's light on it
   (`Niche.kt`); the ordo as the desktop table; the
   Tabula's figures in one line and its tables side by side; from 1000dp "Blessing." hangs into
   the margin as "All:" does, where below it stands above its words. `WideScreenshotTest` renders them
@@ -60,7 +67,9 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   down from the top brings it back for a moment.
 - **Keeping the place.** Each visit on the way back keeps its own scroll position and open
   sections, and the way back itself is saved state: Back returns to where the reader was, and
-  so does a return after Android has closed the app in the background (`PlaceTest`).
+  so does a return after Android has closed the app in the background (`PlaceTest`). An hour
+  the app was closed on opens at the reader's place only by the core's rule, the same on every
+  front (`reopensAtPlace`: within 45 minutes, and not once prayed); otherwise at its top.
 - **The chosen theme throughout.** Nave or Apse colours the window from the first frame, the
   status and navigation bar icons, and (Android 13+) the next launch screen, whatever the
   phone's own light or dark (`WindowThemeTest`).
@@ -71,6 +80,12 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   unfold from their controls and, once open, scroll into view; the menu drops in; the date
   picker's months slide, and a swipe turns them; a new theme or text size dissolves in
   (`Dissolve.kt`). A pressed control dims, as on iOS. Remove animations shows each at once.
+  Home's consecration cross, unannounced, turns the look over by `presentation::crown`'s
+  rule and plays the change as dusk or dawn to the web's timetable (`Crown.kt`, `CrownTest`):
+  the old screen is held as a still, the new theme is drawn live through a front in the head
+  of the arch and then through the arch's own shape grown over the page, and each row hands
+  its ink over at its moment. A black day, a picker open or Remove animations takes the
+  dissolve; a touch elsewhere runs the play out and goes through.
 - **Touch.** A light tick under a choice (a setting, a prayer form, a day) and a toggle's tick
   on a checkbox; none for a page opened.
 - **Shortcuts.** Long-pressing the icon offers Lauds, Vespers, Compline and the Ordo, drawn in
@@ -148,7 +163,13 @@ page count toward the day's readers, an hour and the ordo in their own columns, 
 reminders on as the web counts a generated feed link; only today's pages (a day either side)
 count. Each page counts once a day. In place of the web's cookie the app sends a random
 identifier it replaces every reporting day (America/New_York), so nothing it sends ties one day
-to the next. A beacon is best effort: it is never queued offline, retried later, or shown.
+to the next. It keeps the last two days a beacon of its own was counted, and says only whether
+today is the first in its week and month (`usage_periods`). It also tells, in buckets the core
+writes (`UsageHabits`), how long ago it first reported, its counted days last week, whether an
+hour is opened at its time by the phone's clock and marked prayed, and whether reminders are on;
+it keeps a tally of the week's counted days (`usage-week-days`) and one flag (`usage-offline`) for
+an hour whose beacon failed, said as `offline:yes` on the next that arrives. A beacon is best
+effort: it is never queued offline, retried later, or shown.
 
 This is the app's only use of the network (the `INTERNET` permission). Only `preview` and
 `release` builds report (`BuildConfig.COUNT_USAGE`); `debug`, and so every test and screenshot,
@@ -158,8 +179,8 @@ outnumber the testers. Nothing on those phones reliably marks them (not all carr
 `firebase.test.lab` system setting, which still rules out those that do, and the Play Store
 installs the build), but each is wiped within minutes, so an installation reports only once it is
 two hours old (`Usage.SETTLING`). A reader's first hours on a new install go uncounted; an update
-keeps the install time. `UsageTest` checks what counts, the daily identifier, the retry, and the
-test-device exclusion.
+keeps the install time. `UsageTest` checks what counts, the daily identifier, the retry, the
+habits, and the test-device exclusion.
 
 ## Trying it on a phone
 
@@ -204,18 +225,23 @@ clone of `master`.
 The **Publish to Play** workflow (`.github/workflows/play.yml`) builds the bundle from `master`
 and uploads it to Google Play.
 
-- **Every merge to `master` that changes the app** goes to Internal testing and Closed testing
-  at once, with `apps/android/whatsnew.txt` as the release notes. Internal testing skips Google's
-  review and reaches the maintainers within minutes, so a bad build shows there first; Closed
-  testing reaches testers once the review passes (usually hours), and a newer merge replaces a
-  release still in review.
-- **The release notes** ("What's new") are only ever the text of `apps/android/whatsnew.txt`
-  (lines starting with `#` dropped), never anything from the merge. The same text goes with
-  every build until it is edited, and an empty file uploads builds with no notes. Edit it in the
-  pull request whose merge should carry it; a change to that file alone uploads nothing. A text
-  over Play's 500 characters stops the run before it builds.
-- **The public** gets a build when you promote it in Play Console (*Closed testing → Promote
-  release → Production*), which ships the exact build testers have been running. A manual run from the Actions tab can also upload to any
+- **Every merge to `master` that changes the app** goes to Internal testing, with the release
+  notes since the last production release, once every check on the commit (CI, iOS, Android) has
+  passed (`scripts/ci_gate.py`); a commit with a red check is never uploaded. Internal testing
+  skips Google's review and reaches the maintainers as soon as the slowest check (usually iOS)
+  is done, so a bad build shows there first. Once a day the **Promote to
+  production** workflow (below) moves Internal's newest build up to Closed testing, which reaches
+  testers once Google's review passes (usually hours).
+- **The release notes** ("What's new") are the note files under `release-notes/` that pull
+  requests add for notable changes (`release-notes/README.md`), never anything taken from the
+  merge. A testing upload carries every note added since the newest `android/` tag (what
+  production last had out), so testers see what the public has yet to get; with none, the
+  standing line "Corrections to the texts and improvements to the app." A note alone uploads
+  nothing; the next app change carries it. A manual run's notes replace them. Closed testing
+  gets the notes the build carried on Internal testing.
+- **The public** gets a build when the **Promote to production** workflow moves it there (below),
+  or when you promote it in Play Console (*Closed testing → Promote release → Production*); either
+  way it is the exact build testers have been running. A manual run of Publish to Play can also upload to any
   track (`internal`, `alpha` for Closed testing, or `production`) with a staged rollout and
   notes, but only for a commit that isn't already in Play: each build's version code is its
   commit count, and Play takes each version code once.
@@ -233,20 +259,66 @@ It needs:
 Google's API can't create the app or take its first bundle, so the very first upload is
 done by hand in Play Console.
 
+### Promoting to production
+
+The **Promote to production** workflow (`.github/workflows/play-promote.yml`,
+`scripts/play-promote.py`) moves builds up Play's tracks through the Play API, by version code,
+without rebuilding: from Internal testing to Closed testing, and from there to production. Its
+production release notes are the notes added since production's newest *completed* build, so
+each note goes out once on Android; a staged, halted or replaced release may never reach
+everyone, so its notes go again with the release after it. Each run then tags that completed
+build (`android/0.1.<code>`) as the record, in a job of its own that alone holds a token able to
+push.
+
+- **Every day** at 15:00 UTC: a staged rollout the workflow started two days before is
+  finished (all users). Otherwise Closed testing's build, if it is newer than production's and
+  has been there a day (20 hours, as GitHub starts scheduled runs late), goes to 20% of users.
+  Then, once production has Closed testing's build (at any share), Internal testing's newest build
+  moves up to Closed testing. So testers get one build a day, the public a fifth of it a day
+  later and everyone two days after that. Google's review of each release (usually hours) comes
+  out of those stages.
+- **Why a day on Closed testing, not a day since upload:** Play's API can release only a build
+  some track still holds. Merges land more than once a day and each replaces the build on Internal
+  testing, so a build picked from older uploads is usually gone ("APK version codes could not be
+  found"), though Play Console still lists it. A build on Closed testing stays there until the
+  workflow moves the next one up, which waits until production has it.
+- **The Closed testing release's name** ("0.1.130 tested from 2026-11-13T15:00Z") records when
+  the workflow moved it there. A build put on Closed testing another way (by hand, or a manual
+  run of Publish to Play) has no such name and counts as a day old.
+- **The staged release's name** in Play Console ("0.1.120 staged 2026-11-12T15:00Z") records when
+  it started; that is how the next runs know its age.
+- **Halting** a rollout in Play Console (*Production → Halt rollout*), or starting one there,
+  stops the daily promotions until you resume, finish or replace it (a manual run can do any of
+  these by releasing a build).
+- **A manual run** from the Actions tab releases Closed testing's newest build (or the version code
+  given) now, to the share of users asked for; *Only say what would be released* reads Play and
+  changes nothing.
+- **Google reviews** every new production release. With managed publishing on in Play Console,
+  approved releases also wait for you to press Publish there, so leave it off for the daily
+  promotion to run unattended. If Play refuses the commit asking for `changesNotSentForReview`
+  (it can after a rejection), send the release for review by hand in Play Console once.
+
+It needs `PLAY_SERVICE_ACCOUNT_JSON` as a repository secret (or on both environments); without it
+runs warn and promote nothing. Scheduled runs use the `play-auto` environment, which GitHub creates
+on first use with no reviewer; manual runs use `play`, with its required reviewer. Give both
+environments the deployment branch rule *master* (Settings → Environments), so only master's
+copy of the workflow can promote.
+
 ### Closed testers
 
-Closed testing's tester list is the Google Group `daily-office-testers` (*Anyone can join*),
-so volunteers add themselves. Send them to `/beta` on the website: it links the group and the
-test's opt-in page (`play.google.com/apps/testing/org.orthodoxwest.office`) and says what to
-keep doing for the 14 days Google asks of a new developer account. Neither link is set in
-code; if the group's name changes in Play Console, change `crates/render-html/templates/beta.html` to match.
+Closed testing's tester list is the Google Group `daily-office-testers` (*Anyone can join*).
+The app is public on Google Play
+(`play.google.com/store/apps/details?id=org.orthodoxwest.office`), so the website no longer
+recruits testers: its old sign-up page, `/beta`, now redirects home.
 
 ### Listing screenshots
 
-`StoreScreenshotTest` renders the listing's phone screenshots at 1080×1920 into
-`app/build/screenshots/store/` (`make android-screenshots`; CI's `android-screenshots`
-artifact carries them). Re-shoot after a visible change and replace them under *Main store
-listing*.
+`StoreScreenshotTest` renders the listing's screenshots into `app/build/screenshots/store/`
+(`make android-screenshots`; CI's `android-screenshots` artifact carries them), all 9:16
+portrait: the phone at 1080×1920 and the 7-inch and 10-inch tablets at 1224×2176 and 1800×3200.
+Files are numbered in upload order. The pages and the day follow the App Store's set in
+`.github/workflows/ios.yml`, so both stores show the same screens; change them together. Re-shoot
+after a visible change and replace them under *Main store listing*.
 
 ## Building locally
 

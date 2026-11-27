@@ -1,0 +1,3 @@
+[commemoration-collect]
+# SOURCE: ordo "Col. 27*"; Diurnal p. 532 (June 2, Ss Marcellinus and Peter: "Collect O God, who makest us glad, p. 27*")
+@use commons/martyrs/collect-alternate

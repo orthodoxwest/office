@@ -2,7 +2,15 @@
 // again when that or the text size changes. The page carries the score at one
 // width for a browser that can't run the engine (render-html chant.rs), and
 // that score stands wherever this can't run: the engine is fetched only once a
-// score is shown, and only by a browser that can run it.
+// score is shown at a width it was not engraved at, and only by a browser that
+// can run it.
+//
+// A score holds its ground. The column's width is kept in a cookie, and the
+// server engraves the next page's scores at it, so they arrive laid out and
+// nothing is drawn again. Where a score must be laid out again on arriving (a
+// first visit, an offline copy made at another width), one on screen keeps its
+// first drawing until it leaves the screen, and one off it changes with the
+// reader's place held (leader.js), so the words being read never move.
 //
 // A module script (layout.html), so a browser without modules never parses the
 // dynamic import below, and app.js stays readable to every browser.
@@ -25,6 +33,38 @@
   var serial = 0;
   var states = new Map();
   var font = "google";
+  // The width in SVG units each score is drawn at: the server's, until laid out here.
+  var shown = new Map(boxes.map(function (box) { return [box, parseFloat(box.getAttribute("data-chant-units")) || 0]; }));
+  // Scores laid out once since the page arrived; and new drawings waiting for
+  // their score to leave the screen.
+  var settled = new Set();
+  var waiting = new Map();
+  var COOKIE = "chant-width";
+  var told = null;
+
+  // The score's column, in lyric ems and in SVG units, or null while unshown.
+  var measure = function (box) {
+    var score = box.parentNode;
+    var width = score.clientWidth;
+    if (!width) return null;
+    var em = parseFloat(getComputedStyle(score).fontSize);
+    return { em: width / em, units: (width / em) * LYRIC_SPACES * SCALE, px: em, column: width };
+  };
+
+  // The server engraves the next page's scores at this column (chant.rs at_width),
+  // to the nearest sixteenth of an em (chant.rs WIDTH_STEPS): within 1/32 em,
+  // 0.46 units, of the column, so the score it sends fits as one laid out here.
+  var tell = function (em) {
+    var value = (Math.round(em * 16) / 16).toFixed(4);
+    if (value === told) return;
+    told = value;
+    document.cookie = COOKIE + "=" + value + ";path=/;max-age=31536000;SameSite=Lax";
+  };
+
+  // A sliver of a unit changes no line; a score within it is left alone.
+  var fits = function (box, units) {
+    return Math.abs((shown.get(box) || 0) - units) < 0.5;
+  };
 
   var load = function () {
     if (!engine) {
@@ -56,12 +96,42 @@
     return engine;
   };
 
-  var layOut = function (neuma, box) {
-    var score = box.parentNode;
-    var width = score.clientWidth;
-    if (!width) return;
-    var em = parseFloat(getComputedStyle(score).fontSize);
-    var units = (width / em) * LYRIC_SPACES * SCALE;
+  var onScreen = function (element) {
+    var rect = element.getBoundingClientRect();
+    return rect.bottom > 0 && rect.top < window.innerHeight;
+  };
+
+  var show = function (box, drawn) {
+    waiting.delete(box);
+    shown.set(box, drawn.units);
+    var draw = function () {
+      box.style.width = (drawn.width / (LYRIC_SPACES * SCALE)).toFixed(3) + "em";
+      box.style.aspectRatio = drawn.width.toFixed(2) + "/" + drawn.height.toFixed(2);
+      box.innerHTML = drawn.svg;
+      // The score's group carries the words it sets, not its SVG.
+      var svg = box.firstElementChild;
+      svg.removeAttribute("role");
+      svg.removeAttribute("aria-label");
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("focusable", "false");
+    };
+    if (window.officeHoldPlace) window.officeHoldPlace(draw);
+    else draw();
+  };
+
+  // A score waiting to be drawn anew is drawn once it is off the screen.
+  var away = "IntersectionObserver" in window ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      var box = byScore.get(entry.target);
+      if (entry.isIntersecting || !waiting.has(box)) return;
+      away.unobserve(entry.target);
+      show(box, waiting.get(box));
+    });
+  }) : null;
+
+  var layOut = function (neuma, box, first) {
+    var column = measure(box);
+    if (!column || fits(box, column.units)) return;
     var state = states.get(box);
     if (!state) {
       // As chant.rs's page_options, and the apps' Score.kt and Score.swift: the mode's
@@ -76,36 +146,54 @@
         shortLastStaff: true,
         phraseLines: box.getAttribute("data-chant-phrases") === "1",
       });
-      state = { chant: chant, prefix: box.getAttribute("data-chant-prefix") + "c" + serial++, units: 0 };
+      state = { chant: chant, prefix: box.getAttribute("data-chant-prefix") + "c" + serial++ };
       states.set(box, state);
     }
-    // A sliver of a unit changes no line; resizes within it are left alone.
-    if (Math.abs(state.units - units) < 0.5) return;
-    var page = state.chant.layout(units, { scale: SCALE, prefix: state.prefix, ids: false, style: false });
-    state.units = units;
-    box.style.width = (page.width / (LYRIC_SPACES * SCALE)).toFixed(3) + "em";
-    box.style.aspectRatio = page.width.toFixed(2) + "/" + page.height.toFixed(2);
-    box.innerHTML = page.svg;
+    var page = state.chant.layout(column.units, { scale: SCALE, prefix: state.prefix, ids: false, style: false });
+    var drawn = { width: page.width, height: page.height, svg: page.svg, units: column.units };
     page.free();
-    // The score's group carries the words it sets, not its SVG.
-    var svg = box.firstElementChild;
-    svg.removeAttribute("role");
-    svg.removeAttribute("aria-label");
-    svg.setAttribute("aria-hidden", "true");
-    svg.setAttribute("focusable", "false");
+    // Arriving, a score the reader can see keeps its first drawing until it
+    // leaves the screen, unless the new one stands exactly in its place. A
+    // change the reader makes (the window, the text size) draws it at once.
+    var height = Math.min((drawn.width / (LYRIC_SPACES * SCALE)) * column.px, column.column) * drawn.height / drawn.width;
+    if (first && away && onScreen(box.parentNode) && Math.abs(height - box.getBoundingClientRect().height) >= 1) {
+      waiting.set(box, drawn);
+      away.observe(box.parentNode);
+      return;
+    }
+    show(box, drawn);
   };
 
   var pending = new Set();
   var scheduled = false;
   var run = function () {
     scheduled = false;
-    var due = Array.from(pending).filter(function (box) { return box.parentNode.clientWidth > 0; });
+    var due = [];
+    pending.forEach(function (box) {
+      var column = measure(box);
+      if (!column) return;
+      tell(column.em);
+      var first = !settled.has(box);
+      settled.add(box);
+      var held = waiting.get(box);
+      if (held && Math.abs(held.units - column.units) >= 0.5) {
+        // The column changed while the new drawing waited: it is stale.
+        waiting.delete(box);
+        if (away) away.unobserve(box.parentNode);
+      }
+      // Engraved at this column already, by the server or here.
+      if (fits(box, column.units)) {
+        if (held) { waiting.delete(box); if (away) away.unobserve(box.parentNode); }
+        return;
+      }
+      if (!waiting.has(box)) due.push({ box: box, first: first });
+    });
     pending.clear();
     if (!due.length) return;
     load().then(function (neuma) {
-      due.forEach(function (box) {
+      due.forEach(function (one) {
         try {
-          layOut(neuma, box);
+          layOut(neuma, one.box, one.first);
         } catch {
           // This score keeps what it shows; the others are laid out still.
         }

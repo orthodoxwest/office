@@ -192,10 +192,6 @@ In the likeness.
 # [psalm-antiphon-3-vespers]
 # Vespers-only override for psalm antiphon 3.
 #
-[psalm-antiphon-4-vespers]
-# SOURCE: Monastic Diurnal pp. 475, 478–479; 2026 ordo p. 36
-@use proper/st-scholastica/psalm-antiphon-5
-
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.
 #

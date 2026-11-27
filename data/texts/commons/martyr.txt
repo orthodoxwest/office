@@ -36,9 +36,6 @@ Father, * I will that where I am, there may also my servant be.
 [psalm-antiphon-3-vespers]
 @use commons/martyr/psalm-antiphon-3
 
-[psalm-antiphon-4-vespers]
-@use commons/martyr/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of One Martyr) — parish noted manual
 He that hateth his life * in this world shall keep it unto life eternal.
@@ -186,3 +183,7 @@ Amen.
 [versicle-none]
 # SOURCE: diurnal pp. 22*-23* (One Martyr; the Bishop distinction changes the collect, not these little-hour pairs)
 @use commons/bishop-martyr/versicle-none
+
+[collect-alternate]
+# SOURCE: Monastic Diurnal p. 23* (Common of One Martyr out of Paschaltide, For a Martyr not a Bishop, Another Collect)
+Grant, we beseech thee, Almighty God: that by the intercession of blessed N., thy Martyr, our bodies may be delivered from all adversities, and our minds be cleansed from every evil thought.

@@ -41,9 +41,6 @@ The daughters of Sion * have seen her and have declared her blessed, and the que
 [psalm-antiphon-3-vespers]
 @use proper/motherhood-bvm/psalm-antiphon-3
 
-[psalm-antiphon-4-vespers]
-@use proper/motherhood-bvm/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 579 (Motherhood of the B.V.M.)
 O holy Mary, * help thou the suffering, strengthen the faint-hearted, comfort the sorrowful; pray for the people, entreat for the clergy, intercede for all womankind vowed unto God: may all acknowledge the help of thy prayer, who celebrate thine admirable maternity.

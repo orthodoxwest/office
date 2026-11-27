@@ -116,6 +116,15 @@ impl VespersDesignation {
         }
     }
 
+    /// The feast or Sunday whose First Vespers the evening is, by its name; none when the
+    /// evening keeps the day's own office or none.
+    pub fn first_vespers_of(&self) -> Option<&str> {
+        match &self.office {
+            VespersOffice::First { feast, .. } => Some(feast.name.as_str()),
+            VespersOffice::Unowned | VespersOffice::Second { .. } => None,
+        }
+    }
+
     /// The office that owns the evening.
     pub fn feast(&self) -> Option<&FeastRef> {
         match &self.office {

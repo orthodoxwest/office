@@ -14,12 +14,19 @@
  *
  * Page strategy (per URL class):
  *   - Dated hours, /?date=YYYY-MM-DD, ordo pages (/calendar/YYYY, /MM, /all),
- *     /reminders →
+ *     /reminders, /about →
  *     stale-while-revalidate (serve precache immediately, refresh in background).
  *   - Undated /, /lauds, /calendar → redirect to today's dated equivalent so
  *     navigation shares the same cache keys the precache fills.
  *   - /lauds?date=D → redirect to /lauds/D (canonical dated path).
  *   - /static/* → cache-first on versioned URLs.
+ *
+ * A page the cache does not hold waits for the network, however slow the
+ * server is: the offline page answers only when the fetch fails (as it does
+ * at once with no connection), when the device reports itself offline, or
+ * after PAGE_NETWORK_GIVE_UP_MS. A held page is never kept waiting on a slow
+ * or hung network: stale-while-revalidate serves it at once, and the other
+ * pages fall back to it after PAGE_NETWORK_TIMEOUT_MS.
  *
  * Install only precaches the shell + today so skipWaiting is not blocked on
  * the full 14-day window; activate claims quickly, then app message + free
@@ -32,8 +39,16 @@ var VERSION = "__VERSION__";
 var CACHE = "office-" + VERSION;
 var META_CACHE = "office-meta";
 var PRECACHE_DAYS = 14;
-// Bounds cold SWR miss only (cache hit revalidates in background unbounded).
+// How long a page the cache holds a copy of waits on the network before the
+// copy is served (network-first pages; stale-while-revalidate serves its copy
+// at once).
 var PAGE_NETWORK_TIMEOUT_MS = 2500;
+// How long a page the cache does not hold waits before the offline page. Far
+// shorter than this, a slow server reads as no connection: a page beyond the
+// precached fortnight took longer than 2.5 s to compose, the reader was shown
+// "not saved" while online, and a reload found the page the abandoned fetch
+// had saved meanwhile.
+var PAGE_NETWORK_GIVE_UP_MS = 30000;
 var HOURS = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
 var ASSET_Q = "?v=" + VERSION;
 // Filled by the server: "/static/path": "content stamp" for every asset.
@@ -74,6 +89,15 @@ var CORE_ASSETS = [
   assetURL("/static/plaster-soft.jpg"),
   assetURL("/static/plaster-wide-soft.jpg"),
   assetURL("/static/leaf.png"),
+  // Home's painted materials (tools/genpaint.py) and, by night on a phone,
+  // the apse's sky and its stars (tools/genplaster.py --sky-of,
+  // tools/genstars.py).
+  assetURL("/static/pigment.png"),
+  assetURL("/static/tablet.png"),
+  assetURL("/static/gild.png"),
+  assetURL("/static/sky-wash.jpg"),
+  assetURL("/static/ornaments/stars.json"),
+  assetURL("/static/ornaments/sky-tile.svg"),
   // The painted ornaments style.css masks its colours through
   // (tools/genornaments.py).
   assetURL("/static/ornaments/consecration.svg"),
@@ -91,6 +115,20 @@ var CORE_ASSETS = [
 // entry under an unversioned HTML URL).
 function networkFetch(req) {
   return fetch(req, { cache: "reload" });
+}
+
+// revalidate asks the network for a page the cache holds, naming the copy held
+// by its ETag: the server answers 304 Not Modified, composing and sending
+// nothing, while the page is unchanged (a 304 is not ok, so putIfOk keeps the
+// copy). A copy without a tag is fetched whole, as networkFetch does.
+function revalidate(req, cached) {
+  var tag = cached.headers.get("ETag");
+  if (!tag) {
+    return networkFetch(req);
+  }
+  // Redirects stay unfollowed, as for the navigation itself: a page that now
+  // redirects is not stored under its old key.
+  return fetch(req.url, { headers: { "If-None-Match": tag }, cache: "no-store", credentials: "same-origin", redirect: "manual" });
 }
 
 function putIfOk(cache, req, resp) {
@@ -137,7 +175,7 @@ function precacheAssets(cache, urls) {
 
 function todayShellURLs() {
   var today = localDateSlug(new Date());
-  var urls = ["/?date=" + today, "/reminders"];
+  var urls = ["/?date=" + today, "/reminders", "/about"];
   for (var h = 0; h < HOURS.length; h++) {
     urls.push("/" + HOURS[h] + "/" + today);
   }
@@ -266,7 +304,7 @@ function datedEquivalent(url) {
 // from the versioned Cache bucket immediately (revalidated in background).
 function isSWRPage(url) {
   var path = normalizePathname(url.pathname);
-  if (path === "/reminders") {
+  if (path === "/reminders" || path === "/about") {
     return true;
   }
   if (path === "/" && DATE_RE.test(url.searchParams.get("date") || "")) {
@@ -285,8 +323,8 @@ function isSWRPage(url) {
 // trailing-slash and theme variants land on the same precache entry.
 function canonicalCacheKey(url) {
   var path = normalizePathname(url.pathname);
-  if (path === "/reminders") {
-    return "/reminders";
+  if (path === "/reminders" || path === "/about") {
+    return path;
   }
   if (path === "/" && DATE_RE.test(url.searchParams.get("date") || "")) {
     return "/?date=" + url.searchParams.get("date");
@@ -296,6 +334,11 @@ function canonicalCacheKey(url) {
     return "/" + hourMatch[1] + "/" + hourMatch[2];
   }
   if (CALENDAR_RE.test(path)) {
+    return path;
+  }
+  // A feast's page is one page whichever day or month of the ordo opened it
+  // (`?from=` names only the way back), so one copy serves them all offline.
+  if (path.indexOf("/feast/") === 0) {
     return path;
   }
   return path + url.search;
@@ -373,22 +416,15 @@ function offlineResponse() {
     "<link rel=\"stylesheet\" href=\"" + assetURL("/static/style.css") + "\">" +
     "<link rel=\"icon\" type=\"image/svg+xml\" href=\"" + assetURL("/static/favicon.svg") + "\">" +
     "<link rel=\"manifest\" href=\"" + assetURL("/static/manifest.webmanifest") + "\">" +
-    "<meta name=\"theme-color\" content=\"#fdf1e6\">" +
+    "<meta name=\"theme-color\" content=\"#faf3e9\">" +
     "<script src=\"" + assetURL("/static/app.js") + "\" defer></script></head><body>" +
     "<a class=\"skip-link\" href=\"#main-content\">Skip to content</a>" +
     "<header class=\"site-header\"><div class=\"site-nav-shell\">" +
     "<a class=\"site-brand\" href=\"/\" data-nav=\"home\"><span aria-hidden=\"true\">✠</span> Daily Office</a>" +
     "<details class=\"site-menu\"><summary>Menu</summary><nav aria-label=\"Primary\">" +
-    "<a href=\"/lauds\" data-nav=\"hour\" data-hour=\"lauds\">Lauds</a>" +
-    "<a href=\"/prime\" data-nav=\"hour\" data-hour=\"prime\">Prime</a>" +
-    "<a href=\"/terce\" data-nav=\"hour\" data-hour=\"terce\">Terce</a>" +
-    "<a href=\"/sext\" data-nav=\"hour\" data-hour=\"sext\">Sext</a>" +
-    "<a href=\"/none\" data-nav=\"hour\" data-hour=\"none\">None</a>" +
-    "<a href=\"/vespers\" data-nav=\"hour\" data-hour=\"vespers\">Vespers</a>" +
-    "<a href=\"/compline\" data-nav=\"hour\" data-hour=\"compline\">Compline</a>" +
-    "<span class=\"nav-divider\" aria-hidden=\"true\"></span>" +
     "<a href=\"/calendar\" data-nav=\"calendar\">Ordo</a>" +
     "<a class=\"nav-secondary\" href=\"/reminders\" data-nav=\"reminders\">Reminders</a>" +
+    "<a class=\"nav-secondary\" href=\"/about\" data-nav=\"about\">About</a>" +
     "</nav></details>" +
     "</div></header><main id=\"main-content\">" +
     "<section class=\"offline-page\" aria-labelledby=\"offline-heading\">" +
@@ -433,28 +469,58 @@ function staleWhileRevalidate(req, url) {
     candidates.unshift(req);
 
     return cacheMatchFirst(cache, candidates).then(function (cached) {
-      var revalidate = networkFetch(req).then(function (resp) {
-        return putIfOk(cache, storeKey, resp);
-      }).catch(function () {
-        return undefined;
-      });
-
       if (cached) {
-        revalidate.then(function () {});
+        revalidate(req, cached).then(function (resp) {
+          return putIfOk(cache, storeKey, resp);
+        }).catch(function () {});
         return cached;
       }
+      // Cold miss: one fetch, waited for (see pageFromNetwork).
+      return pageFromNetwork(req, cache, candidates, storeKey);
+    });
+  });
+}
 
-      // Cold miss: bound wait so a hung network falls back to near-miss cache keys.
-      return fetchWithTimeout(req, PAGE_NETWORK_TIMEOUT_MS).then(function (resp) {
-        return putIfOk(cache, storeKey, resp);
-      }).catch(function () {
-        return cacheMatchFirst(cache, candidates).then(function (fallback) {
-          if (fallback) {
-            return fallback;
-          }
-          return offlineResponse();
-        });
-      });
+// pageFromNetwork answers a page from the network, storing it under storeKey.
+// It falls back to the first cached candidate when the fetch fails, when the
+// device reports itself offline, or after PAGE_NETWORK_TIMEOUT_MS; with no
+// cached candidate it keeps waiting, and the offline page answers only a
+// failed fetch or one PAGE_NETWORK_GIVE_UP_MS old. A fetch outlived by a
+// cached answer still stores what it brings.
+function pageFromNetwork(req, cache, candidates, storeKey) {
+  function cachedOrOffline() {
+    return cacheMatchFirst(cache, candidates).then(function (cached) {
+      return cached || offlineResponse();
+    });
+  }
+  if (self.navigator && self.navigator.onLine === false) {
+    return cachedOrOffline();
+  }
+  return new Promise(function (resolve) {
+    var settled = false;
+    function settle(resp) {
+      if (!settled) {
+        settled = true;
+        resolve(resp);
+      }
+    }
+    var timer = setTimeout(function () {
+      cacheMatchFirst(cache, candidates).then(function (cached) {
+        if (cached) {
+          settle(cached);
+        }
+      }).catch(function () {});
+    }, PAGE_NETWORK_TIMEOUT_MS);
+    fetchWithTimeout(req, PAGE_NETWORK_GIVE_UP_MS).then(function (resp) {
+      return putIfOk(cache, storeKey, resp);
+    }).then(function (resp) {
+      clearTimeout(timer);
+      settle(resp);
+    }, function () {
+      clearTimeout(timer);
+      if (!settled) {
+        cachedOrOffline().then(settle);
+      }
     });
   });
 }
@@ -466,24 +532,12 @@ function redirectToDated(url, datedPath) {
 }
 
 // networkFirstWithFallback is retained for non-dated pages that are not SWR
-// targets (errors, odd paths). Prefer cache after a failed network attempt.
+// targets (feast pages, errors, odd paths).
 function networkFirstWithFallback(req, url) {
   return caches.open(CACHE).then(function (cache) {
     var candidates = fallbackURLs(url);
     candidates.push(req);
-    return fetchWithTimeout(req, PAGE_NETWORK_TIMEOUT_MS).then(function (resp) {
-      if (resp.ok) {
-        cache.put(canonicalCacheKey(url) || req, resp.clone());
-      }
-      return resp;
-    }).catch(function () {
-      return cacheMatchFirst(cache, candidates).then(function (cached) {
-        if (cached) {
-          return cached;
-        }
-        return offlineResponse();
-      });
-    });
+    return pageFromNetwork(req, cache, candidates, canonicalCacheKey(url) || req);
   });
 }
 
@@ -508,8 +562,9 @@ self.addEventListener("fetch", function (event) {
     return;
   }
 
-  // Metrics and the unlinked report must never enter Cache Storage.
-  if (url.pathname === "/api/usage" || url.pathname === "/admin/usage") {
+  // Metrics, the date picker's marks and the unlinked report must never
+  // enter Cache Storage; offline, the picker's days are plain.
+  if (url.pathname.indexOf("/api/") === 0 || url.pathname === "/admin/usage") {
     return;
   }
 
@@ -583,7 +638,23 @@ function pruneOldPages(cache, today) {
 
 // precacheUpcoming fetches the home page and all seven hours for the next
 // PRECACHE_DAYS days, at most once per day per worker version.
+// One top-up at a time: activation starts one and every page that registers
+// asks for one, and the day's stamp is written only when a run ends, so later
+// asks join the run in flight rather than fetching the same pages again (#831).
+var precacheRun = null;
+
 function precacheUpcoming() {
+  if (!precacheRun) {
+    precacheRun = runPrecache().then(function () {
+      precacheRun = null;
+    }, function () {
+      precacheRun = null;
+    });
+  }
+  return precacheRun;
+}
+
+function runPrecache() {
   var today = localDateSlug(new Date());
   var stampKey = "/__precache-stamp";
   var stampValue = VERSION + ":" + today;
@@ -610,8 +681,9 @@ function precacheUpcoming() {
           }
           d.setDate(d.getDate() + 1);
         }
-        urls = urls.concat(ordo);
-        urls.push("/reminders");
+        // The ordo's few pages first, so the offline Ordo is ready soonest.
+        urls = ordo.concat(urls);
+        urls.push("/reminders", "/about");
         return pruneOldPages(cache, today).then(function () {
           return uncachedURLs(cache, urls);
         }).then(function (missing) {

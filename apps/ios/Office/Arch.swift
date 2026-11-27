@@ -24,8 +24,10 @@ extension Arch {
     static let tall = Arch(rise: 0.56, haunch: 0.4, centre: 1, depth: 0.535519, radius: 1.204227)
     /// The taller head, for a phone from 880 high: a 123° point.
     static let taller = Arch(rise: 0.64, haunch: 0.4, centre: 1.05, depth: 0.364522, radius: 1.145236)
-    /// The niche head, for a wide screen's niche: a 146° point.
-    static let niche = Arch(rise: 0.4, haunch: 0.24, centre: 0.86, depth: 0.795773, radius: 1.248789)
+    /// The niche head, for a wide screen's niche on its side: a 137° point.
+    static let niche = Arch(rise: 0.5, haunch: 0.34, centre: 0.95, depth: 0.632955, radius: 1.219052)
+    /// The upright head, for a wide screen's niche held upright: a 125° point.
+    static let upright = Arch(rise: 0.62, haunch: 0.38, centre: 1.02, depth: 0.372603, radius: 1.120563)
 }
 // genarch:end
 

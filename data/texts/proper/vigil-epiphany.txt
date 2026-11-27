@@ -33,9 +33,6 @@ Lo, Mary * hath brought forth to us the Saviour; whom when John beheld, he cried
 [psalm-antiphon-3-vespers]
 @use proper/vigil-epiphany/psalm-antiphon-3
 
-[psalm-antiphon-4-vespers]
-@use proper/vigil-epiphany/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: Monastic Diurnal.pdf, p. 222
 While all things were in quiet silence, * and that night was in the midst of her swift course, thine Almighty Word, O Lord, leaped down out of thy royal throne, alleluia.
@@ -216,3 +213,7 @@ R. His salvation, alleluia.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[lauds-psalmody]
+# SOURCE: Monastic Diurnal pp. 210 and 222 (Ant. & Pss. of the Circumcision, "Ps. 93 Dominus regnavit and the rest, p. 34"); p. 33 rubric (Vigils of Christmas, Epiphany and Pentecost)
+@use psalmody/lauds/festal

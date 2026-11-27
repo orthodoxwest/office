@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { holdCrown, seekCrown } from "./crown-play.js";
 
 const testDate = "2026-03-15";
 
@@ -10,6 +11,9 @@ async function openForSnapshot(page, path, theme) {
   }, theme);
   await page.goto(path);
   await page.evaluate(() => document.fonts.ready);
+  // Home's paint is laid as one coat once it is all to hand (the wall
+  // first): shoot it laid, not held or coming in.
+  await page.waitForFunction(() => !document.documentElement.matches(".wall-first, .wall-coat"));
   // Ordo intentionally keeps a fallback when its font arrives late. Record
   // the cached-font appearance deterministically; UX tests cover a cold font.
   if (path.startsWith("/calendar/")) {
@@ -35,8 +39,10 @@ for (const theme of ["light", "dark"]) {
     // Pinned so today's wash always falls on the same day of the month.
     await page.clock.setFixedTime(new Date("2026-03-18T10:00:00-04:00"));
     await openForSnapshot(page, `/lauds/${testDate}`, theme);
-    await page.getByText("Change date", { exact: true }).click();
+    await page.locator("button.hour-meta-date").click();
     await expect(page.locator(".date-picker")).toBeVisible();
+    // The day marks come with the year's letters; shoot them laid.
+    await expect(page.locator(".date-picker-day[data-color]")).toHaveCount(31);
     // The picker lends its parts to the controls' grid, so the row and its open panel are shot.
     await expect(page.locator(".hour-context-controls")).toHaveScreenshot(`date-picker-${theme}.png`);
   });
@@ -61,6 +67,17 @@ for (const theme of ["light", "dark"]) {
     await openForSnapshot(page, "/reminders", theme);
     await expect(page.getByRole("heading", { name: "Set prayer reminders", exact: true })).toBeVisible();
     await expect(page).toHaveScreenshot(`reminders-${theme}.png`, { fullPage: true });
+  });
+}
+
+// About: the seven hours with the hour it is now lit, and home's invitation at the
+// foot. Pinned to an afternoon, so None is lit and invited to.
+for (const theme of ["light", "dark"]) {
+  test(`mobile About — ${theme}`, async ({ page }) => {
+    await page.clock.install({ time: new Date("2026-03-18T15:30:00-04:00") });
+    await openForSnapshot(page, "/about", theme);
+    await expect(page.locator(".about-hour.is-current")).toHaveAttribute("data-hour", "none");
+    await expect(page).toHaveScreenshot(`about-${theme}.png`, { fullPage: true });
   });
 }
 
@@ -104,8 +121,8 @@ test("mobile menu — light", async ({ page }) => {
   await expect(page).toHaveScreenshot("menu-open-light.png");
 });
 
-// Hour pages add the Morning / Day / Evening bands above Ordo and the
-// preferences; dark checks the panel's rules and underlines on the night.
+// Hour pages add the preferences under Ordo, Reminders and About; dark
+// checks the panel's rules and underlines on the night.
 test("mobile hour menu — dark", async ({ page }) => {
   await openForSnapshot(page, `/lauds/${testDate}`, "dark");
   await page.getByText("Menu", { exact: true }).click();
@@ -200,3 +217,23 @@ test("full-size raised alphabet — light", async ({ page }) => {
   await expect(page.locator(".initial-elevated")).toHaveCount(26);
   await expect(page.locator(".elements")).toHaveScreenshot(`raised-alphabet-light.png`);
 });
+
+// The crown's play, mid-flight (a tap on home's cross turns the look over as
+// dusk or dawn: app.js, "Home: the crown's play"). Each frame is the play
+// stopped and set to a moment of presentation::crown's timetable, in ms
+// from the tap (crown-play.js): the front in the head, the window moment,
+// the wall shaded, crossed and nearly at rest. The ending beat is not
+// here: it is played from script after the stills go.
+for (const [dir, moments] of [
+  ["dusk", [1000, 1500, 2000, 2500, 2900, 3200]],
+  ["dawn", [1000, 1300, 1700, 2000, 2400, 2700]],
+]) {
+  test(`the crown's ${dir}, held at six moments`, async ({ page }) => {
+    await holdCrown(page, dir);
+    for (const at of moments) {
+      await seekCrown(page, at);
+      // (The play's animations are held, not to be run to their ends.)
+      await expect(page).toHaveScreenshot(`crown-${dir}-${at}.png`, { animations: "allow" });
+    }
+  });
+}

@@ -33,7 +33,7 @@ class GlossScreenshotTest {
     @get:Rule
     val compose = createComposeRule()
 
-    private fun open(hour: String, rubric: String, term: String, theme: ThemeChoice, name: String) {
+    private fun open(hour: String, rubric: String, title: String, theme: ThemeChoice, name: String) {
         val lent = LocalDate.of(2026, 3, 15)
         val view = Office.core.compose(hour, 2026, 3, 15, "private")
         val glossed = view.sections.flatMap { it.blocks }.flatMap { it.runs }.mapNotNull { it.gloss?.title }
@@ -52,20 +52,23 @@ class GlossScreenshotTest {
         compose.onNode(hasScrollToIndexAction()).performScrollToNode(node)
         compose.waitForIdle()
         compose.onRoot().captureRoboImage("build/screenshots/gloss-$name-closed.png")
-        compose.onNode(node).performCustomAccessibilityActionWithLabel("Explain “$term”")
+        compose.onNode(node).performCustomAccessibilityActionWithLabel("Explain “$title”")
         compose.waitForIdle()
         captureScreenRoboImage("build/screenshots/gloss-$name-open.png")
     }
 
-    @Test fun terceNave() = open("terce", "is said secretly", "secretly", ThemeChoice.NAVE, "terce-nave")
-    @Test fun terceApse() = open("terce", "is said secretly", "secretly", ThemeChoice.APSE, "terce-apse")
-    @Test fun complineApse() = open("compline", "entirely in secret", "entirely in secret", ThemeChoice.APSE, "compline-apse")
+    @Test fun terceNave() = open("terce", "is said secretly", "Secretly", ThemeChoice.NAVE, "terce-nave")
+    @Test fun terceApse() = open("terce", "is said secretly", "Secretly", ThemeChoice.APSE, "terce-apse")
+    @Test fun complineApse() = open("compline", "entirely in secret", "Entirely in secret", ThemeChoice.APSE, "compline-apse")
 
     /** The apps gloss the same words the web does. */
     @Test
     fun theNotesAreTheWebs() {
-        val notes = Office.core.compose("compline", 2026, 3, 15, "private").sections.flatMap { it.blocks }.flatMap { it.runs }.mapNotNull { it.gloss }
-        assertEquals(listOf("Entirely in secret", "Secretly"), notes.map { it.title })
-        assertEquals("The whole prayer, shown in grey, is said silently.", notes[0].note)
+        val all = Office.core.compose("compline", 2026, 3, 15, "private").sections.flatMap { it.blocks }.flatMap { it.runs }.mapNotNull { it.gloss }
+        val rubric = all.filter { !it.quiet }
+        assertEquals(listOf("Entirely in secret", "Secretly"), rubric.map { it.title })
+        assertEquals("The whole prayer, shown in grey, is said silently.", rubric[0].note)
+        val quiet = all.filter { it.quiet }.map { it.title }
+        assert(quiet.contains("Psalm numbering") && quiet.contains("Chapter")) { "missing quiet structural glosses: $quiet" }
     }
 }

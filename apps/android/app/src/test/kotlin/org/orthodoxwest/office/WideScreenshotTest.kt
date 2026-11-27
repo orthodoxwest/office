@@ -62,6 +62,7 @@ class WideScreenshotTest {
         val home = (page as? Page.Home)?.let { core.home(it.date.toCivil(), today.toCivil(), 18) }
         val hour = (page as? Page.Hour)?.let { core.compose(it.hour, it.date.year, it.date.monthValue, it.date.dayOfMonth, form) }
         val ordo = (page as? Page.Ordo)?.let { core.ordoMonth(it.year, it.month) }
+        val course = (page as? Page.Year)?.let { core.ordoCourse(it.year) }
         compose.setContent {
             OfficeTheme(choice = theme, season = home?.ornament ?: hour?.ornament ?: "") {
                 OfficeApp(
@@ -69,6 +70,7 @@ class WideScreenshotTest {
                     onOpen = {}, onHome = {}, onForm = {}, onTheme = {}, onTextSize = {},
                     reminders = reminders, reminderStatus = status,
                     onReminders = {}, onTurnOn = {}, onTurnOff = {}, onAllowNotifications = {}, onAllowExact = {},
+                    course = course,
                 )
             }
         }
@@ -88,6 +90,31 @@ class WideScreenshotTest {
 
     @Test fun reminders() { show(Page.Reminders, ThemeChoice.NAVE); shoot("reminders") }
 
+    @Test fun aboutPage() { show(Page.About, ThemeChoice.NAVE); shoot("about") }
+
+    /** About closes the header's links on home, as on every page. */
+    @Test
+    fun aboutInTheHeader() {
+        show(Page.Home(lent), ThemeChoice.NAVE)
+        compose.onNodeWithText("ABOUT").assertExists()
+    }
+
+    /** A wide hour's header reaches About too, after Reminders, as on the web (#927). */
+    @Test
+    fun aboutInAWideHoursHeader() {
+        show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE)
+        compose.onAllNodesWithText("ABOUT").assertCountEquals(1)
+    }
+
+    /** Where an hour's links take their own rank, About stands once, beside Settings. */
+    @Test
+    @Config(qualifiers = "w820dp-h1180dp-mdpi")
+    fun aboutInARankedHoursHeader() {
+        show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE)
+        compose.onAllNodesWithText("ABOUT").assertCountEquals(1)
+        compose.onAllNodesWithText("SETTINGS").assertCountEquals(1)
+    }
+
     /** The theme and text size wait under the header's Settings; no page ends in them. */
     @Test
     fun settings() {
@@ -103,6 +130,20 @@ class WideScreenshotTest {
     @Test
     @Config(qualifiers = "w800dp-h1280dp-mdpi")
     fun tabletHome() { show(Page.Home(lent), ThemeChoice.NAVE); shoot("tablet-home") }
+
+    @Test
+    @Config(qualifiers = "w800dp-h1280dp-mdpi")
+    fun tabletHomeApse() { show(Page.Home(lent), ThemeChoice.APSE); shoot("tablet-home-apse") }
+
+    @Test fun aboutApse() { show(Page.About, ThemeChoice.APSE); shoot("about-apse") }
+
+    @Test
+    @Config(qualifiers = "w800dp-h2400dp-mdpi")
+    fun tabletAbout() { show(Page.About, ThemeChoice.NAVE); shoot("tablet-about") }
+
+    @Test
+    @Config(qualifiers = "w800dp-h2400dp-mdpi")
+    fun tabletAboutApse() { show(Page.About, ThemeChoice.APSE); shoot("tablet-about-apse") }
 
     @Test
     @Config(qualifiers = "w800dp-h1280dp-mdpi")
